@@ -20,7 +20,7 @@ import { presetRoles } from '../lib/shared/roles.mjs';
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/harness/vendor-artifacts.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const OVERLAY = join(ROOT, 'tools', 'research.overlay.yml');
+const OVERLAY = join(ROOT, 'tools', 'record', 'research.overlay.yml');
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : process.argv[i + 1];

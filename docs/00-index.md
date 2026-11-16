@@ -16,7 +16,7 @@
 | 用户的说法 | 走哪（该事的唯一 owner） | 首个动作 |
 |---|---|---|
 | "用它""启动这个插件""跑研究""装到我的 DSH"（安装用户） | [`_dist/安装手册.md`](../_dist/安装手册.md)（生成物；源 = [product-manual](../tools/release/product-manual.md)）+ [pack README](../packages/deep-research-pack/README.md) + [guides/65](./guides/65-run-forms.md) | 按手册：CLI 建 profile（仅首次）→ `dsh plugin --profile deep-research add file:<tgz>`（当前唯一发布形态）；npm/Plugins 页/Discover 为 staged |
-| "在本仓启动/开跑/接着上次跑"（开发通道，默认 `runtime/harness-home`） | [guides/61](./guides/61-run-playbook.md) | `node tools/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 呈交 URL） |
+| "在本仓启动/开跑/接着上次跑"（开发通道，默认 `runtime/harness-home`） | [guides/61](./guides/61-run-playbook.md) | `node tools/channel/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 呈交 URL） |
 | "换 profile/home""装进现有 web profile""诊断装得对不对" | [guides/65](./guides/65-run-forms.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | 换 profile 用新名字重新初始化；**已有 profile 不要重复 `--from-default-profile`**（破坏性）；诊断 = 安装副本的 `dsh-deep-research-doctor` |
 | "只验证插件还能挂载/安装"（证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `node checks/smoke/install-shape.entry.mjs`（自带临时 home，无需 source；或 `source tools/env.sh && node checks/smoke/preset.e2e.mjs` / `release.entry`） |
 | "复现/验证某个机制"（模型不按纪律/角色、GUI、入口链、流）或"看 run 现场"（状态/会话/交付投影） | [guides/66](guides/66-probe-playbook.md) + [probes/](../probes/README.md) | 先看 [探针索引](../probes/INDEX.generated.md)，再跑现有探针或 `analyze/` 取证件；没有就按指南新增 |
@@ -29,16 +29,16 @@
 
 - **安装用户**：DSH 满足 `engines.dsh` + Node 满足 `engines.node`；`dsh` 在 PATH；首次团队层需要 pnpm；
   工作区可写；研究 run 需要模型凭据（首启/安装不需要）。
-- **开发**：仓根 `pnpm install` + vendor submodule + vendor 构建（`bash tools/vendor-build.sh`）；
+- **开发**：仓根 `pnpm install` + vendor submodule + vendor 构建（`bash tools/build/vendor-build.sh`）；
   `runtime/harness-home` 凭据；端口空闲（缺省 3083）；`research-workspace` 已注册（run-kickoff 幂等补登）。
-  `bash tools/boot-run.sh` 自己 source `tools/env.sh`；命令/前置唯一 owner = [guides/60 §2](./guides/60-dev-loop.md)。
+  `bash tools/channel/boot-run.sh` 自己 source `tools/env.sh`；命令/前置唯一 owner = [guides/60 §2](./guides/60-dev-loop.md)。
 
 **歧义裁定**：用户未指定 home 时——安装用户默认 `$DSH_HOME`；开发通道默认
 `runtime/harness-home`（source env.sh）。"启动这个插件"没有额外上下文时默认指本仓开发通道；
 要给外部用户安装走安装行。**开发通道**别绕过 run-driver 的漂移门（直接 `dsh --profile deep-research`
 会用旧镜像）；**安装用户**用 DSH 原生 profile（CLI 建 profile）+ 本地 tarball 装包（npm/Plugins 为 staged）+ `dsh --profile deep-research`；首屏问项目目录。
 
-**裸动词也指开发通道**："启动一下""起一下"未点名对象时，默认指本仓 DSH 环境，首个动作 = `node tools/run-driver.mjs up`；仅当对话正围着另一个可启动物（某条冒烟/探针）时才跟随该物。
+**裸动词也指开发通道**："启动一下""起一下"未点名对象时，默认指本仓 DSH 环境，首个动作 = `node tools/channel/run-driver.mjs up`；仅当对话正围着另一个可启动物（某条冒烟/探针）时才跟随该物。
 
 **每次开发通道"启动"前先扫一眼在飞 run**：根目录下每个未归档 bundle（`archive/` 除外）都要报出来，
 接续/归档/新开问用户、带 slug + mtime；分类判据与问询全文 = [61 §0](./guides/61-run-playbook.md)。

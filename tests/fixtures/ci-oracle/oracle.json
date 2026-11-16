@@ -1,5 +1,5 @@
 {
-  "generatedBy": "tools/record-ci-oracle.mjs",
+  "generatedBy": "tools/record/record-ci-oracle.mjs",
   "oracle": "yaml@2 (real YAML 1.2) + bash -eo pipefail (GitHub Actions default shell) + per-target failing stub node",
   "fixtures": [
     {

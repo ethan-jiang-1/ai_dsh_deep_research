@@ -109,7 +109,7 @@ try {
       bin: join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts'),
       cwd: ROOT,
       profile: 'web',
-      patchPath: join(ROOT, 'tools', 'research.overlay.yml'),
+      patchPath: join(ROOT, 'tools', 'record', 'research.overlay.yml'),
       port: PORT,
       env: scrubbedEnv({ DSH_HOME: HOME }),
       timeoutMs: 90_000,

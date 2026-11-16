@@ -106,7 +106,7 @@ export function renderTestIndex(root) {
   const lines = [
     '# tests/INDEX.generated.md — 测试 ↔ 源码 owner/domain 索引（生成物，勿手改）',
     '',
-    '> 生成器 = `node tools/render-test-index.mjs`；对账 = `tests/checks/test-index.test.mjs`。',
+    '> 生成器 = `node tools/record/render-test-index.mjs`；对账 = `tests/checks/test-index.test.mjs`。',
     '> 维度 = 模块 → owner/domain → 直接 import 它的测试；目录回答「谁在用」，本索引回答「这概念在哪」。',
     '',
     '## checks/lib（研发面）',

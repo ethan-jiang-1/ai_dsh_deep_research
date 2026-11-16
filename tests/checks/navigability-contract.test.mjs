@@ -81,13 +81,15 @@ test('资产门：scripts 职责索引覆盖全部盘上入口（根面 + 职责
   for (const f of libEntries) assert.ok(idx.includes(`lib/${f}`), `scripts 职责索引未点名：lib/${f}`);
 });
 
-test('资产门：dev 入口说明覆盖 dev 全量盘上入口（含运行区目录）', () => {
-  assert.ok(existsSync(join(ROOT, 'tools/README.md')), 'tools/README.md 缺席——dev 入口说明（RFC Phase 1 第 7 项）');
+test('资产门：tools 入口说明覆盖 tools 全量盘上入口（递归子组）', () => {
+  assert.ok(existsSync(join(ROOT, 'tools/README.md')), 'tools/README.md 缺席——operate 面入口索引');
   const idx = read('tools/README.md');
-  for (const ent of readdirSync(join(ROOT, 'tools'), { withFileTypes: true })) {
-    if (ent.name === 'README.md') continue; // 自指豁免
-    assert.ok(idx.includes(ent.name), `dev 入口说明未点名：${ent.name}${ent.isDirectory() ? '/' : ''}`);
-  }
+  // 子组化后顶层 readdir 会静默漏掉组内件——递归枚举，README 须以「子组/件」全路径点名。
+  const walk = (dir, prefix = '') => readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? walk(join(dir, e.name), `${prefix}${e.name}/`) : (e.name === 'README.md' ? [] : [`${prefix}${e.name}`]));
+  const entries = walk(join(ROOT, 'tools'));
+  assert.ok(entries.length >= 15, `防空语料：tools 盘上入口过少（${entries.length}）——扫描面被收窄`);
+  for (const rel of entries) assert.ok(idx.includes(rel), `tools 入口说明未点名：${rel}`);
 });
 
 test('资产门：fixtures taxonomy 覆盖全部顶层组，每组 ≥1 真实 consumer，零孤儿', () => {

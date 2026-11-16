@@ -384,7 +384,7 @@ export async function openSessionById(page, sessionId, title = null, opts = {}) 
 export const PREVIEW_NOTICE_HEADING = 'Preview Notice|预览版说明'
 
 /** 遮罩关闭按钮文案（中英三形态；Continue 同时也是问询卡提交按钮——只在遮罩标题在场时点它，
- *  避免误点 HITL 卡片，见 tools/hitl-answer.mjs 的同名教训）。 */
+ *  避免误点 HITL 卡片，见 tools/channel/hitl-answer.mjs 的同名教训）。 */
 export const PREVIEW_NOTICE_CONTINUE = ['Continue', '继续', '我知道了', 'Got it']
 
 /** CDP evaluate 用的探测器源码（cdp-probe 字符串插值消费；Playwright 消费方下方函数）。

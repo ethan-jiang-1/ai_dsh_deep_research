@@ -167,7 +167,7 @@
 | lib/shared/replay-request.mjs | record-role-fixture、replay-request.spec、snapshot-replay.entry | 组装请求面逐条比较：persona、header 全序列、四处 user/message 注入（含时钟序列）（定向归一化） |
 | lib/harness/snapshot-mode.mjs | snapshot-readonly.test、snapshot-replay.entry | 快照 smoke 模式判据：只读/刷新互斥、`DSH_SNAPSHOT` 只认 replay、刷新必须 `--why` |
 | lib/repo/smoke-lane.mjs | run-lane、smoke-lane.test | smoke 车道选择：lane/tier 过滤、support 不进车道、默认 ci + `--all` |
-| lib/tools/test-index.mjs | render-test-index、test-index.test、test-owner-mirror.test、pack-mirror.test、test-surface.test | 测试 ↔ 源码 owner 索引生成：模块 → owner → 直接 import 的测试（生成物 = tests/INDEX.generated.md；生成器 = tools/render-test-index.mjs） |
+| lib/tools/test-index.mjs | render-test-index、test-index.test、test-owner-mirror.test、pack-mirror.test、test-surface.test | 测试 ↔ 源码 owner 索引生成：模块 → owner → 直接 import 的测试（生成物 = tests/INDEX.generated.md；生成器 = tools/record/render-test-index.mjs） |
 | lib/shared/profile-health.mjs | profile-health.spec、record-role-fixture、snapshot-replay.entry、team-preflight.e2e | dev profile 版本与镜像新鲜度预检：团队层版本 == 运行时 dsh 版本且安装副本关键文件与包源一致；缺席/落后/陈旧 → 明确 exit 2 + 重建指令（BUG-066/080） |
 | lib/shared/startup-hint.mjs | startup-hint.spec、web-banner | boot 失败归因：识别日志里的 incompatible/exemption，指出 profile 未随 pin 重钉（BUG-066） |
 | lib/harness/client-load-select.mjs | client-load-reference.support、client-load-select.spec | client-load 绑定会话选择（只认 lead 根；防富 coach 会话假红，BUG-142） |

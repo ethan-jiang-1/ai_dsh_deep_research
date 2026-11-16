@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
-# tools/bootstrap.sh — 独立环境冷启动前置（幂等；默认准备，--check 只预检、不安装/不构建）。
+# tools/build/bootstrap.sh — 独立环境冷启动前置（幂等；默认准备，--check 只预检、不安装/不构建）。
 #
 # 做的事：Node/pnpm/git 检查 → vendor submodule → pnpm install → vendor 构建 → env.sh →
 # 凭据/端口工具检查 → 打印本次隔离根/profile/port/state。它不启动 web；启动用
-# `node tools/run-driver.mjs up --bootstrap`（或 `bash tools/boot-run.sh`）。
+# `node tools/channel/run-driver.mjs up --bootstrap`（或 `bash tools/channel/boot-run.sh`）。
 #
 # 多实例：DSH_DEV_HOME（隔离 home）、DSH_RUN_PROFILE、DSH_RUN_PORT、DSH_RUN_STATE_DIR。
 # 离线：团队层需 registry（或预装）、Playwright MCP 需 npx 首次拉取；本脚本不伪装离线可用。
 #
-# 用法：bash tools/bootstrap.sh [--check]
+# 用法：bash tools/build/bootstrap.sh [--check]
 # --check 只预检、不安装/不构建（仍会确保隔离 home 与 hooks 配置）。
 # 退出码：0 就绪 / 1 缺件（--check 时列出）/ 2 用法错误
 set -euo pipefail
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 MODE=prepare
 for arg in "$@"; do
   case "$arg" in
     --check) MODE=check ;;
-    -h|--help) echo "用法：bash tools/bootstrap.sh [--check]"; exit 0 ;;
+    -h|--help) echo "用法：bash tools/build/bootstrap.sh [--check]"; exit 0 ;;
     *) echo "bootstrap: 未知参数 $arg" >&2; exit 2 ;;
   esac
 done
@@ -66,10 +66,10 @@ fi
 if node "$ROOT/checks/lib/harness/vendor-artifacts.mjs" >/dev/null 2>&1; then
   ok "vendor 构建产物在场"
 elif [ "$MODE" = check ]; then
-  would "bash tools/vendor-build.sh（vendor 产物缺席）"
+  would "bash tools/build/vendor-build.sh（vendor 产物缺席）"
 else
-  echo "bootstrap: bash tools/vendor-build.sh…"
-  bash "$ROOT/tools/vendor-build.sh" || bad "vendor 构建失败"
+  echo "bootstrap: bash tools/build/vendor-build.sh…"
+  bash "$ROOT/tools/build/vendor-build.sh" || bad "vendor 构建失败"
 fi
 
 # ⑤ 数据面隔离 + 凭据/端口工具
@@ -90,4 +90,4 @@ if [ "$missing" -gt 0 ]; then
   echo "bootstrap: $missing 项未就绪（见上）" >&2
   exit 1
 fi
-echo "bootstrap: 就绪；启动：node tools/run-driver.mjs up --bootstrap"
+echo "bootstrap: 就绪；启动：node tools/channel/run-driver.mjs up --bootstrap"

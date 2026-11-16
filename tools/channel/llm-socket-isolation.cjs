@@ -1,4 +1,4 @@
-// tools/llm-socket-isolation.cjs — api.deepseek.com 请求的 socket 隔离（NODE_OPTIONS 预载，
+// tools/channel/llm-socket-isolation.cjs — api.deepseek.com 请求的 socket 隔离（NODE_OPTIONS 预载，
 // 用户指令 2026-10-13：「LLM 沟通和 web search 沟通不要复用 socket，用独立的 socket」）。
 // 依据（postmortem 2026-10-13）：上游边缘对长命复用连接有相位性故障（零响应头 + 未声明 brotli 体，
 // 实拍 64 健康 → 2 秒 → 23 垃圾的硬切换），而全新连接在 150+ 次受控请求中从未失败。
@@ -15,7 +15,7 @@ const undiciOf = () => {
   if (undiciCache === null) {
     try {
       const { execSync } = require('node:child_process');
-      const dir = execSync(`ls -d ${PATH.join(__dirname, '..', 'vendor', 'dsh', 'node_modules', '.pnpm', 'undici@*', 'node_modules', 'undici')} 2>/dev/null | head -1`, { encoding: 'utf8' }).trim();
+      const dir = execSync(`ls -d ${PATH.join(__dirname, '..', '..', 'vendor', 'dsh', 'node_modules', '.pnpm', 'undici@*', 'node_modules', 'undici')} 2>/dev/null | head -1`, { encoding: 'utf8' }).trim();
       if (dir === '') throw new Error('vendor pnpm 树里找不到 undici');
       undiciCache = require(PATH.join(dir, 'index.js')) ?? createRequireFallback(dir);
     } catch (e) {

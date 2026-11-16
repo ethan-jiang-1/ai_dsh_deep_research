@@ -12,7 +12,7 @@
 // 为什么存在：技能 .agents/skills/reproducing-a-failure §2 的「透明 fetch tee」此前无
 // tracked 实现——每次取证按技能现场从零重写（2026-10-13 postmortem 的 capture2.cjs 是
 // 一次性工具，随运行区清理消失）。本件把它转正：预载只**抄写**字节、零行为路径改动
-// （预载形态与 tools/llm-socket-isolation.cjs 同构——NODE_OPTIONS 挂载、拦 globalThis.fetch、
+// （预载形态与 tools/channel/llm-socket-isolation.cjs 同构——NODE_OPTIONS 挂载、拦 globalThis.fetch、
 // 命中外的请求原样透传）。方法论正本 = 技能 §2（判读要点：**响应头集合本身是证据**——
 // MALFORMED 事故里失败响应 = 200 + 零头 + 未声明压缩体，对照组 = 完整头 + content-encoding）。
 // 何时用：流异常第一动作 = 挂 tee 抓原始字节与响应头，不以错误字符串推断归因。

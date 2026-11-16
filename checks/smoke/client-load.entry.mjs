@@ -33,7 +33,7 @@
 //   不新增 smoke 面、不动 route 表）；checks/smoke/client-load-reference.support.mjs = 磁盘参考
 //   对象构建器（绑定/未绑定/交付候选选取合同）。
 //
-// 通道：源码域（--profile web --patch tools/research.overlay.yml，与 preset.e2e 真挂载档
+// 通道：源码域（--profile web --patch tools/record/research.overlay.yml，与 preset.e2e 真挂载档
 // 同款——boot 起自本仓，行包名经根 node_modules 解析到 pack 源码树，浏览器经
 // exports["./client"] 取已构建的 lib/client.js）。
 // 前置：source tools/env.sh；pack 已构建（lib/client.js 在位——boot 前自检会拦）。
@@ -205,7 +205,7 @@ const TEAM_ROW = `
 `
 const teamPatchPath = join(ROOT, 'runtime', 'smoke-workspace', 'client-load-team.overlay.yml')
 mkdirSync(dirname(teamPatchPath), { recursive: true })
-writeFileSync(teamPatchPath, readFileSync(join(ROOT, 'tools', 'research.overlay.yml'), 'utf8') + TEAM_ROW, 'utf8')
+writeFileSync(teamPatchPath, readFileSync(join(ROOT, 'tools', 'record', 'research.overlay.yml'), 'utf8') + TEAM_ROW, 'utf8')
 
 /** boot web（源码域 overlay 通道 + agent-team host 行），等到启动横幅打印带 token 的 URL。
  *  启停与横幅等待正本 = lib/web-harness.bootWeb；本件的原值：非组长（detached: false）、`scrubbedEnv`、

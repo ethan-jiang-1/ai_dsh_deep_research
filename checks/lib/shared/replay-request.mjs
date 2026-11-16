@@ -22,7 +22,7 @@ const headersOf = (events) => events.filter((event) => event?.type === 'request/
 const normalizePersona = (text) => text;
 
 // runtime-context 承担可变身份（逐行独立归一——只归值，句式与其余正文不动）：
-// ① 录制/回放端口必不同（录制 tools/record-role-fixture 默认 3105、回放 smoke 默认 3103），
+// ① 录制/回放端口必不同（录制 tools/record/record-role-fixture 默认 3105、回放 smoke 默认 3103），
 //    端口是 boot 生成物而非契约内容；② checkout 根随 clone 位置；③ 工作区根嵌在 sandbox 策略句；
 // ④ **profile 安装根**随 DSH_HOME（dev home vs CI temp home）——它指向同一份 pack 内容，
 //    是位置身份，不是模型可见语义；包名后的 content 路径后缀仍逐字比较。
@@ -143,7 +143,7 @@ export function compareReplayRequests(expectedEvents, actualEvents) {
 }
 
 // ── 回合落定判据（BUG-030 正修；单一正本）──────────────────────────────────────────────
-// 消费 = snapshot-replay.entry A 层（"回放回合是否走完"）+ tools/record-role-fixture（录制收尾）。
+// 消费 = snapshot-replay.entry A 层（"回放回合是否走完"）+ tools/record/record-role-fixture（录制收尾）。
 // 为什么必须单独成件：哨兵字样**写在录制 prompt 里**，用"全文 includes"判回合完成会在 user/message
 // 一落盘时立刻放行（BUG-030 实测：A 层提前放行 → 后续层在回合在飞时执行 → 渲染金标准缺末行）。
 

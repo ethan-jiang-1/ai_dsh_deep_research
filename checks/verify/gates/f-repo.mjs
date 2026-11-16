@@ -357,10 +357,10 @@ export function runF() {
 // profile patch（cat >> … cordis.patch.yml）→ 红；把团队层版本改回读包清单 → 红。
 {
   const gate = 'dev-parity';
-  const bootPath = join(ROOT, 'tools', 'boot-run.sh');
-  const driverPath = join(ROOT, 'tools', 'run-driver.mjs');
+  const bootPath = join(ROOT, 'tools', 'channel', 'boot-run.sh');
+  const driverPath = join(ROOT, 'tools', 'channel', 'run-driver.mjs');
   const readmePath = join(ROOT, 'tools', 'README.md');
-  for (const [file, path] of [['tools/boot-run.sh', bootPath], ['tools/run-driver.mjs', driverPath], ['tools/README.md', readmePath]]) {
+  for (const [file, path] of [['tools/channel/boot-run.sh', bootPath], ['tools/channel/run-driver.mjs', driverPath], ['tools/README.md', readmePath]]) {
     if (!existsSync(path)) fail(gate, `${file} 缺席——dev 通道的 parity 判据失去对象`);
   }
   if (existsSync(bootPath) && existsSync(driverPath)) {

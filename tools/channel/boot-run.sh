@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# tools/boot-run.sh — 开跑就绪命令（幂等，keyless）：deep-research profile（= 用户安装 profile 名）组合校验/补装 → boot web
+# tools/channel/boot-run.sh — 开跑就绪命令（幂等，keyless）：deep-research profile（= 用户安装 profile 名）组合校验/补装 → boot web
 # → 打印入口步骤。RFC：notes/implemented/2026-09-24-m2-p1-run-channel.md（A 定案：团队机制归
 # vendor agent-team-profile 层）。操作指南全文 = docs/guides/61-run-playbook.md。
-# 用法：bash tools/boot-run.sh（Ctrl-C 停 web）；--prepare-profile = 只装/校验 profile，不起 web（CI 快照用）。
+# 用法：bash tools/channel/boot-run.sh（Ctrl-C 停 web）；--prepare-profile = 只装/校验 profile，不起 web（CI 快照用）。
 # 重复执行不重复安装（组合在位即跳过）。
 # 同机制纪律：dev 与用户安装走同一条载入路径（tarball → dsh plugin add → roster），差异只看 tools/README
 # 的 parity 表；profile 用户层（cordis.patch.yml）dev 不写——MCP 行走 --patch 覆盖层。
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # 先 source 再进 strict mode：被 source 的脚本不该继承调用方的 nounset（env.sh 已加花括号
 # 防全角括号陷阱，此为标准防御序——第三方/共享 env 一律裸 source）。
 source "$ROOT/tools/env.sh"   # 双 home（DSH_HOME=runtime/harness-home）+ dsh 机制基线函数
@@ -20,7 +20,7 @@ node "$ROOT/checks/lib/harness/vendor-artifacts.mjs"
 
 PROFILE="${DSH_RUN_PROFILE:-deep-research}"
 # 端口：缺省 3083（2026-09-28 用户指令——3081 让给别的项目；3080 = 本仓开发 GUI）；覆写：
-#   DSH_RUN_PORT=<空闲端口> bash tools/boot-run.sh
+#   DSH_RUN_PORT=<空闲端口> bash tools/channel/boot-run.sh
 PORT="${DSH_RUN_PORT:-3083}"
 # 实例状态根：多实例用不同 DSH_RUN_STATE_DIR（web.log/dashboard/run-pack/npm-cache 各自独立）。
 STATE_DIR="${DSH_RUN_STATE_DIR:-$ROOT/runtime/smoke-workspace}"
@@ -112,7 +112,7 @@ fi
 if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
   echo "boot-run: 端口 $PORT 已被占用：pid = $(lsof -nP -iTCP:"$PORT" -sTCP:LISTEN -t 2>/dev/null | tr '\n' ' ')" >&2
   echo "          若是本仓在飞的 run 通道 → 别另起：用它（URL/token 见启动横幅或 $STATE_DIR/web.log）" >&2
-  echo "          确要重启或换端口：先停占用者，或 DSH_RUN_PORT=<空闲端口> bash tools/boot-run.sh" >&2
+  echo "          确要重启或换端口：先停占用者，或 DSH_RUN_PORT=<空闲端口> bash tools/channel/boot-run.sh" >&2
   exit 1
 fi
 
@@ -277,7 +277,7 @@ echo "boot-run: boot web（profile=${PROFILE}，端口 ${PORT}；Ctrl-C 停止�
 echo "boot-run: runtime = ${DSH_BOOT_LABEL}"
 # LLM 流 socket 隔离（用户指令 2026-10-13：LLM 流式请求走一次性连接不复用——上游边缘对
 # 长命复用连接有相位性故障，postmortem 2026-10-13；移除 = 删本行）
-ISOLATION_GUARD="$ROOT/tools/llm-socket-isolation.cjs"
+ISOLATION_GUARD="$ROOT/tools/channel/llm-socket-isolation.cjs"
 if [ ! -f "$ISOLATION_GUARD" ]; then
   echo "boot-run: 隔离预载件缺席（${ISOLATION_GUARD}）——拒绝在未隔离通道上启动；先恢复该文件" >&2
   exit 2

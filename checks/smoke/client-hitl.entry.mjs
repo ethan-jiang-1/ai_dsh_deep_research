@@ -85,7 +85,7 @@ const bin = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts')
 // 启停与横幅等待正本 = lib/web-harness.bootWeb（原值：**非组长** detached:false、overlay 通道、
 // withModelKey({DSH_HOME}) 环境、超时 BOOT_TIMEOUT_MS、失败尾部 600 字符）
 const booted = await bootWeb({
-  bin, cwd: ROOT, profile: 'web', patchPath: join(ROOT, 'tools', 'research.overlay.yml'), port: PORT,
+  bin, cwd: ROOT, profile: 'web', patchPath: join(ROOT, 'tools', 'record', 'research.overlay.yml'), port: PORT,
   env: withModelKey({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 600,
   detached: false,
 })
@@ -220,7 +220,7 @@ try {
       const expandBackVisible = await expandBack.isVisible({ timeout: 6_000 }).catch(() => false)
       step(expandBackVisible, '⑤a 右栏已收起（页签 dock 保持挂载——观察者仍在）')
       // 答掉挂起卡（hitl-answer 子进程 = 代理模拟的唯一实现；本冒烟即验证场，标注如实）
-      const answeredRun = spawnSync(process.execPath, ['--import', 'tsx/esm', join(ROOT, 'tools', 'hitl-answer.mjs'), '--port', String(PORT), '--token', token], { encoding: 'utf8', cwd: ROOT })
+      const answeredRun = spawnSync(process.execPath, ['--import', 'tsx/esm', join(ROOT, 'tools', 'channel', 'hitl-answer.mjs'), '--port', String(PORT), '--token', token], { encoding: 'utf8', cwd: ROOT })
       const answeredCount = answeredCountOf(answeredRun.stdout ?? '')
       let landed = null
       for (let i = 0; i < 20 && landed === null; i++) {
@@ -245,7 +245,7 @@ try {
           if (!foldHitlPending(events).pending && events.some((j) => j?.type === 'turn/end')) { turnClosed = true; break }
           if (foldHitlPending(events).pending && i === 20) {
             // lead 又追问了——再答一轮
-            spawnSync(process.execPath, ['--import', 'tsx/esm', join(ROOT, 'tools', 'hitl-answer.mjs'), '--port', String(PORT), '--token', token], { encoding: 'utf8', cwd: ROOT })
+            spawnSync(process.execPath, ['--import', 'tsx/esm', join(ROOT, 'tools', 'channel', 'hitl-answer.mjs'), '--port', String(PORT), '--token', token], { encoding: 'utf8', cwd: ROOT })
           }
         }
       }

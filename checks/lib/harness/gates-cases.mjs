@@ -784,7 +784,7 @@ export const CASES = [
     } },
   // overlay-fresh：改生成物一字节（registry 默认 preset 指向）——手改生成物 = 与渲染器漂移。
   { id: 'overlay-fresh-stale-byte', gate: 'overlay-fresh', mutate: (dir) => {
-      const p = join(dir, 'tools', 'research.overlay.yml');
+      const p = join(dir, 'tools', 'record', 'research.overlay.yml');
       writeFileSync(p, readFileSync(p, 'utf8').replace('default: lead', 'default: probe'));
     } },
   // repo-conventions：本门禁在副本基线**非 PASS**（fixture 无 vendor/dsh/package.json → engines
@@ -800,7 +800,7 @@ export const CASES = [
   // → bootstrap --check 永远误报“vendor 产物缺席”、boot-run 的护栏/缓存整段静默失效。
   // 注入 = 在 bootstrap.sh 末尾加一条指向不存在模块的 node 调用（门禁按字面量扫描，不必真执行）。
   { id: 'repo-conventions-dev-script-path', gate: 'repo-conventions',
-    mutate: appendTo(join('tools', 'bootstrap.sh'), '\nnode "$ROOT/checks/lib/__moved-probe__.mjs"\n'),
+    mutate: appendTo(join('tools', 'build', 'bootstrap.sh'), '\nnode "$ROOT/checks/lib/__moved-probe__.mjs"\n'),
     expect: '引用不存在的 checks/lib/__moved-probe__.mjs' },
 
   // 2026-11-15 `482abf14` 把同一个扫描面从 tools/*.sh 扩到 tools/hooks/*，但同 diff 没有注入案例
@@ -870,7 +870,7 @@ export const CASES = [
   } },
   // dev-parity：dev 通道退回另一个 profile 名——dev 与用户路径身份分叉。
   { id: 'dev-parity-driver-profile', gate: 'dev-parity', mutate: (dir) => {
-    const p = join(dir, 'tools', 'run-driver.mjs');
+    const p = join(dir, 'tools', 'channel', 'run-driver.mjs');
     const text = readFileSync(p, 'utf8');
     if (!text.includes("|| 'deep-research'")) throw new Error('夹具 run-driver 默认 profile 不是 deep-research——案例失效');
     writeFileSync(p, text.replace("|| 'deep-research'", "|| 'research'"));

@@ -12,14 +12,14 @@
   `DEEPSEEK_API_KEY`（见 [AGENTS.md §密钥](../../AGENTS.md)；boot 本身 keyless）。
   启动横幅出来后自查一步：`grep -q DEEPSEEK runtime/harness-home/.credentials.yaml`——
   boot 不查凭据，缺了要到 lead 首次调模型才炸（启动成功 ≠ 能跑研究）；
-- 启动：`node tools/run-driver.mjs up`（起/复用通道 → 验浏览器面 → 打印呈交块；内部调
-  `bash tools/boot-run.sh` 做自检/组合/漂移门）→ 用浏览器打开呈交块里的
+- 启动：`node tools/channel/run-driver.mjs up`（起/复用通道 → 验浏览器面 → 打印呈交块；内部调
+  `bash tools/channel/boot-run.sh` 做自检/组合/漂移门）→ 用浏览器打开呈交块里的
   `http://127.0.0.1:<port>/?token=…`。**端口 = `DSH_RUN_PORT`，缺省 3083**
   （3080 = 本仓开发 GUI、3081 = 已让渡外部项目，均勿占；换端口：
-  `DSH_RUN_PORT=<空闲端口> node tools/run-driver.mjs up`）。端口已被占时 boot-run 会 fail-loud 并给
+  `DSH_RUN_PORT=<空闲端口> node tools/channel/run-driver.mjs up`）。端口已被占时 boot-run 会 fail-loud 并给
   补救，**先看占用者是谁**：若是本仓在飞的 run 通道 → **别另起**，用它（URL/token 见启动横幅或
   `runtime/smoke-workspace/web.log`）；不是 → 换端口，或确认后停掉它（**别盲杀**：在飞会话的
-  日志尾部可能丢失——BUG-007 卡）。想守在前台看日志 = `bash tools/boot-run.sh`（底层启动面）；
+  日志尾部可能丢失——BUG-007 卡）。想守在前台看日志 = `bash tools/channel/boot-run.sh`（底层启动面）；
 - **环境不变式（2026-11-05 用户定调）**：启动一律落在**隔离 dev home**（`tools/env.sh` 把 `DSH_HOME`
   指到 `runtime/harness-home`，绝不落到日用 `~/.dsh`；换实例用 `DSH_DEV_HOME`），且载入路径
   **尽量与用户安装同形**：CLI 建 profile → `dsh plugin --profile deep-research add file:<tgz>` →
@@ -34,15 +34,15 @@
   **不得自创**：不手起 `dsh --profile deep-research`（dev 绕漂移门）、不对已有 profile 重复
   `--from-default-profile`、不手写/改 `dsh.profile.bundles`（roster 只经 `dsh plugin add/remove`）、
   roster 变更后不跳过重启；
-- **已有通道时**：取当前 URL = `node tools/run-driver.mjs url`；只验浏览器面（不启动、不换 token）=
-  `node tools/run-driver.mjs probe`。probe/up 复用通道时先跑只读镜像门（`boot-run --drift-only`）：
+- **已有通道时**：取当前 URL = `node tools/channel/run-driver.mjs url`；只验浏览器面（不启动、不换 token）=
+  `node tools/channel/run-driver.mjs probe`。probe/up 复用通道时先跑只读镜像门（`boot-run --drift-only`）：
   通道镜像 ≠ 当前 pack 源 → **exit 2 未跑**（不是绿）——旧页面验不出当前代码，先重建/重启再验。
   URL/token 的唯一来源仍是最后一条启动横幅；旧横幅 = 旧 token；
 - **启动三分支（先判"通道活没活 + 镜像一不一致"，再动手）**（实测 2026-11-05：缓存热复用 ≈0.5s，
   冷启动缓存命中 ≈10s，缓存过期后真验 ≈20–25s，冷重建 ≈2–3 min）：
-  - 通道活 + 镜像一致 → `up` 复用并跑全量探针；只要当前 URL = `node tools/run-driver.mjs url`（≈0.2s）；
+  - 通道活 + 镜像一致 → `up` 复用并跑全量探针；只要当前 URL = `node tools/channel/run-driver.mjs url`（≈0.2s）；
   - 通道活 + 镜像漂移 → `up` 判 exit 2；确认没有在飞 run 要保活后，一条命令重建：
-    `kill $(lsof -t -iTCP:3083 -sTCP:LISTEN) ; rm -rf runtime/harness-home/profiles/deep-research ; node tools/run-driver.mjs up`
+    `kill $(lsof -t -iTCP:3083 -sTCP:LISTEN) ; rm -rf runtime/harness-home/profiles/deep-research ; node tools/channel/run-driver.mjs up`
     ——≈2–3 min 是 npm pack + 两次 plugin add + boot + 探针的必要开销，不是卡死（端口按当次横幅换）；
   - 通道死 → 直接 `up`（它自己起 boot-run）；**别手起 `dsh --profile deep-research`**，那会绕漂移门；
 - **运行时与验证缓存（加速的事实边界）**：boot-run 默认用 **vendor 构建产物** `lib/bin.js` 启动
@@ -60,7 +60,7 @@
   run-driver 就是这条纪律的可复跑入口（exit 0 = 可呈交 / 1 = 红不得呈交 / 2 = 未跑）。三步序如下，
   红了按序修后重跑同一条：
   ① boot-run 全序（自检 → 组合检查/必要补装 → 漂移检测）红了当场修——漂移 = 按脚本处方重建
-  profile；vendor 产物缺失 = `bash tools/vendor-build.sh`；
+  profile；vendor 产物缺失 = `bash tools/build/vendor-build.sh`；
   ② boot 出横幅后验浏览器面：探针断言宿主就位 / **首屏无遮挡**（DSH 版本升级后的 Preview Notice
   全屏遮罩必须关掉——探针的 JS 派发绕过可点性检查，不关则绿的是 DOM、不是人看得见的页面）/
   零 console 错误（boot 横幅只证宿主侧，观察面可能坏着——0.2.0 轮教训）；
@@ -78,7 +78,7 @@
 
 ### 0.1 特殊形态与排障（按需读，首跑不需要）
 
-- **SPA 抓取通道（mcp-playwright，默认挂载）**：`bash tools/boot-run.sh` 自带本地 Playwright MCP
+- **SPA 抓取通道（mcp-playwright，默认挂载）**：`bash tools/channel/boot-run.sh` 自带本地 Playwright MCP
   （npx 拉起 `@0.0.83`、headless——SPA 定价页/JS 榜单的渲染抓取；不设任何代理参数，浏览器网络
   继承环境）；`MCP_PLAYWRIGHT=0` = 显式拆。决定与环境踩坑正本 =
   [mcp-playwright 采纳 Note](../../notes/archived/2026-10-02-mcp-playwright-adoption.md)；
@@ -95,15 +95,15 @@
 
   - 交互式使用 = 让 `boot-run.sh` 待在终端里（Ctrl-C 才停）；
   - 需要它在你离开后继续服务（agent 驱动 / 无人值守）= 无人值守形态两条路按场景选：
-    - **托管后台 job 直接跑 `bash tools/boot-run.sh`（首选）**——自检/补装/漂移门全走，
+    - **托管后台 job 直接跑 `bash tools/channel/boot-run.sh`（首选）**——自检/补装/漂移门全走，
       实测一场 run 全程存活（2026-10-11：web 未因 stdin 退出）；
     - **裸命令 + 睡眠管道（备用）**：宿主会关后台 job 的 stdin 时用（症状 = web 自行退出）：
       `sleep <秒> | node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts --profile deep-research
       -- --port <端口，缺省 3083> --no-open`。**这条绕过 boot-run 的漂移门**（
       [00-index §先分流](../00-index.md) 首行"别直接 `dsh --profile deep-research`"正为此——
-      同理：绕过漂移检测、静默用旧镜像）：先 `bash tools/boot-run.sh --drift-check` 过门再用它；
+      同理：绕过漂移检测、静默用旧镜像）：先 `bash tools/channel/boot-run.sh --drift-check` 过门再用它；
   `--drift-check` 模式会检查端口且可初始化环境/补装 profile/写 MCP patch，不是只读探针。要只读地
-  回答"当前安装镜像是否等于 pack 源"（不碰活通道）= `bash tools/boot-run.sh --drift-only`——run-driver
+  回答"当前安装镜像是否等于 pack 源"（不碰活通道）= `bash tools/channel/boot-run.sh --drift-only`——run-driver
   复用通道时用的就是它。判红只看**运行时文件**（`lib/`/presets/content/locale/cordis.patch.yml 等）；
   README/LICENSE 漂移只提示、不拦绿（页面行为不变）。报漂移就按
       [guides/62 §改动影响面](./62-plugin-authoring.md) 重建镜像；
@@ -111,7 +111,7 @@
   （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，
   用当次横幅里的 URL；旧 URL 作废）；③ 有监听且 token 新但页面空 = 前端壳产物陈旧
   （`pnpm --filter @deepseek-ai/dsh-web-frontend run build` 重建；vendor 构建产物整体重建 =
-  `bash tools/vendor-build.sh`，见 [guides/60 §2](./60-dev-loop.md)）。
+  `bash tools/build/vendor-build.sh`，见 [guides/60 §2](./60-dev-loop.md)）。
 
 ## 1. 开哪个会话
 
@@ -123,16 +123,16 @@
 #   workspace/create { request: { path: "<repo>/research-workspace" } }（幂等）
 ```
 
-**自检 / 补登记**：`tools/run-kickoff.mjs` 建会话前就调 `workspace/create`（幂等，RPC 同上）——
+**自检 / 补登记**：`tools/channel/run-kickoff.mjs` 建会话前就调 `workspace/create`（幂等，RPC 同上）——
 "这台机器登记过没有"不用记；`runtime/harness-home` 被重建后本步重新需要。
 
 **为什么关键**：研究手册随包（`content/manual.md`），由本包的 content 行经
 `systemPrompt.context` 注入每个角色，**与会话 cwd 无关**；工作区登记决定的是**角色会话的 cwd**
-——cwd 不在研究工作区，`drt_<slug>/` 就写不到用户工作区。`tools/run-kickoff.mjs` 已默认用
+——cwd 不在研究工作区，`drt_<slug>/` 就写不到用户工作区。`tools/channel/run-kickoff.mjs` 已默认用
 workspaceId 形态把会话建在 research-workspace。
 
 - web GUI 新建会话：preset 选 Deep Research Lead（默认项），工作区选 research-workspace；
-- 无 GUI 手（代理操作）：`node tools/run-kickoff.mjs --port 3083 --token <横幅 token>
+- 无 GUI 手（代理操作）：`node tools/channel/run-kickoff.mjs --port 3083 --token <横幅 token>
   [--prompt-file <file>]` 建 Lead 会话（workspace/create 幂等自检已内建；全档参数 =
   [guides/60 §2](./60-dev-loop.md)）；
 - 只跟 lead 对话——它是唯一入口与出口：立项、组队、派活、综合、交付全归它；
@@ -169,7 +169,7 @@ workspaceId 形态把会话建在 research-workspace。
 CLI/host 侧没有 answerer，也没有提交答案的 RPC）——所以代答要用真浏览器：
 
 ```sh
-source tools/env.sh && node --import tsx/esm tools/hitl-answer.mjs --port 3083 --token <横幅 token>   # 默认逐题选带(Recommended)的那一项
+source tools/env.sh && node --import tsx/esm tools/channel/hitl-answer.mjs --port 3083 --token <横幅 token>   # 默认逐题选带(Recommended)的那一项
 ```
 
 **HITL1 是两段卡**（三问卡 → 计划确认卡）：同一条命令**跑两次**，每次只答当前挂起的一张卡
@@ -236,17 +236,17 @@ BUG-020）。
 
 四类运行状态（run bundle / session log / goal·任务板 / 观察面）的 canonical 合同与恢复优先级正本 = [design/50](../design/50-agent-loop-and-state.md)——本节只载人的操作步骤。
 
-- 任何时候可关页面/停机。恢复 = 重跑 `node tools/run-driver.mjs up` → 新开 lead 会话说
+- 任何时候可关页面/停机。恢复 = 重跑 `node tools/channel/run-driver.mjs up` → 新开 lead 会话说
   "继续 <slug> 这个 run"——lead 只凭 `drt_<slug>/` 的文件事实重建上下文，
   不依赖聊天记忆；
 - **通道还活着、只是回合停摆**（模型空响应 / 厂商流错误打断，会话未终局化）→ **不必新开**：
-  `node tools/run-kickoff.mjs --port 3083 --token <t> --session <会话 id> --prompt <恢复指令>`
+  `node tools/channel/run-kickoff.mjs --port 3083 --token <t> --session <会话 id> --prompt <恢复指令>`
   即向该会话注入指令唤醒（等价于你在 GUI 手打一句）。该模式**自带送达对账**：exit 0 =
   会话日志里已出现这条 `user/message`，1 = 未对账（多半是该会话已终局化或日志尾部未落盘
   → 走上面"重跑 + 新会话"那条路），2 = 用法/前置错（续跑模式需先 `source tools/env.sh`）；
 - **通道跑久后 UI 可能"零会话行"**（实测约 5 小时后：侧栏组能展开成 `aria-expanded=true`，却渲染不出任何
   `session:` 行；代答于是报"侧栏没有目标会话行"）——**不是**归档、也不是回合终局化。处置 = 重跑
-  `node tools/run-driver.mjs up` + **新会话**；`hitl-answer` 自 2026-10-16 起在报错里给「错因判据 = aging」这一行
+  `node tools/channel/run-driver.mjs up` + **新会话**；`hitl-answer` 自 2026-10-16 起在报错里给「错因判据 = aging」这一行
   （判据正本 = [BUG-031](../../_backlog/_archived/fixed_bugs/BUG-031-hitl-answer-sidebar-session-rows-unrendered.md)）；
 - **被通道重启打断的 ask 不会终局化，会永久留在盘上算 pending**（UI 卡在场但点不动、答复永不落地，盘侧谓词会继续
   把它当"最新挂起"报出）→ 别去答它：重开新会话说"继续 <slug> 这个 run"，让 lead 原样重发问询；

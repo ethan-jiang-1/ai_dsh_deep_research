@@ -72,7 +72,7 @@ try {
     mkdirSync(inst.ws, { recursive: true })
     writeFileSync(join(inst.ws, `only-${inst.id}.txt`), `workspace-${inst.id}\n`)
 
-    const driver = spawnSync(process.execPath, [join(ROOT, 'tools', 'run-driver.mjs'), 'up', '--bootstrap'], {
+    const driver = spawnSync(process.execPath, [join(ROOT, 'tools', 'channel', 'run-driver.mjs'), 'up', '--bootstrap'], {
       cwd: ROOT, encoding: 'utf8', env: envFor(inst), timeout: 300_000,
     })
     const verdictPath = join(inst.state, 'run-driver-verdict.json')
@@ -85,7 +85,7 @@ try {
     let token = null
     try { token = new URL(verdict.url).searchParams.get('token') } catch {}
     check(typeof token === 'string' && token.length > 0, `${inst.id} 从 verdict 取 token`)
-    const kick = spawnSync(process.execPath, [join(ROOT, 'tools', 'run-kickoff.mjs'), '--port', String(inst.port), '--token', token], {
+    const kick = spawnSync(process.execPath, [join(ROOT, 'tools', 'channel', 'run-kickoff.mjs'), '--port', String(inst.port), '--token', token], {
       cwd: ROOT, encoding: 'utf8', env: { ...envFor(inst), DSH_HOME: inst.home }, timeout: 120_000,
     })
     const sessionId = (kick.stdout ?? '').trim().split('\n').filter(Boolean).at(-1) ?? ''

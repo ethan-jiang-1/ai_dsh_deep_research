@@ -1678,7 +1678,7 @@
     },
     {
       "from": "scripts/run-ops/runtime-clean.mjs",
-      "to": "tools/runtime-clean.mjs",
+      "to": "tools/clean/runtime-clean.mjs",
       "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
     },
     {
@@ -2488,12 +2488,12 @@
     },
     {
       "from": "dev/boot-run.sh",
-      "to": "tools/boot-run.sh",
+      "to": "tools/channel/boot-run.sh",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
       "from": "dev/bootstrap.sh",
-      "to": "tools/bootstrap.sh",
+      "to": "tools/build/bootstrap.sh",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
@@ -2503,7 +2503,7 @@
     },
     {
       "from": "dev/hitl-answer.mjs",
-      "to": "tools/hitl-answer.mjs",
+      "to": "tools/channel/hitl-answer.mjs",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
@@ -2513,22 +2513,22 @@
     },
     {
       "from": "dev/llm-socket-isolation.cjs",
-      "to": "tools/llm-socket-isolation.cjs",
+      "to": "tools/channel/llm-socket-isolation.cjs",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
       "from": "dev/record-asset-ledger.mjs",
-      "to": "tools/record-asset-ledger.mjs",
+      "to": "tools/record/record-asset-ledger.mjs",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
       "from": "dev/record-ci-oracle.mjs",
-      "to": "tools/record-ci-oracle.mjs",
+      "to": "tools/record/record-ci-oracle.mjs",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
       "from": "dev/record-role-fixture.mjs",
-      "to": "tools/record-role-fixture.mjs",
+      "to": "tools/record/record-role-fixture.mjs",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
@@ -2553,53 +2553,138 @@
     },
     {
       "from": "dev/render-overlay.mjs",
-      "to": "tools/render-overlay.mjs",
+      "to": "tools/record/render-overlay.mjs",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
       "from": "dev/render-test-index.mjs",
-      "to": "tools/render-test-index.mjs",
+      "to": "tools/record/render-test-index.mjs",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
       "from": "dev/research.overlay.yml",
-      "to": "tools/research.overlay.yml",
+      "to": "tools/record/research.overlay.yml",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
       "from": "dev/run-driver.mjs",
-      "to": "tools/run-driver.mjs",
+      "to": "tools/channel/run-driver.mjs",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
       "from": "dev/run-kickoff.mjs",
-      "to": "tools/run-kickoff.mjs",
+      "to": "tools/channel/run-kickoff.mjs",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
       "from": "dev/runtime-clean.mjs",
-      "to": "tools/runtime-clean.mjs",
+      "to": "tools/clean/runtime-clean.mjs",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
       "from": "dev/vendor-build.sh",
-      "to": "tools/vendor-build.sh",
+      "to": "tools/build/vendor-build.sh",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
       "from": "dev/vendor-host-bundle.config.ts",
-      "to": "tools/vendor-host-bundle.config.ts",
+      "to": "tools/build/vendor-host-bundle.config.ts",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
       "from": "dev/vendor-host-typert.config.ts",
-      "to": "tools/vendor-host-typert.config.ts",
+      "to": "tools/build/vendor-host-typert.config.ts",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
       "from": "dev/vendor-typert-emit.mjs",
-      "to": "tools/vendor-typert-emit.mjs",
+      "to": "tools/build/vendor-typert-emit.mjs",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "tools/boot-run.sh",
+      "to": "tools/channel/boot-run.sh",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/run-driver.mjs",
+      "to": "tools/channel/run-driver.mjs",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/run-kickoff.mjs",
+      "to": "tools/channel/run-kickoff.mjs",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/hitl-answer.mjs",
+      "to": "tools/channel/hitl-answer.mjs",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/llm-socket-isolation.cjs",
+      "to": "tools/channel/llm-socket-isolation.cjs",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/bootstrap.sh",
+      "to": "tools/build/bootstrap.sh",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/vendor-build.sh",
+      "to": "tools/build/vendor-build.sh",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/vendor-host-bundle.config.ts",
+      "to": "tools/build/vendor-host-bundle.config.ts",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/vendor-host-typert.config.ts",
+      "to": "tools/build/vendor-host-typert.config.ts",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/vendor-typert-emit.mjs",
+      "to": "tools/build/vendor-typert-emit.mjs",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/record-asset-ledger.mjs",
+      "to": "tools/record/record-asset-ledger.mjs",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/record-ci-oracle.mjs",
+      "to": "tools/record/record-ci-oracle.mjs",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/record-role-fixture.mjs",
+      "to": "tools/record/record-role-fixture.mjs",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/render-overlay.mjs",
+      "to": "tools/record/render-overlay.mjs",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/render-test-index.mjs",
+      "to": "tools/record/render-test-index.mjs",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/research.overlay.yml",
+      "to": "tools/record/research.overlay.yml",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
+    },
+    {
+      "from": "tools/runtime-clean.mjs",
+      "to": "tools/clean/runtime-clean.mjs",
+      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
     }
   ]
 }

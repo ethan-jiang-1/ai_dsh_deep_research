@@ -1,4 +1,4 @@
-// tools/vendor-typert-emit.mjs —— 本仓驱动的 typert host/client 产物生成（不改 vendor 内容）。
+// tools/build/vendor-typert-emit.mjs —— 本仓驱动的 typert host/client 产物生成（不改 vendor 内容）。
 //
 // 背景（详见 notes/archived/2026-09-25-vendor-pin-bump-017rc2.md）：0.1.7 起启动需要各贡献包
 // 的 `lib/typert.<face>.js`（`typert-loader` 会 import 包的 `./typert` 子路径）。vendor 自己的
@@ -13,9 +13,9 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { WorkspaceTypertGenerator } from '../vendor/dsh/packages/typert/generator/lib/types/workspace.js'
+import { WorkspaceTypertGenerator } from '../../vendor/dsh/packages/typert/generator/lib/types/workspace.js'
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const VENDOR = join(ROOT, 'vendor', 'dsh')
 // vendor 插件同款：本脚本消费 tsc 已产出的 lib/types，故跳过逐包诊断遍。
 const TSC_VERIFIED_INPUT = { checkDiagnostics: false }

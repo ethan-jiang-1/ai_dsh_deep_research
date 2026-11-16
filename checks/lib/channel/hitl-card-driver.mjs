@@ -1,12 +1,12 @@
 /** Revalidate the target Session and ask card in the same DOM turn as each action. */
 // hitl-card-driver.mjs — HITL 问询卡的**浏览器内**驱动片段（Playwright `page.evaluate` 的入参）。
 //
-// 从 tools/hitl-answer.mjs 原样搬出（2026-10-28 Phase C）：它本就是被序列化进页面的纯 DOM 函数
+// 从 tools/channel/hitl-answer.mjs 原样搬出（2026-10-28 Phase C）：它本就是被序列化进页面的纯 DOM 函数
 // ——不闭包任何模块变量（targetSessionId/expectedCardKey/action 等全部走参数），所以搬出来零
 // 语义变化，只是让 717 行的驱动壳回到"编排"本职。
 //
 // 为什么住 lib 而不是 tools/：它是判据的**执行面**（问卡可见性、选项结构、提交/推进按钮的可用性），
-// 与 lib/ask-drive（判据面）成对；tools/hitl-answer 只负责打开会话、按判据结果点击与对账。
+// 与 lib/ask-drive（判据面）成对；tools/channel/hitl-answer 只负责打开会话、按判据结果点击与对账。
 //
 // 契约：返回 `{ ready, reason, ...观察值 }`；**不得**在这里做业务判定（选哪个选项、能不能交付
 // 由 lib/ask-drive 的决定函数给）。改动本函数即改浏览器行为，必须跑一次真实 HITL 卡验证。

@@ -327,7 +327,7 @@ composer 左侧 `conversation.input.left` 的状态按钮（有 session 才渲�
   挂起期抑制仅读绑定的渐进面（预检读取不算"本会话的 run"）。
 - **页签内区块归属**：每个页签的头部/正文/底部以 §2 的页签行为准；新增块先在该行写归属区
   （图谱：头部 = 只读标记 + plan/task 计数；正文首行 = 版本轨；其下 = 覆盖率 + 刷新时刻），不另立第二套布局说明。
-- **发现规则单源**：驾驶舱 client 的三位置发现实现 = `src/lib/run/run-context.ts`；机械侧 = `run-context-single-source`（`src/client` 非注释 `_abandoned` 即红；`src/lib` 的终稿地址校验不在词法门禁范围）。`tools/hitl-answer` 与 `tools/run-kickoff` 的盘侧路径枚举、`run-dashboard` 投影与 `client-load-reference.support` oracle 各自保留，不在此行。
+- **发现规则单源**：驾驶舱 client 的三位置发现实现 = `src/lib/run/run-context.ts`；机械侧 = `run-context-single-source`（`src/client` 非注释 `_abandoned` 即红；`src/lib` 的终稿地址校验不在词法门禁范围）。`tools/channel/hitl-answer` 与 `tools/channel/run-kickoff` 的盘侧路径枚举、`run-dashboard` 投影与 `client-load-reference.support` oracle 各自保留，不在此行。
 
 ## 5. 验证面与改动路由（索引，非正文）
 

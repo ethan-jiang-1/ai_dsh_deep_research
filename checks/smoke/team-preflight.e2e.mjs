@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // team-preflight.e2e.mjs — M2 铺垫 P2：team 机制迷你预检（真模型档，需 DEEPSEEK_API_KEY）。
 // 定义：notes/implemented/2026-09-24-m2-p2-team-preflight RFC。仿 l4-lite 形状（标记法 +
-// 会话日志即真相），通道 = run 通道（--profile deep-research 安装域，boot 形状同 tools/boot-run.sh）。
+// 会话日志即真相），通道 = run 通道（--profile deep-research 安装域，boot 形状同 tools/channel/boot-run.sh）。
 // 断言：spawn_teammate 真调用 ×2 / list_agents / 成员会话建立 + 响应标记 / lead 的
 //   one-shot subagent 调用（company D18 现状探针）/ 成员组合画像（发现型：agentPreset 字段 +
 //   工具面线索 → 打印事实，不硬断言——机制预读预期成员 = 裸代理，无角色 preset）。
@@ -9,7 +9,7 @@
 //   不等于等回合完成；这里用静默检测（日志行数连续 4 次轮询不变）等回合真正落定。
 // 成员发现（首跑实证）：lead 日志的 "Background subagent <uuid>" user/message 行 =
 //   成员 session id 的机制原生记录（roster childId）；行级标记扫描作 fallback。
-// 前置：DSH_HOME（dev home 已配凭据）+ research 组合在位（缺则先跑 tools/boot-run.sh）+ zstd。
+// 前置：DSH_HOME（dev home 已配凭据）+ research 组合在位（缺则先跑 tools/channel/boot-run.sh）+ zstd。
 // 用法：source tools/env.sh && node checks/smoke/team-preflight.e2e.mjs [--port 3102]
 
 import { spawnSync } from 'node:child_process';
@@ -61,7 +61,7 @@ const profDir = join(home, 'profiles', PROFILE);
     ok = ok && existsSync(join(profDir, 'node_modules', 'dsh-deep-research-pack', 'presets', `${r}.patch.yml`));
   }
   if (!ok) {
-    console.error(`team-preflight: ${PROFILE} profile 组合不完整（本包 + vendor 层 + 盘上全部角色 preset）——先跑 tools/boot-run.sh 再来`);
+    console.error(`team-preflight: ${PROFILE} profile 组合不完整（本包 + vendor 层 + 盘上全部角色 preset）——先跑 tools/channel/boot-run.sh 再来`);
     process.exit(2);
   }
   const issues = profileLayerIssues({ profileDir: profDir, runtimeVersion: runtimeVersionOf(ROOT), profileName: PROFILE });

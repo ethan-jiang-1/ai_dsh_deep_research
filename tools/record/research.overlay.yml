@@ -1,5 +1,5 @@
-# 生成文件 —— 由 tools/render-overlay.mjs 从 packages/deep-research-pack 渲染；**勿手改**
-# （门禁 overlay-fresh 对账：改 pack 后跑 `node tools/render-overlay.mjs` 重生成）。
+# 生成文件 —— 由 tools/record/render-overlay.mjs 从 packages/deep-research-pack 渲染；**勿手改**
+# （门禁 overlay-fresh 对账：改 pack 后跑 `node tools/record/render-overlay.mjs` 重生成）。
 #
 # research.overlay.yml — 源码域 overlay（preset.e2e 真挂载用）
 # 机制：`--profile web --patch <本文件绝对路径>` 在 profile 层之后追加本 overlay——行包名在
@@ -41,7 +41,7 @@
     fetchProvider: deepseek-fallback-fetch
 
 - insert:
-    # ── analyst.patch.yml（由 tools/render-overlay.mjs 从 pack presets 渲染）──
+    # ── analyst.patch.yml（由 tools/record/render-overlay.mjs 从 pack presets 渲染）──
     - id: preset-analyst
       name: '@deepseek-ai/dsh-agent-preset'
       config:
@@ -115,7 +115,7 @@
               maxBytes: 22528
               projectRootMarkers: []
 
-    # ── critic.patch.yml（由 tools/render-overlay.mjs 从 pack presets 渲染）──
+    # ── critic.patch.yml（由 tools/record/render-overlay.mjs 从 pack presets 渲染）──
     - id: preset-critic
       name: '@deepseek-ai/dsh-agent-preset'
       config:
@@ -182,7 +182,7 @@
               maxBytes: 22528
               projectRootMarkers: []
 
-    # ── lead.patch.yml（由 tools/render-overlay.mjs 从 pack presets 渲染）──
+    # ── lead.patch.yml（由 tools/record/render-overlay.mjs 从 pack presets 渲染）──
     - id: preset-lead
       name: '@deepseek-ai/dsh-agent-preset'
       config:
@@ -293,7 +293,7 @@
               maxBytes: 22528
               projectRootMarkers: []
 
-    # ── method-editor.patch.yml（由 tools/render-overlay.mjs 从 pack presets 渲染）──
+    # ── method-editor.patch.yml（由 tools/record/render-overlay.mjs 从 pack presets 渲染）──
     - id: preset-method-editor
       name: '@deepseek-ai/dsh-agent-preset'
       config:
@@ -353,7 +353,7 @@
               maxBytes: 22528
               projectRootMarkers: []
 
-    # ── scout.patch.yml（由 tools/render-overlay.mjs 从 pack presets 渲染）──
+    # ── scout.patch.yml（由 tools/record/render-overlay.mjs 从 pack presets 渲染）──
     - id: preset-scout
       name: '@deepseek-ai/dsh-agent-preset'
       config:
@@ -427,7 +427,7 @@
               maxBytes: 22528
               projectRootMarkers: []
 
-    # ── research-wave.patch.yml（由 tools/render-overlay.mjs 从 pack workers 渲染）──
+    # ── research-wave.patch.yml（由 tools/record/render-overlay.mjs 从 pack workers 渲染）──
     - id: preset-research-wave
       name: '@deepseek-ai/dsh-agent-preset'
       config:
@@ -492,7 +492,7 @@
               maxBytes: 22528
               projectRootMarkers: []
 
-    # ── research-worker.patch.yml（由 tools/render-overlay.mjs 从 pack workers 渲染）──
+    # ── research-worker.patch.yml（由 tools/record/render-overlay.mjs 从 pack workers 渲染）──
     - id: preset-research-worker
       name: '@deepseek-ai/dsh-agent-preset'
       config:
@@ -542,7 +542,7 @@
               maxBytes: 22528
               projectRootMarkers: []
 
-    # ── cordis.patch.yml 的 bundle 级 insert 行（由 tools/render-overlay.mjs 直读，镜像同源）──
+    # ── cordis.patch.yml 的 bundle 级 insert 行（由 tools/record/render-overlay.mjs 直读，镜像同源）──
     # ── 抓取回退 provider（D31）：本地 web-fetch-http → DeepSeek Fetch API。注册 id =
     #    deepseek-fallback-fetch（上方 web 行钉它）；无 DEEPSEEK_API_KEY 时只走本地、
     #    错误里如实标 fallback unavailable。config.enabled: false = 只走本地（无需改 selection）。──

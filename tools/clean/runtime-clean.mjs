@@ -9,18 +9,18 @@
 // 永不候选：harness-home（活跃 dev home/凭据）、research-workspace（run bundle）、_dist、vendor、
 // packages/*/lib、runtime 根散件、未知名、scenes（场景包是运行证据，人工处理）。
 //
-// 用法：node tools/runtime-clean.mjs [--older-than <days>] [--yes]
+// 用法：node tools/clean/runtime-clean.mjs [--older-than <days>] [--yes]
 // 退出码：0 = 成功（含无事可做 / dry-run）；1 = 删除失败；2 = 用法/前置错。
 import { existsSync, lstatSync, readdirSync, rmSync } from 'node:fs'
 import { dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { classifyRuntimePath, planRuntimeCleanup } from '../checks/lib/ops/runtime-clean-core.mjs'
+import { classifyRuntimePath, planRuntimeCleanup } from '../../checks/lib/ops/runtime-clean-core.mjs'
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const RUNTIME = join(ROOT, 'runtime')
 
 function usage() {
-  console.log(`用法：node tools/runtime-clean.mjs [--older-than <days>] [--yes]
+  console.log(`用法：node tools/clean/runtime-clean.mjs [--older-than <days>] [--yes]
 
 默认 dry-run，只列运行区白名单内、整棵子树都早于保留期的条目。
   --older-than <days>   保留期，缺省 14 天

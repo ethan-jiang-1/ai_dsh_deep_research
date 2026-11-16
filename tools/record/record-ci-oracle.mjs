@@ -7,16 +7,16 @@
 //      调用 **且** 其 exit 1 导致整步非零退出」才计入 executed；
 //   3. 政策：只认 `all-checks-passed.needs` 里的无条件非容错 job 与无跳过/非容错 step。
 //
-// 用法：node tools/record-ci-oracle.mjs [--check]
+// 用法：node tools/record/record-ci-oracle.mjs [--check]
 //   --check：只比对当前 `ci-workflow.mjs` 与真实外部运行结果及 `oracle.json` 新鲜度，不写文件。
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
-import { yaml } from '../checks/lib/tools/workspace-parsers.mjs'
-import { eventKeys, executedSmokeFiles, parseWorkflow } from '../checks/lib/tools/ci-workflow.mjs'
+import { yaml } from '../../checks/lib/tools/workspace-parsers.mjs'
+import { eventKeys, executedSmokeFiles, parseWorkflow } from '../../checks/lib/tools/ci-workflow.mjs'
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const OUT = join(ROOT, 'tests/fixtures/ci-oracle/oracle.json')
 const CHECK = process.argv.includes('--check')
 const WORK = join(ROOT, 'runtime', 'smoke-workspace')
@@ -172,7 +172,7 @@ for (const fixture of mismatches) {
 console.log(`record-ci-oracle: ${fixtures.length} fixtures, ${mismatches.length} mismatches`)
 
 const payload = {
-  generatedBy: 'tools/record-ci-oracle.mjs',
+  generatedBy: 'tools/record/record-ci-oracle.mjs',
   oracle: 'yaml@2 (real YAML 1.2) + bash -eo pipefail (GitHub Actions default shell) + per-target failing stub node',
   fixtures: fixtures.map(({ name, workflow, events, executed }) => ({ name, workflow, events, executed })),
 }
@@ -185,7 +185,7 @@ if (CHECK) {
   }
   const current = JSON.parse(readFileSync(OUT, 'utf8'))
   if (JSON.stringify(current.fixtures) !== JSON.stringify(payload.fixtures)) {
-    console.error('record-ci-oracle --check: oracle.json 与当前 CORPUS / bash -eo pipefail 输出失步——请重跑 node tools/record-ci-oracle.mjs')
+    console.error('record-ci-oracle --check: oracle.json 与当前 CORPUS / bash -eo pipefail 输出失步——请重跑 node tools/record/record-ci-oracle.mjs')
     process.exit(1)
   }
   process.exit(0)

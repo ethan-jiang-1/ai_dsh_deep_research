@@ -17,7 +17,7 @@ export function resolveSnapshotMode({ argv, env = {} }) {
   const why = rawWhy === null ? null : rawWhy.trim()
   const mode = env.DSH_SNAPSHOT ?? ''
   if (mode !== '' && mode !== 'replay') {
-    throw new Error(`DSH_SNAPSHOT=${mode} 不支持——本脚本只回放；refresh 用 --update-expected，record 用 tools/record-role-fixture`)
+    throw new Error(`DSH_SNAPSHOT=${mode} 不支持——本脚本只回放；refresh 用 --update-expected，record 用 tools/record/record-role-fixture`)
   }
   const readOnly = argv.includes('--read-only') || mode === 'replay'
   if (updateExpected && readOnly) {

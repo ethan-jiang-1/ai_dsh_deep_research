@@ -58,7 +58,7 @@ function listEntryRels() {
 test('管道输出消费者必须 setEncoding("utf8")（多字节 chunk 边界不得撕裂）', () => {
   const EXTRA_PIPE_CONSUMERS = [
     'checks/lib/shared/web-banner.mjs',
-    'tools/record-role-fixture.mjs',
+    'tools/record/record-role-fixture.mjs',
   ];
   const offenders = [];
   for (const rel of [...listEntryRels(), ...EXTRA_PIPE_CONSUMERS]) {

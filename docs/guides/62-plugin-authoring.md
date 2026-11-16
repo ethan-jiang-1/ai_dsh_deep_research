@@ -22,7 +22,7 @@
 | profile / profile 归属 | 用户 `dsh --profile <name>` 启动的环境（`dsh.profile`）；三种归属 = shipped template / custom profile / application-owned | 本仓 = custom `deep-research`（CLI 引导建；当前用本地 tarball 装包，npm/Plugins 为 staged）；开发镜像同名；`desktop` 归官方 Desktop；profile 不是发布物、不是隔离边界 |
 | app surface | profile 起的 surface（Web / headless / SDK / ACP / Desktop） | 本包 = Web（`dsh.client.platform: web`）；Desktop 仅互操作；headless/SDK/ACP 不在支持范围 |
 | preset | 一个 agent 形态：persona 行 + 时钟行 + skills + 工具行 | `presets/<role>.patch.yml`（preset 行）+ `presets/<role>/skills/`（角色清单 = 盘上 presets/） |
-| patch / overlay | 层叠覆盖条目（id 定向的 config 覆盖、禁用、插入） | `tools/research.overlay.yml`（源码域通道的镜像源） |
+| patch / overlay | 层叠覆盖条目（id 定向的 config 覆盖、禁用、插入） | `tools/record/research.overlay.yml`（源码域通道的镜像源） |
 
 **Nothing is both**：bundle 与 profile 是两个 manifest 的两种东西，别把本包写成 profile。M1 安装形态（[D41](../decisions.md#d41)）不改变这条：包仍是 bundle；profile 由用户在 DSH 里创建/启动（`--from-default-profile web` + 本地 tarball 装包；npm/Plugins 为 staged），不是第二种分发单位。本包没有 launcher/scaffold，只有 bundle 内的启动行与只读 doctor。
 
@@ -56,7 +56,7 @@ logged）——pack 行只引入**现成**能力，这项义务落在 vendor 面
 |---|---|---|
 | 新增研究角色 | `packages/deep-research-pack/presets/critic/`（skill 隔离最干净） | [`.agents/skills/adding-a-research-role`](../../.agents/skills/adding-a-research-role/SKILL.md) |
 | 新增方法论 skill | `presets/lead/skills/synthesis/SKILL.md`（frontmatter `name`/`description` + 方法论正文） | 同上 |
-| 新增/修改 bundle 行 | [pack bundle](../../packages/deep-research-pack/cordis.patch.yml) → [生成器](../../tools/render-overlay.mjs) 渲染 overlay | `overlay-fresh` 检生成物；[boot-run](../../tools/boot-run.sh) 检发布集与安装镜像 |
+| 新增/修改 bundle 行 | [pack bundle](../../packages/deep-research-pack/cordis.patch.yml) → [生成器](../../tools/record/render-overlay.mjs) 渲染 overlay | `overlay-fresh` 检生成物；[boot-run](../../tools/channel/boot-run.sh) 检发布集与安装镜像 |
 | 新增机械门禁 | `checks/verify/verify.mjs` + `docs/evaluation.md` §L0 | [`.agents/skills/writing-a-gate`](../../.agents/skills/writing-a-gate/SKILL.md) |
 | 跑一次研究 | `packages/deep-research-pack/content/templates/run/` | [`.agents/skills/running-a-research-run`](../../.agents/skills/running-a-research-run/SKILL.md) |
 
@@ -111,9 +111,9 @@ agent-instructions 注入，冲突时项目优先。安装步骤（用户视角�
 包合同 = [pack README](../../packages/deep-research-pack/README.md)；诊断 = 包内只读
 `dsh-deep-research-doctor`（tarball 装法用安装副本内脚本全路径）。
 
-本仓开发面的生成物各有生成器与新鲜度门禁（漂移即红）：`tools/research.overlay.yml`
-（`tools/render-overlay.mjs` → `overlay-fresh`）、run 通道 profile 镜像
-（`tools/boot-run.sh` 幂等重建，逐文件漂移检测）、dist 导出手册（`tools/release/export-dist.mjs`
+本仓开发面的生成物各有生成器与新鲜度门禁（漂移即红）：`tools/record/research.overlay.yml`
+（`tools/record/render-overlay.mjs` → `overlay-fresh`）、run 通道 profile 镜像
+（`tools/channel/boot-run.sh` 幂等重建，逐文件漂移检测）、dist 导出手册（`tools/release/export-dist.mjs`
 → `dist-manual-version`——一条命令出 tarball + 安装手册到 `_dist/`，tarball 不进库，
 手册 tracked；版本动必须重导出，导出不是发布）。
 
@@ -125,7 +125,7 @@ agent-instructions 注入，冲突时项目优先。安装步骤（用户视角�
 
 | 你要做的事 | 必须一起动 | 最小证据 |
 |---|---|---|
-| 加/换一条 bundle 行（host 共享面） | `cordis.patch.yml` → `node tools/render-overlay.mjs` 重渲染；行引用的 `@deepseek-ai/*` 进 `peerDependencies` | `overlay-fresh` / `row-deps` 门禁 + L1 真挂载 + L2 安装形状 |
+| 加/换一条 bundle 行（host 共享面） | `cordis.patch.yml` → `node tools/record/render-overlay.mjs` 重渲染；行引用的 `@deepseek-ai/*` 进 `peerDependencies` | `overlay-fresh` / `row-deps` 门禁 + L1 真挂载 + L2 安装形状 |
 | 加一个研究角色 | 按 [`adding-a-research-role`](../../.agents/skills/adding-a-research-role/SKILL.md) §2 的同步面逐项做（清单以技能为准） | `preset.e2e` 真挂载（L1）+ `preset-structure` / `role-list-sync` |
 | 加一个方法论 skill | `presets/<role>/skills/<n>/SKILL.md`（frontmatter `name` 逐字等于目录名）；persona 若点名 skill 名须同 diff 对账（各 preset 的 persona 均有硬引用） | `preset-structure` + L1 的 skills 隔离断言 |
 | 改研究手册 / 模板 | 改 `packages/deep-research-pack/content/`（手册/模板）；模板路径由 `research_pack_root` 插值 | `content-shape` 门禁 + `snapshot-replay` B 层 + `l4-lite` 真模型 |
@@ -133,8 +133,8 @@ agent-instructions 注入，冲突时项目优先。安装步骤（用户视角�
 | 加观察面 client 面能力 | `src/client/` + `tsconfig.client.json` 的 include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `client-load.entry`（真浏览器）+ `client-keys` 门禁 |
 | 改**现有**观察面页签（最频改动） | 页签 → 文件 → 职责的构成正本 = [design/40 §2](../design/40-research-cockpit.md)；折算住 `src/lib/`（纯函数，别在组件里堆逻辑）；新路径进 design/40 登记 | `client-load.entry`（页签可点可读；失败留 png/html/console/meta）+ `cockpit-doc-registry` / `client-keys` 门禁 |
 | 改 persona / skill / 手册文本（模型可见） | 同 diff 跑真模型档；运行中的 web 缓存 boot 文本，须重启通道 | `l4-lite.e2e`（真模型档） |
-| 换 vendor pin | `tools/vendor-build.sh` 全链重建 + 逐条重审 | [bumping-vendor-pin 技能](../../.agents/skills/bumping-vendor-pin/SKILL.md)（流程正本；历次轮次见归档） |
-| 改 profile 镜像 | 不手改——改 pack 源后跑 `bash tools/boot-run.sh`：组合不完整/缺席时它重建，漂移时它 **exit 1** 并打印 `rm -rf <profile>` 补救（直接 `dsh --profile deep-research` 会静默用旧镜像） | boot-run 漂移检测（fail-loud） |
+| 换 vendor pin | `tools/build/vendor-build.sh` 全链重建 + 逐条重审 | [bumping-vendor-pin 技能](../../.agents/skills/bumping-vendor-pin/SKILL.md)（流程正本；历次轮次见归档） |
+| 改 profile 镜像 | 不手改——改 pack 源后跑 `bash tools/channel/boot-run.sh`：组合不完整/缺席时它重建，漂移时它 **exit 1** 并打印 `rm -rf <profile>` 补救（直接 `dsh --profile deep-research` 会静默用旧镜像） | boot-run 漂移检测（fail-loud） |
 
 **一句话规则**：源改一处（pack），生成物跑生成器，证据按面选档（keyless 证管道 / 真模型档
 证 agent 行为），部署形状变更追加 L2。

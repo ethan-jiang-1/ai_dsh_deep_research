@@ -348,7 +348,7 @@ test('面板关键文案静态钉：术语表/影响范围/底线区别/按钮�
 // 负例留证 2026-10-18：BUG-035（侧栏懒渲染下"扫不到会话"被误判成实例老化/需重启）。
 //   红配方一：把 locateSessionStrategy 的 `if (!triedSearch && …) return 'search'` 改成
 //             `if (false) return 'search'`（即"扫不到就放弃"）→ 本文件该例如实报红（已实测）。
-//   红配方二（端到端）：删掉 tools/hitl-answer.mjs 里 revealTargetRow 末尾的 searchSessionByTitle
+//   红配方二（端到端）：删掉 tools/channel/hitl-answer.mjs 里 revealTargetRow 末尾的 searchSessionByTitle
 //             兜底 → 对一条不在侧栏列表的挂起会话，工具复现"侧栏没有目标会话行"。
 test('侧栏定位策略：扫不到且手上有标题 → 必须走搜索（BUG-035 的 keyless 钉）', () => {
   assert.equal(locateSessionStrategy({ foundByScan: true }), 'accept');

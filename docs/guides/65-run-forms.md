@@ -16,7 +16,7 @@
 |---|---|---|---|
 | **M1 安装形态** | 外部用户 | ① custom profile 首次由 CLI 引导（仅首次、破坏性）② `dsh --profile deep-research` 启动 ③ 本地 tarball 装包（当前唯一发布形态；npm/Plugins 为 staged）+ 团队层开关；首屏选项目目录 | 用户自己的 `DSH_HOME` + 自选工作区；包内容在包内，产物在工作区；**没有 launcher / scaffold / 自定义安装器** |
 | **M1 互操作** | 已有 DSH Web/Desktop 的用户 | 把同一个 bundle 装进现有 profile（Plugins 页或显式 CLI） | bundle 自足，首屏照样问工作区；但没有 `deep-research` 的 profile 身份；Desktop 装进 `desktop` = 互操作 |
-| **M2 独立开发形态** | 贡献者 / 本地验证 | 本仓 + `bash tools/bootstrap.sh` + `node tools/run-driver.mjs up --bootstrap` | 默认仓内 `runtime/harness-home` + `research-workspace/`；可用 `DSH_DEV_HOME` 指到仓外 |
+| **M2 独立开发形态** | 贡献者 / 本地验证 | 本仓 + `bash tools/build/bootstrap.sh` + `node tools/channel/run-driver.mjs up --bootstrap` | 默认仓内 `runtime/harness-home` + `research-workspace/`；可用 `DSH_DEV_HOME` 指到仓外 |
 | **M3 移交形态** | 交给另一人或另一台机器 | `tools/release/export-handoff.mjs`（源码，包内 HANDOFF 给 clone / tar 两条接收路径）或 `export-dist.mjs`（插件） | 不是复制工作树；运行态/凭据/run 数据不随包 |
 
 **决定：M1 安装形态为主。** 安装与启动全部是 DSH 命令；本包只多一个 custom profile 名
@@ -108,9 +108,9 @@ writable roots。`WorkspaceId` 是 DSH Workspace registration ID，不是路径�
 ## 7. 独立环境与多实例
 
 ```sh
-bash tools/bootstrap.sh --check          # 预检（不安装/不构建；仍会确保隔离 home 与 hooks 配置）
-bash tools/bootstrap.sh                  # 缺件时执行 submodule/install/vendor 构建（幂等）
-node tools/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
+bash tools/build/bootstrap.sh --check          # 预检（不安装/不构建；仍会确保隔离 home 与 hooks 配置）
+bash tools/build/bootstrap.sh                  # 缺件时执行 submodule/install/vendor 构建（幂等）
+node tools/channel/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 ```
 
 多实例用这些变量区分（默认值 = 单实例）：

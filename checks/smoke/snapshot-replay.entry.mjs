@@ -24,7 +24,7 @@
 //     工作区态，非录制流）。`--update-expected` 从真实回放渲染重写金标准——只许重写金标准，
 //     不许放宽比对或归一化凑绿（fix fixtures, not normalizers）。
 //
-// 录制：新角色或重录用 `node --import tsx/esm tools/record-role-fixture.mjs --role <r>`
+// 录制：新角色或重录用 `node --import tsx/esm tools/record/record-role-fixture.mjs --role <r>`
 // （with-key 一次，之后 keyless 永久回放；录制品人审后入库，并在场景声明登记 source 身份）。
 //
 // 用法：source tools/env.sh && node checks/smoke/snapshot-replay.entry.mjs [--port 3103] [--read-only] [--layers a,b,c] [--update-expected --why <载体>] [--scenario <id>] [--face <name>]

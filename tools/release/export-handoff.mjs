@@ -69,7 +69,7 @@ git clone --recurse-submodules ${repoUrl} ai_dsh_deep_research
 cd ai_dsh_deep_research
 git checkout ${head}
 pnpm install --frozen-lockfile
-bash tools/vendor-build.sh
+bash tools/build/vendor-build.sh
 source tools/env.sh
 pnpm verify && pnpm test
 \`\`\`
@@ -83,7 +83,7 @@ git init
 git update-index --add --cacheinfo 160000,${submoduleSha},${SUBMODULE_PATH}
 git submodule update --init --recursive
 pnpm install --frozen-lockfile
-bash tools/vendor-build.sh
+bash tools/build/vendor-build.sh
 source tools/env.sh
 pnpm verify && pnpm test
 \`\`\`

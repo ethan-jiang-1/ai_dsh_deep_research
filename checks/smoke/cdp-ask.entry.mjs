@@ -9,7 +9,7 @@
 //
 // 两阶段断言（起一条一次性通道 + 独立 workspace，**绝不打在交付会话上**）：
 //   ①空闲态：提交按钮 = `Send message` → sent + **landed**（journal 对账命中本会话日志）
-//   ②续跑唤醒：`tools/run-kickoff.mjs --session <id>` 向**既有会话**注入恢复指令——该工具**自带送达
+//   ②续跑唤醒：`tools/channel/run-kickoff.mjs --session <id>` 向**既有会话**注入恢复指令——该工具**自带送达
 //     对账**（exit 0 = 会话日志出现本条；1 = 未对账），文档承诺的恢复动作（guides/61 §5）在此有常驻证据。
 //   ③在飞态（子代理挂着，turn 保持 open 且非挂起）：提交按钮 = `Queue message` → sent
 //     —— 这正是生产现场旧探针零命中的形态。**本阶段不硬判落盘**：排队消息由服务端在 turn 取用时
@@ -96,7 +96,7 @@ const TEAM_ROW = `
         forkProvider: fork
 `;
 const PATCH = join(ROOT, 'runtime', 'smoke-workspace', 'cdp-ask.overlay.yml');
-writeFileSync(PATCH, readFileSync(join(ROOT, 'tools', 'research.overlay.yml'), 'utf8') + TEAM_ROW, 'utf8');
+writeFileSync(PATCH, readFileSync(join(ROOT, 'tools', 'record', 'research.overlay.yml'), 'utf8') + TEAM_ROW, 'utf8');
 
 const checks = [];
 const check = (name, ok) => checks.push([name, ok === true]);
@@ -163,7 +163,7 @@ try {
   // ── 阶段②：续跑唤醒（既有会话注入 + journal 对账）──
   const RESUME = '恢复指令测试：请只回复「恢复收到」四个字，不要做任何其他事。';
   const resumeRun = await new Promise((res) => {
-    const proc = spawn(process.execPath, [join(ROOT, 'tools', 'run-kickoff.mjs'), '--port', String(PORT), '--token', token, '--session', sessionId, '--prompt', RESUME], { cwd: ROOT, env: scrubbedEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
+    const proc = spawn(process.execPath, [join(ROOT, 'tools', 'channel', 'run-kickoff.mjs'), '--port', String(PORT), '--token', token, '--session', sessionId, '--prompt', RESUME], { cwd: ROOT, env: scrubbedEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
     let outText = '';
     let errText = '';
     // setEncoding：管道 chunk 可落在多字节字符中间，不先解码会撕成 U+FFFD（判据匹配假红）。

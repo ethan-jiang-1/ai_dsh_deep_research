@@ -3,7 +3,7 @@
 // 代驱显式纪律 + running-a-research-run 技能 §2）——此前驱动只打印承诺不写盘，拍板行
 // 误归因"用户"（BUG-014 症状实录 = mistral run，操作侧手工补记救回）。
 // 纯函数与写盘器分离；keyless 契约测试钉住（tests/hitl-provenance.spec.mjs——含缺件
-// fail-loud 反证）。消费方 = tools/hitl-answer.mjs（盘侧裁决通过后调用）。
+// fail-loud 反证）。消费方 = tools/channel/hitl-answer.mjs（盘侧裁决通过后调用）。
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { sessionBindingOf } from '../../../packages/deep-research-pack/src/lib/run/bundle-bind.ts';
 import { join } from 'node:path';

@@ -125,7 +125,7 @@ try {
     bin: join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts'),
     cwd: ROOT,
     profile: 'web',
-    patchPath: join(ROOT, 'tools', 'research.overlay.yml'),
+    patchPath: join(ROOT, 'tools', 'record', 'research.overlay.yml'),
     port,
     env: withModelKey({ DSH_HOME: home }),
     timeoutMs: BOOT_TIMEOUT_MS,

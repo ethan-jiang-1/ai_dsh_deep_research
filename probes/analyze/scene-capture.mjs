@@ -16,7 +16,7 @@
 //   --list                 列既有场景包（mtime 降序；缺件/坏 meta 如实标记）
 //   --show <name>          看单个场景包（meta 回显 + console/异常摘要 + body 前 40 行）
 //   （均可选 --scenes-dir <dir> 覆盖根，默认 runtime/scenes/）
-// 只连已起的 GUI（不负责 boot；boot = tools/run-driver.mjs up）。
+// 只连已起的 GUI（不负责 boot；boot = tools/channel/run-driver.mjs up）。
 import { mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'

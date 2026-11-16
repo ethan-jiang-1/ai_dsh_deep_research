@@ -142,7 +142,7 @@ try {
   const token = /token=([^&\s]+)/.exec(boot.output)?.[1] ?? null
   let sessionDir = null
   if (token !== null) {
-    const kick = spawnSync(process.execPath, [join(ROOT, 'tools', 'run-kickoff.mjs'), '--port', PORT, '--token', token], {
+    const kick = spawnSync(process.execPath, [join(ROOT, 'tools', 'channel', 'run-kickoff.mjs'), '--port', PORT, '--token', token], {
       cwd: ROOT, encoding: 'utf8', env: scrubbedEnv({ DSH_HOME: HOME, DSH_RUN_WORKSPACE: WS }), timeout: 120_000,
     })
     const sessionId = (kick.stdout ?? '').trim().split('\n').filter(Boolean).at(-1) ?? ''

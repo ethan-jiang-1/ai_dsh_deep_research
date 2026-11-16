@@ -391,8 +391,12 @@ export function runD() {
   // boot-run 的 node 调用未跟：命令静默失败、bootstrap 永远误报“vendor 产物缺席”（真因 =
   // MODULE_NOT_FOUND）。JS import 由测试车道咬；shell 字面量没有车道，故在仓规门禁里把守
   // （防空：扫到 0 个入口即红）。
+  // tools/ 子组化：shell 入口递归枚举（顶层 readdir 会静默漏掉 channel/build 组内的 .sh）。
+  const shWalk = (dir, prefix = '') => readdirSync(dir, { withFileTypes: true }).flatMap((ent) =>
+    ent.isDirectory() ? shWalk(join(dir, ent.name), `${prefix}${ent.name}/`)
+      : (ent.name.endsWith('.sh') ? [join('tools', `${prefix}${ent.name}`)] : []));
   const devEntries = [
-    ...readdirSync(join(ROOT, 'tools')).filter((name) => name.endsWith('.sh')).map((name) => join('tools', name)),
+    ...shWalk(join(ROOT, 'tools')),
     ...(existsSync(join(ROOT, 'tools', 'hooks'))
       ? readdirSync(join(ROOT, 'tools', 'hooks'), { withFileTypes: true })
         .filter((ent) => ent.isFile()).map((ent) => join('tools', 'hooks', ent.name))

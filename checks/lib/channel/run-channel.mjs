@@ -1,11 +1,11 @@
 // checks/lib/channel/run-channel.mjs —— run 通道驱动入口的纯判据（keyless 可钉住的部分）。
 //
-// 为什么住 lib（2026-10-19 分层实测）：tools/run-driver.mjs 是壳（子进程 spawn boot-run、
+// 为什么住 lib（2026-10-19 分层实测）：tools/channel/run-driver.mjs 是壳（子进程 spawn boot-run、
 // 起浏览器探针、读 web.log），而 tests/ 的 import 闭包必须零禁物（spawn/exec/网络）——
 // 契约测试若直接 import 壳，layering 守卫当场判红。故判据下沉本模块（无子进程、无网络、
 // 纯函数），壳与测试都 import 它：与 probe-send-target / probe-status-tab 同款分层。
 //
-// 消费方 = tools/run-driver.mjs（壳）、tests/run-driver-contract.spec.mjs（契约）。
+// 消费方 = tools/channel/run-driver.mjs（壳）、tests/run-driver-contract.spec.mjs（契约）。
 
 /**
  * web.log 文本 → 最后一条横幅的完整 GUI URL。
@@ -30,7 +30,7 @@ export function guiUrlFromWebLog(text) {
  * 探针的 JS 派发绕过 hit-testing，没有这条时 DOM 在位就能判绿，而人打开 URL 正对着一屏
  * Continue（2026-10-27 实测）。
  *
- * `drift` 是镜像一致性的取证（应跑 = `bash tools/boot-run.sh --drift-only`）。未取证（null /
+ * `drift` 是镜像一致性的取证（应跑 = `bash tools/channel/boot-run.sh --drift-only`）。未取证（null /
  * 缺 clean:true）或取证为脏 → 2（**未跑**，不是通过——旧页面验不出当前代码）。2026-10-28
  * 实测：通道 18:47 起、pack `lib/client.js` 02:50 重建，probe 仍报 GREEN——通道加载的是
  * 五天前的镜像。复用通道必须先过镜像门，否则"绿"只是旧页面的绿。

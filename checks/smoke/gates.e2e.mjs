@@ -172,7 +172,7 @@ async function main() {
 
     // 真进程外部 oracle 对账：全量跑时同步核验 CI 执行面与真 bash -eo pipefail 录制件一致（D55 AC2）
     if (caseFilter === null) {
-      const ciOracle = spawnSync(process.execPath, [join(ROOT, 'tools', 'record-ci-oracle.mjs'), '--check'], {
+      const ciOracle = spawnSync(process.execPath, [join(ROOT, 'tools', 'record', 'record-ci-oracle.mjs'), '--check'], {
         cwd: ROOT,
         encoding: 'utf8',
       });

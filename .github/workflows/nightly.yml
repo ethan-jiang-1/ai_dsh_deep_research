@@ -64,7 +64,7 @@ jobs:
 
       - name: Build vendor (pin tree)
         if: steps.vendor-cache.outputs.cache-hit != 'true'
-        run: bash tools/vendor-build.sh
+        run: bash tools/build/vendor-build.sh
 
       # 冒烟有构建新鲜度自检：lib/client.js 旧于 src 即 exit 2。
       - name: Build pack (dual halves)
@@ -133,7 +133,7 @@ jobs:
 
       - name: Build vendor (pin tree)
         if: steps.vendor-cache.outputs.cache-hit != 'true'
-        run: bash tools/vendor-build.sh
+        run: bash tools/build/vendor-build.sh
 
       - name: Build pack (npm pack prepack)
         run: pnpm build
@@ -144,7 +144,7 @@ jobs:
           export DSH_RUN_STATE_DIR="$GITHUB_WORKSPACE/runtime/ci-state"
           export DSH_RUN_PORT=3199
           source tools/env.sh
-          bash tools/boot-run.sh --prepare-profile
+          bash tools/channel/boot-run.sh --prepare-profile
           node checks/smoke/snapshot-replay.entry.mjs --read-only --layers a,b --port 3110
 
   deploy:
@@ -192,7 +192,7 @@ jobs:
 
       - name: Build vendor (pin tree)
         if: steps.vendor-cache.outputs.cache-hit != 'true'
-        run: bash tools/vendor-build.sh
+        run: bash tools/build/vendor-build.sh
 
       # 类型门（测试走 tsx 剥类型，typecheck 是唯一类型回归面）。
       - name: Typecheck (pack dual halves)
@@ -234,7 +234,7 @@ jobs:
       - name: Vendor-source contracts (root tsconfig)
         run: pnpm test:vendor
 
-      # 类型面不在 keyless job：`pnpm typecheck` 要 vendor 构建产物（tools/vendor-build.sh），
+      # 类型面不在 keyless job：`pnpm typecheck` 要 vendor 构建产物（tools/build/vendor-build.sh），
       # 而 keyless 的契约是 fresh clone 无构建也能跑。类型门在 deploy job（同一 push/PR 触发）
       # 的 vendor 构建之后执行，覆盖等价、不把构建成本摊到每次回归。
       # 门禁自测：注入案例 + 对照，经真实 verify 入口判红/判绿。此前只住在

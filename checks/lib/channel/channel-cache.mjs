@@ -1,6 +1,6 @@
 // checks/lib/channel/channel-cache.mjs —— run 通道启动加速的两块缓存判据 + 薄 I/O。
 //
-// 为什么存在（2026-11-05 实测）：`node tools/run-driver.mjs up` 热复用路径 ~21.5s，其中
+// 为什么存在（2026-11-05 实测）：`node tools/channel/run-driver.mjs up` 热复用路径 ~21.5s，其中
 //   · 镜像漂移门 5.1s —— 大头是每次重跑 `npm pack --dry-run` 拿发布清单；
 //   · 浏览器探针 12.0s —— 起 Chrome + 打开研究状态页签。
 // 两者的输入在同一 pack 源 + 同一 runtime 构建下不变，故可缓存：漂移门缓存发布清单（键 = pack 源

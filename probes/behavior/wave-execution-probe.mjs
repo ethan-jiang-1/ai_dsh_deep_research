@@ -10,7 +10,7 @@
 //
 // wave-execution-probe.mjs — wave 执行链的真模型单点探针。
 //
-// 设计：源域 `web` profile + `tools/research.overlay.yml`（与 L1 同一组合），但创建 **analyst**
+// 设计：源域 `web` profile + `tools/record/research.overlay.yml`（与 L1 同一组合），但创建 **analyst**
 // 会话而不是 run 通道，所以不碰 research-workspace/run 会话、不需要 HITL。临时 bundle 只含
 // 1 个 cell；workflow 的 PTC 在嵌套沙箱里需要 full-access（与 P4 试点同因），本探针在 boot
 // env 里显式给 DSH_PERMISSION_MODE=danger-full-access。
@@ -32,7 +32,7 @@ import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../checks/lib/harness
 import { cleanupBootedProbe, prepareProbePort } from '../../checks/lib/harness/port-reclaim.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const OVERLAY = join(ROOT, 'tools', 'research.overlay.yml');
+const OVERLAY = join(ROOT, 'tools', 'record', 'research.overlay.yml');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);

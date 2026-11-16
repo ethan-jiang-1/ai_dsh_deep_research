@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// tools/run-kickoff.mjs — run 通道会话驱动（④ run-mechanics 的操作面，真模型档配套）。
+// tools/channel/run-kickoff.mjs — run 通道会话驱动（④ run-mechanics 的操作面，真模型档配套）。
 // 对已在跑的 run 通道 web 做 session/create（+ 可选 session/prompt）——会话日志即真相，
 // 本脚本不做研究断言。
 //
@@ -10,20 +10,20 @@
 //     是该承诺的可复跑工具，等价于人在 GUI 里手打一句）。
 //
 // 用法：
-//   node tools/run-kickoff.mjs --port 3083 --token <t> [--cwd <dir>] [--preset lead] [--prompt <text> | --prompt-file <f>]
-//   node tools/run-kickoff.mjs --port 3083 --token <t> --session <id> (--prompt <text> | --prompt-file <f>)
+//   node tools/channel/run-kickoff.mjs --port 3083 --token <t> [--cwd <dir>] [--preset lead] [--prompt <text> | --prompt-file <f>]
+//   node tools/channel/run-kickoff.mjs --port 3083 --token <t> --session <id> (--prompt <text> | --prompt-file <f>)
 // 输出：session id（stdout，一行）——后续日志核对/仪表盘观察用它定位。
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { appendDecisionsRow, closingProvenanceRow } from '../checks/lib/shared/hitl-provenance.mjs'
+import { appendDecisionsRow, closingProvenanceRow } from '../../checks/lib/shared/hitl-provenance.mjs'
 import { join } from 'node:path';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { readSessionText, resolveSessionLog } from '../checks/lib/shared/session-log.mjs';
-import { bundleDirOf } from '../checks/lib/shared/run-state.mjs';
-import { reconcileInjectedMessage } from '../checks/lib/channel/inject-reconcile.mjs';
+import { readSessionText, resolveSessionLog } from '../../checks/lib/shared/session-log.mjs';
+import { bundleDirOf } from '../../checks/lib/shared/run-state.mjs';
+import { reconcileInjectedMessage } from '../../checks/lib/channel/inject-reconcile.mjs';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
 const flag = (name, dflt) => {
   const i = args.indexOf(name);
@@ -158,11 +158,11 @@ if (prompt) {
  */
 async function closingRowForPending(sid) {
   try {
-    const { readSessionEvents, resolveSessionLog, researchWorkspaceGroup } = await import('../checks/lib/shared/session-log.mjs')
-    const { foldHitlPending } = await import('../packages/deep-research-pack/src/lib/events/hitl-fold.ts')
-    const { parseAskQuestions } = await import('../checks/lib/channel/ask-drive.mjs')
-    const { isDeliveryReviewCard } = await import('../checks/lib/channel/ask-drive.mjs')
-    const { attributionBundleOf } = await import('../checks/lib/shared/hitl-provenance.mjs')
+    const { readSessionEvents, resolveSessionLog, researchWorkspaceGroup } = await import('../../checks/lib/shared/session-log.mjs')
+    const { foldHitlPending } = await import('../../packages/deep-research-pack/src/lib/events/hitl-fold.ts')
+    const { parseAskQuestions } = await import('../../checks/lib/channel/ask-drive.mjs')
+    const { isDeliveryReviewCard } = await import('../../checks/lib/channel/ask-drive.mjs')
+    const { attributionBundleOf } = await import('../../checks/lib/shared/hitl-provenance.mjs')
     const sessionsRoot = join(process.env.DSH_HOME ?? '', 'sessions')
     const group = researchWorkspaceGroup(sessionsRoot)
     if (group === undefined) { console.error('run-kickoff: 记账跳过——找不到 research-workspace 会话组'); return null }

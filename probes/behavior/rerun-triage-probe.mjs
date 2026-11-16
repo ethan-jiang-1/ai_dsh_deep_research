@@ -42,9 +42,9 @@ if (!home) { console.error('probe: 需要 DSH_HOME（先 source tools/env.sh）'
 requireDevHome('rerun-triage-probe', { home, root: ROOT });
 requireCredentials('rerun-triage-probe', { home });
 const bin = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
-const overlay = join(ROOT, 'tools', 'research.overlay.yml');
+const overlay = join(ROOT, 'tools', 'record', 'research.overlay.yml');
 if (!existsSync(bin)) { console.error(`probe: 机制基线不在位（${bin}）——git submodule update --init`); process.exit(2); }
-if (!existsSync(overlay)) { console.error(`probe: overlay 不在位（${overlay}）——node tools/render-overlay.mjs`); process.exit(2); }
+if (!existsSync(overlay)) { console.error(`probe: overlay 不在位（${overlay}）——node tools/record/render-overlay.mjs`); process.exit(2); }
 
 const sleep = (ms) => new Promise((r) => { setTimeout(r, ms) });
 let failures = 0;

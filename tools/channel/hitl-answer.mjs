@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// tools/hitl-answer.mjs —— HITL 代答驱动（代理模拟 HITL1/HITL2 的唯一实现）。
+// tools/channel/hitl-answer.mjs —— HITL 代答驱动（代理模拟 HITL1/HITL2 的唯一实现）。
 //
 // 为什么需要它（2026-09-26 跑 run 时实测的环路缺口）：`ask_user_question` 走 `ctx.userQuestions`
 // 的 answerer waterfall，而**全仓唯一的 answerer 是连着 web 的浏览器客户端**——CLI/host 侧没有
@@ -9,7 +9,7 @@
 // question.md §Decisions 如实记"代理模拟"。
 //
 // 用法（须带 tsx——前置谓词 import pack .ts 源）：
-//   node --import tsx/esm tools/hitl-answer.mjs --port 3083 --token <横幅 token> [--session <标题子串>]
+//   node --import tsx/esm tools/channel/hitl-answer.mjs --port 3083 --token <横幅 token> [--session <标题子串>]
 //                            [--pick recommended|first|<1-based index>] [--custom <文本>]
 //                            [--max-steps 8] [--dry-run]
 // HITL1 = 两段卡（三问 → 计划确认），同一条命令**跑两次**；HITL2 先跑 node-gate / evidence-audit，
@@ -21,20 +21,20 @@ import { existsSync, readFileSync } from 'node:fs'
 import { resolve, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { once } from 'node:events'
-import { loadChromium, launchChromium } from '../checks/lib/harness/playwright.mjs'
-import { bundleDirOf, runStateOf, readSessionEvents, leadHitlCandidate } from '../checks/lib/shared/run-state.mjs'
-import { terminalReadiness } from '../packages/deep-research-pack/src/lib/review/review-readiness.ts'
-import { clickSearchResultByTitle, revealSessionRow, searchSessionByTitle, sessionRowById } from '../checks/lib/shared/web-ui-nav.mjs'
-import {deliveryAnswerGuard, isDeliveryReviewCard, answerBatchOf, customLandedInBatch, driveVerdict, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict} from '../checks/lib/channel/ask-drive.mjs'
-import { appendProvenance, attributionBundleOf, batchToAnswered } from '../checks/lib/shared/hitl-provenance.mjs'
-import { localDateStr } from '../checks/lib/shared/local-date.mjs'
-import { researchWorkspaceGroup, sessionLogsInGroup } from '../checks/lib/shared/session-log.mjs'
-import { workspaceRoot } from '../checks/lib/shared/workspace-root.mjs'
-import { operateOnTargetCard } from '../checks/lib/channel/hitl-card-driver.mjs'
+import { loadChromium, launchChromium } from '../../checks/lib/harness/playwright.mjs'
+import { bundleDirOf, runStateOf, readSessionEvents, leadHitlCandidate } from '../../checks/lib/shared/run-state.mjs'
+import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review/review-readiness.ts'
+import { clickSearchResultByTitle, revealSessionRow, searchSessionByTitle, sessionRowById } from '../../checks/lib/shared/web-ui-nav.mjs'
+import {deliveryAnswerGuard, isDeliveryReviewCard, answerBatchOf, customLandedInBatch, driveVerdict, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict} from '../../checks/lib/channel/ask-drive.mjs'
+import { appendProvenance, attributionBundleOf, batchToAnswered } from '../../checks/lib/shared/hitl-provenance.mjs'
+import { localDateStr } from '../../checks/lib/shared/local-date.mjs'
+import { researchWorkspaceGroup, sessionLogsInGroup } from '../../checks/lib/shared/session-log.mjs'
+import { workspaceRoot } from '../../checks/lib/shared/workspace-root.mjs'
+import { operateOnTargetCard } from '../../checks/lib/channel/hitl-card-driver.mjs'
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const DEV_WORKSPACE = workspaceRoot({ argv: process.argv.slice(2), env: process.env, defaultRoot: join(ROOT, 'research-workspace') }).root
-// 与 tools/run-kickoff.mjs 同形：name 自带 `--`（本仓约定，别在 helper 里再加一次）
+// 与 tools/channel/run-kickoff.mjs 同形：name 自带 `--`（本仓约定，别在 helper 里再加一次）
 const flag = (name, fallback) => {
   const i = process.argv.indexOf(name)
   return i === -1 ? fallback : process.argv[i + 1]
@@ -76,7 +76,7 @@ let uiTargetSessionId = null
 let uiTargetTitle = null
 // 交付代答闸要按 bundle 读 review.md 定 readiness（见下方 isDelivery 段）——同样**必须在选择
 // 逻辑里取出并提到外层**：`selected` 出了那段作用域就没了（2026-10-19 端到端实测：
-// tools/hitl-answer.mjs:310 直接引用 selected.candidate.bundle → ReferenceError，
+// tools/channel/hitl-answer.mjs:310 直接引用 selected.candidate.bundle → ReferenceError，
 // 交付审阅卡这条路径从未被走到过，所以缺陷一直没暴露）。
 let pendingBundle = null
 {
@@ -449,7 +449,7 @@ try {
   if (!DRY && process.exitCode === 0 && CUSTOM !== null && !customLandedInBatch({ batch: landedBatch, custom: CUSTOM })) {
     // 答复**已落地**（盘侧裁决通过），只是那段说明没进批——与 intentFailed 同族：事实照记、结果响亮红。
     console.error('hitl-answer: ⚠ **custom 文本未进答复批**——UI 的自定义是"替换选择"语义（同一问题二者只能留一个），'
-      + 'lead 收不到这段说明（只看到选项 label）。处置：长修法改走 `tools/run-kickoff.mjs --session <id> --prompt-file <文件>` 注入。')
+      + 'lead 收不到这段说明（只看到选项 label）。处置：长修法改走 `tools/channel/run-kickoff.mjs --session <id> --prompt-file <文件>` 注入。')
     process.exitCode = 1
     customMissing = true
   }

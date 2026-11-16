@@ -69,16 +69,16 @@ export function runE() {
   else note(gate, 'tools/ 无运行态（harness-home / drt_* / sessions / 凭据）');
 }
 
-// ── overlay-fresh（源码域 overlay 是**生成物**——由 tools/render-overlay.mjs 从 pack
+// ── overlay-fresh（源码域 overlay 是**生成物**——由 tools/record/render-overlay.mjs 从 pack
 //    渲染；改 pack 后不重渲染即红。0.1.7 preset 重设计后 overlay 必须携带 preset 行，两处手写
 //    必然漂移，故改成生成 + 新鲜度门禁（vendor 的"生成 + freshness"形态；本仓首个 tracked
 //    生成物，登记在 discipline-map 源 7）。）──
 {
   const gate = 'overlay-fresh';
-  const r = spawnSync(process.execPath, ['tools/render-overlay.mjs', '--check'], { cwd: ROOT, encoding: 'utf8' });
+  const r = spawnSync(process.execPath, ['tools/record/render-overlay.mjs', '--check'], { cwd: ROOT, encoding: 'utf8' });
   if (r.status !== 0) {
     const first = `${r.stderr ?? ''}${r.stdout ?? ''}`.trim().split('\n').filter(Boolean)[0];
-    fail(gate, first ?? 'tools/research.overlay.yml 与 pack 渲染结果不一致——跑 `node tools/render-overlay.mjs` 重生成');
+    fail(gate, first ?? 'tools/record/research.overlay.yml 与 pack 渲染结果不一致——跑 `node tools/record/render-overlay.mjs` 重生成');
   }
 }
 

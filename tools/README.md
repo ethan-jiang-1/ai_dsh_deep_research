@@ -1,35 +1,57 @@
-# tools/ · 入口说明（环境/构建/同步 × run 通道 × 驱动）
+# tools/ · operate 面入口索引
 
-> 维护面：**operate**（run = 起/复用进程；act = 持久改动）——装 run 通道与构建、`release/` 导出与
-> 手册源、`runtime-clean`；不装裁决（→ `checks/`）与只读投影（→ `probes/`）。例外：`hooks/pre-commit`
-> 是 judge；`env.sh`、预载驱动、vendor 构建配置、手册源是非面。
+> 维护面：**operate**（run = 起/复用进程；act = 持久改动，失败可能半途、需 converge/repair）。
+> 装：`channel/` run 通道与驱动、`build/` 环境冷启动与 vendor 构建、`record/` 录制与生成器、
+> `release/` 分发与移交、`clean/` 运行区清理。不装：裁决（→ `checks/`）、只读投影（→ `probes/`）。
+> 例外：`hooks/pre-commit` 是 judge；`env.sh`、预载驱动、vendor 构建配置、手册源是非面。
 > 规则 = [surface-contract](../docs/guides/68-surface-contract.md)。
 >
-> 命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)（含 `source tools/env.sh` 前置说明）；run 通道用法 = [Run 指南](../docs/guides/61-run-playbook.md)。本页 = tools/ 每个盘上入口的职责与状态。
+> 命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)（含 `source tools/env.sh` 前置说明）；run 通道用法 = [Run 指南](../docs/guides/61-run-playbook.md)。本页 = tools/ 每个盘上入口的职责与状态（逐件一行，子组/件 全路径点名）。
 
-## 环境与构建/同步
+## 子组一览
+
+| 子组 | 模式 | 装什么 |
+|---|---|---|
+| `channel/` | run（+ 会话驱动 act） | 起/复用 run 通道、验面呈交、建会话发 kickoff、HITL 代答、socket 隔离预载 |
+| `build/` | act | 独立环境冷启动、vendor 树构建与其配置/产物生成 |
+| `record/` | act | fixture/oracle/资产账录制，overlay 与测试索引生成 |
+| `release/` | act | tarball/手册/市场索引导出、源码移交包 |
+| `clean/` | act | 运行区保留期清理（默认 dry-run） |
+| `hooks/` | judge（例外） | pre-commit 红灯拦 commit |
+| 根级 | 非面 | `env.sh` 配置入口（sourced） |
+
+## channel/（run 通道与驱动）
 
 | 件 | 职责 |
 |---|---|
-| bootstrap.sh | 独立环境冷启动前置（幂等）：Node/pnpm/git → submodule → install → vendor 构建 → env → 凭据/端口工具；`--check` 预检（不安装/不构建，仍会确保隔离 home 与 hooks 配置） |
-| env.sh | 双 home（默认 DSH_HOME=runtime/harness-home；`DSH_DEV_HOME` 可指仓外）+ 裸 dsh 拦截 + pre-commit 挂载——L1/L2 脚本的前置 |
-| vendor-build.sh | vendor 树构建：tsc host/client + typert 产物 + client bundle + host 半补建 + 前端壳 |
-| vendor-host-bundle.config.ts | host 半补建配置（逐包 tsdown，给缺 lib/index.js 的包补产物） |
-| vendor-host-typert.config.ts | host 半补建备选配置（留档） |
-| vendor-typert-emit.mjs | typert 产物生成器 |
-| render-overlay.mjs | 生成器：从 pack 渲染 `tools/research.overlay.yml`（改 pack 后必跑，先于 L1） |
-| research.overlay.yml | **生成物**（render-overlay 产出，勿手改）——源码域 overlay |
+| channel/run-driver.mjs | **驱动入口（启动/验证/呈交一条命令）**：`up` 起通道（经 boot-run，不绕漂移门）或复用已在飞的（复用先跑 `boot-run --drift-only` 验镜像；漂移/未取证 = NOT-RUN）→ 用 cdp-probe 验浏览器面 + 截图 → 打印呈交块；**验证缓存**：同一 pack 源 + 同一 runtime 构建 + 30 分钟内的 GREEN 直接复用（冷启动也命中，命中前做 HTTP 就绪检查；`--force-probe` 强制重验；缓存只存 GREEN）；`--bootstrap` 先跑冷启动前置，`--profile`/`DSH_RUN_STATE_DIR` 支持多实例；`probe` 只验面（同样先验镜像、永远真验）、`url` 打印 URL。verdict = exit 0 可呈交 / 1 红 / 2 未跑。通道事实唯一来源 = 本次 state 的 `web.log` 最后一条横幅 |
+| channel/boot-run.sh | run 通道正式启动面：自检 → 组合检查/补装 → 漂移门 → boot web（默认 3083；runtime 默认 vendor 构建产物 `lib/bin.js`，`DSH_RUN_RUNTIME=source` 退回 tsx 源码）→ 后台仪表盘；`DSH_RUN_PROFILE`/`DSH_RUN_PORT`/`DSH_RUN_STATE_DIR`/`DSH_RUN_WORKSPACE` 支持多实例（自 source env.sh） |
+| channel/run-kickoff.mjs | run 会话驱动：建 lead 会话 + 发 kickoff（GUI 的 RPC 替代入口） |
+| channel/hitl-answer.mjs | HITL 代答（代理模拟；answerer 在浏览器客户端，先盘侧谓词自拒） |
+| channel/llm-socket-isolation.cjs | api.deepseek.com socket 隔离预载（NODE_OPTIONS，非面驱动）：LLM 流与 web_search 两类请求均每请求一次性连接、永不复用；上游边缘对长命复用连接有相位性故障（[postmortem](../notes/archived/2026-10-13-llm-stream-malformed-storm.md)），移除 = 摘 boot-run 一行 |
 
-## run 通道
+## build/（环境冷启动与 vendor 构建）
 
 | 件 | 职责 |
 |---|---|
-| run-driver.mjs | **驱动入口（启动/验证/呈交一条命令）**：`up` 起通道（经 boot-run，不绕漂移门）或复用已在飞的（复用先跑 `boot-run --drift-only` 验镜像；漂移/未取证 = NOT-RUN）→ 用 cdp-probe 验浏览器面 + 截图 → 打印呈交块；**验证缓存**：同一 pack 源 + 同一 runtime 构建 + 30 分钟内的 GREEN 直接复用（冷启动也命中，命中前做 HTTP 就绪检查；`--force-probe` 强制重验；缓存只存 GREEN）；`--bootstrap` 先跑冷启动前置，`--profile`/`DSH_RUN_STATE_DIR` 支持多实例；`probe` 只验面（同样先验镜像、永远真验）、`url` 打印 URL。verdict = exit 0 可呈交 / 1 红 / 2 未跑。通道事实唯一来源 = 本次 state 的 `web.log` 最后一条横幅 |
-| boot-run.sh | run 通道正式启动面：自检 → 组合检查/补装 → 漂移门 → boot web（默认 3083；runtime 默认 vendor 构建产物 `lib/bin.js`，`DSH_RUN_RUNTIME=source` 退回 tsx 源码）→ 后台仪表盘；`DSH_RUN_PROFILE`/`DSH_RUN_PORT`/`DSH_RUN_STATE_DIR`/`DSH_RUN_WORKSPACE` 支持多实例（自 source env.sh） |
-| llm-socket-isolation.cjs | api.deepseek.com socket 隔离预载（NODE_OPTIONS）：LLM 流与 web_search 两类请求均每请求一次性连接、永不复用；上游边缘对长命复用连接有相位性故障（[postmortem](../notes/archived/2026-10-13-llm-stream-malformed-storm.md)），移除 = 摘 boot-run 一行 |
-| run-kickoff.mjs | run 会话驱动：建 lead 会话 + 发 kickoff（GUI 的 RPC 替代入口） |
+| build/bootstrap.sh | 独立环境冷启动前置（幂等）：Node/pnpm/git → submodule → install → vendor 构建 → env → 凭据/端口工具；`--check` 预检（不安装/不构建，仍会确保隔离 home 与 hooks 配置） |
+| build/vendor-build.sh | vendor 树构建：tsc host/client + typert 产物 + client bundle + host 半补建 + 前端壳 |
+| build/vendor-host-bundle.config.ts | host 半补建配置（逐包 tsdown，给缺 lib/index.js 的包补产物；非面管道件） |
+| build/vendor-host-typert.config.ts | host 半补建备选配置（留档；非面管道件） |
+| build/vendor-typert-emit.mjs | typert 产物生成器（非面管道件） |
 
-## 发布与交付（act）
+## record/（录制与生成器）
+
+| 件 | 职责 |
+|---|---|
+| record/record-role-fixture.mjs | 角色组装面 fixture 录制（真模型档一次性；录制品人审入库 + 在场景声明登记 source 身份，此后 keyless 永久回放） |
+| record/record-ci-oracle.mjs | CI 执行面与事件键的外部 oracle 录制（dev-only：真 `yaml@2` + 真 `bash -eo pipefail` + 按目标失败 stub `node`；测试只读 `tests/fixtures/ci-oracle/oracle.json`；`--check` 只比对） |
+| record/record-asset-ledger.mjs | 测试资产组合账生成（spec/check 的 lane/class/cost/uniqueClaim/oracleType/sunset；AST 自动推导 oracleType，测试重算对账，漂移 = 红） |
+| record/render-overlay.mjs | 生成器：从 pack 渲染 `tools/record/research.overlay.yml`（改 pack 后必跑，先于 L1） |
+| record/render-test-index.mjs | 测试 ↔ 源码 owner 索引生成（模块 → owner → 测试；生成物 = tests/INDEX.generated.md；`--check` 只比对） |
+| record/research.overlay.yml | **生成物**（render-overlay 产出，勿手改）——源码域 overlay |
+
+## release/（分发与移交）
 
 | 件 | 职责 |
 |---|---|
@@ -38,11 +60,23 @@
 | release/export-handoff.mjs | HEAD 的 tracked 源 → `_dist/` 干净移交包（不含运行态/凭据/run 数据/依赖）；submodule 需对方 init |
 | release/product-manual.md | 安装手册源（数据，非面；`export-dist` 消费，正文由 `dist-manual-fresh` 对账） |
 
-## 运行区清理（act）
+## clean/（运行区清理）
 
 | 件 | 职责 |
 |---|---|
-| runtime-clean.mjs | 运行区清理：默认 dry-run，`--yes` 才删；白名单容器/实验根 + 子树最新 mtime 保留期（缺省 14 天）；symlink / harness-home / research-workspace / scenes 永不候选（scenes = 证据，人工处理；判据 = lib/runtime-clean-core.mjs） |
+| clean/runtime-clean.mjs | 运行区清理：默认 dry-run，`--yes` 才删；白名单容器/实验根 + 子树最新 mtime 保留期（缺省 14 天）；symlink / harness-home / research-workspace / scenes 永不候选（scenes = 证据，人工处理；判据 = checks/lib/ops/runtime-clean-core.mjs） |
+
+## hooks/（judge 例外）
+
+| 件 | 职责 |
+|---|---|
+| hooks/pre-commit | 提交门禁：whitespace + verify + keyless tests 红灯拦 commit（fail-loud）；`tools/env.sh` 幂等挂载 `core.hooksPath tools/hooks` |
+
+## 根级配置（非面）
+
+| 件 | 职责 |
+|---|---|
+| env.sh | 双 home（默认 DSH_HOME=runtime/harness-home；`DSH_DEV_HOME` 可指仓外）+ 裸 dsh 拦截 + pre-commit 挂载——L1/L2 脚本的前置；sourced 配置入口，不是 operate 入口 |
 
 ## 与用户安装路径的 parity（dev 不是另一条载入路）
 
@@ -65,19 +99,8 @@
 | 观测 | 无 | probe / 仪表盘 / 日志 / LLM socket 隔离预载 | 允许差异（调试必需） |
 | dev-only 工具行 | 无 | MCP Playwright（`--patch` 覆盖层，`MCP_PLAYWRIGHT=0` 可拆） | 允许差异（dev 工具） |
 
-`tools/research.overlay.yml` 是**源码域冒烟 harness**（`--profile web --patch`，preset.e2e 用），
+`tools/record/research.overlay.yml` 是**源码域冒烟 harness**（`--profile web --patch`，preset.e2e 用），
 不是用户载入路径，也不进上面的同形列——它不经过 bundle/tarball，判据只对 L1 挂载面有效。
-
-## 开发驱动
-
-| 件 | 职责 |
-|---|---|
-| hitl-answer.mjs | HITL 代答（代理模拟；answerer 在浏览器客户端，先盘侧谓词自拒） |
-| record-role-fixture.mjs | 角色组装面 fixture 录制（真模型档一次性；录制品人审入库 + 在场景声明登记 source 身份，此后 keyless 永久回放） |
-| record-ci-oracle.mjs | CI 执行面与事件键的外部 oracle 录制（dev-only：真 `yaml@2` + 真 `bash -eo pipefail` + 按目标失败 stub `node`；测试只读 `tests/fixtures/ci-oracle/oracle.json`；`--check` 只比对） |
-| record-asset-ledger.mjs | 测试资产组合账生成（spec/check 的 lane/class/cost/uniqueClaim/oracleType/sunset；AST 自动推导 oracleType，测试重算对账，漂移 = 红） |
-| render-test-index.mjs | 测试 ↔ 源码 owner 索引生成（模块 → owner → 测试；生成物 = tests/INDEX.generated.md；`--check` 只比对） |
-| hooks/ | pre-commit 钩子（verify+tests 红灯拦 commit；env.sh 幂等挂载 core.hooksPath） |
 
 ## 运行区（已外移根级 runtime/）
 

@@ -84,7 +84,7 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
 
 7. **derived state / cache / UI echo / replay 来自 authoritative success point**：
    派生值不能各自推导同一事实。本仓实例：`docs/` 的"D 号台账"与 `notes/` 的 Note
-   是**不同事实**（决定史 vs 当前合同）；`tools/research.overlay.yml` 是**生成物**
+   是**不同事实**（决定史 vs 当前合同）；`tools/record/research.overlay.yml` 是**生成物**
    （源 = pack patch 行，手改即漂移，由 `overlay-fresh` 咬）；`client` 观察面显示的
    run 状态必须来自 `runStateOf` 单点而非各自重算。
    查：新增的缓存/回显/replay 面，其值是否取自唯一的权威成功点。

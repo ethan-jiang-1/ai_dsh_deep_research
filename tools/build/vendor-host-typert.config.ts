@@ -1,4 +1,4 @@
-// tools/vendor-host-typert.config.ts —— 逐包 host 构建配置（本仓所有，不改 vendor 内容）。
+// tools/build/vendor-host-typert.config.ts —— 逐包 host 构建配置（本仓所有，不改 vendor 内容）。
 //
 // 为什么需要它：vendor 自己的 `pnpm run build:lib:host` 在干净树上会红在**根单元**——
 // 根 `tsdown.config.ts` 的 entry glob（`lib/types/{index,invariant,startup}.js`）是逐单元
@@ -14,7 +14,7 @@
 // 退役条件：vendor 干净树上自身 `build:lib:host` 可直接跑通（根单元 entry glob 前置被修）即
 // 可删本件——它是备选路径留档（tools/README 行），不是常驻构建环节，别当依赖维护。
 import { join } from 'node:path'
-import { typertPlugin } from '../vendor/dsh/packages/typert/generator/lib/types/tsdown-plugin.js'
+import { typertPlugin } from '../../vendor/dsh/packages/typert/generator/lib/types/tsdown-plugin.js'
 
 const pkg = process.cwd()
 

@@ -67,7 +67,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 
 **worker profiles（D47）**：`workers/research-worker.patch.yml`（叶子：fs/fs-search/skill/todo/web，无 Team/goal/ask/present/subagent/workflow）与 `workers/research-wave.patch.yml`（叶子 + workflow engine/tool，唯一挂 workflow）。它们是**非研究角色**，不计入 `presets/` 角色清单；一次性角色工作走 `subagent(agent_preset=…)`，多轮协作留 Team，同质 wave 用 `research-wave`。
 
-团队层版本派生：profile 装 `@…-agent-team-profile@<运行中的 DSH 版本>`——安装侧（用户用 `dsh plugin` 显式装，版本取 `dsh --version`）优先从 DSH 安装锚（`--install-anchor` / `DSH_INSTALL_ANCHOR` / PATH 的 `dsh`）取版本，回退 profile 的 `@deepseek-ai/dsh-app-boot`；dev run 通道 `tools/boot-run.sh` 从运行中 dsh 的 exact 版本派生（两者都必须与运行版本一致，不能用 `engines.dsh` 范围当版本号）。
+团队层版本派生：profile 装 `@…-agent-team-profile@<运行中的 DSH 版本>`——安装侧（用户用 `dsh plugin` 显式装，版本取 `dsh --version`）优先从 DSH 安装锚（`--install-anchor` / `DSH_INSTALL_ANCHOR` / PATH 的 `dsh`）取版本，回退 profile 的 `@deepseek-ai/dsh-app-boot`；dev run 通道 `tools/channel/boot-run.sh` 从运行中 dsh 的 exact 版本派生（两者都必须与运行版本一致，不能用 `engines.dsh` 范围当版本号）。
 
 ## 4. 工具面（四研究角色共同基座 + 差异；方法编辑工具面见 D37）
 
@@ -90,7 +90,7 @@ vendor/dsh/                    pinned submodule（只读铁律——verify vendo
 
 - `tools/env.sh`：DSH_HOME 重定向到 `runtime/harness-home`（数据面隔离）+ 裸 dsh 拦截（代码面
   隔离——全局安装随升级漂移，不作机制依据）；机制基线 = 本仓 `vendor/dsh/`（env.sh 的
-  dsh 函数与根 `pnpm dsh` 均从钉 tag 源码起，前置 = 根 pnpm install + `tools/vendor-build.sh`
+  dsh 函数与根 `pnpm dsh` 均从钉 tag 源码起，前置 = 根 pnpm install + `tools/build/vendor-build.sh`
   （vendor 树构建：tsc host/client + typert 产物 + client bundle；构建入口正本 = guides/60 §2）——
   company release.md 同款流程）；
 - 验证五面见 [evaluation.md](../evaluation.md)；preset 类改动的完成定义 = preset.e2e 真挂载。

@@ -10,7 +10,7 @@
 //     （回合已终 + final 在场；present 缺席由 presentCalls 单独暴露，不并入 settled——
 //     偏差要显性，不能静默放行）。
 //
-// 消费方：probes/analyze/watch-run.mjs（盯场）、tools/hitl-answer.mjs（前置自拒）、
+// 消费方：probes/analyze/watch-run.mjs（盯场）、tools/channel/hitl-answer.mjs（前置自拒）、
 // tests/run-state.spec.mjs（三态夹具与 native log reader，测试路径零子进程，layering 合规）。
 // 运行需 `node --import tsx/esm`（直引 pack .ts 源）。
 import { argsObjectOf } from '../../../packages/deep-research-pack/src/lib/events/journal-wire.ts'

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# tools/vendor-build.sh —— vendor 树在新 pin 上的**完整可用构建**（本仓驱动，不改 vendor 内容）。
+# tools/build/vendor-build.sh —— vendor 树在新 pin 上的**完整可用构建**（本仓驱动，不改 vendor 内容）。
 #
 # 为什么需要自建：vendor 自己的 `pnpm run build` 在干净树上红在 tsdown 的**根单元**
 # （root 包无 `lib/types/{index,invariant,startup}.js` 入口——上游构建链在干净树上的自不自洽处；
@@ -12,11 +12,11 @@
 #   ③ client 面 `lib/client.js`——client-modules 组合要求（否则启动报
 #      "client bundle not found; run `pnpm run build` before launch"）。
 #
-# 用法：bash tools/vendor-build.sh [--clean]
+# 用法：bash tools/build/vendor-build.sh [--clean]
 #   --clean 先清陈旧构建状态（`lib/` + `*.tsbuildinfo`）——换 pin 后必做（旧产物会让
 #   tsc 认为"已最新"而跳过 emit，并让旧编译产物引用已删除导出）。
 set -euo pipefail
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 VENDOR="$ROOT/vendor/dsh"
 cd "$VENDOR"
 
@@ -41,7 +41,7 @@ echo "② tsc host 遍（逐包 lib/types）…"
 node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc -b tsconfig.host.json
 
 echo "③ typert host 产物（本仓驱动：按 manifest 过滤后逐包生成）…"
-node "$ROOT/tools/vendor-typert-emit.mjs" host
+node "$ROOT/tools/build/vendor-typert-emit.mjs" host
 
 echo "④ tsc client 遍（叶项目 lib/types 发射；聚合自身 = noEmit 纯 typecheck）…"
 if ! node --max-old-space-size=8192 ./node_modules/typescript/bin/tsc -b tsconfig.client.json; then
@@ -89,9 +89,9 @@ missing="$(find packages apps vendor -maxdepth 3 -type d -name lib -not -path '*
   -exec sh -c 'for l; do p="${l%/lib}"; [ -f "$l/types/index.js" ] && [ ! -f "$l/index.js" ] && [ ! -f "$p/tsdown.config.ts" ] && printf "%s\n" "$p"; done; exit 0' _ {} +)"
 if [[ -n "$missing" ]]; then
   n="$(printf '%s\n' "$missing" | wc -l | tr -d ' ')"
-  echo "  发现 $n 个包缺 host 半产物，逐包补建（tsdown -c tools/vendor-host-bundle.config.ts）…"
+  echo "  发现 $n 个包缺 host 半产物，逐包补建（tsdown -c tools/build/vendor-host-bundle.config.ts）…"
   while IFS= read -r pkgdir; do
-    ( cd "$pkgdir" && "$VENDOR/node_modules/.bin/tsdown" -c "$ROOT/tools/vendor-host-bundle.config.ts" >/dev/null )
+    ( cd "$pkgdir" && "$VENDOR/node_modules/.bin/tsdown" -c "$ROOT/tools/build/vendor-host-bundle.config.ts" >/dev/null )
   done <<< "$missing"
   echo "  补建完成：$n 个包"
 else
@@ -146,14 +146,14 @@ for (const top of ["packages", "apps", "vendor"]) walk(path.join(root, top))
 if (bad.length > 0) {
   console.error(`  失败：${bad.length} 个包的 manifest 主入口不存在（构建遍未覆盖）：`)
   for (const line of bad) console.error(`    ${line}`)
-  console.error("  → 补救：确认该包是否自带 tsdown.config.ts 并选对了构建遍；必要时在 tools/vendor-build.sh 显式补跑其包级配置。")
+  console.error("  → 补救：确认该包是否自带 tsdown.config.ts 并选对了构建遍；必要时在 tools/build/vendor-build.sh 显式补跑其包级配置。")
   process.exit(1)
 }
 console.log("  全部 workspace 包的主入口已落地")
 '
 
 echo "⑦ typert client 产物…"
-node "$ROOT/tools/vendor-typert-emit.mjs" client
+node "$ROOT/tools/build/vendor-typert-emit.mjs" client
 
 # ⑧ 前端壳重建：apps/web/dist 是 gitignored 的**冻结产物**——升 pin 后不重建会留着上一代
 #   平台壳，实测症状是 Web UI 静默报 "settingsNumberField is not a function"（旧壳 + 新

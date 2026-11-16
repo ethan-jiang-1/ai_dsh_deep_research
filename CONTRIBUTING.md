@@ -12,7 +12,7 @@ experimental team layer with `dsh plugin --profile deep-research add …` (comma
 [`_dist/安装手册.md`](_dist/安装手册.md)); the Plugins page becomes the primary install path after
 npm publication. There is no custom installer and no launcher. Development
 in this repository uses the isolated `deep-research` profile, `research-workspace/` and
-`tools/run-driver.mjs` — do not mix the two command sets or data roots.
+`tools/channel/run-driver.mjs` — do not mix the two command sets or data roots.
 
 ## Development charter
 
@@ -61,7 +61,7 @@ first block is setup, the second creates the profile and starts the Web surface:
 git clone --recurse-submodules https://github.com/ethan-jiang-1/ai_dsh_deep_research.git
 cd ai_dsh_deep_research
 pnpm install
-bash tools/vendor-build.sh          # pack's tsc reads vendor lib/types
+bash tools/build/vendor-build.sh          # pack's tsc reads vendor lib/types
 node tools/release/export-dist.mjs # writes _dist/tarball + manual + market
 ```
 
@@ -111,7 +111,7 @@ pnpm verify
 pnpm test
 ```
 
-`pnpm test:vendor` 是 vendor 源码契约的补充检查（fresh clone 可跑，不计入最小集）。`pnpm typecheck` 需要 vendor 构建产物（`bash tools/vendor-build.sh`，CI deploy job 跑），不属于 fresh clone 的 keyless 最小集。
+`pnpm test:vendor` 是 vendor 源码契约的补充检查（fresh clone 可跑，不计入最小集）。`pnpm typecheck` 需要 vendor 构建产物（`bash tools/build/vendor-build.sh`，CI deploy job 跑），不属于 fresh clone 的 keyless 最小集。
 
 Install/first-screen checks (real install / browser; no model calls):
 
@@ -140,7 +140,7 @@ map is [`docs/project-map.md`](docs/project-map.md), and the acceptance contract
 ```sh
 # optional: isolate DSH_HOME in this shell and install git hooks (boot-run sources it too)
 source tools/env.sh
-node tools/run-driver.mjs up # boots or reuses the research channel and prints the URL
+node tools/channel/run-driver.mjs up # boots or reuses the research channel and prints the URL
 ```
 
 A real-model run needs `DEEPSEEK_API_KEY` in `runtime/harness-home/.credentials.yaml`

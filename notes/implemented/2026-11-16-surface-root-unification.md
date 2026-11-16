@@ -25,6 +25,13 @@
 - 每个根的定位（面 + 装什么/不装什么 + 例外）写进 [guides/68](../../docs/guides/68-surface-contract.md)
   与该根 README 首屏——共识随 handoff 携带，不依赖宿主仓对话。
 - 例外登记一次：guides/68 §5（hooks/pre-commit = judge、手册源/配置/预载驱动 = 非面、stream tee 口径差）。
+- **tools/ 内部子组化**（根名统一后的同批整理）：`channel/`（run 通道与驱动）、`build/`（环境冷启动与
+  vendor 构建）、`record/`（录制与生成器）、`release/`（分发与移交）、`clean/`（运行区清理）、
+  `hooks/`（judge 例外）；`env.sh` 留根 = sourced 配置入口（非面）。逐件索引单一 home =
+  [tools/README](../../tools/README.md)（子组/件 全路径点名）；每个子组另有 README 首屏写
+  装什么/不装什么/例外，只指针不复制索引。
+- 索引覆盖门禁随之加宽：navigability 的 tools 覆盖改**递归**枚举（顶层 readdir 会静默漏组内件），
+  repo-conventions 的 tools shell 扫面改递归（.sh 进子组后顶层扫不到）。
 
 **同批同步的机械面**：
 
@@ -56,6 +63,7 @@
 | 保留旧根名、只靠声明 | 上一轮已证：人按根名找件，根名不一致 → 理解差异 → 驱动出错（D64 用户裁决） |
 | 全仓盲 sed `scripts/`→`checks/`、`dev/`→`tools/` | 实测咬伤四类非根路径：vendor 相对源（ledger `source`、vendor-shorthand 反引号）、包内 `scripts/**` 与 `scripts/lib/`、系统 `/dev/null`、npm `"scripts"` 键与 `--ignore-scripts`；必须逐类保护 |
 | show 域沿用 `run/` | 骨架推荐 `analyze/`（只读分析器）；三仓同骨架时域名也应同，避免跨仓再翻译 |
+| tools/ 保持平铺、只改根名 | 一面目录里 20 件平铺混着通道/构建/录制/清理，与 checks/probes 的子组化不对称；fresh agent 按组找件失败 |
 | 把 lib owner `tools/` 改名避撞根名 | 内部子组本仓自由；撞名只发生在生成索引的裸 owner token 被 doc-paths 误读为根路径——给索引发射加 `checks/lib/` 前缀即解，不动 owner 镜像 |
 
 ## 实际跑过的验证
@@ -74,6 +82,12 @@
 - 搬移 CLI 抽跑：`tools/runtime-clean.mjs`（dry-run）= 0、`tools/release/market.mjs --check` = 0、
   `probes/analyze/run-inventory.mjs --workspace research-workspace` = 0、`checks/run-gates/run-accept.mjs`
   无参 = 2（用法语义不变）。
+- **子组化轮真红→绿**：navigability 加宽后首跑点名 `build/bootstrap.sh` 未入索引（红）→ README 子组化 → 绿；
+  lib 消费列对账咬出搬移件**相对 import 浅一层**（`../checks/…` 需 `../../checks/…`、ROOT `..` 需 `../..`）→ 修 15 件 → 绿；
+  转义正则替换曾插入裸 `/` 致 regex flags 语法错（profile-health / run-driver-contract spec）→ `node --check` 定位 → 全斜杠转义 → 绿。
+- 子组化后复跑：`pnpm verify` 全绿、`pnpm test` 1365 + 214 全绿、`gates.e2e` 133 注入红 + 对照绿；
+  搬移 CLI 抽跑 exit 语义不变（runtime-clean dry-run 0、render-test-index --check 0、run-driver url 2、
+  hitl-answer 2、bootstrap --check 0）；173 件相对 import 0 断链；redirect 账本 537 条。
 - 提交经仓内真 `tools/hooks/pre-commit`（verify + tests）跑绿，未用 `--no-verify`。
 
 ### 证据账本

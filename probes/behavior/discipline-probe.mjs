@@ -46,7 +46,7 @@ import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../checks/lib/harness
 import { cleanupBootedProbe, prepareProbePort } from '../../checks/lib/harness/port-reclaim.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const OVERLAY = join(ROOT, 'tools', 'research.overlay.yml');
+const OVERLAY = join(ROOT, 'tools', 'record', 'research.overlay.yml');
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : process.argv[i + 1];

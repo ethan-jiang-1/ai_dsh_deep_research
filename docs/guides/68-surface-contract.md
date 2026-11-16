@@ -37,8 +37,8 @@ operate 的两种模式：
 
 | 模式 | 做什么 | 失败语义 | 例 |
 |---|---|---|---|
-| **run** | 起/复用进程 | 没起来，重试即可 | [`tools/run-driver.mjs`](../../tools/run-driver.mjs) |
-| **act** | 持久改动 | 可能半途，需要 converge/repair | [`tools/release/export-dist.mjs`](../../tools/release/export-dist.mjs)、[`tools/runtime-clean.mjs`](../../tools/runtime-clean.mjs) `--yes` |
+| **run** | 起/复用进程 | 没起来，重试即可 | [`tools/channel/run-driver.mjs`](../../tools/channel/run-driver.mjs) |
+| **act** | 持久改动 | 可能半途，需要 converge/repair | [`tools/release/export-dist.mjs`](../../tools/release/export-dist.mjs)、[`tools/clean/runtime-clean.mjs`](../../tools/clean/runtime-clean.mjs) `--yes` |
 
 ## 3. 判定顺序
 
@@ -64,9 +64,9 @@ operate 的两种模式：
 |---|---|---|---|
 | `checks/` | judge | `verify/`、`smoke/`、`run-gates/`（含 run-accept / acceptance-check）、`dist/`（release-check） | 只读投影（→ `probes/`）、导出与清理（→ `tools/`） |
 | `probes/` | show | `behavior/` `browser/` 探针、`analyze/` 只读取证投影、`stream/` 预载仪器 | 裁决入口（→ `checks/`）、持久改动（→ `tools/`） |
-| `tools/` | operate（run + act） | run 通道与构建、`release/` 导出与手册源、`runtime-clean`、`hooks/`（judge 例外） | 裁决（→ `checks/`）、只读投影（→ `probes/`） |
+| `tools/` | operate（run + act） | `channel/` run 通道与驱动、`build/` 环境与 vendor 构建、`record/` 录制与生成器、`release/` 导出与手册源、`clean/` 运行区清理、`hooks/`（judge 例外）；`env.sh` 留根 = 配置入口 | 裁决（→ `checks/`）、只读投影（→ `probes/`） |
 | `tests/` | oracle（非面） | `pnpm test` runner 的回归与门禁自测；服务三面，不是第四面 | 入口件（三面各自的家） |
-| 启动配置 | 非面 | `tools/env.sh`、`tools/research.overlay.yml` 等 sourced 环境 / 生成物 | 不是入口，不进面计数 |
+| 启动配置 | 非面 | `tools/env.sh`、`tools/record/research.overlay.yml` 等 sourced 环境 / 生成物 | 不是入口，不进面计数 |
 
 非面支撑跟消费者住：`checks/lib/`、`checks/test/` runner、support、配置 JSON（§5）。
 各根 README 首屏承载同一份定位；本页是规则与例外的单一 home。
@@ -80,7 +80,7 @@ operate 的两种模式：
 |---|---|---|
 | `probes/analyze/watch-run.mjs`、`probes/analyze/session-events.mjs`、`probes/analyze/run-dashboard.mjs`、`probes/analyze/stream-diagnostics.mjs`、`probes/analyze/provider-error-stats.mjs`、`probes/analyze/plan-card-stats.mjs`、`probes/analyze/session-replay.mjs`、`probes/analyze/scene-capture.mjs`、`probes/analyze/run-inventory.mjs`、`probes/analyze/unconsumed-evidence.mjs`、`probes/analyze/bundle-sessions.mjs` | show | 只读投影/诊断/回放；exit 1 是超时、标题歧义或零绑定，不是裁决 |
 | `checks/run-gates/run-accept.mjs`、`checks/run-gates/acceptance-check.mjs` | judge | 交付验收原子动作 / 收活判据；红 = 不放行 |
-| `tools/runtime-clean.mjs` | operate（act） | 清理运行区；默认 dry-run，`--yes` 才删 |
+| `tools/clean/runtime-clean.mjs` | operate（act） | 清理运行区；默认 dry-run，`--yes` 才删 |
 | `tools/release/export-dist.mjs`、`tools/release/market.mjs`、`tools/release/export-handoff.mjs` | operate（act） | 产出 `_dist/` 工件 |
 | `checks/dist/release-check.mjs` | judge | 发布前版本/tag 一致性裁决 |
 | `tools/release/product-manual.md` | 非面（数据） | 手册源，被 `readme-shape` / `dist-manual-fresh` 门禁消费 |
@@ -92,11 +92,11 @@ operate 的两种模式：
 | `checks/doc-budgets.json`、`checks/archived-note-pointers.json`、`checks/test-path-redirects.json` | 非面（数据） | 门禁消费的配置与登记簿 |
 | `probes/_index.mjs` | 非面（生成器） | 索引生成/校验；`probe-registry` 用同一渲染对账 |
 | `probes/stream/llm-stream-tee.cjs` | 非面（驱动） | 预载仪器，判据不适用；现行 `probe-registry` 仍按探针扫（§6） |
-| `tools/env.sh`、`tools/research.overlay.yml` | 非面（配置 / 生成物） | sourced 环境 / `render-overlay` 的产出 |
-| `tools/llm-socket-isolation.cjs` | 非面（驱动） | `NODE_OPTIONS` 预载，socket 隔离 |
-| `tools/vendor-host-bundle.config.ts`、`tools/vendor-host-typert.config.ts`、`tools/vendor-typert-emit.mjs` | 非面（管道件） | `vendor-build.sh` 的构建配置与产物生成 |
-| `tools/boot-run.sh`、`tools/run-driver.mjs` | operate（run） | 起/复用 run 通道 |
-| `tools/run-kickoff.mjs`、`tools/hitl-answer.mjs`、`tools/bootstrap.sh`、`tools/vendor-build.sh`、`tools/record-asset-ledger.mjs`、`tools/record-ci-oracle.mjs`、`tools/record-role-fixture.mjs`、`tools/render-overlay.mjs`、`tools/render-test-index.mjs` | operate（act） | 对活通道或仓库做持久改动：建会话发 kickoff、写 HITL provenance、装环境、产 fixture/索引/overlay |
+| `tools/env.sh`、`tools/record/research.overlay.yml` | 非面（配置 / 生成物） | sourced 环境 / `render-overlay` 的产出 |
+| `tools/channel/llm-socket-isolation.cjs` | 非面（驱动） | `NODE_OPTIONS` 预载，socket 隔离 |
+| `tools/build/vendor-host-bundle.config.ts`、`tools/build/vendor-host-typert.config.ts`、`tools/build/vendor-typert-emit.mjs` | 非面（管道件） | `vendor-build.sh` 的构建配置与产物生成 |
+| `tools/channel/boot-run.sh`、`tools/channel/run-driver.mjs` | operate（run） | 起/复用 run 通道 |
+| `tools/channel/run-kickoff.mjs`、`tools/channel/hitl-answer.mjs`、`tools/build/bootstrap.sh`、`tools/build/vendor-build.sh`、`tools/record/record-asset-ledger.mjs`、`tools/record/record-ci-oracle.mjs`、`tools/record/record-role-fixture.mjs`、`tools/record/render-overlay.mjs`、`tools/record/render-test-index.mjs` | operate（act） | 对活通道或仓库做持久改动：建会话发 kickoff、写 HITL provenance、装环境、产 fixture/索引/overlay |
 | `tools/hooks/pre-commit` | judge | git hook 的产物是裁决：红则拦 commit |
 
 ## 6. 已知限制与延后工作

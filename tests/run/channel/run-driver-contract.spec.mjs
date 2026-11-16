@@ -3,7 +3,7 @@
 //
 // 为什么要有这条：启动通道的三步序（boot → 验浏览器面 → 交 URL）此前只活在 guides/61 散文里，
 // 每次启动都要现场拼命令（端口/token 从 web.log 掏、探针用哪面、什么算绿全靠记性）——"承诺了
-// 动作却没有工具 = 动作不可复跑"（tools/run-kickoff.mjs 头注同款教训）。`tools/run-driver.mjs` 是
+// 动作却没有工具 = 动作不可复跑"（tools/channel/run-kickoff.mjs 头注同款教训）。`tools/channel/run-driver.mjs` 是
 // 该序的可复跑入口；本测试钉住它的**行为形状**（verdict 契约、token 来源、URL 抽取、端口回退），
 // 不重跑真浏览器（那是 entry 自身的活）。
 //
@@ -13,15 +13,15 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-// 判据住 checks/lib/channel/run-channel.mjs（壳 = tools/run-driver.mjs 含 spawn，测试不许进其 import
+// 判据住 checks/lib/channel/run-channel.mjs（壳 = tools/channel/run-driver.mjs 含 spawn，测试不许进其 import
 // 闭包——layering 守卫；2026-10-19 实测红后按分层修正）
 import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../../../checks/lib/channel/run-channel.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
 
-test('入口在位：tools/run-driver.mjs + tools/README 索引行（navigability 资产门同期）', () => {
-  assert.ok(existsSync(join(ROOT, 'tools/run-driver.mjs')), 'tools/run-driver.mjs 缺席——启动驱动入口');
+test('入口在位：tools/channel/run-driver.mjs + tools/README 索引行（navigability 资产门同期）', () => {
+  assert.ok(existsSync(join(ROOT, 'tools/channel/run-driver.mjs')), 'tools/channel/run-driver.mjs 缺席——启动驱动入口');
   assert.ok(read('tools/README.md').includes('run-driver.mjs'), 'tools/README 未点名 run-driver.mjs');
 });
 
@@ -134,17 +134,17 @@ test('verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑；消息面出现�
 });
 
 test('复用通道也过镜像门：run-driver 调 boot-run --drift-only，未取证不许绿', () => {
-  const src = read('tools/run-driver.mjs');
+  const src = read('tools/channel/run-driver.mjs');
   assert.ok(src.includes("'--drift-only'"), 'run-driver 复用通道时未调 boot-run --drift-only——旧页面会被判成当前绿');
   assert.ok(src.includes('mirrorDrift()'), 'run-driver 缺镜像取证函数');
-  const boot = read('tools/boot-run.sh');
+  const boot = read('tools/channel/boot-run.sh');
   assert.ok(boot.includes('--drift-only'), 'boot-run 缺只读镜像检查模式（--drift-only）');
   // 旧实现的两个空转点：composing 永远是 false；复用分支没有任何新鲜度取证
   assert.ok(!src.includes('composing'), 'verdict 仍有无人计算的 composing 参数（幻影检查）');
 });
 
-test('驱动入口不绕过漂移门：boot 必须经 tools/boot-run.sh，禁止直起 dsh --profile research', () => {
-  const src = read('tools/run-driver.mjs');
+test('驱动入口不绕过漂移门：boot 必须经 tools/channel/boot-run.sh，禁止直起 dsh --profile research', () => {
+  const src = read('tools/channel/run-driver.mjs');
   assert.ok(src.includes('boot-run.sh'), 'run-driver 未走 boot-run（绕过漂移检测、静默用旧镜像）');
   // 裸起 profile 只在 boot-run 内部合法；驱动入口自己的代码里不许出现
   assert.ok(!/--profile\s+['"]?research/.test(src.replace(/^.*boot-run\.sh.*$/gm, '')),
@@ -165,7 +165,7 @@ test('启动首动作一致：安装行 = 手册（CLI 建 profile + tarball 装
   assert.ok(lineOf('tools/release/product-manual.md', '--from-default-profile web').includes('dsh --profile deep-research'), '手册安装首动作不是 DSH profile 初始化');
   assert.ok(lineOf('README.md', '_dist/安装手册.md').includes('_dist/安装手册.md'), 'README 没有把安装步骤指向手册');
   // 开发入口（run-driver）住在 CONTRIBUTING；README 只留一行路由。
-  assert.ok(lineOf('CONTRIBUTING.md', 'tools/run-driver.mjs up').includes('run-driver.mjs up'), 'CONTRIBUTING 开发入口缺席');
+  assert.ok(lineOf('CONTRIBUTING.md', 'tools/channel/run-driver.mjs up').includes('run-driver.mjs up'), 'CONTRIBUTING 开发入口缺席');
   const installRow = lineOf('docs/00-index.md', '（安装用户）');
   assert.ok(installRow.includes('安装手册'), '00-index 安装行没有把手册写成命令 owner');
   assert.ok(installRow.includes('file:'), '00-index 安装行没有把 tarball 写成当前装包入口');
@@ -179,6 +179,6 @@ test('启动首动作一致：安装行 = 手册（CLI 建 profile + tarball 装
   const guide = read('docs/guides/61-run-playbook.md');
   const runStart = guide.indexOf('## 0. 开跑');
   const section = guide.slice(runStart, guide.indexOf('\n## 1.', runStart));
-  assert.ok(!/\n- 启动：`bash tools\/boot-run\.sh`/.test(section),
+  assert.ok(!/\n- 启动：`bash tools\/channel\/boot-run\.sh`/.test(section),
     'guides/61 §0 仍把 boot-run 写成启动首动作——应先 run-driver，boot-run 只作底层说明');
 });

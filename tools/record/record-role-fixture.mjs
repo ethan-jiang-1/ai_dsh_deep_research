@@ -13,7 +13,7 @@
 // 2026-10-18 实红复现与清理补充：生成式标题**会多次更新**，按"首个 title 事件"匹配会漏（我第一轮
 // 清理就漏了）；清理脚本要按**全部** `"title":"…"` 事件任一命中来判，另把「渐进面探针会话」「探针会话…」
 // 与本轮探针问句派生的标题一并纳入（本次共移出 60+ 场，移出=保留现场可逆，不删除）。
-// 用法：source tools/env.sh && node --import tsx/esm tools/record-role-fixture.mjs --role scout [--port 3105]
+// 用法：source tools/env.sh && node --import tsx/esm tools/record/record-role-fixture.mjs --role scout [--port 3105]
 // BUG-019 修复：MCP server 经 npx 冷启动连接可能晚于首回合请求组装（时序骰子，实录 6 录
 // 4 赢 2 输；宿主 stdout/logs 均无就绪信号可等）——写盘前验 MCP 组谓词，缺组即废弃本录并
 // 有界重试，连续落败 fail-loud；mirror 无 mcp 行（MCP_PLAYWRIGHT=0 形态）时谓词不适用。
@@ -23,11 +23,11 @@ import { writeFileSync, readFileSync, existsSync, mkdirSync, readdirSync, statSy
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { randomUUID } from 'node:crypto'
-import { profileLayerIssues, runtimeVersionOf } from '../checks/lib/shared/profile-health.mjs'
-import { requireCredentials, scrubbedEnv, withModelKey } from '../checks/lib/shared/env.mjs'
-import { sentinelInAssistantText } from '../checks/lib/shared/replay-request.mjs'
+import { profileLayerIssues, runtimeVersionOf } from '../../checks/lib/shared/profile-health.mjs'
+import { requireCredentials, scrubbedEnv, withModelKey } from '../../checks/lib/shared/env.mjs'
+import { sentinelInAssistantText } from '../../checks/lib/shared/replay-request.mjs'
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)
 const argOf = (name, fallback = null) => { const i = argv.indexOf(`--${name}`); return i === -1 ? fallback : argv[i + 1] }
 const ROLE = argOf('role')
@@ -81,7 +81,7 @@ const bin = join(VENDOR, 'apps', 'cli', 'src', 'bin.ts')
 
 const recordOnce = async () => {
   // LLM 流 socket 隔离预载（用户指令 2026-10-13：一次性连接不复用——postmortem 2026-10-13）
-  const iso = join(ROOT, 'tools', 'llm-socket-isolation.cjs')
+  const iso = join(ROOT, 'tools', 'channel', 'llm-socket-isolation.cjs')
   const child = spawn(process.execPath, ['--import', 'tsx/esm', bin, '--profile', 'deep-research', '--', '--port', String(PORT), '--no-open'], { cwd: VENDOR, env: withModelKey(scrubbedEnv({ DSH_HOME, PATH: process.env.PATH, NODE_OPTIONS: `--require ${iso}` })), stdio: ['ignore', 'pipe', 'pipe'], detached: true })
   let output = ''
   let childGone = false

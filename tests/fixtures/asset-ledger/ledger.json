@@ -1,5 +1,5 @@
 {
-  "generatedBy": "tools/record-asset-ledger.mjs",
+  "generatedBy": "tools/record/record-asset-ledger.mjs",
   "note": "组合账：lane/class/cost/uniqueClaim/oracleType/sunset；oracleType 由 AST 推导（禁手写 OVERRIDES）；self-referential = 下一轮迁移面；覆盖由 tests/checks/asset-ledger.test 重算对账。",
   "assets": [
     {
@@ -58,7 +58,7 @@
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "tools/record-ci-oracle.mjs 用「真 YAML 解析 + 真 bash -eo pipefail + 失败 stub node」录制的",
+      "uniqueClaim": "tools/record/record-ci-oracle.mjs 用「真 YAML 解析 + 真 bash -eo pipefail + 失败 stub node」录制的",
       "oracleType": "external",
       "sunset": "随门禁/台账合同退役"
     },
@@ -208,7 +208,7 @@
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "本测试在 node:vm 沙箱里执行 tools/llm-socket-isolation.cjs，注入假 fetch/假 undici：",
+      "uniqueClaim": "本测试在 node:vm 沙箱里执行 tools/channel/llm-socket-isolation.cjs，注入假 fetch/假 undici：",
       "oracleType": "canonical",
       "sunset": "随门禁/台账合同退役"
     },

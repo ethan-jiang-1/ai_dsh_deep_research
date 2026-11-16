@@ -22,7 +22,7 @@ pack 兼容矩阵 `dsh.compatibility.dshReleases`。改完 `pnpm verify`：`vend
 
 ## 2. 干净构建
 
-`bash tools/vendor-build.sh --clean`——**--clean 必做，不是可选项**：旧 typert 产物与前端壳
+`bash tools/build/vendor-build.sh --clean`——**--clean 必做，不是可选项**：旧 typert 产物与前端壳
 build-time externals 会把新 host 半的改动静默稀释（020rc2 轮实证：浏览器模块表报
 "build-time externals drift"，根因 = 陈旧产物）。顺序铁律已固化进脚本注释（host 半补建
 先于 tsdown client），不要调整。
@@ -42,7 +42,7 @@ L4-lite 需凭据（真模型档）；未跑项如实分列，不算通过。
 
 ## 5. run 通道与镜像
 
-`tools/boot-run.sh` 漂移检测会红（**预期态**——agent-team-profile 层版本随兼容矩阵变了）：
+`tools/channel/boot-run.sh` 漂移检测会红（**预期态**——agent-team-profile 层版本随兼容矩阵变了）：
 按其处方删旧 profile 重建，别手改镜像。
 
 ## 5-bis. 证据层（升 pin 必红，不许降档凑绿）
@@ -65,9 +65,9 @@ L4-lite 需凭据（真模型档）；未跑项如实分列，不算通过。
 - `--clean` 会清 vendored cordis 全家（vendor/cordis、cosmokit、schemastery）——重装走
   workspace 解析，不需要手工补救。
 - **017 轮的 vendor 根构建待查**：`pnpm run build` 的 `tsc -b tsconfig.host.json` 缺根包
-  `lib/types`；本仓启动走 tsx 源码，vendor 产物由 `tools/vendor-build.sh` 产出。再遇 vendor
+  `lib/types`；本仓启动走 tsx 源码，vendor 产物由 `tools/build/vendor-build.sh` 产出。再遇 vendor
   根构建红时按 [归档 017](../../../notes/archived/2026-09-25-vendor-pin-bump-017rc2.md) 的待查项复查。
 - **双层安装类型可命名性偏差（020 轮登记，未立项）**：root workspace 与 vendor 内部安装并存，
-  聚合 client typecheck 的 tests 夹具 TS2883；`tools/vendor-build.sh` ④ 步金丝雀守门容忍。
+  聚合 client typecheck 的 tests 夹具 TS2883；`tools/build/vendor-build.sh` ④ 步金丝雀守门容忍。
   根治 = 合并单层安装（动作大）；触发 = 下次升 pin 或 vendor-build 痛点再现（见
   `_backlog/triggers.md`）。

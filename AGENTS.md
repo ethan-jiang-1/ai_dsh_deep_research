@@ -60,7 +60,7 @@ checks/                  judge（+ 非面支撑）：verify/、smoke/（*.e2e.mj
 tests/                   keyless 回归（node:test；*.spec.mjs = 进程内 spec，checks/*.test.mjs = 门禁自身；layering 守卫五件套——规则见 tests/AGENTS.md）
 snapshots/               场景证据层：整组录制资产 + 场景声明 snapshot.json（消费 = snapshot-replay.entry
                          经 checks/lib/harness/replay-scene.mjs）；分类与证据边界 = snapshots/README.md
-tools/                     源码驱动与 run 通道（operate：run+act；hooks/ 是 judge）：env.sh（双 home + 裸 dsh 拦截 + pre-commit 挂载）、vendor-build.sh（vendor 树构建）、render-overlay（tracked 生成物生成器：overlay）、boot-run.sh（run 通道开跑，自 source tools/env.sh）/ run-driver.mjs（通道驱动与呈交，内部调 boot-run）、run-kickoff / hitl-answer（会话驱动与 HITL 代答）、record-role-fixture（fixture 录制）、research.overlay.yml（**生成物**，勿手改）、hooks/（pre-commit 红灯拦 commit）、release/（export-dist / market / export-handoff / 手册源）、runtime-clean（运行区清理）——逐件职责 = tools/README.md，面规则 = docs/guides/68
+tools/                   operate（run+act）：channel/（boot-run / run-driver / run-kickoff / hitl-answer / socket 隔离预载）、build/（bootstrap / vendor-build 及其配置）、record/（record-* 录制 / render-* 生成器 / overlay 生成物）、release/（export-dist / market / export-handoff / 手册源）、clean/（runtime-clean）、hooks/（pre-commit = judge 例外）；env.sh 留根 = sourced 配置入口（非面）——不装裁决与只读投影；逐件职责 = tools/README.md，面规则 = docs/guides/68
 runtime/                 运行态区（gitignored）：harness-home/（开发 DSH home：会话/凭据/插件安装）+
                          smoke-workspace/（冒烟与 boot 运行产物）——tools/ 只住源码驱动，跑出来的东西住这里
 _dist/                   对外交付件：安装手册.md（tracked 生成物，生成器 = tools/release/export-dist.mjs）
@@ -83,10 +83,10 @@ implemented/archived/rejected；事故复盘在 archived/）；写入触发/取�
 ## 命令速查（全档正本 = [guides/60 §2](docs/guides/60-dev-loop.md)；run 通道 = [guides/61](docs/guides/61-run-playbook.md)）
 
 ```sh
-source tools/env.sh    # ⚠ fresh clone 首次（激活 hooks）与 L1/L2、部分 run-gates/probes 件需先 source；run 通道 tools/boot-run.sh 自 source，勿重复。作用：双 home（DSH_HOME=runtime/harness-home）+ pre-commit + 裸 dsh 拦截；未 source 的脚本自拒 exit 2；口径 = guides/60 §2
+source tools/env.sh    # ⚠ fresh clone 首次（激活 hooks）与 L1/L2、部分 run-gates/probes 件需先 source；run 通道 tools/channel/boot-run.sh 自 source，勿重复。作用：双 home（DSH_HOME=runtime/harness-home）+ pre-commit + 裸 dsh 拦截；未 source 的脚本自拒 exit 2；口径 = guides/60 §2
 pnpm verify          # L0 结构门禁（keyless，收尾必跑）
 pnpm test            # L0 keyless 聚合（spec + checks；分车道 = test:spec / test:checks / test:e2e / test:entry；vendor = test:vendor）
-node tools/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏览器面 + 呈交 URL；操作 = guides/61 §0）
+node tools/channel/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏览器面 + 呈交 URL；操作 = guides/61 §0）
                              # 启动次序固定 = profile → plugin add(roster) → dsh --profile → 工作区/会话；别手起 dsh、别自创启动路径
 ```
 
@@ -98,7 +98,7 @@ node tools/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏览器�
 
 档位词汇：**keyless** = 无凭据可跑；preset.e2e 真挂载档无模型调用、不需要 key。
 release.entry 无模型调用，安装验收使用 `--install-only` 跳过模型就绪检查；默认 preflight 仍检查凭据在场；
-**真模型档** = 需凭据并调用模型；`checks/` 入口 closed set 正本 = [smoke-contract](tests/checks/smoke-contract.test.mjs)（成员清单 = 该测试的 REAL_MODEL；本行不复制名单）。`tools/record-role-fixture.mjs` 是单独录制工具，完整研究 run 属 L4，均不在该脚本闭集中；档位与验收面见[项目地图](docs/project-map.md)。CDP `--ask` 按当前会话档处理（模式表 = [项目地图](docs/project-map.md)）。
+**真模型档** = 需凭据并调用模型；`checks/` 入口 closed set 正本 = [smoke-contract](tests/checks/smoke-contract.test.mjs)（成员清单 = 该测试的 REAL_MODEL；本行不复制名单）。`tools/record/record-role-fixture.mjs` 是单独录制工具，完整研究 run 属 L4，均不在该脚本闭集中；档位与验收面见[项目地图](docs/project-map.md)。CDP `--ask` 按当前会话档处理（模式表 = [项目地图](docs/project-map.md)）。
 
 L4-lite 真模型冒烟需要 `DEEPSEEK_API_KEY`：开发 home（`runtime/harness-home/.credentials.yaml`）配一次
 即可，永不提交密钥；web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙（实证：vendor `packages/bundle/base/cordis.patch.yml` 的 web-search-deepseek 行）。

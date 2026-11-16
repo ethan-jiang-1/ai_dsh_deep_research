@@ -13,8 +13,8 @@ launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.m
 
 ## 改这个包时
 
-- **两处一致**（pack 源 = 唯一真源）：① `tools/research.overlay.yml` 由
-  `node tools/render-overlay.mjs` **从 pack 渲染**（门禁 `overlay-fresh` 对账，勿手改）；
+- **两处一致**（pack 源 = 唯一真源）：① `tools/record/research.overlay.yml` 由
+  `node tools/record/render-overlay.mjs` **从 pack 渲染**（门禁 `overlay-fresh` 对账，勿手改）；
   ② `runtime/harness-home/profiles/deep-research/`（run 通道镜像）随 `boot-run.sh` 同步，
   其漂移检测逐文件比对，不符即 fail-loud；改完 pack 跑 `node checks/verify/verify.mjs`；
 - **双重编译面**：`src/lib` 文件的 host/shared/client 归属 = `src/lib/faces.json`；host include = host+shared，client 不得 import host；门禁 = `tests/pack/contract/src-lib-faces.spec.mjs`。

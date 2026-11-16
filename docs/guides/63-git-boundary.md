@@ -26,7 +26,7 @@
    是 → 不进 git（凭据、home、会话、run bundle、用户数据、本机路径/编辑器配置）。
 
 **tracked 生成物**是唯一需要额外条件的类别：必须同时有生成器、新鲜度门禁、以及“为什么必须在
-树内”的理由。现有例子 = `_dist/安装手册.md`（`dist-manual-version`）、`tools/research.overlay.yml`
+树内”的理由。现有例子 = `_dist/安装手册.md`（`dist-manual-version`）、`tools/record/research.overlay.yml`
 （`overlay-fresh`）。没有门禁的生成物不进 git。
 
 ## 必须进 git

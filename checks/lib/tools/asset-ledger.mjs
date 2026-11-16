@@ -3,7 +3,7 @@
 //
 // 为什么生成且禁止手写 OVERRIDES：手写账与硬编码覆盖字典必然随增删和重构腐烂。
 // 本模块用 TypeScript AST（ts.createSourceFile + parseKeylessImports）自动推导每个测试资产的
-// oracleType，由 tools/record-asset-ledger.mjs 写盘，tests/checks/asset-ledger.test.mjs 与
+// oracleType，由 tools/record/record-asset-ledger.mjs 写盘，tests/checks/asset-ledger.test.mjs 与
 // tests/checks/guard-ledger.test.mjs 双向重算对账（漂移或矛盾 = 红）。
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, relative } from 'node:path'

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// tools/run-driver.mjs — run 通道**驱动入口**（启动 / 验证 / 呈交，一条命令）。
+// tools/channel/run-driver.mjs — run 通道**驱动入口**（启动 / 验证 / 呈交，一条命令）。
 //
 // 为什么存在（用户指令 2026-10-19："驱动插件是最常用的命令，内化固定"）：启动通道的三步序
 // （boot → 验浏览器面 → 交 URL）此前只活在 guides/61 §0 散文里，每次启动都要现场拼命令——
 // 端口/token 从 web.log 掏、探针用哪面、什么算绿全靠记性。"承诺了动作却没有工具 = 动作不可复跑"
-// （tools/run-kickoff.mjs 头注同款教训）。本入口把该序固化成可复跑的一步。
+// （tools/channel/run-kickoff.mjs 头注同款教训）。本入口把该序固化成可复跑的一步。
 //
 // 子命令：
 //   up    [--port <p>] [--no-probe] [--require-data]  起通道（或复用已在飞的）+ 验浏览器面 + 打印呈交块
@@ -24,7 +24,7 @@
 // 通道事实的唯一来源 = runtime/smoke-workspace/web.log 的**最后一条** `dsh web: <url>` 横幅
 // （boot-run 每次 boot 以 tee 截断写该文件；旧横幅 = 旧 token，用旧的必 401）。
 //
-// 不绕漂移门（guides/61 §0.1）：起通道一律经 `bash tools/boot-run.sh`，从不直起 `dsh --profile
+// 不绕漂移门（guides/61 §0.1）：起通道一律经 `bash tools/channel/boot-run.sh`，从不直起 `dsh --profile
 // research`——那会跳过 pack 漂移检测、静默用旧镜像。boot 是前台进程（脚本退出即 web 停），
 // 故 `up` 以**托管后台 job** 形态起 boot-run，本驱动的 probe 阶段独立取证。
 import { spawn, spawnSync } from 'node:child_process';
@@ -32,14 +32,14 @@ import { createHash } from 'node:crypto';
 import { copyFileSync, existsSync, mkdirSync, openSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { isMain } from '../checks/lib/shared/cli-entry.mjs';
-import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../checks/lib/channel/run-channel.mjs';
-import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey } from '../checks/lib/channel/channel-cache.mjs';
-import { authenticate } from '../checks/lib/shared/web-harness.mjs';
+import { isMain } from '../../checks/lib/shared/cli-entry.mjs';
+import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../../checks/lib/channel/run-channel.mjs';
+import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey } from '../../checks/lib/channel/channel-cache.mjs';
+import { authenticate } from '../../checks/lib/shared/web-harness.mjs';
 
 export { guiUrlFromWebLog, runDriverVerdict };
 
-const ROOT = resolvePath(dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT = resolvePath(dirname(fileURLToPath(import.meta.url)), '../..');
 // 实例状态根：默认 runtime/smoke-workspace；多实例用 DSH_RUN_STATE_DIR 指向各自目录。
 const DEFAULT_STATE_DIR = join(ROOT, 'runtime/smoke-workspace');
 const STATE_DIR = resolvePath(process.env.DSH_RUN_STATE_DIR ?? DEFAULT_STATE_DIR);
@@ -67,7 +67,7 @@ const runtimeFingerprint = () => {
 };
 // dev 外壳指纹：决定被探测页面内容的 overlay / boot 序列 / 渲染器。pack 没动但外壳变了也必须
 // miss（BUG-065：旧键只有 pack+runtime，会拿 30 分钟前的 GREEN 冒充当前页面）。
-const DEV_SHELL_FILES = ['tools/research.overlay.yml', 'tools/boot-run.sh', 'tools/render-overlay.mjs'];
+const DEV_SHELL_FILES = ['tools/record/research.overlay.yml', 'tools/channel/boot-run.sh', 'tools/record/render-overlay.mjs'];
 const devShellFingerprint = () => {
   const hash = createHash('sha256');
   for (const rel of DEV_SHELL_FILES) {
@@ -103,7 +103,7 @@ const listenPids = (port) => {
 };
 
 const isBootDriving = () => {
-  const r = spawnSync('pgrep', ['-f', 'tools/boot-run.sh'], { encoding: 'utf8' });
+  const r = spawnSync('pgrep', ['-f', 'tools/channel/boot-run.sh'], { encoding: 'utf8' });
   return (r.stdout ?? '').trim() !== '';
 };
 
@@ -145,7 +145,7 @@ function probeFace(url, expectFace, screenshotPath = undefined, htmlPath = undef
 /** 镜像一致性取证 = boot-run 的只读模式（不碰端口/不安装/不起 web）。红 = 当前通道加载的
  *  不是当前 pack 源；此时浏览器面再绿也只是旧页面的绿。 */
 function mirrorDrift() {
-  const r = spawnSync('bash', [join(ROOT, 'tools', 'boot-run.sh'), '--drift-only'], { encoding: 'utf8', cwd: ROOT, timeout: 180_000 });
+  const r = spawnSync('bash', [join(ROOT, 'tools', 'channel', 'boot-run.sh'), '--drift-only'], { encoding: 'utf8', cwd: ROOT, timeout: 180_000 });
   // env.sh 的启动提示与自检绿行不是判据；只留 boot-run 的漂移/修复行，避免把 600 字预算
   // 花在每次都会出现的前缀上（实测 detail 曾从半行 "ile 镜像不一致" 开始）。
   const lines = `${r.stderr ?? ''}\n${r.stdout ?? ''}`.split('\n')
@@ -207,7 +207,7 @@ const wantBootstrap = isCli && process.argv.includes('--bootstrap');
 if (sub === 'url') {
   const s = channelState();
   if (!s.alive) {
-    console.error(`run-driver: 无存活通道（web.log ${s.url === null ? '无横幅' : `有 ${s.url} 但端口 ${s.port} 无监听`}）——先 \`node tools/run-driver.mjs up\``);
+    console.error(`run-driver: 无存活通道（web.log ${s.url === null ? '无横幅' : `有 ${s.url} 但端口 ${s.port} 无监听`}）——先 \`node tools/channel/run-driver.mjs up\``);
     process.exit(2);
   }
   console.log(s.url);
@@ -251,7 +251,7 @@ if (sub === 'probe') {
 }
 
 if (isCli && sub !== 'up') {
-  console.error('run-driver: 用法 node tools/run-driver.mjs up [--port <p>] [--profile <p>] [--bootstrap] [--no-probe] [--force-probe] [--require-data] | probe [--port <p>] [--expect-face <文本>] [--require-data] | url');
+  console.error('run-driver: 用法 node tools/channel/run-driver.mjs up [--port <p>] [--profile <p>] [--bootstrap] [--no-probe] [--force-probe] [--require-data] | probe [--port <p>] [--expect-face <文本>] [--require-data] | url');
   process.exit(2);
 }
 
@@ -276,14 +276,14 @@ if (state.alive) {
     const payload = { url: state.url, port: state.port, ...v, driftDetail: drift.detail };
     const saved = persistVerdict('up', payload);
     console.error(`run-driver: NOT-RUN——通道镜像漂移/未取证（${saved.dir}）；当前页面不是当前代码。`);
-    console.error('           先确认没有在飞 run 需要保活，再停通道并重建镜像（bash tools/boot-run.sh），然后重跑 up。');
+    console.error('           先确认没有在飞 run 需要保活，再停通道并重建镜像（bash tools/channel/boot-run.sh），然后重跑 up。');
     console.log(JSON.stringify(payload, null, 2));
     process.exit(2);
   }
 } else {
   if (wantBootstrap) {
     console.log('run-driver: --bootstrap 检查独立环境前置…');
-    const b = spawnSync('bash', [join(ROOT, 'tools', 'bootstrap.sh')], { cwd: ROOT, stdio: 'inherit', env: process.env });
+    const b = spawnSync('bash', [join(ROOT, 'tools', 'build', 'bootstrap.sh')], { cwd: ROOT, stdio: 'inherit', env: process.env });
     if (b.status !== 0) {
       console.error('run-driver: bootstrap 未就绪——按上方 FAIL/todo 修复后重试（未跑 ≠ 通过）');
       process.exit(1);
@@ -291,7 +291,7 @@ if (state.alive) {
   }
   // 并发检查只守默认 state：不同 state dir 的实例允许并行（多实例）；同端口仍由下方端口检查拦。
   if (STATE_DIR === DEFAULT_STATE_DIR && isBootDriving()) {
-    console.error('run-driver: 默认 state 下已有一个 boot-run.sh 在起通道（勿并发另起）——等它出横幅后跑 `node tools/run-driver.mjs probe`');
+    console.error('run-driver: 默认 state 下已有一个 boot-run.sh 在起通道（勿并发另起）——等它出横幅后跑 `node tools/channel/run-driver.mjs probe`');
     process.exit(2);
   }
   const port = wantPort;
@@ -299,12 +299,12 @@ if (state.alive) {
   if (busy.length > 0) {
     // 端口被非本仓通道占用：说清是谁，不盲杀（BUG-007：在飞会话日志尾部会丢）
     console.error(`run-driver: 端口 ${port} 已被 pid ${busy.join(',')} 占用（不是本仓 web.log 里的通道）`);
-    console.error(`           换端口：node tools/run-driver.mjs up --port <空闲端口>；或确认后停掉占用者`);
+    console.error(`           换端口：node tools/channel/run-driver.mjs up --port <空闲端口>；或确认后停掉占用者`);
     process.exit(1);
   }
-  console.log(`run-driver: 起通道（bash tools/boot-run.sh，端口 ${port}；日志 ${BOOT_LOG}）…`);
+  console.log(`run-driver: 起通道（bash tools/channel/boot-run.sh，端口 ${port}；日志 ${BOOT_LOG}）…`);
   const out = openSync(BOOT_LOG, 'w');
-  const child = spawn('bash', [join(ROOT, 'tools/boot-run.sh')], {
+  const child = spawn('bash', [join(ROOT, 'tools/channel/boot-run.sh')], {
     cwd: ROOT,
     detached: true,
     stdio: ['ignore', out, out],

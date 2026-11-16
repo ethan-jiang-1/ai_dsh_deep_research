@@ -29,7 +29,7 @@ const PRESETS = join(PACK, 'presets');
 const ROLES = presetRoles(ROOT);
 const WORKERS = workerPresets(ROOT);
 const RESEARCH_ROLES = researchRoles(ROOT);
-const OVERLAY = join(ROOT, 'tools', 'research.overlay.yml');
+const OVERLAY = join(ROOT, 'tools', 'record', 'research.overlay.yml');
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);

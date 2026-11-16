@@ -27,9 +27,9 @@ description: Use when adding a research role preset, renaming one, or changing a
 
 - **bundle 装载**：`package.json` 的 `dsh.bundle.patch` 数组补上 `presets/<role>.patch.yml`
   ——0.1.7 的 preset 行随 bundle 装载，漏了它角色不进 roster（`pack-bundle-compat` 红）；
-- **源码域**：`tools/research.overlay.yml` 的 bundle 行——源码域通道（冒烟、探针）走它；
+- **源码域**：`tools/record/research.overlay.yml` 的 bundle 行——源码域通道（冒烟、探针）走它；
 - **镜像**：`runtime/harness-home/profiles/research/` 的 profile 镜像——run 通道走它；
-  `bash tools/boot-run.sh` 的漂移检测会逐文件比 pack 源 vs 镜像，不符即 fail-loud；
+  `bash tools/channel/boot-run.sh` 的漂移检测会逐文件比 pack 源 vs 镜像，不符即 fail-loud；
 - **roster**：`checks/lib/shared/roles.mjs` 是访问器，事实源 = 盘上 `presets/`；改完跑
   `role-list-sync` 门禁（角色清单与 pack 对账）；
 - **persona 引用对账**：每个 preset 的 persona 文本硬引用 skill 名（如 critic「先加载
@@ -42,7 +42,7 @@ description: Use when adding a research role preset, renaming one, or changing a
 ## 3. 验证（完成判据，keyless 优先）
 
 ```sh
-node tools/render-overlay.mjs                       # 生成物先行：L1 挂的是 overlay 不是 pack 源（改 pack 后必跑且先于 L1）
+node tools/record/render-overlay.mjs                       # 生成物先行：L1 挂的是 overlay 不是 pack 源（改 pack 后必跑且先于 L1）
 node checks/verify/verify.mjs                    # preset-structure / row-deps / role-list-sync
 source tools/env.sh && node checks/smoke/preset.e2e.mjs                  # L1 接线（dump 面；未 source 自拒）
 source tools/env.sh && DSH_SMOKE_REAL=1 node checks/smoke/preset.e2e.mjs # L1 真挂载：真会话 + 逐角色断言 + skills 隔离

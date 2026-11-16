@@ -4,7 +4,7 @@
 // 为什么住 lib：预载壳是活进程仪器（挂进真目标进程才有意义），无 keyless 自动测试；
 // 但它依赖的两个判据必须是可断言的——判错 = 漏抓字节（丢证据）或泄密钥（证据包不可
 // 外发），两者都是纯函数，默认回归直接钉住。壳对判据的消费 = require（Node 22.12+
-// require(esm)；壳是 CJS 预载形态，与 tools/llm-socket-isolation.cjs 同构）。
+// require(esm)；壳是 CJS 预载形态，与 tools/channel/llm-socket-isolation.cjs 同构）。
 
 /**
  * 捕获目标判定：URL 含主机子串 → 抄写。

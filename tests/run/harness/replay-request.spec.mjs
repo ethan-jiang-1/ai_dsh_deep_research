@@ -301,7 +301,7 @@ for (const [id, kind] of [['persona', 'system-prompt'], ['skill-catalog', 'skill
 // ── BUG-030 正修：回合落定判据只认 assistant 文本 + turn/end 显式态 ──────────────────────
 // 复现的坑：哨兵「探针完成」写在录制 prompt 里，A 层用**全文 includes** 判回合完成 → user/message
 // 一落盘就放行 → 后续层在回合在飞时执行 → C5 金标准缺末行（当日 4 红 / 6 跑）。
-// 判据正本 = 录制器 tools/record-role-fixture.mjs（2026-10-13 因同一坑改过），此处收成共享件。
+// 判据正本 = 录制器 tools/record/record-role-fixture.mjs（2026-10-13 因同一坑改过），此处收成共享件。
 // 负例留证 2026-10-13：BUG-018——删除一个 JUDGED_KINDS 或注入未声明种类 → unjudgedInjectionKinds 红。
 // 负例留证 2026-10-18：BUG-030——把 sentinelInAssistantText 退回全文 includes → prompt 回显例红。
 const line = (event) => JSON.stringify(event);

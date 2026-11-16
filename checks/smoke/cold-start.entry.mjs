@@ -45,7 +45,7 @@ const env = {
 }
 
 let output = ''
-const child = spawn(process.execPath, [join(ROOT, 'tools', 'run-driver.mjs'), 'up', '--bootstrap'], {
+const child = spawn(process.execPath, [join(ROOT, 'tools', 'channel', 'run-driver.mjs'), 'up', '--bootstrap'], {
   cwd: ROOT, env, stdio: ['ignore', 'pipe', 'pipe'],
 })
 // setEncoding：管道 chunk 可落在多字节字符中间，不先解码会撕成 U+FFFD（启动横幅判据假红）。

@@ -66,16 +66,16 @@ export function profileLayerIssues({
   packDir,
 }) {
   const manifest = join(profileDir, 'package.json')
-  if (!existsSync(manifest)) return [`profile 不在场：${profileDir}——${profileName === 'deep-research' ? '先跑 tools/boot-run.sh（guides/60 §2）' : `${profileName} 档已弃用，消费方改用 deep-research`}`]
+  if (!existsSync(manifest)) return [`profile 不在场：${profileDir}——${profileName === 'deep-research' ? '先跑 tools/channel/boot-run.sh（guides/60 §2）' : `${profileName} 档已弃用，消费方改用 deep-research`}`]
   let pkg
   try { pkg = JSON.parse(readFileSync(manifest, 'utf8')) } catch (error) {
     return [`profile 清单不可解析：${manifest}（${String(error?.message ?? error)}）`]
   }
   const actual = pkg?.dependencies?.[layer]
-  if (actual === undefined) return [`profile 缺团队层 ${layer}——${profileName === 'deep-research' ? '先跑 tools/boot-run.sh 重建' : `${profileName} 档已弃用，消费方改用 deep-research`}`]
+  if (actual === undefined) return [`profile 缺团队层 ${layer}——${profileName === 'deep-research' ? '先跑 tools/channel/boot-run.sh 重建' : `${profileName} 档已弃用，消费方改用 deep-research`}`]
   if (typeof runtimeVersion !== 'string' || runtimeVersion === '') return [`读不到运行中 dsh 版本，拒绝用猜的版本门`]
   if (actual !== runtimeVersion) {
-    return [`${layer} ${String(actual)} ≠ runtime ${runtimeVersion}——profile 未随 pin 重钉；${profileName === 'deep-research' ? '先跑 tools/boot-run.sh 重建' : `${profileName} 档已弃用，消费方改用 deep-research（boot-run 只维护 deep-research）`}`]
+    return [`${layer} ${String(actual)} ≠ runtime ${runtimeVersion}——profile 未随 pin 重钉；${profileName === 'deep-research' ? '先跑 tools/channel/boot-run.sh 重建' : `${profileName} 档已弃用，消费方改用 deep-research（boot-run 只维护 deep-research）`}`]
   }
   if (typeof packDir === 'string' && packDir !== '' && existsSync(packDir)) {
     const mirrorDir = join(profileDir, 'node_modules', 'dsh-deep-research-pack')
@@ -83,7 +83,7 @@ export function profileLayerIssues({
     if (drifted.length > 0) {
       const sample = drifted.slice(0, 4).join('、') + (drifted.length > 4 ? ` 等 ${drifted.length} 项` : '')
       const relProfile = relative(process.cwd(), profileDir) || profileDir
-      return [`profile 内 pack 镜像与源码不一致（${sample}）——先跑 rm -rf '${relProfile}' && MCP_PLAYWRIGHT=0 bash tools/boot-run.sh --prepare-profile 重建镜像`]
+      return [`profile 内 pack 镜像与源码不一致（${sample}）——先跑 rm -rf '${relProfile}' && MCP_PLAYWRIGHT=0 bash tools/channel/boot-run.sh --prepare-profile 重建镜像`]
     }
   }
   return []

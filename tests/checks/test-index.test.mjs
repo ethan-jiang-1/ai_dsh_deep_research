@@ -54,7 +54,7 @@ test('索引与盘上一致（模块数防空 + 逐字节相等）', () => {
   assert.ok(modules.every((m) => m.owner !== 'scripts'), 'lib 根层仍平铺模块——owner 分组未完成')
   const rendered = renderTestIndex(ROOT)
   const current = readFileSync(INDEX, 'utf8')
-  assert.equal(current, rendered, 'tests/INDEX.generated.md 漂移——重跑 node tools/render-test-index.mjs')
+  assert.equal(current, rendered, 'tests/INDEX.generated.md 漂移——重跑 node tools/record/render-test-index.mjs')
   assert.ok(current.split('\n').filter((l) => l.startsWith('| ')).length >= 80, '索引行过少（防空语料）')
 })
 

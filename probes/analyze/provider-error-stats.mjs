@@ -9,7 +9,7 @@
 // provider-error-stats —— 上游流错误（回合被终结）的**跨场分布投影**（只读；run-ops 层）。
 //
 // 为什么存在：BUG-022 的缺陷在上游（vendor 只读、本仓修不了），本仓能做的三件里两件是"可复跑"——
-// ①数它（本件）②恢复它（`tools/run-kickoff.mjs --session`）。没有本件，复发时又得从零写正则猜
+// ①数它（本件）②恢复它（`tools/channel/run-kickoff.mjs --session`）。没有本件，复发时又得从零写正则猜
 // （作者第一版就把 JSON 键序写死 → 全库零命中，白查一轮）。
 //
 // 判据（"一次事故 = 一个被错误终结的回合"）与抽取**不在这里**：唯一语义源 =
@@ -78,6 +78,6 @@ if (JSON_OUT) {
   console.log('（某码出现在"请求重试"里 = 它已被拦截；这就是 MALFORMED_RESPONSE 缓解生效的判据）');
   if (unreadable.length > 0) console.log(`⚠ 日志不可读 ${unreadable.length} 份（坏帧/读失败，已排除在统计外）：${unreadable.slice(0, 5).join('、')}`);
   console.log('恢复程序与缺陷记录 = _backlog/_archived/suspended_bugs/BUG-022-provider-stream-malformed-turn-kill.md'
-    + '（恢复工具 = tools/run-kickoff.mjs --session，自带送达对账）。');
+    + '（恢复工具 = tools/channel/run-kickoff.mjs --session，自带送达对账）。');
 }
 process.exit(0);

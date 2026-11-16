@@ -2,7 +2,7 @@
 //
 // 为什么是纯函数库：真浏览器/通道侧无法进 tests（layering 守卫禁子进程与网络）——把
 // 驱动决策与成功裁决抽成"观察进、动作出"的纯函数，行为契约在这里钉死；浏览器适配层
-// （tools/hitl-answer.mjs）只做 IO 搬运，其正确性由策略函数 + 下一场 run 实测收口。
+// （tools/channel/hitl-answer.mjs）只做 IO 搬运，其正确性由策略函数 + 下一场 run 实测收口。
 //
 // 核心契约（正本 = _backlog/bugs/BUG-004-hitl-answer-submit-not-landing.md）：
 // ① UI 形状（卡头消失/题干更换）**永不**单独判"已提交"——多题卡 auto-advance 换题头
