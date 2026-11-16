@@ -24,7 +24,7 @@
     "test:vendor": "TSX_TSCONFIG_PATH=\"$(pwd -P)/tsconfig.json\" node --import tsx/esm --test --test-reporter=spec 'tests/vendor/*.vendor.spec.mjs'",
     "build": "pnpm --filter dsh-deep-research-pack build",
     "typecheck": "tsc -b packages/deep-research-pack --pretty false",
-    "release:check": "node checks/dist/release-check.mjs",
+    "release:check": "node checks/release/release-check.mjs",
     "dsh": "node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts",
     "test:coverage": "TSX_TSCONFIG_PATH=\"$(pwd -P)/packages/deep-research-pack/tsconfig.client.json\" node --import tsx/esm --test --experimental-test-coverage 'tests/run/**/*.spec.mjs' 'tests/cockpit/**/*.spec.mjs' 'tests/pack/**/*.spec.mjs' 'tests/contracts/**/*.spec.mjs'",
     "test:spec": "TSX_TSCONFIG_PATH=\"$(pwd -P)/packages/deep-research-pack/tsconfig.client.json\" node --import tsx/esm --test --test-reporter=spec 'tests/run/**/*.spec.mjs' 'tests/cockpit/**/*.spec.mjs' 'tests/pack/**/*.spec.mjs' 'tests/contracts/**/*.spec.mjs'",

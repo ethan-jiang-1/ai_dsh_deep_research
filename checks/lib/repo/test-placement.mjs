@@ -70,7 +70,7 @@ export function placementIssues(paths) {
     }
     if (domain === 'contracts') {
       if (seg.length !== 3 || !norm.endsWith('.spec.mjs')) {
-        issues.push(`${norm}: tests/contracts 只收平铺 *.spec.mjs（跨仓产品合同）`)
+        issues.push(`${norm}: tests/contracts 只收平铺 *.spec.mjs（产品级合同，跨 ≥2 面）`)
       }
       continue
     }

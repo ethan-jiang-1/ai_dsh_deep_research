@@ -9,7 +9,7 @@
 //   无 `lib/` 不重算源指纹（sender 的 `--handoff` 负责 freshness）。
 //   为什么：0.3.4 tag（ec652a30 / manual f41a6b）与次日 HEAD 重建的 _dist（manual eed98）
 //   同版本号却两套制品；默认模式与 dist-tarball 各自都绿，没人把 tag 与制品配对。
-// 用法：node checks/dist/release-check.mjs [--handoff|--receiver]
+// 用法：node checks/release/release-check.mjs [--handoff|--receiver]
 // 退出：0 = 通过；1 = 不一致；2 = 前置缺席（未跑 ≠ 通过）。
 import { readFileSync, existsSync } from 'node:fs'
 import { createHash } from 'node:crypto'
@@ -35,7 +35,7 @@ function main(argv = process.argv.slice(2)) {
   const handoff = argv.includes('--handoff') || receiver
   const unknown = argv.filter((a) => a !== '--handoff' && a !== '--receiver')
   if (unknown.length > 0) {
-    console.error(`release-check: 未知参数 ${unknown.join(' ')}（用法：node checks/dist/release-check.mjs [--handoff|--receiver]）`)
+    console.error(`release-check: 未知参数 ${unknown.join(' ')}（用法：node checks/release/release-check.mjs [--handoff|--receiver]）`)
     return 2
   }
   const inside = git(['rev-parse', '--is-inside-work-tree'])
@@ -65,10 +65,10 @@ function main(argv = process.argv.slice(2)) {
     }
     if (headTag === null) {
       console.log(`release-check: OK version=${packVersion}（HEAD 未打 tag）`)
-      console.log(`  发布前：git tag -a ${packVersion} -m "${packVersion}"，再跑 node checks/dist/release-check.mjs --handoff`)
+      console.log(`  发布前：git tag -a ${packVersion} -m "${packVersion}"，再跑 node checks/release/release-check.mjs --handoff`)
     } else {
       console.log(`release-check: OK version=${packVersion} tag=${headTag}（annotated）`)
-      console.log('  移交前：node checks/dist/release-check.mjs --handoff')
+      console.log('  移交前：node checks/release/release-check.mjs --handoff')
     }
     return 0
   }

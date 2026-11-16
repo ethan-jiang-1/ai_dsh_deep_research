@@ -85,7 +85,7 @@ export function runE() {
 // ── release-version（发布版本单一源：root 镜像 pack；tag 一致性由 release-check 在发布前查）──
 // 病根：仓库出现过 root 0.1.0 / pack 0.1.1 / tag 0.1.2 三套版本，发布时无法判断 tag 该对谁。
 // 规则正本 = docs/guides/64-release-versioning.md：发布版本 = pack version；root 必须镜像；
-// tag = 同版本 annotated。CI 不假定 tag 在场，故 tag 检查归 checks/dist/release-check.mjs。
+// tag = 同版本 annotated。CI 不假定 tag 在场，故 tag 检查归 checks/release/release-check.mjs。
 {
   const gate = 'release-version';
   const readVersion = (rel) => {
@@ -200,7 +200,7 @@ export function runE() {
   } else {
     const freshness = artifactFreshness(tarball, packInputRoots(PACK), { manifestPath });
     if (!freshness.fresh) {
-      fail(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 不是由当前 pack 源生成（${freshness.mode}: ${freshness.reason}）——发送方跑 node tools/release/export-dist.mjs 重建；接收方对账用 node checks/dist/release-check.mjs --receiver`);
+      fail(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 不是由当前 pack 源生成（${freshness.mode}: ${freshness.reason}）——发送方跑 node tools/release/export-dist.mjs 重建；接收方对账用 node checks/release/release-check.mjs --receiver`);
     }
   }
 }

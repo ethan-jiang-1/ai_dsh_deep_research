@@ -11,10 +11,10 @@
 
 | 目录 | 映射的源代码/面 | 放什么 |
 |---|---|---|
-| `run/` | run 通道、run 状态、HITL、run 门与审计、观察/回放、run-ops/probe | `checks/lib/<owner>/` 的回归；`run/` 内按 owner 分层（`analyze/` `gates/` `channel/` `harness/` `probes/` `shared/`），与源码同名 |
+| `run/` | run 通道、run 状态、HITL、run 门与审计、观察/回放、观测/probe | `checks/lib/<owner>/` 的回归；`run/` 内按 owner 分层（`analyze/` `gates/` `channel/` `harness/` `probes/` `shared/`），与源码同名 |
 | `cockpit/` | pack client 观察面与其折算 | `client/` = `src/client` 纯逻辑判据；`lib/` = pack `src/lib` 折算回归（组件行为归 client-load 真机档） |
 | `pack/` | pack 结构、preset、导出与部署 | `content/` `startup/` `defaults/` `fetch-fallback/` = 同名 surface；`scripts/` = pack 脚本；`contract/` = 包级产品合同（subject 只涉及本包）；presets/export/deploy 形状 |
-| `contracts/` | 跨仓**产品合同**（run bundle、版本呈现、方法映射等） | `*.spec.mjs`；清单 = 盘上 `contracts/` 目录 |
+| `contracts/` | **产品级合同**：断言同时钉 ≥2 个面（pack × run bundle × vendor/DSH 惯例 × 方法映射） | `*.spec.mjs` 平铺；与 `pack/contract/`（只涉及本包）二选一，判据看断言对象不看 import |
 | `checks/` | **门禁自身**与测试基础设施 | `*.test.mjs` 平铺；`pnpm test:checks` 只收这一层 |
 | `vendor/` | vendor **源码**契约（组合层 Loader、设置 schema） | 不在默认 glob；跑 `pnpm test:vendor`（根 tsconfig 源映射，fresh clone 无 vendor 构建可跑） |
 | `fixtures/` | 构造样本与冻结录制语料 | 测试/smoke 消费；taxonomy = [fixtures/README](fixtures/README.md) |

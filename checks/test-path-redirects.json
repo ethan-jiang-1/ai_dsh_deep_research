@@ -2592,11 +2592,6 @@
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
     },
     {
-      "from": "dev/vendor-host-typert.config.ts",
-      "to": "tools/build/vendor-host-typert.config.ts",
-      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
-    },
-    {
       "from": "dev/vendor-typert-emit.mjs",
       "to": "tools/build/vendor-typert-emit.mjs",
       "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
@@ -2639,11 +2634,6 @@
     {
       "from": "tools/vendor-host-bundle.config.ts",
       "to": "tools/build/vendor-host-bundle.config.ts",
-      "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
-    },
-    {
-      "from": "tools/vendor-host-typert.config.ts",
-      "to": "tools/build/vendor-host-typert.config.ts",
       "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
     },
     {
@@ -2724,6 +2714,7 @@
     {"from": "tests/run/ops/run-state.spec.mjs", "to": "tests/run/shared/run-state.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
     {"from": "tests/run/ops/session-log.spec.mjs", "to": "tests/run/shared/session-log.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
     {"from": "tests/run/ops/stream-failure.spec.mjs", "to": "tests/run/shared/stream-failure.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/tool-card.spec.mjs", "to": "tests/run/shared/tool-card.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"}
+    {"from": "tests/run/ops/tool-card.spec.mjs", "to": "tests/run/shared/tool-card.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
+    {"from": "checks/dist/release-check.mjs", "to": "checks/release/release-check.mjs", "reason": "2026-11-17 维护层对齐：checks/dist → checks/release（与 _dist 交付物去撞名）"}
   ]
 }

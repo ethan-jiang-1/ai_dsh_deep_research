@@ -6,6 +6,8 @@
 
 | 对象 | 当前决定 | 具体观察（出现位置） | owner |
 |---|---|---|---|
+| tests 合同桶改名（`tests/pack/contract` ↔ `tests/contracts` 撞词） | 暂不改名：包内 `AGENTS.md`/源码注释引用 test 路径，改名要同步改包内文档 → 已发布 0.3.6 的 tarball sha 会变（同版本不同工件） | 下一次 pack 版本变更（bump/release）时同 diff 改名；或包内文档不再引用 test 路径时 | [2026-11-17 维护层对齐 Note](../notes/implemented/2026-11-17-maintenance-layer-alignment.md) |
+| client-load.entry 拆分 | 暂不拆：1366 行 phase-oriented 浏览器 E2E，`script-file-size` 登记例外；phase map 在同文件里是当前可读性来源 | 新增 phase / 单次 diff 触及 ≥3 个 phase / 文件 >1600 行时拆（按 phase 边界，不按主题） | [维护层对齐 Note](../notes/implemented/2026-11-17-maintenance-layer-alignment.md) |
 | 自指测试资产的组合迁移 | 已显式可见（`asset-ledger` 由 AST 自动推导 `oracleType`）；先按失败类复发优先迁移，不再逐 bug 补例子 | 某个 `self-referential` 资产对应的失败类再次复发时，先迁移该资产；或季度组合复核时按 `oracleType` 排序 | [D55 补强 Note](../notes/implemented/2026-11-14-verification-oracle-hardening.md) · [补强卡](_archived/settled_issues/2026-11-14-verification-oracle-hardening.md) |
 | 改动面 → 必跑面的自动对账门（F3） | 暂缓：任务路由表尚未机读化，先把设计字段与收口门落地（D52） | 出现第二次「该跑的面没跑 / exit 2 未登记」的真实漏检，或路由表被改成机读 manifest 时，再立 F3 | [workflow-substance 卡](_archived/settled_issues/2026-11-13-workflow-substance-gates.md) |
 | 归档 bundle 的 readiness 新判据冲突 | 新判据下 8 个归档件的 review.md 读作「无法判定」；无活跃消费者，未删除、不追改（数据不可逆） | 任何归档 bundle 被重新 `run-accept`／需要重读 readiness 时：按新判据补 `review/readiness.json`，或按用户决定删除该 bundle；不为其加 epoch 豁免 | [迁移 I](_archived/settled_issues/2026-11-13-verdict-shape-migration.md) |

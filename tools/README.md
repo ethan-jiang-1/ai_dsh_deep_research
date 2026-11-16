@@ -37,7 +37,6 @@
 | build/bootstrap.sh | 独立环境冷启动前置（幂等）：Node/pnpm/git → submodule → install → vendor 构建 → env → 凭据/端口工具；`--check` 预检（不安装/不构建，仍会确保隔离 home 与 hooks 配置） |
 | build/vendor-build.sh | vendor 树构建：tsc host/client + typert 产物 + client bundle + host 半补建 + 前端壳 |
 | build/vendor-host-bundle.config.ts | host 半补建配置（逐包 tsdown，给缺 lib/index.js 的包补产物；非面管道件） |
-| build/vendor-host-typert.config.ts | host 半补建备选配置（留档；非面管道件） |
 | build/vendor-typert-emit.mjs | typert 产物生成器（非面管道件） |
 
 ## record/（录制与生成器）

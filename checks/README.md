@@ -1,10 +1,10 @@
 # checks/ · 职责索引
 
-> 维护面：**judge**——装裁决入口（`verify/`、`smoke/`、`run-gates/`、`dist/release-check`），
+> 维护面：**judge**——装裁决入口（`verify/`、`smoke/`、`run-gates/`、`release/release-check`），
 > 不装只读投影（→ `probes/`）与导出/清理（→ `tools/`）；非面支撑：`lib/` 是维护层公共库（judge/show/operate
 > 共享，按消费者域分组）、`test/` runner、support、配置 JSON 与消费者同根。组级面表见下，逐件例外 = [surface-contract](../docs/guides/68-surface-contract.md)。
 >
-> 职责分组：`verify/`、`smoke/`、`test/`、`run-gates/`、`dist/` + `lib/` 支撑库（show 件住 `probes/analyze/`、operate 件住 `tools/`——拆分后本目录只留 judge）；每个盘上入口一行：类 / 证明什么 / 档位。命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)；档位列申报凭据/调用模式，不替代 guides/60 的 `source` 前置；子树纪律 = [AGENTS.md](AGENTS.md)；测试资产分层 = [tests/fixtures taxonomy](../tests/fixtures/README.md)。本索引不改脚本路径与命令。
+> 职责分组：`verify/`、`smoke/`、`test/`、`run-gates/`、`release/` + `lib/` 支撑库（show 件住 `probes/analyze/`、operate 件住 `tools/`——拆分后本目录只留 judge）；每个盘上入口一行：类 / 证明什么 / 档位。命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)；档位列申报凭据/调用模式，不替代 guides/60 的 `source` 前置；子树纪律 = [AGENTS.md](AGENTS.md)；测试资产分层 = [tests/fixtures taxonomy](../tests/fixtures/README.md)。本索引不改脚本路径与命令。
 
 ## 维护面（组级）
 
@@ -16,7 +16,7 @@
 | `verify/` | judge | L0 结构门禁聚合；红 = 不放行 |
 | `smoke/` | judge（`*.support.mjs` 非面） | 断言红 = 证据面红；support 是夹具/支援件 |
 | `run-gates/` | judge | run bundle 机械门与审计 + 交付验收（run-accept / acceptance-check） |
-| `dist/` | judge | 发布前版本/tag 一致性（release-check） |
+| `release/` | judge | 发布前版本/tag 一致性（release-check） |
 | `test/` | 非面（runner） | 车道调度 |
 | `lib/` | 非面（实现） | 支撑库 |
 | 根面 | 非面（数据/文档） | 门禁消费的配置与登记簿、本索引、子树指令 |
@@ -91,11 +91,11 @@
 | run-accept.mjs | **交付验收原子动作**：node-gate（门 A/交付两门）+ evidence-audit（audit.md）+ verdict-audit（claim 覆盖）+ protocol-audit（Protocol 设计/`protocol-audit.md`）+ path-hygiene（新 bundle 本机 home 路径零容忍；旧 bundle --allow-legacy）+ 未来日期 sanity；预检 `--no-write` 红不写，绿才落盘 node-gate/audit + `delivered.json` + `manifest.json` + `acceptance.md`（回执生成/校验 = lib/run-receipt.mjs，新 run 非 quick_factual 的 reader 角色/哈希一并绑定；present 归一化为 `drt_<slug>/final/vN` 相对标签，语料根写 `$DSH_HOME` 相对标签；待写回执先校验再落盘，门禁/审计生成物落盘后复检；旧 bundle 只写 acceptance）；`--repair` 修历史回执的绝对路径（只动可再生产物）；`--archive` 才移入 archive/ | keyless（须先 source tools/env.sh） |
 | acceptance-check.mjs | **收活判据三态求值**：`<bundleDir> + <criteria.json>`（判据 = 委派方显式清单，仓内无落盘约定）→ 逐条 PASS/FAIL/UNVERIFIED 与汇总（"收活结论" 对账成机械事实；判据 = lib/acceptance-check.mjs）。退出码 = 0 全 PASS / 1 有 FAIL·UNVERIFIED·零判据 / 2 用法或前置错 | keyless |
 
-## run 观察（已迁 probes/analyze/）
+## run 观察 = probes/analyze/
 
 只读投影/诊断/回放件住探针目录：[probes/analyze/](../probes/analyze/)——面 = show，逐件表 = [probes/README](../probes/README.md) 与 [guides/66](../docs/guides/66-probe-playbook.md)；本索引不再列举。
 
-## dist/（发布前裁决）
+## release/（发布前裁决）
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|

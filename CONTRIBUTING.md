@@ -87,14 +87,14 @@ holds run data). The source handoff exporter writes only HEAD's tracked source a
 run data:
 
 ```sh
-node checks/dist/release-check.mjs --handoff
+node checks/release/release-check.mjs --handoff
 node tools/release/export-handoff.mjs --out /tmp/handoff
 node checks/smoke/handoff.e2e.mjs
 ```
 
 `release-check --handoff` must be green: the tag is annotated, points at HEAD, the worktree is
 clean, the manual sha equals the tarball sha, and the tarball matches the current pack source.
-On the receiving clean clone, `node checks/dist/release-check.mjs --receiver` verifies
+On the receiving clean clone, `node checks/release/release-check.mjs --receiver` verifies
 tag/manual/tarball/manifest alignment without recomputing the source fingerprint.
 
 Attach `_dist/dsh-deep-research-pack-<version>.tgz`, the installation manual, and

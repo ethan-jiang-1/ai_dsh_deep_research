@@ -338,7 +338,7 @@
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "script-file-size.spec.mjs — checks/ 的尺寸上限（2026-11-03 第 14 轮审计）。",
+      "uniqueClaim": "script-file-size.spec.mjs — 维护层入口脚本的尺寸上限（checks/tools/probes；2026-11-03 第 14 轮审计，2026-11-17 扩范围）。",
       "oracleType": "canonical",
       "sunset": "随门禁/台账合同退役"
     },

@@ -6,7 +6,7 @@
 // tag 与制品却从未被配对。本测试把配对判据钉成变异矩阵：每个输入错位都必须点名。
 //
 // 反证：本文件先于 `checks/lib/repo/release-anchor.mjs` 落地时红（模块缺席）；实现后绿。
-// 真实世界红证 = `node checks/dist/release-check.mjs --handoff` 在 0.3.4 树上失败
+// 真实世界红证 = `node checks/release/release-check.mjs --handoff` 在 0.3.4 树上失败
 // （tag 不指向 HEAD + 手册 sha 与 tag 制品不一致），0.3.5 锚定后绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'

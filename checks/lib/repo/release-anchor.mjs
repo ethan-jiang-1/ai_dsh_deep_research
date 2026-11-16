@@ -9,7 +9,7 @@
 // 边界：只判“发布锚”，不判包内容（`dist-tarball`/`pack-manifest` 管）；不读盘是刻意的，
 // `release-check` 负责取事实，测试直接喂矩阵。
 
-/** 三段 semver；与 checks/dist/release-check.mjs 及 release-version 门禁同形。 */
+/** 三段 semver；与 checks/release/release-check.mjs 及 release-version 门禁同形。 */
 export const SEMVER = /^\d+\.\d+\.\d+$/
 
 const problem = (code, message) => ({ code, message })
