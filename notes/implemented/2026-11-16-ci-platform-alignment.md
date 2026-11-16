@@ -4,7 +4,7 @@
 
 ## 决定
 
-- **push 门禁只跑 keyless**：`.github/workflows/ci.yml` 只剩 `keyless`（verify / test / coverage / vendor 契约 / 门禁自测 / handoff / run-accept），聚合器 `all-checks-passed.needs = [keyless]`；实测整轮约 2 分钟。
+- **push 门禁 = verify + test 两件事**：`.github/workflows/ci.yml` 只剩 checkout/装依赖 + `pnpm verify` + `pnpm test`；coverage、vendor 源码契约、门禁自测（gates.e2e）、handoff、run-accept 与全部安装/浏览器/回放冒烟进 `nightly.yml`。实测 push 轮次 ~2 分钟（checkout + Node/pnpm + install ≈ 75s，verify 3s，test 35s）。
 - **慢证据进 `nightly.yml`**（每日 02:17 + `workflow_dispatch`）：`deploy`（vendor 构建 / typecheck / preset / export-dist / lifecycle / doctor / tarball）+ `client-load`（真浏览器）+ `snapshot-replay`（回放 A/B），自带聚合器。失败不阻塞 push，但以独立工作流红呈现。
 - **vendor 构建按 pin 缓存**：构建产物是 gitignored 的（fresh checkout 没有），但产物只由子模块 pin 决定——nightly 三个 job 都先 `git rev-parse HEAD:vendor/dsh` 取 pin，用 `actions/cache` 以 `vendor-<pin>` 为键缓存 `packages/*/*/lib`、`vendor/*/lib`、`apps/web/dist`；命中即跳过约 3.5 分钟的构建。
 - **CI 执行面 = ci.yml ∪ nightly.yml**：契约测试（smoke-registry / ci-jobs / ci-workflow）按并集判定「某个 smoke 是否在 CI 执行」，既允许频率分层，又不许任何冒烟无声消失。

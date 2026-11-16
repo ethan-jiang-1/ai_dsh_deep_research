@@ -56,30 +56,6 @@ jobs:
       # 覆盖率是观察面、不设阈值；但命令本身必须真能跑（2026-11-04 实证：
       # test:coverage 缺 TSX_TSCONFIG_PATH，4 个 views 测试红而 pnpm test 绿）。
       # 契约侧由 layering ④b 钉共享前缀，这一步提供真实执行证据。
-      - name: Coverage command (observational)
-        run: source dev/env.sh && pnpm test:coverage
-
-      # 这两条契约 import vendor **源码**（组合层 Loader / 设置 schema）。默认 test 用
-      # client tsconfig（paths 置空 → vendor 包解析到构建产物 lib/）；本步用根 tsconfig
-      # 的 vendor 源路径映射，fresh clone 无 vendor 构建也能跑。
-      - name: Vendor-source contracts (root tsconfig)
-        run: pnpm test:vendor
-
-      # 类型面不在 keyless job：`pnpm typecheck` 要 vendor 构建产物（dev/vendor-build.sh），
-      # 而 keyless 的契约是 fresh clone 无构建也能跑。类型门在 deploy job（同一 push/PR 触发）
-      # 的 vendor 构建之后执行，覆盖等价、不把构建成本摊到每次回归。
-      # 门禁自测：注入案例 + 对照，经真实 verify 入口判红/判绿。此前只住在
-      # "改 verify 必跑"的散文里——CI 上永不执行，门禁钝化只能在本地被发现。
-      - name: Gate self-tests (injected regressions must be named red)
-        run: source dev/env.sh && node scripts/smoke/gates.e2e.mjs
-
-      # 源码移交：产物边界 + HANDOFF 接收指令；git archive HEAD，无网络/模型依赖
-      - name: Source handoff (artifact boundary + recipient instructions)
-        run: source dev/env.sh && node scripts/smoke/handoff.e2e.mjs
-
-      # 交付回执链（合成 bundle + 合成会话日志，真 CLI）：归一/幂等/外部 present/秘密/repair
-      - name: Receipt chain (run-accept end-to-end)
-        run: source dev/env.sh && node scripts/smoke/run-accept.e2e.mjs
 
   all-checks-passed:
     name: all checks passed
