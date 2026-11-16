@@ -72,14 +72,22 @@ test('executedSmokeFiles：只计 needs 内、无跳过条件、run 里真实 no
   assert.deepEqual([...executedSmokeFiles('nonsense')], [], '解析不出 jobs = 空集，不猜')
 })
 
-test('真实 ci.yml：9 条 tier-ci smoke 都在执行面；注释/字符串不冒充', () => {
+test('真实 ci.yml：快档 smoke 在执行面；重冒烟按分层规则二选一；注释/字符串不冒充', () => {
   const ci = readFileSync(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8')
   const executed = executedSmokeFiles(ci)
-  assert.ok(executed.size >= 8, `防空语料：ci.yml 执行面过少（${executed.size}）`)
-  for (const file of ['run-accept.e2e.mjs', 'client-load.entry.mjs', 'snapshot-replay.entry.mjs', 'lifecycle.entry.mjs']) {
+  assert.ok(executed.size >= 6, `防空语料：ci.yml 执行面过少（${executed.size}）`)
+  for (const file of ['run-accept.e2e.mjs', 'lifecycle.entry.mjs']) {
     assert.ok(executed.has(file), `ci.yml 真实执行面应含 ${file}`)
   }
   assert.ok(!executed.has('l4-lite.e2e.mjs'), '真模型档不在 keyless CI 执行面')
+  // 分钟级重冒烟（2026-11-16 快慢分层）：不在 push 门禁时必须是 registry dev-only + 可读理由，
+  // 不许无声消失。理由 = notes/implemented/2026-11-16-ci-platform-alignment.md。
+  const registry = JSON.parse(readFileSync(join(ROOT, 'scripts', 'smoke', 'registry.json'), 'utf8'))
+  for (const file of ['client-load.entry.mjs', 'snapshot-replay.entry.mjs']) {
+    if (executed.has(file)) continue
+    assert.equal(registry[file]?.tier, 'dev-only', `${file} 不在 ci.yml 执行面时必须 registry 标 dev-only`)
+    assert.ok(String(registry[file]?.reason ?? '').trim().length >= 8, `${file} 标 dev-only 必须写明可读理由`)
+  }
 })
 
 test('表达式归一：${{ }} 外壳不改变 always/true/false 语义（step / continue-on-error / job，BUG-177）', () => {

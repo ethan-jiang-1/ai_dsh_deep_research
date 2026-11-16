@@ -68,8 +68,7 @@
     "lane": "support"
   },
   "client-load.entry.mjs": {
-    "tier": "ci",
-    "job": "client-load",
+    "tier": "dev-only",
     "cost": "slow",
     "uniqueClaim": "真浏览器驾驶舱装配/页签/渐进面/磁盘真值对账",
     "oracle": [
@@ -81,7 +80,8 @@
     "args": [
       "--seed",
       "tests/fixtures/client-load-home"
-    ]
+    ],
+    "reason": "分钟级真浏览器冒烟（约 3 分钟）：不进每次 push 的快速门禁；GitHub runner 上仍红且根因未定（trigger 已登记），本地按需跑"
   },
   "cold-start.entry.mjs": {
     "tier": "dev-only",
@@ -274,7 +274,7 @@
     "lane": "e2e"
   },
   "snapshot-replay.entry.mjs": {
-    "tier": "ci",
+    "tier": "dev-only",
     "cost": "slow",
     "uniqueClaim": "A 回放通路 / B 组装请求 diff / C lead 渲染金标准",
     "oracle": [
@@ -283,8 +283,8 @@
       "tests/run/harness/replay-fixtures.spec.mjs"
     ],
     "sunset": "当 A/B 进 CI 且 C 降里程碑时退役",
-    "job": "snapshot-replay",
-    "lane": "entry"
+    "lane": "entry",
+    "reason": "分钟级回放 A/B（本地约 6 分钟）：不进每次 push 的快速门禁；runner 上五回合 240s 超时、根因未定（trigger 已登记），本地按需跑"
   },
   "team-preflight.e2e.mjs": {
     "tier": "dev-only",

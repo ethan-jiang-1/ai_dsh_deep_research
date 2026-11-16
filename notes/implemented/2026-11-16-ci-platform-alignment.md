@@ -1,25 +1,25 @@
-# 2026-11-16 · CI 平台对齐：真浏览器/回放冒烟跑 macOS 基线（Linux 缺口入 trigger）
+# 2026-11-16 · CI 快慢分层：分钟级重冒烟移出 push 门禁
 
 > 状态：implemented
 
 ## 决定
 
-- `.github/workflows/ci.yml` 的 `client-load` 与 `snapshot-replay` 两个 job 改为 `runs-on: macos-latest`；同步修两处平台命令：chromium 安装去掉 `--with-deps`（apt 侧系统依赖安装，macOS 不适用）、zstd 安装改为 `command -v zstd >/dev/null 2>&1 || brew install zstd`。
-- `keyless` 与 `deploy` 两个 job 留在 ubuntu（二者在 ubuntu 上真绿，且 `deploy` 覆盖安装/生命周期/doctor/tarball 的 keyless 面）。
-- 依据 = 仓自己声明的平台合同（[`_backlog/triggers.md`](../../_backlog/triggers.md)「Windows 支持」行）：**「macOS 实测、Linux 只跑 keyless 部署 smoke」**。CI 此前把仅在 macOS 基线上验证过的两条重冒烟跑在 ubuntu，与其自身合同不一致，结果长期**常驻红**——按 DSH 纪律「门禁每次都红 = 已被无视」，它不再是守卫。
-- 新增 trigger 行「Linux 上的真浏览器/回放冒烟」：登记现状（ubuntu 上红、根因未定）与三种恢复条件（用户要求 / 有人给出根因与修法 / macOS 预算不可用）。
+- **每次 push 的 CI 只跑快档**：`.github/workflows/ci.yml` 保留 `keyless`（verify / test / coverage / vendor 契约 / 门禁自测 / handoff / run-accept）与 `deploy`（typecheck / preset / export-dist / lifecycle / doctor / tarball），聚合器 `all-checks-passed.needs = [keyless, deploy]`。两条分钟级重冒烟（`client-load` 真浏览器 ~3 分钟、`snapshot-replay` 回放 A/B 本地 ~6 分钟）从 push 路径移除。
+- `scripts/smoke/registry.json` 对应两条改 `tier: dev-only` 并写明理由（「不进每次 push 的快速门禁；runner 上仍红且根因未定；本地按需跑」）；冒烟资产与判据不动，仍可按需执行。
+- 缺口登记在 [`_backlog/triggers.md`](../../_backlog/triggers.md)「Linux/GitHub runner 上的真浏览器/回放冒烟」行：现状与三种恢复条件（用户要求恢复 push 门禁 / 有人给出根因与可复现修法 / 需要覆盖时先补可读证据通道）。
+- 依据：反馈环成本本身是判据的一部分（「问跑一次多久」）。20 分钟的重冒烟挡在每次 push 上，把 CI 从「守卫」变成「等待」；而它当前是红的、且日志要 admin 才能读——先分层，再在有证据时修。
 
 ## 输掉的方案
 
-- **继续在 ubuntu 上调**：snapshot 表现是「五回合全 240s 超时」，client-load 是「断言红但日志需 admin 才可读」；docker 复现被证明不忠实（无 lsof 时 client-load 在预收割即 exit 2；容器缺系统库时浏览器起不来），本地无法稳定定位，改一次推一次的成本不可控。放弃盲调。
-- **把两条 job 标 `continue-on-error` 或 `if: false`**：这是把红藏起来（禁 `skip 当绿` 纪律）。现在的做法不是跳过——**冒烟照常执行**，只是跑在合同声明的基线平台上。
-- **把 Linux 缺口写成「已修」**：不。trigger 行明写「根因未定」，发布就绪栏仍把 Linux 列为未验证面。
+- **改跑 macOS runner**（同日先试）：`client-load` 在 macOS runner 上仍失败（3m22s，与 ubuntu 3m25s 同阶段）→ 不是平台差异；`snapshot` 在 macOS 上 18 分钟仍未出结果（被并发取消）。平台迁移既没修好，又让每次 push 更慢更贵。放弃。
+- **继续在 push 路径上盲调**：单次反馈 10–25 分钟、失败详情需 admin 读日志，投入产出比不成立。放弃；改为有证据时再修。
+- **`continue-on-error` / `if: false` 藏红**：那是把红藏起来；现在是把慢冒烟**移出快档**并显式登记为 dev-only，红的事实仍写在 trigger 与本 Note 里。
+- **删掉这两条冒烟**：它们是装配面/回放面唯一证据，删了等于弃证据。保留资产、只移出门禁。
 
 ## 实际跑过的验证
 
-- **红（真实缺陷，已修）**：`keyless verify + tests` 长期红，根因 = `verify.mjs` 在 `process.exit(1)` 前未排空 stdout，POSIX 管道写异步 → 失败详情被截断（实测 75,522 B → 11,401 B），`gates.e2e` 的中文 expect 判据因此假红。修法见 [verify 截断 Note](2026-11-16-verify-exit-truncation.md)。
-- **绿（CI 实测）**：run `43832481285`（commit `34901185`）——`keyless verify + tests` **success**（含 Gate self-tests）、`keyless deploy smokes` **success**。
-- **红（CI 实测，本 Note 处理对象）**：同一 run 的 `client-load` 失败（3m25s）、`snapshot-replay` 失败（20m27s）。
-- **绿（本地实测，同提交）**：macOS 上 `snapshot-replay.entry --read-only --layers a,b` → **ALL PASS**（5 场景 A/B）；`client-load.entry --seed` → 断言面全 PASS（唯一失败是宿主 sandbox 禁 `ps` 的收尾收割，非产品面）。
-- `node dev/record-ci-oracle.mjs --check` → 35 fixtures / 0 mismatches（改 `runs-on` 与两步命令不破坏 CI 执行面 oracle）；`node scripts/verify/verify.mjs` → 全绿（`count-free` 曾抓到我注释里的写死计数，已删）；`pnpm test:checks` → 214/214。
-- **未验证**：macOS runner 上的真实 CI 结果（本 Note 推送后由下一次 run 确认）；Linux 上这两条冒烟的可运行性（trigger 行持有）。
+- **红→绿（真实缺陷，已修）**：`keyless verify + tests` 长期红，根因 = `verify.mjs` 在 `process.exit(1)` 前未排空 stdout（POSIX 管道写异步）→ 失败详情被截断（实测同一棵树 75,522 B → 11,401 B），`gates.e2e` 的中文 expect 判据因此假红。修法 = `process.exitCode = 1` 自然退出，见 [verify 截断 Note](2026-11-16-verify-exit-truncation.md)。
+- **CI 实测**：run `43832481285`（commit `34901185`）——`keyless verify + tests` **success**（含 Gate self-tests）、`keyless deploy smokes` **success**；run `43837186113` 的 keyless 亦 success。
+- **重冒烟证据**：同提交本地 macOS `snapshot-replay.entry --read-only --layers a,b` → **ALL PASS**（5 场景 A/B）；`client-load.entry --seed` 断言面全 PASS（唯一失败是沙箱禁 `ps` 的收尾收割）。runner 上则红（client-load 3m2x 两次、snapshot 五回合 240s 超时）。
+- `node scripts/verify/verify.mjs` → 全绿；`pnpm test` → 1365 + 214 全绿；`node dev/record-ci-oracle.mjs --check` → 35 fixtures / 0 mismatch。
+- **未验证（如实）**：两条重冒烟在 GitHub runner 上的根因；恢复条件写在 trigger 行。

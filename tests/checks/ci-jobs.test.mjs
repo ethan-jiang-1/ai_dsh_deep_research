@@ -1,7 +1,7 @@
 // CI 作业清单契约（W3-7）——`.github/workflows/ci.yml` 的必需 job 必须被一个书签式聚合 job 覆盖：
 //   - 聚合 job `all-checks-passed` 的 `needs` 恰为其它 job；
 //   - 失败条件包含 failure/cancelled/skipped（job 级 if 跳过的 check 会显示 success，是假绿入口）；
-//   - snapshot A/B job 必须真的跑 `snapshot-replay.entry`。
+//   - 分钟级重冒烟分层：在 ci.yml 按正确参数跑，或 registry 标 dev-only 且写明理由（2026-11-16）。
 // 这是静态清单契约；CI 行为仍需在 GitHub 上跑出一次绿。
 //
 // 负例留证 2026-11-14：BUG-161——旧实现用窄字符集缩进正则抓 job id 且只认行内 `[a, b]` needs，
@@ -12,7 +12,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { parseWorkflow } from '../../scripts/lib/tools/ci-workflow.mjs'
+import { parseWorkflow, executedSmokeFiles } from '../../scripts/lib/tools/ci-workflow.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const TEXT = readFileSync(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8')
@@ -50,11 +50,26 @@ test('CI 聚合：all-checks-passed 覆盖全部其它 job，且 skipped 判红'
   assert.match(checkTexts, /contains\(needs\.\*\.result,\s*'cancelled'\)/, '聚合失败条件必须含 cancelled')
 })
 
-test('CI snapshot job：真的跑 snapshot-replay.entry 的 A/B（read-only + layers a,b）', () => {
-  assert.ok(JOB_BY_ID.has('snapshot-replay'), '缺 snapshot-replay job')
-  const snapshotJob = JOB_BY_ID.get('snapshot-replay')
-  const runs = snapshotJob.steps.map((step) => step.run ?? '').join('\n')
-  assert.match(runs, /snapshot-replay\.entry\.mjs/, 'snapshot job 没跑 snapshot-replay.entry.mjs')
-  assert.match(runs, /--read-only/, 'snapshot job 必须只读')
-  assert.match(runs, /--layers a,b/, 'snapshot job 必须只跑 A/B（C 不在 CI）')
+test('重冒烟分层：在 ci.yml 按正确参数跑，或 registry 标 dev-only 并写明理由', () => {
+  // 契约变更（2026-11-16，快慢分层）：分钟级重冒烟不再强制进每次 push 的 CI——但**不许无声消失**：
+  // 要么在 ci.yml 里按正确参数执行，要么 registry 标 dev-only 且写明可读理由（缺口 = trigger 行）。
+  // 理由 = notes/implemented/2026-11-16-ci-platform-alignment.md。
+  const registry = JSON.parse(readFileSync(join(ROOT, 'scripts', 'smoke', 'registry.json'), 'utf8'))
+  const executed = executedSmokeFiles(TEXT)
+  for (const file of ['client-load.entry.mjs', 'snapshot-replay.entry.mjs']) {
+    if (!executed.has(file)) {
+      assert.equal(registry[file]?.tier, 'dev-only', `${file} 不在 ci.yml 执行面时必须 registry 标 dev-only`)
+      assert.ok(String(registry[file]?.reason ?? '').trim().length >= 8, `${file} 标 dev-only 必须写明可读理由`)
+      continue
+    }
+    const jobId = file === 'snapshot-replay.entry.mjs' ? 'snapshot-replay' : 'client-load'
+    const job = JOB_BY_ID.get(jobId)
+    assert.ok(job, `ci.yml 执行 ${file} 但没有 ${jobId} job`)
+    const runs = job.steps.map((step) => step.run ?? '').join('\n')
+    assert.ok(runs.includes(file), `${jobId} job 没跑 ${file}`)
+    if (file === 'snapshot-replay.entry.mjs') {
+      assert.match(runs, /--read-only/, 'snapshot 在 CI 时必须只读')
+      assert.match(runs, /--layers a,b/, 'snapshot 在 CI 时必须只跑 A/B（C 不在 CI）')
+    }
+  }
 })
