@@ -1,5 +1,5 @@
 // run-accept 交付门接线 — 静态契约：path-hygiene 必须在预检里，且旧 bundle 走显式豁免。
-// 运行期行为由 scripts/run-gates/path-hygiene.mjs 的 fixture 测试与 run-accept 预检共同承担；
+// 运行期行为由 checks/run-gates/path-hygiene.mjs 的 fixture 测试与 run-accept 预检共同承担；
 // 本文件只防“改了验收流程忘了接入”的静默回退。
 // 负例留证 2026-10-27：BUG-044——把 run-accept 的 scanHomePaths 写前校验与 postHygiene 复检删掉，
 // 本文件「回执文本写盘前校验 + 落盘后复检」测红；修前把 buildDelivered 的 portableBundlePath
@@ -11,7 +11,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
-const src = readFileSync(join(ROOT, 'scripts', 'run-gates', 'run-accept.mjs'), 'utf8')
+const src = readFileSync(join(ROOT, 'checks', 'run-gates', 'run-accept.mjs'), 'utf8')
 
 test('run-accept：path-hygiene 在预检中，且预检红包含它', () => {
   assert.match(src, /path-hygiene\.mjs/, 'run-accept 未调用 path-hygiene')

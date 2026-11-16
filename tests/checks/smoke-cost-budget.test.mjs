@@ -8,10 +8,10 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { smokeFiles, smokeSurfaceIssues } from '../../scripts/lib/test-infra/smoke-assets.mjs'
+import { smokeFiles, smokeSurfaceIssues } from '../../checks/lib/test-infra/smoke-assets.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const SMOKE = join(ROOT, 'scripts', 'smoke')
+const SMOKE = join(ROOT, 'checks', 'smoke')
 const registry = JSON.parse(readFileSync(join(SMOKE, 'registry.json'), 'utf8'))
 const entries = Object.entries(registry)
 const ci = entries.filter(([, e]) => e.tier === 'ci')
@@ -22,7 +22,7 @@ const CAP = { ci: 9, ciSlow: 3, slow: 15 }
 
 test('慢资产预算 ratchet：CI 入口 / CI slow / 全部 slow 不超上限', () => {
   const issues = smokeSurfaceIssues(SMOKE)
-  assert.deepEqual(issues, [], `scripts/smoke 只许顶层普通文件：${issues.join('；')}`)
+  assert.deepEqual(issues, [], `checks/smoke 只许顶层普通文件：${issues.join('；')}`)
   const onDisk = smokeFiles(SMOKE)
   for (const file of Object.keys(registry)) assert.ok(onDisk.includes(file), `${file} 在 registry，但盘上不是顶层 smoke 文件`)
   assert.ok(ci.length <= CAP.ci, `CI 入口 ${ci.length} > ${CAP.ci}——新增 CI 资产先退役/合并一个，或按 D54 改预算`)

@@ -1,7 +1,7 @@
-// frontmatter 拆分契约（keyless 纯函数）——`scripts/lib/shared/frontmatter.mjs` 的直测。
+// frontmatter 拆分契约（keyless 纯函数）——`checks/lib/shared/frontmatter.mjs` 的直测。
 //
 // 为什么补（2026-10-27 卫生轮 维度5）：本件是 run-dashboard-core 与 evidence-audit-core 的共同
-// 依赖（两个 core 各持逐字副本的历史已在 2026-10-16 收敛），但 52 个 scripts/lib 模块里它属于
+// 依赖（两个 core 各持逐字副本的历史已在 2026-10-16 收敛），但 52 个 checks/lib 模块里它属于
 // 唯一被两个消费者间接覆盖、自己**零直测**的纯件——头注的四条契约（首个 `---` 块 / 单行标量 /
 // 重复键后者覆盖 / 无 frontmatter 返回 null）此前没有一条断言。纯件的契约不钉在纯件上，
 // 下一次"帮它加点宽容"就会从两个消费者的失败里才被发现。
@@ -9,7 +9,7 @@
 // 故这里的断言也只覆盖拆分形态，不覆盖"该不该判红"。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { splitFrontmatter } from '../../../scripts/lib/shared/frontmatter.mjs'
+import { splitFrontmatter } from '../../../checks/lib/shared/frontmatter.mjs'
 
 test('基本形态：首个 --- 块拆成扁平映射，body 保留其后全文', () => {
   const { fm, body } = splitFrontmatter('---\nslug: drt_demo\nstatus: 交付\n---\n\n# 标题\n正文\n')

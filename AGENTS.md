@@ -37,7 +37,7 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 ```
 CLAUDE.md→AGENTS.md、.claude/skills→.agents/skills    两条 symlink（编辑真文件；后者让 Claude 系
                          harness 发现同一批开发技能——verify 门禁 claude-symlink 校验）
-子树 AGENTS.md            docs/ · scripts/ · notes/ · packages/deep-research-pack/ · tests/ · _backlog 各一份——只放该
+子树 AGENTS.md            docs/ · checks/ · notes/ · packages/deep-research-pack/ · tests/ · _backlog 各一份——只放该
                          子树的指令（根只放每轮常驻指令；vendor 树内多份同构，份数以盘上为准）
 README.md                 人类门面（使用者：结果 / 安装 / 第一次研究；开发者一行路由；完整安装合同 = _dist/安装手册.md）
 _backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archived/（另有
@@ -55,17 +55,17 @@ notes/                   开发记忆与证据链（见下节）：proposed/（�
                          立项来历 = notes/README §立项来历（台账只做路由、理由归 Note，D56）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
                          （换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷）；与随包 runtime skills（presets/*/skills/）分家
-probes/                  show · 调试第一入口（behavior / browser / run 三域 + stream 仪器；_index 是生成器、stream tee 是驱动——非面）：真实边界实验（behavior/browser）与只读取证投影（run/）；指南 = docs/guides/66，索引 = probes/INDEX.generated.md（生成物），面合同 = docs/guides/68
-scripts/                  judge（+ 非面支撑）：verify/、smoke/（*.e2e.mjs / *.entry.mjs）、run-gates/（含 run-accept / acceptance-check）、dist/（release-check）；非面 = test/（车道 runner）、lib/、*.support.mjs、配置 JSON——组级面表与逐件职责/档位 = scripts/README.md，面规则 = docs/guides/68
+probes/                  show · 证据第一入口（behavior / browser / analyze 三域 + stream 仪器；_index 是生成器、stream tee 是驱动——非面）：真实边界实验（behavior/browser）与只读取证投影（analyze/）；不装裁决与持久改动；指南 = docs/guides/66，索引 = probes/INDEX.generated.md（生成物），面合同 = docs/guides/68
+checks/                  judge（+ 非面支撑）：verify/、smoke/（*.e2e.mjs / *.entry.mjs）、run-gates/（含 run-accept / acceptance-check）、dist/（release-check）；非面 = test/（车道 runner）、lib/、*.support.mjs、配置 JSON——组级面表与逐件职责/档位 = checks/README.md，面规则 = docs/guides/68
 tests/                   keyless 回归（node:test；*.spec.mjs = 进程内 spec，checks/*.test.mjs = 门禁自身；layering 守卫五件套——规则见 tests/AGENTS.md）
 snapshots/               场景证据层：整组录制资产 + 场景声明 snapshot.json（消费 = snapshot-replay.entry
-                         经 scripts/lib/harness/replay-scene.mjs）；分类与证据边界 = snapshots/README.md
-dev/                     源码驱动与 run 通道（operate：run+act；hooks/ 是 judge）：env.sh（双 home + 裸 dsh 拦截 + pre-commit 挂载）、vendor-build.sh（vendor 树构建）、render-overlay（tracked 生成物生成器：overlay）、boot-run.sh（run 通道开跑，自 source dev/env.sh）/ run-driver.mjs（通道驱动与呈交，内部调 boot-run）、run-kickoff / hitl-answer（会话驱动与 HITL 代答）、record-role-fixture（fixture 录制）、research.overlay.yml（**生成物**，勿手改）、hooks/（pre-commit 红灯拦 commit）、release/（export-dist / market / export-handoff / 手册源）、runtime-clean（运行区清理）——逐件职责 = dev/README.md，面规则 = docs/guides/68
+                         经 checks/lib/harness/replay-scene.mjs）；分类与证据边界 = snapshots/README.md
+tools/                     源码驱动与 run 通道（operate：run+act；hooks/ 是 judge）：env.sh（双 home + 裸 dsh 拦截 + pre-commit 挂载）、vendor-build.sh（vendor 树构建）、render-overlay（tracked 生成物生成器：overlay）、boot-run.sh（run 通道开跑，自 source tools/env.sh）/ run-driver.mjs（通道驱动与呈交，内部调 boot-run）、run-kickoff / hitl-answer（会话驱动与 HITL 代答）、record-role-fixture（fixture 录制）、research.overlay.yml（**生成物**，勿手改）、hooks/（pre-commit 红灯拦 commit）、release/（export-dist / market / export-handoff / 手册源）、runtime-clean（运行区清理）——逐件职责 = tools/README.md，面规则 = docs/guides/68
 runtime/                 运行态区（gitignored）：harness-home/（开发 DSH home：会话/凭据/插件安装）+
-                         smoke-workspace/（冒烟与 boot 运行产物）——dev/ 只住源码驱动，跑出来的东西住这里
-_dist/                   对外交付件：安装手册.md（tracked 生成物，生成器 = dev/release/export-dist.mjs）
+                         smoke-workspace/（冒烟与 boot 运行产物）——tools/ 只住源码驱动，跑出来的东西住这里
+_dist/                   对外交付件：安装手册.md（tracked 生成物，生成器 = tools/release/export-dist.mjs）
                          + 打包 tgz（gitignore）
-（布局 = 骨架图，非全量清单——scripts/dev 全档工具与逐命令说明 = guides/60 §2；
+（布局 = 骨架图，非全量清单——checks/tools 全档工具与逐命令说明 = guides/60 §2；
   _backlog 细构[问题、方法、调研与归档] = _backlog/README.md）
 ```
 
@@ -83,14 +83,14 @@ implemented/archived/rejected；事故复盘在 archived/）；写入触发/取�
 ## 命令速查（全档正本 = [guides/60 §2](docs/guides/60-dev-loop.md)；run 通道 = [guides/61](docs/guides/61-run-playbook.md)）
 
 ```sh
-source dev/env.sh    # ⚠ fresh clone 首次（激活 hooks）与 L1/L2、部分 run-gates/probes 件需先 source；run 通道 dev/boot-run.sh 自 source，勿重复。作用：双 home（DSH_HOME=runtime/harness-home）+ pre-commit + 裸 dsh 拦截；未 source 的脚本自拒 exit 2；口径 = guides/60 §2
+source tools/env.sh    # ⚠ fresh clone 首次（激活 hooks）与 L1/L2、部分 run-gates/probes 件需先 source；run 通道 tools/boot-run.sh 自 source，勿重复。作用：双 home（DSH_HOME=runtime/harness-home）+ pre-commit + 裸 dsh 拦截；未 source 的脚本自拒 exit 2；口径 = guides/60 §2
 pnpm verify          # L0 结构门禁（keyless，收尾必跑）
 pnpm test            # L0 keyless 聚合（spec + checks；分车道 = test:spec / test:checks / test:e2e / test:entry；vendor = test:vendor）
-node dev/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏览器面 + 呈交 URL；操作 = guides/61 §0）
+node tools/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏览器面 + 呈交 URL；操作 = guides/61 §0）
                              # 启动次序固定 = profile → plugin add(roster) → dsh --profile → 工作区/会话；别手起 dsh、别自创启动路径
 ```
 
-搜索先限定 `packages/`、`tests/`、`scripts/`、`docs/`；`vendor/`、`runtime/`、`packages/*/lib/` 是生成物/运行区，别全仓 grep。
+搜索先限定 `packages/`、`tests/`、`checks/`、`docs/`；`vendor/`、`runtime/`、`packages/*/lib/` 是生成物/运行区，别全仓 grep。
 
 其余全档（L1 挂载 / L2 安装 / L4-lite / run 通道 / 观察面 / 部署 bin）与逐命令说明 = [guides/60 §2](docs/guides/60-dev-loop.md)；档位与密钥 = 下节。
 
@@ -98,7 +98,7 @@ node dev/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏览器面 
 
 档位词汇：**keyless** = 无凭据可跑；preset.e2e 真挂载档无模型调用、不需要 key。
 release.entry 无模型调用，安装验收使用 `--install-only` 跳过模型就绪检查；默认 preflight 仍检查凭据在场；
-**真模型档** = 需凭据并调用模型；`scripts/` 入口 closed set 正本 = [smoke-contract](tests/checks/smoke-contract.test.mjs)（成员清单 = 该测试的 REAL_MODEL；本行不复制名单）。`dev/record-role-fixture.mjs` 是单独录制工具，完整研究 run 属 L4，均不在该脚本闭集中；档位与验收面见[项目地图](docs/project-map.md)。CDP `--ask` 按当前会话档处理（模式表 = [项目地图](docs/project-map.md)）。
+**真模型档** = 需凭据并调用模型；`checks/` 入口 closed set 正本 = [smoke-contract](tests/checks/smoke-contract.test.mjs)（成员清单 = 该测试的 REAL_MODEL；本行不复制名单）。`tools/record-role-fixture.mjs` 是单独录制工具，完整研究 run 属 L4，均不在该脚本闭集中；档位与验收面见[项目地图](docs/project-map.md)。CDP `--ask` 按当前会话档处理（模式表 = [项目地图](docs/project-map.md)）。
 
 L4-lite 真模型冒烟需要 `DEEPSEEK_API_KEY`：开发 home（`runtime/harness-home/.credentials.yaml`）配一次
 即可，永不提交密钥；web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙（实证：vendor `packages/bundle/base/cordis.patch.yml` 的 web-search-deepseek 行）。
@@ -107,7 +107,7 @@ L4-lite 真模型冒烟需要 `DEEPSEEK_API_KEY`：开发 home（`runtime/harnes
 
 | 实体 | 位置 | 角色 |
 |---|---|---|
-| ① 开发基线（唯一权威） | `vendor/dsh/`（本仓 pinned submodule，tag `dsh-v0.2.1-rc.5` @ `b830ec950f`，只读铁律——verify vendor-pin/vendor-clean 把守） | 机制核对与验证会话一律走它（dev/env.sh 的 dsh 函数与 `pnpm dsh` 从此处源码起） |
+| ① 开发基线（唯一权威） | `vendor/dsh/`（本仓 pinned submodule，tag `dsh-v0.2.1-rc.5` @ `b830ec950f`，只读铁律——verify vendor-pin/vendor-clean 把守） | 机制核对与验证会话一律走它（tools/env.sh 的 dsh 函数与 `pnpm dsh` 从此处源码起） |
 | ② 日用全局安装 | npm 全局（`which dsh`） | 与本 repo 开发无关；版本随全局漂移，行为不作机制依据 |
 | ③ 参考仓（作者本地，不随仓） | `ai_dsh_company`（插件工程范式）、`ai_tool_deepresearch`（方法论源头） | 只读参考；公开贡献者不需要它们；吸收落点登记在 docs/external-materials.md |
 
@@ -129,9 +129,9 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 ## 编辑这些指令
 
 `CLAUDE.md` symlink `AGENTS.md`（编辑真文件）。根 AGENTS.md 只放**每轮都要在场的常驻指令**
-（每条 1–3 行 + 链到 home）；子树专属指令放该子树的 `AGENTS.md`（`docs/` · `scripts/` ·
+（每条 1–3 行 + 链到 home）；子树专属指令放该子树的 `AGENTS.md`（`docs/` · `checks/` ·
 `notes/` · `packages/deep-research-pack/` · `tests/` · `_backlog`）。入口链成员与行数上限分别由 `entry-chain` 与
-`doc-budgets` 门禁把守；上限在 [scripts/doc-budgets.json](scripts/doc-budgets.json)，
+`doc-budgets` 门禁把守；上限在 [checks/doc-budgets.json](checks/doc-budgets.json)，
 超限处置序 = 下放 > 压缩 > 升顶（升顶须同变更登记理由——上限过低是预算 bug）。
 
 ## 术语速查

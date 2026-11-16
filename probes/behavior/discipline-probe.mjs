@@ -14,7 +14,7 @@
 // 竞争指令下的合规；E2E 活体验证（notes/archived/2026-10-07-living-verification-hook.md，
 // 载体 run = archive/drt_open-llm-inference-engine-landscape）已收齐两问全触发证据——本探针
 // 与 run 实证互为印证。场景与纪律合同同 diff 演进
-// （合同改措辞，场景与断言同步改——契约测试同款纪律；基座 = scripts/lib/{acceptance-check,
+// （合同改措辞，场景与断言同步改——契约测试同款纪律；基座 = checks/lib/{acceptance-check,
 // unconsumed-evidence}.mjs 的单元反证，本探针是其行为面补充）。
 //
 // 场景五条（角色 × 触发形态，每场景独立会话防上下文串扰；**先读技能再作答**——
@@ -30,23 +30,23 @@
 // 断言 = assistant/message 事件行携带行为标记（会话日志即真相，非用户消息回显）；
 // 全文留档 runtime/smoke-workspace/discipline-probe-last.md 供人工复核。
 //
-// 前置：source dev/env.sh（DSH_HOME + 凭据 + zstd 在 PATH）。
-// 用法：source dev/env.sh && node probes/behavior/discipline-probe.mjs [--port 3104] [--scenario <id>]
+// 前置：source tools/env.sh（DSH_HOME + 凭据 + zstd 在 PATH）。
+// 用法：source tools/env.sh && node probes/behavior/discipline-probe.mjs [--port 3104] [--scenario <id>]
 // verdict：exit 0=全绿 / 1=断言红 / 2=前置缺席（冒烟可靠性纪律，未跑 ≠ 通过）。
 import { spawnSync } from 'node:child_process';
-import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/shared/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/shared/web-harness.mjs';
-import { readSessionTextOf } from '../../scripts/lib/shared/session-log.mjs';
+import { requireCredentials, requireDevHome, withModelKey } from '../../checks/lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../checks/lib/shared/web-harness.mjs';
+import { readSessionTextOf } from '../../checks/lib/shared/session-log.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles } from '../../scripts/lib/shared/roles.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/harness/vendor-artifacts.mjs';
-import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/harness/port-reclaim.mjs';
+import { presetRoles } from '../../checks/lib/shared/roles.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../checks/lib/harness/vendor-artifacts.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../checks/lib/harness/port-reclaim.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const OVERLAY = join(ROOT, 'dev', 'research.overlay.yml');
+const OVERLAY = join(ROOT, 'tools', 'research.overlay.yml');
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? fallback : process.argv[i + 1];
@@ -57,7 +57,7 @@ const TURN_TIMEOUT_MS = 120_000;
 const POLL_MS = 3_000;
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
-if (!home) { console.error('discipline-probe: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
+if (!home) { console.error('discipline-probe: 需要 DSH_HOME（先 source tools/env.sh）'); process.exit(2); }
 requireDevHome('discipline-probe', { home, root: ROOT });
 requireCredentials('discipline-probe', { home });
 if (spawnSync('zstd', ['--version']).status !== 0) {

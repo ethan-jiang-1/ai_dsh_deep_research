@@ -11,8 +11,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review/review-readiness.ts'
-import { readinessOf } from '../../scripts/lib/shared/node-gate-contracts.mjs'
-import { fromMarkdown } from '../../scripts/lib/tools/workspace-parsers.mjs'
+import { readinessOf } from '../../checks/lib/shared/node-gate-contracts.mjs'
+import { fromMarkdown } from '../../checks/lib/tools/workspace-parsers.mjs'
 
 const mdastInlineText = (line) => {
   const tree = fromMarkdown(line)

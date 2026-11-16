@@ -11,12 +11,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, utimesSync } from 'node:fs';
 import { zstdCompressSync, constants } from 'node:zlib';
-import { resolveSessionLog, sessionLogsInGroup, decompressSessionLog } from '../../../scripts/lib/shared/session-log.mjs';
+import { resolveSessionLog, sessionLogsInGroup, decompressSessionLog } from '../../../checks/lib/shared/session-log.mjs';
 import { zstdFrame, writeZstdLog } from '../../fixtures/events.mjs';
 import { tmpdir } from 'node:os';
 import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readSessionEvents, toolCallCount, hitlPendingOf, turnOpenOf, bundleStateOf, runStateOf, sessionTitleOf, askIndefiniteOf, eventsRegressed } from '../../../scripts/lib/shared/run-state.mjs';
+import { readSessionEvents, toolCallCount, hitlPendingOf, turnOpenOf, bundleStateOf, runStateOf, sessionTitleOf, askIndefiniteOf, eventsRegressed } from '../../../checks/lib/shared/run-state.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const FIX = (name) => join(ROOT, 'tests', 'fixtures', 'run-state', `${name}.jsonl`);
@@ -306,7 +306,7 @@ test('eventsRegressed：首轮无前值 / 不可读态 → false（不误报，�
 });
 
 // ── 盘侧谓词选卡面收窄（审计 P3 件⑨）——先红后绿：preset 字段与谓词未实现时本节即红 ──
-import { leadHitlCandidate } from '../../../scripts/lib/shared/run-state.mjs';
+import { leadHitlCandidate } from '../../../checks/lib/shared/run-state.mjs';
 
 // ── teammate 信号（2026-10-21 卫生轮 维度6 件②）——先红后绿：teammate 字段未实现时本节即红 ──
 // 背景：teammate 会话首事件 agentPreset 继承 "lead"（实盘 336/550 场 origin=subagent 且

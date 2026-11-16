@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, utimesSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { listScenePacks, readScenePack, PACK_FILES } from '../../../scripts/lib/ops/scene-pack.mjs';
+import { listScenePacks, readScenePack, PACK_FILES } from '../../../checks/lib/ops/scene-pack.mjs';
 
 const fullPack = (dir, { at = '2026-10-21T00:00:00Z', url = 'http://x/?token=REDACTED' } = {}) => {
   mkdirSync(dir, { recursive: true });

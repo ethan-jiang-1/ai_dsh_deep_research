@@ -32,17 +32,17 @@
 1. 决定 semver 版本 `X.Y.Z`。
 2. 同 diff 改两处 `package.json` 的 `version`；若有 lockfile 影响，跑
    `pnpm install --lockfile-only`。
-3. `node dev/release/export-dist.mjs` 重导出 `_dist/安装手册.md`、tarball 与 `_dist/market.json`（三件同源同版本；首次/换 pin 后先 `bash dev/vendor-build.sh`——pack 的 tsc 读 vendor 构建产物）；装/起发布前跑 `node scripts/smoke/lifecycle.entry.mjs`（market 索引 → tarball → dump → 真启动 → remove 回落）+ `node scripts/smoke/install-shape.entry.mjs` + `node scripts/smoke/product-boot.entry.mjs`（缺前置 exit 2，未跑 ≠ 通过）。
+3. `node tools/release/export-dist.mjs` 重导出 `_dist/安装手册.md`、tarball 与 `_dist/market.json`（三件同源同版本；首次/换 pin 后先 `bash tools/vendor-build.sh`——pack 的 tsc 读 vendor 构建产物）；装/起发布前跑 `node checks/smoke/lifecycle.entry.mjs`（market 索引 → tarball → dump → 真启动 → remove 回落）+ `node checks/smoke/install-shape.entry.mjs` + `node checks/smoke/product-boot.entry.mjs`（缺前置 exit 2，未跑 ≠ 通过）。
 4. `pnpm verify && pnpm test && pnpm typecheck` 全绿；若本次发布**宣告新的 DSH 版本支持**，
    先在该版本的全局宿主上跑 L1 真挂载 + L2 安装/首启 + client-load（命令 = [guides/60 §2](60-dev-loop.md)；
    缺环境 exit 2，未跑 ≠ 通过）。
-5. `node scripts/dist/release-check.mjs`：确认 root = pack；HEAD 未打 tag 时它只提示
+5. `node checks/dist/release-check.mjs`：确认 root = pack；HEAD 未打 tag 时它只提示
    “未打 tag”。
 6. commit 版本变更（`release: X.Y.Z ...`）。
 7. `git tag -a X.Y.Z -m "X.Y.Z"`，然后
-   `node scripts/dist/release-check.mjs --handoff`（tag=HEAD、工作树干净、manual sha=制品 sha、
+   `node checks/dist/release-check.mjs --handoff`（tag=HEAD、工作树干净、manual sha=制品 sha、
    制品由当前源生成），再 `git push origin master` + `git push origin X.Y.Z`。
-   接收方在 clean clone 上跑 `node scripts/dist/release-check.mjs --receiver`（tag/manual/tarball/manifest）。
+   接收方在 clean clone 上跑 `node checks/dist/release-check.mjs --receiver`（tag/manual/tarball/manifest）。
 8. `npm publish`（在 `packages/deep-research-pack`，需 `npm login`/2FA）；发布后
    `npm view dsh-deep-research-pack@X.Y.Z version`。
 9. 发布后 tag 不再移动；后续修复发新 patch，不改旧 tag。
@@ -65,7 +65,7 @@
 - `dist-manual-version`：`_dist/安装手册.md` 版本 = pack 版本。
 - L1 真挂载 / L2 安装/首启 / client-load：宣告新 DSH 版本支持时的安装面与客户端挂载证据
   （命令 = [guides/60 §2](60-dev-loop.md)；缺环境 exit 2）。
-- `node scripts/dist/release-check.mjs`：发布前检查 root=pack、HEAD tag 与版本一致、tag 为
+- `node checks/dist/release-check.mjs`：发布前检查 root=pack、HEAD tag 与版本一致、tag 为
   annotated；`--handoff` 另查 tag=HEAD、工作树干净、手册 sha=制品 sha、制品由当前 pack 源生成；
   `--receiver` 在 clean clone 上只查 tag/manual/tarball/manifest（跳过源指纹）；不联网、不写盘。
 - keyless CI（[ci.yml](../../.github/workflows/ci.yml)）跑 verify/test；tag 推送另跑

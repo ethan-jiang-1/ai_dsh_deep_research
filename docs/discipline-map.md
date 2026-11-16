@@ -34,7 +34,7 @@
 | Files end with exactly one trailing newline | verify 门禁 md-utf8-newline（tracked 全量） | 照搬 |
 | Add/update an Agent Note **only for lasting decision rationale**（机械与局部编辑——含本地 UI 呈现/交互——豁免；0.1.7 判据自 0.1.5 的 non-trivial 全量收窄） | AGENTS §notes 写入触发（同 diff）+ notes/AGENTS.md §什么时候必须写 Note + note-format 门禁 | 照搬（判据按 0.1.7 收窄） |
 | Plugins, not loop changes（新行为走扩展点，不改 agent-loop） | 组合面（preset/skill/bundle 行）+ 观察面 client 面（`src/client/` 只注册页签/工具卡槽，D18） | 带证据适配（两处贡献都走 DSH 扩展点；agent-loop 属 vendor，本仓零改动——client 面只用 `slots`/`sidebarRightTabs` 注册面） |
-| Prefer maintained dependencies over hand-rolling（真能删掉自 owned 代码与测试时） | 测试栈 node:test、regex 断言——维护中的标准件顶掉自造；tsx/pnpm 构建链引入（vendor 落地）而非自造。**zstd 解压是反例且有意为之**：`scripts/lib/shared/zstd-read.mjs` 走 `spawnSync('zstd')` 调 CLI，非 `node:zlib`——多帧拼接日志 node:zlib 只解第一帧（2026-09-24 实测整轮误判「1 事件」），该项否决见 [observability-gui](../notes/implemented/2026-09-24-observability-gui.md) 与 [layering-v2](../notes/implemented/2026-10-09-layering-v2.md) 输掉的方案 | 带证据适配（标准件**确实删掉自 owned 代码与测试**的两处兑现：测试栈、构建链；zstd 一项经实测后**主动保留自 owned 调用段**——判据的后半句「确实删掉」不成立时就不替换，正是本规则的边界，非偏离） |
+| Prefer maintained dependencies over hand-rolling（真能删掉自 owned 代码与测试时） | 测试栈 node:test、regex 断言——维护中的标准件顶掉自造；tsx/pnpm 构建链引入（vendor 落地）而非自造。**zstd 解压是反例且有意为之**：`checks/lib/shared/zstd-read.mjs` 走 `spawnSync('zstd')` 调 CLI，非 `node:zlib`——多帧拼接日志 node:zlib 只解第一帧（2026-09-24 实测整轮误判「1 事件」），该项否决见 [observability-gui](../notes/implemented/2026-09-24-observability-gui.md) 与 [layering-v2](../notes/implemented/2026-10-09-layering-v2.md) 输掉的方案 | 带证据适配（标准件**确实删掉自 owned 代码与测试**的两处兑现：测试栈、构建链；zstd 一项经实测后**主动保留自 owned 调用段**——判据的后半句「确实删掉」不成立时就不替换，正是本规则的边界，非偏离） |
 | Tests describe behavior, not correctness（过时行为随测试一起改） | tests/ 契约测试（evaluation-contract 对手册谓词、dashboard 对文件形状）；行为变更同 diff 改锚 | 照搬 |
 | No hardcoded tunables（部署可变量必须是 config 字段） | preset 工具行 config（tool-todo allowParallelInProgress、tool-web 超时）皆声明为 config；层版本钉在运行中 dsh 的 exact 版本 | 带证据适配（载体 = cordis 行 config 而非代码 Config 类型） |
 | TODO 标记分级（FIXME/TODO/XXX 按紧急度） | 沿用（仓内出现时按此分级） | 照搬 |
@@ -69,7 +69,7 @@
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
 | Tier 分类法：一处事实一个家（docs 只写 now） | 00-index 组织原则；docs/notes/_backlog 三层分工 | 照搬 |
-| Wordcount budgets（入口文件行数顶） | verify 门禁 `doc-budgets`（逐件行数上限——vendor verify-doc-budgets 裁剪版；上限正本 = [scripts/doc-budgets.json](../scripts/doc-budgets.json)，此处不复制计数；超顶处置序 = 下放>压缩>升顶须同变更登记理由） | 带证据适配 |
+| Wordcount budgets（入口文件行数顶） | verify 门禁 `doc-budgets`（逐件行数上限——vendor verify-doc-budgets 裁剪版；上限正本 = [checks/doc-budgets.json](../checks/doc-budgets.json)，此处不复制计数；超顶处置序 = 下放>压缩>升顶须同变更登记理由） | 带证据适配 |
 | Cross-reference with machine-checkable links, never free prose | 上游含两个机检面：链接可解析 + 禁 commit id 引用。本仓只落前者（md-links，全 tracked md 的方括号圆括号语法）；后者零对应物——正文写 commit 哈希不会被任何门禁拦。entry-chain 门禁只断言文件存在、不判指针语义，不构成兜底 | 带证据适配（语义被收窄：链接面已机检，禁 commit id 面未落；引入条件 = 出现引用 commit 而非文件/Note 的漂移时补门禁） |
 | Slop checklist（文档废话清单） | 上游是 9 条可运行审计。本仓已机械化其中至少两条：`count-free`（禁把易漂移计数写进文档）、`doc-now-only`（只写当前合同、不写历史时态）；其余条目定性吸收进行文规范 | 带证据适配（部分机械化：2 条成门禁，余为规范；不是未机械化） |
 | 一段一行（`verify-md-wrap` 门禁） | 硬折行 ~90 列 | 不适用（登记偏离）：中文优先仓折行是既有惯例，整仓重排会淹没审阅（成本 > 收益）；引入条件 = 转英文或双语文档时 |
@@ -117,8 +117,8 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（编号条目 + `README.md`
 | 形态 | DSH 例子 | 本仓实例 | 机器边界 |
 |---|---|---|---|
 | 手写维护 | AGENTS、docs、README、活动 Note、Skills | 全部 `docs/`、`notes/`、`AGENTS.md`、presets、skills | 结构受门禁（预算/格式/链接），内容人写 |
-| 生成 + freshness 门禁 | tool/config/persistence catalog、module-graph | `dev/research.overlay.yml`（门禁 `overlay-fresh`；[evaluation.md](evaluation.md) §L0 登记为"本仓首个 tracked 生成物"）+ `_dist/安装手册.md`（门禁 `dist-manual-fresh` / `dist-manual-version`） | 改源不重生成即红（门禁机械对账） |
-| 混合（生成区嵌手写页） | subsystem 页的 cordis-surface 区、type-equiv 块 | `packages/deep-research-pack/presets/<role>.patch.yml`（手写）↔ `dev/research.overlay.yml`（渲染生成）+ profile 镜像（同事实的第二落点）——由 `boot-run.sh` 漂移检测承担 freshness | 漂移即 fail-loud |
+| 生成 + freshness 门禁 | tool/config/persistence catalog、module-graph | `tools/research.overlay.yml`（门禁 `overlay-fresh`；[evaluation.md](evaluation.md) §L0 登记为"本仓首个 tracked 生成物"）+ `_dist/安装手册.md`（门禁 `dist-manual-fresh` / `dist-manual-version`） | 改源不重生成即红（门禁机械对账） |
+| 混合（生成区嵌手写页） | subsystem 页的 cordis-surface 区、type-equiv 块 | `packages/deep-research-pack/presets/<role>.patch.yml`（手写）↔ `tools/research.overlay.yml`（渲染生成）+ profile 镜像（同事实的第二落点）——由 `boot-run.sh` 漂移检测承担 freshness | 漂移即 fail-loud |
 | 录制（机器写、人审、封存不改） | snapshots/、archived Note、persistence releases | run bundle（`research-workspace/drt_*` 在飞 + `archive/` 已交付）——gitignored 运行区，事实由 bundle 文件承载 | 不进 L0（运行区不扫）；完整性归 run 内 critic + 观察面谓词 |
 | 投影（canonical 源的抛弃型派生物） | `website/.generated/`（vendor 站点产物，不入库） | `runtime/smoke-workspace/dashboard.html`（canonical = 会话日志 + bundle 文件） | 随时可重建；永不手改、永不入库 |
 
@@ -138,7 +138,7 @@ implemented/ 而退役）。
 | DSH 层 | 能证明 | 本仓对应 | 命令 |
 |---|---|---|---|
 | 编译期 | 类型与穷举分支 | pack 双面编译（host/client 两叶 → `lib/types/**`） | `cd packages/deep-research-pack && pnpm build` |
-| Load / parser | 输入在最早可解析点合法 | L0 门禁 + cordis 行校验 | `node scripts/verify/verify.mjs` |
+| Load / parser | 输入在最早可解析点合法 | L0 门禁 + cordis 行校验 | `node checks/verify/verify.mjs` |
 | 局部行为 | 模块正例/错误/生命周期 | L0 契约测试 | `pnpm test` |
 | 组装行为 | 真实入口产生预期外部结果 | L1 真挂载 + L2 安装形状 | `preset.e2e`（`DSH_SMOKE_REAL=1`）/ `release.entry` |
 | 运行时关系 | 活系统中的 owner relationship | 本仓等价物 = 真模型档与 run 内 critic（无 invariant companion 面） | `l4-lite.e2e` / `team-preflight.e2e` / `entry-chain-probe` / `client-hitl.entry` |
@@ -161,7 +161,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 | `AGENTS.md` | 每轮必须遵守什么 | 情境化长流程、全档命令表 | 入口链、布局树、命令速查、纪律指针 |
 | `docs/` 合同面 | 系统**现在**是什么、怎么用 | 决策历史 | evaluation、discipline-map、guides 60–62 |
 | Skill（`.agents/skills/`） | 面对某类任务怎样调查、判断、验证 | 确定性 pass/fail | 换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷 |
-| 门禁与契约测试 | 一个可机械条件是否满足 | 意图与设计质量 | `scripts/verify/verify.mjs` + `tests/` |
+| 门禁与契约测试 | 一个可机械条件是否满足 | 意图与设计质量 | `checks/verify/verify.mjs` + `tests/` |
 | Agent Note（`notes/`） | 为什么这样决定、放弃了什么 | 当前 API 的唯一说明 | proposed（将来）/ implemented（过去）|
 | 运行区记录 | 这次实际发生了什么 | 可复现的回归证据 | `drt_*` bundle、会话日志、仪表盘投影 |
 
@@ -175,10 +175,10 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| **子树 `AGENTS.md` 层**：根只放每轮常驻指令（1–3 行 + 链 home），子树专属指令放子树 `AGENTS.md`（vendor 28 份） | 六份子树 AGENTS.md（`docs/` · `scripts/` · `notes/` · `packages/deep-research-pack/` · [tests/](../tests/AGENTS.md) · [_backlog](../_backlog/AGENTS.md)）；`entry-chain` 门禁把守成员在场 | 照搬 |
+| **子树 `AGENTS.md` 层**：根只放每轮常驻指令（1–3 行 + 链 home），子树专属指令放子树 `AGENTS.md`（vendor 28 份） | 六份子树 AGENTS.md（`docs/` · `checks/` · `notes/` · `packages/deep-research-pack/` · [tests/](../tests/AGENTS.md) · [_backlog](../_backlog/AGENTS.md)）；`entry-chain` 门禁把守成员在场 | 照搬 |
 | `docs/AGENTS.md` = 文档标准：层级归属（一个事实一个家）/ 写作规则 / slop 清单 / 预算处置序 / 机检链接 | [docs/AGENTS.md](AGENTS.md)：tier 表、写作规则、slop 清单（中文适配）、`## 已知限制与延后工作` 节约定 | 带证据适配 |
-| 预算由 **manifest 拥有**（`scripts/doc-budgets.manifest.json`），门禁拒超限**与缺登记** | [scripts/doc-budgets.json](../scripts/doc-budgets.json) + 门禁 `doc-budgets`（登记项须存在且不超限；仓内新增 AGENTS.md 未登记即红） | 带证据适配（度量词数 → 行数：CJK 词数不可靠） |
-| `scripts/AGENTS.md` = 门禁写作规则（无 shell / 端口与临时路径自持有 / 只在单独运行通过的 spec 是缺陷） | [scripts/AGENTS.md](../scripts/AGENTS.md)：范围（git ls-files tracked-only）、剥 `GIT_*`、端口独占、stdlib-only 分层 | 带证据适配（换成我们的实测教训） |
+| 预算由 **manifest 拥有**（`scripts/doc-budgets.manifest.json`），门禁拒超限**与缺登记** | [checks/doc-budgets.json](../checks/doc-budgets.json) + 门禁 `doc-budgets`（登记项须存在且不超限；仓内新增 AGENTS.md 未登记即红） | 带证据适配（度量词数 → 行数：CJK 词数不可靠） |
+| `scripts/AGENTS.md` = 门禁写作规则（无 shell / 端口与临时路径自持有 / 只在单独运行通过的 spec 是缺陷） | [checks/AGENTS.md](../checks/AGENTS.md)：范围（git ls-files tracked-only）、剥 `GIT_*`、端口独占、stdlib-only 分层 | 带证据适配（换成我们的实测教训） |
 | `packages/AGENTS.md` = 包级约定（插件导出形态 / 当前 owner 与需求 / 限制节） | [packages/deep-research-pack/AGENTS.md](../packages/deep-research-pack/AGENTS.md)：三处同步、模型可见面 + 重启、roster 单一事实源、**部署义务**（发布集/种子/部署脚本变更跑 L2） | 带证据适配（配置为主 + 一个 client 面版） |
 | `.agents/notes/AGENTS.md` = Note 子树常设指令（**取代检查硬触发**） | [notes/AGENTS.md](../notes/AGENTS.md)：写入触发 + 取代检查 + 格式与毕业；根只留指针 | 照搬 |
 | Note 头三行恰为 `# Agent Note: <title>` / 空 / `Status: <status>`（**裸值，无日期括号**），与生命周期目录互验；rejected 的理由用 `—` 附在状态行 | `> 状态：<裸值>` + 目录互验（`note-format` 门禁）；rejected 允许 `— 一行理由`；章节名映射（问题↔Problem · 决定↔Decision · 输掉的方案↔Alternatives considered · 验证↔Verification · 环境状态↔Consequences）登记在 notes/AGENTS.md | 带证据适配（头三行结构与裸值照搬；`## Problem` 不强制于遗留篇——grandfather） |
@@ -186,7 +186,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 | 根 AGENTS 的 “Editing these instructions” 节 | 根新增 §编辑这些指令（预算 manifest / 子树归属 / 门禁把守） | 照搬 |
 | `.agents/skills/` 命名带产品前缀（`dsh-`），少数通用技能无前缀 | 开发技能一律无前缀（与 vendor 的 `agent-experience`、`record-browser-gif` 同风格）；本仓没有产品前缀面，因为技能是仓内开发技能而非随包发布的用户技能 | 不适用（本仓无随包发布用户技能面；引入条件 = 本仓开始对外发布技能集时） |
 | **一段一行**（`verify-md-wrap` 门禁） | 本仓用硬折行 ~90 列，是同一规则（控制行宽以利审阅）的不同实现；上游一条一行是为了收窄 diff 噪声，本仓折行同样收窄横向滚动。没有 `verify-md-wrap` 门禁，靠惯例 | 带证据适配（同规则不同实现：无门禁、靠惯例；引入条件 = 折行漂移成审阅负担时补 wrap 门禁） |
-| `docs/defensive-patterns/`（0.2.1 起为五卷目录：general / package-surface / client-components / conversation-and-session / remote-and-api，双语对 + i18n sidecar；高风险缺陷模式供 review 逐条扫） | 主体 = vendor 的 TypeScript 代码模式清单；本仓 TS 面（`src/client/` 观察面 + `src/lib/` 折算）不另立第二份清单——**可迁移的部分已分居**：门禁与子进程陷阱 → [scripts/AGENTS.md](../scripts/AGENTS.md)，事故与教训 → notes/archived/ 的事故复盘与各毕业 Note | 不适用（不另建第二份清单，避免与上述 home 漂移；**重估触发**：本仓 TS 面扩大到需独立缺陷模式清单时） |
+| `docs/defensive-patterns/`（0.2.1 起为五卷目录：general / package-surface / client-components / conversation-and-session / remote-and-api，双语对 + i18n sidecar；高风险缺陷模式供 review 逐条扫） | 主体 = vendor 的 TypeScript 代码模式清单；本仓 TS 面（`src/client/` 观察面 + `src/lib/` 折算）不另立第二份清单——**可迁移的部分已分居**：门禁与子进程陷阱 → [checks/AGENTS.md](../checks/AGENTS.md)，事故与教训 → notes/archived/ 的事故复盘与各毕业 Note | 不适用（不另建第二份清单，避免与上述 home 漂移；**重估触发**：本仓 TS 面扩大到需独立缺陷模式清单时） |
 
 vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗漏"的误读）：
 
@@ -196,10 +196,10 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | `docs/glossary.md` | 已具备：`docs/terms.md`（一个概念一个 canonical term，含 DSH↔本仓对照） |
 | `docs/development.md` · `docs/testing.md` · `docs/architecture.md` · `docs/cookbook/` · `docs/subsystems/` | 已具备（改名映射）：guides/60 · evaluation + guides/60 §2 · design/10 · guides/61/62 · design/ |
 | `docs/i18n/` · `docs/user/` · `website/` | 不适用：单语、无对外产品文档站与站点投影 |
-| `snapshots/`（session 回放 fixture） | **已具备（带证据适配）**：[snapshots/](../snapshots/README.md) 场景证据层——研究角色场景 [场景证据层 snapshots/](../snapshots/README.md) 的 `snapshot.json` 由 [replay-scene](../scripts/lib/harness/replay-scene.mjs) 消费并驱动 [snapshot-replay.entry](../scripts/smoke/snapshot-replay.entry.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）；纯函数夹具仍住 `tests/fixtures/`；判据见本表源 2 "Snapshot tests" 行 |
+| `snapshots/`（session 回放 fixture） | **已具备（带证据适配）**：[snapshots/](../snapshots/README.md) 场景证据层——研究角色场景 [场景证据层 snapshots/](../snapshots/README.md) 的 `snapshot.json` 由 [replay-scene](../checks/lib/harness/replay-scene.mjs) 消费并驱动 [snapshot-replay.entry](../checks/smoke/snapshot-replay.entry.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）；纯函数夹具仍住 `tests/fixtures/`；判据见本表源 2 "Snapshot tests" 行 |
 | `benchmarks/` · `native/` · `python/` · `patches/` · `apps/` | 不适用：本仓无这些发布 lane 与运行时面 |
 | `CONTRIBUTING.md` · `SAFETY.md` · `SECURITY` · `THIRD_PARTY_NOTICES.md` · `BRAND_GUIDELINES.md` | **已具备（2026-10-25 开源发布）**：`CONTRIBUTING.md` / `SECURITY.md` / `.github/workflows/ci.yml`；`SAFETY.md`、`THIRD_PARTY_NOTICES.md`、`BRAND_GUIDELINES.md` 仍不适用（无运行时安全授权面、无捆绑第三方代码、无独立品牌资产政策）；重估触发 = 出现外部贡献分级审批或捆绑第三方代码时 |
-| `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 前两件已具备（`repo-conventions` 门禁强制与 vendor 对齐）；后四件未引入（TS 面 = 一个包的 `src/`，测试栈 = node:test）；Markdown 纪律由门禁（md-utf8-newline / md-links / md-anchors / doc-budgets）承担，git 钩子 = `dev/hooks/pre-commit` |
+| `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 前两件已具备（`repo-conventions` 门禁强制与 vendor 对齐）；后四件未引入（TS 面 = 一个包的 `src/`，测试栈 = node:test）；Markdown 纪律由门禁（md-utf8-newline / md-links / md-anchors / doc-budgets）承担，git 钩子 = `tools/hooks/pre-commit` |
 | `LICENSE` | **已定：MIT**（2026-10-25 开源发布；根与 pack 各一份 [LICENSE](../LICENSE)，两处 `package.json` 均 `license: MIT`；pack `private: false` 可发布）——决定与输掉的方案 = [开源发布 Note](../notes/implemented/2026-10-25-open-source-launch.md) |
 
 <a id="source-10"></a>
@@ -212,15 +212,15 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | 语料教义 | 本仓落点 | 状态 |
 |---|---|---|
 | 证据匹配面（改动的面 ↔ 证据类型） | [guides/60 §2 任务型路由表](guides/60-dev-loop.md) + [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + 根 AGENTS §纪律常驻指针 | 照搬（增量 = 常驻化：路由表与阶梯本就分住 guides/60 §2 与 guides/62，本条只是把指针常驻进根 AGENTS§纪律） |
-| 可靠性三纪律：retry 白名单 / 等待显式状态 / 释放到静默 | [scripts/AGENTS §冒烟脚本可靠性纪律](../scripts/AGENTS.md) | 照搬（载体 = 冒烟脚本层） |
-| 防假绿 verdict 契约（0 绿 / 1 红 / 2 未跑；未跑 ≠ 通过） | 真模型档脚本既有行为 → scripts/AGENTS.md 契约化 + `tests/checks/smoke-contract.test.mjs` 机械钉住 | 带证据适配（行为先在，语料后成文） |
+| 可靠性三纪律：retry 白名单 / 等待显式状态 / 释放到静默 | [checks/AGENTS §冒烟脚本可靠性纪律](../checks/AGENTS.md) | 照搬（载体 = 冒烟脚本层） |
+| 防假绿 verdict 契约（0 绿 / 1 红 / 2 未跑；未跑 ≠ 通过） | 真模型档脚本既有行为 → checks/AGENTS.md 契约化 + `tests/checks/smoke-contract.test.mjs` 机械钉住 | 带证据适配（行为先在，语料后成文） |
 | 插件五台阶证据阶梯（导出守卫 → 行为 → 注册生命周期 → 真挂载 → 组装面） | [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + `tests/pack/contract/export-shape.spec.mjs`（台阶①）+ verify 门禁 `client-effect-wrap`（台阶③） | 带证据适配（自写代码面 = 驾驶舱） |
 | registrations are effects 的 HMR 投影（dispose 即撤销贡献） | 驾驶舱 slot 注册包 effect + 门禁 `client-effect-wrap` 静态把守（正则查包裹，不判 dispose 是否真发生）；HMR 行为断言不做（迭代循环走重启）。2026-10-19 实测该门禁的盲区：`ctx.inject(..., scoped => scoped.effect(...))` 里 scoped 作用域在回调返回后失活，注册被静默撤销，门禁照绿——静态包裹证明不了生命周期正确 | 带证据适配（静态收口形态；dispose 行为面未验证，2026-10-19 撞到真失效一次，修法 = 效果挂根 ctx 而非注入作用域） |
 | fix fixtures, not normalizers（证据不许磨到跟 bug 吻合） | [tests/AGENTS「改夹具先想红」](../tests/AGENTS.md) + guides/60 金标准红线（只许 `--update-expected` 重写，不许放宽比对） | 照搬 |
-| 后缀即层 / 命名即所有权（expected-filenames 门禁强制改名） | [scripts/AGENTS §依赖与分层「命名即层」](../scripts/AGENTS.md)（后缀申报证据类型与档位）+ 真模型档登记制 closed set（tests/checks/smoke-contract.test.mjs 对账"要求凭据的脚本恰为名单"） | 带证据适配（本仓车道 = glob + 目录形态，非多 vitest 配置） |
+| 后缀即层 / 命名即所有权（expected-filenames 门禁强制改名） | [checks/AGENTS §依赖与分层「命名即层」](../checks/AGENTS.md)（后缀申报证据类型与档位）+ 真模型档登记制 closed set（tests/checks/smoke-contract.test.mjs 对账"要求凭据的脚本恰为名单"） | 带证据适配（本仓车道 = glob + 目录形态，非多 vitest 配置） |
 | prove-it-red 前向化到契约测试（不只门禁） | tests/AGENTS 的反证规则（新契约测试同 diff 注入回归看红再还原）+ 门禁 `guard-red-record` 机械把守「负例留证/夹具留证」块。所称「承重四文件抽检」在采纳 Note 中**不存在**（原记误引），已删 | 带证据适配（规则与门禁都在位；但「抽检」这一执行形态本仓未确立，不为无实据的做法背书） |
-| fixture 守卫先于比较（形状 corpus 层） | [scripts/lib/harness/replay-scene.mjs](../scripts/lib/harness/replay-scene.mjs)：比较前 fail-loud 拒绝相对路径/穿越/**symlink**/manifest 结构/角色 roster 齐整/case 唯一/**夹具路径重复**（14 条守卫）；消费测试钉语义，守卫钉形状，两层不同面 | 带证据适配（2026-10-19 复核修正：原判「不适用」与实况相反——等价物早已在该模块） |
-| 快照世代模型 / record-refresh 分叉 / 平台变体 | `sessionFormat` 钉代（replay-scene.mjs:58 强制 = 4，换代须新 `session.vN.jsonl` + 人审，snapshots/README 登记）；`--update-expected` = refresh 语义；record = 真录制（`dev/record-role-fixture.mjs`）；**平台变体（posixOnly/pwshOnly）不适用**（本仓单平台） | 带证据适配（世代/refresh 已落地；仅平台变体不适用——2026-10-19 复核修正原「不适用」整行） |
+| fixture 守卫先于比较（形状 corpus 层） | [checks/lib/harness/replay-scene.mjs](../checks/lib/harness/replay-scene.mjs)：比较前 fail-loud 拒绝相对路径/穿越/**symlink**/manifest 结构/角色 roster 齐整/case 唯一/**夹具路径重复**（14 条守卫）；消费测试钉语义，守卫钉形状，两层不同面 | 带证据适配（2026-10-19 复核修正：原判「不适用」与实况相反——等价物早已在该模块） |
+| 快照世代模型 / record-refresh 分叉 / 平台变体 | `sessionFormat` 钉代（replay-scene.mjs:58 强制 = 4，换代须新 `session.vN.jsonl` + 人审，snapshots/README 登记）；`--update-expected` = refresh 语义；record = 真录制（`tools/record-role-fixture.mjs`）；**平台变体（posixOnly/pwshOnly）不适用**（本仓单平台） | 带证据适配（世代/refresh 已落地；仅平台变体不适用——2026-10-19 复核修正原「不适用」整行） |
 | 七层宪法层 / coverage 门 / run-gates DAG / 性能基准层 / flake 八分类 | 维持五面合同与偏离登记（L0–L4 已是证据形态分层） | 不适用（理由 = 采纳 Note 输掉的方案；**重估触发**：现有 L0–L4 分层被证明不足（出现该分层接不住的真实缺陷类别）时） |
 
 <a id="source-11"></a>
@@ -232,7 +232,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 |---|---|---|
 | 交付判断四角色：机械检查 / 语义评审 / 批准 / 显式交互——各证明不同的东西，互不冒充 | [evaluation §完成判断四分离](evaluation.md) + [reviewing-a-delivery](../.agents/skills/reviewing-a-delivery/SKILL.md) 技能（语义自审层——agent 可自主完成的角色） | 照搬（判据固化 + 技能载体） |
 | 完成判断公理：能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准 | evaluation §完成判断四分离（四结果 ↔ L1 挂载 / L1 行为断言 / L2 / 收尾对账+用户批准） | 照搬 |
-| 门禁自测模式（语料 verify.spec.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates.e2e](../scripts/smoke/gates.e2e.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/checks/verify-gates.test.mjs](../tests/checks/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量，等价 fresh clone——曾有的「运行区链接目标补拷」对冲已随 BUG-016 修复移除） |
+| 门禁自测模式（语料 verify.spec.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates.e2e](../checks/smoke/gates.e2e.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/checks/verify-gates.test.mjs](../tests/checks/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量，等价 fresh clone——曾有的「运行区链接目标补拷」对冲已随 BUG-016 修复移除） |
 | 验证词汇：oracle 独立预期 / real composition / semantic review | [terms.md](terms.md) 验证词汇行 | 照搬 |
 | 六误区清单（goal≠验收 / mock-only / 刷新≠接受 / 空 invariant / agent-loop / 不抄主仓治理） | 逐条散落既有登记（D6 / L1 真挂载 / tests·AGENTS fix fixtures / 本表源 1 与 alignment-ledger / 不适用登记）——不另立第二份清单（理由 = [毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) 输掉的方案） | 带证据适配（散落形态：六条各自有登记载体，本条不另立第二份清单——理由见毕业 Note 输掉的方案；散落 = 需按条检索，不是免检） |
 | 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 最小开源治理 = keyless CI（[ci.yml](../.github/workflows/ci.yml)）+ 本地 pre-commit + 窄切片 + 收尾对账；Issue/PR policy、weighted approval、stacked PR、release lane 未采纳 | 带证据适配（2026-10-25 开源发布：CI 骨架落地；其余治理面的重估 = 需要外部贡献者分级审批、堆叠 PR 或自动化发布时） |
@@ -273,7 +273,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 
 | 纪律 | 落点 | 机械把守 |
 |---|---|---|
-| [D53](decisions.md#d53) 测试文件名 = 证据车道 | [tests/AGENTS](../tests/AGENTS.md) / [scripts/AGENTS](../scripts/AGENTS.md) / [scripts/README](../scripts/README.md) | [test-lanes](../tests/checks/test-lanes.test.mjs) / [smoke-registry](../tests/checks/smoke-registry.test.mjs) / [smoke-oracle-surface](../tests/checks/smoke-oracle-surface.test.mjs) / layering ④ |
+| [D53](decisions.md#d53) 测试文件名 = 证据车道 | [tests/AGENTS](../tests/AGENTS.md) / [checks/AGENTS](../checks/AGENTS.md) / [checks/README](../checks/README.md) | [test-lanes](../tests/checks/test-lanes.test.mjs) / [smoke-registry](../tests/checks/smoke-registry.test.mjs) / [smoke-oracle-surface](../tests/checks/smoke-oracle-surface.test.mjs) / layering ④ |
 | [D54](decisions.md#d54) 三环四账五关 | [guides/67](guides/67-test-strategy.md) / [失败类普查](../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md) | [test-lanes](../tests/checks/test-lanes.test.mjs) / [smoke-registry](../tests/checks/smoke-registry.test.mjs) / [smoke-oracle-surface](../tests/checks/smoke-oracle-surface.test.mjs) / [ci-jobs](../tests/checks/ci-jobs.test.mjs) / decisions-now |
 
 ## 维护规则

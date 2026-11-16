@@ -1,0 +1,531 @@
+#!/usr/bin/env node
+// tools/hitl-answer.mjs —— HITL 代答驱动（代理模拟 HITL1/HITL2 的唯一实现）。
+//
+// 为什么需要它（2026-09-26 跑 run 时实测的环路缺口）：`ask_user_question` 走 `ctx.userQuestions`
+// 的 answerer waterfall，而**全仓唯一的 answerer 是连着 web 的浏览器客户端**——CLI/host 侧没有
+// answerer，也没有提交答案的 RPC（vendor 实测：只有 web 客户端这条 relayed listener）。
+// 于是"代理代跑"在机制上无法作答：`checks/smoke/client-hitl.entry.mjs` 也明确"触发但不代答"。
+// 本脚本补上这条缝：用真浏览器把挂起的问询答完，并把每次选择打印出来，供 bundle 的
+// question.md §Decisions 如实记"代理模拟"。
+//
+// 用法（须带 tsx——前置谓词 import pack .ts 源）：
+//   node --import tsx/esm tools/hitl-answer.mjs --port 3083 --token <横幅 token> [--session <标题子串>]
+//                            [--pick recommended|first|<1-based index>] [--custom <文本>]
+//                            [--max-steps 8] [--dry-run]
+// HITL1 = 两段卡（三问 → 计划确认），同一条命令**跑两次**；HITL2 先跑 node-gate / evidence-audit，
+// 再跑本命令（交付门在 readiness 非 PASS 时自拒 exit 4）。先 `source tools/env.sh`；多挂起用 --session。
+// 行为：**先盘侧谓词自拒**（无真挂起会话即退出，不开浏览器）→ 精确按 session ID 打开同一会话
+//       → 逐题作答（默认选带 Recommended 的那一项）→ 提交 → 打印每题的选择。
+// 注意：**必须**在 question.md §Decisions 与 journal.md 标注"代理模拟"——它替的是人，不是人。
+import { existsSync, readFileSync } from 'node:fs'
+import { resolve, dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { once } from 'node:events'
+import { loadChromium, launchChromium } from '../checks/lib/harness/playwright.mjs'
+import { bundleDirOf, runStateOf, readSessionEvents, leadHitlCandidate } from '../checks/lib/shared/run-state.mjs'
+import { terminalReadiness } from '../packages/deep-research-pack/src/lib/review/review-readiness.ts'
+import { clickSearchResultByTitle, revealSessionRow, searchSessionByTitle, sessionRowById } from '../checks/lib/shared/web-ui-nav.mjs'
+import {deliveryAnswerGuard, isDeliveryReviewCard, answerBatchOf, customLandedInBatch, driveVerdict, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict} from '../checks/lib/channel/ask-drive.mjs'
+import { appendProvenance, attributionBundleOf, batchToAnswered } from '../checks/lib/shared/hitl-provenance.mjs'
+import { localDateStr } from '../checks/lib/shared/local-date.mjs'
+import { researchWorkspaceGroup, sessionLogsInGroup } from '../checks/lib/shared/session-log.mjs'
+import { workspaceRoot } from '../checks/lib/shared/workspace-root.mjs'
+import { operateOnTargetCard } from '../checks/lib/channel/hitl-card-driver.mjs'
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const DEV_WORKSPACE = workspaceRoot({ argv: process.argv.slice(2), env: process.env, defaultRoot: join(ROOT, 'research-workspace') }).root
+// 与 tools/run-kickoff.mjs 同形：name 自带 `--`（本仓约定，别在 helper 里再加一次）
+const flag = (name, fallback) => {
+  const i = process.argv.indexOf(name)
+  return i === -1 ? fallback : process.argv[i + 1]
+}
+const has = (name) => process.argv.includes(name) // 同约定：name 自带 `--`
+
+const PORT = flag('--port', process.env.DSH_RUN_PORT || '3083')
+const TOKEN = flag('--token', null)
+// 空串/纯空白 = 未指定（2026-09-27 实录：`--session ""` 使 text.includes('') 恒真 →
+// 点开侧栏第一个无关会话——flag 解析不得把空串当"已指定"）
+const rawSession = flag('--session', null)
+const SESSION = rawSession !== null && rawSession.trim() !== '' ? rawSession : null // 标题子串；缺省 = 最新盘侧挂起
+const PICK = flag('--pick', 'recommended') // recommended | first | <1-based index>
+const CUSTOM = flag('--custom', null)
+const MAX_STEPS = Number(flag('--max-steps', '8'))
+const DRY = has('--dry-run')
+const NO_TARGET_SESSION = Symbol('no target session row')
+const stopForMissingUiSession = () => {
+  process.exitCode = 3
+  throw NO_TARGET_SESSION
+}
+
+
+if (!TOKEN) {
+  console.error('缺 --token（web 横幅里的 token）')
+  process.exit(2)
+}
+
+// ⓪⁻ 盘侧前置谓词（RFC run-ops-self-diagnosis）：开浏览器前，先按**事件形状**判定
+//    research-workspace 组最新 15 条 canonical 日志里有没有真挂起（末位回合事件 = 未答 ask_user_question）。
+//    request/header 里的工具 schema 字样不构成挂起——那正是 grep 假阳性的形态。无真挂起即
+//    自拒，不开浏览器空转。
+let pendingLogPath = null
+// 盘侧"目标真挂起"的事实（供侧栏失败路径的错因判据用）：在选会话时记一次，
+// 不在失败路径重算（`selected` 的作用域只在那段选择逻辑里——2026-10-17 注入实测：
+// 直接引用它会在失败路径抛 ReferenceError，即"该报的话报不出来反而崩"）。
+let diskPendingTarget = false
+let uiTargetSessionId = null
+let uiTargetTitle = null
+// 交付代答闸要按 bundle 读 review.md 定 readiness（见下方 isDelivery 段）——同样**必须在选择
+// 逻辑里取出并提到外层**：`selected` 出了那段作用域就没了（2026-10-19 端到端实测：
+// tools/hitl-answer.mjs:310 直接引用 selected.candidate.bundle → ReferenceError，
+// 交付审阅卡这条路径从未被走到过，所以缺陷一直没暴露）。
+let pendingBundle = null
+{
+  const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')
+  const sessionsRoot = join(home, 'sessions')
+  const group = researchWorkspaceGroup(sessionsRoot, DEV_WORKSPACE)
+  if (group === undefined) {
+    console.error('hitl-answer: 找不到工作区会话组——先 source tools/env.sh，或用 DSH_RUN_WORKSPACE/DEEP_RESEARCH_WORKSPACE 指定工作区')
+    process.exit(2)
+  }
+  const gdir = join(sessionsRoot, group)
+  const candidates = sessionLogsInGroup(gdir).slice(0, 15).map((session) => {
+    const state = runStateOf({ logPath: session.logPath, wsRoot: DEV_WORKSPACE, includeSessionIdentity: true })
+    // 字段名 = `activeBundle`（runStateOf 的返回契约）。曾写成 `state.active`（不存在的字段）→
+    // bundle 恒 null → 交付代答闸读不到 review.md 的 readiness，只能报「无判定行」自拒
+    // （2026-10-19 端到端实测：HITL2 推荐档被误挡，review 明明已 PASS）。
+    return { ...session, canonicalSessionId: state.sessionId, title: state.title, bundle: state.activeBundle ?? null, pending: state.readable && leadHitlCandidate(state) }
+  })
+  const selected = selectPendingSession(candidates, SESSION)
+  if (selected.candidate === null) {
+    const why = {
+      'no-pending-session': '最新 15 个会话无 lead 的真挂起',
+      'session-title-ambiguous': '标题子串匹配不唯一——拒绝让 UI 与盘侧日志错配',
+      'session-not-found': `最新 15 个会话里找不到 --session「${SESSION}」`,
+      'session-not-pending': `--session「${SESSION}」匹配的会话不处于 lead 挂起态`,
+      'session-id-unavailable': '候选缺少 UI 会话身份标识，无法保证判决日志与浏览器目标一致',
+    }[selected.reason] ?? '无法唯一定位挂起会话'
+    console.error(`hitl-answer: 盘侧谓词自拒——${why}。不开浏览器。`)
+    process.exit(3)
+  }
+  diskPendingTarget = selected.candidate.pending === true
+  pendingLogPath = selected.candidate.logPath
+  uiTargetSessionId = selected.candidate.sessionId
+  uiTargetTitle = selected.candidate.title ?? null
+  pendingBundle = selected.candidate.bundle ?? null
+  console.log(`hitl-answer: 盘侧谓词——真挂起会话在场：${uiTargetSessionId}「${uiTargetTitle ?? '无标题'}」`)
+}
+// 驱动计划（点击前读盘侧形态，BUG-005）：卡共几题 + ask 形态。活等待（wait:-1）下
+// timed 600s 放行与文本消息兜底**都不可用**——脚本必须真浏览器答满，操作者必须知道这点。
+let plan = { questionCount: null, indefinite: null, callId: null, questions: [] }
+{
+  const s1 = pendingLogPath !== null ? readSessionEvents(pendingLogPath) : { readable: false, events: [] }
+  const ask = s1.readable ? [...s1.events].reverse().find((j) => j?.type === 'tool/call' && j?.data?.name === 'ask_user_question') : undefined
+  if (ask !== undefined) plan = { ...parseAskArgs(ask.data?.arguments), questions: parseAskQuestions(ask.data?.arguments), callId: ask.data?.callId ?? null }
+}
+const expectedCardKey = questionCardKeyOf(uiTargetSessionId, plan.callId)
+if (expectedCardKey === null) {
+  console.error('hitl-answer: 盘侧挂起 ask 缺少可用 callId，无法绑定唯一 UI 卡片——拒绝打开浏览器并作答')
+  process.exit(3)
+}
+// 交付代答闸（2026-10-18 端到端实测的运行纪律）：交付审阅卡在场而 review readiness 非 PASS 时，
+// **默认推荐档**会把「定稿」投给一份未过审的报告 = 交付越过前置；默认档自拒（人工裁决或显式指定）。
+{
+  const isDelivery = isDeliveryReviewCard(plan.questions ?? [])
+  if (isDelivery) {
+    const slug = pendingBundle
+    let readiness = null
+    if (slug !== null) {
+      // 三操作桶发现正本 = run-state.bundleDirOf（根优先；位置只用于发现，D28）——本处
+      // 曾手抄同一份桶循环，新增第四桶时两边会静默分叉（2026-10-27 卫生轮 维度2）。
+      const dir = bundleDirOf(DEV_WORKSPACE, slug)
+      // 用**pack 的终局判据**（与 UI 同源；BUG-036 已把轮次仲裁修在它那里；门侧早已委托，
+      // 此处不再有第二份 readiness）。
+      if (dir !== null && existsSync(join(dir, 'review.md'))) {
+        readiness = terminalReadiness(readFileSync(join(dir, 'review.md'), 'utf8'))
+      }
+    }
+    const verdict = deliveryAnswerGuard({ isDeliveryCard: true, readiness, pick: PICK })
+    if (!verdict.allow) {
+      console.error('hitl-answer: ⛔ 交付代答闸自拒——' + verdict.reason)
+      process.exit(4)
+    }
+    if (verdict.reason !== '') console.log('hitl-answer: 交付代答闸放行注记——' + verdict.reason)
+  }
+}
+console.log(`hitl-answer: 驱动计划——卡共 ${plan.questionCount ?? '?'} 题 · 形态 = ${plan.indefinite === true ? 'wait:-1 无限期（⚠ timed 放行与文本兜底均不可用，必须真浏览器答满）' : plan.indefinite === false ? 'timed/默认（600s 放行 + 保持可答）' : '未知（日志读不到 ask 参数）'}`)
+// 模式自报（2026-09-26 教训：`flag/has` 的 `--` 加了两遍 → `--dry-run` 判假，**"dry-run" 实际
+// 执行了代答**。此后开局即打印模式，操作者一眼能看出它到底会不会点。）
+console.log(`hitl-answer: 模式 = ${DRY ? 'dry-run（只看不点）' : '实答（会提交）'} · pick=${PICK} · session=${SESSION ?? '（盘侧最新挂起）'}`)
+
+const answered = []
+const log = (m) => console.log(m)
+
+const chromium = await loadChromium(ROOT)
+const browser = await launchChromium(chromium)
+// ⚠ 视口要够高（2026-09-27 第七场实测）：题干超长的问询卡会把选项行挤到 y≈2300+，
+// 1100 高的视口里选项在折叠线下方、Playwright 在该容器里自动滚动不生效 → click 超时被
+// catch 吞掉 → Submit 一直 disabled、答了 8 次全没提交。2600 覆盖至今见过的最长卡。
+try {
+  const page = await browser.newPage({ viewport: { width: 1600, height: 2600 } })
+  await page.goto(`http://127.0.0.1:${PORT}/?token=${TOKEN}`, { waitUntil: 'domcontentloaded' })
+  await page.waitForTimeout(6000)
+
+  // ⓪ 关测试须知弹窗——**限定在 dialog/mask 容器内点**：实测教训（2026-09-26 跑第二场 run 时踩到）
+  //   问询卡片的提交按钮同样可能叫 "Continue"，盲点 `button:has-text("Continue")` 会在卡片已
+  //   渲染时**替人提交默认选项**。容器实测有**两种**：`_dialog_`（CSS modules 哈希——测试须知
+  //   "Internal Testing Notice" 用这个，重建 profile 后它会重新出现）与 `_mask_`；按序试。
+  for (const sel of ['[class*="_dialog_"]', '[role="dialog"]', '[class*="_mask_"]']) {
+    const dlg = page.locator(sel).first()
+    if (!(await dlg.isVisible().catch(() => false))) continue
+    for (const lbl of ['button:has-text("Continue")', 'button:has-text("我知道了")', 'button:has-text("Got it")']) {
+      const b = dlg.locator(lbl).first()
+      if (await b.isVisible().catch(() => false)) {
+        try { await b.click() } catch (error) { log(`hitl-answer: ⚠ 测试须知按钮点击失败（${String(error).slice(0, 90)}）`) }
+        break
+      }
+    }
+    break
+  }
+  await page.waitForTimeout(800)
+
+  // ① 点开侧栏里挂起问询的会话（左栏 x < 256，防中央区同名 class 抢匹配）。
+  //    实测坑（2026-09-26 第三场 HITL2）：`click().catch(()=>{})` 会把超时**静默吞掉**——
+  //    页面未加载完时元素在重渲染，click 落空但脚本以为点开了，随后 40s 等卡片当然等不到。
+  //    现在：①初始等待加长到 6s；②click 失败要**报出来**；③点完校验主视图真的切到了该会话
+  //    （正文里出现会话标题或问询卡片），没切就换目标再点一次。
+  const rows = page.locator('span[class*="_root_"]')
+  const sessionRows = page.locator('[data-row-key^="session:"]')
+  const workspaceRows = page.locator('[data-row-key^="workspace:"]')
+  const overflowRows = page.locator('[data-row-key^="overflow:"]')
+  // 侧栏行扫描上限（2026-10-15 卡第 1 条）：原为三处内联 `Math.min(n, 300)`；提为常量便于
+  // 文案引用与反证注入。命中上限与"目标不在侧栏"是**两种因**，报错要分开（下面 capHit 记录）。
+  const ROW_SCAN_CAP = 300
+  // 命中上限的记录（卡第 1 条）：某次行扫因窗满而提前结束 ≠ "目标不在侧栏"——报错要分开说，
+  // 否则超限场会被误导成"归档/终局化"处置（旧文案实测：零上限时报"侧栏没有目标会话行"且
+  // 样本区显示"（侧栏零可见行）"，而行明明在场）。
+  const capHits = new Map() // kind → total（逐类记账：超限时可能多类同时命中，报单一类会漏信息）
+  const noteCap = (kind, total) => { if (total > ROW_SCAN_CAP) capHits.set(kind, total) }
+  const rowTexts = [] // 诊断样本：每次行扫收集可见行文本，找不到目标时报给操作者对照
+  // 仍折叠的组数（BUG-031）：>0 说明还没展开完，不能断言"通道实例老化"——先把可展开的都展开。
+  const collapsedGroupCount = async () => {
+    let n = 0
+    for (const items of [workspaceRows, overflowRows]) {
+      const total = await items.count()
+      for (let i = 0; i < Math.min(total, ROW_SCAN_CAP); i++) {
+        if (await items.nth(i).getAttribute('aria-expanded') === 'false') n++
+      }
+    }
+    return n
+  }
+  // 行键定位/折叠展开 = lib/web-ui-nav **唯一正本**（revealSessionRow：行键直达 → 具名组
+  // 展开(手风琴回正) → aria-expanded 通用扫展 → 「Show N more」逐层——原私有 findTargetRow /
+  // expandOneSidebarSection / revealTargetRow 扫展循环三件退役，2026-10-21 收拢；data-row-key
+  // 主锚的裁决依据见 lib 头注）。诊断面（capHits/rowTexts/collapsedGroupCount）留在本件——
+  // 它们喂 sidebarMissVerdict 的错因判据，不是导航策略。
+  let searchTried = false
+  let searchHit = false
+  const revealTargetRow = async () => {
+    noteCap('session 行', await sessionRows.count().catch(() => 0))
+    noteCap('分组行', await workspaceRows.count().catch(() => 0))
+    const reveal = await revealSessionRow(page, uiTargetSessionId)
+    if (reveal !== null) return reveal.row
+    // 懒渲染兜底（BUG-035 正修，2026-10-18 实测）：侧栏列表可能**根本不含目标会话行**
+    // （分组行在场、会话行不在 DOM），而 `Search sessions` 能搜到同一条——扫行/展开够不着时
+    // 走搜索路径再扫一次；不再把"扫不到"判成"实例老化/需重启"（重启已被实测证伪）。
+    const title = uiTargetTitle
+    if (title !== null && title !== undefined && title !== '') {
+      searchTried = true
+      if (await searchSessionByTitle(page, title)) {
+        log(`hitl-answer: 侧栏扫行未命中 → 走搜索路径（"Search sessions" 输入「${String(title).slice(0, 40)}」）`)
+        // 搜索结果**不带行键**（实测）→ 按文本点；是否真切到目标由 openSession 的 activated() 复核
+        if (await clickSearchResultByTitle(page, title)) {
+          log('hitl-answer: 已点搜索结果（结果行无行键，改为按文本点）——等主视图 session id 复核')
+          searchHit = true
+          return 'search-clicked' // 哨兵：点击已发生，openSession 直接交给 activated() 复核
+        }
+      }
+    }
+    return null
+  }
+  const inspectUi = async (action = 'identity', fields = {}) => page.evaluate(operateOnTargetCard, {
+    targetSessionId: uiTargetSessionId,
+    expectedCardKey,
+    action,
+    ...fields,
+  })
+  const openSession = async () => {
+    rowTexts.length = 0
+    const n = await rows.count()
+    noteCap('可见行（诊断样本）', n)
+    for (let i = 0; i < Math.min(n, ROW_SCAN_CAP); i++) {
+      const el = rows.nth(i)
+      if (!(await el.isVisible().catch(() => false))) continue
+      const box = await el.boundingBox().catch(() => null)
+      if (box === null || box.x >= 256) continue
+      const text = ((await el.textContent()) ?? '').trim()
+      if (text !== '') rowTexts.push(text.slice(0, 60))
+    }
+    const row = await revealTargetRow()
+    if (row === null) return null
+    if (row === 'search-clicked') return 'search-clicked' // 点击已在兜底里完成，不重复点
+    const text = ((await row.textContent()) ?? '').trim()
+    const box = await row.boundingBox().catch(() => null)
+    if (box === null || box.x >= 256) return null
+    try { await row.click({ timeout: 10_000 }) } catch (e) { log(`hitl-answer: ⚠ 目标会话行点击失败（${String(e).slice(0, 90)}）`); return null }
+    return text.slice(0, 60)
+  }
+  const activated = async () => (await inspectUi('session')).ready
+  let opened = await openSession()
+  if (opened !== null && !(await activated())) {
+    log('目标行已点击，但主视图 session ID 尚未切到目标——按 session ID 重试一次')
+    const retryRow = sessionRowById(page, uiTargetSessionId)
+    if (await retryRow.count().catch(() => 0) > 0) {
+      try { await retryRow.first().click({ timeout: 8_000 }) } catch (error) { log(`hitl-answer: ⚠ 目标会话重试点击失败（${String(error).slice(0, 90)}）`) }
+    }
+    await page.waitForTimeout(2500)
+    if (!(await activated())) {
+      log('重试后主视图 session ID 仍不匹配——拒绝在未确认的会话视图代答')
+      stopForMissingUiSession()
+    }
+  }
+  if (opened === null) {
+    // 错因判据（BUG-031）：把"目标不在侧栏"与"通道实例老化（UI 渲染不出会话行）"分开说——
+    // 旧文案在老化现场是误导的（让操作者去查归档/终局化，两条都不成立）。
+    const verdict = sidebarMissVerdict({
+      renderedSessionRows: await sessionRows.count().catch(() => 0),
+      collapsedGroups: await collapsedGroupCount().catch(() => 0),
+      capHit: capHits.size > 0,
+      diskPending: diskPendingTarget,
+      triedSearch: searchTried,
+      searchHit,
+    })
+    console.error(`hitl-answer: 侧栏没有目标会话行（session id=${uiTargetSessionId}，--session=${SESSION ?? '（盘侧最新挂起）'}）`
+      + `——错因判据 = ${verdict.kind}：${verdict.message}`)
+    if (capHits.size > 0) {
+      const detail = [...capHits].map(([kind, total]) => `${kind} ${total} 条`).join('、')
+      console.error(`hitl-answer: ⚠ 扫描上限（上限 ${ROW_SCAN_CAP}）——${detail}：目标可能在**未扫描区间**`
+        + '（与"不在侧栏"不同因——先扩窗或收窄候选再重试，别按"已归档/被终局化"处置）')
+      if (rowTexts.length === 0) console.error('hitl-answer: 注：下面的"侧栏可见行样本"为空同样可能由扫描上限造成——不代表侧栏真的没有行。')
+    }
+    console.error('hitl-answer: 侧栏可见行样本（展开后仍未见目标时对照）：'
+      + (rowTexts.slice(0, 8).join(' ⏐ ') || '（侧栏零可见行）'))
+    process.exitCode = 3
+    throw NO_TARGET_SESSION
+  }
+  log(`hitl-answer: 已打开会话「${opened}」`)
+
+  // Wait until both the active conversation and its one visible ask card match the disk-selected session/call.
+  const cardReady = async () => (await inspectUi('identity')).ready
+  let ready = false
+  for (let i = 0; i < 40; i++) {
+    if (await cardReady()) { ready = true; break }
+    await page.waitForTimeout(1000)
+  }
+  if (!ready) {
+    const identity = await inspectUi('identity')
+    log(`hitl-answer: 等待目标会话 ask 卡超时或身份未匹配（${identity.reason ?? 'identity-unavailable'}）——拒绝操作任何页面卡片`)
+    stopForMissingUiSession()
+  }
+  await page.waitForTimeout(600)
+
+  // ② 策略驱动作答（BUG-004 重写）：观察 → nextDriveAction → 动作，UI 形状**永不**判完成；
+  //    提交成功与否由尾部盘侧裁决（driveVerdict）唯一判定。点击走 DOM 原生派发（Playwright
+  //    在 DSH UI 上的 actionability 检查会被问询卡挡死——cdp-probe 头注同款实测）。
+  const observeCard = async () => inspectUi('observe')
+  const clickOption = async (index, expectedLabels) => inspectUi('click-option', { index, expectedLabels })
+  const fillCustom = async (value) => inspectUi('custom', { value })
+  const clickSubmit = async () => {
+    const result = await inspectUi('click-submit')
+    return result.ready && result.clicked === true ? { clicked: true, kind: result.kind ?? 'final' } : { clicked: false, kind: null }
+  }
+  let submitted = false
+  let customConsumed = false // --custom 文本是否已作为纯文本题作答消费掉
+  // BUG-015 决策层：预选项 vs pick 意图的符合性进决策——目标不可解析（越界/空）时视为相符
+  // 放行（不瞎改选），裁决后的意图对账把关；预选项不符时 nextDriveAction 给 click-option
+  // 先改选目标项（clickOption 的 pick 定位逻辑本就在，劫持机制 = 预选使 Submit 提前可用
+  // 短路了它）。
+  const decideWithIntent = (obs) => {
+    const target = pickTargetLabel(obs.labels, PICK)
+    const selMatch = obs.checkedLabel === null || target.label === null ? undefined : obs.checkedLabel === target.label
+    return nextDriveAction({ ...obs, selectionMatchesIntent: selMatch, textAnswer: CUSTOM })
+  }
+  for (let step = 1; step <= MAX_STEPS; step++) {
+    let obs = await observeCard()
+    if (obs.ready !== true) {
+      // 重渲染瞬态（卡片切换中）给一次复看机会；身份仍未对上即停——绝不操作未验证的卡。
+      await page.waitForTimeout(1200)
+      obs = await observeCard()
+      if (obs.ready !== true) { log(`hitl-answer: 卡片身份校验失败（${obs.reason ?? 'identity-unavailable'}）——拒绝操作，交盘侧裁决`); break }
+    }
+    let act = decideWithIntent(obs)
+    if (act.action === 'abort') {
+      // 重渲染二次确认：题间切换的瞬态（radioCount=0）不该误判"无卡"——1.2s 后重看一次
+      await page.waitForTimeout(1200)
+      obs = await observeCard()
+      if (obs.ready !== true) { log(`hitl-answer: 卡片身份校验失败（${obs.reason ?? 'identity-unavailable'}）——拒绝操作，交盘侧裁决`); break }
+      act = decideWithIntent(obs)
+    }
+    if (DRY) { log(`[dry-run] 观察 radio=${obs.radioCount} checked=${obs.checkedCount} submit=${obs.submitFound}/${obs.submitDisabled} → ${act.action}（${act.reason}）`); break }
+    if (act.action === 'abort') { log(`hitl-answer: ${act.reason}`); break }
+    if (act.action === 'fill-text') {
+      customConsumed = true // 该文本已作为本题作答消费——不再当作选项题的补充文本（防串题）
+      const filled = await fillCustom(CUSTOM)
+      if (filled.ready !== true) { log(`hitl-answer: 纯文本题填入未命中（${filled.reason ?? 'custom-unavailable'}）——如实停止`); break }
+      answered.push({ step, prompt: obs.prompt ?? null, selected: `（文本作答）${String(CUSTOM).slice(0, 60)}` })
+      log(`hitl-answer: 第 ${step} 题 ← 文本作答（${String(CUSTOM).slice(0, 40)}…）`)
+      await page.waitForTimeout(900)
+      continue
+    }
+    if (act.action === 'click-advance') {
+      const adv = await inspectUi('click-advance')
+      if (adv.ready !== true || adv.clicked !== true) { log(`hitl-answer: 推进钮点击未命中（${adv.reason ?? 'advance-unavailable'}）——如实停止`); break }
+      log(`hitl-answer: 第 ${step} 轮 —— 推进钮「${adv.label ?? 'Skip/Next'}」已点击（不代表提交）`)
+      await page.waitForTimeout(900)
+      continue
+    }
+    if (act.action === 'click-option') {
+      const index = optionIndexToClick({ optionLabels: obs.labels, checkedIndex: obs.checkedIndex, pick: PICK })
+      const hit = index === null ? null : await clickOption(index, obs.labels)
+      if (hit === null || hit.ready !== true) { log(`hitl-answer: 选项点击未命中或题面已变化（${hit?.reason ?? 'index-unavailable'}）——如实停止（盘侧裁决收口）`); break }
+      // ⚠ 顺序按**意图**定（BUG-032 定案，2026-10-17）：UI 的"自定义文本"是**替换选择**语义——
+      // 同一问题上「选择」与「自定义」只能留一个（批形态实测：`selected:[] + custom:"…"` 或 `selected:["label"]`）。
+      // 故：给了 `--custom` 就让它**胜出**（点完再填，文本进批；代价 = 选项 label 被替换，stop 语义上
+      // 这正是"用户的答复是这段话"）；没给就只点选项。反过来的顺序会让文本被点击清掉——lead 只看到
+      // label、看不到修法（2026-10-17 实测：两次下达修法静默丢失、回合空转）。
+      if (CUSTOM !== null && !customConsumed) {
+        const filled = await fillCustom(CUSTOM)
+        if (filled.ready !== true) log(`hitl-answer: ⚠ custom 填写未落在目标卡上（${filled.reason ?? 'custom-unavailable'}）——如实跳过`)
+      }
+      answered.push({ step, prompt: hit.prompt, selected: hit.label })
+      log(`hitl-answer: 第 ${step} 题 ← ${hit.label}`)
+      await page.waitForTimeout(900) // 等选中态/翻页渲染
+      continue
+    }
+    // click-submit（kind=advance 只是翻页：继续循环，不算提交成功）
+    const now = await clickSubmit()
+    if (now.clicked && now.kind === 'advance') {
+      log(`hitl-answer: 已答 ${answered.length} 题——翻页（Next）已点击，继续下一题`)
+      await page.waitForTimeout(900)
+      continue
+    }
+    if (now.clicked) { submitted = true; log(`hitl-answer: 已答 ${answered.length} 题——Submit 已点击`); break }
+    await page.waitForTimeout(700) // 提交钮被重渲染 → 回环重观察
+  }
+
+  log(`hitl-answer: 共作答 ${answered.length} 题${plan.questionCount !== null ? ` / 卡共 ${plan.questionCount} 题` : ''}${submitted ? ' · Submit 已点击' : ' · 未走到 Submit'}`)
+  // 盘侧裁决（BUG-004 升格 + 活体验证补切片）：成功判据 = 盘侧 answer 批内容（UI 会预选/
+  // 自动推进选中态，点击计数不可作判据——实测点击 0 次而批全 Recommended 的假红形态）。
+  // 读窗有界重试（BUG-007 关联：日志帧批量落盘，answer 事件可能晚于短读窗数秒——等谓词，
+  // 不固定睡；最多 4 读 × 3s，仍不落地才如实红）。
+  // landedBatch 声明在裁决块外（作用域教训：块内声明 + 块外 provenance 引用 = 裁决通过后必崩，
+  // 答案落地但 provenance 永丢——license run HITL2 实录，第三缺口）。
+  let landedBatch = []
+  {
+    let verdict = null
+    if (DRY) {
+      verdict = driveVerdict({ dryRun: true, settled: false, batch: [], clickCount: answered.length })
+    } else {
+      for (let attempt = 0; attempt < 4; attempt++) {
+        if (attempt > 0) await page.waitForTimeout(3000)
+        const s2 = pendingLogPath !== null
+          ? runStateOf({ logPath: pendingLogPath, wsRoot: DEV_WORKSPACE })
+          : { hitlPending: null }
+        const batch = plan.callId !== null && pendingLogPath !== null
+          ? answerBatchOf(readSessionEvents(pendingLogPath).events, plan.callId)
+          : []
+        const settled = s2.hitlPending === false && batch.length > 0
+        const candidate = driveVerdict({ dryRun: false, settled, batch, clickCount: answered.length })
+        if (candidate.pass) { verdict = candidate; landedBatch = batch; break }
+        verdict = candidate // 保留最后一次（红），继续重试窗
+      }
+    }
+    log(`hitl-answer: 盘侧裁决——${verdict.reason}`)
+    process.exitCode = verdict.exitCode
+  }
+  // custom 进批复核（BUG-032）：盘侧裁决与意图对账都只看 selected——**给了 --custom 却没进批**
+  // 必须响亮红（否则操作侧以为修法已送达，实际 lead 只收到一个 label）。处置指向 = 改用
+  // `run-kickoff --prompt-file` 注入（注入通道可靠，本轮已验证）。
+  let customMissing = false
+  if (!DRY && process.exitCode === 0 && CUSTOM !== null && !customLandedInBatch({ batch: landedBatch, custom: CUSTOM })) {
+    // 答复**已落地**（盘侧裁决通过），只是那段说明没进批——与 intentFailed 同族：事实照记、结果响亮红。
+    console.error('hitl-answer: ⚠ **custom 文本未进答复批**——UI 的自定义是"替换选择"语义（同一问题二者只能留一个），'
+      + 'lead 收不到这段说明（只看到选项 label）。处置：长修法改走 `tools/run-kickoff.mjs --session <id> --prompt-file <文件>` 注入。')
+    process.exitCode = 1
+    customMissing = true
+  }
+  // 意图对账（BUG-015 裁决后半）：盘侧批已落地 ≠ 命令的答案已落地——逐题对 pick 目标，
+  // 不符即响亮红（exit 1）；答案内容仍进 provenance（事实归事实，意图归意图）。
+  let intentFailed = false
+  if (!DRY && process.exitCode === 0 && landedBatch.length > 0 && (plan.questions ?? []).length > 0) {
+    const rec = intentReconcile({ batch: landedBatch, questions: plan.questions, pick: PICK })
+    if (rec.ok) {
+      log(`hitl-answer: 意图对账通过——answer 批与 pick=${PICK} 逐题一致`)
+    } else {
+      intentFailed = true
+      process.exitCode = 1
+      for (const m of rec.mismatches) log(`hitl-answer: ⚠ 意图未达成——Q「${m.id}」pick=${PICK} 目标「${m.expected}」，实际落地「${m.landed}」——答案已落地但不是命令的答案，勿当成功用（BUG-015 对账）`)
+    }
+  }
+  // 代理模拟 provenance（BUG-014 正修 ×3）：盘侧裁决通过（answer 真落地）才写盘——数据源 =
+  // **实际提交的 answer 批**（batchToAnswered，id 作标签），不以点击日志为准（DSH UI 预选推荐项、
+  // 零点击 Submit 时点击日志为空——第二缺口实录：mcp-hosts run HITL2 预选形态零写盘）。
+  // dry-run 不写；裁决红不写；批与点击日志双空 = answer 未落地不写。HITL1 窗口（无 bundle）响亮延迟。
+  // ⚠ 作用域教训（第三缺口实录）：landedBatch 必须声明在裁决块之外——块内声明 + 块外引用
+  // = ReferenceError，裁决通过后必崩（答案已落地但 provenance 永远丢失，且 node --check 查不出）。
+  const provAnswered = batchToAnswered(landedBatch, plan.questions).length > 0 ? batchToAnswered(landedBatch, plan.questions) : answered
+  if (!DRY && provAnswered.length > 0 && (process.exitCode === 0 || intentFailed || customMissing)) {
+    const wsRoot = DEV_WORKSPACE
+    // 归属 = 被答会话自己的 bundle-bind（BUG-020 正修）：仅写命中归属，仅读/无绑定走延迟
+    // 分支——旧字典序 activeBundle 在无关在飞 bundle 在场时误归（两次实测）。journal **现读**
+    // （答案落地后 lead 可能已追加事件；绑定只增不减，现读信号面最全）。
+    const eventsNow = pendingLogPath !== null ? readSessionEvents(pendingLogPath).events : []
+    const attributed = attributionBundleOf(eventsNow)
+    const pickNote = intentFailed ? `${PICK}（意图不符实录：目标未达成，见对账输出——事实仍记账）` : PICK
+    if (attributed === null) {
+      // 无写命中 = HITL1 窗口常态（澄清先于 bundle 实例化）或仅读绑定（预检/恢复，证据不足
+      // 不归属）——provenance 响亮延迟不崩溃（answer 已落地，崩溃会让操作者误判答题失败）；
+      // 记账义务移交操作侧：bundle 出现/确认后补记（答案内容已逐题打印在下方）。
+      log('hitl-answer: answer 已落地但被答会话无可归属 bundle（仅写命中才归属——HITL1 窗口 / 立项预检期常态）——provenance 延迟：bundle 实例化后由操作侧补记，勿隐去')
+    } else {
+      // 写盘竞态自知：答案落地后 lead 常立即爆发写盘（拍板行 / journal 追加），瞬时 rename
+      // 窗口会让严格版 lib 抛「契约件缺席」——驱动侧有界重试（3 次 × 2s）；仍失败则响亮延迟
+      // 不崩（答案落地是关键副作用，provenance 缺席要大声但不能吞掉答题成功）。
+      let written = null
+      for (let attempt = 0; attempt < 3 && written === null; attempt++) {
+        if (attempt > 0) await page.waitForTimeout(2000)
+        try {
+          written = appendProvenance({ bundle: join(wsRoot, `drt_${attributed}`), date: localDateStr(), pick: pickNote, answered: provAnswered })
+        } catch (e) {
+          if (attempt === 2) log(`hitl-answer: provenance 写盘失败（3 次重试后）——${String(e?.message ?? e).slice(0, 140)}；记账义务移交操作侧（答案内容已打印），勿隐去`)
+        }
+      }
+      if (written !== null) log(`hitl-answer: 代理模拟记录已写盘——${written.question} + ${written.journal}`)
+    }
+  } else if (DRY) {
+    log('hitl-answer: dry-run——代理模拟记录不写盘')
+  } else if (answered.length > 0 || provAnswered.length > 0) {
+    log('hitl-answer: 未提交成功（盘侧裁决红）——不写 provenance（answer 未落地，如实）')
+  }
+  for (const a of answered) log(`  Q${a.step}: ${a.prompt}\n     → ${a.selected}`)
+} catch (error) {
+  if (error !== NO_TARGET_SESSION) throw error
+} finally {
+  try { await browser.close() } catch (error) { log(`hitl-answer: browser.close 失败（${String(error?.message ?? error).slice(0, 120)}）`) }
+  // 进程收割（BUG-004 放大器加固）：close 后主进程若仍活着（exitCode null）→ SIGKILL 兜底。
+  // SIGKILL 后等待 exit；close/kill 失败显性报告而不伪装资源已释放。
+  const proc = typeof browser.process === 'function' ? browser.process() : null
+  if (proc !== null && proc !== undefined && proc.pid !== undefined && proc.exitCode === null && proc.signalCode === null) {
+    const exited = once(proc, 'exit').then(() => true, (error) => {
+      log(`hitl-answer: 子进程退出监听失败（${String(error?.message ?? error).slice(0, 120)}）`)
+      return false
+    })
+    let signalled = false
+    try {
+      process.kill(proc.pid, 'SIGKILL')
+      signalled = true
+    } catch (error) {
+      if (error?.code !== 'ESRCH') log(`hitl-answer: SIGKILL 子进程失败（${String(error?.message ?? error).slice(0, 120)}）`)
+    }
+    if (signalled) await exited
+  }
+}

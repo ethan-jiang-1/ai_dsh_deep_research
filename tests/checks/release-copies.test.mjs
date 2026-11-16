@@ -22,7 +22,7 @@ const liveDocs = [
   'docs/guides/64-release-versioning.md',
   'packages/deep-research-pack/README.md',
   'packages/deep-research-pack/README.zh.md',
-  'dev/release/product-manual.md',
+  'tools/release/product-manual.md',
   '_dist/安装手册.md',
 ];
 

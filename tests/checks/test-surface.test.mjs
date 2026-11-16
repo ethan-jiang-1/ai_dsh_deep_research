@@ -1,9 +1,9 @@
 // 覆盖边界（2026-10-28 评分轮 Phase D；同日卫生轮扩到 pack 纯件）。
 //
-// 为什么需要：`scripts/lib` 的模块没有一个机械的覆盖对账，此前的"覆盖"只靠约定（tests/AGENTS 说"文件名为被测
+// 为什么需要：`checks/lib` 的模块没有一个机械的覆盖对账，此前的"覆盖"只靠约定（tests/AGENTS 说"文件名为被测
 // 模块名"），没有任何机械对账——新增一个 lib 模块不写测试、或删掉测试，都不会有人知道。本测试把
 // 覆盖边界钉成可失败的事实：
-//   ① 每个 `scripts/lib/*.{mjs,cjs}` 要么被至少一个 `*.spec.mjs` 直接 import（= 有直测），
+//   ① 每个 `checks/lib/*.{mjs,cjs}` 要么被至少一个 `*.spec.mjs` 直接 import（= 有直测），
 //      要么登记在 `SMOKE_ONLY` 里并给出理由；
 //   ② `SMOKE_ONLY` 的键必须在盘上存在（退役模块不删登记 = 红；`.mjs`/`.cjs` 都算）；
 //   ③ 防空语料：lib 模块数与测试数都不能少到让断言空转；
@@ -15,18 +15,18 @@
 // 负例留证 2026-10-28：删掉 SMOKE_ONLY 里的 hitl-card-driver → 红，报因逐项列出未覆盖模块
 //（cdp-driver, hitl-card-driver, playwright, port-reclaim, web-harness, zstd-read）；还原 → 绿。
 // pack 分支负例：临时新增 `src/lib/__probe-untested.ts` → 红并点名该件；删除 → 绿。
-// 负例留证 2026-11-16：BUG-196——临时新增无测试 `scripts/lib/shared/zz-probe.cjs` → 红并点名，
+// 负例留证 2026-11-16：BUG-196——临时新增无测试 `checks/lib/shared/zz-probe.cjs` → 红并点名，
 // 删除 → 绿；`.cjs` 家族的两个既有件各自有归宿（policy 直测 / preload 登记 SMOKE_ONLY）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localImportPath, parseKeylessImports } from '../../scripts/lib/tools/keyless-imports.mjs'
-import { libModulesOf } from '../../scripts/lib/tools/test-index.mjs'
+import { localImportPath, parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs'
+import { libModulesOf } from '../../checks/lib/tools/test-index.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const LIB = join(ROOT, 'scripts', 'lib')
+const LIB = join(ROOT, 'checks', 'lib')
 const PACK_LIB = join(ROOT, 'packages', 'deep-research-pack', 'src', 'lib')
 
 /** 只能由 smoke/probe 或 vm 沙箱行为测试覆盖的模块（keyless 回归禁真实浏览器/子进程/端口，见 layering 五件套）。 */
@@ -63,7 +63,7 @@ function testFiles() {
 
 /**
  * 被测试**直接 import** 的 lib 模块集合（真 import 语句，非文本提及）。
- * 2026-11-03 卫生审计 D5-5：旧实现是原文正则——注释里写一句 `scripts/lib/foo.mjs` 就算覆盖。
+ * 2026-11-03 卫生审计 D5-5：旧实现是原文正则——注释里写一句 `checks/lib/foo.mjs` 就算覆盖。
  * 现在用 layering 同款 TS 解析器（`parseKeylessImports`）取 import/re-export/动态 import 的
  * 字面量，再用 `localImportPath` 解析到绝对路径；注释与字符串夹具不再计数。
  */
@@ -82,10 +82,10 @@ function coveredByTests(files) {
   return covered
 }
 
-test('覆盖边界：每个 scripts/lib 模块有直测，或登记为 SMOKE_ONLY 并给出理由（BUG-196）', () => {
+test('覆盖边界：每个 checks/lib 模块有直测，或登记为 SMOKE_ONLY 并给出理由（BUG-196）', () => {
   const modules = libModules()
   const files = testFiles()
-  assert.ok(modules.length >= 40, `防空语料：scripts/lib 模块过少（${modules.length}）`)
+  assert.ok(modules.length >= 40, `防空语料：checks/lib 模块过少（${modules.length}）`)
   assert.ok(files.length >= 50, `防空语料：测试文件过少（${files.length}）`)
   const covered = coveredByTests(files)
   const uncovered = modules.filter((name) => !covered.has(name))
@@ -102,7 +102,7 @@ test('覆盖边界：每个 scripts/lib 模块有直测，或登记为 SMOKE_ONL
   }
 })
 
-/** pack 纯件（src/lib/*.ts）被测试直接 import 的集合——同一解析器，路径比 scripts/lib 深一层。 */
+/** pack 纯件（src/lib/*.ts）被测试直接 import 的集合——同一解析器，路径比 checks/lib 深一层。 */
 function coveredPackLib(files) {
   const covered = new Set()
   for (const file of files) {

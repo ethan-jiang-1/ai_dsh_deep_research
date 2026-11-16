@@ -13,7 +13,7 @@ import assert from 'node:assert/strict'
 import { appendFileSync, existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { sessionsOfBundle, sessionsOfBundleCached } from '../../../scripts/lib/ops/bundle-sessions.mjs'
+import { sessionsOfBundle, sessionsOfBundleCached } from '../../../checks/lib/ops/bundle-sessions.mjs'
 
 const HEADER = '{"type":"session","delegationDepth":0,"agentPreset":"lead"}'
 const writeCall = (path) => `{"type":"tool/call","data":{"name":"write","callId":"w1","arguments":${JSON.stringify(JSON.stringify({ path }))}}}`

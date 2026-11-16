@@ -13,7 +13,7 @@
 //   2/2 绿）；还原为 toLocaleDateString → 绿。是"守卫在 CI 时区失效"的直接反证。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { localDateStr } from '../../../scripts/lib/shared/local-date.mjs';
+import { localDateStr } from '../../../checks/lib/shared/local-date.mjs';
 
 test('localDateStr：边界时刻按指定时区取日，UTC slice 实现在任何宿主时区都必红（BUG-017 形态判别）', () => {
   // mcp-hosts 事故同款窗口：UTC = 10-07 深夜，东八区本地 = 10-08 凌晨

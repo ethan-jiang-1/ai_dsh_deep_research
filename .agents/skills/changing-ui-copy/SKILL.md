@@ -62,7 +62,7 @@ pnpm test          # locales/i18n/cjk-source + 既有契约
 pnpm typecheck
 pnpm build         # client bundle 变化时
 pnpm verify
-node --import tsx/esm scripts/smoke/client-load.entry.mjs --seed tests/fixtures/client-load-home
+node --import tsx/esm checks/smoke/client-load.entry.mjs --seed tests/fixtures/client-load-home
 ```
 
 `cjk-source` 的允许清单只收**模型面/数据面/格式面**（如 `config-tables`、`library-fold`、

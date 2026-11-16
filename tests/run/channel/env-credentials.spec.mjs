@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { credentialsPresent, isDevHome, scrubbedEnv, withModelKey } from '../../../scripts/lib/shared/env.mjs';
+import { credentialsPresent, isDevHome, scrubbedEnv, withModelKey } from '../../../checks/lib/shared/env.mjs';
 
 const CREDENTIAL_FILE = ['.credentials', 'yaml'].join('.');
 

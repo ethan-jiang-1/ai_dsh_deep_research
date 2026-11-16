@@ -12,7 +12,7 @@ import {
   missingProbeFields,
   renderProbeIndex,
   scanProbeEntries,
-} from '../scripts/lib/shared/probe-index.mjs';
+} from '../checks/lib/shared/probe-index.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DIR = join(ROOT, 'probes');

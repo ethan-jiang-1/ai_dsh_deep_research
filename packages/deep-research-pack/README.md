@@ -247,7 +247,7 @@ Only the Method Editor Agent sees `method_library_upsert`, `method_library_set_d
 
 #### Token effect
 
-A deterministic Loader scenario prices the real first request (messages + tool schemas, fixed-density estimator) against the earlier upsert/remove schemas. The schema delta is +246 tokens (asserted); the absolute total ≈6.8k varies with the per-step clock injection — regenerate via `node scripts/smoke/method-library-tool.e2e.mjs`. Comparative estimate, not provider tokenization; each save request also carries its full method entry and command marker.
+A deterministic Loader scenario prices the real first request (messages + tool schemas, fixed-density estimator) against the earlier upsert/remove schemas. The schema delta is +246 tokens (asserted); the absolute total ≈6.8k varies with the per-step clock injection — regenerate via `node checks/smoke/method-library-tool.e2e.mjs`. Comparative estimate, not provider tokenization; each save request also carries its full method entry and command marker.
 
 #### KV Cache effect
 
@@ -261,7 +261,7 @@ Each role's first request carries its persona, role-scoped skill descriptions, t
 
 #### Token effect
 
-`node scripts/smoke/model-experience.e2e.mjs` prices the real assembled first request. Stable per-version faces: Lead tool schemas 6,634 tokens, Scout 4,999, manual 2,506 ≈50.6% of Lead message tokens. Absolute totals (Lead ≈11.6k, Scout ≈8.7k) vary with the clock injection; regenerate via the smoke. Comparative estimate, not provider tokenization or billing.
+`node checks/smoke/model-experience.e2e.mjs` prices the real assembled first request. Stable per-version faces: Lead tool schemas 6,634 tokens, Scout 4,999, manual 2,506 ≈50.6% of Lead message tokens. Absolute totals (Lead ≈11.6k, Scout ≈8.7k) vary with the clock injection; regenerate via the smoke. Comparative estimate, not provider tokenization or billing.
 
 #### KV Cache effect
 

@@ -8,7 +8,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { eventKeys, parseWorkflow } from '../../scripts/lib/tools/ci-workflow.mjs'
+import { eventKeys, parseWorkflow } from '../../checks/lib/tools/ci-workflow.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const TEXT = readFileSync(join(ROOT, '.github', 'workflows', 'model-smoke.yml'), 'utf8')
@@ -31,6 +31,6 @@ test('on: 键集合解析：额外事件（含 pull_request_target）与空映�
 
 test('model-smoke：用 secret 注入 key，跑 l4-lite.e2e（缺 key 由脚本 preflight exit 2 拦）', () => {
   assert.match(TEXT, /DEEPSEEK_API_KEY:\s*\$\{\{\s*secrets\.DEEPSEEK_API_KEY\s*\}\}/, '必须从 secret 注入 key')
-  assert.match(TEXT, /scripts\/smoke\/l4-lite\.e2e\.mjs/, '必须跑 l4-lite.e2e')
+  assert.match(TEXT, /checks\/smoke\/l4-lite\.e2e\.mjs/, '必须跑 l4-lite.e2e')
   assert.doesNotMatch(TEXT, /continue-on-error|allowFailure|--install-only/, '真模型档不得降级/跳过')
 })

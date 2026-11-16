@@ -21,8 +21,8 @@ import {
   methodNameMatches,
   preContractByDelivery,
   validateProtocol,
-} from '../../../scripts/lib/gates/protocol-core.mjs'
-import { cardTextOf, evaluateBundle, projectionOf, requiredByProtocolContract } from '../../../scripts/lib/gates/protocol-audit-core.mjs'
+} from '../../../checks/lib/gates/protocol-core.mjs'
+import { cardTextOf, evaluateBundle, projectionOf, requiredByProtocolContract } from '../../../checks/lib/gates/protocol-audit-core.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const TEMPLATE = join(ROOT, 'packages', 'deep-research-pack', 'content', 'templates', 'run', 'protocol.json')
@@ -167,7 +167,7 @@ test('绿基线：valid protocol + 投影 + plan 头 + Decisions + audit 行 →
 // 但 CLI 的 import 被删 → --write 阶段 ReferenceError。还原法 = 删 import 里的该常量。
 test('BUG-077 protocol-audit --write：renderReport 引用的契约日常量必须在 import 内', () => {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
-  const source = readFileSync(resolve(root, 'scripts/run-gates/protocol-audit.mjs'), 'utf8')
+  const source = readFileSync(resolve(root, 'checks/run-gates/protocol-audit.mjs'), 'utf8')
   assert.match(source, /PROTOCOL_CONTRACT_DATE/ , 'renderReport 仍引用契约日')
   assert.match(source, /import \{[^}]*PROTOCOL_CONTRACT_DATE[^}]*\} from '\.\.\/lib\/gates\/protocol-core\.mjs'/,
     'protocol-audit CLI 必须 import PROTOCOL_CONTRACT_DATE（否则 --write ReferenceError）')

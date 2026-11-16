@@ -12,13 +12,13 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localImportPath, parseKeylessImports } from '../../scripts/lib/tools/keyless-imports.mjs'
-import { DOMAINS } from '../../scripts/lib/tools/test-index.mjs'
-import { placementIssues } from '../../scripts/lib/repo/test-placement.mjs'
+import { localImportPath, parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs'
+import { DOMAINS } from '../../checks/lib/tools/test-index.mjs'
+import { placementIssues } from '../../checks/lib/repo/test-placement.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const LIB = join(ROOT, 'packages', 'deep-research-pack', 'src', 'lib')
-const SCRIPTS_LIB = join(ROOT, 'scripts', 'lib')
+const SCRIPTS_LIB = join(ROOT, 'checks', 'lib')
 const TESTS = join(ROOT, 'tests', 'cockpit', 'lib')
 const RUN_DOMAINS = DOMAINS.filter((d) => d !== 'review')
 // 测试支撑 owner 不是运行时 domain 轴：method-presets 这类跨库测试以 test-infra 为家。

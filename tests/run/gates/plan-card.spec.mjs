@@ -1,7 +1,7 @@
 // tests/run/gates/plan-card.spec.mjs —— HITL1 计划确认卡识别与字数口径的 keyless 契约（唯一语义源）。
 //
 // 为什么存在：同一判据曾有**两版实现**（node-gate 门① 的 WARN 记账与运行态标定扫描器）——各写
-// 一份"哪张 ask 是计划卡、正文多长"。收成 `scripts/lib/shared/plan-card.mjs` 后由本测试钉住口径与边界，
+// 一份"哪张 ask 是计划卡、正文多长"。收成 `checks/lib/shared/plan-card.mjs` 后由本测试钉住口径与边界，
 // 免得两处再漂（同族事故 = readiness 终局判定的三版分叉）。
 //
 // 反证（同 diff 注入实测，红→还原→绿）：
@@ -10,7 +10,7 @@
 //   ③不逐问过滤（对 payload.questions 直接 push）→ 用例 3 红（同一次调用里的普通问被计入）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { planCardsOf, PLAN_CARD_MARK, PLAN_CARD_LIMIT } from '../../../scripts/lib/shared/plan-card.mjs';
+import { planCardsOf, PLAN_CARD_MARK, PLAN_CARD_LIMIT } from '../../../checks/lib/shared/plan-card.mjs';
 
 const call = (seq, questions) => JSON.stringify({
   type: 'tool/call',

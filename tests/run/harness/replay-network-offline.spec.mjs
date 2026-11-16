@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import vm from 'node:vm'
-import { isDshMain, isLoopback } from '../../../scripts/lib/harness/replay-network-offline-policy.cjs'
+import { isDshMain, isLoopback } from '../../../checks/lib/harness/replay-network-offline-policy.cjs'
 
 test('BUG-064 离线闸：loopback 放行、外部主机判失败', () => {
   for (const host of ['127.0.0.1', 'localhost', '::1', '0.0.0.0', '127.0.0.53', 'app.localhost', '', undefined]) {
@@ -25,7 +25,7 @@ test('BUG-064 离线闸：loopback 放行、外部主机判失败', () => {
 // 负例留证 2026-11-12：BUG-067——修复前 install() 只补 lookup/connect，resolve4 实测绕过。
 // 现在的覆盖由 vm 行为用例承担：假 dns/net + 假 argv 命中 dsh 主进程，真正执行 install()。
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
-const SOURCE = readFileSync(join(ROOT, 'scripts', 'lib', 'harness', 'replay-network-offline.cjs'), 'utf8')
+const SOURCE = readFileSync(join(ROOT, 'checks', 'lib', 'harness', 'replay-network-offline.cjs'), 'utf8')
 const RESOLVE_NAMES = ['resolve', 'resolve4', 'resolve6', 'resolveAny', 'resolveCname', 'resolveMx', 'resolveNaptr', 'resolveNs', 'resolvePtr', 'resolveSoa', 'resolveSrv', 'resolveTxt', 'resolveCaa']
 
 /** 假 DNS/net：记录真实分支调用次数，并提供与 Node 同形的 callback / promises / Resolver 面。 */

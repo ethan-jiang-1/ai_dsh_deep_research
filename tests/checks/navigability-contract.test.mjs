@@ -4,7 +4,7 @@
 // 全覆盖 + 矩阵链接目标在场）、资产门（scripts 职责索引 + dev 入口说明 + fixtures taxonomy
 // 覆盖全量盘上入口，且每组 fixture ≥1 真实 consumer、零孤儿）。
 // 行为门不在此文件：verify/test 全绿与"diff 无运行件路径移动"是收尾对账命令面（RFC 实施记录）。
-// 立红记录：2026-10-05 R2 首跑——design/50、入口矩阵、scripts/README、dev/README、
+// 立红记录：2026-10-05 R2 首跑——design/50、入口矩阵、checks/README、tools/README、
 // fixtures/README 均缺席即红（红是本测试的正确起点：判据在实现前必须能失败）；
 // consumer 检查与 spot-grep 绿态出生，反证 = 注入孤儿组 / 向非 owner 注入状态定语各看红一次后还原。
 import { test } from 'node:test';
@@ -63,28 +63,28 @@ test('导航门：任务入口矩阵逐行完整（六列非空、首选入口�
 });
 
 test('资产门：scripts 职责索引覆盖全部盘上入口（根面 + 职责子目录 + lib 全量）', () => {
-  assert.ok(existsSync(join(ROOT, 'scripts/README.md')), 'scripts/README.md 缺席——职责索引（RFC Phase 1 第 4 项）');
-  const idx = read('scripts/README.md');
+  assert.ok(existsSync(join(ROOT, 'checks/README.md')), 'checks/README.md 缺席——职责索引（RFC Phase 1 第 4 项）');
+  const idx = read('checks/README.md');
   // 分组布局（2026-10-07 目录治理档 C）：顶层 = 职责子目录 + 根面（README/AGENTS/doc-budgets.json）；
   // 索引对组目录点名、对组内文件点名（lib/ 前缀形态）。
-  const topEntries = readdirSync(join(ROOT, 'scripts'), { withFileTypes: true }).filter((e) => e.name !== 'README.md');
+  const topEntries = readdirSync(join(ROOT, 'checks'), { withFileTypes: true }).filter((e) => e.name !== 'README.md');
   const libEntries = [];
   const collectLib = (dir) => {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {
       const p = join(dir, ent.name);
       if (ent.isDirectory()) collectLib(p);
-      else libEntries.push(relative(join(ROOT, 'scripts', 'lib'), p).split('\\').join('/'));
+      else libEntries.push(relative(join(ROOT, 'checks', 'lib'), p).split('\\').join('/'));
     }
   };
-  collectLib(join(ROOT, 'scripts', 'lib'));
+  collectLib(join(ROOT, 'checks', 'lib'));
   for (const ent of topEntries) assert.ok(idx.includes(ent.name), `scripts 职责索引未点名：${ent.name}${ent.isDirectory() ? '/' : ''}`);
   for (const f of libEntries) assert.ok(idx.includes(`lib/${f}`), `scripts 职责索引未点名：lib/${f}`);
 });
 
 test('资产门：dev 入口说明覆盖 dev 全量盘上入口（含运行区目录）', () => {
-  assert.ok(existsSync(join(ROOT, 'dev/README.md')), 'dev/README.md 缺席——dev 入口说明（RFC Phase 1 第 7 项）');
-  const idx = read('dev/README.md');
-  for (const ent of readdirSync(join(ROOT, 'dev'), { withFileTypes: true })) {
+  assert.ok(existsSync(join(ROOT, 'tools/README.md')), 'tools/README.md 缺席——dev 入口说明（RFC Phase 1 第 7 项）');
+  const idx = read('tools/README.md');
+  for (const ent of readdirSync(join(ROOT, 'tools'), { withFileTypes: true })) {
     if (ent.name === 'README.md') continue; // 自指豁免
     assert.ok(idx.includes(ent.name), `dev 入口说明未点名：${ent.name}${ent.isDirectory() ? '/' : ''}`);
   }
@@ -110,10 +110,10 @@ test('资产门：fixtures taxonomy 覆盖全部顶层组，每组 ≥1 真实 c
   const consumers = [
     ...walkTestFiles(join(ROOT, 'tests')).map((f) => join('tests', f)),
     // 分组布局（2026-10-07）：scripts 入口住职责子目录——逐组一层扫描（lib/ 支撑库单列）
-    ...readdirSync(join(ROOT, 'scripts'), { withFileTypes: true })
+    ...readdirSync(join(ROOT, 'checks'), { withFileTypes: true })
       .filter((e) => e.isDirectory()).flatMap((d) =>
-        readdirSync(join(ROOT, 'scripts', d.name)).filter((f) => f.endsWith('.mjs')).map((f) => join('scripts', d.name, f))),
-    ...readdirSync(join(ROOT, 'scripts', 'lib')).filter((f) => f.endsWith('.mjs')).map((f) => join('scripts', 'lib', f)),
+        readdirSync(join(ROOT, 'checks', d.name)).filter((f) => f.endsWith('.mjs')).map((f) => join('checks', d.name, f))),
+    ...readdirSync(join(ROOT, 'checks', 'lib')).filter((f) => f.endsWith('.mjs')).map((f) => join('checks', 'lib', f)),
   ];
   const texts = Object.fromEntries(consumers.map((c) => [c, read(c)]));
   for (const g of groups) {
@@ -183,17 +183,17 @@ test('资产门：新检查落家序七步在场 + 成本一句原则 + 链接�
   }
 });
 
-// ── scripts/README lib 表消费列对账（2026-10-21 卫生轮）──
+// ── checks/README lib 表消费列对账（2026-10-21 卫生轮）──
 // 索引此前只查「点名在场」不查「点名准确」，消费列静默漂移（六维卫生轮 维度2 M3 实证：
 // frontmatter 行漏 bundle-date-sanity、session-log 行 5↔20、web-harness 行「逐站点迁移中」已废、
 // probe-status-tab 行的 run-driver / run-dashboard-core 行的 run-fold.test / schema-scan-core 行的
-// node-gate-core 三处陈旧点名）。本门把消费列钉到 import 图：正本 = scripts/dev/tests 的 .mjs
+// node-gate-core 三处陈旧点名）。本门把消费列钉到 import 图：正本 = checks/tools/tests 的 .mjs
 // 实际 import（含 lib 互引与动态 import），单元格 = 纯标识符清单（CJK 旁白不参与对账）。
 // 立红实录：2026-10-21 首跑即红（上述各行）；修正 README 后绿。此后新增消费方不同步登记 = 红。
 
-test('资产门：scripts/README lib 表「被谁消费」列 = 实际 import 对账（2026-10-21 卫生轮）', () => {
-  const idx = read('scripts/README.md');
-  const libDir = join(ROOT, 'scripts', 'lib');
+test('资产门：checks/README lib 表「被谁消费」列 = 实际 import 对账（2026-10-21 卫生轮）', () => {
+  const idx = read('checks/README.md');
+  const libDir = join(ROOT, 'checks', 'lib');
   const scanFiles = [];
   const collect = (dir) => {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {
@@ -203,7 +203,7 @@ test('资产门：scripts/README lib 表「被谁消费」列 = 实际 import �
       else if (ent.name.endsWith('.mjs')) scanFiles.push(p);
     }
   };
-  collect(join(ROOT, 'scripts')); collect(join(ROOT, 'probes')); collect(join(ROOT, 'dev')); collect(join(ROOT, 'tests'));
+  collect(join(ROOT, 'checks')); collect(join(ROOT, 'probes')); collect(join(ROOT, 'tools')); collect(join(ROOT, 'tests'));
   const importers = new Map();
   for (const file of scanFiles) {
     const text = readFileSync(file, 'utf8');

@@ -13,10 +13,10 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
-import { hitl2ReplyInLogs, presentedInLogs } from '../../../scripts/lib/shared/node-gate-session-gates.mjs'
-import { hitl2RowGate, isHitl2Mention, presentGate } from '../../../scripts/lib/shared/node-gate-session-gates.mjs'
+import { hitl2ReplyInLogs, presentedInLogs } from '../../../checks/lib/shared/node-gate-session-gates.mjs'
+import { hitl2RowGate, isHitl2Mention, presentGate } from '../../../checks/lib/shared/node-gate-session-gates.mjs'
 import { deriveAnchors } from '../../../packages/deep-research-pack/src/lib/events/hitl-fold.ts'
-import { closingProvenanceRow } from '../../../scripts/lib/shared/hitl-provenance.mjs'
+import { closingProvenanceRow } from '../../../checks/lib/shared/hitl-provenance.mjs'
 
 const makeRoot = (tag) => {
   const base = realpathSync(tmpdir())

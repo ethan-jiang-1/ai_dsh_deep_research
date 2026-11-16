@@ -4,7 +4,7 @@
 // readinessOfSources 判 source:'missing'、run-accept 预检红；补声明件 → declaration/PASS。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { claimReviewFixture } from '../../../scripts/lib/harness/run-accept-fixture.mjs'
+import { claimReviewFixture } from '../../../checks/lib/harness/run-accept-fixture.mjs'
 import { readinessOfSources } from '../../../packages/deep-research-pack/src/lib/review/review-readiness.ts'
 
 test('claim 夹具：声称有 review/ 时必须带 review/readiness.json（declaration/PASS）', () => {

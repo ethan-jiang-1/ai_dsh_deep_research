@@ -40,7 +40,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build vendor (pin tree)
-        run: bash dev/vendor-build.sh
+        run: bash tools/vendor-build.sh
 
       - name: Build pack (dual halves)
         run: pnpm build
@@ -49,5 +49,5 @@ jobs:
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
-          source dev/env.sh
-          node scripts/smoke/l4-lite.e2e.mjs
+          source tools/env.sh
+          node checks/smoke/l4-lite.e2e.mjs

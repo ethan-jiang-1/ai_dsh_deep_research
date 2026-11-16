@@ -8,10 +8,10 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
-import { SHOW_MORE_SESSIONS_PATTERN, TAB_TEXT } from '../../scripts/lib/shared/web-ui-nav.mjs'
+import { SHOW_MORE_SESSIONS_PATTERN, TAB_TEXT } from '../../checks/lib/shared/web-ui-nav.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const SMOKE_DIR = join(ROOT, 'scripts', 'smoke')
+const SMOKE_DIR = join(ROOT, 'checks', 'smoke')
 const hasCjk = (text) => /[\u4e00-\u9fff]/.test(text)
 const hasEnglishWord = (text) => /[A-Za-z]{3,}/.test(text.replace(/\\[dwsbDWSB]/g, ''))
 

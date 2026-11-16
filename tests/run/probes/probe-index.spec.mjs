@@ -1,4 +1,4 @@
-// tests/run/probes/probe-index.spec.mjs — 探针索引纯函数（scripts/lib/shared/probe-index.mjs）的 keyless 契约。
+// tests/run/probes/probe-index.spec.mjs — 探针索引纯函数（checks/lib/shared/probe-index.mjs）的 keyless 契约。
 // 为什么住这里：索引是生成物，门禁 probe-registry 只比较字节；解析/渲染/域分组/缺字段判定必须有直测，
 // 否则门禁只能证明「文件与它自己一致」，不能证明「头注被正确理解」。
 import { test } from 'node:test';
@@ -13,7 +13,7 @@ import {
   parseProbeHeader,
   renderProbeIndex,
   scanProbeEntries,
-} from '../../../scripts/lib/shared/probe-index.mjs';
+} from '../../../checks/lib/shared/probe-index.mjs';
 
 const HEADER = [
   '#!/usr/bin/env node',

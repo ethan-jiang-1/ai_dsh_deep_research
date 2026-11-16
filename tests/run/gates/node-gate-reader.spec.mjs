@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
-import { READER_CHAR_CAP, readerGate } from '../../../scripts/lib/gates/node-gate-reader-gate.mjs'
+import { READER_CHAR_CAP, readerGate } from '../../../checks/lib/gates/node-gate-reader-gate.mjs'
 
 const makeBundle = (t, { contract = '2026-10-23', type = 'exploratory_map', versions = [1] } = {}) => {
   const base = realpathSync(tmpdir())

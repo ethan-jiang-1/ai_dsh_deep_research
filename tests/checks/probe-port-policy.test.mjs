@@ -8,7 +8,7 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
-import { reapBootedWeb, resolveProbePort } from '../../scripts/lib/harness/port-reclaim-policy.mjs'
+import { reapBootedWeb, resolveProbePort } from '../../checks/lib/harness/port-reclaim-policy.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const BEHAVIOR_DIR = join(ROOT, 'probes', 'behavior')

@@ -5,8 +5,8 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { strategyOf } from '../../../scripts/lib/gates/strategy-core.mjs'
-import { researchRoles } from '../../../scripts/lib/shared/roles.mjs'
+import { strategyOf } from '../../../checks/lib/gates/strategy-core.mjs'
+import { researchRoles } from '../../../checks/lib/shared/roles.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 const ROLES = researchRoles(ROOT)

@@ -3,7 +3,7 @@
 //   把报告结构改成回显命中原文 → 「不回显秘密」测红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { findSecrets, scanSecrets } from '../../../scripts/lib/shared/secret-scan.mjs'
+import { findSecrets, scanSecrets } from '../../../checks/lib/shared/secret-scan.mjs'
 
 test('findSecrets：sk-/ghp_/AKIA/PRIVATE KEY/Bearer 命中，prose 与短串不命中', () => {
   const text = [

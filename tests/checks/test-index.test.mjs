@@ -11,8 +11,8 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { libModulesOf, packClientModulesOf, packLibModulesOf, renderTestIndex } from '../../scripts/lib/tools/test-index.mjs'
-import { localImportPath, parseKeylessImports } from '../../scripts/lib/tools/keyless-imports.mjs'
+import { libModulesOf, packClientModulesOf, packLibModulesOf, renderTestIndex } from '../../checks/lib/tools/test-index.mjs'
+import { localImportPath, parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const INDEX = join(ROOT, 'tests/INDEX.generated.md')
@@ -46,7 +46,7 @@ function tsxClientImporters() {
 
 test('索引与盘上一致（模块数防空 + 逐字节相等）', () => {
   const modules = libModulesOf(ROOT)
-  assert.ok(modules.length >= 80, `防空语料：scripts/lib 模块过少（${modules.length}）`)
+  assert.ok(modules.length >= 80, `防空语料：checks/lib 模块过少（${modules.length}）`)
   const packModules = packLibModulesOf(ROOT)
   assert.ok(packModules.length >= 30, `防空语料：pack src/lib 模块过少（${packModules.length}）`)
   const clientModules = packClientModulesOf(ROOT)
@@ -54,7 +54,7 @@ test('索引与盘上一致（模块数防空 + 逐字节相等）', () => {
   assert.ok(modules.every((m) => m.owner !== 'scripts'), 'lib 根层仍平铺模块——owner 分组未完成')
   const rendered = renderTestIndex(ROOT)
   const current = readFileSync(INDEX, 'utf8')
-  assert.equal(current, rendered, 'tests/INDEX.generated.md 漂移——重跑 node dev/render-test-index.mjs')
+  assert.equal(current, rendered, 'tests/INDEX.generated.md 漂移——重跑 node tools/render-test-index.mjs')
   assert.ok(current.split('\n').filter((l) => l.startsWith('| ')).length >= 80, '索引行过少（防空语料）')
 })
 

@@ -9,7 +9,7 @@
 | # | 决定 | 依据/出处 |
 |---|---|---|
 | <a id="d1"></a>D1 | **自写包 = 1 个**（`deep-research-pack`）；角色是 preset 目录，不是包 | [10](./design/10-architecture.md) |
-| <a id="d2"></a>D2 | **角色 = 5 个**：Lead / Scout / Analyst / Critic + Method Editor（非研究角色，D37）；清单事实源 = 盘上 `presets/` | [20](./design/20-roles.md) · [roles.mjs](../scripts/lib/shared/roles.mjs) |
+| <a id="d2"></a>D2 | **角色 = 5 个**：Lead / Scout / Analyst / Critic + Method Editor（非研究角色，D37）；清单事实源 = 盘上 `presets/` | [20](./design/20-roles.md) · [roles.mjs](../checks/lib/shared/roles.mjs) |
 | <a id="d3"></a>D3 | **协作主通道 = Agent Teams**；单点查证走 one-shot subagent；preset 钉默认通道 = 部署层预授权 | [10 §3](./design/10-architecture.md) |
 | <a id="d4"></a>D4 | **方法论内核 = codex harness 考古十条**；不采纳 markdown 控制面与 CLI 状态机，不建仓库 markdown 队列 | [30](./design/30-methodology-mapping.md) · [考古](../notes/archived/2026-09-24-deep-research-harness-analysis.md) |
 | <a id="d5"></a>D5 | **证据身份链 = 唯一自建残留**：evidence frontmatter 文件契约 + critic 狩猎，不做 CLI 引擎 | [30](./design/30-methodology-mapping.md) · [evaluation](./evaluation.md) |
@@ -21,8 +21,8 @@
 | <a id="d11"></a>D11 | **工作由用户请求授权**；复杂工作用会话内 plan/todo，不设仓库任务队列 | [Note](../notes/implemented/2026-10-09-backlog-methodology-absorption.md) · [60](./guides/60-dev-loop.md) |
 | <a id="d12"></a>D12 | **RFC 按持久决定需要使用**，不是实施工作的普遍前置 | [Note](../notes/implemented/2026-10-09-backlog-methodology-absorption.md) · [notes 规则](../notes/AGENTS.md) |
 | <a id="d13"></a>D13 | **status rots 拆除**：docs 只写 now；当前工作由用户本轮请求决定，不由文档状态决定 | [evaluation](./evaluation.md) · [立项来历](../notes/README.md) |
-| <a id="d14"></a>D14 | **preset.e2e 双通道**：源码域（L1）+ 安装域（L2）；断言同构 | [evaluation](./evaluation.md) · [preset.e2e](../scripts/smoke/preset.e2e.mjs) · [Note](../notes/archived/2026-09-24-l1-l2-green.md) |
-| <a id="d15"></a>D15 | **release.entry 五步形状**：pack → 干净 profile → plugin add → manifest 断言 → 安装域冒烟 | [release.entry](../scripts/smoke/release.entry.mjs) · [evaluation](./evaluation.md) · [Note](../notes/archived/2026-09-24-l1-l2-green.md) |
+| <a id="d14"></a>D14 | **preset.e2e 双通道**：源码域（L1）+ 安装域（L2）；断言同构 | [evaluation](./evaluation.md) · [preset.e2e](../checks/smoke/preset.e2e.mjs) · [Note](../notes/archived/2026-09-24-l1-l2-green.md) |
+| <a id="d15"></a>D15 | **release.entry 五步形状**：pack → 干净 profile → plugin add → manifest 断言 → 安装域冒烟 | [release.entry](../checks/smoke/release.entry.mjs) · [evaluation](./evaluation.md) · [Note](../notes/archived/2026-09-24-l1-l2-green.md) |
 | <a id="d16"></a>D16 | **团队组合归 vendor agent-team-profile 层**；bundle 不带团队行；tool-subagent 声明 one-shot | [10 §2/§3](./design/10-architecture.md) · [61](./guides/61-run-playbook.md) · [Note](../notes/implemented/2026-09-24-m2-p1-run-channel.md) |
 | <a id="d17"></a>D17 | **harness / run bundle 分离**：harness 只读、零 per-run 状态；run bundle = `drt_<slug>/` 持全部变量 | [10 §1](./design/10-architecture.md) · [手册](../packages/deep-research-pack/content/manual.md) · [Note](../notes/archived/2026-09-24-run-bundle-drt-separation.md) |
 | <a id="d18"></a>D18 | **观察面 client = D7 第一处有界例外，套件名研究驾驶舱**；用途限定观察/调试，品牌皮肤不纳入 | [40](./design/40-research-cockpit.md) · [RFC](../notes/implemented/2026-09-24-observability-gui.md) · [琢磨稿](../notes/archived/2026-09-24-ui-observability-surfaces.md) · [ui-skin 否决](../notes/rejected/2026-09-24-ui-skin.md) |
@@ -61,7 +61,8 @@
 | <a id="d54"></a>D54 | **测试制度 = 三环四账五关**：先归失败类，再选最低可见层，类级守卫或显式不可机械化 | [67](./guides/67-test-strategy.md) · [Note](../notes/implemented/2026-11-13-test-strategy-operating-model.md) |
 | <a id="d55"></a>D55 | **测试制度 oracle 独立化**：判据锚定独立真值；自指显式入账待迁；修复证据唯一 `json fix-evidence` | [67](./guides/67-test-strategy.md) · [Note](../notes/implemented/2026-11-14-verification-oracle-hardening.md) |
 | <a id="d56"></a>D56 | **决策台账纯路由化（一处事实一个家）**：台账只存 ≤100 字结论 + 活载体路由；参数归 docs/ 合同，理由归 notes/ | [docs/AGENTS](./AGENTS.md) · [Note](../notes/implemented/2026-11-14-decisions-routing-ledger.md) |
-| <a id="d57"></a>D57 | **维护面三分 = judge / show / operate**：判据 = 主要产出什么；judge 住 `scripts/`、show 住 `probes/run/`、operate 住 `dev/`；目录名不改 | [68](./guides/68-surface-contract.md) · [Note](../notes/implemented/2026-11-16-maintenance-surface-taxonomy.md) |
+| <a id="d57"></a>D57 | **维护面三分 = judge / show / operate**：判据 = 主要产出什么；judge 住 `checks/`、show 住 `probes/`、operate 住 `tools/` | [68](./guides/68-surface-contract.md) · [Note](../notes/implemented/2026-11-16-maintenance-surface-taxonomy.md) |
+| <a id="d58"></a>D58 | **根名统一 = checks / probes / tools**（三仓承诺方向的本仓落地）：先纯化后统一；tests = oracle、配置 = 非面 | [68](./guides/68-surface-contract.md) · [Note](../notes/implemented/2026-11-16-surface-root-unification.md) |
 
 ## 已退役
 

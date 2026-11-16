@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { assertVendorArtifacts, ARTIFACT_REMEDY, REPRESENTATIVE_ARTIFACTS, defaultRoot } from '../../../scripts/lib/harness/vendor-artifacts.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY, REPRESENTATIVE_ARTIFACTS, defaultRoot } from '../../../checks/lib/harness/vendor-artifacts.mjs';
 
 const FIX = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'fixtures', 'vendor-artifacts');
 
@@ -43,7 +43,7 @@ test('remedy 一行在场（boot 面失败消息的修正入口）', () => {
   assert.ok(ARTIFACT_REMEDY.includes('vendor-build.sh'), 'remedy 必须指向 vendor-build.sh');
 });
 
-test('CLI 缺省 root = 仓根（搬运后相对层数回归：../.. 曾只到 scripts/）', () => {
+test('CLI 缺省 root = 仓根（搬运后相对层数回归：../.. 曾只到 checks/）', () => {
   const root = defaultRoot();
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
   assert.equal(pkg.name, 'ai-dsh-deep-research', `defaultRoot 解析到 ${root}，不是仓根`);

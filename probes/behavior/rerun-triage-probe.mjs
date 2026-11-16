@@ -15,13 +15,13 @@
 // 为什么是探针不是单测：词表是模型侧程序（skill），机械面只能钉文本同源与出口文案；模型是否
 // 真按它回话，只能真跑一次。探针不证明长尾说法不误判——那是人读（卡 §8 第 6 行人判）。
 //
-// 前置：source dev/env.sh（DSH_HOME + 凭据 + vendor 树）。用法：
+// 前置：source tools/env.sh（DSH_HOME + 凭据 + vendor 树）。用法：
 //   node probes/behavior/rerun-triage-probe.mjs [--port 3118]
 // 退出码：0 = 五条全中；1 = 有断言未中；2 = 前置缺席（未跑 ≠ 通过）。
-import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/shared/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/shared/web-harness.mjs';
-import { findSessionDir, readSessionText, resolveSessionLog } from '../../scripts/lib/shared/session-log.mjs';
-import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/harness/port-reclaim.mjs';
+import { requireCredentials, requireDevHome, withModelKey } from '../../checks/lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../checks/lib/shared/web-harness.mjs';
+import { findSessionDir, readSessionText, resolveSessionLog } from '../../checks/lib/shared/session-log.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../checks/lib/harness/port-reclaim.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -38,13 +38,13 @@ const TURN_TIMEOUT_MS = 240_000;
 const POLL_MS = 3_000;
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
-if (!home) { console.error('probe: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
+if (!home) { console.error('probe: 需要 DSH_HOME（先 source tools/env.sh）'); process.exit(2); }
 requireDevHome('rerun-triage-probe', { home, root: ROOT });
 requireCredentials('rerun-triage-probe', { home });
 const bin = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');
-const overlay = join(ROOT, 'dev', 'research.overlay.yml');
+const overlay = join(ROOT, 'tools', 'research.overlay.yml');
 if (!existsSync(bin)) { console.error(`probe: 机制基线不在位（${bin}）——git submodule update --init`); process.exit(2); }
-if (!existsSync(overlay)) { console.error(`probe: overlay 不在位（${overlay}）——node dev/render-overlay.mjs`); process.exit(2); }
+if (!existsSync(overlay)) { console.error(`probe: overlay 不在位（${overlay}）——node tools/render-overlay.mjs`); process.exit(2); }
 
 const sleep = (ms) => new Promise((r) => { setTimeout(r, ms) });
 let failures = 0;

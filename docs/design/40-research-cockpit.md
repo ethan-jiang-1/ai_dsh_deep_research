@@ -20,7 +20,7 @@
 | 伞 | 观察面 | 驾驶舱 + 仪表盘投影（D18 原语义） | — |
 | **套件** | **研究驾驶舱（Research Cockpit）** | `src/client/` 的 React 件全体 | **最频** |
 | 折算层 | folds | `src/lib/` 纯函数谓词（keyless 单测；驾驶舱与 HTML 投影共享 HITL/步骤事实适配） | 少 |
-| 投影 | 仪表盘（run-dashboard） | `probes/run/run-dashboard.mjs` 只读 HTML 投影（抛弃型、永不入库） | 少 |
+| 投影 | 仪表盘（run-dashboard） | `probes/analyze/run-dashboard.mjs` 只读 HTML 投影（抛弃型、永不入库） | 少 |
 
 件名保留：「研究状态」页签是驾驶舱**里的一个件**，不与套件名混用；目录名守 DSH 双半
 约定 host/client（不叫 `src/cockpit/`），套件名钉 `src/client/index.ts` 入口头注。
@@ -327,14 +327,14 @@ composer 左侧 `conversation.input.left` 的状态按钮（有 session 才渲�
   挂起期抑制仅读绑定的渐进面（预检读取不算"本会话的 run"）。
 - **页签内区块归属**：每个页签的头部/正文/底部以 §2 的页签行为准；新增块先在该行写归属区
   （图谱：头部 = 只读标记 + plan/task 计数；正文首行 = 版本轨；其下 = 覆盖率 + 刷新时刻），不另立第二套布局说明。
-- **发现规则单源**：驾驶舱 client 的三位置发现实现 = `src/lib/run/run-context.ts`；机械侧 = `run-context-single-source`（`src/client` 非注释 `_abandoned` 即红；`src/lib` 的终稿地址校验不在词法门禁范围）。`dev/hitl-answer` 与 `dev/run-kickoff` 的盘侧路径枚举、`run-dashboard` 投影与 `client-load-reference.support` oracle 各自保留，不在此行。
+- **发现规则单源**：驾驶舱 client 的三位置发现实现 = `src/lib/run/run-context.ts`；机械侧 = `run-context-single-source`（`src/client` 非注释 `_abandoned` 即红；`src/lib` 的终稿地址校验不在词法门禁范围）。`tools/hitl-answer` 与 `tools/run-kickoff` 的盘侧路径枚举、`run-dashboard` 投影与 `client-load-reference.support` oracle 各自保留，不在此行。
 
 ## 5. 验证面与改动路由（索引，非正文）
 
 | 面 | 入口 | 断言什么 |
 |---|---|---|
-| keyless 真浏览器 | [client-load.entry](../../scripts/smoke/client-load.entry.mjs) | 装配零失败 + 页签渲染 + 渐进面与**磁盘真值对账** + 未绑定负样本 + 终稿端到端（细则以脚本为准） |
-| 真模型档 | [client-hitl.entry](../../scripts/smoke/client-hitl.entry.mjs) | 活标题翻转 + 横幅 + 挂起迁移 → 右栏自动展开 |
+| keyless 真浏览器 | [client-load.entry](../../checks/smoke/client-load.entry.mjs) | 装配零失败 + 页签渲染 + 渐进面与**磁盘真值对账** + 未绑定负样本 + 终稿端到端（细则以脚本为准） |
+| 真模型档 | [client-hitl.entry](../../checks/smoke/client-hitl.entry.mjs) | 活标题翻转 + 横幅 + 挂起迁移 → 右栏自动展开 |
 | keyless 单测 | `pnpm test` | §2 所列折算各有测试文件 |
 
 命令与改动次序 = [guides/60 §2](../guides/60-dev-loop.md)「改驾驶舱」行；判据 = [evaluation](../evaluation.md) §L0/L1/L4。本页不复述命令表。

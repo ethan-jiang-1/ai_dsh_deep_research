@@ -4,7 +4,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { acceptanceCheck, acceptanceExitCode } from '../../../scripts/lib/ops/acceptance-check.mjs'
+import { acceptanceCheck, acceptanceExitCode } from '../../../checks/lib/ops/acceptance-check.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const bundle = (name) => join(HERE, '..', '..', 'fixtures', 'review-aids', name)

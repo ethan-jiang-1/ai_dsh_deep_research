@@ -1,7 +1,7 @@
 // host-health — 真浏览器冒烟的主机健康判据（client-load 的 NOT-RUN 归因）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { availableMemoryMBFromMeminfo, availableMemoryMBFromVmStat, classifyHostHealth, HOST_HEALTH_THRESHOLDS, isHostUnhealthyVerdict } from '../../../scripts/lib/harness/host-health.mjs'
+import { availableMemoryMBFromMeminfo, availableMemoryMBFromVmStat, classifyHostHealth, HOST_HEALTH_THRESHOLDS, isHostUnhealthyVerdict } from '../../../checks/lib/harness/host-health.mjs'
 
 test('健康主机：free 与 load/cpu 都在阈值内', () => {
   const h = classifyHostHealth({ freeMB: 2048, load1: 2, cpuCount: 8 })

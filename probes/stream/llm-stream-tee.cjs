@@ -12,7 +12,7 @@
 // 为什么存在：技能 .agents/skills/reproducing-a-failure §2 的「透明 fetch tee」此前无
 // tracked 实现——每次取证按技能现场从零重写（2026-10-13 postmortem 的 capture2.cjs 是
 // 一次性工具，随运行区清理消失）。本件把它转正：预载只**抄写**字节、零行为路径改动
-// （预载形态与 dev/llm-socket-isolation.cjs 同构——NODE_OPTIONS 挂载、拦 globalThis.fetch、
+// （预载形态与 tools/llm-socket-isolation.cjs 同构——NODE_OPTIONS 挂载、拦 globalThis.fetch、
 // 命中外的请求原样透传）。方法论正本 = 技能 §2（判读要点：**响应头集合本身是证据**——
 // MALFORMED 事故里失败响应 = 200 + 零头 + 未声明压缩体，对照组 = 完整头 + content-encoding）。
 // 何时用：流异常第一动作 = 挂 tee 抓原始字节与响应头，不以错误字符串推断归因。
@@ -39,12 +39,12 @@
 //
 // 档位：keyless（不碰凭据——抄写面已脱敏；预载侧零模型/网络主动性，只旁路抄写）。
 // 这是活进程仪器，无 keyless 自动测试（不硬凑）；可提取纯函数（捕获判定 + 头脱敏）
-// 住 scripts/lib/probes/llm-stream-tee-core.mjs，被 tests/run/probes/llm-stream-tee-core.spec.mjs 钉住。
+// 住 checks/lib/probes/llm-stream-tee-core.mjs，被 tests/run/probes/llm-stream-tee-core.spec.mjs 钉住。
 'use strict';
 const fs = require('node:fs');
 const net = require('node:net');
 const path = require('node:path');
-const { isCaptureTarget, redactHeaders } = require('../../scripts/lib/probes/llm-stream-tee-core.mjs');
+const { isCaptureTarget, redactHeaders } = require('../../checks/lib/probes/llm-stream-tee-core.mjs');
 
 const TAG = '[llm-stream-tee]';
 const ROOT = path.resolve(__dirname, '..', '..');

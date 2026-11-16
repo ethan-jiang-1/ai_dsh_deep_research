@@ -26,7 +26,7 @@
    是 → 不进 git（凭据、home、会话、run bundle、用户数据、本机路径/编辑器配置）。
 
 **tracked 生成物**是唯一需要额外条件的类别：必须同时有生成器、新鲜度门禁、以及“为什么必须在
-树内”的理由。现有例子 = `_dist/安装手册.md`（`dist-manual-version`）、`dev/research.overlay.yml`
+树内”的理由。现有例子 = `_dist/安装手册.md`（`dist-manual-version`）、`tools/research.overlay.yml`
 （`overlay-fresh`）。没有门禁的生成物不进 git。
 
 ## 必须进 git
@@ -34,7 +34,7 @@
 - 源码、构建配置、`pnpm-lock.yaml`、`package.json`、`.npmrc`、`.gitattributes`、`.editorconfig`
 - `packages/deep-research-pack/` 的 presets、skills、`content/`、`cordis.patch.yml`、doctor
 - `docs/`、`notes/`、`_backlog/`、`.agents/skills/`、`AGENTS.md`、README/CONTRIBUTING/SECURITY
-- `scripts/` 门禁、冒烟、生成器；`probes/` 探针；`tests/` keyless 回归与 fixtures
+- `checks/` 门禁、冒烟、生成器；`probes/` 探针；`tests/` keyless 回归与 fixtures
 - `snapshots/` 中被回放/审计消费的场景证据（录制流、声明、期望文件）
 - `LICENSE`、CI workflow、发布边界需要的 tracked 手册
 
@@ -55,7 +55,7 @@
 
 - **路径**：仓库内只用相对路径；脚本用 `ROOT` / `import.meta.url` 定位，不写 home、用户名、
   OS 盘符。需要展示路径时用环境变量或 `<workspace>` 占位。
-- **DSH home / 凭据**：`DSH_HOME` 默认由 `dev/env.sh` 指向 `runtime/harness-home`；多实例的
+- **DSH home / 凭据**：`DSH_HOME` 默认由 `tools/env.sh` 指向 `runtime/harness-home`；多实例的
   隔离根/profile/端口/state 变量与默认值 = [guides/65 §4](65-run-forms.md)（单一 owner）。
   凭据由使用者自己提供，不入库。不要假定 `~/.dsh`、全局 `dsh` 或某个已安装 profile 在场。
 - **运行时**：Node 区间与 pnpm 版本由 `package.json` 钉住；LF 由 `.gitattributes` 强制；
@@ -66,8 +66,8 @@
 - **生成配置**：`research.overlay.yml` 等由生成器产出；贡献者不手改生成物，
   改源后跑生成器与新鲜度门禁。
 - **干净 clone 是底线**：`git worktree`/fresh clone + `pnpm install --frozen-lockfile` +
-  `source dev/env.sh && pnpm verify && pnpm test` 必须绿。只在作者机器上绿不算绿。
-- **移交不是复制工作树**：源码移交 = `node dev/release/export-handoff.mjs`（只含 tracked 源，不含运行态/凭据/run 数据/依赖；包内 HANDOFF.md 给接收命令，tar 路径用 cacheinfo 写 gitlink，未 push 也成立）；插件移交 = `export-dist.mjs` 的 tarball；run bundle 单独按研究数据移交。`dev/` 只住源码驱动，门禁 `dev-runtime-clean` 直接看盘。
+  `source tools/env.sh && pnpm verify && pnpm test` 必须绿。只在作者机器上绿不算绿。
+- **移交不是复制工作树**：源码移交 = `node tools/release/export-handoff.mjs`（只含 tracked 源，不含运行态/凭据/run 数据/依赖；包内 HANDOFF.md 给接收命令，tar 路径用 cacheinfo 写 gitlink，未 push 也成立）；插件移交 = `export-dist.mjs` 的 tarball；run bundle 单独按研究数据移交。`tools/` 只住源码驱动，门禁 `dev-runtime-clean` 直接看盘。
 
 ## 新文件怎么判
 

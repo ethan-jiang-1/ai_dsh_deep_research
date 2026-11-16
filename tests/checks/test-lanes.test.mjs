@@ -3,7 +3,7 @@
 //      `tests/vendor/*.vendor.spec.mjs` 是 vendor 源契约（独立 test:vendor 车道）。
 //   ② `tests/checks/*.test.mjs` = 门禁自身；必须平铺在 checks/，不得嵌子目录。
 //   ③ 旧后缀 `*.test.mjs`（checks 外）与 `*.e2e.mjs`/`*.entry.mjs`（tests 内）一律红：
-//      它们要么不会被 `pnpm test:spec`/`test:checks` 选中，要么属于 `scripts/smoke` 车道。
+//      它们要么不会被 `pnpm test:spec`/`test:checks` 选中，要么属于 `checks/smoke` 车道。
 //   ④ 默认回归零 skip：`test.skip` / `it.skip` / `describe.skip` / `{ skip: ... }` 一律红；
 //      必须 skip 时先登记理由（当前没有，登记表为空）。
 //
@@ -14,7 +14,7 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, relative, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localImportPath, parseKeylessImports } from '../../scripts/lib/tools/keyless-imports.mjs'
+import { localImportPath, parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const TESTS = join(ROOT, 'tests')
@@ -70,9 +70,9 @@ test('② checks 车道：tests/checks/*.test.mjs 平铺，且数量非空', () 
 
 test('③ 后缀：没有 checks 外的 *.test.mjs，没有 tests 内的 *.e2e.mjs/*.entry.mjs', () => {
   assert.deepEqual(LEGACY_TESTS.map((f) => relative(ROOT, f)), [],
-    '旧后缀 *.test.mjs 不在 checks/ 下——它不会被 test:spec/test:checks 选中；进程内改 *.spec.mjs，真实进程改 scripts/smoke/*.e2e.mjs|*.entry.mjs')
+    '旧后缀 *.test.mjs 不在 checks/ 下——它不会被 test:spec/test:checks 选中；进程内改 *.spec.mjs，真实进程改 checks/smoke/*.e2e.mjs|*.entry.mjs')
   assert.deepEqual(WRONG_SUFFIX.map((f) => relative(ROOT, f)), [],
-    'tests/ 内不得出现 *.e2e.mjs/*.entry.mjs——真实进程/入口资产住 scripts/smoke')
+    'tests/ 内不得出现 *.e2e.mjs/*.entry.mjs——真实进程/入口资产住 checks/smoke')
 
   const imported = new Set()
   for (const file of TEST_FILES) {

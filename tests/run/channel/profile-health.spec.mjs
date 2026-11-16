@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { profileLayerIssues } from '../../../scripts/lib/shared/profile-health.mjs'
+import { profileLayerIssues } from '../../../checks/lib/shared/profile-health.mjs'
 
 const LAYER = '@deepseek-ai/dsh-experimental-agent-team-profile'
 
@@ -27,7 +27,7 @@ test('BUG-066：版本一致 → 无问题；缺席/落后 → 给重建指令',
     const issues = profileLayerIssues({ profileDir: stale.profile, runtimeVersion: '0.2.1-rc.5' })
     assert.equal(issues.length, 1)
     assert.match(issues[0], /未随 pin 重钉/)
-    assert.match(issues[0], /dev\/boot-run\.sh/)
+    assert.match(issues[0], /tools\/boot-run\.sh/)
   } finally { rmSync(stale.dir, { recursive: true, force: true }) }
 
   const missing = join(tmpdir(), 'profile-health-missing-xyz')
@@ -40,7 +40,7 @@ test('BUG-066：读不到 runtime 版本 → 拒绝猜（fail-loud）', () => {
 })
 
 
-// 负例留证 2026-11-12：BUG-070——修复前 research 档失配也提示「跑 dev/boot-run.sh」，而
+// 负例留证 2026-11-12：BUG-070——修复前 research 档失配也提示「跑 tools/boot-run.sh」，而
 // boot-run 只维护 deep-research；该指令对 research 是死路。还原法 = 忽略 profileName 参数。
 test('BUG-070 research 档失配：提示已弃用并指向 deep-research，不冒充 boot-run 能修', () => {
   const item = homeWith('0.2.1-rc.2')
@@ -49,7 +49,7 @@ test('BUG-070 research 档失配：提示已弃用并指向 deep-research，不�
     assert.equal(issues.length, 1)
     assert.match(issues[0], /research 档已弃用/)
     assert.match(issues[0], /deep-research/)
-    assert.doesNotMatch(issues[0], /先跑 dev\/boot-run\.sh 重建/, '不得给死路指令')
+    assert.doesNotMatch(issues[0], /先跑 tools\/boot-run\.sh 重建/, '不得给死路指令')
   } finally { rmSync(item.dir, { recursive: true, force: true }) }
 })
 

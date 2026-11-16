@@ -9,8 +9,8 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
-import { waitForWebBanner } from '../../scripts/lib/shared/web-banner.mjs'
-import { parseKeylessImports } from '../../scripts/lib/tools/keyless-imports.mjs'
+import { waitForWebBanner } from '../../checks/lib/shared/web-banner.mjs'
+import { parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 
@@ -73,7 +73,7 @@ test('waitForWebBanner 三条结算路径均清零 timer 句柄与流监听（BU
 })
 
 test('web-harness.bootWeb 委托 waitForWebBanner 而非内联分叉副本（BUG-095 同源守卫）', () => {
-  const src = readFileSync(join(ROOT, 'scripts/lib/shared/web-harness.mjs'), 'utf8')
+  const src = readFileSync(join(ROOT, 'checks/lib/shared/web-harness.mjs'), 'utf8')
   const parsed = parseKeylessImports(src, 'web-harness.mjs')
   assert.ok(
     parsed.imports.some((item) => item.specifier === './web-banner.mjs'),

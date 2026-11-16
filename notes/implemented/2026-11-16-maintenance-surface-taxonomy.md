@@ -1,6 +1,7 @@
 # 维护面三分：judge / show / operate（D57）
 
 > 状态：implemented
+> 历史注记：纯化轮中间态（`probes/run/`、`dev/release/`）；根名统一后的现行落点看 [surface-root-unification](2026-11-16-surface-root-unification.md) 与 [guides/68](../../docs/guides/68-surface-contract.md)。
 > 关联：[D57](../../docs/decisions.md#d57)；合同 = [guides/68](../../docs/guides/68-surface-contract.md)；
 > 门户 = [probes/README](../../probes/README.md) · [scripts/README](../../scripts/README.md) ·
 > [dev/README](../../dev/README.md)；根布局 = [AGENTS.md](../../AGENTS.md)；

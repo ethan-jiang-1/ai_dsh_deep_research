@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { acquireRunLock, lockOwnerPid, releaseRunLock } from '../../../scripts/lib/harness/run-lock.mjs'
+import { acquireRunLock, lockOwnerPid, releaseRunLock } from '../../../checks/lib/harness/run-lock.mjs'
 
 const makeRoot = () => mkdtempSync(join(tmpdir(), 'run-lock-'))
 const ownerFile = (lock) => JSON.parse(readFileSync(join(lock, 'owner.json'), 'utf8'))

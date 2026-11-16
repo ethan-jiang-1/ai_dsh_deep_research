@@ -5,9 +5,9 @@ import assert from 'node:assert/strict'
 import { basename, dirname, join } from 'node:path'
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { gateBundle } from '../../../scripts/lib/gates/node-gate-core.mjs'
-import { decisionsLines } from '../../../scripts/lib/shared/node-gate-contracts.mjs'
-import { hitl2RowGate } from '../../../scripts/lib/shared/node-gate-session-gates.mjs'
+import { gateBundle } from '../../../checks/lib/gates/node-gate-core.mjs'
+import { decisionsLines } from '../../../checks/lib/shared/node-gate-contracts.mjs'
+import { hitl2RowGate } from '../../../checks/lib/shared/node-gate-session-gates.mjs'
 import { bundle, sessions, newContractSession, PRE_CONTRACT_DATES, structuredAudit, withCompleteBundle } from './node-gate-helpers.mjs'
 
 const V = (name, date) => gateBundle(bundle(name), undefined, { versionDate: date }).gates.version

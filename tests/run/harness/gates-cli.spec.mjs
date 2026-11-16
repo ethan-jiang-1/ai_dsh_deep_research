@@ -7,7 +7,7 @@
 //（空值 filter(Boolean) 丢成全量、裸形态被忽略）→ 本 spec 的 flag 形状用例红；还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { boundedMap, parseE2eArgs, parseJobsArg } from '../../../scripts/lib/harness/gates-cli.mjs'
+import { boundedMap, parseE2eArgs, parseJobsArg } from '../../../checks/lib/harness/gates-cli.mjs'
 
 test('parseJobsArg 接受正整数，缺省走 fallback（BUG-195 负控）', () => {
   assert.equal(parseJobsArg([], 4), 4)

@@ -78,7 +78,7 @@ ID｜假设（要杀死的命题）｜最低可观察层｜oracle 与变异/场�
 
 - 纯函数/判据变异 → `tests/{run,cockpit,pack,contracts}/**/*.spec.mjs`；
 - 门禁自身 → `tests/checks/*.test.mjs`；
-- 真进程 → `scripts/smoke/*.e2e.mjs`；真浏览器/profile/tarball → `*.entry.mjs`；
+- 真进程 → `checks/smoke/*.e2e.mjs`；真浏览器/profile/tarball → `*.entry.mjs`；
 - 单点真实边界 → `probes/`（头注六字段 + 索引）；一次性实验 → `_backlog`/`runtime/`，复现第二次才升格。
 
 ## 5. 反模式

@@ -6,10 +6,10 @@ import assert from 'node:assert/strict'
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localImportPath, parseKeylessImports } from '../../scripts/lib/tools/keyless-imports.mjs'
+import { localImportPath, parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const SMOKE_DIR = join(ROOT, 'scripts', 'smoke')
+const SMOKE_DIR = join(ROOT, 'checks', 'smoke')
 
 function resolveOnDisk(target, fileExists = existsSync) {
   const candidates = [
@@ -60,7 +60,7 @@ test('冒烟目录全部入口及本地传递闭包的静态/动态模块引用�
     .map((file) => join(SMOKE_DIR, file))
   assert.ok(entries.length >= 10, '防空语料：smoke 文件过少')
   const report = collectBrokenLocalImports(entries)
-  assert.ok(report.visitedCount > entries.length, '传递闭包应覆盖 scripts/lib 与 packages 下被引用模块')
+  assert.ok(report.visitedCount > entries.length, '传递闭包应覆盖 checks/lib 与 packages 下被引用模块')
   assert.deepEqual(report.syntaxIssues, [])
   assert.deepEqual(report.missing, [])
 })

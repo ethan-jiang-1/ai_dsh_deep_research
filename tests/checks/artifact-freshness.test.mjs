@@ -9,7 +9,7 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { artifactFileSetProblems, artifactFreshness, newestMtimeIn, writeBuildManifest } from '../../scripts/lib/shared/artifact-freshness.mjs'
+import { artifactFileSetProblems, artifactFreshness, newestMtimeIn, writeBuildManifest } from '../../checks/lib/shared/artifact-freshness.mjs'
 
 const at = (iso) => new Date(iso)
 const touch = (path, iso) => utimesSync(path, at(iso), at(iso))

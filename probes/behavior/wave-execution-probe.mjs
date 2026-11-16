@@ -10,7 +10,7 @@
 //
 // wave-execution-probe.mjs — wave 执行链的真模型单点探针。
 //
-// 设计：源域 `web` profile + `dev/research.overlay.yml`（与 L1 同一组合），但创建 **analyst**
+// 设计：源域 `web` profile + `tools/research.overlay.yml`（与 L1 同一组合），但创建 **analyst**
 // 会话而不是 run 通道，所以不碰 research-workspace/run 会话、不需要 HITL。临时 bundle 只含
 // 1 个 cell；workflow 的 PTC 在嵌套沙箱里需要 full-access（与 P4 试点同因），本探针在 boot
 // env 里显式给 DSH_PERMISSION_MODE=danger-full-access。
@@ -18,21 +18,21 @@
 // 负例：`--role scout`（scout preset 没有 workflow 行）→ C1/C2/C3 红；默认 analyst 绿。
 // 先红证据：2026-11-10 本探针用 --role scout 跑出 C1 红（analyst 行才绿）。
 //
-// 前置：source dev/env.sh；DEV home；zstd 在 PATH。端口 3120 自持有。
-// 用法：source dev/env.sh && node probes/behavior/wave-execution-probe.mjs [--port 3120] [--role analyst] [--keep]
+// 前置：source tools/env.sh；DEV home；zstd 在 PATH。端口 3120 自持有。
+// 用法：source tools/env.sh && node probes/behavior/wave-execution-probe.mjs [--port 3120] [--role analyst] [--keep]
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync, copyFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/shared/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/shared/web-harness.mjs';
-import { readSessionTextOf } from '../../scripts/lib/shared/session-log.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/harness/vendor-artifacts.mjs';
-import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/harness/port-reclaim.mjs';
+import { requireCredentials, requireDevHome, withModelKey } from '../../checks/lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../checks/lib/shared/web-harness.mjs';
+import { readSessionTextOf } from '../../checks/lib/shared/session-log.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../checks/lib/harness/vendor-artifacts.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../checks/lib/harness/port-reclaim.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const OVERLAY = join(ROOT, 'dev', 'research.overlay.yml');
+const OVERLAY = join(ROOT, 'tools', 'research.overlay.yml');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -47,7 +47,7 @@ const POLL_MS = 3_000;
 const ARCHIVE = join(ROOT, 'runtime', 'smoke-workspace', 'wave-execution-probe-last');
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
-if (!home) { console.error('wave-execution-probe: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
+if (!home) { console.error('wave-execution-probe: 需要 DSH_HOME（先 source tools/env.sh）'); process.exit(2); }
 requireDevHome('wave-execution-probe', { home, root: ROOT });
 requireCredentials('wave-execution-probe', { home });
 if (spawnSync('zstd', ['--version']).status !== 0) {

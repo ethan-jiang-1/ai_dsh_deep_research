@@ -1,0 +1,484 @@
+// a-docs.mjs — 域 A · md 文档卫生：tracked .md 的字节 / 链接 / 锚点 / 措辞合同（门禁列表 = context.gates 的前 7 项）。
+//
+// 从 2026-10-27 卫生轮前的单文件 verify.mjs 原样切出（判据与文案逐字未改）；共享助手住
+// ../context.mjs。改本域门禁只需读本文件——域切分 = docs/evaluation.md §L0 表的 A–F 分组。
+
+import { readFileSync, existsSync, statSync } from 'node:fs';
+import { join, dirname, resolve, relative, sep } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { ROOT, fail, gitOnce, note, trackedFiles } from '../context.mjs';
+import { prosePathTokens } from '../../lib/repo/doc-prose-paths.mjs';
+
+export function runA() {
+  // live 文档范围：notes/_backlog 是历史层、fixtures 是样本，均不追改；doc-paths/doc-drefs 共用。
+  const liveMdFiles = (gate) => trackedFiles({
+    gate,
+    glob: '*.md',
+    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f.startsWith('_backlog/') || f.startsWith('tests/fixtures/'),
+    emptyMsg: '防空语料：未扫到任何 live 文档',
+  });
+
+// ── md-utf8-newline（所有 tracked .md 严格 UTF-8、恰一个结尾换行；git
+//    ls-files 驱动——运行区（gitignored bundle/profile 镜像）不扫，研究手册合同既有；
+//    旧版全树 walk 曾被 live run 的 leads.md 双尾换行咬红，2026-09-24 修正范围）──
+{
+  const gate = 'md-utf8-newline';
+  // quotepath=false（2026-10-21 卫生轮补宽，md-links 同款先例）：非 ASCII tracked 路径
+  //（_dist/安装手册.md）被引号转义后 existsSync miss → 稀疏态 continue 静默跳过 = 漏扫；
+  // 反证 = gates.e2e 案例 md-utf8-newline-nonascii-path（先红后绿实录见案例注释）。
+  const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files', '*.md']);
+  if (r.status !== 0) fail(gate, `git ls-files 不可用（${String(r.stderr).slice(0, 120)}）——fail-loud`);
+  else {
+    for (const rel of r.stdout.split('\n').filter(Boolean)) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) continue; // 稀疏态防御（同 md-links）
+      const raw = readFileSync(f);
+      const text = raw.toString('utf8');
+      if (raw.includes(Buffer.from([0xef, 0xbf, 0xbd]))) {
+        // 逐字节比对：decode 后再 encode 不一致 = 有非法字节
+        if (Buffer.from(text, 'utf8').equals(raw) === false) fail(gate, `${rel} 含非 UTF-8 字节`);
+      }
+      if (!text.endsWith('\n')) fail(gate, `${rel} 缺结尾换行`);
+      else if (text.endsWith('\n\n')) fail(gate, `${rel} 结尾多于一个换行`);
+    }
+  }
+}
+
+// ── md-links（所有 tracked .md 的相对链接必须可解析且目标被 git 跟踪；git ls-files 驱动——基础整治 C10）──
+// 原版只扫具名目录（docs/notes/…），根目录其余 tracked .md 逃检——本单子文件初稿 31 条死链
+// 同刻全绿即实证。覆盖面 = tracked 集合（未 staged 的新文件扫不到——pre-commit 在 staged 后兜住）；反引号仓内路径归 doc-paths 门禁（2026-11-03）。
+// BUG-016 加宽（2026-10-07）：链接目标**盘上存在但未被 git 跟踪**同样红——旧判据查盘上
+// 存在性，绿色依赖机器状态（本机有归档产物就绿，fresh clone 即红，_done/_reference 摘要
+// 链接 research-workspace/archive/ 实证）。链接语法 = 仓内可解析承诺；引用运行区/本机数据
+// 请用反引号散文路径。目录目标按"其下有 tracked 文件"判。
+{
+  const gate = 'md-links';
+  // quotepath=false（2026-10-07 ls-files 族收口同款）：非 ASCII 路径（_dist/安装手册.md）的
+  // 引号转义会让 tracked 集合查不到 → 假红；旧版未加此参时该文件被 existsSync 跳过 = 静默漏扫
+  const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files', '*.md']);
+  if (r.status !== 0) {
+    fail(gate, `git ls-files 不可用（${String(r.stderr).slice(0, 120)}）——本门禁覆盖面依赖仓库态，fail-loud`);
+  } else {
+    const lsAll = gitOnce(['-c', 'core.quotepath=false', 'ls-files']);
+    if (lsAll.status !== 0) fail(gate, 'git ls-files（全量）不可用——tracked 目标判定失效，fail-loud');
+    const trackedAll = new Set(lsAll.stdout.split('\n').filter(Boolean));
+    // 路径重定向登记簿（2026-11-15 test-source-mirror）：搬家后旧路径在此登记，冻结层正文不改写。
+    // 条目失真（from 仍在盘上 / to 不在盘上 / to 未跟踪）一律红——登记簿不许腐烂。
+    const registryPath = join(ROOT, 'checks', 'test-path-redirects.json');
+    const redirects = new Map();
+    let redirected = 0;
+    if (existsSync(registryPath)) {
+      let parsed;
+      try { parsed = JSON.parse(readFileSync(registryPath, 'utf8')); }
+      catch (e) { fail(gate, `test-path-redirects.json 非法 JSON：${e.message}`); }
+      for (const entry of parsed?.redirects ?? []) {
+        if (typeof entry?.from !== 'string' || typeof entry?.to !== 'string') {
+          fail(gate, '重定向登记簿条目缺 from/to 字符串'); continue;
+        }
+        if (existsSync(join(ROOT, entry.from))) {
+          fail(gate, `重定向登记簿条目失真：${entry.from} 仍在盘上——搬走时再登记，或删条目`); continue;
+        }
+        if (!existsSync(join(ROOT, entry.to))) {
+          fail(gate, `重定向登记簿目标不存在：${entry.from} → ${entry.to}`); continue;
+        }
+        if (!trackedAll.has(entry.to)) {
+          fail(gate, `重定向登记簿目标未被 git 跟踪：${entry.to}`); continue;
+        }
+        redirects.set(entry.from, entry.to);
+      }
+    }
+    const isTrackedTarget = (abs) => {
+      const rel = relative(ROOT, abs);
+      if (rel.startsWith('..')) return true; // 仓外绝对路径目标（罕见）不在此门禁判
+      if (trackedAll.has(rel)) return true;
+      try {
+        if (statSync(abs).isDirectory()) {
+          const prefix = rel.endsWith('/') ? rel : `${rel}/`;
+          for (const t of trackedAll) if (t.startsWith(prefix)) return true;
+        }
+      } catch { /* 目标不存在由存在性断言管 */ }
+      return false;
+    };
+    for (const rel of r.stdout.split('\n').filter(Boolean)) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) continue; // 稀疏态防御
+      const text = readFileSync(f, 'utf8');
+      const lines = text.split('\n');
+      let inFence = false;
+      for (const line of lines) {
+        if (line.trimStart().startsWith('```')) inFence = !inFence;
+        if (inFence) continue;
+        for (const m of line.matchAll(/\[[^\]]*\]\(([^)\s]+)\)/g)) {
+          const target = m[1].split('#')[0];
+          if (!target || /^[a-z]+:\/\//i.test(target) || target.startsWith('mailto:')) continue;
+          const abs = resolve(dirname(f), target);
+          if (!existsSync(abs)) {
+            const relTarget = relative(ROOT, abs).split('\\').join('/');
+            if (redirects.has(relTarget)) { redirected++; continue; }
+            fail(gate, `${rel}: 链接不可解析 → ${target}（若为搬家：登记 checks/test-path-redirects.json）`);
+          } else if (!isTrackedTarget(abs)) fail(gate, `${rel}: 链接目标未被 git 跟踪 → ${target}（链接语法 = 仓内可解析承诺；运行区/本机数据引用请用反引号路径——BUG-016）`);
+        }
+      }
+    }
+    if (redirected > 0) note(gate, `${redirected} 条链接经 test-path-redirects.json 解析到新位置`)
+  }
+}
+
+// ── md-anchors（相对链接的 #fragment 必须在目标文件里真的存在——
+//    《_agent_ready_development》语料 verify.mjs 吸纳：它校验"内部链接与锚点"，
+//    本仓 md-links 只管文件存在，锚点漂移（标题改名后片段失效）是它的盲区。
+//    slug 规则照抄 GitHub：小写、去非 [字母/数字/_/空格/-]、空格→'-'、重复加 -N；
+//    另认手写 <a id="...">。外链与 mailto 不检（同 md-links）。）──
+{
+  const gate = 'md-anchors';
+  const slug = (h) => h
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')   // 链接 → 其文字
+    .replace(/[*`]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}_ -]/gu, '')
+    .replaceAll(' ', '-');
+  const anchorsOf = (f) => {
+    const out = new Set();
+    const seen = new Map();
+    const text = readFileSync(f, 'utf8');
+    let inFence = false;
+    for (const line of text.split('\n')) {
+      if (line.trimStart().startsWith('```')) { inFence = !inFence; continue; }
+      if (inFence) continue;
+      const m = /^ {0,3}#{1,6}\s+(.+?)\s*$/.exec(line);
+      if (m) {
+        const base = slug(m[1]);
+        let a = base;
+        let n = seen.get(base) ?? 0;
+        while (out.has(a)) { n += 1; a = `${base}-${n}`; }
+        seen.set(base, n);
+        out.add(a);
+      }
+      for (const id of line.matchAll(/<a\s+[^>]*\bid="([^"]+)"[^>]*>/g)) out.add(id[1]);
+    }
+    return out;
+  };
+  const cache = new Map();
+  const anchorsFor = (f) => {
+    if (!cache.has(f)) cache.set(f, existsSync(f) ? anchorsOf(f) : new Set());
+    return cache.get(f);
+  };
+  // quotepath=false（2026-10-21 卫生轮补宽，同 md-utf8-newline/md-links 先例）：非 ASCII tracked
+  // 路径的引号转义会让 existsSync miss → 静默跳过；反证 = gates.e2e 案例 md-anchors-nonascii-path。
+  const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files', '*.md']);
+  if (r.status !== 0) fail(gate, 'git ls-files 不可用——覆盖面依赖仓库态，fail-loud');
+  else {
+    for (const rel of r.stdout.split('\n').filter(Boolean)) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) continue;
+      const text = readFileSync(f, 'utf8');
+      let inFence = false;
+      for (const line of text.split('\n')) {
+        if (line.trimStart().startsWith('```')) inFence = !inFence;
+        if (inFence) continue;
+        for (const m of line.matchAll(/\[[^\]]*\]\(([^)\s]+)\)/g)) {
+          const [target, frag] = m[1].split('#');
+          if (!frag || /^[a-z]+:\/\//i.test(m[1]) || m[1].startsWith('mailto:')) continue;
+          const abs = target === '' ? f : resolve(dirname(f), target);
+          if (!existsSync(abs)) continue; // 文件缺席归 md-links（单一失败源）
+          if (!anchorsFor(abs).has(decodeURIComponent(frag))) {
+            fail(gate, `${rel}: 锚点不可解析 → ${m[1]}（目标文件无此标题或 a-id）`);
+          }
+        }
+      }
+    }
+  }
+}
+
+// ── doc-paths（live 文档反引号里的仓内路径必须存在——2026-11-03 七维卫生审计 D1-2）──
+// 为什么：md-links 只管 Markdown 链接，`` `path` `` 散文件路径无人把守；本轮实测两处腐化
+//（guides/62 的 `research-workspace/templates/run/`、changing-node-topology skill 同款），
+// 另有一批"文件改名后散文仍指旧名"（record-role-fixture 缺 .mjs）同族。反引号路径同样是合同：
+// agent 会照它去读文件，指向空处 = 探索成本 + 误诊。
+// 范围：live 文档（排除 notes/ 历史层、_backlog/ 过程层、tests/fixtures/ 样本、vendor/）；
+// 只解析以仓内已知根开头的 token（packages|checks|tools|docs|tests|snapshots|_dist|research-workspace），
+// 带占位符（<>{ }* ?…）或空格的跳过（示例路径不是事实声明）。
+// 解析优先级：仓根 → 文档所在目录（pack 子树里的 `scripts/doctor.mjs` 这类包内相对写法）→
+// `vendor/dsh/` 前缀（资产文字引用 vendor 路径时省略前缀的既有写法）；无扩展名的 token 另试
+// `.md/.mjs/.sh/.cjs/.ts`（`tools/README` 这类简写）。
+// 外链白名单（必须带理由）：company 仓路径与"守则要求不存在"的反例路径——路径存在性对它们不成立。
+// 构建产物（`packages/*/lib/`）不是 fresh-clone 合同：它是 gitignored 构建输出，CI/新 clone 不存在；
+// 文档描述它时按"构建产物"口径放行。存在性由构建与 pack.e2e 证明，不由文档合同证明。
+// 防空语料：解析到的 token 数 < 100 → 红（范围被收窄或抓取正则失效）。
+// 散文面（BUG-204）：live 文档里**不在反引号里**、但形如 `<root>/….<ext>` 的仓内路径同样会被
+// agent 照读；窄带只认仓内根前缀 + 文件扩展名（`checks/dev` 这类简写无扩展名不在此列），
+// 代码围栏与反引号内已由上一段覆盖/跳过。解析优先级同反引号（仓根/文档目录/vendor）。
+{
+  const gate = 'doc-paths';
+  const files = liveMdFiles(gate);
+  if (files) {
+    const ROOTS = /^(packages|checks|tools|docs|tests|snapshots|_dist|research-workspace)\//;
+    const EXTS = ['.md', '.mjs', '.sh', '.cjs', '.ts'];
+    const EXEMPT = new Map([
+      ['docs/release.md', 'company 仓路径（外部参考，不随本仓）'],
+      ['tests/layering.spec.ts', 'company 仓路径（外部参考，不随本仓）'],
+      ['tools/harness-home', '反例路径：dev-runtime-clean 守则要求它不存在（只作注入样本）'],
+    ]);
+    const BUILD_OUTPUT = /^packages\/[^/]+\/lib(\/|$)/;
+    const existsForDoc = (p, rel) => {
+      if (BUILD_OUTPUT.test(p) || EXEMPT.has(p)) return true;
+      const candidates = [p, 'vendor/dsh/' + p, ...EXTS.map((e) => p + e)];
+      const fromDoc = join(dirname(rel), p);
+      candidates.push(fromDoc, ...EXTS.map((e) => fromDoc + e));
+      return candidates.some((c) => existsSync(join(ROOT, c)));
+    };
+    let checked = 0;
+    for (const { rel, text } of files) {
+      const lines = text.split('\n');
+      for (const [i, line] of lines.entries()) {
+        for (const m of line.matchAll(/`([^`\n]+)`/g)) {
+          const token = m[1].trim();
+          const paths = (() => {
+            const p = token.replace(/:\d+(?:-\d+)?$/, '').replace(/[.,;:]+$/, '');
+            if (ROOTS.test(p)) return /[<>{}*?…\s]/.test(p) || p.includes('$') ? [] : [p];
+            // 命令形态（node/bash/source/cd …）里的仓内路径：ROOTS 只认 token 开头，
+            // 曾让 `node checks/smoke/compat-smoke.mjs` 这类已删除脚本静默通过（2026-11-03 复评）。
+            return [...token.matchAll(/(?:^|[\s"'`])((?:packages|checks|tools|docs|tests|snapshots|_dist|research-workspace)\/[^\s`'"]+)/g)]
+              .map((x) => x[1].replace(/:\d+(?:-\d+)?$/, '').replace(/[.,;:]+$/, ''))
+              .filter((x) => !/[<>{}*?…]/.test(x) && !x.includes('$'));
+          })();
+          for (const p of paths) {
+            checked++;
+            if (existsForDoc(p, rel)) continue;
+            fail(gate, `${rel}:${i + 1} 反引号路径 \`${p}\` 不存在（仓根/文档目录/vendor 均未命中）——散文件路径也是合同；修正路径或改用 Markdown 链接`);
+          }
+        }
+      }
+    }
+    if (checked < 100) fail(gate, `防空语料：只解析到 ${checked} 条仓内反引号路径（过少 = 扫描面被收窄）`);
+
+    // 散文面：由 doc-prose-paths 纯函数剥离反引号/围栏并枚举；存在性用同一 existsForDoc 解析。
+    let proseChecked = 0;
+    for (const { rel, text } of files) {
+      for (const { line, path: p } of prosePathTokens(text)) {
+        proseChecked++;
+        if (existsForDoc(p, rel)) continue;
+        fail(gate, `${rel}:${line} 散文路径 ${p} 不存在（仓根/文档目录/vendor 均未命中）——live 文档的散文件引用也是合同；修正路径或改用反引号`);
+      }
+    }
+    if (proseChecked < 50) fail(gate, `防空语料：只解析到 ${proseChecked} 条散文仓内路径（过少 = 扫描面被收窄）`);
+  }
+}
+
+// ── doc-drefs（D 号引用必须落到 decisions 锚点——2026-11-03 七维卫生审计 D1/D4）──
+// 为什么：D23/D24 曾指向 00-index（该页没有这两个锚点）——点进去落空，"按需跳"失效；
+// md-anchors 只校验目标文件里有没有该 fragment，不校验"这个 D 号应该住在 decisions"。
+// 范围同 doc-paths（live 文档；notes/_backlog 历史层不追改）；只检查 `[D<n>](...)` 形态。
+{
+  const gate = 'doc-drefs';
+  const files = liveMdFiles(gate);
+  if (files) {
+    const decisions = readFileSync(join(ROOT, 'docs', 'decisions.md'), 'utf8');
+    const anchors = new Set([...decisions.matchAll(/<a id="(d\d+)"><\/a>/g)].map((m) => m[1]));
+    let checked = 0;
+    for (const { rel, text } of files) {
+      const lines = text.split('\n');
+      for (const [i, line] of lines.entries()) {
+        for (const m of line.matchAll(/\[(D\d+)\]\(([^)\s]+)\)/g)) {
+          const id = m[1].toLowerCase();
+          const [pathPart, frag] = m[2].split('#');
+          const samePage = pathPart === '' && rel.endsWith('decisions.md');
+          const okFile = samePage || pathPart.split('/').at(-1) === 'decisions.md';
+          if (!okFile || frag !== id) {
+            fail(gate, `${rel}:${i + 1} ${m[1]} 引用指向 ${m[2]}——应指向 docs/decisions.md#${id}（D 号台账的锚点才是按需跳的落点）`);
+          }
+          checked++;
+        }
+      }
+    }
+    if (checked < 20) fail(gate, `防空语料：只扫到 ${checked} 个 D 号引用（过少 = 扫描面被收窄）`);
+  }
+}
+
+// ── archived-note-pointer（归档判定的可复核面——notes-stocktake 体检
+//    （_backlog/_archived/research/notes-stocktake/2026-10-08-notes-stocktake.md）结论"归档判据在本仓不可靠"的机械
+//    切片：活面（notes/archived/ 之外的 tracked .md）以 Markdown 链接引用
+//    notes/archived/<具体 Note> 前，必须在 checks/archived-note-pointers.json 登记
+//    （历史指针类，逐条带理由——登记动作 = 活面显式承认"我在引用冻结件"；被引用还想归档
+//    的 Note 由此在对账面上现形，归档进门条件的语义判断（「不再可能指导未来变更」）保留给人）。红 = ①未登记的
+//    活面→archived 链接；②登记条目失真（源文件已无此链接）；③登记条目失存（源/目标不在
+//    盘上、未跟踪、目标不在 archived）；④archived 语料非空但活面扫描集为空（范围收窄
+//    防空）。notes/archived/README.md 索引导航豁免。反引号裸路径不检（与 md-links 同边界
+//    ——wide 盘点另行决定）。已知边界：参考式定义 / 跨行链接 / 代码围栏内 / HTML href
+//    四形态逃逸（收窄 = 独立 writing-a-gate 轮，启动条件 = 出现真实的该形态引用）；带
+//    title 链接本门禁可捕（正则容忍尾注 title）而 md-links 失明（其正则遇空格即弃）。──
+{
+  const gate = 'archived-note-pointer';
+  const regPath = join(ROOT, 'checks', 'archived-note-pointers.json');
+  const ls = gitOnce(['-c', 'core.quotepath=false', 'ls-files', '*.md']);
+  if (ls.status !== 0) {
+    fail(gate, `git ls-files 不可用（${String(ls.stderr).slice(0, 120)}）——本门禁覆盖面依赖仓库态，fail-loud`);
+  } else if (!existsSync(regPath)) {
+    fail(gate, 'checks/archived-note-pointers.json 缺席——登记簿是本门禁的判定面，fail-loud');
+  } else {
+    const all = ls.stdout.split('\n').filter(Boolean);
+    const archived = all.filter((p) => p.startsWith('notes/archived/') && p.endsWith('.md') && !p.endsWith('README.md'));
+    const live = all.filter((p) => !p.startsWith('notes/archived/'));
+    if (archived.length === 0) {
+      fail(gate, 'notes/archived/ 零 Note——冻结语料为空，本门禁失去把守对象（真清空须同变更退役本门禁，不许静默空转）');
+    } else if (live.length === 0) {
+      fail(gate, '活面 .md 扫描集为空而 archived 语料非空——tracked 范围被收窄，fail-loud');
+    }
+    // 观测集：活面 Markdown 链接解析进 archived 的 (源, 目标) 对（代码围栏外；README 豁免）
+    const observed = new Map();
+    for (const rel of live) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) continue; // 稀疏态防御
+      const text = readFileSync(f, 'utf8');
+      let inFence = false;
+      for (const line of text.split('\n')) {
+        if (line.trimStart().startsWith('```')) { inFence = !inFence; continue; }
+        if (inFence) continue;
+        for (const m of line.matchAll(/\[[^\]]*\]\(<?([^)\s]+?)>?(?:\s+"[^"]*")?\)/g)) {
+          let t = m[1];
+          if (/^[a-z]+:/i.test(t)) continue; // URL / mailto
+          t = t.split('#')[0];
+          if (!t) continue; // 纯锚
+          const relTarget = relative(ROOT, resolve(dirname(f), t)).split(sep).join('/');
+          if (relTarget.startsWith('..')) continue; // 仓外目标不判
+          if (!relTarget.startsWith('notes/archived/') || !relTarget.endsWith('.md') || relTarget.endsWith('README.md')) continue;
+          const key = `${rel}\u0000${relTarget}`;
+          observed.set(key, (observed.get(key) ?? 0) + 1);
+        }
+      }
+    }
+    let entries;
+    try { entries = JSON.parse(readFileSync(regPath, 'utf8')).pointers; } catch (e) {
+      fail(gate, `登记簿不可解析（${String(e).slice(0, 80)}）`);
+      entries = null;
+    }
+    if (entries !== null) {
+      if (!Array.isArray(entries)) fail(gate, '登记簿 pointers 不是数组');
+      const registered = new Set();
+      for (const [i, e] of entries.entries()) {
+        if (typeof e?.source !== 'string' || typeof e?.target !== 'string' || typeof e?.reason !== 'string' || !e.reason.trim()) {
+          fail(gate, `登记簿第 ${i + 1} 条形状非法（需 source/target/reason 且 reason 非空）`);
+          continue;
+        }
+        if (e.source.startsWith('notes/archived/')) fail(gate, `登记条目源在 archived 内（登记簿只收活面）：${e.source}`);
+        const key = `${e.source}\u0000${e.target}`;
+        registered.add(key);
+        if (!all.includes(e.source)) fail(gate, `登记条目失存（源不在 tracked .md）：${e.source} → ${e.target}`);
+        if (!archived.includes(e.target)) {
+          fail(gate, `登记条目失存（目标不在 notes/archived/）：${e.source} → ${e.target}（Note 复活/移位时同步登记簿）`);
+        }
+      }
+      for (const [key, count] of observed) {
+        if (!registered.has(key)) {
+          const [s, t] = key.split('\u0000');
+          fail(gate, `${s}: 未登记的活面→archived 链接 → ${t}（×${count}）——归档前解除引用，或在 checks/archived-note-pointers.json 登记为历史指针（带理由）`);
+        }
+      }
+      for (const key of registered) {
+        if (!observed.has(key)) {
+          const [s, t] = key.split('\u0000');
+          fail(gate, `登记条目失真（源文件已无此链接）：${s} → ${t}——更新或删除该条目`);
+        }
+      }
+    }
+  }
+}
+
+// ── count-free（live 文档不写硬编码计数）──
+// 为什么：门禁数 / tests 数 / 断言数是最易腐的一类自指事实（2026-09-26 清扫实测 5 处写错：
+// tests 数 ×2、note 篇数、源面条数、门禁数——本注释原先照抄这些数字，被本门禁自己咬红，
+// 即为它有效的第一份证据）。计数有正本（gates 数组 / evaluation 台账 / ls），散文里的副本
+// 只会腐烂——一律改成"查正本"。
+// 范围：live 文件（排除 notes/ 历史层、vendor/、pnpm-lock.yaml 与**录制证据**
+// `snapshots/replay/**` / `tests/fixtures/run-state/**`）。录制流是冻结的历史证据，里面是
+// 模型/宿主当时的原文（可能含 `N tests` 一类自指计数）；改夹具来迁就门禁 = 篡改证据。
+// 与 d-vendor 的 vendor-links 录制流豁免同源（2026-09-27 立，2026-10-09 随夹具迁入
+// snapshots/replay/）。防空语料：0 个文件被检查 → 红。
+// 已知边界：只检阿拉伯数字 + 四个名词（门禁/tests/断言/条源面），中文数字与枚举不检
+// （2026-10-20 审计实证：十二件/9 环节/三条/六个 均曾漂移）；关键枚举改指正本，语义面
+// 由 docs-consistency 契约承接。
+{
+  const gate = 'count-free';
+  // 枚举四件套收口（形态正本 = trackedFiles 助手头注）；范围与防空语料措辞是本门禁自己的。
+  const files = trackedFiles({
+    gate,
+    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f === 'pnpm-lock.yaml'
+      || f.startsWith('snapshots/replay/') || f.startsWith('tests/fixtures/run-state/'),
+    emptyMsg: '防空语料：未扫到任何 live 文件',
+  });
+  if (files) for (const { rel, text } of files) {
+    for (const mm of text.matchAll(/(?<![A-Za-z0-9])[0-9]+ ?(门禁|tests|断言|条源面)/g)) {
+      const line = text.slice(0, mm.index).split('\n').length;
+      fail(gate, `${rel}:${line} 写死计数"${mm[0]}"——计数有正本（gates 数组 / evaluation §L0 / ls），散文改指正本`);
+    }
+  }
+}
+
+// ── doc-now-only（live 文档只写 now，不写变更史）──
+// 为什么：docs/AGENTS.md §写作规则明令"写当前状态，不写变更史"，但 2026-09-26 清扫实测 live 文档
+// 里成片出现"已销账 / 修订 → / 曾用 / 首版…已由…替换"——读者会据此以为旧结论仍有效。
+// 范围：live 文档（排除 notes/ 历史层与 vendor/）。豁免两处——① `docs/AGENTS.md`（它是这条规则
+// 的家，slop 清单必须能举例禁用词）；② **含本门禁名 `doc-now-only` 的行**（本门禁在
+// evaluation.md §L0 的登记行与本节注释都要点名禁用词，否则规则无从表述）。
+// 防空语料：0 个文件被检查 → 红。
+{
+  const gate = 'doc-now-only';
+  // 枚举四件套收口（形态正本 = trackedFiles 助手头注——quotepath=false 即非 ASCII 的 .md 不再被
+  // 引号转义输出而静默漏扫，_dist/安装手册.md 实测；不可读改为报红而非裸读崩栈）；豁免与
+  // 防空语料措辞是本门禁自己的。
+  const files = trackedFiles({
+    gate,
+    glob: '*.md',
+    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f === 'docs/AGENTS.md',
+    emptyMsg: '防空语料：未扫到任何 live 文档',
+  });
+  if (files) for (const { rel, text } of files) {
+    const lines = text.split('\n');
+    for (const mm of text.matchAll(/已销账|修订 →|曾用|首版[^\n]{0,15}已由/g)) {
+      const line = text.slice(0, mm.index).split('\n').length;
+      if ((lines[line - 1] ?? '').includes('doc-now-only')) continue; // 规则自身的表述行
+      fail(gate, `${rel}:${line} 含变更史措辞"${mm[0]}"——live 文档只写 now；历史归 notes/ 与 git`);
+    }
+  }
+}
+
+// ── doc-budgets（常驻文档预算——上游 verify-doc-budgets 的等价物：预算由
+//    checks/doc-budgets.json 拥有（不硬编码），登记项必须存在且不超限，仓内新增
+//    AGENTS.md 必须登记（缺登记即红）。台账（00-index）与 guides 是生长面，不设顶
+//    （vendor "review governs unbudgeted tiers" 同款）。行数 = split('\n') - 1
+//    （结尾恰一换行由 md-utf8-newline 保证）；运行区（tools/）与 vendor 不扫。──
+{
+  const gate = 'doc-budgets';
+  const manifestPath = join(ROOT, 'checks', 'doc-budgets.json');
+  if (!existsSync(manifestPath)) fail(gate, 'checks/doc-budgets.json 缺席——常驻文档预算的 owner');
+  else {
+    let manifest = {};
+    try { manifest = JSON.parse(readFileSync(manifestPath, 'utf8')); }
+    catch (error) { fail(gate, `doc-budgets.json 不是合法 JSON：${String(error).slice(0, 80)}`); }
+    // `_` 前缀默认是 manifest 元数据键（_note/_raises）；但 `_backlog/AGENTS.md` 是真实路径，
+    // 也必须受预算（2026-10-20 审计 P1：旧过滤把它的 48 行预算静默跳过）。
+    const budgeted = Object.keys(manifest).filter((k) => !k.startsWith('_') || k.endsWith('.md'));
+    for (const rel of budgeted) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) { fail(gate, `${rel}: 已登记预算但文件缺席`); continue; }
+      const lines = readFileSync(f, 'utf8').split('\n').length - 1;
+      if (lines > manifest[rel]) {
+        fail(gate, `${rel} ${lines} 行 > 预算 ${manifest[rel]} 行——处置序：下放/压缩；升顶须改 manifest 并在同一变更登记理由`);
+      }
+    }
+    // AGENTS.md 枚举 = tracked-only（git ls-files；md-links 族同款 quotepath=false）。
+    // 2026-10-08 收口（审计 P3 件④）：原 walk(ROOT) 无差别枚举把 gitignored 运行区卷进
+    // 预算登记面——release.entry probeWs 直接铺工作区（非 node_modules 层）的 AGENTS.md
+    // 实测误红（runtime/smoke-workspace 探针复现）。范围纪律正解 = 覆盖面跟 tracked 走。
+    const lsAgents = spawnSync('git', ['-c', 'core.quotepath=false', 'ls-files', '*AGENTS.md'], { cwd: ROOT, encoding: 'utf8' });
+    if (lsAgents.status !== 0) fail(gate, `git ls-files 不可用（${String(lsAgents.stderr).slice(0, 120)}）——覆盖面依赖仓库态，fail-loud`);
+    for (const rel of lsAgents.stdout.split('\n').filter(Boolean)) {
+      if (rel.startsWith('tools/') || rel.startsWith('vendor/')) continue;
+      if (!Object.hasOwn(manifest, rel)) fail(gate, `${rel}: 常驻指令文件未登记预算（checks/doc-budgets.json）`);
+    }
+  }
+}
+
+// ══ 域 B · pack 与驾驶舱（preset 形状/pack 声明/client 半/槽与登记合同） ══
+}

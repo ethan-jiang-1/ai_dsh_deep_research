@@ -1,5 +1,5 @@
 // tests/run/probes/probe-status-tab.spec.mjs —— cdp-probe 页签选择/打开判据的 keyless 契约
-// （scripts/lib/shared/probe-status-tab.mjs；2026-10-19 run-driver 落地时实测的假阳/假红正修）。
+// （checks/lib/shared/probe-status-tab.mjs；2026-10-19 run-driver 落地时实测的假阳/假红正修）。
 //
 // 立红记录（反证）：①旧实现用 `textContent.includes('研究状态')` 选按钮——本测试的
 // 「描述串入」用例在旧判据下会被选中（假阳）而新判据拒绝；②旧 `paneText` 取
@@ -8,7 +8,7 @@
 // 判 false。实现前跑本文件：import 失败即红（模块缺席）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pickStatusTab, statusPaneOpened } from '../../../scripts/lib/shared/probe-status-tab.mjs';
+import { pickStatusTab, statusPaneOpened } from '../../../checks/lib/shared/probe-status-tab.mjs';
 
 const btn = (title, guideEntry = null, label = '') => ({ title, guideEntry, label });
 

@@ -1,5 +1,5 @@
 // 负例留证 2026-11-14：BUG-184 / BUG-187 / BUG-190——CI 执行面与触发事件对
-// dev/record-ci-oracle.mjs 用「真 YAML 解析 + 真 bash -eo pipefail + 失败 stub node」录制的
+// tools/record-ci-oracle.mjs 用「真 YAML 解析 + 真 bash -eo pipefail + 失败 stub node」录制的
 // 外部 oracle 逐例断言（同时核对 executed 与 events，修复首轮 BUG-190 只测 executed 漏测 events 的假闭环）。
 // 红配方：① 把 parseWorkflow 的 events 置空或删 flow mapping → BUG-190 events 断言红；
 // ② 把 pipefail 早退或短路过滤删掉 → BUG-187 fixture 红；③ 把表达式归一删掉 → BUG-184 fixture 红。
@@ -8,7 +8,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { eventKeys, executedSmokeFiles, parseWorkflow } from '../../scripts/lib/tools/ci-workflow.mjs'
+import { eventKeys, executedSmokeFiles, parseWorkflow } from '../../checks/lib/tools/ci-workflow.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const ORACLE = JSON.parse(readFileSync(join(ROOT, 'tests/fixtures/ci-oracle/oracle.json'), 'utf8'))

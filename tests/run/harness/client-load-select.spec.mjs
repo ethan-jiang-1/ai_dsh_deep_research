@@ -3,7 +3,7 @@
 // 还原法 = selectBoundSession 去掉 agentPreset==='lead' 过滤。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { selectBoundSession } from '../../../scripts/lib/harness/client-load-select.mjs'
+import { selectBoundSession } from '../../../checks/lib/harness/client-load-select.mjs'
 
 const candidate = (id, preset, count, title = id) => ({ sessionId: id, agentPreset: preset, eventCount: count, title })
 

@@ -1,11 +1,11 @@
-// 真模型档 verdict 契约机械钉住（scripts/AGENTS §冒烟脚本可靠性纪律；test-strategy 语料
+// 真模型档 verdict 契约机械钉住（checks/AGENTS §冒烟脚本可靠性纪律；test-strategy 语料
 // 防假绿机制采纳）。契约：exit 0 = 全绿 / 1 = 断言红 / 2 = 未跑（前置缺席）——未跑 ≠ 通过。
 // 登记的真模型档脚本行为由形状断言钉住，防将来漂移；实际成员以 REAL_MODEL 闭集为准。
 // 登记制 closed set（命名即层）：真模型档 = 要凭据的档位，名单就是本文件的 REAL_MODEL——
 // 任何入口脚本引用 `requireCredentials(`（凭据要求标记；旧形态 `.credentials.yaml` 仍认）而未登记 = 档位词表漂移即红；
 // 反向（登记脚本摘掉凭据要求）同样红。语料事实：`withModelKey` 是条件透传（key 在才传），
 // keyless 冒烟也合法调用，故判据用凭据**要求**而非透传。
-// 覆盖面 = `scripts/` 各组入口 + 根 `probes/`；探针迁根后不再属于 scripts/，但 closed set 语义不变。
+// 覆盖面 = `checks/` 各组入口 + 根 `probes/`；探针迁根后不再属于 checks/，但 closed set 语义不变。
 // 反证：①给 keyless 脚本注入 .credentials.yaml 引用 → closed set 红；②删登记脚本的
 // exit(2)/收尾判定 → 对应断言红；还原 → 绿。
 import { test } from 'node:test';
@@ -13,18 +13,18 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { listProbeFiles } from '../../scripts/lib/shared/probe-index.mjs';
+import { listProbeFiles } from '../../checks/lib/shared/probe-index.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const SCRIPTS = join(ROOT, 'scripts');
+const SCRIPTS = join(ROOT, 'checks');
 const PROBES = join(ROOT, 'probes');
-// 路径 = 仓根相对（scripts/smoke/…、probes/…），让两类入口同一名单对账。
+// 路径 = 仓根相对（checks/smoke/…、probes/…），让两类入口同一名单对账。
 const REAL_MODEL = [
-  'scripts/smoke/l4-lite.e2e.mjs',
-  'scripts/smoke/team-preflight.e2e.mjs',
+  'checks/smoke/l4-lite.e2e.mjs',
+  'checks/smoke/team-preflight.e2e.mjs',
   'probes/behavior/entry-chain-probe.mjs',
-  'scripts/smoke/client-hitl.entry.mjs',
-  'scripts/smoke/cdp-ask.entry.mjs',
+  'checks/smoke/client-hitl.entry.mjs',
+  'checks/smoke/cdp-ask.entry.mjs',
   'probes/behavior/discipline-probe.mjs',
   'probes/behavior/method-library-probe.mjs',
   'probes/behavior/defaults-probe.mjs',
@@ -32,7 +32,7 @@ const REAL_MODEL = [
   'probes/behavior/wave-execution-probe.mjs',
 ];
 
-// 收集 scripts/ 各组入口（每组一层；lib/ 除外）+ probes/ 各域入口（递归），
+// 收集 checks/ 各组入口（每组一层；lib/ 除外）+ probes/ 各域入口（递归），
 // 仓根相对路径；任一区收窄为空集时判红（防空语料）。
 function listEntryRels() {
   const rels = [];
@@ -40,12 +40,12 @@ function listEntryRels() {
     if (ent.name === 'lib' || ent.name === 'node_modules') continue;
     if (ent.isDirectory()) {
       for (const sub of readdirSync(join(SCRIPTS, ent.name), { withFileTypes: true })) {
-        if (sub.isFile() && sub.name.endsWith('.mjs')) rels.push(`scripts/${ent.name}/${sub.name}`);
+        if (sub.isFile() && sub.name.endsWith('.mjs')) rels.push(`checks/${ent.name}/${sub.name}`);
       }
-    } else if (ent.isFile() && ent.name.endsWith('.mjs')) rels.push(`scripts/${ent.name}`);
+    } else if (ent.isFile() && ent.name.endsWith('.mjs')) rels.push(`checks/${ent.name}`);
   }
   for (const rel of listProbeFiles(PROBES)) rels.push(`probes/${rel}`);
-  assert.ok(rels.some((rel) => rel.startsWith('scripts/')), 'scripts/ 扫到 0 个入口——分组结构变了而 closed set 未跟进');
+  assert.ok(rels.some((rel) => rel.startsWith('checks/')), 'checks/ 扫到 0 个入口——分组结构变了而 closed set 未跟进');
   assert.ok(rels.some((rel) => rel.startsWith('probes/')), 'probes/ 扫到 0 个入口——域结构变了而 closed set 未跟进');
   return rels.sort();
 }
@@ -57,8 +57,8 @@ function listEntryRels() {
 // 反证：删任一消费者的 setEncoding → 本测试点名该文件红；还原 → 绿。
 test('管道输出消费者必须 setEncoding("utf8")（多字节 chunk 边界不得撕裂）', () => {
   const EXTRA_PIPE_CONSUMERS = [
-    'scripts/lib/shared/web-banner.mjs',
-    'dev/record-role-fixture.mjs',
+    'checks/lib/shared/web-banner.mjs',
+    'tools/record-role-fixture.mjs',
   ];
   const offenders = [];
   for (const rel of [...listEntryRels(), ...EXTRA_PIPE_CONSUMERS]) {

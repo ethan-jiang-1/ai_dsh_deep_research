@@ -64,7 +64,7 @@ jobs:
 
       - name: Build vendor (pin tree)
         if: steps.vendor-cache.outputs.cache-hit != 'true'
-        run: bash dev/vendor-build.sh
+        run: bash tools/vendor-build.sh
 
       # 冒烟有构建新鲜度自检：lib/client.js 旧于 src 即 exit 2。
       - name: Build pack (dual halves)
@@ -76,7 +76,7 @@ jobs:
 
       # --seed 自建 home（会话 + 已交付 bundle 夹具），不依赖开发 home/凭据。
       - name: Client load (seed fixture)
-        run: source dev/env.sh && node --import tsx/esm scripts/smoke/client-load.entry.mjs --seed tests/fixtures/client-load-home --port 3109
+        run: source tools/env.sh && node --import tsx/esm checks/smoke/client-load.entry.mjs --seed tests/fixtures/client-load-home --port 3109
 
       - name: Upload failure scene
         if: failure()
@@ -133,7 +133,7 @@ jobs:
 
       - name: Build vendor (pin tree)
         if: steps.vendor-cache.outputs.cache-hit != 'true'
-        run: bash dev/vendor-build.sh
+        run: bash tools/vendor-build.sh
 
       - name: Build pack (npm pack prepack)
         run: pnpm build
@@ -143,9 +143,9 @@ jobs:
           export DSH_DEV_HOME="$GITHUB_WORKSPACE/runtime/ci-home"
           export DSH_RUN_STATE_DIR="$GITHUB_WORKSPACE/runtime/ci-state"
           export DSH_RUN_PORT=3199
-          source dev/env.sh
-          bash dev/boot-run.sh --prepare-profile
-          node scripts/smoke/snapshot-replay.entry.mjs --read-only --layers a,b --port 3110
+          source tools/env.sh
+          bash tools/boot-run.sh --prepare-profile
+          node checks/smoke/snapshot-replay.entry.mjs --read-only --layers a,b --port 3110
 
   deploy:
     name: keyless deploy smokes
@@ -192,7 +192,7 @@ jobs:
 
       - name: Build vendor (pin tree)
         if: steps.vendor-cache.outputs.cache-hit != 'true'
-        run: bash dev/vendor-build.sh
+        run: bash tools/vendor-build.sh
 
       # 类型门（测试走 tsx 剥类型，typecheck 是唯一类型回归面）。
       - name: Typecheck (pack dual halves)
@@ -204,11 +204,11 @@ jobs:
       # L1 真挂载（无模型）：roster + 逐角色 session/create + skills 隔离 + boot 页模块表行。
       # 用 vendor 源码基线（bootWeb 起自本仓），无需全局 dsh；DSH_HOME 由 env.sh 隔离。
       - name: L1 preset smoke (real mount, keyless)
-        run: source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs
+        run: source tools/env.sh && DSH_SMOKE_REAL=1 node checks/smoke/preset.e2e.mjs
 
       # L2 发布/安装/卸载：export-dist 出 tarball + market，vendor CLI 作 dsh（无需全局安装）。
       - name: Export dist (L2 tarball + market)
-        run: node dev/release/export-dist.mjs
+        run: node tools/release/export-dist.mjs
 
       - name: L2 lifecycle smoke (install → display → remove)
         run: |
@@ -217,16 +217,16 @@ jobs:
           exec env TSX_TSCONFIG_PATH="$GITHUB_WORKSPACE/tsconfig.json" node --import tsx/esm "$GITHUB_WORKSPACE/vendor/dsh/apps/cli/src/bin.ts" "\$@"
           EOF
           chmod +x /tmp/dsh-vendor
-          DSH_BIN=/tmp/dsh-vendor node scripts/smoke/lifecycle.entry.mjs
+          DSH_BIN=/tmp/dsh-vendor node checks/smoke/lifecycle.entry.mjs
 
       # 方法库 tool smoke 不在此 job：真 Loader 需要 native system 产物（`pnpm build:native`），
       # CI 无该工具链（2026-11-03 实测：system.node 缺席 → MODULE_NOT_FOUND）。证据 = 开发档。
 
       - name: Doctor (read-only profile/anchor/workspace/credentials)
-        run: node scripts/smoke/doctor.e2e.mjs
+        run: node checks/smoke/doctor.e2e.mjs
 
       - name: Coverage command (observational)
-        run: source dev/env.sh && pnpm test:coverage
+        run: source tools/env.sh && pnpm test:coverage
 
       # 这两条契约 import vendor **源码**（组合层 Loader / 设置 schema）。默认 test 用
       # client tsconfig（paths 置空 → vendor 包解析到构建产物 lib/）；本步用根 tsconfig
@@ -234,24 +234,24 @@ jobs:
       - name: Vendor-source contracts (root tsconfig)
         run: pnpm test:vendor
 
-      # 类型面不在 keyless job：`pnpm typecheck` 要 vendor 构建产物（dev/vendor-build.sh），
+      # 类型面不在 keyless job：`pnpm typecheck` 要 vendor 构建产物（tools/vendor-build.sh），
       # 而 keyless 的契约是 fresh clone 无构建也能跑。类型门在 deploy job（同一 push/PR 触发）
       # 的 vendor 构建之后执行，覆盖等价、不把构建成本摊到每次回归。
       # 门禁自测：注入案例 + 对照，经真实 verify 入口判红/判绿。此前只住在
       # "改 verify 必跑"的散文里——CI 上永不执行，门禁钝化只能在本地被发现。
       - name: Gate self-tests (injected regressions must be named red)
-        run: source dev/env.sh && node scripts/smoke/gates.e2e.mjs
+        run: source tools/env.sh && node checks/smoke/gates.e2e.mjs
 
       # 源码移交：产物边界 + HANDOFF 接收指令；git archive HEAD，无网络/模型依赖
       - name: Source handoff (artifact boundary + recipient instructions)
-        run: source dev/env.sh && node scripts/smoke/handoff.e2e.mjs
+        run: source tools/env.sh && node checks/smoke/handoff.e2e.mjs
 
       # 交付回执链（合成 bundle + 合成会话日志，真 CLI）：归一/幂等/外部 present/秘密/repair
       - name: Receipt chain (run-accept end-to-end)
-        run: source dev/env.sh && node scripts/smoke/run-accept.e2e.mjs
+        run: source tools/env.sh && node checks/smoke/run-accept.e2e.mjs
 
       - name: Tarball shape
-        run: node scripts/smoke/pack.e2e.mjs
+        run: node checks/smoke/pack.e2e.mjs
 
   all-checks-passed:
     name: all checks passed

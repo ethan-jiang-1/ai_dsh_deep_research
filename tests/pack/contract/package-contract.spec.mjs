@@ -1,7 +1,7 @@
 // T0/T8 静态发布契约 — 不构建、不联网，钉住“发出去的是什么/不会执行什么”。
 // 反证：给 pack 加 install 脚本、删 files 里的 cordis.patch.yml、把 exports["./client"]
 // 指向不存在的路径 → 本文件红。**构建产物断言一律不住这里**（fresh clone 无 lib/）：
-// 运行期产物与 client 模块表由 scripts/smoke/pack.e2e.mjs 验（它本就要求 lib/ 在位）。
+// 运行期产物与 client 模块表由 checks/smoke/pack.e2e.mjs 验（它本就要求 lib/ 在位）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'

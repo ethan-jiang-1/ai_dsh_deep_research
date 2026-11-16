@@ -12,9 +12,9 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
-import { readinessOfBundle } from '../../../scripts/lib/shared/node-gate-contracts.mjs'
+import { readinessOfBundle } from '../../../checks/lib/shared/node-gate-contracts.mjs'
 import { parseReadinessDeclaration, readinessOfSources } from '../../../packages/deep-research-pack/src/lib/review/review-readiness.ts'
-import { deliveryGate } from '../../../scripts/lib/gates/node-gate-delivery-gate.mjs'
+import { deliveryGate } from '../../../checks/lib/gates/node-gate-delivery-gate.mjs'
 import { withCompleteBundle } from './node-gate-helpers.mjs'
 
 const makeBundle = (reviewText, declaration = undefined) => {

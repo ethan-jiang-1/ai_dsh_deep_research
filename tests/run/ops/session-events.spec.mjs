@@ -7,7 +7,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   eventSummary, eventClock, formatEventLine, filterEvents, tailEvents, textOfContent, readableTitle, stuckOf,
-} from '../../../scripts/lib/ops/session-events-core.mjs'
+} from '../../../checks/lib/ops/session-events-core.mjs'
 
 test('eventSummary：tool/call 解析 JSON 字符串参数并截断；未知事件保留 type', () => {
   const call = { type: 'tool/call', data: { name: 'bash', arguments: JSON.stringify({ command: 'pwd' }) } }

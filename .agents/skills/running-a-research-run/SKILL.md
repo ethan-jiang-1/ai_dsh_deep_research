@@ -18,28 +18,28 @@ run 的操作面是**文件 + 会话通道**，不是代码。启动器、观察
   都要报出来，分两类：(a) 无 `final/` 或 `review.md` 不是 `readiness: PASS` = 在飞 → 问**接续它还是
   新开**（接续做法 = §3）；(b) 有 `final/` 且 PASS = 交付线已在盘但未归档 → 问**先归档再新开，还是
   补研究**。两类都带 slug + mtime，**都不自己挑**；
-- 起通道：**`node dev/run-driver.mjs up`**（起/复用通道 → 验浏览器面 → 打印呈交块；exit 0 = 可呈交 /
-  1 = 红不得呈交 / 2 = 未跑）。它内部就是 `bash dev/boot-run.sh`（幂等：组合校验 → 漂移检测 →
+- 起通道：**`node tools/run-driver.mjs up`**（起/复用通道 → 验浏览器面 → 打印呈交块；exit 0 = 可呈交 /
+  1 = 红不得呈交 / 2 = 未跑）。它内部就是 `bash tools/boot-run.sh`（幂等：组合校验 → 漂移检测 →
   boot web（`DSH_RUN_PORT`，缺省 3083）→ 仪表盘）+ `cdp-probe --open-status`。**呈交纪律 = 先自跑
   自修（红了当场修）+ 验浏览器面全绿，才把 URL 交给用户**（正本 = guides/61 §0 启动请求的呈交纪律）。
-  通道已在飞时 `up` 直接复用不另起；只想重验面 = `node dev/run-driver.mjs probe`。
+  通道已在飞时 `up` 直接复用不另起；只想重验面 = `node tools/run-driver.mjs probe`。
   **启动加速（边界不变）**：boot-run 默认用 vendor **构建产物** `lib/bin.js`（≈3s；`DSH_RUN_RUNTIME=source`
   退回 tsx 源码 ≈13s），仍是同一条 `dsh --profile` 启动面；`up` 对同一 pack 源 + 同一 runtime 构建的最近
   GREEN 在 30 分钟内复用（**冷启动也命中，≈10s**；命中前做 HTTP 就绪检查；`--force-probe` 强制真验），
   缓存只存 GREEN（正本 = guides/61 §0）。
   **冷启动按三分支走**（正本 = guides/61 §0）：通道活 + 镜像一致 → 复用（缓存 ≈1s / 首验 ≈15s）；活 + 漂移 →
   `up` exit 2，确认无在飞 run 后一条命令 `kill $(lsof -t -iTCP:3083 -sTCP:LISTEN) ; rm -rf
-  runtime/harness-home/profiles/deep-research ; node dev/run-driver.mjs up`（≈2–3 min，不是卡死）；
+  runtime/harness-home/profiles/deep-research ; node tools/run-driver.mjs up`（≈2–3 min，不是卡死）；
   通道死 → 直接 `up`。**exit 1 的红先看 checks 与最近 verdict 历史**，再用人话判据（preset 四角色 +
   右栏「研究状态」页签）复核插件——先分清是探针判据还是插件没挂上，再动手；
   环境不变式：隔离 dev home（`DSH_DEV_HOME` 可换，绝不用日用 `~/.dsh`）+ 与用户安装同形的载入路径
-  （CLI 建 profile → `plugin add file:<tgz>` → `dsh --profile`；差异以 dev/README parity 表为准）；
+  （CLI 建 profile → `plugin add file:<tgz>` → `dsh --profile`；差异以 tools/README parity 表为准）；
   **启动次序不得重排**：profile → plugin add（roster，成员变更必须重启）→ `dsh --profile` 起 web →
   工作区/会话；缓存与探针只跳过重复验证，不跳过任何一步（正本 = guides/61 §0）。
   **不许自创**：不手起 `dsh --profile deep-research`、不重复 `--from-default-profile`、不手写 roster、
   roster 变更不跳过重启；
   改了 pack 文本（persona/skill/手册）必须重启通道——**web 进程缓存 boot 时的文本**；
-- 观察面两处、同一折算：`node probes/run/run-dashboard.mjs --latest --out <html>`（或 `--watch`，
+- 观察面两处、同一折算：`node probes/analyze/run-dashboard.mjs --latest --out <html>`（或 `--watch`，
   多场扫描的 HTML 投影）与 GUI 右栏「研究状态」页签（会话内实时：步骤条 + HITL 挂起横幅 +
   活标题「研究状态 · ⏳ 等你拍板」）——"这次 run 是否在等我"两处答案一致。
 
@@ -71,7 +71,7 @@ question.md + topics.md 定稿后**再发计划确认卡**（≤200 字计划要
   **会话日志尾部不保证**：在飞写入丢尾实测 303→158 事件（BUG-007 卡正本），盘侧谓词
   消费前先过 `eventsRegressed` 回退检测；
 - 会话日志是 zstd **多帧**拼接（逐次 append 一帧），单帧 API 只解出首帧——按魔数
-  `28 B5 2F FD` 切段逐帧解压（`probes/run/run-dashboard.mjs` 有实现）。
+  `28 B5 2F FD` 切段逐帧解压（`probes/analyze/run-dashboard.mjs` 有实现）。
 
 ## 4. 交付落位（完成判据）
 

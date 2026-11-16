@@ -1,5 +1,5 @@
 // tests/run/channel/channel-cache.spec.mjs — 启动加速缓存的 keyless 契约
-// （scripts/lib/channel/channel-cache.mjs；2026-11-05 实测：漂移门 5.1s + 探针 12s 是热启动的主要开销）。
+// （checks/lib/channel/channel-cache.mjs；2026-11-05 实测：漂移门 5.1s + 探针 12s 是热启动的主要开销）。
 //
 // 立的规矩：缓存只省重复计算，不改变判据——键必须含身份（web pid + pack 指纹），
 // 只复用 GREEN，TTL 外/键不符/时间戳坏一律 miss。反证：把 probeCacheHit 的 GREEN 过滤或
@@ -17,7 +17,7 @@ import {
   probeCacheKey,
   readShippedCache,
   writeShippedCache,
-} from '../../../scripts/lib/channel/channel-cache.mjs'
+} from '../../../checks/lib/channel/channel-cache.mjs'
 
 const entry = (rel, size, mtimeMs) => ({ rel, size, mtimeMs })
 

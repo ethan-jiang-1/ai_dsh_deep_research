@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const SMOKE = join(ROOT, 'scripts', 'smoke')
+const SMOKE = join(ROOT, 'checks', 'smoke')
 
 test('smoke 及其消费的 lib 无未声明标识符（TS2304/TS2552；BUG-051）', () => {
   const files = readdirSync(SMOKE).filter((file) => file.endsWith('.mjs')).map((file) => join(SMOKE, file))

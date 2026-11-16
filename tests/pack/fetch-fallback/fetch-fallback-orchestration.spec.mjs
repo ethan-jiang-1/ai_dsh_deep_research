@@ -14,7 +14,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { fetchWithFallback, markRescued, describeFailure } from '../../../packages/deep-research-pack/src/fetch-fallback/orchestrate.ts';
 import { PROVIDER_ID } from '../../../packages/deep-research-pack/src/fetch-fallback/policy.ts';
-import { researchRoles } from '../../../scripts/lib/shared/roles.mjs';
+import { researchRoles } from '../../../checks/lib/shared/roles.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');

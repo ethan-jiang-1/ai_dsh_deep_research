@@ -9,8 +9,8 @@ import { basename, dirname, join } from 'node:path'
 import {
   READ_ORDER, buildDelivered, buildManifest, corpusRootLabel, pickPresented, receiptProblems,
   manualEvidenceOf, renderAcceptance, repairReceiptPaths, shouldWriteReceipts, sha256Of, sha256Text, withManualEvidence,
-} from '../../../scripts/lib/shared/run-receipt.mjs'
-import { hygieneOf } from '../../../scripts/lib/gates/schema-scan-core.mjs'
+} from '../../../checks/lib/shared/run-receipt.mjs'
+import { hygieneOf } from '../../../checks/lib/gates/schema-scan-core.mjs'
 
 const marked = (body) => `<!-- manual-walkthrough:start -->\n${body}\n<!-- manual-walkthrough:end -->`
 
@@ -232,7 +232,7 @@ test('READ_ORDER 首项是 run.md（读序与手册逐字一致的单点）', ()
 })
 
 test('deliveryGate 消费回执：哈希匹配不红；present 后改 final/vN → RED', async () => {
-  const { deliveryGate } = await import('../../../scripts/lib/gates/node-gate-delivery-gate.mjs')
+  const { deliveryGate } = await import('../../../checks/lib/gates/node-gate-delivery-gate.mjs')
   const { dir, cleanup } = makeRoot()
   try {
     const b = writeBundle(dir)

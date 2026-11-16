@@ -18,7 +18,7 @@ const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
 
 test('I1 安装形态：custom profile + DSH 原生安装，无 launcher/scaffold bin', () => {
-  const manual = read('dev/release/product-manual.md')
+  const manual = read('tools/release/product-manual.md')
   assert.match(manual, /dsh --profile deep-research --from-default-profile web/, '手册缺 DSH profile 初始化')
   assert.match(manual, /dsh plugin --profile deep-research add/, '手册缺 DSH 原生安装')
   assert.match(manual, /dsh --profile deep-research/, '手册缺原生启动')

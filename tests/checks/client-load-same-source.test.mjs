@@ -11,7 +11,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
 
 test('client-load 直调 hitl-fold.deriveAnchors，不手抄锚点公式（BUG-003）', () => {
-  const src = read('scripts/smoke/client-load.entry.mjs')
+  const src = read('checks/smoke/client-load.entry.mjs')
   assert.match(src, /import \{[^}]*deriveAnchors[^}]*\} from ['"][^'"]*hitl-fold(?:\.ts)?['"]/)
   assert.match(src, /deriveAnchors\(/)
   assert.doesNotMatch(src, /(?:const|function)\s+deriveAnchors\b/)
@@ -19,7 +19,7 @@ test('client-load 直调 hitl-fold.deriveAnchors，不手抄锚点公式（BUG-0
 })
 
 test('client-load 会话定位走 web-ui-nav.openSessionById，不赖默认视图（BUG-034）', () => {
-  const src = read('scripts/smoke/client-load.entry.mjs')
+  const src = read('checks/smoke/client-load.entry.mjs')
   assert.match(src, /import \{[^}]*openSessionById[^}]*\} from ['"][^'"]*web-ui-nav/)
   assert.match(src, /openSessionById\(/)
   assert.doesNotMatch(src, /(?:const|function)\s+(?:openSessionByRowKey|clickRowByText)\b/)

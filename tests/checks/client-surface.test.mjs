@@ -1,7 +1,7 @@
 // client 直测面契约（W0-4 / S1）——`src/client/**/*.ts` 每个纯逻辑件必须被至少一个
 // `*.spec.mjs` 直接 import，或在 `CLIENT_SMOKE_ONLY` 登记「为什么只能 smoke / 为什么没有直测」。
 //
-// 为什么需要：`test-surface` 只覆盖 `scripts/lib` 与 pack `src/lib`；`src/client` 的 36/59
+// 为什么需要：`test-surface` 只覆盖 `checks/lib` 与 pack `src/lib`；`src/client` 的 36/59
 // 文件此前没有直测（S1 已补 6 个纯逻辑件）。没有这条契约时，新加一个纯客户端模块不会有人
 // 发现它没测试——这正是 test-asset-fence 研究点名的「无直测区」。
 //
@@ -13,7 +13,7 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import { join, relative, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localImportPath, parseKeylessImports } from '../../scripts/lib/tools/keyless-imports.mjs'
+import { localImportPath, parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const CLIENT = join(ROOT, 'packages', 'deep-research-pack', 'src', 'client')

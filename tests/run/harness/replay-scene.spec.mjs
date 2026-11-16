@@ -9,8 +9,8 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, realpathSync, symlinkSyn
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { presetRoles, researchRoles } from '../../../scripts/lib/shared/roles.mjs';
-import { loadReplayScene, discoverReplayFaces } from '../../../scripts/lib/harness/replay-scene.mjs';
+import { presetRoles, researchRoles } from '../../../checks/lib/shared/roles.mjs';
+import { loadReplayScene, discoverReplayFaces } from '../../../checks/lib/harness/replay-scene.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const ROLES = presetRoles(ROOT);
@@ -189,7 +189,7 @@ test('rejects symlink files, symlink parent directories and a symlink manifest',
 
 test('limits workspace to a repository relative directory', (t) => {
   const { dir, manifest, save } = scene(t);
-  for (const workspace of [ROOT, '../outside', 'nested/../../outside', '.', 'C:\\outside', '..\\outside', 'scripts/lib/shared/roles.mjs', 'missing-workspace']) {
+  for (const workspace of [ROOT, '../outside', 'nested/../../outside', '.', 'C:\\outside', '..\\outside', 'checks/lib/shared/roles.mjs', 'missing-workspace']) {
     manifest.workspace = workspace;
     save();
     assert.throws(() => loadReplayScene(dir, ROLES), /workspace/i);

@@ -7,7 +7,7 @@ import { mkdirSync, mkdtempSync, rmSync, symlinkSync, utimesSync, writeFileSync 
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { openRun, listRuns } from '../../../packages/deep-research-pack/src/lib/run/run-context.ts';
-import { nodeRunSource } from '../../../scripts/lib/gates/run-source-node.mjs';
+import { nodeRunSource } from '../../../checks/lib/gates/run-source-node.mjs';
 
 const reviewLines = (count = 1448) => Array.from({ length: count }, (_, index) => {
   if (index === 570) return 'readiness: FAIL';

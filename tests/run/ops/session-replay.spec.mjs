@@ -17,7 +17,7 @@ import {
   resolveSessionQuery,
   sessionMetaOf,
   formatReplaySummary,
-} from '../../../scripts/lib/ops/session-replay.mjs';
+} from '../../../checks/lib/ops/session-replay.mjs';
 
 const ev = (o) => JSON.stringify(o);
 

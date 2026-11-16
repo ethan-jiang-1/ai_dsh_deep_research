@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { findGroup, findSessionDir, readSessionTextOf, researchWorkspaceGroup } from '../../../scripts/lib/shared/session-log.mjs';
+import { findGroup, findSessionDir, readSessionTextOf, researchWorkspaceGroup } from '../../../checks/lib/shared/session-log.mjs';
 
 const mkSessionsRoot = () => {
   const root = mkdtempSync(join(tmpdir(), 'session-groups-'));

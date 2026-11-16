@@ -5,7 +5,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { fromMarkdown, resolveLockedParserPath, yaml } from '../../scripts/lib/tools/workspace-parsers.mjs'
+import { fromMarkdown, resolveLockedParserPath, yaml } from '../../checks/lib/tools/workspace-parsers.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 

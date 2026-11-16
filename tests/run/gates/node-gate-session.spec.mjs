@@ -2,9 +2,9 @@
 // 路径/断代助手 = node-gate-helpers.mjs。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { gateBundle } from '../../../scripts/lib/gates/node-gate-core.mjs'
-import { headingGate } from '../../../scripts/lib/gates/node-gate-run-gates.mjs'
-import { isHitl2Mention } from '../../../scripts/lib/shared/node-gate-session-gates.mjs'
+import { gateBundle } from '../../../checks/lib/gates/node-gate-core.mjs'
+import { headingGate } from '../../../checks/lib/gates/node-gate-run-gates.mjs'
+import { isHitl2Mention } from '../../../checks/lib/shared/node-gate-session-gates.mjs'
 import { bundle, sessions } from './node-gate-helpers.mjs'
 
 

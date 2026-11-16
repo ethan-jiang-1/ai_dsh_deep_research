@@ -5,7 +5,7 @@
 // 两个判据：捕获目标判定（fail-closed）与凭据头脱敏（证据包可外发）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { isCaptureTarget, redactHeaders } from '../../../scripts/lib/probes/llm-stream-tee-core.mjs'
+import { isCaptureTarget, redactHeaders } from '../../../checks/lib/probes/llm-stream-tee-core.mjs'
 
 test('isCaptureTarget：主机子串命中（缺省 api.deepseek.com）与不命中', () => {
   assert.equal(isCaptureTarget('https://api.deepseek.com/anthropic/v1/messages'), true)

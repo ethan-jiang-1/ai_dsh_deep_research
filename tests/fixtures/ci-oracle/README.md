@@ -1,6 +1,6 @@
 # ci-oracle/ · CI 执行面的外部 oracle
 
-> 组宪章：`oracle.json` 由 [dev/record-ci-oracle.mjs](../../../dev/record-ci-oracle.mjs) 录制：
+> 组宪章：`oracle.json` 由 [tools/record-ci-oracle.mjs](../../../tools/record-ci-oracle.mjs) 录制：
 > 真 YAML 解析（workspace 传递依赖 `yaml@2`）+ 真 bash 执行 `run:` + **失败 stub node**。
 > 消费 = [ci-workflow-oracle.test.mjs](../../checks/ci-workflow-oracle.test.mjs)。
 
@@ -15,6 +15,6 @@
 
 ## 冻结
 
-- 禁手改；重录 = `node dev/record-ci-oracle.mjs`（`--check` 只比对，non-zero = 有分歧）。
+- 禁手改；重录 = `node tools/record-ci-oracle.mjs`（`--check` 只比对，non-zero = 有分歧）。
 - 录制器是 dev-only（yaml 是传递依赖）；测试与 CI 只读 JSON。
 - 改 oracle 应预期测试变红；先红后绿，不许放宽断言。

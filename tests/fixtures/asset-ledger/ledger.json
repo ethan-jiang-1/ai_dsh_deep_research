@@ -1,5 +1,5 @@
 {
-  "generatedBy": "dev/record-asset-ledger.mjs",
+  "generatedBy": "tools/record-asset-ledger.mjs",
   "note": "组合账：lane/class/cost/uniqueClaim/oracleType/sunset；oracleType 由 AST 推导（禁手写 OVERRIDES）；self-referential = 下一轮迁移面；覆盖由 tests/checks/asset-ledger.test 重算对账。",
   "assets": [
     {
@@ -58,7 +58,7 @@
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "dev/record-ci-oracle.mjs 用「真 YAML 解析 + 真 bash -eo pipefail + 失败 stub node」录制的",
+      "uniqueClaim": "tools/record-ci-oracle.mjs 用「真 YAML 解析 + 真 bash -eo pipefail + 失败 stub node」录制的",
       "oracleType": "external",
       "sunset": "随门禁/台账合同退役"
     },
@@ -208,7 +208,7 @@
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "本测试在 node:vm 沙箱里执行 dev/llm-socket-isolation.cjs，注入假 fetch/假 undici：",
+      "uniqueClaim": "本测试在 node:vm 沙箱里执行 tools/llm-socket-isolation.cjs，注入假 fetch/假 undici：",
       "oracleType": "canonical",
       "sunset": "随门禁/台账合同退役"
     },
@@ -318,7 +318,7 @@
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "script-file-size.spec.mjs — scripts/ 的尺寸上限（2026-11-03 第 14 轮审计）。",
+      "uniqueClaim": "script-file-size.spec.mjs — checks/ 的尺寸上限（2026-11-03 第 14 轮审计）。",
       "oracleType": "canonical",
       "sunset": "随门禁/台账合同退役"
     },
@@ -328,7 +328,7 @@
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "smoke-assets 契约（BUG-176）——`scripts/smoke` 顶层分类必须看见 symlink / 目录：",
+      "uniqueClaim": "smoke-assets 契约（BUG-176）——`checks/smoke` 顶层分类必须看见 symlink / 目录：",
       "oracleType": "canonical",
       "sunset": "随门禁/台账合同退役"
     },
@@ -348,7 +348,7 @@
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "真模型档 verdict 契约机械钉住（scripts/AGENTS §冒烟脚本可靠性纪律；test-strategy 语料",
+      "uniqueClaim": "真模型档 verdict 契约机械钉住（checks/AGENTS §冒烟脚本可靠性纪律；test-strategy 语料",
       "oracleType": "canonical",
       "sunset": "随门禁/台账合同退役"
     },
@@ -908,7 +908,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "方法预设解析器合同回归（scripts/lib/test-infra/method-presets.mjs）——内置名单/推荐映射/共同底线的",
+      "uniqueClaim": "方法预设解析器合同回归（checks/lib/test-infra/method-presets.mjs）——内置名单/推荐映射/共同底线的",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
@@ -1328,7 +1328,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "presets 结构回归 — 与 scripts/verify/verify.mjs 的 preset-structure / pack-bundle-compat /",
+      "uniqueClaim": "presets 结构回归 — 与 checks/verify/verify.mjs 的 preset-structure / pack-bundle-compat /",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
@@ -2068,7 +2068,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "tests/run/probes/probe-index.spec.mjs — 探针索引纯函数（scripts/lib/shared/probe-index.mjs）的 keyless 契约。",
+      "uniqueClaim": "tests/run/probes/probe-index.spec.mjs — 探针索引纯函数（checks/lib/shared/probe-index.mjs）的 keyless 契约。",
       "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
@@ -2108,7 +2108,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "frontmatter 拆分契约（keyless 纯函数）——`scripts/lib/shared/frontmatter.mjs` 的直测。",
+      "uniqueClaim": "frontmatter 拆分契约（keyless 纯函数）——`checks/lib/shared/frontmatter.mjs` 的直测。",
       "oracleType": "self-referential",
       "sunset": "随被测模块删除"
     },

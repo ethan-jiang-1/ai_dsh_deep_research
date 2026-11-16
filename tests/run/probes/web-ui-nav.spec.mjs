@@ -6,7 +6,7 @@
 // `PREVIEW_NOTICE_PROBE_JS`（唯一正本，cdp-probe 与冒烟消费方共用选择器策略），
 // 本测试在**不启动浏览器**的前提下钉住它的判定与点击语义：
 //   ① 无遮罩 → present=false 且零点击（不许误点页面上的 Continue——HITL 卡片的提交按钮同名，
-//      见 dev/hitl-answer.mjs 的同款教训）；
+//      见 tools/hitl-answer.mjs 的同款教训）；
 //   ② 有遮罩 + Continue → present=true、clicked=true，且只点那个按钮；
 //   ③ 有遮罩但按钮找不到 → present=true、clicked=false（交给调用方判红，不空转）；
 //   ④ 中英三形态文案（Continue / 我知道了 / Got it）都认。
@@ -14,7 +14,7 @@
 // 第 ① 例红（页面上的 Continue 被误点）。还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { PREVIEW_NOTICE_CONTINUE, PREVIEW_NOTICE_HEADING, PREVIEW_NOTICE_PROBE_JS } from '../../../scripts/lib/shared/web-ui-nav.mjs'
+import { PREVIEW_NOTICE_CONTINUE, PREVIEW_NOTICE_HEADING, PREVIEW_NOTICE_PROBE_JS } from '../../../checks/lib/shared/web-ui-nav.mjs'
 
 /** 极简假 DOM：只实现探针用到的 querySelectorAll / children / textContent / dispatchEvent。 */
 function fakeDocument({ heading = null, buttons = [], hidden = false } = {}) {

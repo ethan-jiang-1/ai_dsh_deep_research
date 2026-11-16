@@ -27,14 +27,14 @@ description: Use when adding a research role preset, renaming one, or changing a
 
 - **bundle 装载**：`package.json` 的 `dsh.bundle.patch` 数组补上 `presets/<role>.patch.yml`
   ——0.1.7 的 preset 行随 bundle 装载，漏了它角色不进 roster（`pack-bundle-compat` 红）；
-- **源码域**：`dev/research.overlay.yml` 的 bundle 行——源码域通道（冒烟、探针）走它；
+- **源码域**：`tools/research.overlay.yml` 的 bundle 行——源码域通道（冒烟、探针）走它；
 - **镜像**：`runtime/harness-home/profiles/research/` 的 profile 镜像——run 通道走它；
-  `bash dev/boot-run.sh` 的漂移检测会逐文件比 pack 源 vs 镜像，不符即 fail-loud；
-- **roster**：`scripts/lib/shared/roles.mjs` 是访问器，事实源 = 盘上 `presets/`；改完跑
+  `bash tools/boot-run.sh` 的漂移检测会逐文件比 pack 源 vs 镜像，不符即 fail-loud；
+- **roster**：`checks/lib/shared/roles.mjs` 是访问器，事实源 = 盘上 `presets/`；改完跑
   `role-list-sync` 门禁（角色清单与 pack 对账）；
 - **persona 引用对账**：每个 preset 的 persona 文本硬引用 skill 名（如 critic「先加载
   adversarial-review skill」）——增删/改名 skill 时同 diff 检查 persona 是否跟着改（模型可见面）；
-- **真模型档覆盖**：`scripts/smoke/l4-lite.e2e.mjs` 的 `PROMPTS` 加该角色的标记 prompt——它是
+- **真模型档覆盖**：`checks/smoke/l4-lite.e2e.mjs` 的 `PROMPTS` 加该角色的标记 prompt——它是
   全角色冒烟，盘上有角色而无覆盖即 exit 2；
 - **台账**：增删角色 = 推翻 D2（角色 = 5 个：4 研究 + 方法编辑，D37），先在 `docs/decisions.md` 台账登记新 D 号，
   再动代码——`tests/pack/scripts/presets.spec.mjs` 的数量哨兵会拦住没登记的增删。
@@ -42,17 +42,17 @@ description: Use when adding a research role preset, renaming one, or changing a
 ## 3. 验证（完成判据，keyless 优先）
 
 ```sh
-node dev/render-overlay.mjs                       # 生成物先行：L1 挂的是 overlay 不是 pack 源（改 pack 后必跑且先于 L1）
-node scripts/verify/verify.mjs                    # preset-structure / row-deps / role-list-sync
-source dev/env.sh && node scripts/smoke/preset.e2e.mjs                  # L1 接线（dump 面；未 source 自拒）
-source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs # L1 真挂载：真会话 + 逐角色断言 + skills 隔离
-source dev/env.sh && node scripts/smoke/release.entry.mjs --install-only  # L2 仅部署面改动时必跑（跳凭据；未 source 自拒）
+node tools/render-overlay.mjs                       # 生成物先行：L1 挂的是 overlay 不是 pack 源（改 pack 后必跑且先于 L1）
+node checks/verify/verify.mjs                    # preset-structure / row-deps / role-list-sync
+source tools/env.sh && node checks/smoke/preset.e2e.mjs                  # L1 接线（dump 面；未 source 自拒）
+source tools/env.sh && DSH_SMOKE_REAL=1 node checks/smoke/preset.e2e.mjs # L1 真挂载：真会话 + 逐角色断言 + skills 隔离
+source tools/env.sh && node checks/smoke/release.entry.mjs --install-only  # L2 仅部署面改动时必跑（跳凭据；未 source 自拒）
 ```
 
-改了模型可见行（persona/skill 文本）→ keyless 先跑 `node scripts/smoke/snapshot-replay.entry.mjs`
+改了模型可见行（persona/skill 文本）→ keyless 先跑 `node checks/smoke/snapshot-replay.entry.mjs`
 （B 层组装请求 diff：persona 全文 + 全部 request/header + 四处 user/message 注入（含时钟序列）；有意变更的
 红 = 已捕获，走重录场景或 `--update-expected` 重写金标准）→ 再跑真模型档
-`source dev/env.sh && node scripts/smoke/l4-lite.e2e.mjs`（全角色响应，含 method-editor；+ scout 工具调用）。
+`source tools/env.sh && node checks/smoke/l4-lite.e2e.mjs`（全角色响应，含 method-editor；+ scout 工具调用）。
 **只跑 keyless 不算验过角色行为**——机制基线切换的
 教训（E1 回归）就是漏了 with-key 面。
 

@@ -1,0 +1,2605 @@
+{
+  "comment": "搬家路径重定向登记簿（2026-11-15 test-source-mirror）。md-links 对缺失目标先查本簿；条目必须 from 已不在盘上、to 在盘上且被 git 跟踪，否则门禁红。冻结层不改写：旧链接靠本簿解析。",
+  "redirects": [
+    {
+      "from": "packages/deep-research-pack/src/lib/activity-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/events/activity-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/binding-trust.ts",
+      "to": "packages/deep-research-pack/src/lib/run/binding-trust.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/brief-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/run/brief-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/bundle-bind.ts",
+      "to": "packages/deep-research-pack/src/lib/run/bundle-bind.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/config-tables.ts",
+      "to": "packages/deep-research-pack/src/lib/shared/config-tables.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/final-target.ts",
+      "to": "packages/deep-research-pack/src/lib/run/final-target.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/graph-model.ts",
+      "to": "packages/deep-research-pack/src/lib/plan/graph-model.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/hitl-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/events/hitl-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/i18n.ts",
+      "to": "packages/deep-research-pack/src/lib/shared/i18n.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/journal-wire.ts",
+      "to": "packages/deep-research-pack/src/lib/events/journal-wire.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/library-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/library-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/markdown-mask.ts",
+      "to": "packages/deep-research-pack/src/lib/shared/markdown-mask.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/member-activity.ts",
+      "to": "packages/deep-research-pack/src/lib/events/member-activity.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-draft.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-draft.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-commands.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-commands.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-events.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-events.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-hash.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-hash.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-operation-state.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-operation-state.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-operation.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-operation.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-read.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-read.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-source.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-source.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-library-write.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-library-write.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/method-of-question.ts",
+      "to": "packages/deep-research-pack/src/lib/method-library/method-of-question.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/plan-diff.ts",
+      "to": "packages/deep-research-pack/src/lib/plan/plan-diff.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/plan-graph.ts",
+      "to": "packages/deep-research-pack/src/lib/plan/plan-graph.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/plan-index.ts",
+      "to": "packages/deep-research-pack/src/lib/plan/plan-index.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/receipt-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/run/receipt-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/rerun-triage.ts",
+      "to": "packages/deep-research-pack/src/lib/run/rerun-triage.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/research-defaults.ts",
+      "to": "packages/deep-research-pack/src/lib/workspace/research-defaults.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/review-readiness.ts",
+      "to": "packages/deep-research-pack/src/lib/review/review-readiness.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/run-context.ts",
+      "to": "packages/deep-research-pack/src/lib/run/run-context.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/run-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/run/run-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/run-version.ts",
+      "to": "packages/deep-research-pack/src/lib/run/run-version.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/start-card.ts",
+      "to": "packages/deep-research-pack/src/lib/workspace/start-card.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/stream-failure.ts",
+      "to": "packages/deep-research-pack/src/lib/events/stream-failure.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/text-fold.ts",
+      "to": "packages/deep-research-pack/src/lib/shared/text-fold.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/tool-card.ts",
+      "to": "packages/deep-research-pack/src/lib/events/tool-card.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "packages/deep-research-pack/src/lib/workspace-title.ts",
+      "to": "packages/deep-research-pack/src/lib/workspace/workspace-title.ts",
+      "reason": "2026-11-15 pack src domain 分层"
+    },
+    {
+      "from": "scripts/lib/acceptance-check.mjs",
+      "to": "checks/lib/ops/acceptance-check.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/artifact-freshness.mjs",
+      "to": "checks/lib/shared/artifact-freshness.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/ask-drive.mjs",
+      "to": "checks/lib/channel/ask-drive.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/asset-ledger.mjs",
+      "to": "checks/lib/tools/asset-ledger.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/backlog-liveness.mjs",
+      "to": "checks/lib/repo/backlog-liveness.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/browser-cache.mjs",
+      "to": "checks/lib/harness/browser-cache.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/bundle-date-sanity.mjs",
+      "to": "checks/lib/ops/bundle-date-sanity.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/bundle-sessions.mjs",
+      "to": "checks/lib/ops/bundle-sessions.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/cdp-driver.mjs",
+      "to": "checks/lib/shared/cdp-driver.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/channel-cache.mjs",
+      "to": "checks/lib/channel/channel-cache.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/ci-workflow.mjs",
+      "to": "checks/lib/tools/ci-workflow.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/cli-entry.mjs",
+      "to": "checks/lib/shared/cli-entry.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/client-load-select.mjs",
+      "to": "checks/lib/harness/client-load-select.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/content-budget.mjs",
+      "to": "checks/lib/repo/content-budget.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/direct-authorization-boundary.mjs",
+      "to": "checks/lib/probes/direct-authorization-boundary.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/env.mjs",
+      "to": "checks/lib/shared/env.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/evidence-audit-core.mjs",
+      "to": "checks/lib/gates/evidence-audit-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/final-version.mjs",
+      "to": "checks/lib/shared/final-version.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/fix-evidence.mjs",
+      "to": "checks/lib/repo/fix-evidence.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/frontmatter.mjs",
+      "to": "checks/lib/shared/frontmatter.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/gates-cases.mjs",
+      "to": "checks/lib/harness/gates-cases.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/hitl-card-driver.mjs",
+      "to": "checks/lib/channel/hitl-card-driver.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/hitl-provenance.mjs",
+      "to": "checks/lib/shared/hitl-provenance.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/host-health.mjs",
+      "to": "checks/lib/harness/host-health.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/inject-reconcile.mjs",
+      "to": "checks/lib/channel/inject-reconcile.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/keyless-imports.mjs",
+      "to": "checks/lib/tools/keyless-imports.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/llm-stream-tee-core.mjs",
+      "to": "checks/lib/probes/llm-stream-tee-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/local-date.mjs",
+      "to": "checks/lib/shared/local-date.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/method-presets.mjs",
+      "to": "checks/lib/test-infra/method-presets.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/node-gate-contracts.mjs",
+      "to": "checks/lib/shared/node-gate-contracts.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/node-gate-core.mjs",
+      "to": "checks/lib/gates/node-gate-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/node-gate-delivery-gate.mjs",
+      "to": "checks/lib/gates/node-gate-delivery-gate.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/node-gate-reader-gate.mjs",
+      "to": "checks/lib/gates/node-gate-reader-gate.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/node-gate-run-gates.mjs",
+      "to": "checks/lib/gates/node-gate-run-gates.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/node-gate-session-gates.mjs",
+      "to": "checks/lib/shared/node-gate-session-gates.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/note-scan.mjs",
+      "to": "checks/lib/repo/note-scan.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/path-hygiene.mjs",
+      "to": "checks/lib/shared/path-hygiene.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/plan-card.mjs",
+      "to": "checks/lib/shared/plan-card.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/playwright.mjs",
+      "to": "checks/lib/harness/playwright.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/port-reclaim-policy.mjs",
+      "to": "checks/lib/harness/port-reclaim-policy.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/port-reclaim.mjs",
+      "to": "checks/lib/harness/port-reclaim.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/probe-index.mjs",
+      "to": "checks/lib/shared/probe-index.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/probe-send-target.mjs",
+      "to": "checks/lib/probes/probe-send-target.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/probe-status-tab.mjs",
+      "to": "checks/lib/shared/probe-status-tab.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/profile-health.mjs",
+      "to": "checks/lib/shared/profile-health.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/protocol-audit-core.mjs",
+      "to": "checks/lib/gates/protocol-audit-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/protocol-core.mjs",
+      "to": "checks/lib/gates/protocol-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/provenance.mjs",
+      "to": "checks/lib/gates/provenance.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/provider-errors.mjs",
+      "to": "checks/lib/ops/provider-errors.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/release-anchor.mjs",
+      "to": "checks/lib/repo/release-anchor.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/replay-network-offline-policy.cjs",
+      "to": "checks/lib/harness/replay-network-offline-policy.cjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/replay-network-offline.cjs",
+      "to": "checks/lib/harness/replay-network-offline.cjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/replay-request.mjs",
+      "to": "checks/lib/shared/replay-request.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/replay-scene.mjs",
+      "to": "checks/lib/harness/replay-scene.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/roles.mjs",
+      "to": "checks/lib/shared/roles.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-accept-fixture.mjs",
+      "to": "checks/lib/harness/run-accept-fixture.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-channel.mjs",
+      "to": "checks/lib/channel/run-channel.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-dashboard-core.mjs",
+      "to": "checks/lib/ops/run-dashboard-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-dashboard-html.mjs",
+      "to": "checks/lib/ops/run-dashboard-html.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-inventory-core.mjs",
+      "to": "checks/lib/ops/run-inventory-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-lock.mjs",
+      "to": "checks/lib/harness/run-lock.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-receipt.mjs",
+      "to": "checks/lib/shared/run-receipt.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-source-node.mjs",
+      "to": "checks/lib/gates/run-source-node.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/run-state.mjs",
+      "to": "checks/lib/shared/run-state.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/runtime-clean-core.mjs",
+      "to": "checks/lib/ops/runtime-clean-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/scene-pack.mjs",
+      "to": "checks/lib/ops/scene-pack.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/schema-scan-core.mjs",
+      "to": "checks/lib/gates/schema-scan-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/secret-scan.mjs",
+      "to": "checks/lib/shared/secret-scan.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/selftest-library.mjs",
+      "to": "checks/lib/test-infra/selftest-library.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/session-events-core.mjs",
+      "to": "checks/lib/ops/session-events-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/session-log.mjs",
+      "to": "checks/lib/shared/session-log.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/session-replay.mjs",
+      "to": "checks/lib/ops/session-replay.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/smoke-assets.mjs",
+      "to": "checks/lib/test-infra/smoke-assets.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/smoke-lane.mjs",
+      "to": "checks/lib/repo/smoke-lane.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/snapshot-mode.mjs",
+      "to": "checks/lib/harness/snapshot-mode.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/staged-change-pairing.mjs",
+      "to": "checks/lib/repo/staged-change-pairing.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/startup-hint.mjs",
+      "to": "checks/lib/shared/startup-hint.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/strategy-core.mjs",
+      "to": "checks/lib/gates/strategy-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/stream-diagnostics-core.mjs",
+      "to": "checks/lib/ops/stream-diagnostics-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/unconsumed-evidence.mjs",
+      "to": "checks/lib/ops/unconsumed-evidence.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/vendor-artifacts.mjs",
+      "to": "checks/lib/harness/vendor-artifacts.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/verdict-audit-core.mjs",
+      "to": "checks/lib/gates/verdict-audit-core.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/web-banner.mjs",
+      "to": "checks/lib/shared/web-banner.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/web-harness.mjs",
+      "to": "checks/lib/shared/web-harness.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/web-ui-nav.mjs",
+      "to": "checks/lib/shared/web-ui-nav.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/workspace-parsers.mjs",
+      "to": "checks/lib/tools/workspace-parsers.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/workspace-root.mjs",
+      "to": "checks/lib/shared/workspace-root.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "scripts/lib/zstd-read.mjs",
+      "to": "checks/lib/shared/zstd-read.mjs",
+      "reason": "2026-11-15 test-source-mirror owner 分层"
+    },
+    {
+      "from": "tests/cockpit/brief-fold.spec.mjs",
+      "to": "tests/cockpit/lib/run/brief-fold.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/builtin-display.spec.mjs",
+      "to": "tests/cockpit/client/builtin-display.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/client-pure-logic.spec.mjs",
+      "to": "tests/cockpit/shared/client-pure-logic.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/client/client-pure-logic.spec.mjs",
+      "to": "tests/cockpit/shared/client-pure-logic.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/config-feed-session.spec.mjs",
+      "to": "tests/cockpit/client/research-config/config-feed-session.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/defaults-store.spec.mjs",
+      "to": "tests/cockpit/client/defaults/defaults-store.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/defaults-ui.spec.mjs",
+      "to": "tests/cockpit/shared/defaults-ui.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/i18n.spec.mjs",
+      "to": "tests/cockpit/shared/i18n.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/locales.spec.mjs",
+      "to": "tests/cockpit/client/method-library/locales.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/method-library-model.spec.mjs",
+      "to": "tests/cockpit/client/method-library/method-library-model.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/method-library-selection.spec.mjs",
+      "to": "tests/cockpit/client/method-library/method-library-selection.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/method-library-views.spec.mjs",
+      "to": "tests/cockpit/client/method-library/method-library-views.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/client/startup/product-startup.spec.mjs",
+      "to": "tests/cockpit/client/product-startup.spec.mjs",
+      "reason": "2026-11-15 pack client 镜像落点修正"
+    },
+    {
+      "from": "tests/cockpit/client/state-note.spec.mjs",
+      "to": "tests/cockpit/client/research-graph/state-note.spec.mjs",
+      "reason": "2026-11-15 pack client 测试镜像"
+    },
+    {
+      "from": "tests/cockpit/coach-sessions.spec.mjs",
+      "to": "tests/cockpit/client/coach-sessions.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/config-feed-session.spec.mjs",
+      "to": "tests/cockpit/client/research-config/config-feed-session.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/defaults-store.spec.mjs",
+      "to": "tests/cockpit/client/defaults/defaults-store.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/defaults-ui.spec.mjs",
+      "to": "tests/cockpit/shared/defaults-ui.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/defaults/defaults-store.spec.mjs",
+      "to": "tests/cockpit/client/defaults/defaults-store.spec.mjs",
+      "reason": "2026-11-15 pack client 镜像落点修正"
+    },
+    {
+      "from": "tests/cockpit/delivery-watch.spec.mjs",
+      "to": "tests/cockpit/client/delivery-watch.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/final-tab-patterns.spec.mjs",
+      "to": "tests/cockpit/client/final-tab-patterns.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/graph-model.spec.mjs",
+      "to": "tests/cockpit/lib/plan/graph-model.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/i18n.spec.mjs",
+      "to": "tests/cockpit/shared/i18n.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/lib/brief-fold.spec.mjs",
+      "to": "tests/cockpit/lib/run/brief-fold.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/graph-model.spec.mjs",
+      "to": "tests/cockpit/lib/plan/graph-model.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/library-fold.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/library-fold.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/library-heading-codec.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/library-heading-codec.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/library-heading-consistency.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/method-library-operation-state.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-library-operation-state.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/method-library-read.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-library-read.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/method-of-question.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-of-question.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/method-presets.spec.mjs",
+      "to": "tests/cockpit/lib/shared/method-presets.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/plan-diff.spec.mjs",
+      "to": "tests/cockpit/lib/plan/plan-diff.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/plan-graph.spec.mjs",
+      "to": "tests/cockpit/lib/plan/plan-graph.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/plan-index.spec.mjs",
+      "to": "tests/cockpit/lib/plan/plan-index.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/receipt-fold.spec.mjs",
+      "to": "tests/cockpit/lib/run/receipt-fold.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/rerun-triage.spec.mjs",
+      "to": "tests/cockpit/lib/run/rerun-triage.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/run-source-picker.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/run-source-picker.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/run-version.spec.mjs",
+      "to": "tests/cockpit/lib/run/run-version.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/start-card.spec.mjs",
+      "to": "tests/cockpit/lib/workspace/start-card.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/status-feed.spec.mjs",
+      "to": "tests/cockpit/lib/events/status-feed.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/text-fold.spec.mjs",
+      "to": "tests/cockpit/lib/shared/text-fold.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/lib/workspace-title.spec.mjs",
+      "to": "tests/cockpit/lib/workspace/workspace-title.spec.mjs",
+      "reason": "2026-11-15 pack 测试 domain 镜像"
+    },
+    {
+      "from": "tests/cockpit/library-fold.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/library-fold.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/library-heading-codec.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/library-heading-codec.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/library-heading-consistency.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/locales.spec.mjs",
+      "to": "tests/cockpit/client/method-library/locales.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/method-library-model.spec.mjs",
+      "to": "tests/cockpit/client/method-library/method-library-model.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/method-library-operation-state.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-library-operation-state.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/method-library-read.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-library-read.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/method-library-selection.spec.mjs",
+      "to": "tests/cockpit/client/method-library/method-library-selection.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/method-library-views.spec.mjs",
+      "to": "tests/cockpit/client/method-library/method-library-views.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/method-library/locales.spec.mjs",
+      "to": "tests/cockpit/client/method-library/locales.spec.mjs",
+      "reason": "2026-11-15 pack client 镜像落点修正"
+    },
+    {
+      "from": "tests/cockpit/method-library/method-library-model.spec.mjs",
+      "to": "tests/cockpit/client/method-library/method-library-model.spec.mjs",
+      "reason": "2026-11-15 pack client 镜像落点修正"
+    },
+    {
+      "from": "tests/cockpit/method-library/method-library-selection.spec.mjs",
+      "to": "tests/cockpit/client/method-library/method-library-selection.spec.mjs",
+      "reason": "2026-11-15 pack client 镜像落点修正"
+    },
+    {
+      "from": "tests/cockpit/method-library/method-library-views.spec.mjs",
+      "to": "tests/cockpit/client/method-library/method-library-views.spec.mjs",
+      "reason": "2026-11-15 pack client 镜像落点修正"
+    },
+    {
+      "from": "tests/cockpit/method-of-question.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-of-question.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/method-presets.spec.mjs",
+      "to": "tests/cockpit/lib/shared/method-presets.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/plan-diff.spec.mjs",
+      "to": "tests/cockpit/lib/plan/plan-diff.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/plan-graph.spec.mjs",
+      "to": "tests/cockpit/lib/plan/plan-graph.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/plan-index.spec.mjs",
+      "to": "tests/cockpit/lib/plan/plan-index.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/receipt-fold.spec.mjs",
+      "to": "tests/cockpit/lib/run/receipt-fold.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/rerun-triage.spec.mjs",
+      "to": "tests/cockpit/lib/run/rerun-triage.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/research-config-source.spec.mjs",
+      "to": "tests/cockpit/client/research-config-source.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/research-config/config-feed-session.spec.mjs",
+      "to": "tests/cockpit/client/research-config/config-feed-session.spec.mjs",
+      "reason": "2026-11-15 pack client 镜像落点修正"
+    },
+    {
+      "from": "tests/cockpit/research-graph/state-note.spec.mjs",
+      "to": "tests/cockpit/client/research-graph/state-note.spec.mjs",
+      "reason": "2026-11-15 pack client 镜像落点修正"
+    },
+    {
+      "from": "tests/cockpit/research-tabs.spec.mjs",
+      "to": "tests/cockpit/client/research-tabs.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/run-source-browser.spec.mjs",
+      "to": "tests/cockpit/client/run-source-browser.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/run-source-picker.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/run-source-picker.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/run-version.spec.mjs",
+      "to": "tests/cockpit/lib/run/run-version.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/session-follow.spec.mjs",
+      "to": "tests/cockpit/client/session-follow.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/start-card.spec.mjs",
+      "to": "tests/cockpit/lib/workspace/start-card.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/state-note.spec.mjs",
+      "to": "tests/cockpit/client/research-graph/state-note.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/status-feed.spec.mjs",
+      "to": "tests/cockpit/lib/events/status-feed.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/text-fold.spec.mjs",
+      "to": "tests/cockpit/lib/shared/text-fold.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/workspace-boot.spec.mjs",
+      "to": "tests/cockpit/client/workspace-boot.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/workspace-files.spec.mjs",
+      "to": "tests/cockpit/client/workspace-files.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/cockpit/workspace-title.spec.mjs",
+      "to": "tests/cockpit/lib/workspace/workspace-title.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror cockpit 源根切分"
+    },
+    {
+      "from": "tests/pack/client-locale.spec.mjs",
+      "to": "tests/cockpit/client/locales/client-locale.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/content-coverage.spec.mjs",
+      "to": "tests/pack/contract/content-coverage.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/content-disclosure.spec.mjs",
+      "to": "tests/pack/contract/content-disclosure.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/content-effect.spec.mjs",
+      "to": "tests/pack/content/content-effect.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/content-injection.spec.mjs",
+      "to": "tests/pack/contract/content-injection.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/credentials-status.spec.mjs",
+      "to": "tests/pack/scripts/credentials-status.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/data-plane-invariants.spec.mjs",
+      "to": "tests/pack/contract/data-plane-invariants.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/defaults-command.spec.mjs",
+      "to": "tests/pack/defaults/defaults-command.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/defaults-effect.spec.mjs",
+      "to": "tests/pack/defaults/defaults-effect.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/dsh-home.spec.mjs",
+      "to": "tests/pack/scripts/dsh-home.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/export-shape.spec.mjs",
+      "to": "tests/pack/contract/export-shape.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/fetch-fallback-credentials.spec.mjs",
+      "to": "tests/pack/fetch-fallback/fetch-fallback-credentials.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/fetch-fallback-orchestration.spec.mjs",
+      "to": "tests/pack/fetch-fallback/fetch-fallback-orchestration.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/fetch-fallback.spec.mjs",
+      "to": "tests/pack/fetch-fallback/fetch-fallback.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/host-compat.spec.mjs",
+      "to": "tests/pack/contract/host-compat.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/install-anchor.spec.mjs",
+      "to": "tests/pack/scripts/install-anchor.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/lenses.spec.mjs",
+      "to": "tests/pack/contract/lenses.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/method-draft.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-draft.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/method-library-commands.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-library-commands.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/method-library-events.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-library-events.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/method-library-io.spec.mjs",
+      "to": "tests/pack/contract/method-library-io.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/method-library-write.spec.mjs",
+      "to": "tests/cockpit/lib/method-library/method-library-write.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/package-contract.spec.mjs",
+      "to": "tests/pack/contract/package-contract.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/presets-wiring.spec.mjs",
+      "to": "tests/pack/contract/presets-wiring.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/presets.spec.mjs",
+      "to": "tests/pack/scripts/presets.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/product-startup.spec.mjs",
+      "to": "tests/cockpit/client/product-startup.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/readme-bilingual.spec.mjs",
+      "to": "tests/pack/contract/readme-bilingual.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/research-brief-contract.spec.mjs",
+      "to": "tests/pack/contract/research-brief-contract.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/research-defaults.spec.mjs",
+      "to": "tests/pack/defaults/research-defaults.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/role-consumer-matrix.spec.mjs",
+      "to": "tests/pack/contract/role-consumer-matrix.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/src-lib-faces.spec.mjs",
+      "to": "tests/pack/contract/src-lib-faces.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/startup-effect.spec.mjs",
+      "to": "tests/pack/startup/startup-effect.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/startup.spec.mjs",
+      "to": "tests/pack/startup/startup.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/template-contract.spec.mjs",
+      "to": "tests/pack/contract/template-contract.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/version-range.spec.mjs",
+      "to": "tests/pack/scripts/version-range.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/wave-contract.spec.mjs",
+      "to": "tests/pack/contract/wave-contract.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/wave-recipes.spec.mjs",
+      "to": "tests/pack/contract/wave-recipes.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/pack/workers.spec.mjs",
+      "to": "tests/pack/contract/workers.spec.mjs",
+      "reason": "2026-11-15 pack 测试 surface/contract 分层"
+    },
+    {
+      "from": "tests/run/acceptance-check.spec.mjs",
+      "to": "tests/run/ops/acceptance-check.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/activity-fold.spec.mjs",
+      "to": "tests/run/ops/activity-fold.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/ask-drive.spec.mjs",
+      "to": "tests/run/channel/ask-drive.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/binding-trust.spec.mjs",
+      "to": "tests/run/gates/binding-trust.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/browser-cache.spec.mjs",
+      "to": "tests/run/harness/browser-cache.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/bundle-bind.spec.mjs",
+      "to": "tests/run/gates/bundle-bind.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/bundle-date-sanity.spec.mjs",
+      "to": "tests/run/ops/bundle-date-sanity.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/bundle-sessions.spec.mjs",
+      "to": "tests/run/ops/bundle-sessions.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/channel-cache.spec.mjs",
+      "to": "tests/run/channel/channel-cache.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/client-load-select.spec.mjs",
+      "to": "tests/run/harness/client-load-select.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/entry-chain-probe.spec.mjs",
+      "to": "tests/run/probes/entry-chain-probe.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/env-credentials.spec.mjs",
+      "to": "tests/run/channel/env-credentials.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/evidence-audit.spec.mjs",
+      "to": "tests/run/gates/evidence-audit.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/final-target.spec.mjs",
+      "to": "tests/run/gates/final-target.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/final-version.spec.mjs",
+      "to": "tests/run/gates/final-version.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/frontmatter.spec.mjs",
+      "to": "tests/run/shared/frontmatter.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/hitl-fold.spec.mjs",
+      "to": "tests/run/channel/hitl-fold.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/hitl-provenance.spec.mjs",
+      "to": "tests/run/channel/hitl-provenance.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/hitl-signature-contract.spec.mjs",
+      "to": "tests/run/channel/hitl-signature-contract.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/hitl1-intake-samples.spec.mjs",
+      "to": "tests/run/channel/hitl1-intake-samples.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/host-health.spec.mjs",
+      "to": "tests/run/harness/host-health.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/inject-reconcile.spec.mjs",
+      "to": "tests/run/channel/inject-reconcile.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/journal-wire.spec.mjs",
+      "to": "tests/run/ops/journal-wire.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/llm-stream-tee-core.spec.mjs",
+      "to": "tests/run/probes/llm-stream-tee-core.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/local-date.spec.mjs",
+      "to": "tests/run/shared/local-date.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/member-activity-fold.spec.mjs",
+      "to": "tests/run/ops/member-activity-fold.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/node-gate-contracts.spec.mjs",
+      "to": "tests/run/gates/node-gate-contracts.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/node-gate-delivery.spec.mjs",
+      "to": "tests/run/gates/node-gate-delivery.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/node-gate-helpers.mjs",
+      "to": "tests/run/gates/node-gate-helpers.mjs",
+      "reason": "node-gate 家族助手随家族"
+    },
+    {
+      "from": "tests/run/node-gate-leads.spec.mjs",
+      "to": "tests/run/gates/node-gate-leads.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/node-gate-reader.spec.mjs",
+      "to": "tests/run/gates/node-gate-reader.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/node-gate-session.spec.mjs",
+      "to": "tests/run/gates/node-gate-session.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/node-gate-witness.spec.mjs",
+      "to": "tests/run/gates/node-gate-witness.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/path-hygiene.spec.mjs",
+      "to": "tests/run/gates/path-hygiene.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/plan-card.spec.mjs",
+      "to": "tests/run/gates/plan-card.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/port-reclaim.spec.mjs",
+      "to": "tests/run/harness/port-reclaim.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/probe-index.spec.mjs",
+      "to": "tests/run/probes/probe-index.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/probe-send-target.spec.mjs",
+      "to": "tests/run/probes/probe-send-target.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/probe-status-tab.spec.mjs",
+      "to": "tests/run/probes/probe-status-tab.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/profile-health.spec.mjs",
+      "to": "tests/run/channel/profile-health.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/protocol-core.spec.mjs",
+      "to": "tests/run/gates/protocol-core.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/provenance.spec.mjs",
+      "to": "tests/run/gates/provenance.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/provider-errors.spec.mjs",
+      "to": "tests/run/ops/provider-errors.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/readiness-declaration.spec.mjs",
+      "to": "tests/run/gates/readiness-declaration.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/replay-fixtures.spec.mjs",
+      "to": "tests/run/harness/replay-fixtures.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/replay-network-offline.spec.mjs",
+      "to": "tests/run/harness/replay-network-offline.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/replay-request.spec.mjs",
+      "to": "tests/run/harness/replay-request.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/replay-scene.spec.mjs",
+      "to": "tests/run/harness/replay-scene.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/review-readiness.spec.mjs",
+      "to": "tests/run/gates/review-readiness.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-accept-fixture.spec.mjs",
+      "to": "tests/run/harness/run-accept-fixture.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-accept.spec.mjs",
+      "to": "tests/run/ops/run-accept.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-context-node.spec.mjs",
+      "to": "tests/run/gates/run-context-node.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-context.spec.mjs",
+      "to": "tests/run/gates/run-context.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-dashboard.spec.mjs",
+      "to": "tests/run/ops/run-dashboard.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-driver-contract.spec.mjs",
+      "to": "tests/run/channel/run-driver-contract.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-fold.spec.mjs",
+      "to": "tests/run/ops/run-fold.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-inventory.spec.mjs",
+      "to": "tests/run/ops/run-inventory.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-lock.spec.mjs",
+      "to": "tests/run/harness/run-lock.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-receipt.spec.mjs",
+      "to": "tests/run/gates/run-receipt.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/run-state.spec.mjs",
+      "to": "tests/run/ops/run-state.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/runtime-clean.spec.mjs",
+      "to": "tests/run/ops/runtime-clean.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/scene-pack.spec.mjs",
+      "to": "tests/run/ops/scene-pack.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/schema-scan.spec.mjs",
+      "to": "tests/run/gates/schema-scan.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/secret-scan.spec.mjs",
+      "to": "tests/run/shared/secret-scan.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/session-events.spec.mjs",
+      "to": "tests/run/ops/session-events.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/session-log.spec.mjs",
+      "to": "tests/run/ops/session-log.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/session-replay.spec.mjs",
+      "to": "tests/run/ops/session-replay.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/startup-hint.spec.mjs",
+      "to": "tests/run/channel/startup-hint.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/strategy-core.spec.mjs",
+      "to": "tests/run/gates/strategy-core.spec.mjs",
+      "reason": "2026-11-16 BUG-205 shared 归位（经 shared 的最终落点）"
+    },
+    {
+      "from": "tests/run/shared/strategy-core.spec.mjs",
+      "to": "tests/run/gates/strategy-core.spec.mjs",
+      "reason": "2026-11-16 BUG-205 shared 归位"
+    },
+    {
+      "from": "tests/run/stream-diagnostics.spec.mjs",
+      "to": "tests/run/ops/stream-diagnostics.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/stream-failure.spec.mjs",
+      "to": "tests/run/ops/stream-failure.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/tool-card.spec.mjs",
+      "to": "tests/run/ops/tool-card.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/unconsumed-evidence.spec.mjs",
+      "to": "tests/run/ops/unconsumed-evidence.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/vendor-artifacts.spec.mjs",
+      "to": "tests/run/harness/vendor-artifacts.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/verdict-audit-fixture.spec.mjs",
+      "to": "tests/run/gates/verdict-audit-fixture.spec.mjs",
+      "reason": "2026-11-16 BUG-205 shared 归位（经 shared 的最终落点）"
+    },
+    {
+      "from": "tests/run/shared/verdict-audit-fixture.spec.mjs",
+      "to": "tests/run/gates/verdict-audit-fixture.spec.mjs",
+      "reason": "2026-11-16 BUG-205 shared 归位"
+    },
+    {
+      "from": "tests/run/verdict-audit.spec.mjs",
+      "to": "tests/run/gates/verdict-audit.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/web-ui-nav.spec.mjs",
+      "to": "tests/run/probes/web-ui-nav.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "tests/run/workspace-root.spec.mjs",
+      "to": "tests/run/shared/workspace-root.spec.mjs",
+      "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "scripts/run-ops/watch-run.mjs",
+      "to": "probes/analyze/watch-run.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/session-events.mjs",
+      "to": "probes/analyze/session-events.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/run-dashboard.mjs",
+      "to": "probes/analyze/run-dashboard.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/stream-diagnostics.mjs",
+      "to": "probes/analyze/stream-diagnostics.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/provider-error-stats.mjs",
+      "to": "probes/analyze/provider-error-stats.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/plan-card-stats.mjs",
+      "to": "probes/analyze/plan-card-stats.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/session-replay.mjs",
+      "to": "probes/analyze/session-replay.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/scene-capture.mjs",
+      "to": "probes/analyze/scene-capture.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/run-inventory.mjs",
+      "to": "probes/analyze/run-inventory.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/unconsumed-evidence.mjs",
+      "to": "probes/analyze/unconsumed-evidence.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/bundle-sessions.mjs",
+      "to": "probes/analyze/bundle-sessions.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/run-accept.mjs",
+      "to": "checks/run-gates/run-accept.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/acceptance-check.mjs",
+      "to": "checks/run-gates/acceptance-check.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/runtime-clean.mjs",
+      "to": "tools/runtime-clean.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/dist/export-dist.mjs",
+      "to": "tools/release/export-dist.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/dist/market.mjs",
+      "to": "tools/release/market.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/dist/export-handoff.mjs",
+      "to": "tools/release/export-handoff.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/dist/product-manual.md",
+      "to": "tools/release/product-manual.md",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/AGENTS.md",
+      "to": "checks/AGENTS.md",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/README.md",
+      "to": "checks/README.md",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/archived-note-pointers.json",
+      "to": "checks/archived-note-pointers.json",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/dist/release-check.mjs",
+      "to": "checks/dist/release-check.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/doc-budgets.json",
+      "to": "checks/doc-budgets.json",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/channel/ask-drive.mjs",
+      "to": "checks/lib/channel/ask-drive.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/channel/channel-cache.mjs",
+      "to": "checks/lib/channel/channel-cache.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/channel/hitl-card-driver.mjs",
+      "to": "checks/lib/channel/hitl-card-driver.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/channel/inject-reconcile.mjs",
+      "to": "checks/lib/channel/inject-reconcile.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/channel/run-channel.mjs",
+      "to": "checks/lib/channel/run-channel.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/gates/evidence-audit-core.mjs",
+      "to": "checks/lib/gates/evidence-audit-core.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/gates/node-gate-core.mjs",
+      "to": "checks/lib/gates/node-gate-core.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/gates/node-gate-delivery-gate.mjs",
+      "to": "checks/lib/gates/node-gate-delivery-gate.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/gates/node-gate-reader-gate.mjs",
+      "to": "checks/lib/gates/node-gate-reader-gate.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/gates/node-gate-run-gates.mjs",
+      "to": "checks/lib/gates/node-gate-run-gates.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/gates/protocol-audit-core.mjs",
+      "to": "checks/lib/gates/protocol-audit-core.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/gates/protocol-core.mjs",
+      "to": "checks/lib/gates/protocol-core.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/gates/provenance.mjs",
+      "to": "checks/lib/gates/provenance.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/gates/run-source-node.mjs",
+      "to": "checks/lib/gates/run-source-node.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/gates/schema-scan-core.mjs",
+      "to": "checks/lib/gates/schema-scan-core.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/gates/strategy-core.mjs",
+      "to": "checks/lib/gates/strategy-core.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/gates/verdict-audit-core.mjs",
+      "to": "checks/lib/gates/verdict-audit-core.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/browser-cache.mjs",
+      "to": "checks/lib/harness/browser-cache.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/client-load-select.mjs",
+      "to": "checks/lib/harness/client-load-select.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/gates-cases.mjs",
+      "to": "checks/lib/harness/gates-cases.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/gates-cli.mjs",
+      "to": "checks/lib/harness/gates-cli.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/host-health.mjs",
+      "to": "checks/lib/harness/host-health.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/playwright.mjs",
+      "to": "checks/lib/harness/playwright.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/port-reclaim-policy.mjs",
+      "to": "checks/lib/harness/port-reclaim-policy.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/port-reclaim.mjs",
+      "to": "checks/lib/harness/port-reclaim.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/replay-network-offline-policy.cjs",
+      "to": "checks/lib/harness/replay-network-offline-policy.cjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/replay-network-offline.cjs",
+      "to": "checks/lib/harness/replay-network-offline.cjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/replay-scene.mjs",
+      "to": "checks/lib/harness/replay-scene.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/run-accept-fixture.mjs",
+      "to": "checks/lib/harness/run-accept-fixture.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/run-lock.mjs",
+      "to": "checks/lib/harness/run-lock.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/snapshot-mode.mjs",
+      "to": "checks/lib/harness/snapshot-mode.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/harness/vendor-artifacts.mjs",
+      "to": "checks/lib/harness/vendor-artifacts.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/ops/acceptance-check.mjs",
+      "to": "checks/lib/ops/acceptance-check.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/ops/bundle-date-sanity.mjs",
+      "to": "checks/lib/ops/bundle-date-sanity.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/ops/bundle-sessions.mjs",
+      "to": "checks/lib/ops/bundle-sessions.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/ops/provider-errors.mjs",
+      "to": "checks/lib/ops/provider-errors.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/ops/run-dashboard-core.mjs",
+      "to": "checks/lib/ops/run-dashboard-core.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/ops/run-dashboard-html.mjs",
+      "to": "checks/lib/ops/run-dashboard-html.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/ops/run-inventory-core.mjs",
+      "to": "checks/lib/ops/run-inventory-core.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/ops/runtime-clean-core.mjs",
+      "to": "checks/lib/ops/runtime-clean-core.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/ops/scene-pack.mjs",
+      "to": "checks/lib/ops/scene-pack.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/ops/session-events-core.mjs",
+      "to": "checks/lib/ops/session-events-core.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/ops/session-replay.mjs",
+      "to": "checks/lib/ops/session-replay.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/ops/stream-diagnostics-core.mjs",
+      "to": "checks/lib/ops/stream-diagnostics-core.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/ops/unconsumed-evidence.mjs",
+      "to": "checks/lib/ops/unconsumed-evidence.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/probes/direct-authorization-boundary.mjs",
+      "to": "checks/lib/probes/direct-authorization-boundary.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/probes/llm-stream-tee-core.mjs",
+      "to": "checks/lib/probes/llm-stream-tee-core.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/probes/probe-send-target.mjs",
+      "to": "checks/lib/probes/probe-send-target.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/repo/backlog-liveness.mjs",
+      "to": "checks/lib/repo/backlog-liveness.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/repo/content-budget.mjs",
+      "to": "checks/lib/repo/content-budget.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/repo/doc-prose-paths.mjs",
+      "to": "checks/lib/repo/doc-prose-paths.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/repo/fix-evidence.mjs",
+      "to": "checks/lib/repo/fix-evidence.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/repo/note-scan.mjs",
+      "to": "checks/lib/repo/note-scan.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/repo/release-anchor.mjs",
+      "to": "checks/lib/repo/release-anchor.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/repo/smoke-lane.mjs",
+      "to": "checks/lib/repo/smoke-lane.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/repo/staged-change-pairing.mjs",
+      "to": "checks/lib/repo/staged-change-pairing.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/repo/test-placement.mjs",
+      "to": "checks/lib/repo/test-placement.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/artifact-freshness.mjs",
+      "to": "checks/lib/shared/artifact-freshness.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/cdp-driver.mjs",
+      "to": "checks/lib/shared/cdp-driver.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/cli-entry.mjs",
+      "to": "checks/lib/shared/cli-entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/env.mjs",
+      "to": "checks/lib/shared/env.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/final-version.mjs",
+      "to": "checks/lib/shared/final-version.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/frontmatter.mjs",
+      "to": "checks/lib/shared/frontmatter.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/hitl-provenance.mjs",
+      "to": "checks/lib/shared/hitl-provenance.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/local-date.mjs",
+      "to": "checks/lib/shared/local-date.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/node-gate-contracts.mjs",
+      "to": "checks/lib/shared/node-gate-contracts.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/node-gate-session-gates.mjs",
+      "to": "checks/lib/shared/node-gate-session-gates.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/path-hygiene.mjs",
+      "to": "checks/lib/shared/path-hygiene.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/plan-card.mjs",
+      "to": "checks/lib/shared/plan-card.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/probe-index.mjs",
+      "to": "checks/lib/shared/probe-index.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/probe-status-tab.mjs",
+      "to": "checks/lib/shared/probe-status-tab.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/profile-health.mjs",
+      "to": "checks/lib/shared/profile-health.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/replay-request.mjs",
+      "to": "checks/lib/shared/replay-request.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/roles.mjs",
+      "to": "checks/lib/shared/roles.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/run-receipt.mjs",
+      "to": "checks/lib/shared/run-receipt.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/run-state.mjs",
+      "to": "checks/lib/shared/run-state.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/secret-scan.mjs",
+      "to": "checks/lib/shared/secret-scan.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/session-log.mjs",
+      "to": "checks/lib/shared/session-log.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/startup-hint.mjs",
+      "to": "checks/lib/shared/startup-hint.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/web-banner.mjs",
+      "to": "checks/lib/shared/web-banner.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/web-harness.mjs",
+      "to": "checks/lib/shared/web-harness.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/web-ui-nav.mjs",
+      "to": "checks/lib/shared/web-ui-nav.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/workspace-root.mjs",
+      "to": "checks/lib/shared/workspace-root.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/shared/zstd-read.mjs",
+      "to": "checks/lib/shared/zstd-read.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/test-infra/method-presets.mjs",
+      "to": "checks/lib/test-infra/method-presets.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/test-infra/selftest-library.mjs",
+      "to": "checks/lib/test-infra/selftest-library.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/test-infra/smoke-assets.mjs",
+      "to": "checks/lib/test-infra/smoke-assets.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/tools/asset-ledger.mjs",
+      "to": "checks/lib/tools/asset-ledger.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/tools/ci-workflow.mjs",
+      "to": "checks/lib/tools/ci-workflow.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/tools/keyless-imports.mjs",
+      "to": "checks/lib/tools/keyless-imports.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/tools/test-index.mjs",
+      "to": "checks/lib/tools/test-index.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/lib/tools/workspace-parsers.mjs",
+      "to": "checks/lib/tools/workspace-parsers.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/run-gates/acceptance-check.mjs",
+      "to": "checks/run-gates/acceptance-check.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/run-gates/evidence-audit.mjs",
+      "to": "checks/run-gates/evidence-audit.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/run-gates/node-gate.mjs",
+      "to": "checks/run-gates/node-gate.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/run-gates/path-hygiene.mjs",
+      "to": "checks/run-gates/path-hygiene.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/run-gates/protocol-audit.mjs",
+      "to": "checks/run-gates/protocol-audit.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/run-gates/run-accept.mjs",
+      "to": "checks/run-gates/run-accept.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/run-gates/schema-scan.mjs",
+      "to": "checks/run-gates/schema-scan.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/run-gates/secret-scan.mjs",
+      "to": "checks/run-gates/secret-scan.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/run-gates/verdict-audit.mjs",
+      "to": "checks/run-gates/verdict-audit.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/cdp-ask.entry.mjs",
+      "to": "checks/smoke/cdp-ask.entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/client-hitl.entry.mjs",
+      "to": "checks/smoke/client-hitl.entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/client-load-config.support.mjs",
+      "to": "checks/smoke/client-load-config.support.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/client-load-final.support.mjs",
+      "to": "checks/smoke/client-load-final.support.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/client-load-reference.support.mjs",
+      "to": "checks/smoke/client-load-reference.support.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/client-load-seed.support.mjs",
+      "to": "checks/smoke/client-load-seed.support.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/client-load.entry.mjs",
+      "to": "checks/smoke/client-load.entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/cold-start.entry.mjs",
+      "to": "checks/smoke/cold-start.entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/data.entry.mjs",
+      "to": "checks/smoke/data.entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/doctor.e2e.mjs",
+      "to": "checks/smoke/doctor.e2e.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/gates.e2e.mjs",
+      "to": "checks/smoke/gates.e2e.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/handoff.e2e.mjs",
+      "to": "checks/smoke/handoff.e2e.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/install-shape.entry.mjs",
+      "to": "checks/smoke/install-shape.entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/l4-lite.e2e.mjs",
+      "to": "checks/smoke/l4-lite.e2e.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/lifecycle.entry.mjs",
+      "to": "checks/smoke/lifecycle.entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/method-library-tool.e2e.mjs",
+      "to": "checks/smoke/method-library-tool.e2e.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/model-experience.e2e.mjs",
+      "to": "checks/smoke/model-experience.e2e.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/pack.e2e.mjs",
+      "to": "checks/smoke/pack.e2e.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/preset.e2e.mjs",
+      "to": "checks/smoke/preset.e2e.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/product-boot.entry.mjs",
+      "to": "checks/smoke/product-boot.entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/profile-concurrency.entry.mjs",
+      "to": "checks/smoke/profile-concurrency.entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/registry.json",
+      "to": "checks/smoke/registry.json",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/release.entry.mjs",
+      "to": "checks/smoke/release.entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/run-accept.e2e.mjs",
+      "to": "checks/smoke/run-accept.e2e.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/secret-scan.e2e.mjs",
+      "to": "checks/smoke/secret-scan.e2e.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/snapshot-replay.entry.mjs",
+      "to": "checks/smoke/snapshot-replay.entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/team-preflight.e2e.mjs",
+      "to": "checks/smoke/team-preflight.e2e.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/user-env.entry.mjs",
+      "to": "checks/smoke/user-env.entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/smoke/workspace-isolation.entry.mjs",
+      "to": "checks/smoke/workspace-isolation.entry.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/test-path-redirects.json",
+      "to": "checks/test-path-redirects.json",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/test/run-lane.mjs",
+      "to": "checks/test/run-lane.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/verify/context.mjs",
+      "to": "checks/verify/context.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/verify/gates/a-docs.mjs",
+      "to": "checks/verify/gates/a-docs.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/verify/gates/b-pack.mjs",
+      "to": "checks/verify/gates/b-pack.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/verify/gates/c-notes.mjs",
+      "to": "checks/verify/gates/c-notes.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/verify/gates/d-vendor.mjs",
+      "to": "checks/verify/gates/d-vendor.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/verify/gates/e-workspace.mjs",
+      "to": "checks/verify/gates/e-workspace.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/verify/gates/f-repo.mjs",
+      "to": "checks/verify/gates/f-repo.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "scripts/verify/verify.mjs",
+      "to": "checks/verify/verify.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "probes/run/bundle-sessions.mjs",
+      "to": "probes/analyze/bundle-sessions.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "probes/run/plan-card-stats.mjs",
+      "to": "probes/analyze/plan-card-stats.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "probes/run/provider-error-stats.mjs",
+      "to": "probes/analyze/provider-error-stats.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "probes/run/run-dashboard.mjs",
+      "to": "probes/analyze/run-dashboard.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "probes/run/run-inventory.mjs",
+      "to": "probes/analyze/run-inventory.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "probes/run/scene-capture.mjs",
+      "to": "probes/analyze/scene-capture.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "probes/run/session-events.mjs",
+      "to": "probes/analyze/session-events.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "probes/run/session-replay.mjs",
+      "to": "probes/analyze/session-replay.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "probes/run/stream-diagnostics.mjs",
+      "to": "probes/analyze/stream-diagnostics.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "probes/run/unconsumed-evidence.mjs",
+      "to": "probes/analyze/unconsumed-evidence.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "probes/run/watch-run.mjs",
+      "to": "probes/analyze/watch-run.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/README.md",
+      "to": "tools/README.md",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/boot-run.sh",
+      "to": "tools/boot-run.sh",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/bootstrap.sh",
+      "to": "tools/bootstrap.sh",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/env.sh",
+      "to": "tools/env.sh",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/hitl-answer.mjs",
+      "to": "tools/hitl-answer.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/hooks/pre-commit",
+      "to": "tools/hooks/pre-commit",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/llm-socket-isolation.cjs",
+      "to": "tools/llm-socket-isolation.cjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/record-asset-ledger.mjs",
+      "to": "tools/record-asset-ledger.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/record-ci-oracle.mjs",
+      "to": "tools/record-ci-oracle.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/record-role-fixture.mjs",
+      "to": "tools/record-role-fixture.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/release/export-dist.mjs",
+      "to": "tools/release/export-dist.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/release/export-handoff.mjs",
+      "to": "tools/release/export-handoff.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/release/market.mjs",
+      "to": "tools/release/market.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/release/product-manual.md",
+      "to": "tools/release/product-manual.md",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/render-overlay.mjs",
+      "to": "tools/render-overlay.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/render-test-index.mjs",
+      "to": "tools/render-test-index.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/research.overlay.yml",
+      "to": "tools/research.overlay.yml",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/run-driver.mjs",
+      "to": "tools/run-driver.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/run-kickoff.mjs",
+      "to": "tools/run-kickoff.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/runtime-clean.mjs",
+      "to": "tools/runtime-clean.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/vendor-build.sh",
+      "to": "tools/vendor-build.sh",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/vendor-host-bundle.config.ts",
+      "to": "tools/vendor-host-bundle.config.ts",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/vendor-host-typert.config.ts",
+      "to": "tools/vendor-host-typert.config.ts",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    },
+    {
+      "from": "dev/vendor-typert-emit.mjs",
+      "to": "tools/vendor-typert-emit.mjs",
+      "reason": "2026-11-16 根名统一 D64（scripts→checks、dev→tools、probes/run→probes/analyze）"
+    }
+  ]
+}

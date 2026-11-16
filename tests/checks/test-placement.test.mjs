@@ -8,7 +8,7 @@ import assert from 'node:assert/strict'
 import {
   CLIENT_SUBS, COCKPIT_LIB_DOMAINS, PACK_SURFACES, RUN_OWNERS,
   isTestFile, placementIssues,
-} from '../../scripts/lib/repo/test-placement.mjs'
+} from '../../checks/lib/repo/test-placement.mjs'
 
 const good = [
   'tests/run/gates/plan-card.spec.mjs',
@@ -29,7 +29,7 @@ test('合法落点全集零问题（BUG-191 负控）', () => {
   assert.ok(good.length >= 10, '防空语料：合法样本过少')
   assert.deepEqual(placementIssues(good), [])
   assert.equal(isTestFile('tests/pack/preset-helpers.mjs'), false)
-  assert.equal(isTestFile('scripts/lib/tools/x.spec.mjs'), false)
+  assert.equal(isTestFile('checks/lib/tools/x.spec.mjs'), false)
 })
 
 test('未知子树/深度/平铺根逐条点名（BUG-191）', () => {

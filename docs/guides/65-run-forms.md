@@ -16,13 +16,13 @@
 |---|---|---|---|
 | **M1 安装形态** | 外部用户 | ① custom profile 首次由 CLI 引导（仅首次、破坏性）② `dsh --profile deep-research` 启动 ③ 本地 tarball 装包（当前唯一发布形态；npm/Plugins 为 staged）+ 团队层开关；首屏选项目目录 | 用户自己的 `DSH_HOME` + 自选工作区；包内容在包内，产物在工作区；**没有 launcher / scaffold / 自定义安装器** |
 | **M1 互操作** | 已有 DSH Web/Desktop 的用户 | 把同一个 bundle 装进现有 profile（Plugins 页或显式 CLI） | bundle 自足，首屏照样问工作区；但没有 `deep-research` 的 profile 身份；Desktop 装进 `desktop` = 互操作 |
-| **M2 独立开发形态** | 贡献者 / 本地验证 | 本仓 + `bash dev/bootstrap.sh` + `node dev/run-driver.mjs up --bootstrap` | 默认仓内 `runtime/harness-home` + `research-workspace/`；可用 `DSH_DEV_HOME` 指到仓外 |
-| **M3 移交形态** | 交给另一人或另一台机器 | `dev/release/export-handoff.mjs`（源码，包内 HANDOFF 给 clone / tar 两条接收路径）或 `export-dist.mjs`（插件） | 不是复制工作树；运行态/凭据/run 数据不随包 |
+| **M2 独立开发形态** | 贡献者 / 本地验证 | 本仓 + `bash tools/bootstrap.sh` + `node tools/run-driver.mjs up --bootstrap` | 默认仓内 `runtime/harness-home` + `research-workspace/`；可用 `DSH_DEV_HOME` 指到仓外 |
+| **M3 移交形态** | 交给另一人或另一台机器 | `tools/release/export-handoff.mjs`（源码，包内 HANDOFF 给 clone / tar 两条接收路径）或 `export-dist.mjs`（插件） | 不是复制工作树；运行态/凭据/run 数据不随包 |
 
 **决定：M1 安装形态为主。** 安装与启动全部是 DSH 命令；本包只多一个 custom profile 名
 （`deep-research`）。自定义 profile 的建立只能用 CLI（DSH 没有 UI 建自定义 profile；CLI 对未知名
 profile 只初始化 `dsh-base`——`--from-default-profile web` 是文档给的路径）。装包入口 = 本地 tarball
-（当前唯一发布形态）；npm/Plugins 页是发布后路径（当前 staged）。本包不发明安装器。**完整安装合同的 owner = [`dev/release/product-manual.md`](../../dev/release/product-manual.md)（生成 `_dist/安装手册.md`）；根 README 承担用户路径（最短安装 + 一次走查），命令由 [`readme-manual-commands`](../../tests/checks/readme-manual-commands.test.mjs) 对账**；
+（当前唯一发布形态）；npm/Plugins 页是发布后路径（当前 staged）。本包不发明安装器。**完整安装合同的 owner = [`tools/release/product-manual.md`](../../tools/release/product-manual.md)（生成 `_dist/安装手册.md`）；根 README 承担用户路径（最短安装 + 一次走查），命令由 [`readme-manual-commands`](../../tests/checks/readme-manual-commands.test.mjs) 对账**；
 本页只写合同，不复制命令。
 
 ## 2. 六轴 owner
@@ -91,7 +91,7 @@ writable roots。`WorkspaceId` 是 DSH Workspace registration ID，不是路径�
 - **回滚**：没有命令级回滚；回退 = 重装旧 exact 版本，旧包必须满足运行中 DSH 的 `engines.dsh`。
 - **卸载**：只移除包与 patch 层；工作区、方法库、deep-research 设置文件、Session、凭据、
   Workspace registration 都保留；显式删 profile/设置目录才清。
-- 命令、前置与故障排查 = [`dev/release/product-manual.md`](../../dev/release/product-manual.md)（源；生成 `_dist/安装手册.md`）。
+- 命令、前置与故障排查 = [`tools/release/product-manual.md`](../../tools/release/product-manual.md)（源；生成 `_dist/安装手册.md`）。
 
 ## 6. 工作区
 
@@ -108,9 +108,9 @@ writable roots。`WorkspaceId` 是 DSH Workspace registration ID，不是路径�
 ## 7. 独立环境与多实例
 
 ```sh
-bash dev/bootstrap.sh --check          # 预检（不安装/不构建；仍会确保隔离 home 与 hooks 配置）
-bash dev/bootstrap.sh                  # 缺件时执行 submodule/install/vendor 构建（幂等）
-node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
+bash tools/bootstrap.sh --check          # 预检（不安装/不构建；仍会确保隔离 home 与 hooks 配置）
+bash tools/bootstrap.sh                  # 缺件时执行 submodule/install/vendor 构建（幂等）
+node tools/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 ```
 
 多实例用这些变量区分（默认值 = 单实例）：
@@ -127,19 +127,19 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 
 ## 8. 移交
 
-- **源码移交**：`node dev/release/export-handoff.mjs` → `_dist/ai_dsh_deep_research-src-<version>-<head>.tar.gz`；
+- **源码移交**：`node tools/release/export-handoff.mjs` → `_dist/ai_dsh_deep_research-src-<version>-<head>.tar.gz`；
   只含 tracked 源与 `.gitmodules`，包内 HANDOFF.md 给两条接收路径：有 git 的 `git clone --recurse-submodules`，
   只有 tar 的 `git init` → `git update-index --add --cacheinfo 160000,<submodule-sha>,vendor/dsh` →
   `git submodule update --init --recursive`；这条不依赖 origin 上有该 HEAD（未 push 的移交也成立），
   tar 里没有 `.git`，不要直接跑 `git submodule update --init`。
-- **插件移交**：`node dev/release/export-dist.mjs` → tarball + 安装手册 + `build-manifest.json`
+- **插件移交**：`node tools/release/export-dist.mjs` → tarball + 安装手册 + `build-manifest.json`
   （审计记录）+ 市场索引（含 sha256、升级/回滚、离线矩阵）。
-- **移交锚**：移交方在源树跑 `node scripts/dist/release-check.mjs --handoff` 必须绿（annotated tag = HEAD、工作树干净、
+- **移交锚**：移交方在源树跑 `node checks/dist/release-check.mjs --handoff` 必须绿（annotated tag = HEAD、工作树干净、
   manual sha = tarball sha、tarball 由当前 pack 源生成）；接收方在 clean clone 上跑
-  `node scripts/dist/release-check.mjs --receiver`（tag/manual/tarball/manifest 对齐，不重算源指纹）；
+  `node checks/dist/release-check.mjs --receiver`（tag/manual/tarball/manifest 对齐，不重算源指纹）；
   未构建的 clone 上 `dist-freshness` 只 note（源指纹由发送方负责），不误红；
   源码包、`_dist` 制品与手册必须来自同一个 commit。
-- **研究数据移交**：run bundle 单独拷贝/归档；移交前跑 `node scripts/run-gates/path-hygiene.mjs <bundle>`。
+- **研究数据移交**：run bundle 单独拷贝/归档；移交前跑 `node checks/run-gates/path-hygiene.mjs <bundle>`。
 - **不做**：`cp -r` 工作树、把 `runtime/` 或 `research-workspace/drt_*` 打进源码包、把凭据/会话随包发送；
   不把旧 tag 与新 `_dist` 配对。
 
@@ -153,7 +153,7 @@ node dev/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览器面验证
 - `release.entry`：tarball → 干净 profile → 真启动。
 - `lifecycle.entry`：staged market 索引（plugins 空）→ tarball → dump → 真启动 → `readPluginMeta` → remove 回落。
 - `data.entry`：`$DSH_HOME` 只写 deep-research 设置文件；无 storage domain / 新 session event。
-- `scripts/smoke/handoff.e2e.mjs`：源码移交包边界 + HANDOFF 接收指令（CI keyless job）。
+- `checks/smoke/handoff.e2e.mjs`：源码移交包边界 + HANDOFF 接收指令（CI keyless job）。
 - `content-shape`（L0）：手册/模板随包、包内无种子。
 - `snapshot-replay` B 层 + `l4-lite`（真模型）：手册以 runtime context 进请求、Lead 仍按手册工作。
 

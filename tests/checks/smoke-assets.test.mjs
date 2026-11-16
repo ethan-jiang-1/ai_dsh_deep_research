@@ -1,4 +1,4 @@
-// smoke-assets 契约（BUG-176）——`scripts/smoke` 顶层分类必须看见 symlink / 目录：
+// smoke-assets 契约（BUG-176）——`checks/smoke` 顶层分类必须看见 symlink / 目录：
 //   `Dirent.isFile()/isDirectory()` 对 symlink 均为 false；若只用它们过滤，链接会从 registry/
 //   车道/oracle 三个消费者同时消失。本测试用临时目录造四种形态，钉住分类与红项。
 //
@@ -11,7 +11,7 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { inspectSmokeDir, smokeFiles, smokeSurfaceIssues } from '../../scripts/lib/test-infra/smoke-assets.mjs'
+import { inspectSmokeDir, smokeFiles, smokeSurfaceIssues } from '../../checks/lib/test-infra/smoke-assets.mjs'
 
 test('smoke-assets：普通文件 / 目录 / symlink 文件 / symlink 目录分类可见（BUG-162 / BUG-176）', () => {
   const dir = mkdtempSync(join(tmpdir(), 'smoke-assets-'))

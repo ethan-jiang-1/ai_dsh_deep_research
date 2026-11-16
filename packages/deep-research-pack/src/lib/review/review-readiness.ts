@@ -18,8 +18,8 @@
  * 残留边界：轮次标题的「第 N 轮」与判定之间允许至多 24 字插入语；这一段是下一片声明件要替代的形态，
  * 不在本函数里再加宽容。
  *
- * 消费方：驾驶舱 `ResearchStatusTab.tsx`、`scripts/smoke/client-load.entry.mjs` 与
- * `scripts/lib/ops/run-dashboard-core.mjs` 直接调用本函数；门禁的 `readinessOf` 直接委托本函数的
+ * 消费方：驾驶舱 `ResearchStatusTab.tsx`、`checks/smoke/client-load.entry.mjs` 与
+ * `checks/lib/ops/run-dashboard-core.mjs` 直接调用本函数；门禁的 `readinessOf` 直接委托本函数的
  * `terminalVerdictLine`（BUG-040 后不再有第二份 mirror），由 `tests/run/gates/review-readiness.spec.mjs`
  * 与 `tests/contracts/verdict-conformance.spec.mjs`（变异矩阵 + 不变量）覆盖。
  */
@@ -32,7 +32,7 @@ const AMBIGUOUS = 'ambiguous' as const
 
 /**
  * 把非正文行（fence / HTML 注释 / indented code）替换为空行（BUG-169/178/179/183/185）：
- * 委托全仓唯一实现 `markdown-mask.ts`（与 `scripts/lib/repo/note-scan.mjs` 同源，由
+ * 委托全仓唯一实现 `markdown-mask.ts`（与 `checks/lib/repo/note-scan.mjs` 同源，由
  * `tests/contracts/markdown-mask-conformance.spec.mjs` 直接对照 `mdast-util-from-markdown` 守卫）。
  */
 export function maskReadinessLines(text: string): string[] {

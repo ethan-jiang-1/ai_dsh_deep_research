@@ -19,7 +19,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { answeredCountOf, landedAnswerOf, provenanceLines, appendProvenance, batchToAnswered, attributionBundleOf, appendDecisionsRow, closingProvenanceRow } from '../../../scripts/lib/shared/hitl-provenance.mjs';
+import { answeredCountOf, landedAnswerOf, provenanceLines, appendProvenance, batchToAnswered, attributionBundleOf, appendDecisionsRow, closingProvenanceRow } from '../../../checks/lib/shared/hitl-provenance.mjs';
 import { toolCall } from '../../fixtures/events.mjs';
 
 const ANSWERED = [

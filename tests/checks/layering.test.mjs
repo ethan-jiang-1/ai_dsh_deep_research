@@ -1,7 +1,7 @@
 // 测试分层守卫 — 回归层（tests/）禁止真实模型/浏览器/网络/子进程/密钥依赖（layering 二代）。
 // 定义：docs/evaluation.md §L0；语义移植自 ai_dsh_company tests/harness/layering.spec.ts 四件套
 // （2026-10-09 探查实录与拍板 = _backlog/issues/2026-10-09-layering-v2.md）；解析器 =
-// scripts/lib/tools/keyless-imports.mjs（company tools/lib/keyless-imports.mjs@59551f2 移植，
+// checks/lib/tools/keyless-imports.mjs（company tools/lib/keyless-imports.mjs@59551f2 移植，
 // typescript 作纯函数解析器——typescript@6.0.3 是本仓既有 root devDep；keyless 判据 =
 // 运行时禁子进程/网络/凭据，npm 解析库不在判例内，company 同款实践）。
 //
@@ -18,13 +18,13 @@
 // ⚠ 教训（首版实证）：本文件的注释不要以"可匹配形态"引用违规示例——示例代码逐字
 //   进注释会被自己的正则命中（守卫红是对的，命中的是文档不是代码）。描述违规用散文。
 // 负例留证 2026-10-09：BUG-010——回归测试经本地模块传递引入子进程调用而不触发顶层文本扫描；
-//   红配方 = 在被 tests 引入的 scripts/lib 模块里放一个子进程调用 → inspectKeylessGraph 闭包红。
+//   红配方 = 在被 tests 引入的 checks/lib 模块里放一个子进程调用 → inspectKeylessGraph 闭包红。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { inspectKeylessGraph, parseKeylessImports } from '../../scripts/lib/tools/keyless-imports.mjs';
+import { inspectKeylessGraph, parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const TESTS = join(ROOT, 'tests');
@@ -70,7 +70,7 @@ test('① 回归层禁物：任意提及级（子进程 import / 浏览器 / 密
       if (pattern.test(src)) offenders.push(`${f} → ${why}`);
     }
   }
-  assert.deepEqual(offenders, [], '回归层要秒级 keyless：真入口的检查写 scripts/ 的 smoke/probe（子进程归 smoke 道），密钥名文本契约走 MENTION_EXEMPT 登记');
+  assert.deepEqual(offenders, [], '回归层要秒级 keyless：真入口的检查写 checks/ 的 smoke/probe（子进程归 smoke 道），密钥名文本契约走 MENTION_EXEMPT 登记');
 });
 
 test('② 回归层禁物：解析级调用表达式（spawn/exec/fetch——夹具字符串不咬）', () => {
@@ -92,8 +92,8 @@ test('③ import 图：tests 禁 import 驱动面 + 本地闭包零禁物（传�
   for (const f of files) {
     if (resolve(join(TESTS, f)) === SELF) continue;
     const src = readFileSync(join(TESTS, f), 'utf8');
-    if (/(?:from|import)\s*\(?['"](?:[^'"]*scripts\/(?:smoke|probe|dist|verify)\/|(?:\.\.\/)+probes\/)/.test(src))
-      importers.push(`${f} → scripts/(smoke|probe|dist|verify) 或 probes/ 是驱动面——tests 的本地 import 走 scripts/lib/（run-gates/run-ops 纯件由闭包图背书）`);
+    if (/(?:from|import)\s*\(?['"](?:[^'"]*checks\/(?:smoke|probe|dist|verify)\/|(?:\.\.\/)+probes\/)/.test(src))
+      importers.push(`${f} → checks/(smoke|probe|dist|verify) 或 probes/ 是驱动面——tests 的本地 import 走 checks/lib/（run-gates/run-ops 纯件由闭包图背书）`);
   }
   assert.deepEqual(importers, [], '驱动面不得被 tests/ import（import 进来会把 spawn/fetch 整条带进回归层）');
 

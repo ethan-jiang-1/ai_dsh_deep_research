@@ -25,7 +25,7 @@ import {
   RESIDENT_TOTAL_MAX_TOKENS,
   T0_HARD_MAX_CHARS,
   T0_TRIGGER_CHARS,
-} from '../../../scripts/lib/repo/content-budget.mjs';
+} from '../../../checks/lib/repo/content-budget.mjs';
 
 const CONTENT = join(PACK, 'content');
 const GENERIC = join(CONTENT, 'generic');

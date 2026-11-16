@@ -96,7 +96,7 @@
 ## 8. 当前债与下一步
 
 `content/manual.md` 现为 **9,996 字符**：下放触发 = 10,000（余 4），硬顶 = 12,288（余 2,292）。
-两个数只住 `scripts/lib/repo/content-budget.mjs`：触发由 `tests/pack/contract/content-disclosure.spec.mjs` 把守，
+两个数只住 `checks/lib/repo/content-budget.mjs`：触发由 `tests/pack/contract/content-disclosure.spec.mjs` 把守，
 硬顶由 `content-shape` 门禁把守；硬顶只防失控，不是可挪用的余量。
 
 **首刀已落（2026-11-11）**：状态头/读序/恢复细则下放到 `content/generic/state-and-recovery.md`；
@@ -107,7 +107,7 @@ trigger = T0 >10,000 或新增跨角色规则装不下。首刀卡 = [2026-11-11
 
 ## 9. 指针
 
-- 常驻面预算与准入规则 = [`content-shape` 门禁](../../scripts/verify/gates/e-workspace.mjs)
+- 常驻面预算与准入规则 = [`content-shape` 门禁](../../checks/verify/gates/e-workspace.mjs)
 - 内容接线守卫 = [presets-wiring](../../tests/pack/contract/presets-wiring.spec.mjs) · [content-coverage](../../tests/pack/contract/content-coverage.spec.mjs)
 - 测试落家与证据分层 = [project-map §测试怎么选](../project-map.md) · [evaluation §L0/L3](../evaluation.md)
 - 参照仓内容宪章（只读） = `ai_dsh_company/docs/content-charter.md`

@@ -1,11 +1,11 @@
 // 减法契约：scripts / dev / tests / pack src 里不得留下未使用的 import binding 或未导出的顶层声明。
 //
 // 为什么需要（2026-11-04）：本仓把“加法/验证”机械化了（门禁、契约测试、覆盖边界），
-// 但“减法”只有人眼。实证：scripts/verify/context.mjs 等 20+ 处未使用 import、entry-chain-probe
+// 但“减法”只有人眼。实证：checks/verify/context.mjs 等 20+ 处未使用 import、entry-chain-probe
 // 的重构残留 decompressLog 都逃过了所有门禁；jscpd 一次性扫出 3% 重复面但没人消费。
 // 本测试只做最窄的一刀：import 绑定与顶层声明必须有引用——不判导出 API、不判复杂度、不判重复。
 //
-// 反证（红先行）：在 scripts/verify/context.mjs 临时加 `import { tmpdir } from 'node:os'`，
+// 反证（红先行）：在 checks/verify/context.mjs 临时加 `import { tmpdir } from 'node:os'`，
 // 本测试点名该文件与 tmpdir 后红；还原后绿。实现前本文件本身即红（债务 20+ 处）。
 //
 // 边界：
@@ -24,9 +24,9 @@ import ts from 'typescript'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SCOPES = [
-  join(ROOT, 'scripts'),
+  join(ROOT, 'checks'),
   join(ROOT, 'probes'),
-  join(ROOT, 'dev'),
+  join(ROOT, 'tools'),
   join(ROOT, 'tests'),
   join(ROOT, 'packages', 'deep-research-pack', 'src'),
 ]

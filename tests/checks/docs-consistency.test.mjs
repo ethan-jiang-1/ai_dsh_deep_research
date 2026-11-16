@@ -37,7 +37,7 @@ test('开发技能清单覆盖盘上目录（2026-10-20 审计 P1-1 反证）', 
 // 2026-11-03：**不再扫本机 research-workspace/**。`drt_*`/`archive/`/`_abandoned/`/
 // `method-library.md` 是 gitignored 运行态；CI fresh clone 只有 tracked 的 `drafts/`，
 // 扫盘会把 keyless 回归绑到开发机现场（实测 CI 红：根实体 1 < 5）。契约以常量枚举钉住，
-// 只对 tracked 的 `drafts/` 做存在性校验——运行区不参与 L0（scripts/AGENTS 范围纪律）。
+// 只对 tracked 的 `drafts/` 做存在性校验——运行区不参与 L0（checks/AGENTS 范围纪律）。
 const WORKSPACE_ROOT_ENTITIES = ['method-library.md', 'drt_<slug>', 'archive/', '_abandoned/', 'drafts/']
 test('根 AGENTS 布局块覆盖工作区根实体与 pack 种子（2026-10-21 卫生轮，BUG-042）', () => {
   const agents = read('AGENTS.md')
@@ -135,10 +135,10 @@ test('入口链导航合同：开跑前置含 vendor 构建/工作区注册；�
   assert.ok(guide.includes('根/子树 AGENTS 或入口链'), '§4 的探针触发词与路由表不一致（docs/AGENTS vs AGENTS/入口链）')
   const agents = read('AGENTS.md')
   assert.ok(agents.includes('改仓任务的验收/收尾按第 4 步'), 'AGENTS 最小集未指向第 4 步——fresh agent 会停在 1–3')
-  assert.ok(agents.includes('口径 = guides/60 §2'), 'AGENTS 的 source 清单 owner 应指向 guides/60 §2（scripts/README 只申报凭据/调用模式）')
+  assert.ok(agents.includes('口径 = guides/60 §2'), 'AGENTS 的 source 清单 owner 应指向 guides/60 §2（checks/README 只申报凭据/调用模式）')
   const evalText = read('docs/evaluation.md')
-  assert.ok(evalText.includes('node --import tsx/esm scripts/smoke/client-load.entry.mjs'), 'evaluation 的 client-load 命令缺 tsx（直接 node 会在 .ts import 处失败）')
-  assert.ok(!evalText.includes('`node scripts/smoke/client-load.entry.mjs`'), 'evaluation 仍有不带 --import tsx/esm 的 client-load 命令')
+  assert.ok(evalText.includes('node --import tsx/esm checks/smoke/client-load.entry.mjs'), 'evaluation 的 client-load 命令缺 tsx（直接 node 会在 .ts import 处失败）')
+  assert.ok(!evalText.includes('`node checks/smoke/client-load.entry.mjs`'), 'evaluation 仍有不带 --import tsx/esm 的 client-load 命令')
 })
 
 test('研究配置面板形态：COMPACT 默认态下 README 不描述已迁走的管理四区（2026-10-27 卫生轮）', () => {

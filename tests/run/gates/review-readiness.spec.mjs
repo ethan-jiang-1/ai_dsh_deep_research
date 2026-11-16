@@ -14,7 +14,7 @@
 //   红配方 = 删掉轮次仲裁或回退未锚行首匹配 → 附录轮次例红。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readinessOf } from '../../../scripts/lib/shared/node-gate-contracts.mjs'
+import { readinessOf } from '../../../checks/lib/shared/node-gate-contracts.mjs'
 import { terminalReadiness } from '../../../packages/deep-research-pack/src/lib/review/review-readiness.ts';
 
 test('终局判定：首行 frontmatter 形态（readiness: PASS）→ PASS', () => {

@@ -45,11 +45,11 @@ description: Use when archiving, deleting, merging, or auditing Agent Notes in t
 ## 取证程序（判断"未来价值"之前）
 
 1. **读当前世界**：代码、配置、包/手册、门禁台账、更新的 Note；
-2. **grep 全部 live 面**：`docs/`、`_backlog/`、`scripts/`、`tests/`、`packs/`——
+2. **grep 全部 live 面**：`docs/`、`_backlog/`、`checks/`、`tests/`、`packs/`——
    找真实引用，不只看同目录邻居；
 3. **确认承接 owner**：理由是被 code / gate / skill / docs / 新 Note **完整**承接，
    还是只"看起来有承接文件"？后者不算（2026-10-08 体检的 8/8 反例就是这种）；
-4. **查入链**：活面→冻结件的 Markdown 链接必须在 `scripts/archived-note-pointers.json`
+4. **查入链**：活面→冻结件的 Markdown 链接必须在 `checks/archived-note-pointers.json`
    登记（`archived-note-pointer` 门禁会红）；归档前能改指现行权威的，改指而不是登记。
 
 ## 校准样例（规模与判定方向无关）

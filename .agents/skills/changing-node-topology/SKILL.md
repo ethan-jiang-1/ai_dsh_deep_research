@@ -26,10 +26,10 @@ description: Use when adding, removing, or rewiring a research pipeline node —
 | 3 | `packages/deep-research-pack/content/templates/run/` | 字段级契约实例（模板即 schema） | 新输出件 = 新模板；改必备件 = 改对应模板 |
 | 4 | [研究手册](../../../packages/deep-research-pack/content/manual.md) | 目录约定 + owner 表（一处事实一个家） | 新文件 = 补目录约定与 owner 行（手册有行数预算，挤一补一） |
 | 5 | `packages/deep-research-pack/src/lib/run/run-fold.ts` | `STEP_ORDER`（观察面轨道折算） | 节点序变才动；动了要 `pnpm build`（client 面）+ `client-load.entry` |
-| 6 | `scripts/run-gates/schema-scan.mjs` + `scripts/run-gates/node-gate.mjs` | 在场级全行断言 + CONDITIONAL 条件件 / 判据级逐行 | 新输出件 = schema-scan 行；条件性节点登记 CONDITIONAL；判据级按证据升格（fixtures 先红后绿 + 契约日） |
+| 6 | `checks/run-gates/schema-scan.mjs` + `checks/run-gates/node-gate.mjs` | 在场级全行断言 + CONDITIONAL 条件件 / 判据级逐行 | 新输出件 = schema-scan 行；条件性节点登记 CONDITIONAL；判据级按证据升格（fixtures 先红后绿 + 契约日） |
 
 **附属两处**（按需，非每次）：[步序正本 Note](../../../notes/archived/2026-09-24-m2-run-mechanics.md)
-（轨道全图——加/删/并节点须回写或互链新 Note）；`probes/run/run-dashboard.mjs`（投影跟随
+（轨道全图——加/删/并节点须回写或互链新 Note）；`probes/analyze/run-dashboard.mjs`（投影跟随
 run-state 谓词，通常自动——改文件名/轨道序才动）。
 
 ## 验证档（按改动面选跑，L0 必跑）

@@ -1,6 +1,6 @@
 // 子进程/前置路径的分段字面量守卫（BUG-192 / BUG-193 类级，M3 非 JS 字面量）。
 //
-// 为什么需要：`join(ROOT, 'scripts', 'lib', 'x.cjs')` 这类路径不在 import 图上——搬家后
+// 为什么需要：`join(ROOT, 'checks', 'lib', 'x.cjs')` 这类路径不在 import 图上——搬家后
 // `smoke-imports` 不跟子进程 argv、`repo-conventions` 只扫 dev shell，断链只能等真跑时以
 // `MODULE_NOT_FOUND` / banner 超时收场（BUG-192 离线预载、BUG-193 cdp-probe）。本守卫直接解析
 // 全树源码里的 `join(ROOT, <全字符串字面量>)`，要求目标文件在场；运行前置（entry 的 existsSync
@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const SCAN_ROOTS = ['scripts', 'dev', 'probes']
+const SCAN_ROOTS = ['checks', 'tools', 'probes']
 const SOURCE = /\.(mjs|cjs|js|ts|tsx)$/
 const GENERATED = /^(?:runtime|_dist|node_modules)\/|^packages\/deep-research-pack\/lib\/|^vendor\/dsh\/.+\/lib\//
 
@@ -86,9 +86,9 @@ test('子进程/前置的分段路径字面量全部可解析（BUG-192 / BUG-19
 })
 
 test('负控：分段路径指向不存在文件必红，运行期/生成区路径不误伤（BUG-192 / BUG-193 反证）', () => {
-  const stale = "const p = join(ROOT, 'scripts', 'lib', '__moved-probe__.cjs')\n"
+  const stale = "const p = join(ROOT, 'checks', 'lib', '__moved-probe__.cjs')\n"
   const bad = scanChildPaths([['synthetic.mjs', stale]], () => false)
-  assert.deepEqual(bad.checked, ['scripts/lib/__moved-probe__.cjs'])
+  assert.deepEqual(bad.checked, ['checks/lib/__moved-probe__.cjs'])
   assert.equal(bad.missing.length, 1)
   assert.match(bad.missing[0], /__moved-probe__/)
 

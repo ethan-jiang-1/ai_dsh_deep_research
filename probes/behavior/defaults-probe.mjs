@@ -14,14 +14,14 @@
 // 「无项目默认」标记是两条独立判据；语言不是 `research-defaults.json` 的轴，故 seeded 卡里
 // 含「项目默认」的选项不得把「中文」并进去（C5）。
 //
-// 前置：source dev/env.sh（DSH_HOME + 凭据）；pack 已构建。
-// 用法：source dev/env.sh && node probes/behavior/defaults-probe.mjs [--port 3124] [--keep]
+// 前置：source tools/env.sh（DSH_HOME + 凭据）；pack 已构建。
+// 用法：source tools/env.sh && node probes/behavior/defaults-probe.mjs [--port 3124] [--keep]
 // verdict：exit 0=全绿 / 1=断言红 / 2=前置缺席（未跑 ≠ 通过）。
-import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/shared/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/shared/web-harness.mjs';
-import { readSessionTextOf } from '../../scripts/lib/shared/session-log.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/harness/vendor-artifacts.mjs';
-import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/harness/port-reclaim.mjs';
+import { requireCredentials, requireDevHome, withModelKey } from '../../checks/lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../checks/lib/shared/web-harness.mjs';
+import { readSessionTextOf } from '../../checks/lib/shared/session-log.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../checks/lib/harness/vendor-artifacts.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../checks/lib/harness/port-reclaim.mjs';
 import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -39,7 +39,7 @@ const TURN_TIMEOUT_MS = 180_000;
 const POLL_MS = 2_000;
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
-if (!home) { console.error('defaults-probe: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
+if (!home) { console.error('defaults-probe: 需要 DSH_HOME（先 source tools/env.sh）'); process.exit(2); }
 requireDevHome('defaults-probe', { home, root: ROOT });
 requireCredentials('defaults-probe', { home });
 if (!existsSync(join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts'))) {
@@ -125,7 +125,7 @@ try {
     bin: join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts'),
     cwd: ROOT,
     profile: 'web',
-    patchPath: join(ROOT, 'dev', 'research.overlay.yml'),
+    patchPath: join(ROOT, 'tools', 'research.overlay.yml'),
     port,
     env: withModelKey({ DSH_HOME: home }),
     timeoutMs: BOOT_TIMEOUT_MS,

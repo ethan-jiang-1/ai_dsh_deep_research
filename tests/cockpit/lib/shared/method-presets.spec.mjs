@@ -1,13 +1,13 @@
-// 方法预设解析器合同回归（scripts/lib/test-infra/method-presets.mjs）——内置名单/推荐映射/共同底线的
+// 方法预设解析器合同回归（checks/lib/test-infra/method-presets.mjs）——内置名单/推荐映射/共同底线的
 // **唯一解析入口**（tests/library-fold 与 client-load.entry 共用）。
 // 判读原则：解析器的形状违约必须 **fail-loud**——静默解析成空集 = 门禁不存在（防空语料纪律，
-// scripts/AGENTS.md）；本文件逐条钉住 throw 分支，正是"解析器会咬人"的反证。
+// checks/AGENTS.md）；本文件逐条钉住 throw 分支，正是"解析器会咬人"的反证。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   baselineDisciplinesFromSkill, markdownTableCells, methodPresetsFromSkill,
   patternMethodMappingFromSkill, MAPPING_HEADERS, METHOD_PRESET_HEADERS,
-} from '../../../../scripts/lib/test-infra/method-presets.mjs';
+} from '../../../../checks/lib/test-infra/method-presets.mjs';
 
 const row = (cells) => `| ${cells.join(' | ')} |`;
 const PRESET_TABLE = [

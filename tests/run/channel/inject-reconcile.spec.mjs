@@ -10,7 +10,7 @@
 //   若放行（`text === ''` 时 `includes('')` 恒真）→ 用例 6 红（防空语料）。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { reconcileInjectedMessage } from '../../../scripts/lib/channel/inject-reconcile.mjs'
+import { reconcileInjectedMessage } from '../../../checks/lib/channel/inject-reconcile.mjs'
 
 const T0 = 1_791_700_000_000
 

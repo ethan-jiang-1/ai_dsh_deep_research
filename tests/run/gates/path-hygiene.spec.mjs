@@ -2,7 +2,7 @@
 // 反证：删 `/home/` 分支或把行号/上下文判断改坏 → 本文件红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { findHomePaths, portableBundlePath, scanHomePaths } from '../../../scripts/lib/shared/path-hygiene.mjs'
+import { findHomePaths, portableBundlePath, scanHomePaths } from '../../../checks/lib/shared/path-hygiene.mjs'
 import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
@@ -36,7 +36,7 @@ test('scanHomePaths：逐文件带路径汇总；相对路径与普通 URL 零 f
 })
 
 test('交付门覆盖面：run/question/plan/findings/review/journal/evidence 都在扫描入口', () => {
-  const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'scripts', 'run-gates', 'path-hygiene.mjs'), 'utf8')
+  const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'checks', 'run-gates', 'path-hygiene.mjs'), 'utf8')
   for (const name of ['run.md', 'question.md', 'topics.md', 'plan.md', 'findings.md', 'review.md', 'journal.md', 'leads.md', 'evidence']) {
     assert.ok(src.includes(name), `path-hygiene 未覆盖 ${name}`)
   }

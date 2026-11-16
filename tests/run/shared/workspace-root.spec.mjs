@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
   defaultDevWorkspace, groupForWorkspace, projectGroupDir, projectKey, workspaceName, workspaceRoot,
-} from '../../../scripts/lib/shared/workspace-root.mjs'
+} from '../../../checks/lib/shared/workspace-root.mjs'
 
 test('projectKey：spike 路径 / 空格 / 非 ASCII / 连续分隔符 / 长路径', () => {
   assert.equal(projectKey('/private/tmp/dsh-product-boot/ws'), '--private-tmp-dsh-product-boot-ws--')

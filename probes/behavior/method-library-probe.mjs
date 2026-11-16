@@ -19,11 +19,11 @@
 // 零工具 prompt（避免 read/bash 审批把探针挂起）：模型只凭手册/上下文回答，所以「未核实」
 // 是当前的诚实态，不是失败；失败面 = 编造条目或假称已执行。
 //
-// 前置：source dev/env.sh。用法：node probes/behavior/method-library-probe.mjs [--port 3116]
-import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/shared/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/shared/web-harness.mjs';
-import { readSessionTextOf } from '../../scripts/lib/shared/session-log.mjs';
-import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/harness/port-reclaim.mjs';
+// 前置：source tools/env.sh。用法：node probes/behavior/method-library-probe.mjs [--port 3116]
+import { requireCredentials, requireDevHome, withModelKey } from '../../checks/lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../checks/lib/shared/web-harness.mjs';
+import { readSessionTextOf } from '../../checks/lib/shared/session-log.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../checks/lib/harness/port-reclaim.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -40,7 +40,7 @@ const TURN_TIMEOUT_MS = 240_000;
 const POLL_MS = 3_000;
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
-if (!home) { console.error('probe: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
+if (!home) { console.error('probe: 需要 DSH_HOME（先 source tools/env.sh）'); process.exit(2); }
 requireDevHome('method-library-probe', { home, root: ROOT });
 requireCredentials('method-library-probe', { home });
 const bin = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'src', 'bin.ts');

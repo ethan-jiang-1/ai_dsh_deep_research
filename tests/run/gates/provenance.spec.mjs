@@ -4,8 +4,8 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
-import { provenanceOf, sha256OfFile } from '../../../scripts/lib/gates/provenance.mjs'
-import { auditBundle } from '../../../scripts/lib/gates/evidence-audit-core.mjs'
+import { provenanceOf, sha256OfFile } from '../../../checks/lib/gates/provenance.mjs'
+import { auditBundle } from '../../../checks/lib/gates/evidence-audit-core.mjs'
 
 const makeRoot = () => {
   const base = realpathSync(tmpdir())

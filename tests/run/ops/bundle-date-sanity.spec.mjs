@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { futureDateFindings } from '../../../scripts/lib/ops/bundle-date-sanity.mjs'
+import { futureDateFindings } from '../../../checks/lib/ops/bundle-date-sanity.mjs'
 
 const NOW = Date.UTC(2026, 9, 20, 12, 0, 0) // 2026-10-20T12:00Z
 

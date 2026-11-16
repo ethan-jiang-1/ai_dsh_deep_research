@@ -1,5 +1,5 @@
 // 负例留证 2026-11-14：BUG-024 / BUG-028——隔离预载此前只有 soak/日志，无 keyless 行为测试。
-// 本测试在 node:vm 沙箱里执行 dev/llm-socket-isolation.cjs，注入假 fetch/假 undici：
+// 本测试在 node:vm 沙箱里执行 tools/llm-socket-isolation.cjs，注入假 fetch/假 undici：
 //   ① DeepSeek POST 必开一次性 Agent + dispatcher，走 undici 而非共享池（024）；
 //   ② undici 不可用时逐次计数并 console.warn，不静默（028）；
 //   ③ 一旦一次性请求已发出，失败原样抛，绝不回落共享池（028）。
@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url'
 import vm from 'node:vm'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const SOURCE = readFileSync(join(ROOT, 'dev/llm-socket-isolation.cjs'), 'utf8')
+const SOURCE = readFileSync(join(ROOT, 'tools/llm-socket-isolation.cjs'), 'utf8')
 
 const emptyBody = () => new ReadableStream({ start(controller) { controller.close() } })
 
@@ -29,7 +29,7 @@ function load({ undici = null } = {}) {
   }
   const origin = async (input, init) => { state.origCalls += 1; return { status: 299, statusText: 'ORIG', headers: {}, body: null } }
   const context = {
-    __dirname: join(ROOT, 'dev'),
+    __dirname: join(ROOT, 'tools'),
     module: { exports: {} },
     exports: {},
     process: { env: { DSH_ISOLATION_ANNOUNCE: '1' }, pid: 4242 },

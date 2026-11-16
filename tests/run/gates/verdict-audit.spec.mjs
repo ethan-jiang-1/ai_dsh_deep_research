@@ -2,7 +2,7 @@
 // 负例留证 2026-11-13：BUG-158（review-missing 只 warning）
 // 负例留证 2026-11-13：BUG-159（claims evidence/topics 不盘上对账）
 // verdict-audit —— claim 级裁决判据的 keyless 回归（契约 = `_backlog/_archived/research/quality-loop/
-// 2026-11-10-verdict-contract.md` §5；实现 = `scripts/lib/gates/verdict-audit-core.mjs`）。
+// 2026-11-10-verdict-contract.md` §5；实现 = `checks/lib/gates/verdict-audit-core.mjs`）。
 //
 // 覆盖形状：绿基线 + 每条红判据各一例（负例即反证：删掉对应断言/放宽判据，这些用例会变绿）。
 // 另外把 `content/templates/run/claims.json|verdicts.json`（写者契约）钉到解析面——模板键集合
@@ -21,7 +21,7 @@ import {
   parseVerdicts,
   sha256Text,
   stripCitations,
-} from '../../../scripts/lib/gates/verdict-audit-core.mjs'
+} from '../../../checks/lib/gates/verdict-audit-core.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const TEMPLATES = join(ROOT, 'packages', 'deep-research-pack', 'content', 'templates', 'run')

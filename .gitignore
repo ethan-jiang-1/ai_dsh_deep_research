@@ -42,7 +42,7 @@ _cache/
 # verify secrets-untracked 对已 tracked 的同形态文件另有一道断言）
 .tmp*/
 # dist 导出目的地（ai_dsh_architect 同款导出合同）：tarball 是导出产物不进库；安装手册是
-# 唯一 tracked 例外——tracked 生成物（生成器 = scripts/dist/export-dist.mjs；verify 门禁
+# 唯一 tracked 例外——tracked 生成物（生成器 = checks/dist/export-dist.mjs；verify 门禁
 # dist-manual-version 钉它与 pack 版本一致，版本动 → 同 diff 重导出）
 _dist/*
 !_dist/安装手册.md
@@ -89,7 +89,7 @@ packages/deep-research-pack/lib/
 # 连环境路径提进历史）。
 .pi/
 
-# dev/ 只住源码驱动（布局约定），run 产物住 research-workspace/ 或 runtime/。
+# tools/ 只住源码驱动（布局约定），run 产物住 research-workspace/ 或 runtime/。
 # 此处是误落位的活跃 run bundle（2026-10-19 曾在跑）：不跟踪，免得 git add -A 把整场
 # run 提交进库，也免得它的 evidence 内部链接把 pre-commit 的 md-links 拦红。
-dev/harness-home/
+tools/harness-home/

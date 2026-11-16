@@ -2,7 +2,7 @@
 //
 // 为什么是纯函数库：真浏览器/通道侧无法进 tests（layering 守卫禁子进程与网络）——把
 // 驱动决策与成功裁决抽成"观察进、动作出"的纯函数，行为契约在这里钉死；浏览器适配层
-// （dev/hitl-answer.mjs）只做 IO 搬运，其正确性由策略函数 + 下一场 run 实测收口。
+// （tools/hitl-answer.mjs）只做 IO 搬运，其正确性由策略函数 + 下一场 run 实测收口。
 //
 // 核心契约（正本 = _backlog/bugs/BUG-004-hitl-answer-submit-not-landing.md）：
 // ① UI 形状（卡头消失/题干更换）**永不**单独判"已提交"——多题卡 auto-advance 换题头
@@ -21,9 +21,9 @@
 //   红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { closingProvenanceRow } from '../../../scripts/lib/shared/hitl-provenance.mjs'
-import { isHitl2Mention } from '../../../scripts/lib/shared/node-gate-session-gates.mjs'
-import { deliveryAnswerGuard, isDeliveryReviewCard, answerBatchOf, customLandedInBatch, driveVerdict, hitlUiIdentityOf, hitlUiSessionOf, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict } from '../../../scripts/lib/channel/ask-drive.mjs';
+import { closingProvenanceRow } from '../../../checks/lib/shared/hitl-provenance.mjs'
+import { isHitl2Mention } from '../../../checks/lib/shared/node-gate-session-gates.mjs'
+import { deliveryAnswerGuard, isDeliveryReviewCard, answerBatchOf, customLandedInBatch, driveVerdict, hitlUiIdentityOf, hitlUiSessionOf, intentReconcile, nextDriveAction, optionIndexToClick, parseAskArgs, parseAskQuestions, pickTargetLabel, questionCardKeyOf, selectPendingSession, sidebarMissVerdict } from '../../../checks/lib/channel/ask-drive.mjs';
 
 test('parseAskArgs：三问卡带 wait:-1 → 3 题 + 无限期（BUG-005 第 5 例现场的盘侧形态）', () => {
   const args = JSON.stringify({

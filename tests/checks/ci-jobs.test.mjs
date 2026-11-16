@@ -12,7 +12,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { parseWorkflow, executedSmokeFiles } from '../../scripts/lib/tools/ci-workflow.mjs'
+import { parseWorkflow, executedSmokeFiles } from '../../checks/lib/tools/ci-workflow.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const TEXT = readFileSync(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8')

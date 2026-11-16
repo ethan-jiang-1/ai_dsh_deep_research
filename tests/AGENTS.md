@@ -11,17 +11,17 @@
 
 | 目录 | 映射的源代码/面 | 放什么 |
 |---|---|---|
-| `run/` | run 通道、run 状态、HITL、run 门与审计、观察/回放、run-ops/probe | `scripts/lib/<owner>/` 的回归；`run/` 内按 owner 分层（`gates/` `ops/` `channel/` `harness/` `probes/` `shared/`），与源码同名 |
+| `run/` | run 通道、run 状态、HITL、run 门与审计、观察/回放、run-ops/probe | `checks/lib/<owner>/` 的回归；`run/` 内按 owner 分层（`gates/` `ops/` `channel/` `harness/` `probes/` `shared/`），与源码同名 |
 | `cockpit/` | pack client 观察面与其折算 | `client/` = `src/client` 纯逻辑判据；`lib/` = pack `src/lib` 折算回归（组件行为归 client-load 真机档） |
-| `pack/` | pack 结构、preset、导出与部署 | `content/` `startup/` `defaults/` `fetch-fallback/` = 同名 surface；`scripts/` = pack 脚本；`contract/` = 无主语产品合同；presets/export/deploy 形状 |
+| `pack/` | pack 结构、preset、导出与部署 | `content/` `startup/` `defaults/` `fetch-fallback/` = 同名 surface；`checks/` = pack 脚本；`contract/` = 无主语产品合同；presets/export/deploy 形状 |
 | `contracts/` | 跨仓**产品合同**（run bundle、版本呈现、方法映射等） | `*.spec.mjs`；清单 = 盘上 `contracts/` 目录 |
 | `checks/` | **门禁自身**与测试基础设施 | `*.test.mjs` 平铺；`pnpm test:checks` 只收这一层 |
 | `vendor/` | vendor **源码**契约（组合层 Loader、设置 schema） | 不在默认 glob；跑 `pnpm test:vendor`（根 tsconfig 源映射，fresh clone 无 vendor 构建可跑） |
 | `fixtures/` | 构造样本与冻结录制语料 | 测试/smoke 消费；taxonomy = [fixtures/README](fixtures/README.md) |
 
-域内文件名 = 被测模块名 + `.spec.mjs`（如 `run/shared/run-state.spec.mjs` ↔ `scripts/lib/shared/run-state.mjs`）；checks 用 `<check>.test.mjs`；
+域内文件名 = 被测模块名 + `.spec.mjs`（如 `run/shared/run-state.spec.mjs` ↔ `checks/lib/shared/run-state.mjs`）；checks 用 `<check>.test.mjs`；
 一文件测多个面按**主语**归域，跨域合同放 `contracts/`——pack src/lib 的 run 族折算（journal-wire 类）归
-`run/`，跨 scripts/lib 与 pack 的驾驶舱数据面（method-presets 类）归 `cockpit/`；与 verify 门禁同源的双断言面（`pack/presets.spec` ↔ role-list-sync/preset-structure/row-deps/pack-bundle-compat）登记 = 该测试头注。 **owner 镜像（2026-11-15）**：`run/<owner>/` 与 `scripts/lib/<owner>/` 同名，根层零平铺、仅无依赖/仅 shared（或 test-support）的跨切住 `shared/`；索引 = [INDEX.generated.md](INDEX.generated.md)（对账 [test-index](checks/test-index.test.mjs)、契约 [test-owner-mirror](checks/test-owner-mirror.test.mjs)）。**pack 镜像（2026-11-15）**：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`（run/plan/events/method-library/review/workspace/shared；`faces.json` 留 `src/lib` 根）、`src/client/<sub>/` ↔ `tests/cockpit/client/<sub>/`、`src/<surface>/` ↔ `tests/pack/<surface>/`；`tests/cockpit/shared/` 收跨 sub 的 client spec；跨根例外（`tests/contracts`、`tests/run`）在 [pack-mirror](checks/pack-mirror.test.mjs) 头注登记。
+`run/`，跨 checks/lib 与 pack 的驾驶舱数据面（method-presets 类）归 `cockpit/`；与 verify 门禁同源的双断言面（`pack/presets.spec` ↔ role-list-sync/preset-structure/row-deps/pack-bundle-compat）登记 = 该测试头注。 **owner 镜像（2026-11-15）**：`run/<owner>/` 与 `checks/lib/<owner>/` 同名，根层零平铺、仅无依赖/仅 shared（或 test-support）的跨切住 `shared/`；索引 = [INDEX.generated.md](INDEX.generated.md)（对账 [test-index](checks/test-index.test.mjs)、契约 [test-owner-mirror](checks/test-owner-mirror.test.mjs)）。**pack 镜像（2026-11-15）**：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`（run/plan/events/method-library/review/workspace/shared；`faces.json` 留 `src/lib` 根）、`src/client/<sub>/` ↔ `tests/cockpit/client/<sub>/`、`src/<surface>/` ↔ `tests/pack/<surface>/`；`tests/cockpit/shared/` 收跨 sub 的 client spec；跨根例外（`tests/contracts`、`tests/run`）在 [pack-mirror](checks/pack-mirror.test.mjs) 头注登记。
 
 ## 放置规则（一处证据一个家）
 
@@ -31,13 +31,13 @@
   消费。原始运行日志、报告与抓取证据归 `runtime/smoke-workspace/`、`research-workspace/` 的
   `drt_*`/`archive/`，夹具不自动进入默认测试 glob；
 - 真模型/浏览器/网络/子进程检查走独立 smoke；默认回归无凭据可跑。`layering` 守卫五件套 =
-  提及级禁物 + 解析级调用（[lib/keyless-imports](../scripts/lib/tools/keyless-imports.mjs)——夹具
-  字符串不咬）+ import 闭包图（传递引入也红；从 `scripts/` 树只许 import `lib/`，pack
+  提及级禁物 + 解析级调用（[lib/keyless-imports](../checks/lib/tools/keyless-imports.mjs)——夹具
+  字符串不咬）+ import 闭包图（传递引入也红；从 `checks/` 树只许 import `lib/`，pack
   `src/lib` 纯件另由闭包图背书）+ 命令钉 + 有家句。违规样本只住 `fixtures/`，不回头污染域。
 
 ## 写测试时
 
-- **覆盖边界 + 减法都有契约**：`scripts/lib` 每个模块要么有直测、要么在 [test-surface](checks/test-surface.test.mjs) 的 `SMOKE_ONLY` 登记"为什么只能 smoke"；覆盖率 = `pnpm test:coverage`（观察面，不设百分比门禁）；未使用 import / 未导出顶层声明由 [no-unused-code](checks/no-unused-code.test.mjs) 机械清点（scripts/、dev/、tests/、pack src/；只证零引用，删副作用初始化前人工确认）；
+- **覆盖边界 + 减法都有契约**：`checks/lib` 每个模块要么有直测、要么在 [test-surface](checks/test-surface.test.mjs) 的 `SMOKE_ONLY` 登记"为什么只能 smoke"；覆盖率 = `pnpm test:coverage`（观察面，不设百分比门禁）；未使用 import / 未导出顶层声明由 [no-unused-code](checks/no-unused-code.test.mjs) 机械清点（checks/、tools/、tests/、pack src/；只证零引用，删副作用初始化前人工确认）；
 - **命名即申报**：`*.spec.mjs` 进 spec 车道、`tests/checks/*.test.mjs` 进门禁车道（各自 glob 选中，`layering`/`test-lanes` 钉 keyless 与后缀）——
   新检查先想清它是不是 keyless 契约证据再命名；支援件住 `lib/`、`fixtures/`（glob 之外，
   import 不注册测试）；

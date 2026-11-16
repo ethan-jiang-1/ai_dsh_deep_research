@@ -2,15 +2,15 @@
 // 红配方：新增/删除任一 spec/check 不重跑生成器 → 重算对账红；无外部语法解析 import 的测试被伪标为 external → AST 负例红。
 // 负例留证 2026-11-16：BUG-198——把任一 uniqueClaim 里的 tests/… 路径改成不存在文件 → 下方 claim
 // 路径检查点名红；还原 → 绿。
-// 负例留证 2026-11-16：BUG-202——把 claim 的路径换成不存在的 scripts/… 或 docs/…（重生成账本）
+// 负例留证 2026-11-16：BUG-202——把 claim 的路径换成不存在的 checks/… 或 docs/…（重生成账本）
 // → 同一检查点名红；旧版只认 tests/ 前缀会绿。还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import * as assetLedgerMod from '../../scripts/lib/tools/asset-ledger.mjs'
-import { ASSET_CLASSES, ASSET_COSTS, ORACLE_TYPES, assetLedgerOf, listTestFiles, oracleTypeOf } from '../../scripts/lib/tools/asset-ledger.mjs'
+import * as assetLedgerMod from '../../checks/lib/tools/asset-ledger.mjs'
+import { ASSET_CLASSES, ASSET_COSTS, ORACLE_TYPES, assetLedgerOf, listTestFiles, oracleTypeOf } from '../../checks/lib/tools/asset-ledger.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const LEDGER = JSON.parse(readFileSync(join(ROOT, 'tests/fixtures/asset-ledger/ledger.json'), 'utf8'))
@@ -36,8 +36,8 @@ test('每项具备完整六属性（lane/class/cost/uniqueClaim/oracleType/sunse
   }
 })
 
-test('uniqueClaim 里的仓内路径 token（tests/scripts/docs/…）必须存在（BUG-198 / BUG-202；防空 ≥10 条 claim）', () => {
-  const TOKEN = /(?:scripts|tests|packages|docs|dev|probes|snapshots|notes)\/[A-Za-z0-9_./-]+\.(?:mjs|cjs|ts|tsx|md|json|yml|yaml|sh)/g
+test('uniqueClaim 里的仓内路径 token（tests/checks/docs/…）必须存在（BUG-198 / BUG-202；防空 ≥10 条 claim）', () => {
+  const TOKEN = /(?:checks|tests|packages|docs|tools|probes|snapshots|notes)\/[A-Za-z0-9_./-]+\.(?:mjs|cjs|ts|tsx|md|json|yml|yaml|sh)/g
   const claimsWithPaths = LEDGER.assets.filter((asset) => asset.uniqueClaim.match(TOKEN) !== null)
   const prefixes = new Map()
   for (const asset of LEDGER.assets) {

@@ -23,9 +23,9 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { cardTitleOf, parseArgsObject } from '../../../packages/deep-research-pack/src/lib/events/tool-card.ts'
 import { foldActivityRows } from '../../../packages/deep-research-pack/src/lib/events/activity-fold.ts'
-import { loadReplayScene } from '../../../scripts/lib/harness/replay-scene.mjs'
-import { presetRoles } from '../../../scripts/lib/shared/roles.mjs'
-import { yaml } from '../../../scripts/lib/tools/workspace-parsers.mjs'
+import { loadReplayScene } from '../../../checks/lib/harness/replay-scene.mjs'
+import { presetRoles } from '../../../checks/lib/shared/roles.mjs'
+import { yaml } from '../../../checks/lib/tools/workspace-parsers.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 const PACK_DIR = join(ROOT, 'packages', 'deep-research-pack')
@@ -155,7 +155,7 @@ test('渲染金标准 ↔ fixture 的 web_search 面静态对账（--update-expe
 })
 
 test('5 角色入库录制流与当前 pack 源 persona / skill-catalog / manual.md / vendor pin 逐字同代（BUG-013 / BUG-080）', () => {
-  const vendorGateSrc = readFileSync(join(ROOT, 'scripts/verify/gates/d-vendor.mjs'), 'utf8')
+  const vendorGateSrc = readFileSync(join(ROOT, 'checks/verify/gates/d-vendor.mjs'), 'utf8')
   const pinMatch = /const PIN = '([0-9a-f]{40})'/.exec(vendorGateSrc)
   assert.ok(pinMatch !== null, '无法从 d-vendor.mjs 读取当前 vendor PIN')
   const expectedVendorPin = pinMatch[1]

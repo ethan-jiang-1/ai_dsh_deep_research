@@ -32,7 +32,7 @@ description: Use when a mechanism's contract needs evidence at a real boundary �
 
 1. 读索引的「一句话 / 何时跑 / 状态」；现有探针能覆盖就先跑它，别新写。
 2. 跑之前读该脚本头注的 **判据** 与 **不证明**；绿只在这个场景/判据下成立。
-3. 真模型档需要 `source dev/env.sh` 与凭据；`--port` 用脚本自己的缺省，不要改 `--port 0`
+3. 真模型档需要 `source tools/env.sh` 与凭据；`--port` 用脚本自己的缺省，不要改 `--port 0`
    （本仓端口独占由 `port-exclusive` 门禁守）。
 4. 失败现场按头注/指南 §5 落 `runtime/smoke-workspace/`；不要覆盖旧现场。
 
@@ -46,7 +46,7 @@ description: Use when a mechanism's contract needs evidence at a real boundary �
 4. **证据**：`verdict` + 原始日志/页面文本/截图；离线拿同一份证据重扫判据仍得同样结论。
 5. **登记**：补头注六字段（状态 / 一句话 / 何时跑 / 档位 / 判据 / 不证明；为什么存在推荐）
    → `node probes/_index.mjs --write` → `pnpm verify` 绿。
-6. **分层**：探针之间不互相 import；共享纯函数放 `scripts/lib/`，真实驱动放 driver 面；
+6. **分层**：探针之间不互相 import；共享纯函数放 `checks/lib/`，真实驱动放 driver 面；
    真模型档同 diff 登记 `REAL_MODEL` 闭集（`tests/checks/smoke-contract.test.mjs`）。
 
 ## 4. 反模式（写之前先排除）

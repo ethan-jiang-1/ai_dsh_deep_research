@@ -11,7 +11,7 @@
 //   ③空表守卫删除（防空语料）→ 用例「空按钮表」红。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pickSendTarget, SEND_LABELS, STOP_LABELS } from '../../../scripts/lib/probes/probe-send-target.mjs';
+import { pickSendTarget, SEND_LABELS, STOP_LABELS } from '../../../checks/lib/probes/probe-send-target.mjs';
 
 const b = (label, y) => ({ label, y });
 

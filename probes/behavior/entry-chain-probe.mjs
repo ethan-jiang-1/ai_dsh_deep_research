@@ -16,18 +16,18 @@
 //   2. prompt 按根 AGENTS.md 条件式入口读取，核验授权边界与开发环路由；
 //   3. 会话日志即真相：assistant/message 事件里找答案文本（不是用户消息回显），全文留档供人工复核。
 //
-// 前置：source dev/env.sh（DSH_HOME + 凭据）；DSH_SRC 默认本仓根（vendor/dsh）。
-// 用法：source dev/env.sh && node probes/behavior/entry-chain-probe.mjs [--port 3114]
-import { requireCredentials, requireDevHome, withModelKey } from '../../scripts/lib/shared/env.mjs';
-import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/shared/web-harness.mjs';
-import { readSessionTextOf } from '../../scripts/lib/shared/session-log.mjs';
+// 前置：source tools/env.sh（DSH_HOME + 凭据）；DSH_SRC 默认本仓根（vendor/dsh）。
+// 用法：source tools/env.sh && node probes/behavior/entry-chain-probe.mjs [--port 3114]
+import { requireCredentials, requireDevHome, withModelKey } from '../../checks/lib/shared/env.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../checks/lib/shared/web-harness.mjs';
+import { readSessionTextOf } from '../../checks/lib/shared/session-log.mjs';
 import { randomUUID } from 'node:crypto';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/harness/vendor-artifacts.mjs';
-import { directAuthorizationBoundaryPasses, rfcBoundaryPasses } from '../../scripts/lib/probes/direct-authorization-boundary.mjs';
-import { cleanupBootedProbe, prepareProbePort } from '../../scripts/lib/harness/port-reclaim.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../checks/lib/harness/vendor-artifacts.mjs';
+import { directAuthorizationBoundaryPasses, rfcBoundaryPasses } from '../../checks/lib/probes/direct-authorization-boundary.mjs';
+import { cleanupBootedProbe, prepareProbePort } from '../../checks/lib/harness/port-reclaim.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
@@ -41,7 +41,7 @@ const POLL_MS = 3_000;
 const OUT = join(ROOT, 'runtime', 'smoke-workspace');
 
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
-if (!home) { console.error('probe: 需要 DSH_HOME（先 source dev/env.sh）'); process.exit(2); }
+if (!home) { console.error('probe: 需要 DSH_HOME（先 source tools/env.sh）'); process.exit(2); }
 requireDevHome('entry-chain-probe', { home, root: ROOT });
 requireCredentials('entry-chain-probe', { home });
 const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/dsh submodule）

@@ -17,7 +17,7 @@ import {
   hasFinalVersion,
   readableVersionOf,
   readableVersionsIn,
-} from '../../../scripts/lib/shared/final-version.mjs';
+} from '../../../checks/lib/shared/final-version.mjs';
 import { latestRunVersion } from '../../../packages/deep-research-pack/src/lib/run/run-fold.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
@@ -60,7 +60,7 @@ test('run-fold.latestRunVersion 与单一判据同源（边界形态一致）', 
   assert.equal(latestRunVersion([]), 0);
 });
 
-test('漂移锁：scripts/ 与 pack src/lib 不再自写 vN 正则（单一正本 = final-target）', () => {
+test('漂移锁：checks/ 与 pack src/lib 不再自写 vN 正则（单一正本 = final-target）', () => {
   const LEGACY = [String.raw`^v\d`, String.raw`^v(\d`];
   const files = [];
   const walk = (dir, ext) => {
@@ -71,7 +71,7 @@ test('漂移锁：scripts/ 与 pack src/lib 不再自写 vN 正则（单一正�
       else if (ent.name.endsWith(ext)) files.push(path);
     }
   };
-  walk(join(ROOT, 'scripts'), '.mjs');
+  walk(join(ROOT, 'checks'), '.mjs');
   walk(join(ROOT, 'packages', 'deep-research-pack', 'src', 'lib'), '.ts');
   assert.ok(files.length >= 80, `防空语料：只扫到 ${files.length} 个源文件（scripts + pack src/lib）`);
   const offenders = [];

@@ -3,7 +3,7 @@
 // startup-hint — boot 失败归因（BUG-066）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { startupFailureHint } from '../../../scripts/lib/shared/startup-hint.mjs'
+import { startupFailureHint } from '../../../checks/lib/shared/startup-hint.mjs'
 
 test('BUG-066：插件不兼容文本 → 指出 profile 未随 pin 重钉', () => {
   const output = 'plugin version @x@0.2.1-rc.2 is incompatible with dsh 0.2.1-rc.5\nExact-version exemption: not active.'

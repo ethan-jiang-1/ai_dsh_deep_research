@@ -2,7 +2,7 @@
 // 直接执行 / 需请批分界）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { directAuthorizationBoundaryPasses, rfcBoundaryPasses } from '../../../scripts/lib/probes/direct-authorization-boundary.mjs';
+import { directAuthorizationBoundaryPasses, rfcBoundaryPasses } from '../../../checks/lib/probes/direct-authorization-boundary.mjs';
 
 test('direct authorization probe accepts authorized scope without invented prerequisites', () => {
   assert.equal(directAuthorizationBoundaryPasses('用户已授权的局部工作按请求范围执行，无需重复请批。'), true);

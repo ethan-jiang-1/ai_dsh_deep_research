@@ -9,13 +9,13 @@
 | 层 | 拥有 | 不放什么 |
 |---|---|---|
 | 根 [AGENTS.md](../AGENTS.md) | 每轮都要在场的常驻指令（每条 1–3 行，链到 home） | 教程、历史故事、情境化长流程 |
-| 子树 `AGENTS.md`（本文件、`scripts/`、`packages/*`、`notes/`、`tests/`、`_backlog`） | 只属于该子树的指令 | 根已承载的仓级规则 |
+| 子树 `AGENTS.md`（本文件、`checks/`、`packages/*`、`notes/`、`tests/`、`_backlog`） | 只属于该子树的指令 | 根已承载的仓级规则 |
 | `docs/00-index.md`（+ `terms.md` / `decisions.md` / `external-materials.md`） | 文档地图；术语对照、D 号台账与外部材料正文分页（按需查） | 教程正文、决策理由 |
 | `docs/design/` | 系统**现在**怎么组成、为什么这样组成（架构/角色/方法论映射/机制依据） | 当前 API 的唯一说明（→ 源码/README） |
 | `docs/guides/` | 按任务怎么操作（清单 = 盘上目录，不在此枚举；入口 = 60 开发环 / 61 run / 62 插件作者） | 设计理由（→ notes/implemented） |
 | `docs/discipline-map.md` · [evaluation.md](evaluation.md) | 纪律三态表 · 验收合同与门禁台账 | 变更史 |
 | `notes/` | 为什么这样决定、放弃了什么、跑了什么验证 | 当前合同（→ `docs/`） |
-| 运行区（`research-workspace/`、`dev/`） | 这次实际发生了什么 | 可复现的回归证据（→ `tests/`） |
+| 运行区（`research-workspace/`、`runtime/`） | 这次实际发生了什么 | 可复现的回归证据（→ `tests/`） |
 
 高层文档只描述自己的主题与**直接子项**的职责；更低层的细节链接到拥有它的下层文档。
 
@@ -36,7 +36,7 @@
 
 ## 预算与处置序
 
-常驻文档的行数上限由 [scripts/doc-budgets.json](../scripts/doc-budgets.json) 拥有，
+常驻文档的行数上限由 [checks/doc-budgets.json](../checks/doc-budgets.json) 拥有，
 门禁 `doc-budgets` 强制（超限或缺登记即红）。红了按序处置：
 
 1. **下放**（把内容移到拥有它的层，原地留一行链接）；

@@ -12,7 +12,7 @@ experimental team layer with `dsh plugin --profile deep-research add …` (comma
 [`_dist/安装手册.md`](_dist/安装手册.md)); the Plugins page becomes the primary install path after
 npm publication. There is no custom installer and no launcher. Development
 in this repository uses the isolated `deep-research` profile, `research-workspace/` and
-`dev/run-driver.mjs` — do not mix the two command sets or data roots.
+`tools/run-driver.mjs` — do not mix the two command sets or data roots.
 
 ## Development charter
 
@@ -61,8 +61,8 @@ first block is setup, the second creates the profile and starts the Web surface:
 git clone --recurse-submodules https://github.com/ethan-jiang-1/ai_dsh_deep_research.git
 cd ai_dsh_deep_research
 pnpm install
-bash dev/vendor-build.sh          # pack's tsc reads vendor lib/types
-node dev/release/export-dist.mjs # writes _dist/tarball + manual + market
+bash tools/vendor-build.sh          # pack's tsc reads vendor lib/types
+node tools/release/export-dist.mjs # writes _dist/tarball + manual + market
 ```
 
 ```sh
@@ -87,14 +87,14 @@ holds run data). The source handoff exporter writes only HEAD's tracked source a
 run data:
 
 ```sh
-node scripts/dist/release-check.mjs --handoff
-node dev/release/export-handoff.mjs --out /tmp/handoff
-node scripts/smoke/handoff.e2e.mjs
+node checks/dist/release-check.mjs --handoff
+node tools/release/export-handoff.mjs --out /tmp/handoff
+node checks/smoke/handoff.e2e.mjs
 ```
 
 `release-check --handoff` must be green: the tag is annotated, points at HEAD, the worktree is
 clean, the manual sha equals the tarball sha, and the tarball matches the current pack source.
-On the receiving clean clone, `node scripts/dist/release-check.mjs --receiver` verifies
+On the receiving clean clone, `node checks/dist/release-check.mjs --receiver` verifies
 tag/manual/tarball/manifest alignment without recomputing the source fingerprint.
 
 Attach `_dist/dsh-deep-research-pack-<version>.tgz`, the installation manual, and
@@ -106,18 +106,18 @@ freshness). Do not pair an older tag with a newer `_dist`.
 Keyless checks (no model key, no network calls):
 
 ```sh
-source dev/env.sh   # fresh clone：激活 pre-commit；之后幂等
+source tools/env.sh   # fresh clone：激活 pre-commit；之后幂等
 pnpm verify
 pnpm test
 ```
 
-`pnpm test:vendor` 是 vendor 源码契约的补充检查（fresh clone 可跑，不计入最小集）。`pnpm typecheck` 需要 vendor 构建产物（`bash dev/vendor-build.sh`，CI deploy job 跑），不属于 fresh clone 的 keyless 最小集。
+`pnpm test:vendor` 是 vendor 源码契约的补充检查（fresh clone 可跑，不计入最小集）。`pnpm typecheck` 需要 vendor 构建产物（`bash tools/vendor-build.sh`，CI deploy job 跑），不属于 fresh clone 的 keyless 最小集。
 
 Install/first-screen checks (real install / browser; no model calls):
 
 ```sh
-node scripts/smoke/install-shape.entry.mjs
-node scripts/smoke/product-boot.entry.mjs
+node checks/smoke/install-shape.entry.mjs
+node checks/smoke/product-boot.entry.mjs
 ```
 
 They need pnpm, the team-layer registry/cache, and Playwright chromium (the repo's `.pnpm` store);
@@ -127,7 +127,7 @@ missing prerequisites exit 2, not green.
 suite. When you change a gate, also run:
 
 ```sh
-node scripts/smoke/gates.e2e.mjs
+node checks/smoke/gates.e2e.mjs
 ```
 
 For the full development loop — including which evidence tier applies to a change —
@@ -139,8 +139,8 @@ map is [`docs/project-map.md`](docs/project-map.md), and the acceptance contract
 
 ```sh
 # optional: isolate DSH_HOME in this shell and install git hooks (boot-run sources it too)
-source dev/env.sh
-node dev/run-driver.mjs up # boots or reuses the research channel and prints the URL
+source tools/env.sh
+node tools/run-driver.mjs up # boots or reuses the research channel and prints the URL
 ```
 
 A real-model run needs `DEEPSEEK_API_KEY` in `runtime/harness-home/.credentials.yaml`
@@ -173,7 +173,7 @@ outputs; the ignored paths are documented in [`.gitignore`](.gitignore).
   [`docs/guides/64-release-versioning.md`](docs/guides/64-release-versioning.md); run
   `pnpm release:check` before tagging or publishing.
 - The pre-commit hook runs `pnpm verify` and `pnpm test`; enable it with
-  `source dev/env.sh` (or set `core.hooksPath=dev/hooks`).
+  `source tools/env.sh` (or set `core.hooksPath=tools/hooks`).
 
 ## Pull requests
 

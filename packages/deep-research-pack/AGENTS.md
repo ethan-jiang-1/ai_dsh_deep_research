@@ -13,10 +13,10 @@ launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.m
 
 ## 改这个包时
 
-- **两处一致**（pack 源 = 唯一真源）：① `dev/research.overlay.yml` 由
-  `node dev/render-overlay.mjs` **从 pack 渲染**（门禁 `overlay-fresh` 对账，勿手改）；
+- **两处一致**（pack 源 = 唯一真源）：① `tools/research.overlay.yml` 由
+  `node tools/render-overlay.mjs` **从 pack 渲染**（门禁 `overlay-fresh` 对账，勿手改）；
   ② `runtime/harness-home/profiles/deep-research/`（run 通道镜像）随 `boot-run.sh` 同步，
-  其漂移检测逐文件比对，不符即 fail-loud；改完 pack 跑 `node scripts/verify/verify.mjs`；
+  其漂移检测逐文件比对，不符即 fail-loud；改完 pack 跑 `node checks/verify/verify.mjs`；
 - **双重编译面**：`src/lib` 文件的 host/shared/client 归属 = `src/lib/faces.json`；host include = host+shared，client 不得 import host；门禁 = `tests/pack/contract/src-lib-faces.spec.mjs`。
 - **界面文案 day-one 双语**：任何用户可见文本（页签/按钮/空态/提示、数据面折层、内置打法/领域示范等）必须同时有 zh/en；
   chrome/折层走 `src/client/locales/`，canonical 内容（skill/库格式/模型 prompt）不动、UI 经显示投影取词，模型面不翻译。
@@ -37,7 +37,7 @@ launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.m
 
 ## 文档义务
 
-- 包 README 拥有**包级**合同（安装形态摘要/验证/配置/升级/卸载/数据/兼容）；用户逐步安装合同的 owner = 手册源（dev/release/product-manual.md），本 README 只留摘要与首装顺序（readme-shape + install-copies 校验）；行为/架构细节 = design/，发布 = guides/64；README 或发布集改变同 diff 更新；
+- 包 README 拥有**包级**合同（安装形态摘要/验证/配置/升级/卸载/数据/兼容）；用户逐步安装合同的 owner = 手册源（tools/release/product-manual.md），本 README 只留摘要与首装顺序（readme-shape + install-copies 校验）；行为/架构细节 = design/，发布 = guides/64；README 或发布集改变同 diff 更新；
 - 启动/部署面（`src/startup`、`src/content`、`src/defaults`、`scripts/doctor.mjs`、`$DSH_HOME/deep-research/settings.json`）改动要跑
   `install-shape.entry` + `product-boot.entry` + `release.entry`（L2 安装/首启形状）；
 - 已知限制与延后工作放固定节 `## Known Limitations and Deferred Work`（中文名：已知限制与延后工作）。

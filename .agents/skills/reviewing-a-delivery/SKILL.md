@@ -50,11 +50,11 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
 
 1. **error / cancellation / ownership / disposal**：接口的失败与取消路径，以及"谁负责释放"。
    本仓实例：子进程（playwright、`dsh` 挂载）、临时目录、端口、浏览器上下文——
-   `scripts/AGENTS.md` §释放到静默 是它的机械侧（kill 后 await 退出码；孤儿进程 = 脚本缺陷）。
+   `checks/AGENTS.md` §释放到静默 是它的机械侧（kill 后 await 退出码；孤儿进程 = 脚本缺陷）。
    查：新起的资源有没有对应的释放点，释放点是否在**失败路径上也走到**（早退/throw 绕过）。
 2. **race / reentry / detach / quiescent disposal**：async setup、callback、teardown 的交叠。
    本仓实例：`watch-run` 盯场与 run 本体对同一 bundle 的读写交叠；`run-dashboard` 只读投影
-   与落盘之间的快照时刻；smoke 脚本的 retry 与"等显式状态"（`scripts/AGENTS.md`）就是为
+   与落盘之间的快照时刻；smoke 脚本的 retry 与"等显式状态"（`checks/AGENTS.md`）就是为
    消解这类交叠而立的纪律。查：并发写同一 session log / bundle 时有无丢失更新；
    detach 的异步任务在进程退出前是否被 await。
 
@@ -84,13 +84,13 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
 
 7. **derived state / cache / UI echo / replay 来自 authoritative success point**：
    派生值不能各自推导同一事实。本仓实例：`docs/` 的"D 号台账"与 `notes/` 的 Note
-   是**不同事实**（决定史 vs 当前合同）；`dev/research.overlay.yml` 是**生成物**
+   是**不同事实**（决定史 vs 当前合同）；`tools/research.overlay.yml` 是**生成物**
    （源 = pack patch 行，手改即漂移，由 `overlay-fresh` 咬）；`client` 观察面显示的
    run 状态必须来自 `runStateOf` 单点而非各自重算。
    查：新增的缓存/回显/replay 面，其值是否取自唯一的权威成功点。
 8. **byte/size limit 覆盖 wrapper 与 metadata 后的最终结果**：上限按**字节**不按字符，
    且要算上包装层与元数据。本仓实例（CJK 语境高发）：`doc-budgets` 用**行数**而非词数
-   ——正因 "CJK 词数不可靠"（`scripts/doc-budgets.json` §_note）；反过来，
+   ——正因 "CJK 词数不可靠"（`checks/doc-budgets.json` §_note）；反过来，
    凡是按字符数设限的地方，CJK 下字节数会超。
    查：新增/改动的上限断言是否覆盖了 wrapper 与 metadata 之后的结果。
 
@@ -128,7 +128,7 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
 | 证据 | 层 | 覆盖的失败类 | 负控（见过红） | CI/收尾 |
 |---|---|---|---|---|
 | `tests/...` | unit / contract | 例：语法矩阵 / 同源 codec / 状态交错 | 是（注入什么）/ 否（理由） | `pnpm test` |
-| `scripts/smoke/...` | 装配 / 真入口 | 例：安装形状 / 浏览器装配 | 是 / 否 | CI job / 本地 |
+| `checks/smoke/...` | 装配 / 真入口 | 例：安装形状 / 浏览器装配 | 是 / 否 | CI job / 本地 |
 | `snapshots/...` | 组装转录 | 模型可见漂移 | diff 人审 | job / 本地 |
 
 - **够了判据**：七问（会红 / 真入口 / 验世界 / 模型可见钉住 / 最低层 / skip 可见 / 可重复）

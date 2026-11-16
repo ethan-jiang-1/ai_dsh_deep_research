@@ -2,8 +2,8 @@
 // 路径/断代助手 = node-gate-helpers.mjs。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { gateBundle } from '../../../scripts/lib/gates/node-gate-core.mjs'
-import { leadsGate } from '../../../scripts/lib/gates/node-gate-run-gates.mjs'
+import { gateBundle } from '../../../checks/lib/gates/node-gate-core.mjs'
+import { leadsGate } from '../../../checks/lib/gates/node-gate-run-gates.mjs'
 import { bundle } from './node-gate-helpers.mjs'
 
 const L = (name, date) => gateBundle(bundle(name), undefined, { leadsDate: date }).gates.leads

@@ -16,17 +16,17 @@ import assert from 'node:assert/strict'
 import { readFileSync, existsSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { inspectSmokeDir, smokeSurfaceIssues } from '../../scripts/lib/test-infra/smoke-assets.mjs'
+import { inspectSmokeDir, smokeSurfaceIssues } from '../../checks/lib/test-infra/smoke-assets.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const SMOKE = join(ROOT, 'scripts', 'smoke')
+const SMOKE = join(ROOT, 'checks', 'smoke')
 const registry = JSON.parse(readFileSync(join(SMOKE, 'registry.json'), 'utf8'))
 const files = inspectSmokeDir(SMOKE).files.filter((f) => f.endsWith('.mjs')).sort()
 const COSTS = new Set(['fast', 'medium', 'slow', 'manual'])
 
 test('smoke 资产账：每条 smoke 有 cost/uniqueClaim/oracle/sunset，oracle 可直测或有 none 理由', () => {
-  assert.deepEqual(smokeSurfaceIssues(SMOKE), [], `scripts/smoke 只许顶层普通文件：${smokeSurfaceIssues(SMOKE).join('；')}`)
-  assert.deepEqual(Object.keys(registry).sort(), files, 'registry 与 scripts/smoke/*.mjs 集合必须相等')
+  assert.deepEqual(smokeSurfaceIssues(SMOKE), [], `checks/smoke 只许顶层普通文件：${smokeSurfaceIssues(SMOKE).join('；')}`)
+  assert.deepEqual(Object.keys(registry).sort(), files, 'registry 与 checks/smoke/*.mjs 集合必须相等')
   assert.ok(files.length >= 20, `防空语料：smoke 过少（${files.length}）`)
   let realOracles = 0
   for (const [file, entry] of Object.entries(registry)) {

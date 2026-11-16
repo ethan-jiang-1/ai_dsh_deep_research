@@ -21,8 +21,8 @@ import {
   parseSessionFacts,
   parseVerdicts,
   stripCitations,
-} from '../../../scripts/lib/gates/verdict-audit-core.mjs'
-import { findSessionDir, resolveSessionLog } from '../../../scripts/lib/shared/session-log.mjs'
+} from '../../../checks/lib/gates/verdict-audit-core.mjs'
+import { findSessionDir, resolveSessionLog } from '../../../checks/lib/shared/session-log.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const FIXTURE = join(ROOT, 'tests', 'fixtures', 'verdict-audit', 'pilot-a')

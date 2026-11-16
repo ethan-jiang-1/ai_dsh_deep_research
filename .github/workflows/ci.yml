@@ -16,7 +16,7 @@ concurrency:
 # 快慢分层：每次 push 的 CI 只跑 keyless + deploy（约 5 分钟）。client-load（真浏览器）与
 # snapshot-replay（回放 A/B）是分钟级重冒烟，**不进 push 门禁**——它们在 GitHub runner 上
 # 仍红且根因未定（见 _backlog/triggers.md「Linux 上的真浏览器/回放冒烟」行）；本地按需跑，
-# 冒烟资产仍在 scripts/smoke/（registry tier = dev-only）。
+# 冒烟资产仍在 checks/smoke/（registry tier = dev-only）。
 jobs:
   keyless:
     name: keyless verify + tests
@@ -48,10 +48,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Verify (structural gates)
-        run: source dev/env.sh && pnpm verify
+        run: source tools/env.sh && pnpm verify
 
       - name: Test (keyless regression)
-        run: source dev/env.sh && pnpm test
+        run: source tools/env.sh && pnpm test
 
       # 覆盖率是观察面、不设阈值；但命令本身必须真能跑（2026-11-04 实证：
       # test:coverage 缺 TSX_TSCONFIG_PATH，4 个 views 测试红而 pnpm test 绿）。

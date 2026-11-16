@@ -11,7 +11,7 @@ import { mkdirSync, mkdtempSync, rmSync, rmdirSync, writeFileSync, readFileSync,
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { auditBundle } from '../../../scripts/lib/gates/evidence-audit-core.mjs';
+import { auditBundle } from '../../../checks/lib/gates/evidence-audit-core.mjs';
 import { toolCall, toolResult } from '../../fixtures/events.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');

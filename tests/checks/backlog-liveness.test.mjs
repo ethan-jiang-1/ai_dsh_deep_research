@@ -1,11 +1,11 @@
 // backlog-liveness 回归 — 问题/缺陷/调研/方法/归档池结构合同的 keyless 断言；
-// 判据核心 = scripts/lib/repo/backlog-liveness.mjs（本测试即其反证记录）。
+// 判据核心 = checks/lib/repo/backlog-liveness.mjs（本测试即其反证记录）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { backlogLivenessProblems } from '../../scripts/lib/repo/backlog-liveness.mjs';
+import { backlogLivenessProblems } from '../../checks/lib/repo/backlog-liveness.mjs';
 
 const METHOD_NAMES = ['requirements-elicitation', 'requirements-probes', 'requirements-synthesis',
   'validation-design', 'validation-evidence', 'validation-judgment', 'issue-to-note'];
@@ -19,9 +19,9 @@ const READY_ISSUE_TEXT = '---\nstatus: 待落地\nopened: 2026-10-08\n---\n\n# R
   + '> 去向：implemented — `notes/implemented/2026-10-08-ready.md`（交付时写）\n\n'
   + '## 验收标准\n1. 行为可观察。\n';
 const READY_BUG = 'BUG-019-ready.md';
-const PROSE_ONLY_FIX_EVIDENCE = '\n## 修复落地\n\n- **改动**：`scripts/lib/fix.mjs`、`tests/checks/fix.test.mjs`\n- **红证**：`node --test tests/checks/fix.test.mjs`\n  ```\n  not ok 1 - old\n  ```\n- **绿证**：`node --test tests/checks/fix.test.mjs`\n  ```\n  ok 1 - new\n  ```\n';
+const PROSE_ONLY_FIX_EVIDENCE = '\n## 修复落地\n\n- **改动**：`checks/lib/fix.mjs`、`tests/checks/fix.test.mjs`\n- **红证**：`node --test tests/checks/fix.test.mjs`\n  ```\n  not ok 1 - old\n  ```\n- **绿证**：`node --test tests/checks/fix.test.mjs`\n  ```\n  ok 1 - new\n  ```\n';
 const FIX_EVIDENCE = '\n## 修复落地\n\n```json fix-evidence\n' + JSON.stringify({
-  changes: ['scripts/lib/fix.mjs', 'tests/checks/fix.test.mjs'],
+  changes: ['checks/lib/fix.mjs', 'tests/checks/fix.test.mjs'],
   red: { command: 'node --test tests/checks/fix.test.mjs', exit: 1, output: 'not ok 1 - old' },
   green: { command: 'node --test tests/checks/fix.test.mjs', exit: 0 },
   guard: { path: 'tests/checks/fix.test.mjs' },
@@ -331,7 +331,7 @@ test('D55 补强：活跃 修复落地 卡禁借旧 opened 日期走散文绕过
   f.put('bugs/README.md', '# Empty\n');
 
   const archivedWithDeletedGuard = '---\nstatus: 已修\nseverity: P1\nopened: 2026-11-15\n---\n\n# BUG-900\n> 状态：已修｜可关闭：是\n\n## 修复判据\n1. ok\n\n## 修复落地\n\n```json fix-evidence\n' + JSON.stringify({
-    changes: ['scripts/lib/fix.mjs', 'tests/checks/deleted.test.mjs'],
+    changes: ['checks/lib/fix.mjs', 'tests/checks/deleted.test.mjs'],
     red: { command: 'node --test tests/checks/deleted.test.mjs', exit: 1 },
     green: { command: 'node --test tests/checks/deleted.test.mjs', exit: 0 },
     guard: { path: 'tests/checks/deleted.test.mjs' },

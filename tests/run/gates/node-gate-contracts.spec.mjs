@@ -4,8 +4,8 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
-import { contractEpochOf } from '../../../scripts/lib/gates/schema-scan-core.mjs'
-import { isPreContract } from '../../../scripts/lib/shared/node-gate-contracts.mjs'
+import { contractEpochOf } from '../../../checks/lib/gates/schema-scan-core.mjs'
+import { isPreContract } from '../../../checks/lib/shared/node-gate-contracts.mjs'
 
 const make = () => {
   const base = realpathSync(tmpdir())

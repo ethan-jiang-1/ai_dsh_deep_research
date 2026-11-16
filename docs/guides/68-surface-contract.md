@@ -2,23 +2,24 @@
 
 > 层：指南（怎么读目录、怎么判一个入口）。**本文的「面」只指维护面**——一个入口主要产出什么、
 > 会不会动你的世界；不指 [evaluation.md](../evaluation.md) 的 L0–L4 评估面（那套「面」判验收等级）。
-> 决策路由 = [D57](../decisions.md#d57)；目录门户 = [probes/](../../probes/README.md) ·
-> [scripts/](../../scripts/README.md) · [dev/](../../dev/README.md)；逐件例外 = 本文 §5。
+> 决策路由 = [D57](../decisions.md#d57)（分类法）· [D58](../decisions.md#d58)（根名统一）；目录门户 = [probes/](../../probes/README.md) ·
+> [checks/](../../checks/README.md) · [tools/](../../tools/README.md)；逐件例外 = 本文 §5。
 
 ## 0. 一句话
 
-目录名不保证动词。判面只问一件事：**这个入口主要产出什么？** 裁决 → judge，证据 → show，
-持久状态 → operate。
+根名即动词：`checks/` = judge、`probes/` = show、`tools/` = operate（三仓同骨架）。判一个入口
+仍只问一件事：**它主要产出什么？** 裁决 → judge，证据 → show，持久状态 → operate；名字与产物
+冲突时以产物为准，并把该件登记进例外表。
 
-## 1. 两层：test 层与 entry 层
+## 1. 两层：oracle 层（test 层）与 entry 层
 
 | 层 | 判据 | 住哪 |
 |---|---|---|
-| **test 层** | 由 `pnpm test` 的 runner 跑（node:test：`test:spec` + `test:checks`，vendor 契约另跑 `test:vendor`） | `tests/` |
-| **entry 层** | 要自己起命令、进程或浏览器 | `probes/`、`scripts/`、`dev/`——下面三面 |
+| **oracle 层**（test 层） | 由 `pnpm test` 的 runner 跑（node:test：`test:spec` + `test:checks`，vendor 契约另跑 `test:vendor`） | `tests/` |
+| **entry 层** | 要自己起命令、进程或浏览器 | `probes/`、`checks/`、`tools/`——下面三面 |
 
-测试层**不是面**，也不进面计数：判 runner，不判进程数。`test:e2e` / `test:entry` 由
-[`scripts/test/run-lane.mjs`](../../scripts/test/run-lane.mjs) 按登记表选跑，跑到的件在这里仍按
+oracle 层**不是面**，也不进面计数：判 runner，不判进程数。`test:e2e` / `test:entry` 由
+[`checks/test/run-lane.mjs`](../../checks/test/run-lane.mjs) 按登记表选跑，跑到的件在这里仍按
 entry 层的三面判。
 
 ## 2. 三面（只对 entry 层）
@@ -36,8 +37,8 @@ operate 的两种模式：
 
 | 模式 | 做什么 | 失败语义 | 例 |
 |---|---|---|---|
-| **run** | 起/复用进程 | 没起来，重试即可 | [`dev/run-driver.mjs`](../../dev/run-driver.mjs) |
-| **act** | 持久改动 | 可能半途，需要 converge/repair | [`dev/release/export-dist.mjs`](../../dev/release/export-dist.mjs)、[`dev/runtime-clean.mjs`](../../dev/runtime-clean.mjs) `--yes` |
+| **run** | 起/复用进程 | 没起来，重试即可 | [`tools/run-driver.mjs`](../../tools/run-driver.mjs) |
+| **act** | 持久改动 | 可能半途，需要 converge/repair | [`tools/release/export-dist.mjs`](../../tools/release/export-dist.mjs)、[`tools/runtime-clean.mjs`](../../tools/runtime-clean.mjs) `--yes` |
 
 ## 3. 判定顺序
 
@@ -55,16 +56,21 @@ operate 的两种模式：
 为什么产物优先：「失败要重跑」对每个条目都成立，判别力为零；「裁决 / 证据 / 世界状态」三者互斥，
 可以判。
 
-## 4. 本仓落点
+## 4. 本仓落点（三仓同骨架：checks / probes / tools）
 
-| 目录 | 面 | 说明 |
-|---|---|---|
-| `tests/` | test 层（不是面） | 阅读地图与车道 = [tests/AGENTS.md](../../tests/AGENTS.md)、[guides/67](./67-test-strategy.md) |
-| `probes/` | show | behavior / browser / run 三域 + stream 仪器；`_index` 是生成器、stream tee 是驱动（§5） |
-| `scripts/` | judge（+ 非面支撑） | `verify/`、`smoke/`、`run-gates/`（含 run-accept / acceptance-check）、`dist/`（release-check）；非面 = `test/` runner、`lib/`、support、配置 JSON |
-| `dev/` | operate（run + act） | run 通道与构建、发布交付（`release/`）、运行区清理；`hooks/pre-commit` 是 judge；配置/预载驱动/手册源是非面 |
+根名三仓固定；每根只装一个动词；内部子组名本仓自定。定位一眼可判，例外只登记一次（§5）。
 
-目录与动词一一对应：judge 住 `scripts/`，只读投影住 `probes/run/`，导出与清理住 `dev/`。
+| 根 | 面 | 装什么 | 不装什么 |
+|---|---|---|---|
+| `checks/` | judge | `verify/`、`smoke/`、`run-gates/`（含 run-accept / acceptance-check）、`dist/`（release-check） | 只读投影（→ `probes/`）、导出与清理（→ `tools/`） |
+| `probes/` | show | `behavior/` `browser/` 探针、`analyze/` 只读取证投影、`stream/` 预载仪器 | 裁决入口（→ `checks/`）、持久改动（→ `tools/`） |
+| `tools/` | operate（run + act） | run 通道与构建、`release/` 导出与手册源、`runtime-clean`、`hooks/`（judge 例外） | 裁决（→ `checks/`）、只读投影（→ `probes/`） |
+| `tests/` | oracle（非面） | `pnpm test` runner 的回归与门禁自测；服务三面，不是第四面 | 入口件（三面各自的家） |
+| 启动配置 | 非面 | `tools/env.sh`、`tools/research.overlay.yml` 等 sourced 环境 / 生成物 | 不是入口，不进面计数 |
+
+非面支撑跟消费者住：`checks/lib/`、`checks/test/` runner、support、配置 JSON（§5）。
+各根 README 首屏承载同一份定位；本页是规则与例外的单一 home。
+测试层的阅读地图与车道 = [tests/AGENTS.md](../../tests/AGENTS.md)、[guides/67](./67-test-strategy.md)。
 
 ## 5. 例外清单
 
@@ -72,33 +78,34 @@ operate 的两种模式：
 
 | 路径 | 面 | 理由 |
 |---|---|---|
-| `probes/run/watch-run.mjs`、`probes/run/session-events.mjs`、`probes/run/run-dashboard.mjs`、`probes/run/stream-diagnostics.mjs`、`probes/run/provider-error-stats.mjs`、`probes/run/plan-card-stats.mjs`、`probes/run/session-replay.mjs`、`probes/run/scene-capture.mjs`、`probes/run/run-inventory.mjs`、`probes/run/unconsumed-evidence.mjs`、`probes/run/bundle-sessions.mjs` | show | 只读投影/诊断/回放；exit 1 是超时、标题歧义或零绑定，不是裁决 |
-| `scripts/run-gates/run-accept.mjs`、`scripts/run-gates/acceptance-check.mjs` | judge | 交付验收原子动作 / 收活判据；红 = 不放行 |
-| `dev/runtime-clean.mjs` | operate（act） | 清理运行区；默认 dry-run，`--yes` 才删 |
-| `dev/release/export-dist.mjs`、`dev/release/market.mjs`、`dev/release/export-handoff.mjs` | operate（act） | 产出 `_dist/` 工件 |
-| `scripts/dist/release-check.mjs` | judge | 发布前版本/tag 一致性裁决 |
-| `dev/release/product-manual.md` | 非面（数据） | 手册源，被 `readme-shape` / `dist-manual-fresh` 门禁消费 |
-| `scripts/verify/context.mjs` | 非面（助手） | 门禁共享助手（路径常量 / `gitOnce` / `trackedFiles`），不作判定 |
-| `scripts/test/run-lane.mjs` | 非面（runner） | 车道调度 |
-| `scripts/lib/*` | 非面（实现） | 支撑库，跟消费者 |
-| `scripts/smoke/*.support.mjs` | 非面（support） | 夹具/支援件 |
-| `scripts/smoke/registry.json` | 非面（数据） | 车道登记表 |
-| `scripts/doc-budgets.json`、`scripts/archived-note-pointers.json`、`scripts/test-path-redirects.json` | 非面（数据） | 门禁消费的配置与登记簿 |
+| `probes/analyze/watch-run.mjs`、`probes/analyze/session-events.mjs`、`probes/analyze/run-dashboard.mjs`、`probes/analyze/stream-diagnostics.mjs`、`probes/analyze/provider-error-stats.mjs`、`probes/analyze/plan-card-stats.mjs`、`probes/analyze/session-replay.mjs`、`probes/analyze/scene-capture.mjs`、`probes/analyze/run-inventory.mjs`、`probes/analyze/unconsumed-evidence.mjs`、`probes/analyze/bundle-sessions.mjs` | show | 只读投影/诊断/回放；exit 1 是超时、标题歧义或零绑定，不是裁决 |
+| `checks/run-gates/run-accept.mjs`、`checks/run-gates/acceptance-check.mjs` | judge | 交付验收原子动作 / 收活判据；红 = 不放行 |
+| `tools/runtime-clean.mjs` | operate（act） | 清理运行区；默认 dry-run，`--yes` 才删 |
+| `tools/release/export-dist.mjs`、`tools/release/market.mjs`、`tools/release/export-handoff.mjs` | operate（act） | 产出 `_dist/` 工件 |
+| `checks/dist/release-check.mjs` | judge | 发布前版本/tag 一致性裁决 |
+| `tools/release/product-manual.md` | 非面（数据） | 手册源，被 `readme-shape` / `dist-manual-fresh` 门禁消费 |
+| `checks/verify/context.mjs` | 非面（助手） | 门禁共享助手（路径常量 / `gitOnce` / `trackedFiles`），不作判定 |
+| `checks/test/run-lane.mjs` | 非面（runner） | 车道调度 |
+| `checks/lib/*` | 非面（实现） | 支撑库，跟消费者 |
+| `checks/smoke/*.support.mjs` | 非面（support） | 夹具/支援件 |
+| `checks/smoke/registry.json` | 非面（数据） | 车道登记表 |
+| `checks/doc-budgets.json`、`checks/archived-note-pointers.json`、`checks/test-path-redirects.json` | 非面（数据） | 门禁消费的配置与登记簿 |
 | `probes/_index.mjs` | 非面（生成器） | 索引生成/校验；`probe-registry` 用同一渲染对账 |
 | `probes/stream/llm-stream-tee.cjs` | 非面（驱动） | 预载仪器，判据不适用；现行 `probe-registry` 仍按探针扫（§6） |
-| `dev/env.sh`、`dev/research.overlay.yml` | 非面（配置 / 生成物） | sourced 环境 / `render-overlay` 的产出 |
-| `dev/llm-socket-isolation.cjs` | 非面（驱动） | `NODE_OPTIONS` 预载，socket 隔离 |
-| `dev/vendor-host-bundle.config.ts`、`dev/vendor-host-typert.config.ts`、`dev/vendor-typert-emit.mjs` | 非面（管道件） | `vendor-build.sh` 的构建配置与产物生成 |
-| `dev/boot-run.sh`、`dev/run-driver.mjs` | operate（run） | 起/复用 run 通道 |
-| `dev/run-kickoff.mjs`、`dev/hitl-answer.mjs`、`dev/bootstrap.sh`、`dev/vendor-build.sh`、`dev/record-asset-ledger.mjs`、`dev/record-ci-oracle.mjs`、`dev/record-role-fixture.mjs`、`dev/render-overlay.mjs`、`dev/render-test-index.mjs` | operate（act） | 对活通道或仓库做持久改动：建会话发 kickoff、写 HITL provenance、装环境、产 fixture/索引/overlay |
-| `dev/hooks/pre-commit` | judge | git hook 的产物是裁决：红则拦 commit |
+| `tools/env.sh`、`tools/research.overlay.yml` | 非面（配置 / 生成物） | sourced 环境 / `render-overlay` 的产出 |
+| `tools/llm-socket-isolation.cjs` | 非面（驱动） | `NODE_OPTIONS` 预载，socket 隔离 |
+| `tools/vendor-host-bundle.config.ts`、`tools/vendor-host-typert.config.ts`、`tools/vendor-typert-emit.mjs` | 非面（管道件） | `vendor-build.sh` 的构建配置与产物生成 |
+| `tools/boot-run.sh`、`tools/run-driver.mjs` | operate（run） | 起/复用 run 通道 |
+| `tools/run-kickoff.mjs`、`tools/hitl-answer.mjs`、`tools/bootstrap.sh`、`tools/vendor-build.sh`、`tools/record-asset-ledger.mjs`、`tools/record-ci-oracle.mjs`、`tools/record-role-fixture.mjs`、`tools/render-overlay.mjs`、`tools/render-test-index.mjs` | operate（act） | 对活通道或仓库做持久改动：建会话发 kickoff、写 HITL provenance、装环境、产 fixture/索引/overlay |
+| `tools/hooks/pre-commit` | judge | git hook 的产物是裁决：红则拦 commit |
 
 ## 6. 已知限制与延后工作
 
-- **目录名未统一**（目标名 checks / probes / tools）：`scripts/` 改名不只是一次路径替换，会动
-  `scripts/AGENTS.md` 的目录注入面、`scripts/test-path-redirects.json` 对冻结层的旧链解析、
-  `dev/env.sh` 的 `core.hooksPath`。面已拆开，改名另立迁移。
-- **`scripts/dist/` 只剩 `release-check`**：分组名沿用历史（发布前裁决），不改名以免再触发一轮引用迁移。
 - **stream tee 口径差**：`probes/stream/llm-stream-tee.cjs` 按本页是非面（驱动），但
   `probe-registry` 现行按探针扫它（必须带六字段头注）。统一 = 改
-  `scripts/lib/shared/probe-index.mjs` 的非探针清单，属门禁扫描面的行为改动，需红→绿留证。
+  `checks/lib/shared/probe-index.mjs` 的非探针清单，属门禁扫描面的行为改动，需红→绿留证。
+- **`checks/dist/` 只剩 `release-check`**：子组名沿用历史（发布前裁决）；内部子组本仓自定，
+  不为它再触发一轮引用迁移。
+- **旧根名只活在 redirect 账本**：`scripts/`、`dev/`、`probes/run/` 已退役；冻结层旧链接经
+  `checks/test-path-redirects.json` 解析。老 clone 的 `core.hooksPath` 需重 source `tools/env.sh`
+  幂等恢复（hooks-active 门禁会点名未激活态）。

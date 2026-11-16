@@ -1,8 +1,8 @@
 // verify-gates.spec.mjs — 门禁自测面的静态契约
 //
-// 真执行体 = scripts/smoke/gates.e2e.mjs（语料 verify.spec.mjs 模式：临时副本 + 注入回归 +
+// 真执行体 = checks/smoke/gates.e2e.mjs（语料 verify.spec.mjs 模式：临时副本 + 注入回归 +
 // 真实 verify 入口判红；子进程归 smoke 道——layering 禁默认回归 spawn）。案例表住
-// scripts/lib/harness/gates-cases.mjs（纯 fs——layering 二代后 tests 只消费 lib，不 import 驱动壳）。
+// checks/lib/harness/gates-cases.mjs（纯 fs——layering 二代后 tests 只消费 lib，不 import 驱动壳）。
 // 本测试钉住它俩的接口不漂移：gates.e2e 的案例门禁名必须真实存在于 context.mjs 的 gates
 // 数组——门禁改名或退役而案例表没跟 = 本测试红（此时 smoke 的案例会在对照组就红，这里更早、
 // keyless 秒级报因）。依据 = RFC「DSH 插件开发语料（二代）吸收审计」缺口 2（2026-10-07）。
@@ -14,12 +14,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { CASES, CONTROLS, NO_CASE_GATES } from '../../scripts/lib/harness/gates-cases.mjs';
+import { CASES, CONTROLS, NO_CASE_GATES } from '../../checks/lib/harness/gates-cases.mjs';
 
 const here = (p) => new URL(p, import.meta.url);
 // 门禁名单正本 = context.mjs（2026-10-27 拆域：verify.mjs 只留入口，gates 数组搬进 context）；
 // 本测试是 keyless 纯 fs，不 import context（其闭包含 child_process）——按源码文本解析。
-const verifySrc = readFileSync(here('../../scripts/verify/context.mjs'), 'utf8');
+const verifySrc = readFileSync(here('../../checks/verify/context.mjs'), 'utf8');
 const gatesMatch = verifySrc.match(/const gates = \[([^\]]+)\]/);
 assert.ok(gatesMatch, 'context.mjs 的 gates 数组不可解析——本契约测试的前提失效');
 const gatesArray = gatesMatch[1].split(',').map((s) => s.trim().replace(/^'|'$/g, '')).filter(Boolean);
@@ -82,16 +82,16 @@ test('事故回归注入与正向控制常驻在场：未跟踪链接 / 产品�
   assert.ok(caseIds.has('note-tree-hidden-dir'), 'BUG-166：缺 note-tree-hidden-dir 隐藏目录注入案例');
   assert.ok(caseIds.has('note-tree-hidden-note-file'), 'BUG-166：缺 note-tree-hidden-note-file 隐藏文件注入案例');
   assert.ok(controlIds.has('note-tree-dot-store'), 'BUG-166：缺 note-tree-dot-store 点文件忽略控制');
-  const bPackSrc = readFileSync(here('../../scripts/verify/gates/b-pack.mjs'), 'utf8');
+  const bPackSrc = readFileSync(here('../../checks/verify/gates/b-pack.mjs'), 'utf8');
   assert.ok(bPackSrc.includes('产品内(?!容)'), 'BUG-072：b-pack.mjs 必须保留 产品内(?!容) 负向先行断言');
 });
 
 // 负例留证 2026-11-16：BUG-197——删掉 repo-conventions-dev-hook-path 案例 → 本测试红；
 // 还原 → 绿。案例自身由 gates.e2e 的真注入（pre-commit 追加坏路径）证明。
-test('dev/hooks 扫描面有常驻注入案例（BUG-197）', () => {
+test('tools/hooks 扫描面有常驻注入案例（BUG-197）', () => {
   const caseIds = new Set(CASES.map((c) => c.id));
   assert.ok(caseIds.has('repo-conventions-dev-hook-path'),
-    'BUG-197：缺 dev/hooks 注入案例——扫描面扩到 dev/hooks 后没有反证，改窄不会被自测台咬住');
+    'BUG-197：缺 tools/hooks 注入案例——扫描面扩到 tools/hooks 后没有反证，改窄不会被自测台咬住');
 });
 
 // 负例留证 2026-11-16：BUG-191——删掉 test-placement-unknown-subtree 案例 → 本测试红；

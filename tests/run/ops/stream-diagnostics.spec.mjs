@@ -1,7 +1,7 @@
 // stream-diagnostics selection contract: --recent counts model-active sessions, not merely fresh logs.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { analyzeModelAttempts, selectRecentActiveSessions } from '../../../scripts/lib/ops/stream-diagnostics-core.mjs';
+import { analyzeModelAttempts, selectRecentActiveSessions } from '../../../checks/lib/ops/stream-diagnostics-core.mjs';
 
 const activeEvents = new Map([
   ['new-tool-only', [{ type: 'tool/call', data: { name: 'web_search' } }]],

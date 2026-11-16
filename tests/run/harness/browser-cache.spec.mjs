@@ -2,7 +2,7 @@
 // chromium 回退失效 → client-load 在 CI 红在 launch）。纯函数，不启动浏览器。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { browserCacheDirs } from '../../../scripts/lib/harness/browser-cache.mjs'
+import { browserCacheDirs } from '../../../checks/lib/harness/browser-cache.mjs'
 
 test('缓存候选跨平台：macOS / Linux / Windows 三个缺省目录都在', () => {
   assert.deepEqual(browserCacheDirs('/home/u', undefined), [
