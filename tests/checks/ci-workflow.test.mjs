@@ -72,24 +72,22 @@ test('executedSmokeFiles：只计 needs 内、无跳过条件、run 里真实 no
   assert.deepEqual([...executedSmokeFiles('nonsense')], [], '解析不出 jobs = 空集，不猜')
 })
 
-test('真实 ci.yml：快档 smoke 在执行面；重冒烟按分层规则二选一；注释/字符串不冒充', () => {
-  const ci = readFileSync(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8')
-  const executed = executedSmokeFiles(ci)
-  assert.ok(executed.size >= 6, `防空语料：ci.yml 执行面过少（${executed.size}）`)
-  for (const file of ['run-accept.e2e.mjs', 'lifecycle.entry.mjs']) {
-    assert.ok(executed.has(file), `ci.yml 真实执行面应含 ${file}`)
+test('真实工作流：ci ∪ nightly 覆盖必需 smoke；重冒烟必须在某个工作流执行（不许无声消失）', () => {
+  const ciText = readFileSync(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8')
+  const nightlyText = readFileSync(join(ROOT, '.github', 'workflows', 'nightly.yml'), 'utf8')
+  const executed = new Set([...executedSmokeFiles(ciText), ...executedSmokeFiles(nightlyText)])
+  assert.ok(executed.size >= 6, `防空语料：CI 执行面过少（${executed.size}）`)
+  for (const file of ['run-accept.e2e.mjs', 'lifecycle.entry.mjs', 'client-load.entry.mjs', 'snapshot-replay.entry.mjs']) {
+    assert.ok(executed.has(file), `CI 执行面（ci ∪ nightly）应含 ${file}`)
   }
   assert.ok(!executed.has('l4-lite.e2e.mjs'), '真模型档不在 keyless CI 执行面')
-  // 分钟级重冒烟（2026-11-16 快慢分层）：不在 push 门禁时必须是 registry dev-only + 可读理由，
-  // 不许无声消失。理由 = notes/implemented/2026-11-16-ci-platform-alignment.md。
+  // 2026-11-16 频率分层：慢证据进 nightly（每日 + 手动），push 门禁只留 keyless；
+  // 但两条重冒烟必须在某个 CI 工作流里执行，且 registry 标 ci——不许无声消失。
   const registry = JSON.parse(readFileSync(join(ROOT, 'scripts', 'smoke', 'registry.json'), 'utf8'))
   for (const file of ['client-load.entry.mjs', 'snapshot-replay.entry.mjs']) {
-    if (executed.has(file)) continue
-    assert.equal(registry[file]?.tier, 'dev-only', `${file} 不在 ci.yml 执行面时必须 registry 标 dev-only`)
-    assert.ok(String(registry[file]?.reason ?? '').trim().length >= 8, `${file} 标 dev-only 必须写明可读理由`)
+    assert.equal(registry[file]?.tier, 'ci', `${file} 在 CI 执行面时必须 registry 标 ci`)
   }
 })
-
 test('表达式归一：${{ }} 外壳不改变 always/true/false 语义（step / continue-on-error / job，BUG-177）', () => {
   const wf = (ifExpr = '', coe = '') => `on:\n  workflow_dispatch:\njobs:\n  smoke:\n    steps:\n      - name: s\n${ifExpr === '' ? '' : `        if: ${ifExpr}\n`}${coe === '' ? '' : `        continue-on-error: ${coe}\n`}        run: node scripts/smoke/foo.e2e.mjs\n  all-checks-passed:\n    needs: [smoke]\n`
   for (const expr of ['always()', '${{ always() }}', 'true', '${{ true }}']) {

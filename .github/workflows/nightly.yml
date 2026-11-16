@@ -1,0 +1,245 @@
+# nightly — 分钟级/构建级证据，不挡每次 push（push 门禁 = ci.yml 的 keyless，约 2 分钟）。
+# 内容：vendor 构建 + 安装/生命周期/doctor/tarball（deploy）+ 真浏览器装配（client-load）+
+# 回放 A/B（snapshot-replay）。失败不阻塞 push，但会以本工作流红呈现；处置 = _backlog/triggers.md
+# 「Linux/GitHub runner 上的真浏览器/回放冒烟」行。
+name: nightly
+
+on:
+  schedule:
+    - cron: "17 18 * * *"   # 每日 02:17 Asia/Shanghai（UTC 18:17）
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  client-load:
+    name: client-load (seeded home, real browser)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout (with pinned DSH submodule)
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.7.0
+          run_install: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # 顺序有依赖：pack 的 tsc 需要 vendor 产出的类型（vendor-build 后才有 lib/types）。
+      # client-load 的 assertVendorArtifacts 还需要 vendor 的 typert/client 产物。
+      - name: Read vendor pin
+        id: pin
+        run: echo "sha=$(git rev-parse HEAD:vendor/dsh)" >> "$GITHUB_OUTPUT"
+
+      # vendor 构建产物 gitignored（fresh checkout 没有），但产物只由子模块 pin 决定——
+      # 按 pin SHA 缓存，命中即跳过约 3.5 分钟的构建（pin 不变 = 产物不变）。
+      - name: Cache vendor build (pin tree)
+        id: vendor-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            vendor/dsh/packages/*/*/lib
+            vendor/dsh/vendor/*/lib
+            vendor/dsh/apps/web/dist
+          key: ${{ runner.os }}-vendor-${{ steps.pin.outputs.sha }}
+
+      - name: Build vendor (pin tree)
+        if: steps.vendor-cache.outputs.cache-hit != 'true'
+        run: bash dev/vendor-build.sh
+
+      # 冒烟有构建新鲜度自检：lib/client.js 旧于 src 即 exit 2。
+      - name: Build pack (dual halves)
+        run: pnpm build
+
+      # chromium 由 vendor inspector 包的 playwright 安装（loadChromium 从 .pnpm 取 API）。
+      - name: Install chromium
+        run: pnpm --dir vendor/dsh/packages/experimental/inspector exec playwright install --with-deps chromium
+
+      # --seed 自建 home（会话 + 已交付 bundle 夹具），不依赖开发 home/凭据。
+      - name: Client load (seed fixture)
+        run: source dev/env.sh && node --import tsx/esm scripts/smoke/client-load.entry.mjs --seed tests/fixtures/client-load-home --port 3109
+
+      - name: Upload failure scene
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-load-artifacts
+          path: runtime/smoke-workspace/client-load-*
+          if-no-files-found: warn
+
+  snapshot-replay:
+    name: snapshot A/B (fresh profile, keyless)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout (with pinned DSH submodule)
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.7.0
+          run_install: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install zstd
+        run: sudo apt-get update && sudo apt-get install -y zstd
+
+      - name: Read vendor pin
+        id: pin
+        run: echo "sha=$(git rev-parse HEAD:vendor/dsh)" >> "$GITHUB_OUTPUT"
+
+      # vendor 构建产物 gitignored（fresh checkout 没有），但产物只由子模块 pin 决定——
+      # 按 pin SHA 缓存，命中即跳过约 3.5 分钟的构建（pin 不变 = 产物不变）。
+      - name: Cache vendor build (pin tree)
+        id: vendor-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            vendor/dsh/packages/*/*/lib
+            vendor/dsh/vendor/*/lib
+            vendor/dsh/apps/web/dist
+          key: ${{ runner.os }}-vendor-${{ steps.pin.outputs.sha }}
+
+      - name: Build vendor (pin tree)
+        if: steps.vendor-cache.outputs.cache-hit != 'true'
+        run: bash dev/vendor-build.sh
+
+      - name: Build pack (npm pack prepack)
+        run: pnpm build
+
+      - name: Prepare fresh profile + snapshot A/B
+        run: |
+          export DSH_DEV_HOME="$GITHUB_WORKSPACE/runtime/ci-home"
+          export DSH_RUN_STATE_DIR="$GITHUB_WORKSPACE/runtime/ci-state"
+          export DSH_RUN_PORT=3199
+          source dev/env.sh
+          bash dev/boot-run.sh --prepare-profile
+          node scripts/smoke/snapshot-replay.entry.mjs --read-only --layers a,b --port 3110
+
+  deploy:
+    name: keyless deploy smokes
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout (with pinned DSH submodule)
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.7.0
+          run_install: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # 类型面与 pack 构建都需要 vendor 产出的类型（tsc 的 TS2307 实测）。
+      - name: Read vendor pin
+        id: pin
+        run: echo "sha=$(git rev-parse HEAD:vendor/dsh)" >> "$GITHUB_OUTPUT"
+
+      # vendor 构建产物 gitignored（fresh checkout 没有），但产物只由子模块 pin 决定——
+      # 按 pin SHA 缓存，命中即跳过约 3.5 分钟的构建（pin 不变 = 产物不变）。
+      - name: Cache vendor build (pin tree)
+        id: vendor-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            vendor/dsh/packages/*/*/lib
+            vendor/dsh/vendor/*/lib
+            vendor/dsh/apps/web/dist
+          key: ${{ runner.os }}-vendor-${{ steps.pin.outputs.sha }}
+
+      - name: Build vendor (pin tree)
+        if: steps.vendor-cache.outputs.cache-hit != 'true'
+        run: bash dev/vendor-build.sh
+
+      # 类型门（测试走 tsx 剥类型，typecheck 是唯一类型回归面）。
+      - name: Typecheck (pack dual halves)
+        run: pnpm typecheck
+
+      - name: Build pack (pack.e2e needs lib/)
+        run: pnpm build
+
+      # L1 真挂载（无模型）：roster + 逐角色 session/create + skills 隔离 + boot 页模块表行。
+      # 用 vendor 源码基线（bootWeb 起自本仓），无需全局 dsh；DSH_HOME 由 env.sh 隔离。
+      - name: L1 preset smoke (real mount, keyless)
+        run: source dev/env.sh && DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs
+
+      # L2 发布/安装/卸载：export-dist 出 tarball + market，vendor CLI 作 dsh（无需全局安装）。
+      - name: Export dist (L2 tarball + market)
+        run: node scripts/dist/export-dist.mjs
+
+      - name: L2 lifecycle smoke (install → display → remove)
+        run: |
+          cat > /tmp/dsh-vendor <<EOF
+          #!/usr/bin/env bash
+          exec env TSX_TSCONFIG_PATH="$GITHUB_WORKSPACE/tsconfig.json" node --import tsx/esm "$GITHUB_WORKSPACE/vendor/dsh/apps/cli/src/bin.ts" "\$@"
+          EOF
+          chmod +x /tmp/dsh-vendor
+          DSH_BIN=/tmp/dsh-vendor node scripts/smoke/lifecycle.entry.mjs
+
+      # 方法库 tool smoke 不在此 job：真 Loader 需要 native system 产物（`pnpm build:native`），
+      # CI 无该工具链（2026-11-03 实测：system.node 缺席 → MODULE_NOT_FOUND）。证据 = 开发档。
+
+      - name: Doctor (read-only profile/anchor/workspace/credentials)
+        run: node scripts/smoke/doctor.e2e.mjs
+
+      - name: Tarball shape
+        run: node scripts/smoke/pack.e2e.mjs
+
+  all-checks-passed:
+    name: all checks passed
+    # 书签式聚合：branch protection 只认这一条；任何 needed job 的 failure/cancelled/skipped 都判红
+    # （job 级 if 跳过的 check 会显示 success，这是假绿入口——2026-11-13 W3-7）。
+    if: always()
+    needs: [deploy, client-load, snapshot-replay]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any needed job did not succeed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
+        run: |
+          echo "::error::Needed job results: ${{ join(needs.*.result, ', ') }}"
+          exit 1
+      - name: All checks passed
+        run: echo "All needed jobs succeeded (${{ join(needs.*.result, ', ') }})"

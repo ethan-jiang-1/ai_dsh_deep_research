@@ -4,8 +4,10 @@
 
 ## 决定
 
-- **每次 push 的 CI 只跑快档**：`.github/workflows/ci.yml` 保留 `keyless`（verify / test / coverage / vendor 契约 / 门禁自测 / handoff / run-accept）与 `deploy`（typecheck / preset / export-dist / lifecycle / doctor / tarball），聚合器 `all-checks-passed.needs = [keyless, deploy]`。两条分钟级重冒烟（`client-load` 真浏览器 ~3 分钟、`snapshot-replay` 回放 A/B 本地 ~6 分钟）从 push 路径移除。
-- `scripts/smoke/registry.json` 对应两条改 `tier: dev-only` 并写明理由（「不进每次 push 的快速门禁；runner 上仍红且根因未定；本地按需跑」）；冒烟资产与判据不动，仍可按需执行。
+- **push 门禁只跑 keyless**：`.github/workflows/ci.yml` 只剩 `keyless`（verify / test / coverage / vendor 契约 / 门禁自测 / handoff / run-accept），聚合器 `all-checks-passed.needs = [keyless]`；实测整轮约 2 分钟。
+- **慢证据进 `nightly.yml`**（每日 02:17 + `workflow_dispatch`）：`deploy`（vendor 构建 / typecheck / preset / export-dist / lifecycle / doctor / tarball）+ `client-load`（真浏览器）+ `snapshot-replay`（回放 A/B），自带聚合器。失败不阻塞 push，但以独立工作流红呈现。
+- **vendor 构建按 pin 缓存**：构建产物是 gitignored 的（fresh checkout 没有），但产物只由子模块 pin 决定——nightly 三个 job 都先 `git rev-parse HEAD:vendor/dsh` 取 pin，用 `actions/cache` 以 `vendor-<pin>` 为键缓存 `packages/*/*/lib`、`vendor/*/lib`、`apps/web/dist`；命中即跳过约 3.5 分钟的构建。
+- **CI 执行面 = ci.yml ∪ nightly.yml**：契约测试（smoke-registry / ci-jobs / ci-workflow）按并集判定「某个 smoke 是否在 CI 执行」，既允许频率分层，又不许任何冒烟无声消失。
 - 缺口登记在 [`_backlog/triggers.md`](../../_backlog/triggers.md)「Linux/GitHub runner 上的真浏览器/回放冒烟」行：现状与三种恢复条件（用户要求恢复 push 门禁 / 有人给出根因与可复现修法 / 需要覆盖时先补可读证据通道）。
 - 依据：反馈环成本本身是判据的一部分（「问跑一次多久」）。20 分钟的重冒烟挡在每次 push 上，把 CI 从「守卫」变成「等待」；而它当前是红的、且日志要 admin 才能读——先分层，再在有证据时修。
 

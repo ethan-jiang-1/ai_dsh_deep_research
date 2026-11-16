@@ -18,6 +18,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SMOKE = join(ROOT, 'scripts', 'smoke')
 const registry = JSON.parse(readFileSync(join(SMOKE, 'registry.json'), 'utf8'))
 const ci = readFileSync(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8')
+const nightly = readFileSync(join(ROOT, '.github', 'workflows', 'nightly.yml'), 'utf8')
 const { files } = inspectSmokeDir(SMOKE)
 const surfaceIssues = smokeSurfaceIssues(SMOKE)
 
@@ -30,7 +31,7 @@ test('smoke registry：scripts/smoke 只许顶层普通文件——子目录 / s
 test('smoke registry：盘上每个 smoke 都有且只有一条 CI/dev-only 归属（BUG-160）', () => {
   assert.deepEqual(Object.keys(registry).sort(), files.filter((name) => name.endsWith('.mjs')).sort(),
     'registry 与 scripts/smoke/*.mjs 集合必须相等')
-  const executed = executedSmokeFiles(ci)
+  const executed = new Set([...executedSmokeFiles(ci), ...executedSmokeFiles(nightly)])
   for (const [file, entry] of Object.entries(registry)) {
     const lane = file.endsWith('.e2e.mjs') ? 'e2e' : file.endsWith('.entry.mjs') ? 'entry' : file.endsWith('.support.mjs') ? 'support' : null
     assert.ok(lane !== null, `${file} 后缀不是 .e2e.mjs / .entry.mjs / .support.mjs——命名即车道`)
@@ -46,8 +47,9 @@ test('smoke registry：盘上每个 smoke 都有且只有一条 CI/dev-only 归�
   }
 })
 
-test('smoke registry：ci.yml 真正执行的每个 smoke 都在 registry 标记 ci', () => {
-  for (const file of executedSmokeFiles(ci)) {
-    assert.equal(registry[file]?.tier, 'ci', `${file} 在 ci.yml 被执行，但 registry 没标 ci`)
+test('smoke registry：CI 工作流（ci.yml ∪ nightly.yml）真正执行的每个 smoke 都在 registry 标记 ci', () => {
+  const executed = new Set([...executedSmokeFiles(ci), ...executedSmokeFiles(nightly)])
+  for (const file of executed) {
+    assert.equal(registry[file]?.tier, 'ci', `${file} 在 CI 工作流被执行，但 registry 没标 ci`)
   }
 })
