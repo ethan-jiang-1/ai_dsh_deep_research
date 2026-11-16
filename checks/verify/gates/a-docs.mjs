@@ -8,6 +8,7 @@ import { join, dirname, resolve, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { ROOT, fail, gitOnce, note, trackedFiles } from '../context.mjs';
 import { prosePathTokens } from '../../lib/repo/doc-prose-paths.mjs';
+import { MAX_REDIRECT_DEPTH, indexRedirects, resolveRedirect } from '../../lib/repo/redirect-ledger.mjs';
 
 export function runA() {
   // live 文档范围：notes/_backlog 是历史层、fixtures 是样本，均不追改；doc-paths/doc-drefs 共用。
@@ -64,29 +65,32 @@ export function runA() {
     const lsAll = gitOnce(['-c', 'core.quotepath=false', 'ls-files']);
     if (lsAll.status !== 0) fail(gate, 'git ls-files（全量）不可用——tracked 目标判定失效，fail-loud');
     const trackedAll = new Set(lsAll.stdout.split('\n').filter(Boolean));
-    // 路径重定向登记簿（2026-11-15 test-source-mirror）：搬家后旧路径在此登记，冻结层正文不改写。
-    // 条目失真（from 仍在盘上 / to 不在盘上 / to 未跟踪）一律红——登记簿不许腐烂。
+    // 路径重定向登记簿（2026-11-15；2026-11-17 链式化）：旧路径只追加，旧条目的 `to` 可再次成为
+    // `from`——解析沿链到最终落点；环/过深/重复 from/失真条目一律红。
     const registryPath = join(ROOT, 'checks', 'test-path-redirects.json');
-    const redirects = new Map();
     let redirected = 0;
+    const entries = [];
     if (existsSync(registryPath)) {
       let parsed;
       try { parsed = JSON.parse(readFileSync(registryPath, 'utf8')); }
       catch (e) { fail(gate, `test-path-redirects.json 非法 JSON：${e.message}`); }
-      for (const entry of parsed?.redirects ?? []) {
-        if (typeof entry?.from !== 'string' || typeof entry?.to !== 'string') {
-          fail(gate, '重定向登记簿条目缺 from/to 字符串'); continue;
-        }
-        if (existsSync(join(ROOT, entry.from))) {
-          fail(gate, `重定向登记簿条目失真：${entry.from} 仍在盘上——搬走时再登记，或删条目`); continue;
-        }
-        if (!existsSync(join(ROOT, entry.to))) {
-          fail(gate, `重定向登记簿目标不存在：${entry.from} → ${entry.to}`); continue;
-        }
-        if (!trackedAll.has(entry.to)) {
-          fail(gate, `重定向登记簿目标未被 git 跟踪：${entry.to}`); continue;
-        }
-        redirects.set(entry.from, entry.to);
+      entries.push(...(parsed?.redirects ?? []));
+    }
+    const indexed = indexRedirects(entries);
+    for (const problem of indexed.problems) fail(gate, problem);
+    const redirects = indexed.map;
+    for (const entry of entries) {
+      if (typeof entry?.from !== 'string' || typeof entry?.to !== 'string') continue; // 形状问题已报
+      if (existsSync(join(ROOT, entry.from))) {
+        fail(gate, `重定向登记簿条目失真：${entry.from} 仍在盘上——搬走时再登记，或删条目`); continue;
+      }
+      const res = resolveRedirect(redirects, entry.to);
+      if (res.cycle || res.tooDeep) { fail(gate, `重定向登记簿${res.cycle ? '成环' : `链过深（>${MAX_REDIRECT_DEPTH}）`}：${entry.from}`); continue; }
+      if (!existsSync(join(ROOT, res.final))) {
+        fail(gate, `重定向登记簿目标不存在：${entry.from} → ${entry.to}（最终 ${res.final}）`); continue;
+      }
+      if (!trackedAll.has(res.final)) {
+        fail(gate, `重定向登记簿目标未被 git 跟踪：${entry.from} → ${res.final}`); continue;
       }
     }
     const isTrackedTarget = (abs) => {
@@ -116,12 +120,16 @@ export function runA() {
           const abs = resolve(dirname(f), target);
           if (!existsSync(abs)) {
             const relTarget = relative(ROOT, abs).split('\\').join('/');
-            if (redirects.has(relTarget)) {
-              // 账本只服务冻结层：活文档自己就是「当前合同」，指旧路径必须就地改指新位置——
-              // 否则旧根名在活面长期存在（2026-11-17 根名统一实测：snapshots/README 3 条链接
-              // 全靠账本解析，doc-paths 的退役根守卫看不见 markdown 链接目标）。
+            const res = resolveRedirect(redirects, relTarget);
+            if (res.cycle || res.tooDeep) { fail(gate, `${rel}: 链接经重定向账本${res.cycle ? '成环' : '过深'} → ${relTarget}`); continue; }
+            if (res.final !== relTarget) {
+              if (!existsSync(join(ROOT, res.final))) {
+                fail(gate, `${rel}: 链接经账本落到不存在的 ${res.final}（旧路径 ${relTarget}）`); continue;
+              }
+              // 账本只服务冻结层：活文档指旧路径必须就地改指新位置（否则旧根名在活面长期存在；
+              // doc-paths 的退役根守卫看不见 markdown 链接目标）。
               if (!/^(notes\/|_backlog\/|vendor\/|tests\/fixtures\/|snapshots\/replay\/)/.test(rel)) {
-                fail(gate, `${rel}: 活文档链接依赖搬家账本 → ${relTarget}（现行 = ${redirects.get(relTarget)}）——活面必须直接指新路径；账本只服务冻结层`);
+                fail(gate, `${rel}: 活文档链接依赖搬家账本 → ${relTarget}（现行 = ${res.final}）——活面必须直接指新路径；账本只服务冻结层`);
                 continue;
               }
               redirected++; continue;

@@ -303,6 +303,16 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/redirect-ledger.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "redirect-ledger 契约（2026-11-17 维护层对齐）：账本 append-only 后必须能走链。",
+      "oracleType": "self-referential",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/release-anchor.test.mjs",
       "domain": "checks",
       "lane": "checks",

@@ -60,6 +60,7 @@
 | repo | `checks/lib/repo/doc-prose-paths` | `tests/checks/doc-prose-paths.test.mjs` |
 | repo | `checks/lib/repo/fix-evidence` | `tests/checks/fix-evidence.test.mjs` |
 | repo | `checks/lib/repo/note-scan` | `tests/checks/note-scan.test.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs` |
+| repo | `checks/lib/repo/redirect-ledger` | `tests/checks/redirect-ledger.test.mjs` |
 | repo | `checks/lib/repo/release-anchor` | `tests/checks/release-anchor.test.mjs` |
 | repo | `checks/lib/repo/smoke-lane` | `tests/checks/smoke-lane.test.mjs` |
 | repo | `checks/lib/repo/staged-change-pairing` | `tests/checks/staged-change-pairing.test.mjs` |

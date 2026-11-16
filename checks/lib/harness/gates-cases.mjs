@@ -467,6 +467,14 @@ export const CASES = [
   { id: 'test-placement-support-module', gate: 'test-placement', mutate: (dir) => {
       writeFileSync(join(dir, 'tests', 'pack', 'zz-support.mjs'), 'export const x = 1\n');
     } },
+  // md-links 账本链式化（2026-11-17）：环必须红——链式解析不能静默停在中间态或选一个终点。
+  { id: 'md-links-chain-cycle', gate: 'md-links', mutate: (dir) => {
+      const p = join(dir, 'checks', 'test-path-redirects.json');
+      const j = JSON.parse(readFileSync(p, 'utf8'));
+      j.redirects.push({ from: 'checks/lib/__cycle-a.mjs', to: 'checks/lib/__cycle-b.mjs' });
+      j.redirects.push({ from: 'checks/lib/__cycle-b.mjs', to: 'checks/lib/__cycle-a.mjs' });
+      writeFileSync(p, JSON.stringify(j, null, 1) + '\n');
+    } },
   // doc-drefs（2026-11-03 七维审计）：D 号引用指向没有该锚点的地图页——点进去落空，
   // 而 md-anchors 只校验目标文件里有没有 fragment，不校验"这个 D 号该住 decisions"。
   { id: 'doc-drefs-misdirected', gate: 'doc-drefs',

@@ -162,6 +162,7 @@
 | lib/repo/staged-change-pairing.mjs | staged-change-pairing.test、f-repo | 暂存区成对变更判据（归档卡↔Note、ui.expected↔lastRewrite）；纯函数，git 由门禁注入 |
 | lib/repo/test-placement.mjs | f-repo、pack-mirror.test、test-owner-mirror.test、test-placement.test | tests 落点闭集：全集 − 已知子集 = 空（未知子树/深度/平铺根 = 红；BUG-191/200） |
 | lib/repo/doc-prose-paths.mjs | a-docs、doc-prose-paths.test | live 文档散文里的仓内路径 token 枚举（剥反引号/围栏/URL；BUG-204） |
+| lib/repo/redirect-ledger.mjs | a-docs、redirect-ledger.test | 搬家账本链式解析：append-only 后旧条目的 `to` 可再次成为 `from`，解析走到最终落点；环/过深/重复 from fail-loud |
 | lib/probes/direct-authorization-boundary.mjs | entry-chain-probe、entry-chain-probe.spec | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |
 | lib/harness/replay-scene.mjs | replay-fixtures.spec、replay-scene.spec、snapshot-replay.entry | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |
 | lib/shared/replay-request.mjs | record-role-fixture、replay-request.spec、snapshot-replay.entry | 组装请求面逐条比较：persona、header 全序列、四处 user/message 注入（含时钟序列）（定向归一化） |
