@@ -241,31 +241,19 @@ non-role worker row; `presets/<role>/skills/` holds the role's methodology skill
 
 ### Method Editor library operations
 
-#### What the model sees
+Only the Method Editor Agent sees `method_library_upsert`, `method_library_set_default`, and `method_library_remove`. Each page action is a durable user message beginning `【方法库操作】` carrying one `operationId`, action, target name, and (for saves) the entry SHA-256; the save tool also receives `operationHash` and `defaultAction`, the default/remove tools only their action/name. Results give short text plus `presentationMeta` for the Client. The default marker is not part of `method-draft`; only explicit page actions change it.
 
-Only the Method Editor Agent sees `method_library_upsert`, `method_library_set_default`, and
-`method_library_remove`. Each explicit page action is a durable user message beginning with
-`【方法库操作】`; it carries one `operationId`, action and target name, plus an entry SHA-256 for
-saves. The save tool also receives `operationHash` and `defaultAction`; the default and remove tools
-receive only the operation-specific action/name. Successful responses give a short textual result,
-while `presentationMeta` carries structured operation data for the Client. The default marker is not
-part of `method-draft`; only explicit page actions can change it.
+**Token effect.** A deterministic Loader scenario prices the real first request (messages + tool schemas, fixed-density estimator) against the earlier upsert/remove schemas. The schema delta is +246 tokens (asserted); the absolute total ≈6.8k varies with the per-step clock injection — regenerate via `node scripts/smoke/method-library-tool.e2e.mjs`. Comparative estimate, not provider tokenization; each save request also carries its full method entry and command marker.
 
-#### Token effect
+**KV cache.** Tool schemas are stable within a request series; per-operation command text and the method entry append as user content, not replacing the prefix. Other bundle rows are composition carriers whose model-facing behavior is owned by the inserted row packages.
 
-A deterministic Method Editor Loader scenario prices the actual first request as the sum of its
-model-visible messages and tool schemas with DSH's fixed-density estimator. It compares that request
-with the same messages and the earlier upsert/remove schemas; the current fixture measures 6,778
-first-turn input tokens, of which the schema change is +246. This is a comparative estimate, not
-provider-specific tokenization or billing; each save request also includes its complete method entry
-and command marker.
+### Research roles (Lead / Scout)
 
-#### KV Cache effect
+Each role's first request carries its persona, role-scoped skill descriptions, tool schemas, and the research manual (`content/manual.md`) injected as runtime context (D40), not written to the workspace.
 
-Tool schemas are stable within a Method Editor request series; a newly selected Agent receives its
-composed schema in the request header. Per-operation command text and the method entry are appended
-as user content, so they do not replace the preceding conversation prefix. The bundle's other rows
-are composition carriers; their model-facing behavior is owned by the inserted row packages.
+**Token effect.** `node scripts/smoke/model-experience.e2e.mjs` prices the real assembled first request. Stable per-version faces: Lead tool schemas 6,634 tokens, Scout 4,999, manual 2,506 ≈50.6% of Lead message tokens. Absolute totals (Lead ≈11.6k, Scout ≈8.7k) vary with the clock injection; regenerate via the smoke. Comparative estimate, not provider tokenization or billing.
+
+**KV cache.** Persona, manual, skill descriptions, and tool schemas are stable per version (KV-friendly prefix); the per-step time-context reading appends rather than replaces. The manual's ≈50% message share is the T0 always-injected cost; growth and slimming reviews are owned by design/70.
 
 ## Known Limitations and Deferred Work
 

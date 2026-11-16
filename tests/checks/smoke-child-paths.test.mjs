@@ -7,7 +7,9 @@
 // + exit 2）负责把「未跑」显式化，本测试负责在搬家当刻咬住。
 //
 // 范围纪律：只查有文件扩展名的目标（目录/运行期 workspace 路径按需创建，不是资产）；
-// `runtime/`、`_dist/`、`node_modules/` 与 pack 构建产物 `lib/` 是运行/生成区，跳过。
+// `runtime/`、`_dist/`、`node_modules/`、pack 构建产物 `lib/` 与 vendor 构建产物 `lib/`
+// （vendor/dsh/**/lib/，vendor-build 后才在场）是运行/生成区，跳过——keyless 合同 = fresh
+// clone 无 vendor 构建也能跑，要求构建产物在场会把 clean clone / CI keyless 判红（暖树绿掩盖）。
 // 防空语料：扫到的源码文件与路径字面量都设下限——扫描面被收窄成空集时红。
 //
 // 负例留证 2026-11-16：BUG-192 / BUG-193——把 snapshot-replay 的 OFFLINE_PRELOAD 或 cdp-ask
@@ -23,7 +25,7 @@ import ts from 'typescript'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SCAN_ROOTS = ['scripts', 'dev', 'probes']
 const SOURCE = /\.(mjs|cjs|js|ts|tsx)$/
-const GENERATED = /^(?:runtime|_dist|node_modules)\/|^packages\/deep-research-pack\/lib\//
+const GENERATED = /^(?:runtime|_dist|node_modules)\/|^packages\/deep-research-pack\/lib\/|^vendor\/dsh\/.+\/lib\//
 
 function walk(dir, out = []) {
   for (const ent of readdirSync(dir, { withFileTypes: true })) {
@@ -98,4 +100,7 @@ test('负控：分段路径指向不存在文件必红，运行期/生成区路�
 
   const dirOnly = scanChildPaths([['synthetic.mjs', "const p = join(ROOT, 'research-workspace')\n"]], () => false)
   assert.deepEqual(dirOnly.checked, [])
+
+  const vendorLib = scanChildPaths([['synthetic.mjs', "const p = join(ROOT, 'vendor', 'dsh', 'apps', 'cli', 'lib', 'bin.js')\n"]], () => false)
+  assert.deepEqual(vendorLib.checked, [], 'vendor 构建产物 lib/ 须豁免（fresh clone 无 vendor 构建）')
 })

@@ -1,0 +1,20 @@
+# Test-only headless composition for Model Experience first-request pricing.
+# Inserts the product manual injection (research-content) so Lead/Scout first requests
+# carry the same runtime-context manual as production; the mock LLM captures the request.
+- id: headless-runner
+  name: '@deepseek-ai/dsh-headless'
+  disabled: true
+
+- id: headless-startup
+  name: '@deepseek-ai/dsh-headless/startup'
+  disabled: true
+
+- insert:
+    - id: research-content
+      name: 'dsh-deep-research-pack/content'
+    - id: model-experience-mock-llm
+      name: './mock-llm.ts'
+    - id: agent-preset-registry
+      name: '@deepseek-ai/dsh-agent-preset-registry'
+      config:
+        default: lead

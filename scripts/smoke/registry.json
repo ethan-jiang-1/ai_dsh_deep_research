@@ -183,6 +183,17 @@
     "sunset": "当 host tool 组装可由 preset.e2e 覆盖时退役",
     "lane": "e2e"
   },
+  "model-experience.e2e.mjs": {
+    "tier": "dev-only",
+    "reason": "需 native system.node；CI 工具链缺，开发档",
+    "cost": "medium",
+    "uniqueClaim": "真 Loader 捕获 Lead/Scout 组装首请求（persona+手册 runtime context+skill 目录+工具 schema）并 token-meter 计价：工具 schema token 与手册占比",
+    "oracle": [
+      "none: 计价判据核 = 真 Loader 捕获真实组装首请求（冒烟本体）；token-meter 估价为 vendor 上游已测，无独立 keyless 核"
+    ],
+    "sunset": "当 preset.e2e 真挂载档附带首请求计价输出时并入退役",
+    "lane": "e2e"
+  },
   "pack.e2e.mjs": {
     "tier": "ci",
     "job": "deploy",

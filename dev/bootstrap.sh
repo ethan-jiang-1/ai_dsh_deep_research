@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dev/bootstrap.sh — 独立环境冷启动前置（幂等；默认准备，--check 只读）。
+# dev/bootstrap.sh — 独立环境冷启动前置（幂等；默认准备，--check 只预检、不安装/不构建）。
 #
 # 做的事：Node/pnpm/git 检查 → vendor submodule → pnpm install → vendor 构建 → env.sh →
 # 凭据/端口工具检查 → 打印本次隔离根/profile/port/state。它不启动 web；启动用

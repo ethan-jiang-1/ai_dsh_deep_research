@@ -223,27 +223,19 @@ client 行。团队可视化行（`ui-agent-team`）归团队机制层，不在�
 
 ### Method Editor 的方法库操作
 
-#### 模型看到什么
+只有 Method Editor Agent 能看到 `method_library_upsert`、`method_library_set_default` 与 `method_library_remove`。每个页面操作都是一条以 `【方法库操作】` 开头的持久用户消息，携带一个 `operationId`、动作与目标名，保存操作还带条目的 SHA-256；保存工具另收到 `operationHash` 与 `defaultAction`，默认/删除工具只收到各自的 action/name。响应给出简短文本加给 client 的 `presentationMeta`。默认标记不属于 `method-draft`；只有显式页面操作能改变它。
 
-只有 Method Editor Agent 能看到 `method_library_upsert`、`method_library_set_default` 与
-`method_library_remove`。每个显式的页面操作都是一条以 `【方法库操作】` 开头的持久用户消息；它携带
-一个 `operationId`、动作与目标名，保存操作还带条目的 SHA-256。保存工具还会收到 `operationHash` 与
-`defaultAction`；默认与删除工具只收到该操作特有的 action/name。成功的响应给出简短的文本结果，而
-`presentationMeta` 携带给 client 的结构化操作数据。默认标记不属于 `method-draft`；只有显式的页面
-操作才能改变它。
+**Token 影响。** 一个确定性 Loader 场景用 DSH 固定密度估计器把真实首请求（消息 + 工具 schema）与早先的 upsert/remove schema 对比计价。schema 变化为 +246 token（冒烟断言）；绝对总数 ≈6.8k 随每步时钟注入变化——用 `node scripts/smoke/method-library-tool.e2e.mjs` 重生成，不读固定数。比较性估计，非特定 provider 分词或计费；每个保存请求还含完整方法条目与命令标记。
 
-#### Token 影响
+**KV 缓存。** 工具 schema 在同一请求序列内稳定；逐操作命令文本与方法条目作为用户内容追加，不替换前缀。其他行是组合载体，其模型可见行为由被插入的行包各自拥有。
 
-一个确定性的 Method Editor Loader 场景，用 DSH 的固定密度估计器把真实的首次请求计价为其模型可见
-消息与工具 schema 之和。它把该请求与相同的消息加早先的 upsert/remove schema 做对比；当前 fixture
-测得 6,778 个首轮输入 token，其中 schema 变化为 +246。这是比较性估计，不是特定 provider 的分词或
-计费；每个保存请求还包含其完整的方法条目与命令标记。
+### 研究角色（Lead / Scout）
 
-#### KV 缓存影响
+每个研究角色的首请求携带其 persona、角色隔离的 skill 描述、工具 schema，以及以 runtime context 注入的研究手册（`content/manual.md`，D40），不落工作区。
 
-工具 schema 在同一条 Method Editor 请求序列内保持稳定；新选中的 Agent 在请求头中收到它组合出的
-schema。逐操作的命令文本与方法条目作为用户内容追加，因此不会替换前面的对话前缀。本组合包的其他行是
-组合载体；其模型可见行为由被插入的行包各自拥有。
+**Token 影响。** `node scripts/smoke/model-experience.e2e.mjs` 捕获真实组装的首请求计价。稳定、由包版本决定的面：Lead 工具 schema 6,634 token、Scout 4,999、手册 2,506 ≈ Lead 消息 token 的 50.6%。绝对总数（Lead ≈11.6k、Scout ≈8.7k）随时钟注入变化；用冒烟重生成。比较性估计，非特定 provider 分词或计费。
+
+**KV 缓存。** persona、手册、skill 描述、工具 schema 在同一包版本内稳定（KV 友好前缀）；每步 time-context 读数追加而非替换。手册占 Lead 消息 token 约一半 = T0 常驻成本；内容生长与瘦身复议归 design/70。
 
 ## 已知限制与延后工作
 
