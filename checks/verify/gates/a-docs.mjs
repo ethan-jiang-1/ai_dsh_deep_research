@@ -14,7 +14,9 @@ export function runA() {
   const liveMdFiles = (gate) => trackedFiles({
     gate,
     glob: '*.md',
-    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f.startsWith('_backlog/') || f.startsWith('tests/fixtures/'),
+    // snapshots/replay/ = 录制证据（渲染金标准与回放期望）：改写它 = 篡改证据，
+    // 故路径合同不追改（与 count-free 的录制流豁免同源）；链接仍由 md-links 管。
+    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f.startsWith('_backlog/') || f.startsWith('tests/fixtures/') || f.startsWith('snapshots/replay/'),
     emptyMsg: '防空语料：未扫到任何 live 文档',
   });
 
@@ -213,7 +215,15 @@ export function runA() {
   const gate = 'doc-paths';
   const files = liveMdFiles(gate);
   if (files) {
-    const ROOTS = /^(packages|checks|tools|docs|tests|snapshots|_dist|research-workspace)\//;
+    // 收集面 = 现行根 + 退役根（dev|scripts）：退役根必须被显式判红，否则它因不匹配 ROOTS
+    // 而**静默逃检**——2026-11-17 根名统一后实测：runtime/README 的 `dev/env.sh` 绿着漏过去。
+    const ROOTS = /^(packages|checks|tools|docs|tests|snapshots|probes|_dist|research-workspace|dev|scripts)\//;
+    const RETIRED = /^(dev|scripts|probes\/run)\//;
+    const RETIRED_HINT = [[/^scripts\//, 'checks/'], [/^dev\//, 'tools/'], [/^probes\/run\//, 'probes/analyze/']];
+    // 退役根名放行条件：① 裸目录名（讨论退役本身，以 / 结尾）② vendor 源 shorthand
+    // （vendor/dsh/scripts/AGENTS.md 等）③ 包内 shorthand（packages/deep-research-pack/scripts/doctor.mjs）。
+    const retiredAllowed = (p) => p.endsWith('/') || ['vendor/dsh/', 'packages/deep-research-pack/']
+      .some((base) => EXTS.concat(['']).some((e) => existsSync(join(ROOT, base + p + e))));
     const EXTS = ['.md', '.mjs', '.sh', '.cjs', '.ts'];
     const EXEMPT = new Map([
       ['docs/release.md', 'company 仓路径（外部参考，不随本仓）'],
@@ -239,12 +249,18 @@ export function runA() {
             if (ROOTS.test(p)) return /[<>{}*?…\s]/.test(p) || p.includes('$') ? [] : [p];
             // 命令形态（node/bash/source/cd …）里的仓内路径：ROOTS 只认 token 开头，
             // 曾让 `node checks/smoke/compat-smoke.mjs` 这类已删除脚本静默通过（2026-11-03 复评）。
-            return [...token.matchAll(/(?:^|[\s"'`])((?:packages|checks|tools|docs|tests|snapshots|_dist|research-workspace)\/[^\s`'"]+)/g)]
+            return [...token.matchAll(/(?:^|[\s"'`])((?:packages|checks|tools|docs|tests|snapshots|probes|_dist|research-workspace|dev|scripts)\/[^\s`'"]+)/g)]
               .map((x) => x[1].replace(/:\d+(?:-\d+)?$/, '').replace(/[.,;:]+$/, ''))
               .filter((x) => !/[<>{}*?…]/.test(x) && !x.includes('$'));
           })();
           for (const p of paths) {
             checked++;
+            if (RETIRED.test(p)) {
+              if (retiredAllowed(p)) continue;
+              const hint = (RETIRED_HINT.find(([re]) => re.test(p)) ?? [null, ''])[1];
+              fail(gate, `${rel}:${i + 1} 退役根名 \`${p}\`——现行根 = ${hint}（2026-11-17 根名统一；vendor/包内 shorthand 与裸目录名已放行）`);
+              continue;
+            }
             if (existsForDoc(p, rel)) continue;
             fail(gate, `${rel}:${i + 1} 反引号路径 \`${p}\` 不存在（仓根/文档目录/vendor 均未命中）——散文件路径也是合同；修正路径或改用 Markdown 链接`);
           }

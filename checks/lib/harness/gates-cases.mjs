@@ -426,6 +426,11 @@ export const CASES = [
   // expect 指名本案例的散文报因。
   { id: 'doc-paths-prose-dangling', gate: 'doc-paths', expect: '散文路径 checks/lib/__gone__.mjs',
     mutate: appendTo('docs/project-map.md', '\n散文路径探针：checks/lib/__gone__.mjs\n') },
+  // 退役根名（2026-11-17 根名统一）：ROOTS 只认现行根，退役根（scripts/ dev/ probes/run/）的残留
+  // 引用会**因不匹配 ROOTS 而静默逃检**——实测 runtime/README 的 `dev/env.sh` 就这样绿着漏过去。
+  // 本案例钉住守卫：注入退役根路径 → 点名报红；同时注入 vendor/包内 shorthand 作放行对照。
+  { id: 'doc-paths-retired-root', gate: 'doc-paths', expect: '退役根名 `scripts/__retired__.mjs`',
+    mutate: appendTo('docs/project-map.md', '\n退役根探针：`scripts/__retired__.mjs` 放行对照：`scripts/AGENTS.md`\n') },
   // doc-drefs（2026-11-03 七维审计）：D 号引用指向没有该锚点的地图页——点进去落空，
   // 而 md-anchors 只校验目标文件里有没有 fragment，不校验"这个 D 号该住 decisions"。
   { id: 'doc-drefs-misdirected', gate: 'doc-drefs',

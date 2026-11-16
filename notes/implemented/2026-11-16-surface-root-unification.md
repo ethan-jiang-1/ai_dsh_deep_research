@@ -106,6 +106,49 @@
 模型可见回放（`snapshot-replay.entry`）、真模型档——本轮 pack 模型可见面零改动（仅注释/文档根名引用），
 安装镜像未重建（run 通道未起；boot-run 漂移门会在下次开跑时点名）。值级：无值级改动。
 
+### 真入口证据（DSH 插件环境，非静态 grep）
+
+搬移后按「跑过才算过」重跑**真入口链**（`runtime/smoke-workspace/battery-results.txt` / `battery2.txt`）：
+
+| 面 | 命令 | 结果 |
+|---|---|---|
+| L1 真挂载 | `DSH_SMOKE_REAL=1 checks/smoke/preset.e2e.mjs` | **exit 0** |
+| L2 冷启动（真 boot + 浏览器） | `checks/smoke/cold-start.entry.mjs` | 浏览器面 **GREEN**、全部断言 ok；exit 1 仅因收尾端口收割（见下） |
+| 观察面装配 | `checks/smoke/client-load.entry.mjs --seed …` | **exit 0** |
+| 首启 / 安装 / 生命周期 | `product-boot` / `install-shape` / `lifecycle` | **exit 0 / 0 / 0** |
+| 回放与模型可见组装 | `snapshot-replay.entry --read-only --layers a,b` | 重建镜像后 **ALL PASS（5 场景 A+B+渲染金标准）** |
+| 真模型全角色 + web_search | `checks/smoke/l4-lite.e2e.mjs` | **ALL PASS**（5 角色 assistant 响应 + scout `web_search` 真调用） |
+| 真浏览器 HITL | `checks/smoke/client-hitl.entry.mjs` | **exit 0** |
+| Agent Teams 组队 | `checks/smoke/team-preflight.e2e.mjs` | **exit 0** |
+| 验收/移交/诊断/包形状 | `run-accept.e2e` / `handoff.e2e` / `doctor.e2e` / `pack.e2e` | **全 ALL PASS** |
+| 双实例隔离 | `workspace-isolation.entry.mjs` | 绑定/隔离断言通过；exit 1 仅因收尾端口收割（见下） |
+| vendor 契约车道 | `pnpm test:vendor` | **4 pass / 0 fail** |
+
+**两处 exit≠0 的归因（已排除路径因素）**：`cold-start` 与 `workspace-isolation` 的失败行都是
+`端口 N 的 listener pid … 身份不可读——拒绝收割`。根因 = 本会话沙箱禁止进程检查（实测
+`bash: /bin/ps: Operation not permitted`），而 `port-reclaim.mjs` 的 `commandOf` 正是 `ps`，
+拿不到身份就 fail-closed 拒绝收割。**排除法证据**：① 自起 listener 复现同句（`reclaimPort(3199)`
+→ 身份不可读）；② `port-reclaim-policy.mjs` 与迁移前 **BYTE-IDENTICAL**，`port-reclaim.mjs`
+仅注释路径变化（逻辑零改）；③ 两例的浏览器断言全绿、失败点在收尾清理。
+
+**模型可见面**：迁移只改了一行模型可见文本（`research-brief/SKILL.md` 里指路 `checks/lib/…`），
+`snapshot-replay` A/B/C 全绿 + `model-experience.e2e` 绿（Lead 11589 / Scout 8657 tokens）证明
+组装面与录制金标准未漂移。
+
+### 退役根名守卫（本轮新增的类级防线）
+
+根名统一暴露一个**静默逃检**：`doc-paths` 的 `ROOTS` 只认现行根，退役根（`scripts/` `dev/`
+`probes/run/`）的残留引用因不匹配而**不被检查**——实测 `runtime/README.md` 的 `dev/env.sh`、
+`scripts/lib/ops/scene-pack.mjs`、`dev/runtime-clean.mjs`、`probes/run/…` 就这么绿着漏过。处置：
+
+- `doc-paths` 收集面纳入退役根，逐条判红并给新根提示；放行三类：裸目录名（讨论退役本身）、
+  vendor 源 shorthand（`scripts/AGENTS.md`）、包内 shorthand（`scripts/doctor.mjs`）。
+- 顺带补上 **`probes/` 从未进 ROOTS** 的历史缺口（探针路径此前不受 doc-paths 约束）。
+- `snapshots/replay/` 明示排除（录制证据不改写，与 count-free 同源理由）。
+- 反证：注入 `dev/env.sh` / `scripts/lib/…` → 点名红；注入 `scripts/AGENTS.md` / `scripts/doctor.mjs` /
+  裸 `scripts/` → 放行；注入 `probes/analyze/not-real.mjs` → 红。常驻案例
+  `doc-paths-retired-root`（gates.e2e 134 案例全红命中）。
+
 ## 环境状态
 
 - 未改任何 exit code 判定分支；未改 pack 模型可见文本（仅 pack 内注释/文档的根名引用）。
