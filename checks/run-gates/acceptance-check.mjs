@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// acceptance-check —— 收活判据三态求值的操作侧 CLI（run-ops 层；2026-10-21 卫生轮 B8 补壳）。
+// acceptance-check —— 收活判据三态求值的操作侧 CLI（交付验收层；2026-10-21 卫生轮 B8 补壳）。
 //
 // 为什么存在：lib/acceptance-check.mjs 头注承诺"供操作侧收尾核验"（把"收活结论"对账成
 // 机械事实），但仓内此前无 CLI 入口。判据求值与三态语义（PASS/FAIL/UNVERIFIED，判不了的

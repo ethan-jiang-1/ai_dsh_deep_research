@@ -53,6 +53,7 @@
 | 索引 | `render-test-index --check` / `probes/_index.mjs --check` | 一致（19 支） |
 | 生成物 | snapshot 金标准头由 `node scripts/…` 修为 `node checks/…`（生成器命令） | 红→绿 |
 | 账本 | 追加 40 条、旧条目零重写；冻结层 307 条链接链式解析 | 绿 |
+| fresh-agent 审计 | 无上下文子代理按入口链走三任务（探针入口 / run-dashboard 核心 / 面分类） | 3 处发现：run-dashboard-core 头注退役名、design/40 导航缺口、guides/60 缺 `source` 前缀 → 已修；pack 注释按计划延后 |
 | 发布面 | pack 源未改（误改的注释已 revert）；`_dist` 复建后 sha 回到 `1b1dde…`（0.3.6 原 sha），manual 恢复 HEAD | 绿 |
 
 ## 残余风险

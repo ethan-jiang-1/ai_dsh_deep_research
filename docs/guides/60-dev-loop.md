@@ -172,8 +172,8 @@ node tools/clean/runtime-clean.mjs [--older-than 14] [--yes]   # 运行区清理
 node checks/run-gates/evidence-audit.mjs <bundle>|--latest  # 证据溯源审计（**须先 source tools/env.sh**：它锚定本仓 dev home，DSH_HOME 指向别处即自拒）（keyless：URL/摘录/final 链对会话日志机械对账 → audit.md；CRITICAL 即 exit 1）
 node checks/run-gates/node-gate.mjs <bundle>|--latest [--sessions <dir>] [--write]  # 节点交接契约门（keyless：交付两门 = §Decisions 拍板行 + present 声明；RED = exit 1 / UNATTESTED = exit 2；默认只读，--write 才落 bundle node-gate.md）
 node checks/run-gates/schema-scan.mjs [<bundle-dir>…]     # schema 保真度扫描（keyless：八节点输出件在场断言；断代定红——新 run 按 `schema` 整数（低/高版本都判红），旧场按 contract 日期（契约日 2026-09-29）；现行形态违约 = exit 1，契约前/旧场如实报告不计红；默认扫 archive 全量）
-node probes/behavior/entry-chain-probe.mjs    # 入口链探针（真模型档：授权范围、RFC 条件、开发环路径三问；词面断言与原文留档人工复核）
-node probes/behavior/discipline-probe.mjs     # 纪律行为探针（真模型档：A2 超界 / B1 差集 / 收活缺件·UNVERIFIED / 计划确认卡·quick_factual 免发互补对五场景标记断言——先读技能正本再作答；--scenario <id> 定向；留档人工复核）
+source tools/env.sh && node probes/behavior/entry-chain-probe.mjs    # 入口链探针（真模型档：授权范围、RFC 条件、开发环路径三问；词面断言与原文留档人工复核）
+source tools/env.sh && node probes/behavior/discipline-probe.mjs     # 纪律行为探针（真模型档：A2 超界 / B1 差集 / 收活缺件·UNVERIFIED / 计划确认卡·quick_factual 免发互补对五场景标记断言——先读技能正本再作答；--scenario <id> 定向；留档人工复核）
 node packages/deep-research-pack/scripts/doctor.mjs --workspace <dir>   # 只读诊断（pack 自带 bin：DSH 版本/profile roster/安装副本/团队层/工作区/凭据；不安装、不启动、不写 profile）
 ```
 

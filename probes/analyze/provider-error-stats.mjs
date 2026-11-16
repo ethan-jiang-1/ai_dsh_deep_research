@@ -6,7 +6,7 @@
 // 档位：keyless（须先 source tools/env.sh）
 // 判据：不适用（show：有无错误不是本工具判据）
 // 不证明：单场归因（= stream-diagnostics）
-// provider-error-stats —— 上游流错误（回合被终结）的**跨场分布投影**（只读；run-ops 层）。
+// provider-error-stats —— 上游流错误（回合被终结）的**跨场分布投影**（只读；观察层）。
 //
 // 为什么存在：BUG-022 的缺陷在上游（vendor 只读、本仓修不了），本仓能做的三件里两件是"可复跑"——
 // ①数它（本件）②恢复它（`tools/channel/run-kickoff.mjs --session`）。没有本件，复发时又得从零写正则猜

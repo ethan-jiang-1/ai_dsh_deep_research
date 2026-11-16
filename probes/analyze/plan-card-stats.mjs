@@ -6,7 +6,7 @@
 // 档位：keyless（须先 source tools/env.sh）
 // 判据：不适用（show）
 // 不证明：单场超限判定（= node-gate 门①）
-// plan-card-stats —— HITL1「计划确认卡」字数的**跨场分布投影**（只读；run-ops 层）。
+// plan-card-stats —— HITL1「计划确认卡」字数的**跨场分布投影**（只读；观察层）。
 //
 // 为什么存在：node-gate 门① 只判**单场**（该 bundle 的计划卡超限 → WARN 记账）。而 ①-c 的
 // **升硬门前置**是「措辞收紧后连续 ≥3 场 ≤200 字达标」——判定这个条件必须**跨场聚合**：一场一场

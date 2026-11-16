@@ -6,7 +6,7 @@
 // 档位：keyless（纯读盘）
 // 判据：不适用（show；exit 0 = 正常投影）
 // 不证明：证据质量与结论正确性
-// unconsumed-evidence —— B1 差集出题的操作侧 CLI（run-ops 层；2026-10-21 卫生轮 B8 补壳）。
+// unconsumed-evidence —— B1 差集出题的操作侧 CLI（分析观察层；2026-10-21 卫生轮 B8 补壳）。
 //
 // 为什么存在：lib/unconsumed-evidence.mjs 头注承诺"供操作侧收尾核验"（critic 差集出题的
 // 机械基座），但仓内此前无 CLI 入口——承诺的动作没有工具。判据与差集语义**不在这里**：

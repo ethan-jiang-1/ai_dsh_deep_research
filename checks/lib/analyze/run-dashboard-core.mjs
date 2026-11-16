@@ -1,6 +1,6 @@
 // run-dashboard-core.mjs — M2 run 只读观察面的解析/场景/模型管线（全 fail-soft；tests 消费的
 // 纯函数面；HTML 渲染 = run-dashboard-html.mjs，2026-10-28 拆出）。从 probes/analyze/run-dashboard.mjs 下沉（2026-10-13 结构重构——
-// 同 node-gate-core / schema-scan-core 形态：CLI 壳（参数/watch 循环/写盘）住 run-ops）。
+// 同 node-gate-core / schema-scan-core 形态：CLI 壳（参数/watch 循环/写盘）住 probes/analyze/run-dashboard.mjs。
 //
 // 原则（RFC 定死，勿破）：
 //   1. 投影不是真相——只读解析 run 文件，不写 run 目录，不缓存派生状态；
