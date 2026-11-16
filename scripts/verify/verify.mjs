@@ -56,6 +56,11 @@ for (const n of notes) console.log(`note  ${n}`);
 if (failures.length > 0) {
   console.log(`\n${failures.length} 处失败：`);
   for (const f of failures) console.log(`  ${f}`);
-  process.exit(1);
+  // 不 process.exit(1)：POSIX 下管道写是**异步**的，进程立即退出会截断尚未排空的 stdout——
+  // 实测（2026-11-16，Linux）同一棵树 file 重定向 75,522 B、管道捕获仅 11,401 B，位于失败清单
+  // 末尾的报因整段丢失，宿主脚本（gates.e2e 的 expect 判据）因此报「门禁报了红但非本案例报因」。
+  // 置 exitCode 让 Node 自然退出：stdio 排空后再走，退出码语义不变。
+  process.exitCode = 1;
+} else {
+  console.log(only === null ? '\nverify: 全绿' : `\nverify: 仅判 ${[...only].length} 道（--only）——其余门禁未计；收尾仍须全量跑`);
 }
-console.log(only === null ? '\nverify: 全绿' : `\nverify: 仅判 ${[...only].length} 道（--only）——其余门禁未计；收尾仍须全量跑`);
