@@ -79,7 +79,11 @@ jobs:
 
   client-load:
     name: client-load (seeded home, real browser)
-    runs-on: ubuntu-latest
+    # 平台合同（_backlog/triggers.md「Windows 支持」行）：macOS = 实测基线；Linux 只跑
+    # keyless 部署 smoke。真浏览器冒烟依赖 macOS 的字体/浏览器栈，Linux 上长期红且根因未定
+    # （2026-11-16 实测：同提交 macOS 断言全过、ubuntu 在数分钟内失败）——按合同跑在基线平台，
+    # 恢复 Linux 的条件登记在该行 trigger（先逐一复绿再移回 ubuntu）。
+    runs-on: macos-latest
     timeout-minutes: 40
     steps:
       - name: Checkout (with pinned DSH submodule)
@@ -113,8 +117,9 @@ jobs:
         run: pnpm build
 
       # chromium 由 vendor inspector 包的 playwright 安装（loadChromium 从 .pnpm 取 API）。
+      # macOS 基线：不用 --with-deps（那是 apt 侧的系统依赖安装，macOS 不适用）。
       - name: Install chromium
-        run: pnpm --dir vendor/dsh/packages/experimental/inspector exec playwright install --with-deps chromium
+        run: pnpm --dir vendor/dsh/packages/experimental/inspector exec playwright install chromium
 
       # --seed 自建 home（会话 + 已交付 bundle 夹具），不依赖开发 home/凭据。
       - name: Client load (seed fixture)
@@ -130,7 +135,10 @@ jobs:
 
   snapshot-replay:
     name: snapshot A/B (fresh profile, keyless)
-    runs-on: ubuntu-latest
+    # 平台合同同 client-load：macOS 实测基线、Linux 只跑 keyless 部署 smoke。回放在 ubuntu 上
+    # 5 个回合全部 240s 超时（2026-11-16 实测 20m27s 失败；同提交 macOS ALL PASS），根因未定，
+    # 按合同跑在基线平台；恢复 Linux 的条件登记在 _backlog/triggers.md 对应行。
+    runs-on: macos-latest
     timeout-minutes: 25
     steps:
       - name: Checkout (with pinned DSH submodule)
@@ -155,7 +163,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install zstd
-        run: sudo apt-get update && sudo apt-get install -y zstd
+        run: command -v zstd >/dev/null 2>&1 || brew install zstd
 
       - name: Build vendor (pin tree)
         run: bash dev/vendor-build.sh
