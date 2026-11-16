@@ -16,7 +16,7 @@ import {
   HANDOFF_FILENAME,
   REQUIRED_ENTRIES,
   SUBMODULE_PATH,
-} from '../dist/export-handoff.mjs'
+} from '../../dev/release/export-handoff.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const OUT = mkdtempSync(join(tmpdir(), 'handoff.e2e-'))
@@ -39,7 +39,7 @@ try {
     check(hit === item.forbidden, `边界判据：${item.path}`, `期望 ${item.forbidden ? '禁入' : '放行'}，实际 ${hit ? '禁入' : '放行'}`)
   }
 
-  const run = spawnSync(process.execPath, [join(ROOT, 'scripts', 'dist', 'export-handoff.mjs'), '--out', OUT], { encoding: 'utf8' })
+  const run = spawnSync(process.execPath, [join(ROOT, 'dev', 'release', 'export-handoff.mjs'), '--out', OUT], { encoding: 'utf8' })
   check(run.status === 0, 'export-handoff 退出 0', (run.stderr || '').slice(-400))
   const tarballs = readdirSync(OUT).filter((n) => n.endsWith('.tar.gz'))
   check(tarballs.length === 1, '产出一个源码移交包', JSON.stringify(tarballs))

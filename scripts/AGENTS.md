@@ -1,7 +1,7 @@
 # AGENTS.md — 仓库脚本（门禁与生成器）
 
-`scripts/` 拥有**检查逻辑**：`verify/verify.mjs` 是唯一 L0 聚合入口（门禁清单正本 = [docs/evaluation.md](../docs/evaluation.md) §L0 登记表，本文件不复制计数），其余是分级冒烟与
-观察/运维与分发生成（[职责地图](../docs/project-map.md)）。上游对应物 = DSH `scripts/AGENTS.md` + `scripts/run-gates.ts`。
+`scripts/` 拥有**检查逻辑**：`verify/verify.mjs` 是唯一 L0 聚合入口（门禁清单正本 = [docs/evaluation.md](../docs/evaluation.md) §L0 登记表，本文件不复制计数），其余是分级冒烟、run 门与 run 验收、发布前裁决与
+支撑库；run 观察住 [probes/run](../probes/README.md)，导出/清理住 [dev/](../dev/README.md)（[职责地图](../docs/project-map.md)）。上游对应物 = DSH `scripts/AGENTS.md` + `scripts/run-gates.ts`。
 
 ## 新增或改门禁
 

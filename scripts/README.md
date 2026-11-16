@@ -1,22 +1,21 @@
 # scripts/ · 职责索引
 
-> 维护面：**mixed**（judge + show + operate 同住）；组级面表见下，逐件例外 =
+> 维护面：**judge**（+ 非面支撑）；组级面表见下，逐件例外 =
 > [surface-contract](../docs/guides/68-surface-contract.md)。
 >
-> 职责分组（2026-10-07 目录治理档 C；2026-11-13 命名对齐加 `test/`）：`verify/`、`smoke/`、`test/`、`run-gates/`、`run-ops/`、`dist/` + `lib/` 支撑库；每个盘上入口一行：类 / 证明什么 / 档位。命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)；档位列申报凭据/调用模式，不替代 guides/60 的 `source` 前置；子树纪律 = [AGENTS.md](AGENTS.md)；测试资产分层 = [tests/fixtures taxonomy](../tests/fixtures/README.md)。本索引不改脚本路径与命令。
+> 职责分组：`verify/`、`smoke/`、`test/`、`run-gates/`、`dist/` + `lib/` 支撑库（show 件住 `probes/run/`、operate 件住 `dev/`——拆分后本目录只留 judge）；每个盘上入口一行：类 / 证明什么 / 档位。命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)；档位列申报凭据/调用模式，不替代 guides/60 的 `source` 前置；子树纪律 = [AGENTS.md](AGENTS.md)；测试资产分层 = [tests/fixtures taxonomy](../tests/fixtures/README.md)。本索引不改脚本路径与命令。
 
 ## 维护面（组级）
 
 判据 = 主要产出什么：裁决 → judge，证据 → show，持久状态 → operate；规则与逐件例外 =
-[surface-contract](../docs/guides/68-surface-contract.md)。**分组名不预告动词**——`run-ops/` 以 show 为主。
+[surface-contract](../docs/guides/68-surface-contract.md)。本目录已按面拆开：show 件住 `probes/run/`、operate 件住 `dev/`，这里只留 judge 与非面支撑。
 
 | 组 | 面 | 判定 |
 |---|---|---|
 | `verify/` | judge | L0 结构门禁聚合；红 = 不放行 |
 | `smoke/` | judge（`*.support.mjs` 非面） | 断言红 = 证据面红；support 是夹具/支援件 |
-| `run-gates/` | judge | run bundle 机械门与审计 |
-| `run-ops/` | **mixed** | show = 只读投影/诊断/回放（多数）；judge = run-accept / acceptance-check；operate = runtime-clean |
-| `dist/` | **mixed** | operate = export-dist / market / export-handoff；judge = release-check；`product-manual.md` = 数据 |
+| `run-gates/` | judge | run bundle 机械门与审计 + 交付验收（run-accept / acceptance-check） |
+| `dist/` | judge | 发布前版本/tag 一致性（release-check） |
 | `test/` | 非面（runner） | 车道调度 |
 | `lib/` | 非面（实现） | 支撑库 |
 | 根面 | 非面（数据/文档） | 门禁消费的配置与登记簿、本索引、子树指令 |
@@ -64,9 +63,9 @@
 | team-preflight.e2e.mjs | spawn_teammate 组队与成员组合画像 | 真模型档 |
 | cdp-ask.entry.mjs | cdp-probe `--ask` 端到端：空闲态 `Send message` 与在飞态 `Queue message` 双路径发出 + **journal 落盘对账**（BUG-021 正修；判定本体 keyless 钉在 `lib/probe-send-target.mjs`） | 真模型档 |
 
-## probes/（探针，已迁根）
+## probes/（探针与只读取证，住根目录）
 
-探针住根 [probes/](../probes/README.md)：指南 = [guides/66](../docs/guides/66-probe-playbook.md)，索引 = [probes/INDEX.generated.md](../probes/INDEX.generated.md)。本索引不再手枚举探针（头注是事实源，索引是生成物）。
+探针与只读取证投影住根 [probes/](../probes/README.md)：behavior / browser / run 三域 + stream 仪器；指南 = [guides/66](../docs/guides/66-probe-playbook.md)，索引 = [probes/INDEX.generated.md](../probes/INDEX.generated.md)。本索引不再手枚举（头注是事实源，索引是生成物）。
 
 ## 分发/安装失败面 → 资产
 
@@ -88,34 +87,20 @@
 | verdict-audit.mjs | **claim 级裁决审计**：`review/claims.json` + `review/verdicts-r<N>.json` 的覆盖（critical 全有结论性裁决）/ 值域 / raw 原文重解析 / 与 child 会话逐字一致 / child preset·depth·只读；默认只读，`--write` 才落 `review/verdict-audit-r<N>.md`；旧 bundle/quick_factual/契约日前 = 不适用（epoch），`--require` 强制审——判据核心住 lib/verdict-audit-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless（须 source dev/env.sh） |
 | protocol-audit.mjs | **Protocol（研究设计）审计**：schema/枚举/四字段/canonical hash/effort 合同/output 形状/`§Protocol` 投影/策略行投影（通道/worker/预算上限；预算不可解析 = 红）/`§Decisions` 与 `plan.md` 版本/`approval_basis`/复合方法包含判据/`deviations` 形状；默认只读，`--write` 才落 `protocol-audit.md`（版本指纹行）；旧 bundle/契约日前 = 不适用（epoch），`--require` 强制审——判据核心住 lib/protocol-core.mjs（schema）+ lib/protocol-audit-core.mjs（bundle 审计；本件 = CLI 壳 + bundle 读取） | keyless |
 | secret-scan.mjs | 交付物面（final/、receipts、audit、node-gate）的高置信凭据形态（sk-/ghp_/AKIA/AIza/xox[baprs]-/PRIVATE KEY/Bearer）；默认红，`--allow-legacy` 旧场只报告，`--all` 加证据/过程件；输出只到 path/line/kind | keyless |
-
-## run-ops/（run 观察与运维）
-
-| 件 | 证明什么 | 档位 |
-|---|---|---|
-| watch-run.mjs | 谓词化状态判定（HITL-PENDING / RUN-SETTLED 自报；挂起带 `hitlAgeMs` / STATE-NOTE 等待分钟）；teammate 会话（首事件 origin=subagent）显性提示「hitlPending 不构成停靠信号」；TIMEOUT 文案带归档提示（bundle 已归档 → 盯旧会话永不落定）；`--group <子串>` 换组盯场（缺省 research-workspace） | keyless（会话根缺省回退开发 home；显式 source 更稳） |
-| session-events.mjs | **会话事件尾部**（agent 的"刚才发生了什么"入口）：id/标题 → `[HH:MM:SS] type 摘要`；`--tail/--type/--grep/--json/--group`（组过滤盲区逃生口——冒烟/自测组可读，缺省 research-workspace）；`--stuck-after <分钟>` 给卡住判定（开回合 + 静默超阈，`STUCK`/`NOT-STUCK`）；teammate 标题 strip `<system-reminder>` 前缀；摘要与筛选 = lib/session-events-core.mjs | keyless（读会话日志；须先 source） |
-| run-dashboard.mjs | 只读 HTML 投影：多 run 扫描 + 步骤条 + 归档场 stdout 标注（fail-soft；解析/模型住 lib/run-dashboard-core.mjs、渲染住 lib/run-dashboard-html.mjs，本件 = CLI 壳） | keyless |
-| stream-diagnostics.mjs | 流失败归因诊断（run-ops）：模型尝试时间线/失败密度/provider 与重试策略实名/工具调用与检索查询——出问题第一步跑它；`--recent N` 限制最近 N 个有模型活动的会话 | keyless（读会话日志） |
-| provider-error-stats.mjs | 上游流错误（回合被终结）的跨场分布投影（BUG-022 的"可数"面；判据与抽取 = lib/provider-errors.mjs） | keyless（须 source dev/env.sh） |
-| plan-card-stats.mjs | 计划确认卡字数的跨场分布投影（升硬门前置 = 连续多场达标；口径与识别 = lib/plan-card.mjs，与 node-gate 门① 同源） | keyless（须 source dev/env.sh） |
-| session-replay.mjs | **历史会话回放**：任意历史会话（id 全名/标题唯一子串，跨组）在真实 UI 里重开并抓场景包——检验/扩大症状还原面；判据纯函数 = lib/session-replay.mjs，浏览器编排在本壳（keyless：起一次性通道 + 登记 cwd 工作区 + 按 id 打开 + 五件套落盘；`--open-status` 展开右栏研究状态页签） | keyless（真实浏览器；须先 source） |
-| scene-capture.mjs | **场景包捕获与读取**：抓取（连已起 GUI → 截图(fullPage)+DOM+正文+console+meta，token 脱敏，落 `runtime/scenes/<name>/`）+ 读取（`--list` 列既有包 / `--show <name>` 看单包——事后看现场，消费闭环；判据 = lib/scene-pack.mjs） | 抓取 keyless（真实浏览器；须先起通道）；读取 keyless（纯读盘） |
-| run-inventory.mjs | **只读保留期视图**：`--workspace <dir>` 扫 root/`archive/`/`_abandoned/` 的 `drt_*`，逐场文件数/大小/最老日期与合计；`--json` 给脚本；不删除任何文件（折算 = lib/run-inventory-core.mjs） | keyless |
 | run-accept.mjs | **交付验收原子动作**：node-gate（门 A/交付两门）+ evidence-audit（audit.md）+ verdict-audit（claim 覆盖）+ protocol-audit（Protocol 设计/`protocol-audit.md`）+ path-hygiene（新 bundle 本机 home 路径零容忍；旧 bundle --allow-legacy）+ 未来日期 sanity；预检 `--no-write` 红不写，绿才落盘 node-gate/audit + `delivered.json` + `manifest.json` + `acceptance.md`（回执生成/校验 = lib/run-receipt.mjs，新 run 非 quick_factual 的 reader 角色/哈希一并绑定；present 归一化为 `drt_<slug>/final/vN` 相对标签，语料根写 `$DSH_HOME` 相对标签；待写回执先校验再落盘，门禁/审计生成物落盘后复检；旧 bundle 只写 acceptance）；`--repair` 修历史回执的绝对路径（只动可再生产物）；`--archive` 才移入 archive/ | keyless（须先 source dev/env.sh） |
-| unconsumed-evidence.mjs | **B1 差集出题的操作侧投影**：bundle 的 evidence/ 未进 findings.md 清单（收尾核验入口——lib 头注承诺"操作侧核验"，此前无 CLI；判据 = lib/unconsumed-evidence.mjs） | keyless |
-| bundle-sessions.mjs | **bundle → 见证会话反查**：给 bundle 或 slug，按绑定谓词（写过 `drt_<slug>/` 的 lead 会话）列出会话 id/组/present 条数，并打印**状态摘要**（runStateOf 的 events/hitlPending/runSettled 一行）与下一步诊断命令——诊断入口都要会话 id，而 bundle 不记它（折算 = lib/bundle-sessions.mjs，绑定语义复用 node-gate 门①②同一条谓词） | keyless（须先 source dev/env.sh；默认只扫 `research-workspace` 组、结果按日志 mtime+size 缓存——首次约 25s、重复调用 <0.1s；`--all` 扫整根、`--no-cache` 绕过） |
-| acceptance-check.mjs | **收活判据三态求值**：`<bundleDir> + <criteria.json>`（判据 = 委派方显式清单，仓内无落盘约定）→ 逐条 PASS/FAIL/UNVERIFIED 与汇总（"收活结论"对账成机械事实；判据 = lib/acceptance-check.mjs）。退出码 = 0 全 PASS / 1 有 FAIL·UNVERIFIED·零判据 / 2 用法或前置错 | keyless |
-| runtime-clean.mjs | **运行区清理**：默认 dry-run；`--yes` 才删；白名单容器/实验根 + 子树最新 mtime 保留期（缺省 14 天）；symlink / harness-home / research-workspace / scenes 永不候选（scenes = 证据，人工处理；判据 = lib/runtime-clean-core.mjs） | keyless |
+| acceptance-check.mjs | **收活判据三态求值**：`<bundleDir> + <criteria.json>`（判据 = 委派方显式清单，仓内无落盘约定）→ 逐条 PASS/FAIL/UNVERIFIED 与汇总（"收活结论" 对账成机械事实；判据 = lib/acceptance-check.mjs）。退出码 = 0 全 PASS / 1 有 FAIL·UNVERIFIED·零判据 / 2 用法或前置错 | keyless |
 
-## dist/（分发）
+## run 观察（已迁 probes/run/）
+
+只读投影/诊断/回放件住探针目录：[probes/run/](../probes/run/)——面 = show，逐件表 = [probes/README](../probes/README.md) 与 [guides/66](../docs/guides/66-probe-playbook.md)；本索引不再列举。
+
+## dist/（发布前裁决）
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
-| export-dist.mjs | pack → `_dist/` 安装包、安装手册与 staged 市场索引（tarball/手册同版本；market 为 0 条目） | keyless |
-| market.mjs | 生成 `_dist/market.json`（DSH 插件市场 format 1），先过 `parseMarketIndex` 再落盘；`--check` 只校验 | keyless |
-| export-handoff.mjs | HEAD 的 tracked 源 → `_dist/` 干净移交包（不含运行态/凭据/run 数据/依赖）；submodule 需对方 init | keyless |
 | release-check.mjs | 发布前版本/tag 一致性（root = pack、HEAD tag = version、tag 为 annotated）；`--handoff` 另查 tag=HEAD、工作树、manual sha、artifact freshness；`--receiver` 在 clean clone 上跳过源指纹（tag/manual/tarball/manifest）；只读 | keyless |
+
+（分发与移交的 operate 件住 [dev/release/](../dev/release/)：export-dist / market / export-handoff + 手册源。）
 
 ## test/（测试车道 runner）
 
@@ -140,7 +125,7 @@
 | lib/shared/web-harness.mjs | client-hitl.entry、client-load.entry、defaults-probe、discipline-probe、wave-execution-probe、entry-chain-probe、l4-lite.e2e、method-library-probe、preset.e2e、rerun-triage-probe、run-driver、session-replay、snapshot-replay.entry、team-preflight.e2e | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（委托 `web-banner` 等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
 | lib/shared/web-banner.mjs | boot-timer.test、web-harness | DSH web 启动横幅等待与超时定时器结算纯函数（零 child_process/fetch，成功/早退/超时三路径均回收 timer；BUG-095） |
 | lib/shared/session-log.mjs | bundle-sessions、cdp-ask.entry、cdp-probe、client-hitl.entry、client-load-reference.support、defaults-probe、client-load.entry、data.entry、discipline-probe、wave-execution-probe、entry-chain-probe、hitl-answer、l4-lite.e2e、method-library-probe、plan-card-stats、product-boot.entry、provider-error-stats、rerun-triage-probe、run-dashboard-core、run-kickoff、run-state、run-state.spec、session-events、session-log.spec、session-replay、snapshot-replay.entry、stream-diagnostics、team-preflight.e2e、verdict-audit、verdict-audit-fixture.spec、watch-run、workspace-isolation.entry | canonical 日志选择与读取 + 会话目录发现（findSessionDir 双形态/首匹配；readSessionTextOf 定位+读取——六处真模型档副本 2026-11-04 收口）+ 会话组发现（findGroup 子串参数化，缺省 research-workspace——BUG-010 三处同款一行收敛；冒烟/自测组逃生口 = 观察工具 --group） |
-| lib/ops/session-events-core.mjs | session-events、session-events.spec | 会话事件摘要与筛选纯函数（CLI 壳 = run-ops/session-events 行） |
+| lib/ops/session-events-core.mjs | session-events、session-events.spec | 会话事件摘要与筛选纯函数（CLI 壳 = probes/run/session-events） |
 | lib/probes/llm-stream-tee-core.mjs | llm-stream-tee-core.spec | LLM 流 tee 的捕获判定（主机子串，fail-closed）与凭据头脱敏（预载壳 = probes/stream/llm-stream-tee.cjs——CJS require 面不在 .mjs 对账图内，壳本体是活进程仪器不设 keyless 自测） |
 | lib/ops/provider-errors.mjs | provider-error-stats、provider-errors.spec | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
 | lib/shared/plan-card.mjs | node-gate-session-gates、plan-card-stats、plan-card.spec | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
@@ -166,8 +151,8 @@
 | lib/channel/ask-drive.mjs | ask-drive.spec、hitl-answer、run-kickoff | 代答读窗与谓词 |
 | lib/shared/workspace-root.mjs | bundle-sessions、evidence-audit、hitl-answer、node-gate、plan-card-stats、provider-error-stats、schema-scan、session-events、session-log、watch-run、workspace-root.spec | dev 工作区根解析（flag → DSH_RUN_WORKSPACE → 仓内默认）+ vendor 同形 `projectKey(cwd)` 会话组（D38 C1：替代数据根/组名各写一份；legacy substring 兜底） |
 | lib/shared/web-ui-nav.mjs | cdp-probe、client-hitl.entry、client-load-config.support、client-load-final.support、client-load.entry、hitl-answer、library-fold.spec、session-replay、snapshot-replay.entry、web-ui-nav-bilingual.test、web-ui-nav.spec | 观察面侧栏会话定位**唯一正本**（2026-10-21 收拢，六处私有版退役）：data-row-key 主锚（session:\<id\>/workspace: 行键）+ 折叠组展开（expandGroup，data-row-key 主 + 类名兜底）+「Show N more」逐层 + 搜索兜底（结果无行键→按文本点）；类名扫描降级为兜底——两套选择器各有实红教训，裁决依据 = 模块头注；零依赖 page 鸭子类型；CDP 边界 = 纯常量 SHOW_MORE_SESSIONS_PATTERN / PREVIEW_NOTICE_PROBE_JS 供 cdp-probe evaluate 字符串消费（后者 = 首屏 Preview Notice 遮罩的探测与关闭，keyless 钉 = web-ui-nav.spec）；真浏览器证据归消费方冒烟档（client-load.entry） |
-| lib/ops/unconsumed-evidence.mjs | unconsumed-evidence、unconsumed-evidence.spec | B1 机械基座：evidence/ 未进 findings.md 的差集投影（critic 差集出题的操作侧对账；CLI 壳 = run-ops/unconsumed-evidence 行） |
-| lib/ops/acceptance-check.mjs | acceptance-check、acceptance-check.spec | 收活判据机械求值：PASS/FAIL/UNVERIFIED 三态（DeerFlow acceptance_criteria keyless 移植，判不了永不静默放行；CLI 壳 = run-ops/acceptance-check 行） |
+| lib/ops/unconsumed-evidence.mjs | unconsumed-evidence、unconsumed-evidence.spec | B1 机械基座：evidence/ 未进 findings.md 的差集投影（critic 差集出题的操作侧对账；CLI 壳 = probes/run/unconsumed-evidence） |
+| lib/ops/acceptance-check.mjs | acceptance-check、acceptance-check.spec | 收活判据机械求值：PASS/FAIL/UNVERIFIED 三态（DeerFlow acceptance_criteria keyless 移植，判不了永不静默放行；CLI 壳 = scripts/run-gates/acceptance-check） |
 | lib/shared/hitl-provenance.mjs | ask-drive.spec、client-hitl.entry、hitl-answer、hitl-provenance.spec、node-gate-witness.spec、run-kickoff | 代答 provenance 写盘（BUG-014 正修——代理模拟显式记账；BUG-017 题面富集） |
 | lib/shared/local-date.mjs | export-dist、hitl-answer、local-date.spec、schema-scan-core、schema-scan.spec | 人读日期行本地口径（与 bash date 同源；BUG-017 正修——UTC slice 凌晨窗口差一天） |
 | lib/ops/bundle-date-sanity.mjs | bundle-date-sanity.spec、run-accept | run bundle 未来日期检查（操作侧验收前哨——r1-license 29 处未来日期事故的机械面；消费语境 = run-accept 行） |

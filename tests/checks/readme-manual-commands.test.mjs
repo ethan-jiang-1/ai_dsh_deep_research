@@ -27,9 +27,9 @@ test('README 的最短路径命令与 _dist/安装手册.md 同源', () => {
   const readme = dshCommands(readmeText)
   const manual = new Set(dshCommands(manualText))
   assert.ok(readme.length >= 3, `README 只有 ${readme.length} 条 dsh 命令——最短路径应含建 profile / 装包 / 启动（防空）`)
-  assert.ok(manual.size >= 3, '安装手册缺 dsh 命令——生成物与源模板对不上，先跑 node scripts/dist/export-dist.mjs')
+  assert.ok(manual.size >= 3, '安装手册缺 dsh 命令——生成物与源模板对不上，先跑 node dev/release/export-dist.mjs')
   for (const command of readme) {
-    assert.ok(manual.has(command), `README 的命令不在 _dist/安装手册.md：${command}\n—— 两处必须逐字一致；改一条就同 diff 改另一条（源 = scripts/dist/product-manual.md，记得重导出）`)
+    assert.ok(manual.has(command), `README 的命令不在 _dist/安装手册.md：${command}\n—— 两处必须逐字一致；改一条就同 diff 改另一条（源 = dev/release/product-manual.md，记得重导出）`)
   }
   if (readme.some((command) => command.includes('$DSH_VER'))) {
     assert.ok(readmeText.includes('DSH_VER="$(dsh --version)"'), 'README 的团队能力版本赋值行缺席——`@$DSH_VER` 会装成空版本')

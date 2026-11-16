@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 状态：常驻
+// 一句话：任意历史会话在真实 UI 重开并抓场景包（现在的客户端 + 当年的数据）
+// 何时跑：复看历史会话当时/现在的页面；症状还原
+// 档位：keyless（真实浏览器；须先 source）
+// 判据：不适用（show）
+// 不证明：像素级复现；当年的 console 已不可得
 // session-replay.mjs — 把**任意历史会话**在真实 UI 里打开并抓成场景包（2026-10-21，反馈通路事后半边）。
 //
 // 为什么存在：`scene-capture` 只能抓"当场"；`snapshot-replay` 回放的是录制好的固定语料。
@@ -17,21 +24,21 @@
 //   0 = 已捕获并落盘；1 = 打开或捕获失败；2 = 前置缺席（未 source / 无会话根 / 会话不存在 / 歧义 / 通道起不来）。
 // 端口自持有：3117。
 // 用法：
-//   source dev/env.sh && node scripts/run-ops/session-replay.mjs <session-id|标题子串> [--group <子串>] [--port 3117]
+//   source dev/env.sh && node probes/run/session-replay.mjs <session-id|标题子串> [--group <子串>] [--port 3117]
 //     [--url <已起 GUI 的带 token URL>] [--out runtime/scenes/replay-<name>] [--wait-ms 2500]
 //     [--open-status]（展开右栏并打开「研究状态」页签——驾驶舱观察面入镜）
 //     [--open-graph]（同上，打开「研究图谱」页签——plan↔Team 映射/覆盖率症状的现场） [--json]
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { scrubbedEnv } from '../lib/shared/env.mjs';
-import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/harness/vendor-artifacts.mjs';
-import { authenticate, bootWeb, makeRpc } from '../lib/shared/web-harness.mjs';
-import { launchChromium, loadChromium } from '../lib/harness/playwright.mjs';
-import { openSessionById } from '../lib/shared/web-ui-nav.mjs';
-import { pickStatusTab } from '../lib/shared/probe-status-tab.mjs';
-import { readSessionEvents } from '../lib/shared/session-log.mjs';
-import { resolveSessionQuery, sessionMetaOf, formatReplaySummary } from '../lib/ops/session-replay.mjs';
+import { scrubbedEnv } from '../../scripts/lib/shared/env.mjs';
+import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../../scripts/lib/harness/vendor-artifacts.mjs';
+import { authenticate, bootWeb, makeRpc } from '../../scripts/lib/shared/web-harness.mjs';
+import { launchChromium, loadChromium } from '../../scripts/lib/harness/playwright.mjs';
+import { openSessionById } from '../../scripts/lib/shared/web-ui-nav.mjs';
+import { pickStatusTab } from '../../scripts/lib/shared/probe-status-tab.mjs';
+import { readSessionEvents } from '../../scripts/lib/shared/session-log.mjs';
+import { resolveSessionQuery, sessionMetaOf, formatReplaySummary } from '../../scripts/lib/ops/session-replay.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);

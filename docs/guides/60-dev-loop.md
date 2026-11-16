@@ -82,7 +82,7 @@
 | L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --import tsx/esm --test tests/checks/evaluation-contract.test.mjs` |
 | L4 交付 | 里程碑级 | `source dev/env.sh && node scripts/smoke/l4-lite.e2e.mjs`（真模型档：需 `DEEPSEEK_API_KEY`，未 source 自拒）/ 完整 run（授权范围） |
 
-**source 口径**：fresh clone 首次跑 L0 前先 `source dev/env.sh`（激活 pre-commit；此后幂等）。表中标 source 的命令必须 source；`lifecycle.entry` / `install-shape.entry` / `product-boot.entry` 自行设定 home、不依赖 source；run-ops 的 `evidence-audit` / `run-accept` / `plan-card-stats` / `provider-error-stats` 需要 source（见命令块注记）。
+**source 口径**：fresh clone 首次跑 L0 前先 `source dev/env.sh`（激活 pre-commit；此后幂等）。表中标 source 的命令必须 source；`lifecycle.entry` / `install-shape.entry` / `product-boot.entry` 自行设定 home、不依赖 source；`scripts/run-gates/` 的 `evidence-audit` / `run-accept` 与 `probes/run/` 的 `plan-card-stats` / `provider-error-stats` 需要 source（见命令块注记）。
 
 判据与负面判据（什么算"框架不合理"）见 [evaluation.md](../evaluation.md)——面与面不互抵。
 
@@ -150,15 +150,15 @@ node scripts/smoke/l4-lite.e2e.mjs        # L4-lite 真模型冒烟（真模型�
 node scripts/smoke/team-preflight.e2e.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
 node dev/run-driver.mjs up          # **run 通道驱动入口（常用）**：起/复用通道（复用先验安装镜像=当前 pack 源）+ 验浏览器面 + 呈交块（exit 0 可呈交/1 红/2 未跑；镜像漂移/未取证 = 2）；--bootstrap 先跑冷启动前置；--profile/DSH_RUN_STATE_DIR 支持多实例；probe = 只验已起通道（同样先验镜像）；url = 打印当前 URL
 bash dev/boot-run.sh                  # run 通道底层启动面：自检→组合检查/必要补装→漂移门；仪表盘后台观察、web 前台 3083；用法 = 61（驱动入口内部调它）
-node scripts/run-ops/stream-diagnostics.mjs --recent N   # 流失败归因诊断（尝试时间线/失败密度/provider 实名；出问题第一步）
-node --import tsx/esm scripts/run-ops/run-dashboard.mjs --latest --out <html>   # run 只读投影（多场扫描 + 步骤条 + HITL 等待横幅；--watch 持续再生成）
-node scripts/run-ops/plan-card-stats.mjs   # 计划确认卡字数跨场分布（keyless，须先 source；升硬门前置 = 连续多场 ≤200 字达标）
-node scripts/run-ops/provider-error-stats.mjs   # 上游流错误（回合被终结）跨场分布——BUG-022 的"可数"面（keyless，须先 source）
+node probes/run/stream-diagnostics.mjs --recent N   # 流失败归因诊断（尝试时间线/失败密度/provider 实名；出问题第一步）
+node --import tsx/esm probes/run/run-dashboard.mjs --latest --out <html>   # run 只读投影（多场扫描 + 步骤条 + HITL 等待横幅；--watch 持续再生成）
+node probes/run/plan-card-stats.mjs   # 计划确认卡字数跨场分布（keyless，须先 source；升硬门前置 = 连续多场 ≤200 字达标）
+node probes/run/provider-error-stats.mjs   # 上游流错误（回合被终结）跨场分布——BUG-022 的"可数"面（keyless，须先 source）
 node dev/run-kickoff.mjs --port 3083 --token <横幅 token> --prompt-file <file>        # run 会话驱动（建会话+发 kickoff）
-node --import tsx/esm scripts/run-ops/watch-run.mjs <session-id>   # run 盯场（谓词化状态判定：事件形状，非字符串 grep——HITL-PENDING/RUN-SETTLED 时退出自报；grep 会误报 request/header 工具 schema）
-node scripts/run-ops/scene-capture.mjs '<gui-url>' --out runtime/scenes/<name>   # 场景包：page.png/html/body/console/meta（看见当时页面；token 脱敏）；事后读取 = --list / --show <name>（agent 看历史现场，纯读盘）
-node scripts/run-ops/session-replay.mjs <session-id|标题子串> [--group <子串>] [--open-status|--open-graph]   # **任意历史会话**在真实 UI 里重开并抓场景包（keyless；起一次性通道 + 登记该会话 cwd 工作区 + 按 id 打开）；判读含日志/工作区/场景包路径；边界 = 现在的客户端代码 + 当年的数据（不是像素级复现）
-node --import tsx/esm scripts/run-ops/session-events.mjs <session-id|标题> --tail 30   # 会话事件尾部（agent 看"刚才发生了什么"：tool/call、tool/result、turn/end 摘要；--type/--grep/--json）
+node --import tsx/esm probes/run/watch-run.mjs <session-id>   # run 盯场（谓词化状态判定：事件形状，非字符串 grep——HITL-PENDING/RUN-SETTLED 时退出自报；grep 会误报 request/header 工具 schema）
+node probes/run/scene-capture.mjs '<gui-url>' --out runtime/scenes/<name>   # 场景包：page.png/html/body/console/meta（看见当时页面；token 脱敏）；事后读取 = --list / --show <name>（agent 看历史现场，纯读盘）
+node probes/run/session-replay.mjs <session-id|标题子串> [--group <子串>] [--open-status|--open-graph]   # **任意历史会话**在真实 UI 里重开并抓场景包（keyless；起一次性通道 + 登记该会话 cwd 工作区 + 按 id 打开）；判读含日志/工作区/场景包路径；边界 = 现在的客户端代码 + 当年的数据（不是像素级复现）
+node --import tsx/esm probes/run/session-events.mjs <session-id|标题> --tail 30   # 会话事件尾部（agent 看"刚才发生了什么"：tool/call、tool/result、turn/end 摘要；--type/--grep/--json）
 node --import tsx/esm dev/hitl-answer.mjs --port 3083 --token <t>   # HITL 代答（代理模拟；默认逐题选推荐项——先盘侧谓词自拒：无真挂起不开浏览器；answerer 只在浏览器客户端，故用真浏览器）
 pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 源码；等价 dev/env.sh 的 dsh 函数）
 node --import tsx/esm scripts/smoke/client-hitl.entry.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）
@@ -167,8 +167,8 @@ node --import tsx/esm scripts/smoke/cdp-ask.entry.mjs    # 交互探针端到端
 
 node scripts/smoke/snapshot-replay.entry.mjs --read-only --layers a,b   # keyless 回放冒烟（须先 source dev/env.sh，端口 3103）：CI job `snapshot-replay` 跑同一条 A/B；场景集由 snapshots/replay/research-face/snapshot.json 声明（研究角色集与盘上 presets/ 对账；方法编辑不属 run 生命周期）——逐场景 A 回放收尾逐字命中 + B 组装请求 diff（persona 全文 + 全部 request/header + 四处 user/message 注入（含时钟序列））；`--layers c` + 声明了 renderExpected 的场景做 C 渲染金标准比对（C 本地/里程碑）；`--scenario <id>` 单场景、`--update-expected --why <载体>` 重写金标准
 node --import tsx/esm dev/record-role-fixture.mjs --role <scout|analyst|critic|lead>   # 角色组装面 fixture 录制（真模型档一次性：`deep-research` profile（与回放同域，boot-run 维护版本面）+ 哨兵「探针完成」收尾 + 日志静默判定；录制品人审后入库 + 在场景声明登记 source 身份，此后 keyless 永久回放）
-node scripts/run-ops/run-accept.mjs <bundle>   # 交付验收原子动作：门 A + 证据审计 + 未来日期 sanity → acceptance.md；--archive 才归档
-node scripts/run-ops/runtime-clean.mjs [--older-than 14] [--yes]   # 运行区清理：默认 dry-run，只列白名单内过期条目；--yes 才删；黑名单/symlink/scenes/保留期 = runtime/README
+node scripts/run-gates/run-accept.mjs <bundle>   # 交付验收原子动作：门 A + 证据审计 + 未来日期 sanity → acceptance.md；--archive 才归档
+node dev/runtime-clean.mjs [--older-than 14] [--yes]   # 运行区清理：默认 dry-run，只列白名单内过期条目；--yes 才删；黑名单/symlink/scenes/保留期 = runtime/README
 node scripts/run-gates/evidence-audit.mjs <bundle>|--latest  # 证据溯源审计（**须先 source dev/env.sh**：它锚定本仓 dev home，DSH_HOME 指向别处即自拒）（keyless：URL/摘录/final 链对会话日志机械对账 → audit.md；CRITICAL 即 exit 1）
 node scripts/run-gates/node-gate.mjs <bundle>|--latest [--sessions <dir>] [--write]  # 节点交接契约门（keyless：交付两门 = §Decisions 拍板行 + present 声明；RED = exit 1 / UNATTESTED = exit 2；默认只读，--write 才落 bundle node-gate.md）
 node scripts/run-gates/schema-scan.mjs [<bundle-dir>…]     # schema 保真度扫描（keyless：八节点输出件在场断言；断代定红——新 run 按 `schema` 整数（低/高版本都判红），旧场按 contract 日期（契约日 2026-09-29）；现行形态违约 = exit 1，契约前/旧场如实报告不计红；默认扫 archive 全量）

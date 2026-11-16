@@ -62,16 +62,19 @@ probes/
   _index.mjs             ← --write / --check
   behavior/              ← 真模型行为：entry-chain / discipline / method-library / rerun-triage
   browser/               ← 真浏览器交互：cdp-probe
+  run/                   ← run 现场与取证投影：只读日志/会话/bundle 的投影、诊断、回放（不判裁决）
   stream/                ← 流取证仪器：llm-stream-tee（不判 PASS/FAIL）
 ```
 
 - **域 = 第一级子目录**：域是一组共享 harness、共享证据来源、共享失败模式的机制；域内平铺
-  `<mechanism>-probe.mjs`，不按 unit/integration 分。现在三个域 = 真模型行为 / 真浏览器 /
-  流取证；新域先问「它和现有域共享 harness 吗」，没有就新建。
+  `<mechanism>-probe.mjs`，不按 unit/integration 分。四个域 = 真模型行为 / 真浏览器 / run 现场取证 /
+  流取证仪器；新域先问「它和现有域共享 harness 吗」，没有就新建。
+- **两类件**：`behavior/` `browser/` 是**探针**（给 PASS/FAIL）；`run/` 是**取证件**（只读投影，
+  不判裁决——红了只让人来看）；`stream/` 是预载仪器。面归属 = [guides/68](./68-surface-contract.md)。
 - **头注是唯一事实源**；索引只投影（一句话/档位/何时跑/状态），不复制判据与不证明全文。
 - 索引与目录不一致 = 红。重生成：`node probes/_index.mjs --write`；校验：`--check`。
 - **勿手改** `INDEX.generated.md`；新增/改名/删除探针必须重生成。
-- 探针之间不互相 import；共享纯函数放 `scripts/lib/`（如 `probe-index.mjs`、
+- 探针之间不互相 import（可以 import `scripts/lib/` 的纯函数）；共享纯函数放 `scripts/lib/`（如 `probe-index.mjs`、
   `probe-send-target.mjs`），真实驱动放 `scripts/lib/` 的 driver 面。
 
 ## 4. 头注协议
@@ -93,12 +96,15 @@ probes/
 - `不证明` 不是免责声明，是防止别人把绿读大；没有它，探针会变成新的假绿来源。
 - `档位` 申报凭据与调用模式：真模型档必须登记在
   [smoke-contract](../../tests/checks/smoke-contract.test.mjs) 的 `REAL_MODEL` 闭集。
+- `run/` 的取证件用同一协议，`判据` 写「不适用（show：不判 PASS/FAIL）」，`不证明` 写清它只投影
+  日志里已有的事实。
 - 端口：每个脚本独占固定端口（`scripts/AGENTS §端口与临时路径自持有`），由 `port-exclusive`
   门禁把守；不要改成 `--port 0`。
 
 ## 5. 新增一支（四步）
 
 1. **先红**：改坏夹具、去掉保护或加负例，证明判据真的会红；还原后绿。只交付绿 = 不知道它会不会咬人。
+   取证件（`run/`）没有裁决可红：验证 = 输出与盘上事实一致（同一输入两次同结果、缺件如实报）。
 2. **隔离/端口**：临时目录/临时 home；端口独占；结束清理（`--keep` 才留现场）；拒绝碰日用 home。
    **工作区夹具**：D40 后包不再播种 workspace 种子，`scaffold.mjs` 也已移除；探针用
    空工作区或自建 bundle，不要引用已删除的 pack 种子。零工具 prompt 可避免 read/bash 审批把
@@ -138,6 +144,7 @@ probes/
 | wave 执行链 | `wave-execution-probe` | 真模型；lens-fanout 单 cell 链 |
 | 不满转接 | `rerun-triage-probe` | 真模型；五条行为 |
 | 驾驶舱交互/页签/发送 | `cdp-probe` | 连已起 GUI；`--ask` 按会话档 |
+| run 现场（状态/会话/交付投影） | `run/` 域（watch-run / session-events / run-dashboard / bundle-sessions …） | 只读取证，不判裁决；索引看域分组 |
 | LLM 流取证 | `llm-stream-tee` | 仪器；不判 PASS/FAIL |
 | 并发/竞态、重启恢复、安装组合 | —（暂无专用探针） | 现有证据 = L1/L2 / client-load / 真 run；补探针时优先考虑 |
 

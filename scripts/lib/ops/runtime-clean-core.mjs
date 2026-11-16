@@ -3,7 +3,7 @@
 // 为什么有它：runtime/ 是 gitignored 运行态，没有索引义务也没有自动 GC；smoke/probe 产物
 // 长期累积（2026-11-04 盘点 697M）。但“能删”必须窄：活跃 dev home（harness-home）与 run
 // bundle（research-workspace）绝不在此列。本模块只回答“哪些白名单条目已过保留期”，
-// 删除动作与安全边界归 CLI 壳（scripts/run-ops/runtime-clean.mjs）。
+// 删除动作与安全边界归 CLI 壳（dev/runtime-clean.mjs）。
 //
 // 判据：
 // - 容器根 smoke-workspace：候选 = 其**直接子项**（不删容器本身）；

@@ -19,7 +19,7 @@ import { projectionOf } from '../lib/gates/protocol-audit-core.mjs'
 import { claimReviewFixture } from '../lib/harness/run-accept-fixture.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
-const CLI = join(ROOT, 'scripts', 'run-ops', 'run-accept.mjs')
+const CLI = join(ROOT, 'scripts', 'run-gates', 'run-accept.mjs')
 const HYGIENE = join(ROOT, 'scripts', 'run-gates', 'path-hygiene.mjs')
 const SECRET = join(ROOT, 'scripts', 'run-gates', 'secret-scan.mjs')
 const SCHEMA_SCAN = join(ROOT, 'scripts', 'run-gates', 'schema-scan.mjs')

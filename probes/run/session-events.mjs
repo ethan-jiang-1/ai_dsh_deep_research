@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 状态：常驻
+// 一句话：会话事件尾部：按 id/标题看「刚才发生了什么」（tool/call、turn/end 摘要）
+// 何时跑：agent 需要会话时间线；诊断第一步（除会话 id 之外的事实）
+// 档位：keyless（读会话日志）
+// 判据：不适用（show；exit 1 = 标题歧义，不是裁决）
+// 不证明：事件语义正确性与交付合格；只投影日志已有事实
 // session-events.mjs — 会话日志的 agent 观察入口：按 id/标题选中会话，打印尾部事件摘要。
 //
 // 为什么存在（2026-10-20 审计 P0-4）：日志数据源（zstd 多帧 + session-log.mjs）很强，但 agent
@@ -6,7 +13,7 @@
 // 流失败，run-dashboard 是给人看的 HTML；要按 tool/call、turn/end 看只能临时写 node -e。
 // 本壳复用唯一解码正本（session-log.mjs）与纯摘要/筛选核（session-events-core.mjs）。
 //
-// 用法：node --import tsx/esm scripts/run-ops/session-events.mjs <session-id|标题子串>
+// 用法：node --import tsx/esm probes/run/session-events.mjs <session-id|标题子串>
 //         [--tail N] [--type <type 子串>] [--grep <原文子串>] [--json] [--sessions <dir>] [--group <组名子串>] [--stuck-after <分钟>]
 //   --tail 0 = 全部（默认 30）；--json = 原始事件逐行 JSON（不再摘要）。
 //   --group 覆盖缺省 research-workspace 组（组过滤盲区逃生口：冒烟/自测会话组如
@@ -15,10 +22,10 @@
 import { existsSync, readdirSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { findGroup, sessionLogsInGroup, readSessionEvents } from '../lib/shared/session-log.mjs'
-import { defaultGroupSubstring } from '../lib/shared/workspace-root.mjs'
-import { sessionTitleOf } from '../lib/shared/run-state.mjs'
-import { filterEvents, tailEvents, formatEventLine, readableTitle, stuckOf } from '../lib/ops/session-events-core.mjs'
+import { findGroup, sessionLogsInGroup, readSessionEvents } from '../../scripts/lib/shared/session-log.mjs'
+import { defaultGroupSubstring } from '../../scripts/lib/shared/workspace-root.mjs'
+import { sessionTitleOf } from '../../scripts/lib/shared/run-state.mjs'
+import { filterEvents, tailEvents, formatEventLine, readableTitle, stuckOf } from '../../scripts/lib/ops/session-events-core.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)
@@ -33,7 +40,7 @@ const target = argv.find((a) => !a.startsWith('--') && argv[argv.indexOf(a) - 1]
   && argv[argv.indexOf(a) - 1] !== '--stuck-after')
 
 if (target === undefined || flag('--help')) {
-  console.error('session-events: 用法 node --import tsx/esm scripts/run-ops/session-events.mjs <session-id|标题子串> [--tail N] [--type <子串>] [--grep <子串>] [--json] [--sessions <dir>] [--group <组名子串>]')
+  console.error('session-events: 用法 node --import tsx/esm probes/run/session-events.mjs <session-id|标题子串> [--tail N] [--type <子串>] [--grep <子串>] [--json] [--sessions <dir>] [--group <组名子串>]')
   process.exit(2)
 }
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')

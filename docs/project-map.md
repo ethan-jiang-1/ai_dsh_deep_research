@@ -116,7 +116,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 浏览器交互探针 | [cdp-probe](../probes/browser/cdp-probe.mjs) | 连接已起 GUI；`--ask` 会发送消息并可能触发模型/工具调用 | 指定场景的显示、点击、会话回复；是否调用模型取决于模式与会话 |
 | 偏好库可发现性 | [method-library-probe](../probes/behavior/method-library-probe.mjs) | 真模型档；cwd = 临时研究工作区 | 偏好库文件名/位置、条目数、点名条目缺席时如实说（BUG-042 修复判据的机器化证明） |
 | run 文件审计 | [node-gate](../scripts/run-gates/node-gate.mjs)、[schema-scan](../scripts/run-gates/schema-scan.mjs)、[evidence-audit](../scripts/run-gates/evidence-audit.mjs)、[path-hygiene](../scripts/run-gates/path-hygiene.mjs)、[secret-scan](../scripts/run-gates/secret-scan.mjs) | 无主动外网请求；压缩日志读取可能用 zstd 子进程 | 节点在场、部分交接判据、URL/摘录/引用链、本机路径、交付物高置信凭据；默认只读，`--write` 才写审计/门报告 |
-| 交付验收 | [run-accept](../scripts/run-ops/run-accept.mjs) | 无模型；须先 source；会跑 node-gate/evidence-audit/path-hygiene/secret-scan | 门 A + 审计（CRITICAL=0）+ 未来日期 + 本机路径 + 高置信凭据；预检红不写，绿写 delivered.json + manifest.json + acceptance.md（present 归一化为相对标签），`--archive` 才归档；`--repair` 修历史回执 |
+| 交付验收 | [run-accept](../scripts/run-gates/run-accept.mjs) | 无模型；须先 source；会跑 node-gate/evidence-audit/path-hygiene/secret-scan | 门 A + 审计（CRITICAL=0）+ 未来日期 + 本机路径 + 高置信凭据；预检红不写，绿写 delivered.json + manifest.json + acceptance.md（present 归一化为相对标签），`--archive` 才归档；`--repair` 修历史回执 |
 | 完整 L4 | 真实问题的完整研究 run | 模型与真实信息检索、真人 HITL | 报告质量、可追溯结论与整体研究体验 |
 
 回放夹具不能证明模型服从变化后的方法论；真挂载也不能证明研究质量。
@@ -161,8 +161,8 @@ pack 侧：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`（7 个 domain�
 | 职责 | 查哪些入口 | 结果/支撑资产 |
 |---|---|---|
 | 门禁、挂载、安装、浏览器、回放与模型检查 | 上表具名入口 | `tests/` 与 [tests/fixtures taxonomy](../tests/fixtures/README.md) 提供确定性消费路径 |
-| 研究观察与运维 | [watch-run](../scripts/run-ops/watch-run.mjs)、[run-dashboard](../scripts/run-ops/run-dashboard.mjs)、[plan-card-stats](../scripts/run-ops/plan-card-stats.mjs)、[provider-error-stats](../scripts/run-ops/provider-error-stats.mjs)、[run-kickoff](../dev/run-kickoff.mjs)、[hitl-answer](../dev/hitl-answer.mjs) | `runtime/smoke-workspace/` 放日志与 HTML；会话日志在开发 home；bundle 在研究工作区 |
-| 分发生成 | [export-dist](../scripts/dist/export-dist.mjs) | `_dist/` 生成包与安装手册；安装可用性由 L2 证明 |
+| 研究观察与取证（只读） | [watch-run](../probes/run/watch-run.mjs)、[run-dashboard](../probes/run/run-dashboard.mjs)、[plan-card-stats](../probes/run/plan-card-stats.mjs)、[provider-error-stats](../probes/run/provider-error-stats.mjs)、[run-kickoff](../dev/run-kickoff.mjs)、[hitl-answer](../dev/hitl-answer.mjs) | `runtime/smoke-workspace/` 放日志与 HTML；会话日志在开发 home；bundle 在研究工作区 |
+| 分发生成 | [export-dist](../dev/release/export-dist.mjs) | `_dist/` 生成包与安装手册；安装可用性由 L2 证明 |
 | 环境与生成物 | [env](../dev/env.sh)、[vendor-build](../dev/vendor-build.sh)、上方同步生成器 | vendor 构建产物、overlay、包内 content/ |
 | 支撑模块 | `scripts/lib/`、pack `src/lib/` | 消费方直接调用接口；测试覆盖纯解析/折算/判据路径 |
 
@@ -176,12 +176,12 @@ pack 侧：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`（7 个 domain�
 | 现象 | 先看 | 定位下一步 |
 |---|---|---|
 | 无法启动/镜像漂移 | 本次 [boot-run](../dev/boot-run.sh) 终端报错；进入 web 启动后再看 `runtime/smoke-workspace/web.log` | 环境/构建/组合/镜像检查；修复入口见 [Run 指南](guides/61-run-playbook.md) |
-| 页面能开但页签或交互坏 | 浏览器加载/console 与 [client-load.entry](../scripts/smoke/client-load.entry.mjs)；随手抓现场 = [scene-capture](../scripts/run-ops/scene-capture.mjs) | [驾驶舱](design/40-research-cockpit.md) 装配与数据通道；HITL 行为另用真模型证据 |
+| 页面能开但页签或交互坏 | 浏览器加载/console 与 [client-load.entry](../scripts/smoke/client-load.entry.mjs)；随手抓现场 = [scene-capture](../probes/run/scene-capture.mjs) | [驾驶舱](design/40-research-cockpit.md) 装配与数据通道；HITL 行为另用真模型证据 |
 | 要看某次 `up`/`probe` 的现场 | `runtime/smoke-workspace/run-verdicts/<ts>-<kind>/`：`verdict.json` + `page.png`（打开过页面的判定另写 `page.html`；NOT-RUN 无页面现场） | `latest-verdict.json` 指向最近一次；每次判定独立归档，旧红不被新绿覆盖 |
-| 想复看**历史会话**当时/现在的页面 | [session-replay](../scripts/run-ops/session-replay.mjs) `<session-id\|标题子串>`（keyless：起通道 → 登记该会话 cwd 工作区 → 按 id 打开 → 抓场景包）；日志侧先看 [session-events](../scripts/run-ops/session-events.mjs) | 场景包读回 = [scene-capture](../scripts/run-ops/scene-capture.mjs) `--show <name>`；边界：现在的客户端代码 + 当年的数据，不是像素级复现 |
-| 研究卡住、工具报错、present 不明 | 先用 [session-events](../scripts/run-ops/session-events.mjs) 看该会话的事件尾部；原始日志仍在 `runtime/harness-home/sessions/<工作区组>/<会话>/` | [watch-run](../scripts/run-ops/watch-run.mjs) 看状态；[node-gate](../scripts/run-gates/node-gate.mjs) 查交付声明 |
-| HITL 卡没弹出来 / 挂起不明 | [watch-run](../scripts/run-ops/watch-run.mjs) 的挂起谓词（只认 lead 会话的 pending）+ [hitl-answer](../dev/hitl-answer.mjs) 的盘侧自拒信息（未匹配/歧义/非挂起均拒绝作答并说理由） | 挂起与代答语义 = [Run 指南 §3](guides/61-run-playbook.md)；「卡永久 pending」边界 = [Run 指南 §5](guides/61-run-playbook.md) |
-| 模型回合被流错误终结 / 重试风暴 | [stream-diagnostics](../scripts/run-ops/stream-diagnostics.mjs) `--session <id>` 或 `--recent N` | 模型尝试时间线/失败密度/provider 与重试策略实名；处置 = [Run 指南 §0.1](guides/61-run-playbook.md) |
+| 想复看**历史会话**当时/现在的页面 | [session-replay](../probes/run/session-replay.mjs) `<session-id\|标题子串>`（keyless：起通道 → 登记该会话 cwd 工作区 → 按 id 打开 → 抓场景包）；日志侧先看 [session-events](../probes/run/session-events.mjs) | 场景包读回 = [scene-capture](../probes/run/scene-capture.mjs) `--show <name>`；边界：现在的客户端代码 + 当年的数据，不是像素级复现 |
+| 研究卡住、工具报错、present 不明 | 先用 [session-events](../probes/run/session-events.mjs) 看该会话的事件尾部；原始日志仍在 `runtime/harness-home/sessions/<工作区组>/<会话>/` | [watch-run](../probes/run/watch-run.mjs) 看状态；[node-gate](../scripts/run-gates/node-gate.mjs) 查交付声明 |
+| HITL 卡没弹出来 / 挂起不明 | [watch-run](../probes/run/watch-run.mjs) 的挂起谓词（只认 lead 会话的 pending）+ [hitl-answer](../dev/hitl-answer.mjs) 的盘侧自拒信息（未匹配/歧义/非挂起均拒绝作答并说理由） | 挂起与代答语义 = [Run 指南 §3](guides/61-run-playbook.md)；「卡永久 pending」边界 = [Run 指南 §5](guides/61-run-playbook.md) |
+| 模型回合被流错误终结 / 重试风暴 | [stream-diagnostics](../probes/run/stream-diagnostics.mjs) `--session <id>` 或 `--recent N` | 模型尝试时间线/失败密度/provider 与重试策略实名；处置 = [Run 指南 §0.1](guides/61-run-playbook.md) |
 | 研究内容/交接缺件 | 该 bundle 的问题、证据、发现、审查与最终报告 | [NODES](../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) + run 机械审计；恢复查 [Run 指南](guides/61-run-playbook.md) |
 | 不知道改什么、怎么验 | 根 [AGENTS.md](../AGENTS.md) 入口链与本轮请求授权 | 对应 RFC 与 [开发环](guides/60-dev-loop.md) 任务型路由 |
 
@@ -197,8 +197,8 @@ pack 侧：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`（7 个 domain�
 |---|---|---|
 | 页面空白 / 插件横幅报错 | [client-load.entry](../scripts/smoke/client-load.entry.mjs) | `runtime/smoke-workspace/client-load-*/{page.png,page.html,console.txt,meta.json}`；**最近一次结果 = `client-load-latest.json`**（PASS/SKIP/FAIL 指针，旧红目录不再冒充最新） |
 | 页签不出现 / keyed 槽空白 | 同上 + `client-keys` 门禁 | `keys.ts` 字面量与 [驾驶舱 §2](design/40-research-cockpit.md) 的登记 |
-| 状态页显示“未绑定” | [client-load.entry](../scripts/smoke/client-load.entry.mjs) 的绑定会话断言；run 通道用 `run-driver probe --require-data` | [bundle-sessions](../scripts/run-ops/bundle-sessions.mjs) 反查会话 id + 状态摘要 |
-| run 卡住 / HITL 不弹 | [watch-run](../scripts/run-ops/watch-run.mjs) + [bundle-sessions](../scripts/run-ops/bundle-sessions.mjs) | 挂起谓词与日志回退检测；语义 = [Run 指南 §3](guides/61-run-playbook.md) |
+| 状态页显示“未绑定” | [client-load.entry](../scripts/smoke/client-load.entry.mjs) 的绑定会话断言；run 通道用 `run-driver probe --require-data` | [bundle-sessions](../probes/run/bundle-sessions.mjs) 反查会话 id + 状态摘要 |
+| run 卡住 / HITL 不弹 | [watch-run](../probes/run/watch-run.mjs) + [bundle-sessions](../probes/run/bundle-sessions.mjs) | 挂起谓词与日志回退检测；语义 = [Run 指南 §3](guides/61-run-playbook.md) |
 | 方法库保存失败 | [method-library 单测](../tests/cockpit/lib/method-library/method-library-operation-state.spec.mjs) + 写路径 [method-library-tool.e2e](../scripts/smoke/method-library-tool.e2e.mjs)（开发档，需 native 产物） | 回执三态；`useOperationQueue` |
 | 交付门红 | [node-gate-delivery 测试](../tests/run/gates/node-gate-delivery.spec.mjs) + [node-gate](../scripts/run-gates/node-gate.mjs) | 门 A/C 判据与 `present` 见证 |
 | 证据链红 | [evidence-audit 测试](../tests/run/gates/evidence-audit.spec.mjs) + [evidence-audit](../scripts/run-gates/evidence-audit.mjs) | `source_url` / 摘录 / 引用链 |

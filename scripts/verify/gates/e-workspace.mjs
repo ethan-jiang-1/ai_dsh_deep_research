@@ -106,23 +106,23 @@ export function runE() {
 }
 
 // ── dist-manual-version（dist 导出合同——精神移植 ai_dsh_architect docs/distribution.md：
-//    _dist/安装手册.md 是 tracked 生成物（生成器 = scripts/dist/export-dist.mjs），表头版本必须等于
+//    _dist/安装手册.md 是 tracked 生成物（生成器 = dev/release/export-dist.mjs），表头版本必须等于
 //    pack 的 package.json 版本，且指名同目录 tarball 的文件名——版本动而手册不重导出即红，
 //    迫使版本 bump 与重导出同 diff。导出目的地 = _dist/（tarball gitignored）。）──
 {
   const gate = 'dist-manual-version';
   const manualPath = join(ROOT, '_dist', '安装手册.md');
   if (!existsSync(manualPath)) {
-    fail(gate, '_dist/安装手册.md 缺席——tracked 生成物必须在库（跑 `node scripts/dist/export-dist.mjs` 导出）');
+    fail(gate, '_dist/安装手册.md 缺席——tracked 生成物必须在库（跑 `node dev/release/export-dist.mjs` 导出）');
   } else {
     const manual = readFileSync(manualPath, 'utf8');
     const packVersion = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8')).version;
     const head = manual.split('\n').slice(0, 10).join('\n');
     const m = head.match(/\|\s*版本\s*\|\s*(\S+)\s*\|/);
     if (!m) {
-      fail(gate, '_dist/安装手册.md: 表头 10 行内无「| 版本 | … |」行——手册是 scripts/dist/export-dist.mjs 的生成物，勿手写；跑 `node scripts/dist/export-dist.mjs` 重生成');
+      fail(gate, '_dist/安装手册.md: 表头 10 行内无「| 版本 | … |」行——手册是 dev/release/export-dist.mjs 的生成物，勿手写；跑 `node dev/release/export-dist.mjs` 重生成');
     } else if (m[1] !== packVersion) {
-      fail(gate, `_dist/安装手册.md: 表头版本 ${m[1]} ≠ pack package.json 的 ${packVersion}——版本 bump 必须同 diff 重导出（跑 \`node scripts/dist/export-dist.mjs\` 后提交）`);
+      fail(gate, `_dist/安装手册.md: 表头版本 ${m[1]} ≠ pack package.json 的 ${packVersion}——版本 bump 必须同 diff 重导出（跑 \`node dev/release/export-dist.mjs\` 后提交）`);
     }
     const t = head.match(/\|\s*安装包\s*\|\s*`([^`]+)`/);
     if (!t || t[1] !== `dsh-deep-research-pack-${packVersion}.tgz`) {
@@ -143,16 +143,16 @@ export function runE() {
   const pack = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
   const tarball = join(ROOT, '_dist', `dsh-deep-research-pack-${pack.version}.tgz`);
   if (!existsSync(tarball)) {
-    note(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 缺席（源码 handoff）——制品 sha/内容检查跳过；发布前跑 node scripts/dist/export-dist.mjs`);
+    note(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 缺席（源码 handoff）——制品 sha/内容检查跳过；发布前跑 node dev/release/export-dist.mjs`);
   } else {
     const manualPath = join(ROOT, '_dist', '安装手册.md');
     if (!existsSync(manualPath)) {
-      fail(gate, '_dist/安装手册.md 缺席——跑 node scripts/dist/export-dist.mjs');
+      fail(gate, '_dist/安装手册.md 缺席——跑 node dev/release/export-dist.mjs');
     } else {
       const manual = readFileSync(manualPath, 'utf8');
       const m = manual.match(/\|\s*sha256\s*\|\s*`([0-9a-f]{64})`\s*\|/);
       const actual = createHash('sha256').update(readFileSync(tarball)).digest('hex');
-      if (!m) fail(gate, '_dist/安装手册.md 表头缺 sha256 行——手册是生成物，跑 node scripts/dist/export-dist.mjs');
+      if (!m) fail(gate, '_dist/安装手册.md 表头缺 sha256 行——手册是生成物，跑 node dev/release/export-dist.mjs');
       else if (m[1] !== actual) fail(gate, `_dist/安装手册.md 的 sha256 ${m[1]} ≠ 制品 ${actual}——手册与 tarball 漂移，重导出`);
     }
     const listed = spawnSync('tar', ['-tzf', tarball], { encoding: 'utf8' });
@@ -192,15 +192,15 @@ export function runE() {
   const tarball = join(ROOT, '_dist', `dsh-deep-research-pack-${pack.version}.tgz`);
   const manifestPath = join(ROOT, '_dist', 'build-manifest.json');
   if (!existsSync(tarball)) {
-    note(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 缺席（clean clone / 源码 handoff）——源指纹检查跳过；发布/移交前跑 node scripts/dist/export-dist.mjs`);
+    note(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 缺席（clean clone / 源码 handoff）——源指纹检查跳过；发布/移交前跑 node dev/release/export-dist.mjs`);
   } else if (!existsSync(join(PACK, 'lib'))) {
     note(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 在场但 pack lib/ 缺席（接收方/未构建形态）——源指纹不可重算；源指纹以发送方 release-check --handoff 为准，接收方用 --receiver 对账`);
   } else if (!existsSync(manifestPath)) {
-    fail(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 与 pack lib/ 在场，但缺 _dist/build-manifest.json——无法证明制品↔源同源；跑 node scripts/dist/export-dist.mjs 重导出`);
+    fail(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 与 pack lib/ 在场，但缺 _dist/build-manifest.json——无法证明制品↔源同源；跑 node dev/release/export-dist.mjs 重导出`);
   } else {
     const freshness = artifactFreshness(tarball, packInputRoots(PACK), { manifestPath });
     if (!freshness.fresh) {
-      fail(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 不是由当前 pack 源生成（${freshness.mode}: ${freshness.reason}）——发送方跑 node scripts/dist/export-dist.mjs 重建；接收方对账用 node scripts/dist/release-check.mjs --receiver`);
+      fail(gate, `_dist/dsh-deep-research-pack-${pack.version}.tgz 不是由当前 pack 源生成（${freshness.mode}: ${freshness.reason}）——发送方跑 node dev/release/export-dist.mjs 重建；接收方对账用 node scripts/dist/release-check.mjs --receiver`);
     }
   }
 }

@@ -372,7 +372,7 @@ export function renderAcceptance({ slug, stamp, critical, finalVersion, readable
     : present.path
   return `# Acceptance — ${slug}（${stamp}）
 
-> 由 scripts/run-ops/run-accept.mjs 生成（操作侧验收回执；不是研究内容）。
+> 由 scripts/run-gates/run-accept.mjs 生成（操作侧验收回执；不是研究内容）。
 > 预检（--no-write）先过，才落盘 node-gate/audit${legacy ? '' : ' 并写 delivered.json/manifest.json'}；红跑不写 bundle。
 > 人工走查写在 \`<!-- manual-walkthrough:start -->\` 与 \`<!-- manual-walkthrough:end -->\` 之间（重跑验收原样保留；无标记的旧回执按 \`## 人工走查\` 迁移一次）。
 ${legacy ? '> 旧契约 bundle（无 run.md）：只留本回执，不补新契约回执（D28 epoch 豁免）。\n' : ''}

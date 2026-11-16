@@ -73,7 +73,7 @@ export function evaluateHandoff({
     problems.push(problem('handoff-worktree-dirty', '工作树有未提交改动——先 commit，移交包必须来自干净树'))
   }
   if (tarballSha === null) {
-    problems.push(problem('handoff-tarball-missing', '缺少 `_dist/dsh-deep-research-pack-<version>.tgz`——先 node scripts/dist/export-dist.mjs'))
+    problems.push(problem('handoff-tarball-missing', '缺少 `_dist/dsh-deep-research-pack-<version>.tgz`——先 node dev/release/export-dist.mjs'))
   }
   if (manualSha === null || manualVersion === null) {
     problems.push(problem('handoff-manual-missing', '缺少 `_dist/安装手册.md` 或其版本/sha 表头——先重导出'))
@@ -91,7 +91,7 @@ export function evaluateHandoff({
     problems.push(problem('handoff-manifest-sha-mismatch', `build-manifest sha ${manifestSha} ≠ 制品 ${tarballSha}——重导出`))
   }
   if (mode !== 'receiver' && artifactFresh !== true) {
-    problems.push(problem('handoff-artifact-stale', 'tarball 不是由当前 pack 源生成（build-manifest 源指纹不匹配）——先 node scripts/dist/export-dist.mjs'))
+    problems.push(problem('handoff-artifact-stale', 'tarball 不是由当前 pack 源生成（build-manifest 源指纹不匹配）——先 node dev/release/export-dist.mjs'))
   }
   return problems
 }

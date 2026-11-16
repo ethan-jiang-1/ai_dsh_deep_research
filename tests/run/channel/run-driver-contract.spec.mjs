@@ -162,7 +162,7 @@ test('启动首动作一致：安装行 = 手册（CLI 建 profile + tarball 装
     return line;
   };
   // 安装用户：命令唯一 owner = 手册；README/00-index/project-map 只指手册 + 默认入口。开发通道：run-driver。
-  assert.ok(lineOf('scripts/dist/product-manual.md', '--from-default-profile web').includes('dsh --profile deep-research'), '手册安装首动作不是 DSH profile 初始化');
+  assert.ok(lineOf('dev/release/product-manual.md', '--from-default-profile web').includes('dsh --profile deep-research'), '手册安装首动作不是 DSH profile 初始化');
   assert.ok(lineOf('README.md', '_dist/安装手册.md').includes('_dist/安装手册.md'), 'README 没有把安装步骤指向手册');
   // 开发入口（run-driver）住在 CONTRIBUTING；README 只留一行路由。
   assert.ok(lineOf('CONTRIBUTING.md', 'dev/run-driver.mjs up').includes('run-driver.mjs up'), 'CONTRIBUTING 开发入口缺席');

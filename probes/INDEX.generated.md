@@ -20,6 +20,22 @@
 |---|---|---|---|---|
 | [cdp-probe.mjs](browser/cdp-probe.mjs) | 驾驶舱显示/点击/会话回复在真实浏览器成立（--ask 以日志落盘为判据） | 连已起 GUI（--ask 按会话档） | 改驾驶舱渲染/交互/页签；run-driver 浏览器判据；BUG-021 回归 | 常驻 |
 
+## run/（11 支）
+
+| 探针 | 一句话 | 档位 | 何时跑 | 状态 |
+|---|---|---|---|---|
+| [bundle-sessions.mjs](run/bundle-sessions.mjs) | bundle → 见证会话反查 + 状态摘要 + 下一步命令 | keyless（须先 source；默认只扫 research-workspace 组） | 诊断第一步：bundle 不记会话 id，需要拿会话 id | 常驻 |
+| [plan-card-stats.mjs](run/plan-card-stats.mjs) | 计划确认卡字数的跨场分布投影（升硬门前置的可复跑仪器） | keyless（须先 source dev/env.sh） | 评估「连续多场 ≤200 字」是否达标 | 常驻 |
+| [provider-error-stats.mjs](run/provider-error-stats.mjs) | 上游流错误（回合被终结）的跨场分布投影 | keyless（须先 source dev/env.sh） | BUG-022 类复发时数它；需要跨场而非单场分布 | 常驻 |
+| [run-dashboard.mjs](run/run-dashboard.mjs) | M2 run 只读 HTML 投影（步骤条 / HITL 等待横幅 / 归档标注；多场扫描） | keyless（只读 bundle 与会话日志；写抛弃型 HTML） | 要看 run 进度或多场对比；给用户看现场 | 常驻 |
+| [run-inventory.mjs](run/run-inventory.mjs) | run bundle 只读保留期视图（数量 / 大小 / 最老日期；不删任何东西） | keyless（纯读盘） | 清理运行区前先看有几场、多大；保留期评估 | 常驻 |
+| [scene-capture.mjs](run/scene-capture.mjs) | 场景包捕获/读取：截图 + DOM + 正文 + console + meta（token 脱敏） | 抓取 keyless（真实浏览器，须起通道）；读取 keyless（纯读盘） | 看见「当时页面」；事后看现场（--list / --show） | 常驻 |
+| [session-events.mjs](run/session-events.mjs) | 会话事件尾部：按 id/标题看「刚才发生了什么」（tool/call、turn/end 摘要） | keyless（读会话日志） | agent 需要会话时间线；诊断第一步（除会话 id 之外的事实） | 常驻 |
+| [session-replay.mjs](run/session-replay.mjs) | 任意历史会话在真实 UI 重开并抓场景包（现在的客户端 + 当年的数据） | keyless（真实浏览器；须先 source） | 复看历史会话当时/现在的页面；症状还原 | 常驻 |
+| [stream-diagnostics.mjs](run/stream-diagnostics.mjs) | 流失败归因诊断：模型尝试时间线 / 失败密度 / provider 与重试策略实名 | keyless（读会话日志） | 回合被流错误终结、重试风暴、上游错误归因 | 常驻 |
+| [unconsumed-evidence.mjs](run/unconsumed-evidence.mjs) | bundle 的 evidence/ 未进 findings.md 的差集投影（收尾核验入口） | keyless（纯读盘） | 收活前核验证据是否被消费 | 常驻 |
+| [watch-run.mjs](run/watch-run.mjs) | run 盯场：谓词化状态判定（HITL-PENDING / RUN-SETTLED；超时自报） | keyless（只读会话日志；先 source dev/env.sh 更稳） | run 挂起/等 HITL/落定不明；要盯某会话状态时 | 常驻 |
+
 ## stream/（1 支）
 
 | 探针 | 一句话 | 档位 | 何时跑 | 状态 |

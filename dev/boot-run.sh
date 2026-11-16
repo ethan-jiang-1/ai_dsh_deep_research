@@ -243,7 +243,7 @@ fi
 # HITL 等待横幅（⏳ 等你拍板）、web GUI deep-link（token 读自下方 tee 的 web.log）。
 DASH_OUT="$STATE_DIR/dashboard.html"
 mkdir -p "$(dirname "$DASH_OUT")"
-node --import tsx/esm "$ROOT/scripts/run-ops/run-dashboard.mjs" --latest \
+node --import tsx/esm "$ROOT/probes/run/run-dashboard.mjs" --latest \
   --out "$DASH_OUT" --watch --interval 5 &
 DASH_PID=$!
 # trap 修复（RFC debug-dashboard-plus，2026-09-24 事故 ① 收尾）：EXIT/INT/TERM 全杀子进程；

@@ -36,7 +36,7 @@ if (process.env.PNPM_MISSING === '1') notRun('pnpm 缺失')
 const dshVersion = String(version.stdout ?? '').match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/)?.[0] ?? null
 if (dshVersion === null) notRun('dsh --version 读不出三段版本')
 const tarball = process.env.PACK_TARBALL ?? join(ROOT, '_dist', `dsh-deep-research-pack-${pkg.version}.tgz`)
-if (!existsSync(tarball)) notRun(`tarball 缺席：${tarball}（先 node scripts/dist/export-dist.mjs）`)
+if (!existsSync(tarball)) notRun(`tarball 缺席：${tarball}（先 node dev/release/export-dist.mjs）`)
 const teamSpec = process.env.TEAM_LAYER_SPEC ?? `${TEAM}@${dshVersion}`
 
 const home = mkdtempSync(join(tmpdir(), 'dsh-install-shape-'))

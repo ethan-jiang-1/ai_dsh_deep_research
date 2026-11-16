@@ -884,14 +884,14 @@ export const CASES = [
   } },
   // readme-shape：删掉 profile 引导——默认路径到不了 deep-research profile。
   { id: 'readme-shape-no-profile-bootstrap', gate: 'readme-shape', mutate: (dir) => {
-    const p = join(dir, 'scripts', 'dist', 'product-manual.md');
+    const p = join(dir, 'dev', 'release', 'product-manual.md');
     const text = readFileSync(p, 'utf8');
     if (!text.includes('--from-default-profile web')) throw new Error('夹具手册无 profile 引导——案例失效');
     writeFileSync(p, text.replaceAll('--from-default-profile web', '--from-default-profile __missing__'));
   } },
   // readme-shape：profile 引导挪到 Plugins 页之后——默认路径顺序反了（装包入口先于产品 profile）。
   { id: 'readme-shape-profile-after-plugins', gate: 'readme-shape', mutate: (dir) => {
-    const p = join(dir, 'scripts', 'dist', 'product-manual.md');
+    const p = join(dir, 'dev', 'release', 'product-manual.md');
     const text = readFileSync(p, 'utf8');
     if (!text.includes('--from-default-profile web')) throw new Error('夹具手册无 profile 引导——案例失效');
     writeFileSync(p, `${text.replaceAll('--from-default-profile web', '__PROFILE_BOOTSTRAP__')}\n\n` +
@@ -926,14 +926,14 @@ export const CASES = [
   } },
   // manual：缺安全/平台节——10+ 节的必需节不齐。
   { id: 'manual-shape-missing-security', gate: 'readme-shape', mutate: (dir) => {
-    const p = join(dir, 'scripts', 'dist', 'product-manual.md');
+    const p = join(dir, 'dev', 'release', 'product-manual.md');
     const text = readFileSync(p, 'utf8');
     if (!text.includes('## 十一、安全与平台')) throw new Error('夹具手册缺安全节——案例失效');
     writeFileSync(p, text.replace('## 十一、安全与平台', '## 十一、其他'));
   } },
   // manual：缺 Discover 的实验开关前置——市场入口不可执行。
   { id: 'manual-shape-no-market', gate: 'readme-shape', mutate: (dir) => {
-    const p = join(dir, 'scripts', 'dist', 'product-manual.md');
+    const p = join(dir, 'dev', 'release', 'product-manual.md');
     const text = readFileSync(p, 'utf8');
     if (!text.includes('Custom plugin markets')) throw new Error('夹具手册缺 Custom plugin markets——案例失效');
     writeFileSync(p, text.replaceAll('Custom plugin markets', 'custom market'));

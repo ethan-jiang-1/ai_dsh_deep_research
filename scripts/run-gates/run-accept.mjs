@@ -8,7 +8,7 @@
 // + 日期 sanity；
 // 绿才写 acceptance.md，--archive 才移入 archive/drt_<slug>/。
 //
-// 用法：source dev/env.sh && node scripts/run-ops/run-accept.mjs <bundle> [--sessions <dir>] [--archive] [--repair]
+// 用法：source dev/env.sh && node scripts/run-gates/run-accept.mjs <bundle> [--sessions <dir>] [--archive] [--repair]
 //       `--no-write` = 只跑预检、不写 bundle（绿也退出 0）；不带它则绿后给两个门 --write 落盘，
 //       再写 delivered.json/manifest.json/acceptance.md；`--archive` 才移入 archive/。
 // 退出码：0 = 验收绿（或 --no-write 预检绿）；1 = 验收红；2 = 用法/前置/未知参数。
@@ -46,7 +46,7 @@ for (let i = 0; i < argv.length; i += 1) {
 const positional = argv.filter((a) => !a.startsWith('--') && argv[argv.indexOf(a) - 1] !== '--sessions')
 const bundleArg = positional[0]
 if (bundleArg === undefined || flag('--help')) {
-  console.error('run-accept: 用法 node scripts/run-ops/run-accept.mjs <bundle> [--sessions <dir>] [--archive] [--repair]')
+  console.error('run-accept: 用法 node scripts/run-gates/run-accept.mjs <bundle> [--sessions <dir>] [--archive] [--repair]')
   process.exit(2)
 }
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null

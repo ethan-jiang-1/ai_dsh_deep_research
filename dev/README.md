@@ -1,6 +1,6 @@
 # dev/ · 入口说明（环境/构建/同步 × run 通道 × 驱动）
 
-> 维护面：operate（run + act）；`hooks/pre-commit` 是 judge。`env.sh`、预载驱动、vendor 构建配置是非面。
+> 维护面：operate（run + act）；只有 `hooks/pre-commit` 是 judge。`env.sh`、预载驱动、vendor 构建配置、手册源是非面。
 > 规则 = [surface-contract](../docs/guides/68-surface-contract.md)。
 >
 > 命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)（含 `source dev/env.sh` 前置说明）；run 通道用法 = [Run 指南](../docs/guides/61-run-playbook.md)。本页 = dev/ 每个盘上入口的职责与状态。
@@ -26,6 +26,21 @@
 | boot-run.sh | run 通道正式启动面：自检 → 组合检查/补装 → 漂移门 → boot web（默认 3083；runtime 默认 vendor 构建产物 `lib/bin.js`，`DSH_RUN_RUNTIME=source` 退回 tsx 源码）→ 后台仪表盘；`DSH_RUN_PROFILE`/`DSH_RUN_PORT`/`DSH_RUN_STATE_DIR`/`DSH_RUN_WORKSPACE` 支持多实例（自 source env.sh） |
 | llm-socket-isolation.cjs | api.deepseek.com socket 隔离预载（NODE_OPTIONS）：LLM 流与 web_search 两类请求均每请求一次性连接、永不复用；上游边缘对长命复用连接有相位性故障（[postmortem](../notes/archived/2026-10-13-llm-stream-malformed-storm.md)），移除 = 摘 boot-run 一行 |
 | run-kickoff.mjs | run 会话驱动：建 lead 会话 + 发 kickoff（GUI 的 RPC 替代入口） |
+
+## 发布与交付（act）
+
+| 件 | 职责 |
+|---|---|
+| release/export-dist.mjs | pack → `_dist/` 安装包、安装手册与 staged 市场索引（tarball/手册同版本；market 为 0 条目） |
+| release/market.mjs | 生成 `_dist/market.json`（DSH 插件市场 format 1），先过 `parseMarketIndex` 再落盘；`--check` 只校验 |
+| release/export-handoff.mjs | HEAD 的 tracked 源 → `_dist/` 干净移交包（不含运行态/凭据/run 数据/依赖）；submodule 需对方 init |
+| release/product-manual.md | 安装手册源（数据，非面；`export-dist` 消费，正文由 `dist-manual-fresh` 对账） |
+
+## 运行区清理（act）
+
+| 件 | 职责 |
+|---|---|
+| runtime-clean.mjs | 运行区清理：默认 dry-run，`--yes` 才删；白名单容器/实验根 + 子树最新 mtime 保留期（缺省 14 天）；symlink / harness-home / research-workspace / scenes 永不候选（scenes = 证据，人工处理；判据 = lib/runtime-clean-core.mjs） |
 
 ## 与用户安装路径的 parity（dev 不是另一条载入路）
 

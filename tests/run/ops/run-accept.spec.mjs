@@ -11,7 +11,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
-const src = readFileSync(join(ROOT, 'scripts', 'run-ops', 'run-accept.mjs'), 'utf8')
+const src = readFileSync(join(ROOT, 'scripts', 'run-gates', 'run-accept.mjs'), 'utf8')
 
 test('run-accept：path-hygiene 在预检中，且预检红包含它', () => {
   assert.match(src, /path-hygiene\.mjs/, 'run-accept 未调用 path-hygiene')

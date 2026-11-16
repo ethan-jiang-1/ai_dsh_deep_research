@@ -5,7 +5,7 @@
 // ——旧回执只有 `sessions: "$DSH_HOME/sessions"` 一个根。于是"哪场 run 坏了"→"该点哪个会话"
 // 这一步没有入口，agent 只能按 mtime 猜（多 run 并存时串场），或自己写 node -e 解 zstd 再
 // 文本匹配。本模块把那条谓词（绑定 = 会话日志里出现指向 `drt_<slug>/` 的路径）暴露成可复算
-// 的纯函数；CLI 壳 = scripts/run-ops/bundle-sessions.mjs。
+// 的纯函数；CLI 壳 = probes/run/bundle-sessions.mjs。
 //
 // 判据正本 = node-gate-session-gates 的 scanWitnessLogs（门①②共用的同一条绑定谓词），
 // 本模块只做聚合，不另立第二套绑定语义（两套判据会漂移）。

@@ -1,18 +1,25 @@
 #!/usr/bin/env node
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 状态：常驻
+// 一句话：M2 run 只读 HTML 投影（步骤条 / HITL 等待横幅 / 归档标注；多场扫描）
+// 何时跑：要看 run 进度或多场对比；给用户看现场
+// 档位：keyless（只读 bundle 与会话日志；写抛弃型 HTML）
+// 判据：不适用（show）
+// 不证明：交付合格；HTML 永不入库、不是事实源
 // run-dashboard — M2 run 只读观察面（RFC：notes/archived/2026-09-24-m2-run-dashboard.md
 // + debug-dashboard-plus：notes/archived/2026-09-24-debug-dashboard-plus.md）的 CLI 壳：
 // 纯管线（解析→场景→模型，全 fail-soft）住 scripts/lib/ops/run-dashboard-core.mjs；HTML 渲染 = scripts/lib/ops/run-dashboard-html.mjs
 // （2026-10-13 下沉——tests 消费纯函数不再 import CLI 入口），本件只管参数、watch 循环、输出写盘。
 //
 // 用法：
-//   node --import tsx/esm scripts/run-ops/run-dashboard.mjs <runDir> [--out <html>]          一次性生成
-//   node --import tsx/esm scripts/run-ops/run-dashboard.mjs --latest [--out <html>]          多场扫描取最新（SCENE_ROOTS）
+//   node --import tsx/esm probes/run/run-dashboard.mjs <runDir> [--out <html>]          一次性生成
+//   node --import tsx/esm probes/run/run-dashboard.mjs --latest [--out <html>]          多场扫描取最新（SCENE_ROOTS）
 //   加 --watch --interval <秒> 持续再生成（配合页面 meta refresh；默认 5s）
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { listScenes, sceneState, buildModel, deriveStep, detectHitlWait, readGuiBase, isArchivedScene, isParkedScene } from '../lib/ops/run-dashboard-core.mjs';
-import { renderHtml } from '../lib/ops/run-dashboard-html.mjs';
-import { isMain } from '../lib/shared/cli-entry.mjs';
+import { listScenes, sceneState, buildModel, deriveStep, detectHitlWait, readGuiBase, isArchivedScene, isParkedScene } from '../../scripts/lib/ops/run-dashboard-core.mjs';
+import { renderHtml } from '../../scripts/lib/ops/run-dashboard-html.mjs';
+import { isMain } from '../../scripts/lib/shared/cli-entry.mjs';
 
 // ── CLI ─────────────────────────────────────────────────────────────────────
 

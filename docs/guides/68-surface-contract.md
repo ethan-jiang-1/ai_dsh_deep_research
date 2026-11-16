@@ -37,7 +37,7 @@ operate 的两种模式：
 | 模式 | 做什么 | 失败语义 | 例 |
 |---|---|---|---|
 | **run** | 起/复用进程 | 没起来，重试即可 | [`dev/run-driver.mjs`](../../dev/run-driver.mjs) |
-| **act** | 持久改动 | 可能半途，需要 converge/repair | [`scripts/dist/export-dist.mjs`](../../scripts/dist/export-dist.mjs)、[`scripts/run-ops/runtime-clean.mjs`](../../scripts/run-ops/runtime-clean.mjs) `--yes` |
+| **act** | 持久改动 | 可能半途，需要 converge/repair | [`dev/release/export-dist.mjs`](../../dev/release/export-dist.mjs)、[`dev/runtime-clean.mjs`](../../dev/runtime-clean.mjs) `--yes` |
 
 ## 3. 判定顺序
 
@@ -60,11 +60,11 @@ operate 的两种模式：
 | 目录 | 面 | 说明 |
 |---|---|---|
 | `tests/` | test 层（不是面） | 阅读地图与车道 = [tests/AGENTS.md](../../tests/AGENTS.md)、[guides/67](./67-test-strategy.md) |
-| `probes/` | show | behavior / browser / stream 三域；`_index` 是生成器、stream tee 是驱动（§5） |
-| `scripts/` | **mixed** | judge + show + operate 同住；**组级面表 = [scripts/README.md](../../scripts/README.md)**（单一 home，本页不复制） |
-| `dev/` | operate（run + act） | 源码驱动与 run 通道；`env.sh`、预载驱动、vendor 构建配置是非面（§5），`hooks/pre-commit` 是 judge |
+| `probes/` | show | behavior / browser / run 三域 + stream 仪器；`_index` 是生成器、stream tee 是驱动（§5） |
+| `scripts/` | judge（+ 非面支撑） | `verify/`、`smoke/`、`run-gates/`（含 run-accept / acceptance-check）、`dist/`（release-check）；非面 = `test/` runner、`lib/`、support、配置 JSON |
+| `dev/` | operate（run + act） | run 通道与构建、发布交付（`release/`）、运行区清理；`hooks/pre-commit` 是 judge；配置/预载驱动/手册源是非面 |
 
-目录名是职责分组，不预告动词：`scripts/run-ops/` 名字像 operate，内容以 show 为主。面以组表与 §5 为准。
+目录与动词一一对应：judge 住 `scripts/`，只读投影住 `probes/run/`，导出与清理住 `dev/`。
 
 ## 5. 例外清单
 
@@ -72,12 +72,12 @@ operate 的两种模式：
 
 | 路径 | 面 | 理由 |
 |---|---|---|
-| `scripts/run-ops/watch-run.mjs`、`scripts/run-ops/session-events.mjs`、`scripts/run-ops/run-dashboard.mjs`、`scripts/run-ops/stream-diagnostics.mjs`、`scripts/run-ops/provider-error-stats.mjs`、`scripts/run-ops/plan-card-stats.mjs`、`scripts/run-ops/session-replay.mjs`、`scripts/run-ops/scene-capture.mjs`、`scripts/run-ops/run-inventory.mjs`、`scripts/run-ops/unconsumed-evidence.mjs`、`scripts/run-ops/bundle-sessions.mjs` | show | 只读投影/诊断/回放；exit 1 是超时、标题歧义或零绑定，不是裁决 |
-| `scripts/run-ops/run-accept.mjs`、`scripts/run-ops/acceptance-check.mjs` | judge | 交付验收原子动作 / 收活判据；红 = 不放行 |
-| `scripts/run-ops/runtime-clean.mjs` | operate（act） | 清理运行区；默认 dry-run，`--yes` 才删 |
-| `scripts/dist/export-dist.mjs`、`scripts/dist/market.mjs`、`scripts/dist/export-handoff.mjs` | operate（act） | 产出 `_dist/` 工件 |
+| `probes/run/watch-run.mjs`、`probes/run/session-events.mjs`、`probes/run/run-dashboard.mjs`、`probes/run/stream-diagnostics.mjs`、`probes/run/provider-error-stats.mjs`、`probes/run/plan-card-stats.mjs`、`probes/run/session-replay.mjs`、`probes/run/scene-capture.mjs`、`probes/run/run-inventory.mjs`、`probes/run/unconsumed-evidence.mjs`、`probes/run/bundle-sessions.mjs` | show | 只读投影/诊断/回放；exit 1 是超时、标题歧义或零绑定，不是裁决 |
+| `scripts/run-gates/run-accept.mjs`、`scripts/run-gates/acceptance-check.mjs` | judge | 交付验收原子动作 / 收活判据；红 = 不放行 |
+| `dev/runtime-clean.mjs` | operate（act） | 清理运行区；默认 dry-run，`--yes` 才删 |
+| `dev/release/export-dist.mjs`、`dev/release/market.mjs`、`dev/release/export-handoff.mjs` | operate（act） | 产出 `_dist/` 工件 |
 | `scripts/dist/release-check.mjs` | judge | 发布前版本/tag 一致性裁决 |
-| `scripts/dist/product-manual.md` | 非面（数据） | 手册源，被 `readme-shape` / `dist-manual-fresh` 门禁消费 |
+| `dev/release/product-manual.md` | 非面（数据） | 手册源，被 `readme-shape` / `dist-manual-fresh` 门禁消费 |
 | `scripts/verify/context.mjs` | 非面（助手） | 门禁共享助手（路径常量 / `gitOnce` / `trackedFiles`），不作判定 |
 | `scripts/test/run-lane.mjs` | 非面（runner） | 车道调度 |
 | `scripts/lib/*` | 非面（实现） | 支撑库，跟消费者 |
@@ -95,12 +95,10 @@ operate 的两种模式：
 
 ## 6. 已知限制与延后工作
 
-- **`scripts/` 未按面拆**：show 件（`run-ops/` 多数）与 operate 件（`dist/` 三件、`runtime-clean`）
-  仍与 judge 同桌。拆分 = 搬家，要同 diff 改门禁输入（`scripts/verify/gates/b-pack.mjs` 硬编码的手册与导出脚本路径）、
-  `package.json` 命令与各 README 面表；按面表另立迁移。
 - **目录名未统一**（目标名 checks / probes / tools）：`scripts/` 改名不只是一次路径替换，会动
   `scripts/AGENTS.md` 的目录注入面、`scripts/test-path-redirects.json` 对冻结层的旧链解析、
-  `dev/env.sh` 的 `core.hooksPath`，且组内面不改则新名仍混装。先拆组，再谈改名。
+  `dev/env.sh` 的 `core.hooksPath`。面已拆开，改名另立迁移。
+- **`scripts/dist/` 只剩 `release-check`**：分组名沿用历史（发布前裁决），不改名以免再触发一轮引用迁移。
 - **stream tee 口径差**：`probes/stream/llm-stream-tee.cjs` 按本页是非面（驱动），但
   `probe-registry` 现行按探针扫它（必须带六字段头注）。统一 = 改
   `scripts/lib/shared/probe-index.mjs` 的非探针清单，属门禁扫描面的行为改动，需红→绿留证。

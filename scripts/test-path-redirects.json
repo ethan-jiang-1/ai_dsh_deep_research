@@ -1610,6 +1610,96 @@
       "from": "tests/run/workspace-root.spec.mjs",
       "to": "tests/run/shared/workspace-root.spec.mjs",
       "reason": "2026-11-15 test-source-mirror 测试镜像"
+    },
+    {
+      "from": "scripts/run-ops/watch-run.mjs",
+      "to": "probes/run/watch-run.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/session-events.mjs",
+      "to": "probes/run/session-events.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/run-dashboard.mjs",
+      "to": "probes/run/run-dashboard.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/stream-diagnostics.mjs",
+      "to": "probes/run/stream-diagnostics.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/provider-error-stats.mjs",
+      "to": "probes/run/provider-error-stats.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/plan-card-stats.mjs",
+      "to": "probes/run/plan-card-stats.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/session-replay.mjs",
+      "to": "probes/run/session-replay.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/scene-capture.mjs",
+      "to": "probes/run/scene-capture.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/run-inventory.mjs",
+      "to": "probes/run/run-inventory.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/unconsumed-evidence.mjs",
+      "to": "probes/run/unconsumed-evidence.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/bundle-sessions.mjs",
+      "to": "probes/run/bundle-sessions.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/run-accept.mjs",
+      "to": "scripts/run-gates/run-accept.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/acceptance-check.mjs",
+      "to": "scripts/run-gates/acceptance-check.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/run-ops/runtime-clean.mjs",
+      "to": "dev/runtime-clean.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/dist/export-dist.mjs",
+      "to": "dev/release/export-dist.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/dist/market.mjs",
+      "to": "dev/release/market.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/dist/export-handoff.mjs",
+      "to": "dev/release/export-handoff.mjs",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
+    },
+    {
+      "from": "scripts/dist/product-manual.md",
+      "to": "dev/release/product-manual.md",
+      "reason": "2026-11-16 维护面拆分（show → probes/run、operate → dev）"
     }
   ]
 }

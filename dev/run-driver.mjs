@@ -199,7 +199,7 @@ const arg = (name, dflt) => {
 };
 const has = (name) => process.argv.includes(name);
 // CLI 守卫：本文件同时被 tests/run-driver-contract.spec.mjs import（纯函数面），import 时不许
-// 跑子命令（否则 `pnpm test` 里一 import 就 exit 2）。与 scripts/run-ops/run-dashboard.mjs 同款。
+// 跑子命令（否则 `pnpm test` 里一 import 就 exit 2）。与 probes/run/run-dashboard.mjs 同款。
 const isCli = isMain(import.meta.url);
 const sub = isCli ? process.argv[2] : undefined;
 const wantBootstrap = isCli && process.argv.includes('--bootstrap');

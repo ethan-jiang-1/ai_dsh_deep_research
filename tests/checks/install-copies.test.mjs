@@ -19,7 +19,7 @@ const docs = [
   'README.md',
   'packages/deep-research-pack/README.md',
   'packages/deep-research-pack/README.zh.md',
-  'scripts/dist/product-manual.md',
+  'dev/release/product-manual.md',
   '_dist/安装手册.md',
 ];
 const PROFILE = /--from-default-profile\s+web\s+--dump-default-config/;

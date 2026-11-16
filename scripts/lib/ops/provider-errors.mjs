@@ -4,7 +4,7 @@
 // 事件形状本身是嵌套 JSON，**解析**才是对的判据（"parse, don't regex"）：
 //   `{"type":"turn/end", …, "data":{"turn":N,"reason":{"kind":"error","error":{"message":"…","code":"MALFORMED_RESPONSE"}}}}`
 // 上游只读、本仓修不了（BUG-022）：能做的是**可复跑地数**它、并让恢复程序有据可依。
-// 消费方 = `scripts/run-ops/provider-error-stats.mjs`（跨场分布）与 keyless 契约测试。
+// 消费方 = `probes/run/provider-error-stats.mjs`（跨场分布）与 keyless 契约测试。
 
 /**
  * 抽取日志里所有**被错误终结的回合**（判据 = `turn/end` 且 `reason.kind === 'error'`）。

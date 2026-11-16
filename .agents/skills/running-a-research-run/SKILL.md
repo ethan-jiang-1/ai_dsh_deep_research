@@ -39,7 +39,7 @@ run 的操作面是**文件 + 会话通道**，不是代码。启动器、观察
   **不许自创**：不手起 `dsh --profile deep-research`、不重复 `--from-default-profile`、不手写 roster、
   roster 变更不跳过重启；
   改了 pack 文本（persona/skill/手册）必须重启通道——**web 进程缓存 boot 时的文本**；
-- 观察面两处、同一折算：`node scripts/run-ops/run-dashboard.mjs --latest --out <html>`（或 `--watch`，
+- 观察面两处、同一折算：`node probes/run/run-dashboard.mjs --latest --out <html>`（或 `--watch`，
   多场扫描的 HTML 投影）与 GUI 右栏「研究状态」页签（会话内实时：步骤条 + HITL 挂起横幅 +
   活标题「研究状态 · ⏳ 等你拍板」）——"这次 run 是否在等我"两处答案一致。
 
@@ -71,7 +71,7 @@ question.md + topics.md 定稿后**再发计划确认卡**（≤200 字计划要
   **会话日志尾部不保证**：在飞写入丢尾实测 303→158 事件（BUG-007 卡正本），盘侧谓词
   消费前先过 `eventsRegressed` 回退检测；
 - 会话日志是 zstd **多帧**拼接（逐次 append 一帧），单帧 API 只解出首帧——按魔数
-  `28 B5 2F FD` 切段逐帧解压（`scripts/run-ops/run-dashboard.mjs` 有实现）。
+  `28 B5 2F FD` 切段逐帧解压（`probes/run/run-dashboard.mjs` 有实现）。
 
 ## 4. 交付落位（完成判据）
 

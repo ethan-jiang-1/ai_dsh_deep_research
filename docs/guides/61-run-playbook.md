@@ -89,7 +89,7 @@
   用户自设代理 env 时 LLM SSE 流可能被撕裂（BUG-023 教训——遇「event precedes message_start」
   先查代理路径，不要先怀疑上游）。零干预的理由与拆掉的方案 =
   [网络零干预 Note](../../notes/rejected/2026-10-13-network-vanilla-restore.md)；
-  - **出问题第一步 = 诊断**：先把「哪场 run」变成「哪个会话」——`node scripts/run-ops/bundle-sessions.mjs <bundle|slug>`（bundle 不记会话 id，这是唯一反查入口；判据 = 写过 `drt_<slug>/` 的 lead 会话，并直接打印下一步命令）；再 `node scripts/run-ops/stream-diagnostics.mjs --session <标题|id>`（或 `--recent N`）——输出模型尝试时间线、失败密度、provider/重试策略实名、该会话的工具调用与检索查询。判定行直接给"链路/上游态 vs 间歇性"。
+  - **出问题第一步 = 诊断**：先把「哪场 run」变成「哪个会话」——`node probes/run/bundle-sessions.mjs <bundle|slug>`（bundle 不记会话 id，这是唯一反查入口；判据 = 写过 `drt_<slug>/` 的 lead 会话，并直接打印下一步命令）；再 `node probes/run/stream-diagnostics.mjs --session <标题|id>`（或 `--recent N`）——输出模型尝试时间线、失败密度、provider/重试策略实名、该会话的工具调用与检索查询。判定行直接给"链路/上游态 vs 间歇性"。
 - **web 进程生命周期（实测约束）**：`boot-run.sh` 把 web 跑在**前台**并用 trap 管子进程——
   **脚本退出即 web 停**（这是特性：不留孤儿）。因此：
 
@@ -206,9 +206,9 @@ BUG-020）。
   进 HITL2**（审计判据正本 = 研究手册「机械强度诚实记账」节）；CRITICAL>0 = 证据链有
   伪造/断链，先让 lead 修证据再回来；review 的 readiness 若为**附条件 PASS**，node-gate
   门A 会带 ⚠ 注记显性化——拍板时先核条件（裁决归你，机械门不替你拦）；
-- **保留期视图（只读）**：`node scripts/run-ops/run-inventory.mjs --workspace research-workspace` 列出每场
+- **保留期视图（只读）**：`node probes/run/run-inventory.mjs --workspace research-workspace` 列出每场
   run 的文件数/大小/最老日期与合计（`--json` 给脚本）；它不删除任何文件，删/归档仍是显式动作。
-- **拍板后操作侧跑一次验收（原子动作）**：`source dev/env.sh && node scripts/run-ops/run-accept.mjs
+- **拍板后操作侧跑一次验收（原子动作）**：`source dev/env.sh && node scripts/run-gates/run-accept.mjs
   research-workspace/drt_<slug>`——node-gate + evidence-audit + path-hygiene（本机 home 路径）+ 未来日期 sanity 同次跑；预检红不写，绿写
   `delivered.json` + `manifest.json` + `acceptance.md`（新 run 非 quick_factual 的 reader 角色/哈希一并绑定）；`acceptance.md` 的「人工走查」节是 L4 ③④ 的唯一载体，重跑验收与 `--repair` 保留该节；回执里 present 只记
   `drt_<slug>/final/vN` 相对标签，不写本机绝对路径；落盘后还会复检一次门禁/审计生成物。复核后加 `--archive` 才移入

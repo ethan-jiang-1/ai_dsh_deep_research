@@ -62,7 +62,7 @@ git clone --recurse-submodules https://github.com/ethan-jiang-1/ai_dsh_deep_rese
 cd ai_dsh_deep_research
 pnpm install
 bash dev/vendor-build.sh          # pack's tsc reads vendor lib/types
-node scripts/dist/export-dist.mjs # writes _dist/tarball + manual + market
+node dev/release/export-dist.mjs # writes _dist/tarball + manual + market
 ```
 
 ```sh
@@ -88,7 +88,7 @@ run data:
 
 ```sh
 node scripts/dist/release-check.mjs --handoff
-node scripts/dist/export-handoff.mjs --out /tmp/handoff
+node dev/release/export-handoff.mjs --out /tmp/handoff
 node scripts/smoke/handoff.e2e.mjs
 ```
 

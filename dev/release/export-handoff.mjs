@@ -8,7 +8,7 @@
 // 产物 = git archive 的 tracked 源 + 包内 HANDOFF.md。tar 不含 .git，所以 HANDOFF 给两条接收
 // 路径：有 git 的 clone；只有 tar 的 git init → fetch → reset → submodule update。
 // vendor/dsh 是 submodule，内容不在 tar 里，两条路径都需要网络取它。
-// 用法：node scripts/dist/export-handoff.mjs [--out <dir>]
+// 用法：node dev/release/export-handoff.mjs [--out <dir>]
 // 退出码：0 产物可用 / 1 检查失败 / 2 前置缺席（未跑 ≠ 通过）。
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
@@ -16,7 +16,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync }
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { isMain } from '../lib/shared/cli-entry.mjs'
+import { isMain } from '../../scripts/lib/shared/cli-entry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')

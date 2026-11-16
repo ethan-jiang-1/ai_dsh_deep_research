@@ -1,7 +1,14 @@
 #!/usr/bin/env node
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 状态：常驻
+// 一句话：bundle → 见证会话反查 + 状态摘要 + 下一步命令
+// 何时跑：诊断第一步：bundle 不记会话 id，需要拿会话 id
+// 档位：keyless（须先 source；默认只扫 research-workspace 组）
+// 判据：不适用（show；exit 1 = 零绑定，不是裁决）
+// 不证明：交付合格；零绑定不等于没跑过（可能换了组）
 // bundle-sessions.mjs — run bundle → 见证会话清单（诊断入口的第一步）。
 //
-// 用法：source dev/env.sh && node scripts/run-ops/bundle-sessions.mjs <bundle|slug> [--sessions <dir>] [--json] [--no-cache]
+// 用法：source dev/env.sh && node probes/run/bundle-sessions.mjs <bundle|slug> [--sessions <dir>] [--json] [--no-cache]
 // 退出码：0 = 找到见证会话 / 1 = 语料在场但零绑定会话 / 2 = 用法或前置缺席（未跑 ≠ 通过）。
 //
 // 为什么要它：诊断一律从会话起手（`stream-diagnostics --session <标题|id>`），而 bundle 里
@@ -10,11 +17,11 @@
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { sessionsOfBundleCached } from '../lib/ops/bundle-sessions.mjs'
-import { readZstdText } from '../lib/shared/zstd-read.mjs'
-import { defaultGroupSubstring, workspaceRoot } from '../lib/shared/workspace-root.mjs'
-import { resolveSessionLog } from '../lib/shared/session-log.mjs'
-import { runStateOf } from '../lib/shared/run-state.mjs'
+import { sessionsOfBundleCached } from '../../scripts/lib/ops/bundle-sessions.mjs'
+import { readZstdText } from '../../scripts/lib/shared/zstd-read.mjs'
+import { defaultGroupSubstring, workspaceRoot } from '../../scripts/lib/shared/workspace-root.mjs'
+import { resolveSessionLog } from '../../scripts/lib/shared/session-log.mjs'
+import { runStateOf } from '../../scripts/lib/shared/run-state.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)
@@ -26,7 +33,7 @@ const flag = (name) => argv.includes(name)
 const target = argv.find((a) => !a.startsWith('--') && argv[argv.indexOf(a) - 1] !== '--sessions')
 
 if (target === undefined || flag('--help')) {
-  console.error('bundle-sessions: 用法 node scripts/run-ops/bundle-sessions.mjs <bundle|drt_<slug>|slug> [--sessions <dir>] [--json]')
+  console.error('bundle-sessions: 用法 node probes/run/bundle-sessions.mjs <bundle|drt_<slug>|slug> [--sessions <dir>] [--json]')
   process.exit(2)
 }
 
@@ -96,7 +103,7 @@ try {
 }
 console.log('')
 console.log('下一步（诊断）：')
-console.log(`  node scripts/run-ops/stream-diagnostics.mjs --session ${top.sessionId}`)
+console.log(`  node probes/run/stream-diagnostics.mjs --session ${top.sessionId}`)
 // watch-run 的判据参数是 **session-id**，不是 slug（2026-11-03 实测：传 slug → exit 2）。
-console.log(`  node scripts/run-ops/watch-run.mjs ${top.sessionId}`)
+console.log(`  node probes/run/watch-run.mjs ${top.sessionId}`)
 process.exit(0)

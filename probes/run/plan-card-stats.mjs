@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 状态：常驻
+// 一句话：计划确认卡字数的跨场分布投影（升硬门前置的可复跑仪器）
+// 何时跑：评估「连续多场 ≤200 字」是否达标
+// 档位：keyless（须先 source dev/env.sh）
+// 判据：不适用（show）
+// 不证明：单场超限判定（= node-gate 门①）
 // plan-card-stats —— HITL1「计划确认卡」字数的**跨场分布投影**（只读；run-ops 层）。
 //
 // 为什么存在：node-gate 门① 只判**单场**（该 bundle 的计划卡超限 → WARN 记账）。而 ①-c 的
@@ -9,12 +16,12 @@
 // 口径与识别**不在这里**：`scripts/lib/shared/plan-card.mjs` 是唯一语义源（与门① 同源消费）——本件只做
 // 扫描、聚合与呈现。判据语义（严重级 = WARN、升格条件）= notes/implemented/2026-10-11-plan-card-length-warn.md。
 //
-// 用法：source dev/env.sh && node scripts/run-ops/plan-card-stats.mjs [--days 30] [--group <子串>] [--json]
+// 用法：source dev/env.sh && node probes/run/plan-card-stats.mjs [--days 30] [--group <子串>] [--json]
 // 退出码：0 = 正常输出（超限与否不是本工具的判据）/ 2 = 用法或前置错（未 source dev/env.sh）
 import { join, resolve } from 'node:path';
-import { readSessionText, sessionLogsSince } from '../lib/shared/session-log.mjs';
-import { defaultGroupSubstring } from '../lib/shared/workspace-root.mjs';
-import { planCardsOf, PLAN_CARD_LIMIT } from '../lib/shared/plan-card.mjs';
+import { readSessionText, sessionLogsSince } from '../../scripts/lib/shared/session-log.mjs';
+import { defaultGroupSubstring } from '../../scripts/lib/shared/workspace-root.mjs';
+import { planCardsOf, PLAN_CARD_LIMIT } from '../../scripts/lib/shared/plan-card.mjs';
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);

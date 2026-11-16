@@ -6,14 +6,14 @@
 // （`plugins: []`）+ 明确文案，发现面可见但**不承诺可安装**；npm 发布后再由发布流程恢复条目。
 //
 // 纪律：产物必须先过 DSH 自己的 `parseMarketIndex` 再落盘；本脚本不发明格式。
-// 用法：node scripts/dist/market.mjs [--check]（--check 只校验不写盘）
+// 用法：node dev/release/market.mjs [--check]（--check 只校验不写盘）
 
 import { createHash } from 'node:crypto'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseMarketIndex } from '@deepseek-ai/dsh-plugin-market-index'
-import { isMain } from '../lib/shared/cli-entry.mjs'
+import { isMain } from '../../scripts/lib/shared/cli-entry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const DIST = join(ROOT, '_dist')

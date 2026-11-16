@@ -111,8 +111,8 @@ export function runB() {
         if (!ok) fail(gate, `${rel} 的 engines.dsh 副本与 package.json 不一致（应为 ${exact ? range : endpoints.join(' / ')}）——同一事实多副本必须同步`);
       }
       // 手册源是模板：{dshEngine} 由 export-dist 注入；占位符改名/删除会让生成物失去版本事实。
-      const manualSource = readFileSync(join(ROOT, 'scripts/dist/product-manual.md'), 'utf8');
-      if (!manualSource.includes('{{dshEngine}}')) fail(gate, 'scripts/dist/product-manual.md 缺 {{dshEngine}} 占位——手册生成物拿不到 engines.dsh');
+      const manualSource = readFileSync(join(ROOT, 'dev/release/product-manual.md'), 'utf8');
+      if (!manualSource.includes('{{dshEngine}}')) fail(gate, 'dev/release/product-manual.md 缺 {{dshEngine}} 占位——手册生成物拿不到 engines.dsh');
     }
   }
 }
@@ -407,7 +407,7 @@ export function runB() {
 {
   const gate = 'market-index';
   const indexPath = join(ROOT, '_dist', 'market.json');
-  if (!existsSync(indexPath)) fail(gate, '_dist/market.json 缺席——跑 node scripts/dist/export-dist.mjs 导出');
+  if (!existsSync(indexPath)) fail(gate, '_dist/market.json 缺席——跑 node dev/release/export-dist.mjs 导出');
   else {
     let doc;
     try { doc = JSON.parse(readFileSync(indexPath, 'utf8')) } catch (error) { fail(gate, `market.json 不是合法 JSON：${String(error)}`) }
@@ -432,7 +432,7 @@ export function runB() {
 {
   const gate = 'readme-shape';
   const readmePath = join(PACK, 'README.md');
-  const manualPath = join(ROOT, 'scripts', 'dist', 'product-manual.md');
+  const manualPath = join(ROOT, 'dev', 'release', 'product-manual.md');
   if (!existsSync(readmePath)) fail(gate, 'pack README 缺席');
   else {
     const readme = readFileSync(readmePath, 'utf8');
@@ -463,7 +463,7 @@ export function runB() {
     if (/dsh\.compatibility/.test(readme)) fail(gate, 'README 仍写已删除的 dsh.compatibility 字段（版本合同只有 engines.dsh）');
     if (readme.split('\n').length > 310) fail(gate, `README 超出 310 行预算（当前 ${readme.split('\n').length}）——把维护者/架构内容下沉，不要扩顶`);
   }
-  if (!existsSync(manualPath)) fail(gate, '安装手册源 scripts/dist/product-manual.md 缺席');
+  if (!existsSync(manualPath)) fail(gate, '安装手册源 dev/release/product-manual.md 缺席');
   else {
     const manual = readFileSync(manualPath, 'utf8');
     const sections = [...manual.matchAll(/^## [一二三四五六七八九十]+、/gm)].length;
@@ -496,7 +496,7 @@ export function runB() {
   const files = [
     'README.md', 'CONTRIBUTING.md',
     'packages/deep-research-pack/README.md', 'packages/deep-research-pack/AGENTS.md',
-    'scripts/dist/product-manual.md',
+    'dev/release/product-manual.md',
     'docs/00-index.md', 'docs/evaluation.md', 'docs/project-map.md', 'docs/discipline-map.md',
     'docs/guides/60-dev-loop.md', 'docs/guides/61-run-playbook.md', 'docs/guides/62-plugin-authoring.md',
     'docs/guides/63-git-boundary.md', 'docs/guides/64-release-versioning.md', 'docs/guides/65-run-forms.md',
@@ -519,9 +519,9 @@ export function runB() {
 // 反证：向 _dist/安装手册.md 正文追加一行 → 红；重导出 → 绿。
 {
   const gate = 'dist-manual-fresh';
-  const sourcePath = join(ROOT, 'scripts', 'dist', 'product-manual.md');
+  const sourcePath = join(ROOT, 'dev', 'release', 'product-manual.md');
   const generatedPath = join(ROOT, '_dist', '安装手册.md');
-  if (!existsSync(generatedPath)) fail(gate, '_dist/安装手册.md 缺席——先 node scripts/dist/export-dist.mjs');
+  if (!existsSync(generatedPath)) fail(gate, '_dist/安装手册.md 缺席——先 node dev/release/export-dist.mjs');
   else {
     const marker = '## 一、';
     const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
@@ -532,7 +532,7 @@ export function runB() {
       .replaceAll('{{tarballName}}', `dsh-deep-research-pack-${pkg.version}.tgz`)
       .replaceAll('{{dshEngine}}', pkg.engines?.dsh ?? '');
     const b = generated.slice(generated.indexOf(marker));
-    if (a !== b) fail(gate, '源手册正文与 _dist/安装手册.md 不一致——改源后跑 node scripts/dist/export-dist.mjs');
+    if (a !== b) fail(gate, '源手册正文与 _dist/安装手册.md 不一致——改源后跑 node dev/release/export-dist.mjs');
   }
 }
 

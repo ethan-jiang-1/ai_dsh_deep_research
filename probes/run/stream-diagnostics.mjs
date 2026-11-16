@@ -1,15 +1,22 @@
 #!/usr/bin/env node
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 状态：常驻
+// 一句话：流失败归因诊断：模型尝试时间线 / 失败密度 / provider 与重试策略实名
+// 何时跑：回合被流错误终结、重试风暴、上游错误归因
+// 档位：keyless（读会话日志）
+// 判据：不适用（show）
+// 不证明：上游修复；也不判 run 交付
 // stream-diagnostics —— 流失败归因诊断（"把诊断埋进去"的落点；run-ops 观察工具）。
 //
 // 一条命令回答三个问题：①模型尝试时间线（成功/失败/码/间隔）；②失败密度与分布；
 // ③重试策略与 provider 实名（策略串来自 llm/retry 事件）。
 //
 // 用法：
-//   node scripts/run-ops/stream-diagnostics.mjs --session <id|标题子串>
-//   node scripts/run-ops/stream-diagnostics.mjs --recent 3        # 最近 3 个有模型活动的会话
+//   node probes/run/stream-diagnostics.mjs --session <id|标题子串>
+//   node probes/run/stream-diagnostics.mjs --recent 3        # 最近 3 个有模型活动的会话
 //   追加 --json 输出机器可读结果。
-import { readSessionEvents, resolveSessionLog } from '../lib/shared/session-log.mjs';
-import { analyzeModelAttempts, selectRecentActiveSessions } from '../lib/ops/stream-diagnostics-core.mjs';
+import { readSessionEvents, resolveSessionLog } from '../../scripts/lib/shared/session-log.mjs';
+import { analyzeModelAttempts, selectRecentActiveSessions } from '../../scripts/lib/ops/stream-diagnostics-core.mjs';
 import { readdirSync, statSync, existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';

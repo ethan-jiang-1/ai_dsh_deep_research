@@ -1,9 +1,16 @@
 #!/usr/bin/env node
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 状态：常驻
+// 一句话：场景包捕获/读取：截图 + DOM + 正文 + console + meta（token 脱敏）
+// 何时跑：看见「当时页面」；事后看现场（--list / --show）
+// 档位：抓取 keyless（真实浏览器，须起通道）；读取 keyless（纯读盘）
+// 判据：不适用（show）
+// 不证明：页面正确性；它是在场证据，不是判定
 // scene-capture.mjs — 把"当时页面"抓成一个可复核的场景包（截图 + DOM + 正文 + console + meta）。
 //
 // 为什么存在（2026-10-20 审计 P0-4）：调试/复现时，agent 只能拿到 PASS/FAIL 文本；页面
 // 到底长什么样、console 报了什么，没有统一留痕。本工具是"看见页面"的最小入口：
-//   node scripts/run-ops/scene-capture.mjs '<gui-url>' [--out runtime/scenes/<name>] [--wait-ms 2000]
+//   node probes/run/scene-capture.mjs '<gui-url>' [--out runtime/scenes/<name>] [--wait-ms 2000]
 // 输出目录四件套 page.png / page.html / body.txt / console.txt + meta.json（token 已脱敏）。
 // 读取半边（2026-10-21 卫生轮——场景包此前全仓零消费者，抓了只能人肉开文件）：
 //   --list                 列既有场景包（mtime 降序；缺件/坏 meta 如实标记）
@@ -13,8 +20,8 @@
 import { mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { launchCdpBrowser } from '../lib/shared/cdp-driver.mjs'
-import { listScenePacks, readScenePack, PACK_FILES } from '../lib/ops/scene-pack.mjs'
+import { launchCdpBrowser } from '../../scripts/lib/shared/cdp-driver.mjs'
+import { listScenePacks, readScenePack, PACK_FILES } from '../../scripts/lib/ops/scene-pack.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)
@@ -71,7 +78,7 @@ if (argv.includes('--show')) {
 const positional = argv.filter((a) => !a.startsWith('--') && argv[argv.indexOf(a) - 1] !== '--out' && argv[argv.indexOf(a) - 1] !== '--wait-ms' && argv[argv.indexOf(a) - 1] !== '--show' && argv[argv.indexOf(a) - 1] !== '--scenes-dir')
 const url = positional[0]
 if (url === undefined || !/^(https?|data):/.test(url)) {
-  console.error("scene-capture: 用法 node scripts/run-ops/scene-capture.mjs '<http(s)/data url>' [--out <dir>] [--wait-ms 2000]")
+  console.error("scene-capture: 用法 node probes/run/scene-capture.mjs '<http(s)/data url>' [--out <dir>] [--wait-ms 2000]")
   process.exit(2)
 }
 const waitMs = Number(opt('--wait-ms', '2000'))

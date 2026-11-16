@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 状态：常驻
+// 一句话：bundle 的 evidence/ 未进 findings.md 的差集投影（收尾核验入口）
+// 何时跑：收活前核验证据是否被消费
+// 档位：keyless（纯读盘）
+// 判据：不适用（show；exit 0 = 正常投影）
+// 不证明：证据质量与结论正确性
 // unconsumed-evidence —— B1 差集出题的操作侧 CLI（run-ops 层；2026-10-21 卫生轮 B8 补壳）。
 //
 // 为什么存在：lib/unconsumed-evidence.mjs 头注承诺"供操作侧收尾核验"（critic 差集出题的
@@ -6,16 +13,16 @@
 // 唯一语义源 = scripts/lib/ops/unconsumed-evidence.mjs（消费方 = 本件与 keyless 契约测试
 // tests/run/ops/unconsumed-evidence.spec.mjs）；活体验证 E2E = notes/archived/2026-10-07-living-verification-hook.md。
 //
-// 用法：node scripts/run-ops/unconsumed-evidence.mjs <bundleDir> [--json]
+// 用法：node probes/run/unconsumed-evidence.mjs <bundleDir> [--json]
 // 退出码：0 = 正常投影（有无未消费证据是结论不是工具错误）/ 2 = 用法或前置错（bundle 缺席等）
 import { existsSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { unconsumedEvidence } from '../lib/ops/unconsumed-evidence.mjs';
+import { unconsumedEvidence } from '../../scripts/lib/ops/unconsumed-evidence.mjs';
 
 const JSON_OUT = process.argv.includes('--json');
 const positional = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 if (positional.length !== 1) {
-  console.error('用法：node scripts/run-ops/unconsumed-evidence.mjs <bundleDir> [--json]');
+  console.error('用法：node probes/run/unconsumed-evidence.mjs <bundleDir> [--json]');
   console.error('  <bundleDir> = run bundle 根（drt_<slug>/，含 evidence/ 与 findings.md）');
   process.exit(2);
 }

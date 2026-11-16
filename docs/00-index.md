@@ -11,15 +11,15 @@
 **先记住这条模型**：本包是 DSH 插件（bundle），运行环境 = 用户自建的 **custom profile**
 `deep-research`（[D41](./decisions.md#d41)）。首次由 CLI 建 profile（仅首次、破坏性）；**当前 0.3.6 用本地 tarball 装包（`file:`）**，npm/Plugins 页/Discover 为 staged（未发布 npm）；启动 `dsh --profile deep-research`。没有 launcher、没有 scaffold、没有自定义安装器；
 只保留只读 doctor。开发者在本仓走同名 profile（隔离 home）+ `research-workspace/` + run-driver。
-两条路径的命令与数据根不同，不要互相套用。**完整安装合同的 owner = [`scripts/dist/product-manual.md`](../scripts/dist/product-manual.md)；生成物 = [`_dist/安装手册.md`](../_dist/安装手册.md)（勿手改，重导出 = `node scripts/dist/export-dist.mjs`）；根 [README](../README.md) 承担用户路径（最短安装 + 一次走查），包 README 承担包级安装摘要与首装顺序（`readme-shape` + `install-copies` 校验），完整步骤归手册，完整合同 = 手册，命令由契约测试对账**。
+两条路径的命令与数据根不同，不要互相套用。**完整安装合同的 owner = [`dev/release/product-manual.md`](../dev/release/product-manual.md)；生成物 = [`_dist/安装手册.md`](../_dist/安装手册.md)（勿手改，重导出 = `node dev/release/export-dist.mjs`）；根 [README](../README.md) 承担用户路径（最短安装 + 一次走查），包 README 承担包级安装摘要与首装顺序（`readme-shape` + `install-copies` 校验），完整步骤归手册，完整合同 = 手册，命令由契约测试对账**。
 
 | 用户的说法 | 走哪（该事的唯一 owner） | 首个动作 |
 |---|---|---|
-| "用它""启动这个插件""跑研究""装到我的 DSH"（安装用户） | [`_dist/安装手册.md`](../_dist/安装手册.md)（生成物；源 = [product-manual](../scripts/dist/product-manual.md)）+ [pack README](../packages/deep-research-pack/README.md) + [guides/65](./guides/65-run-forms.md) | 按手册：CLI 建 profile（仅首次）→ `dsh plugin --profile deep-research add file:<tgz>`（当前唯一发布形态）；npm/Plugins 页/Discover 为 staged |
+| "用它""启动这个插件""跑研究""装到我的 DSH"（安装用户） | [`_dist/安装手册.md`](../_dist/安装手册.md)（生成物；源 = [product-manual](../dev/release/product-manual.md)）+ [pack README](../packages/deep-research-pack/README.md) + [guides/65](./guides/65-run-forms.md) | 按手册：CLI 建 profile（仅首次）→ `dsh plugin --profile deep-research add file:<tgz>`（当前唯一发布形态）；npm/Plugins 页/Discover 为 staged |
 | "在本仓启动/开跑/接着上次跑"（开发通道，默认 `runtime/harness-home`） | [guides/61](./guides/61-run-playbook.md) | `node dev/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 呈交 URL） |
 | "换 profile/home""装进现有 web profile""诊断装得对不对" | [guides/65](./guides/65-run-forms.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | 换 profile 用新名字重新初始化；**已有 profile 不要重复 `--from-default-profile`**（破坏性）；诊断 = 安装副本的 `dsh-deep-research-doctor` |
 | "只验证插件还能挂载/安装"（证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `node scripts/smoke/install-shape.entry.mjs`（自带临时 home，无需 source；或 `source dev/env.sh && node scripts/smoke/preset.e2e.mjs` / `release.entry`） |
-| "复现/验证某个机制"（模型不按纪律/角色、GUI、入口链、流） | [guides/66](guides/66-probe-playbook.md) + [probes/](../probes/README.md) | 先看 [探针索引](../probes/INDEX.generated.md)，再跑现有探针；没有就按指南新增 |
+| "复现/验证某个机制"（模型不按纪律/角色、GUI、入口链、流）或"看 run 现场"（状态/会话/交付投影） | [guides/66](guides/66-probe-playbook.md) + [probes/](../probes/README.md) | 先看 [探针索引](../probes/INDEX.generated.md)，再跑现有探针或 `run/` 取证件；没有就按指南新增 |
 | "这次改动该配什么证据 / 算不算够" | [guides/67](./guides/67-test-strategy.md) | 先归失败类，再选最低可见层；五关/四账/三环；命名车道 = D53 |
 | "改插件内容"（角色 / skill / 驾驶舱 / 部署面） | [guides/62](./guides/62-plugin-authoring.md) | 该页 §参与阶梯 + §改动影响面 |
 | "改本仓开发流程或仓库文档"（门禁 / docs / notes / 入口链 / 各 README） | [guides/60 §1](./guides/60-dev-loop.md) | 按工作类型分支（入口链第 3–4 步在此展开） |

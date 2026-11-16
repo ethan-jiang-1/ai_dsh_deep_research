@@ -119,7 +119,7 @@ const waitFor = (child, pattern, timeoutMs) => new Promise((resolveWait) => {
 })
 
 if (!existsSync(BIN)) { console.error('data.entry: vendor/dsh 源码不在位——未跑 ≠ 通过'); process.exit(2) }
-if (!existsSync(TARBALL)) { console.error(`data.entry: tarball 缺席（${TARBALL}）——先 node scripts/dist/export-dist.mjs`); process.exit(2) }
+if (!existsSync(TARBALL)) { console.error(`data.entry: tarball 缺席（${TARBALL}）——先 node dev/release/export-dist.mjs`); process.exit(2) }
 
 rmSync(TEMP, { recursive: true, force: true })
 mkdirSync(HOME, { recursive: true })

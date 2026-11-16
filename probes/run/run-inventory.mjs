@@ -1,14 +1,21 @@
 #!/usr/bin/env node
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 状态：常驻
+// 一句话：run bundle 只读保留期视图（数量 / 大小 / 最老日期；不删任何东西）
+// 何时跑：清理运行区前先看有几场、多大；保留期评估
+// 档位：keyless（纯读盘）
+// 判据：不适用（show）
+// 不证明：删除决策（删除 = 用户显式动作）
 // run-inventory.mjs — run bundle 的只读保留期视图（数量/大小/最老日期；不删任何东西）。
 //
 // 为什么存在：run bundle/归档是用户数据，没有自动 GC。删除必须由用户显式决定，前提是
 // 能看见「有几场、多大、最老多久」。本工具只读；`--json` 给脚本消费。
 //
-// 用法：node scripts/run-ops/run-inventory.mjs --workspace <研究工作区> [--json]
+// 用法：node probes/run/run-inventory.mjs --workspace <研究工作区> [--json]
 // 退出码：0 成功（含空工作区）；2 用法/前置缺失。
 import { existsSync, lstatSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { formatAge, formatBytes, summarizeRuns } from '../lib/ops/run-inventory-core.mjs'
+import { formatAge, formatBytes, summarizeRuns } from '../../scripts/lib/ops/run-inventory-core.mjs'
 
 const argv = process.argv.slice(2)
 const value = (name, fallback = null) => {
@@ -18,7 +25,7 @@ const value = (name, fallback = null) => {
 const workspace = value('--workspace')
 const asJson = argv.includes('--json')
 if (workspace === null) {
-  console.error('run-inventory: 用法 node scripts/run-ops/run-inventory.mjs --workspace <研究工作区> [--json]')
+  console.error('run-inventory: 用法 node probes/run/run-inventory.mjs --workspace <研究工作区> [--json]')
   process.exit(2)
 }
 const root = resolve(workspace)

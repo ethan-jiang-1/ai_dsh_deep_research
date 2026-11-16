@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // export-dist.mjs — 一条命令出完整交付：tarball + 安装手册 → _dist/。
-// 精神移植自 ai_dsh_architect scripts/dist/export-dist.mjs（docs/distribution.md 的导出合同）：
+// 精神移植自 ai_dsh_architect dev/release/export-dist.mjs（docs/distribution.md 的导出合同）：
 //   ① 手册是**生成物**不是手写物——版本/日期/条目数在导出时注入，手册与旁边的 tarball 不能漂移；
 //   ② 打包步骤 = release.entry 每轮证明的同一条 `npm pack`（cache 钉进仓库 gitignored 区，
 //      工具态纪律：npm 不碰 ~/.npm）；inventory 在导出的产物本体上重申发布边界；
@@ -11,7 +11,7 @@
 // 导出不是发布：不动版本、不跑自带门禁之外的面、不发布任何东西——打包的是当下工作树的 pack；
 // 市场索引（_dist/market.json）与 tarball/手册同源同版本，供 Plugins → Discover 添加。
 //
-// 用法：node scripts/dist/export-dist.mjs
+// 用法：node dev/release/export-dist.mjs
 
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
@@ -19,8 +19,8 @@ import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSyn
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localDateStr } from '../lib/shared/local-date.mjs'
-import { packInputRoots, writeBuildManifest } from '../lib/shared/artifact-freshness.mjs'
+import { localDateStr } from '../../scripts/lib/shared/local-date.mjs'
+import { packInputRoots, writeBuildManifest } from '../../scripts/lib/shared/artifact-freshness.mjs'
 import { writeMarketIndex } from './market.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -110,7 +110,7 @@ try {
   // 3. 手册——版本/日期/条目数注入，让它指名它旁边这份产物；步骤 = release.entry 的路径
   //    日期 = 本地口径（人读日期行；UTC slice 在 00:00–08:00 窗口差一天——BUG-017 同款口径纪律）
   const date = localDateStr()
-  const manual = readFileSync(join(ROOT, 'scripts', 'dist', 'product-manual.md'), 'utf8')
+  const manual = readFileSync(join(ROOT, 'dev', 'release', 'product-manual.md'), 'utf8')
     .replaceAll('{{version}}', version)
     .replaceAll('{{tarballName}}', tarballName)
     .replaceAll('{{date}}', date)

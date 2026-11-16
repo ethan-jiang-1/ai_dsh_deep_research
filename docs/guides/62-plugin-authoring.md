@@ -113,7 +113,7 @@ agent-instructions 注入，冲突时项目优先。安装步骤（用户视角�
 
 本仓开发面的生成物各有生成器与新鲜度门禁（漂移即红）：`dev/research.overlay.yml`
 （`dev/render-overlay.mjs` → `overlay-fresh`）、run 通道 profile 镜像
-（`dev/boot-run.sh` 幂等重建，逐文件漂移检测）、dist 导出手册（`scripts/dist/export-dist.mjs`
+（`dev/boot-run.sh` 幂等重建，逐文件漂移检测）、dist 导出手册（`dev/release/export-dist.mjs`
 → `dist-manual-version`——一条命令出 tarball + 安装手册到 `_dist/`，tarball 不进库，
 手册 tracked；版本动必须重导出，导出不是发布）。
 

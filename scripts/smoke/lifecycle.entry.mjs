@@ -10,7 +10,7 @@
 //   ⑥ `dsh plugin remove` 后 roster 回到 base + web-app
 //
 // 前置：PATH 上有 dsh 与 pnpm；`_dist` 里同时有本版本 tarball 与 market.json（先跑
-// `node scripts/dist/export-dist.mjs`）。缺任一 = exit 2（未跑 ≠ 通过）；断言失败 = exit 1。
+// `node dev/release/export-dist.mjs`）。缺任一 = exit 2（未跑 ≠ 通过）；断言失败 = exit 1。
 // 用法：node scripts/smoke/lifecycle.entry.mjs
 import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
@@ -38,8 +38,8 @@ const version = spawnSync(dsh, ['--version'], { encoding: 'utf8' })
 if (version.status !== 0) notRun(`找不到 dsh（${dsh}）；用 DSH_BIN 指定`)
 const tarball = process.env.PACK_TARBALL ?? join(ROOT, '_dist', `dsh-deep-research-pack-${pkg.version}.tgz`)
 const marketFile = join(ROOT, '_dist', 'market.json')
-if (!existsSync(tarball)) notRun(`tarball 缺席：${tarball}（先 node scripts/dist/export-dist.mjs）`)
-if (!existsSync(marketFile)) notRun('_dist/market.json 缺席（先 node scripts/dist/export-dist.mjs）')
+if (!existsSync(tarball)) notRun(`tarball 缺席：${tarball}（先 node dev/release/export-dist.mjs）`)
+if (!existsSync(marketFile)) notRun('_dist/market.json 缺席（先 node dev/release/export-dist.mjs）')
 // 产物新鲜度（BUG-174）：旧 tarball 装上也能 ALL PASS，断言对象就不是当前 HEAD。CI 先
 // export-dist，天然新鲜；本地/显式 PACK_TARBALL 用 --allow-stale 覆盖并打印理由。
 const allowStale = process.argv.includes('--allow-stale') || process.env.LIFECYCLE_ALLOW_STALE === '1'
@@ -58,7 +58,7 @@ if (allowStale) {
     const detail = freshness.mode === 'mtime-only'
       ? `早于 ${freshness.newest === null ? '—' : relative(ROOT, freshness.newest.path)}`
       : freshness.reason
-    notRun(`tarball 不是由当前 pack 生成（${freshness.mode}：${detail}）——先 node scripts/dist/export-dist.mjs（显式旧产物用 --allow-stale / LIFECYCLE_ALLOW_STALE=1）`)
+    notRun(`tarball 不是由当前 pack 生成（${freshness.mode}：${detail}）——先 node dev/release/export-dist.mjs（显式旧产物用 --allow-stale / LIFECYCLE_ALLOW_STALE=1）`)
   }
 }
 

@@ -1,9 +1,16 @@
 #!/usr/bin/env node
-// scripts/run-ops/watch-run.mjs — run 盯场件（RFC run-ops-self-diagnosis）。谓词 =
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 状态：常驻
+// 一句话：run 盯场：谓词化状态判定（HITL-PENDING / RUN-SETTLED；超时自报）
+// 何时跑：run 挂起/等 HITL/落定不明；要盯某会话状态时
+// 档位：keyless（只读会话日志；先 source dev/env.sh 更稳）
+// 判据：不适用（show：输出状态投影，不判 PASS/FAIL）
+// 不证明：run 内容质量与交付合格；交付门是 judge（run-accept）
+// probes/run/watch-run.mjs — run 盯场件（RFC run-ops-self-diagnosis）。谓词 =
 // scripts/lib/shared/run-state.mjs（事件形状，非字符串 grep）。
 //
 // 退出码：0 = HITL-PENDING 或 RUN-SETTLED（stdout `STATE:` 行自报是哪个）；1 = 超时；2 = 用法错。
-// 用法：node --import tsx/esm scripts/run-ops/watch-run.mjs <session-id> [--interval 20] [--timeout-min 90]
+// 用法：node --import tsx/esm probes/run/watch-run.mjs <session-id> [--interval 20] [--timeout-min 90]
 //         [--group <组名子串>]
 //   --group 覆盖缺省 research-workspace 组（组过滤盲区逃生口：盯冒烟/自测会话组如
 //   dev-smoke-workspace；无命中 fail-loud 列在场组）。
@@ -11,9 +18,9 @@
 import { existsSync, readdirSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { runStateOf, eventsRegressed, leadHitlCandidate } from '../lib/shared/run-state.mjs'
-import { findGroup, researchWorkspaceGroup, resolveSessionLog } from '../lib/shared/session-log.mjs'
-import { workspaceRoot } from '../lib/shared/workspace-root.mjs'
+import { runStateOf, eventsRegressed, leadHitlCandidate } from '../../scripts/lib/shared/run-state.mjs'
+import { findGroup, researchWorkspaceGroup, resolveSessionLog } from '../../scripts/lib/shared/session-log.mjs'
+import { workspaceRoot } from '../../scripts/lib/shared/workspace-root.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const SID = process.argv[2]
@@ -30,7 +37,7 @@ const GROUP_ARG = (() => {
 const WORKSPACE = workspaceRoot({ argv: process.argv.slice(2), env: process.env, defaultRoot: join(ROOT, 'research-workspace') })
 
 if (!SID || !/^[\w-]+$/.test(SID)) {
-  console.error('watch-run: 用法 node --import tsx/esm scripts/run-ops/watch-run.mjs <session-id> [--interval 20] [--timeout-min 90] [--group <组名子串>]')
+  console.error('watch-run: 用法 node --import tsx/esm probes/run/watch-run.mjs <session-id> [--interval 20] [--timeout-min 90] [--group <组名子串>]')
   process.exit(2)
 }
 const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : join(ROOT, 'runtime', 'harness-home')

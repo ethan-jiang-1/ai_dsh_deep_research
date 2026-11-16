@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 状态：常驻
+// 一句话：上游流错误（回合被终结）的跨场分布投影
+// 何时跑：BUG-022 类复发时数它；需要跨场而非单场分布
+// 档位：keyless（须先 source dev/env.sh）
+// 判据：不适用（show：有无错误不是本工具判据）
+// 不证明：单场归因（= stream-diagnostics）
 // provider-error-stats —— 上游流错误（回合被终结）的**跨场分布投影**（只读；run-ops 层）。
 //
 // 为什么存在：BUG-022 的缺陷在上游（vendor 只读、本仓修不了），本仓能做的三件里两件是"可复跑"——
@@ -8,12 +15,12 @@
 // 判据（"一次事故 = 一个被错误终结的回合"）与抽取**不在这里**：唯一语义源 =
 // `scripts/lib/ops/provider-errors.mjs`（消费方 = 本件与 keyless 契约测试）。缺陷记录 = BUG-022。
 //
-// 用法：source dev/env.sh && node scripts/run-ops/provider-error-stats.mjs [--days 30] [--group <子串>] [--json]
+// 用法：source dev/env.sh && node probes/run/provider-error-stats.mjs [--days 30] [--group <子串>] [--json]
 // 退出码：0 = 正常输出（有没有错不是本工具的判据）/ 2 = 用法或前置错
 import { join, resolve } from 'node:path';
-import { readSessionText, sessionLogsSince } from '../lib/shared/session-log.mjs';
-import { defaultGroupSubstring } from '../lib/shared/workspace-root.mjs';
-import { turnEndErrorsOf, tallyTurnEndErrors, retryEventsOf } from '../lib/ops/provider-errors.mjs';
+import { readSessionText, sessionLogsSince } from '../../scripts/lib/shared/session-log.mjs';
+import { defaultGroupSubstring } from '../../scripts/lib/shared/workspace-root.mjs';
+import { turnEndErrorsOf, tallyTurnEndErrors, retryEventsOf } from '../../scripts/lib/ops/provider-errors.mjs';
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);

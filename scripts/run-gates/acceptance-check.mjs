@@ -10,7 +10,7 @@
 // 数组入参；仓内 run 模板无判据落盘约定）→ 壳参数 = bundle 目录 + 判据 JSON 文件（数组，
 // 叶子三型 = file_exists / file_contains / frontmatter_fields）。
 //
-// 用法：node scripts/run-ops/acceptance-check.mjs <bundleDir> <criteria.json>
+// 用法：node scripts/run-gates/acceptance-check.mjs <bundleDir> <criteria.json>
 // 退出码：0 = 全 PASS（至少一条判据）/ 1 = 有 FAIL / UNVERIFIED / 零判据（收活不放行）/ 2 = 用法或前置错
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -18,7 +18,7 @@ import { acceptanceCheck, acceptanceExitCode } from '../lib/ops/acceptance-check
 
 const positional = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 if (positional.length !== 2) {
-  console.error('用法：node scripts/run-ops/acceptance-check.mjs <bundleDir> <criteria.json>');
+  console.error('用法：node scripts/run-gates/acceptance-check.mjs <bundleDir> <criteria.json>');
   console.error('  <bundleDir>     run bundle 根（判据 path/file 相对它解析）');
   console.error('  <criteria.json> 判据 JSON 文件（数组；叶子三型 = file_exists / file_contains / frontmatter_fields）');
   process.exit(2);
