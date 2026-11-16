@@ -413,6 +413,16 @@ export const CASES = [
     mutate: writeRedirectRegistry([{ from: 'README.md', to: 'AGENTS.md', reason: '注入：from 仍在盘上' }]) },
   { id: 'md-links-redirect-dangling', gate: 'md-links',
     mutate: writeRedirectRegistry([{ from: 'tests/run/__moved-probe.spec.mjs', to: 'tests/run/__nowhere.spec.mjs', reason: '注入：to 不存在' }]) },
+  // 账本只服务冻结层（2026-11-17 根名统一）：活文档指旧路径却靠账本解析 = 旧根名在活面长期存在。
+  // 注入「搬家 + 登记 + 活文档链接」→ 必须点名红；同一手法放到冻结层（控制组）→ 绿。
+  { id: 'md-links-live-doc-uses-ledger', gate: 'md-links', mutate: (dir) => {
+    const from = 'tests/run/__live-ledger-probe.spec.mjs'
+    const to = 'tests/run/gates/__live-ledger-probe.spec.mjs'
+    mkdirSync(dirname(join(dir, to)), { recursive: true })
+    writeFileSync(join(dir, to), '// probe\n')
+    appendFileSync(join(dir, 'README.md'), '\n[live ledger probe](./tests/run/__live-ledger-probe.spec.mjs)\n')
+    writeRedirectRegistry([{ from, to, reason: '注入：活文档靠账本' }])(dir)
+  } },
   { id: 'md-anchors-missing', gate: 'md-anchors', mutate: appendTo('README.md', '\n[坏锚探针](AGENTS.md#这个锚点肯定不存在xyz)\n') },
   // doc-paths（2026-11-03 卫生审计 D1-2）：反引号散文件路径指向空处——md-links 看不见，
   // 但 agent 会照它去读。注入到 docs/ 的 live 文档（fixtures 与 notes 层不在扫描面）。
@@ -984,7 +994,8 @@ export const CONTROLS = [
     const to = 'tests/run/gates/__redirect-probe.spec.mjs';
     mkdirSync(dirname(join(dir, to)), { recursive: true });
     writeFileSync(join(dir, from), '// md-links redirect probe\n');
-    appendFileSync(join(dir, 'README.md'), '\n[redirect probe](./tests/run/__redirect-probe.spec.mjs)\n');
+    // 账本只服务冻结层：控制组把链接放在冻结文档（notes/）里，证明「搬家+登记」仍可解析。
+    appendFileSync(join(dir, 'notes/README.md'), '\n[redirect probe](../tests/run/__redirect-probe.spec.mjs)\n');
     writeFileSync(join(dir, to), readFileSync(join(dir, from)));
     rmSync(join(dir, from));
     writeRedirectRegistry([{ from, to, reason: '注入：搬家 + 登记' }])(dir);

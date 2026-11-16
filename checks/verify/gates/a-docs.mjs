@@ -116,7 +116,16 @@ export function runA() {
           const abs = resolve(dirname(f), target);
           if (!existsSync(abs)) {
             const relTarget = relative(ROOT, abs).split('\\').join('/');
-            if (redirects.has(relTarget)) { redirected++; continue; }
+            if (redirects.has(relTarget)) {
+              // 账本只服务冻结层：活文档自己就是「当前合同」，指旧路径必须就地改指新位置——
+              // 否则旧根名在活面长期存在（2026-11-17 根名统一实测：snapshots/README 3 条链接
+              // 全靠账本解析，doc-paths 的退役根守卫看不见 markdown 链接目标）。
+              if (!/^(notes\/|_backlog\/|vendor\/|tests\/fixtures\/|snapshots\/replay\/)/.test(rel)) {
+                fail(gate, `${rel}: 活文档链接依赖搬家账本 → ${relTarget}（现行 = ${redirects.get(relTarget)}）——活面必须直接指新路径；账本只服务冻结层`);
+                continue;
+              }
+              redirected++; continue;
+            }
             fail(gate, `${rel}: 链接不可解析 → ${target}（若为搬家：登记 checks/test-path-redirects.json）`);
           } else if (!isTrackedTarget(abs)) fail(gate, `${rel}: 链接目标未被 git 跟踪 → ${target}（链接语法 = 仓内可解析承诺；运行区/本机数据引用请用反引号路径——BUG-016）`);
         }

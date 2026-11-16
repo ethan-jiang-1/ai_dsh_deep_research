@@ -149,6 +149,36 @@
   裸 `scripts/` → 放行；注入 `probes/analyze/not-real.mjs` → 红。常驻案例
   `doc-paths-retired-root`（gates.e2e 134 案例全红命中）。
 
+### 复扫轮（搬家后副作用再验证）
+
+同一套真入口**再跑一遍**，并补两类只查静态会漏的面：
+
+| 项 | 结果 |
+|---|---|
+| 旧根残留（`git ls-files` / 盘上 / 空目录 / 孤儿 / 端口） | `scripts/`、`dev/` 零残留；无空目录；无孤儿；无端口残留 |
+| **全仓路径字面量存在性**（代码+文档+数据，3862 条） | **0 缺失** |
+| 退役根残留（代码面，排除账本 `from` 与注入负例） | **0**（唯一命中是守卫自身的解释性注释） |
+| 生成物新鲜度（probes INDEX / tests INDEX / 资产账 / CI oracle / overlay） | 全部一致，`--check` 0 漂移 |
+| spawn 链路径段（`$ROOT/…`、`join(ROOT,…)`） | 新根 70 处 / 旧根 **0** |
+| keyless：verify / test / vendor / gates.e2e | 0 / 0 / 0 / 0（135 注入案例全红命中） |
+| 真入口：L1、product-boot、install-shape、lifecycle、snapshot-replay、l4-lite、client-hitl、team-preflight、run-accept、handoff、doctor、pack、drift | 全部 **0** |
+| cold-start / workspace-isolation | 浏览器面 GREEN、断言全过；exit 1 仅端口收割（沙箱禁 `ps`，见下） |
+| client-load | 首轮 exit 2 = **主机不健康**（load/cpu 4.04 > 1.5，被本轮并行自测推高，正确 fail-closed）；空载后仍高（2.02），用文档逃生口 `DSH_CLIENT_LOAD_ALLOW_UNHEALTHY=1` 强制跑 → **ALL PASS** |
+
+**端口收割红的环境证据（非路径因素）**：`/bin/ps: Operation not permitted`（沙箱禁进程检查），
+而 `port-reclaim.mjs` 的 `commandOf` 就是 `ps`，取不到身份就 fail-closed；自起 listener 复现同句；
+`port-reclaim-policy.mjs` 与迁移前 **BYTE-IDENTICAL**，`port-reclaim.mjs` 仅注释路径变化。
+
+### 又一条静默逃检（本轮新抓）
+
+**活文档可以靠搬家账本蒙混**：`md-links` 对找不到的链接先查 `checks/test-path-redirects.json`，
+于是活文档指旧根名也能绿——实测 `snapshots/README.md` 有 3 条链接（`scripts/lib/harness/replay-scene.mjs`、
+`scripts/smoke/snapshot-replay.entry.mjs`）全靠账本解析，doc-paths 的退役根守卫看不见 markdown 链接目标。
+处置：① 三条链接就地改指 `checks/…`；② `md-links` 加不变式——**账本只服务冻结层**
+（`notes/` `_backlog/` `vendor/` `tests/fixtures/` `snapshots/replay/`），活文档依赖账本即点名红；
+③ 常驻案例 `md-links-live-doc-uses-ledger`（注入活文档链 + 登记 → 红），并把原正向控制组
+`md-links-redirected` 的探针挪到冻结层 `notes/`（否则与新不变式冲突）。
+
 ## 环境状态
 
 - 未改任何 exit code 判定分支；未改 pack 模型可见文本（仅 pack 内注释/文档的根名引用）。
