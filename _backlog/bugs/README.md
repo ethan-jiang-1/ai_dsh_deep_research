@@ -13,9 +13,23 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| （无） | — | — | 批 E（191–198）于 2026-11-16 修复归档，见下方「最近归档」 |
+| （无） | — | — | 批 F（199–208）于 2026-11-16 修复归档，见下方「最近归档」 |
 
 ## 最近归档
+
+（2026-11-16 批 F 守卫契约加固闭环（10 张，199–208），批 Note =
+[2026-11-16-guard-contract-hardening](../../notes/implemented/2026-11-16-guard-contract-hardening.md)：
+[199](../_archived/fixed_bugs/BUG-199-offline-gate-promises-resolver-bypass.md) promises Resolver；
+[200](../_archived/fixed_bugs/BUG-200-test-placement-unknown-depth-not-enforced.md) 落点深度；
+[201](../_archived/fixed_bugs/BUG-201-guard-ledger-closed-set-stops-at-190.md) 守卫台账；
+[202](../_archived/fixed_bugs/BUG-202-asset-ledger-claim-path-check-tests-prefix-only.md) claim 前缀；
+[203](../_archived/fixed_bugs/BUG-203-gates-e2e-empty-and-bare-flag-shapes.md) flag 形状；
+[204](../_archived/fixed_bugs/BUG-204-live-doc-prose-stale-paths-ungated.md) 散文路径；
+[205](../_archived/fixed_bugs/BUG-205-mirror-shared-escape-hatch.md) shared 准入；
+[206](../_archived/fixed_bugs/BUG-206-offline-preload-source-substring-test-and-smoke-only.md) 离线闸回归；
+[207](../_archived/fixed_bugs/BUG-207-tests-symlink-directory-passes-placement-never-runs.md) symlink；
+[208](../_archived/fixed_bugs/BUG-208-test-index-tsx-spot-check-nonempty-only.md) 索引集合。
+）
 
 （2026-11-16 批 E 搬家副作用修复闭环（8 张，191–198），批 Note =
 [2026-11-15-move-side-effect-guards](../../notes/implemented/2026-11-15-move-side-effect-guards.md)：

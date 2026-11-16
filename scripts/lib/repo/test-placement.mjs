@@ -64,6 +64,8 @@ export function placementIssues(paths) {
         issues.push(`${norm}: tests/run 只收 *.spec.mjs（进程内车道）`)
       } else if (seg.length < 4) {
         issues.push(`${norm}: tests/run 下必须再有 owner 目录——已知 = ${list(RUN_OWNERS)}`)
+      } else if (seg.length > 4) {
+        issues.push(`${norm}: tests/run 未知深度（应为 tests/run/<owner>/<file>；收到 ${seg.length} 段）——按 owner 归位，不建二级目录`)
       } else if (!RUN_OWNERS.includes(seg[2])) {
         issues.push(`${norm}: tests/run 未知 owner ${seg[2]}——已知 = ${list(RUN_OWNERS)}；spec 依赖 owner ∈ {目录, shared}`)
       }
@@ -86,11 +88,15 @@ export function placementIssues(paths) {
       if (part === 'lib') {
         if (seg.length < 5) {
           issues.push(`${norm}: tests/cockpit/lib 下必须再有 domain（${list(COCKPIT_LIB_DOMAINS)}）`)
+        } else if (seg.length > 5) {
+          issues.push(`${norm}: tests/cockpit/lib 未知深度（应为 tests/cockpit/lib/<domain>/<file>；收到 ${seg.length} 段）`)
         } else if (!COCKPIT_LIB_DOMAINS.includes(seg[3])) {
           issues.push(`${norm}: tests/cockpit/lib 未知 domain ${seg[3]}——已知 = ${list(COCKPIT_LIB_DOMAINS)}`)
         }
       } else if (part === 'client') {
-        if (seg.length >= 5 && !CLIENT_SUBS.includes(seg[3])) {
+        if (seg.length > 5) {
+          issues.push(`${norm}: tests/cockpit/client 未知深度（应为 client/<file> 或 client/<sub>/<file>；收到 ${seg.length} 段）`)
+        } else if (seg.length === 5 && !CLIENT_SUBS.includes(seg[3])) {
           issues.push(`${norm}: 未知 client 子目录 ${seg[3]}——已知 = ${list(CLIENT_SUBS)}；跨 sub 的 spec 住 tests/cockpit/shared/`)
         }
       } else if (part === 'shared') {

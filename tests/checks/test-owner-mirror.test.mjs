@@ -3,7 +3,10 @@
 //  ② 每个 spec 住已知 owner 目录；
 //  ③ spec 的 lib 依赖 owner ∈ {spec 目录, shared}（无 lib 依赖的跨切 spec 只许住 shared）；
 //  ④ scripts/lib 根不得平铺模块；⑤ 六个 run owner 目录都非空（防空语料）。
-// 反证：把 spec 移回 tests/run 根 → ①红；把 gates spec 放进 ops → ③红；清空一个 owner 目录 → ⑤红。
+// 反证：把 spec 移回 tests/run 根 → ①红；把 gates spec 放进 ops → ③红；清空一个 owner 目录 → ⑤红；
+// 单 owner spec 藏进 shared → ③红（BUG-205）。
+// 负例留证 2026-11-16：BUG-205——在 tests/run/shared 放一个只依赖 scripts/lib/gates 的 spec →
+// ③ 报「住 shared/，但依赖 gates」；单 owner spec 归位后绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
@@ -11,6 +14,7 @@ import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { localImportPath, parseKeylessImports } from '../../scripts/lib/tools/keyless-imports.mjs'
 import { OWNERS } from '../../scripts/lib/tools/test-index.mjs'
+import { placementIssues } from '../../scripts/lib/repo/test-placement.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const RUN = join(ROOT, 'tests', 'run')
@@ -37,9 +41,11 @@ test('tests/run 根零平铺 spec，且每个 spec 住已知 owner 目录', () =
     const owner = rel.split('/')[0]
     assert.ok(RUN_OWNERS.includes(owner), `${relative(ROOT, p)} 不在已知 owner（${RUN_OWNERS.join('/')}）`)
   }
+  assert.deepEqual(placementIssues(specs.map((p) => relative(ROOT, p).split('\\').join('/'))), [],
+    'tests/run 出现未知深度（应为 tests/run/<owner>/<file>）——按 owner 归位，不建二级目录')
 })
 
-test('spec 的 lib 依赖 owner ∈ {spec 目录, shared}；根层 lib 零平铺', () => {
+test('spec 的 lib 依赖 owner ∈ {spec 目录, shared}；shared 只收跨切（BUG-205）；根层 lib 零平铺', () => {
   const flatLib = readdirSync(LIB).filter((n) => /\.(mjs|cjs)$/.test(n))
   assert.deepEqual(flatLib, [], `scripts/lib 根仍平铺模块：${flatLib.join(', ')}`)
   const libModules = walk(LIB, (n) => /\.(mjs|cjs)$/.test(n))
@@ -62,7 +68,10 @@ test('spec 的 lib 依赖 owner ∈ {spec 目录, shared}；根层 lib 零平铺
     }
     // 跨切 spec：无 lib 依赖、或只依赖 shared——允许住任一 owner（索引记录实际依赖面）。
     if (owners.size === 0 || (owners.size === 1 && owners.has('shared'))) continue
-    assert.ok(owners.has(dir) || dir === 'shared',
+    if (dir === 'shared') {
+      assert.fail(`${relative(ROOT, p)} 住 shared/，但依赖 ${[...owners].sort().join('/')}——shared 只收无 lib 依赖或只依赖 shared 的跨切 spec；单 owner spec 归位到对应 owner 目录`)
+    }
+    assert.ok(owners.has(dir),
       `${relative(ROOT, p)} 住 ${dir}/，但只依赖 ${[...owners].sort().join('/')}——归位或改登记`)
   }
 })

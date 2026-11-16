@@ -3,15 +3,18 @@
 // 负例留证 2026-11-16：BUG-195——把 `--jobs=abc` / `--jobs=0` / `--jobs=1e999` 放回旧解析
 //（`Math.max(1, Number(raw))`）→ 本 spec 的 invalid 用例红；旧 mapLimit 收到 NaN 会起 0 个
 // worker 导致结果 undefined，`boundedMap` 的 limit 用例红。还原 → 绿。
+// 负例留证 2026-11-16：BUG-203——把 `--case=` / `--case`（缺值）/ 裸 `--jobs 8` 放回旧解析
+//（空值 filter(Boolean) 丢成全量、裸形态被忽略）→ 本 spec 的 flag 形状用例红；还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { boundedMap, parseJobsArg } from '../../../scripts/lib/harness/gates-cli.mjs'
+import { boundedMap, parseE2eArgs, parseJobsArg } from '../../../scripts/lib/harness/gates-cli.mjs'
 
 test('parseJobsArg 接受正整数，缺省走 fallback（BUG-195 负控）', () => {
   assert.equal(parseJobsArg([], 4), 4)
   assert.equal(parseJobsArg(['--case=x'], 4), 4)
   assert.equal(parseJobsArg(['--jobs=1'], 4), 1)
   assert.equal(parseJobsArg(['--jobs=8', '--case=x'], 4), 8)
+  assert.equal(parseJobsArg(['--jobs', '8'], 4), 8)
 })
 
 test('parseJobsArg 对 NaN/Infinity/小数/0/负数/非数字 fail-loud 并点名原值（BUG-195）', () => {
@@ -22,6 +25,31 @@ test('parseJobsArg 对 NaN/Infinity/小数/0/负数/非数字 fail-loud 并点�
       `--jobs=${JSON.stringify(raw)} 必须被拒绝并点名原值`,
     )
   }
+})
+
+test('parseE2eArgs：--case/--jobs 两种形状同判，空值/缺值/未知参数/位置参数 fail-loud（BUG-203）', () => {
+  assert.deepEqual(parseE2eArgs(['--case=a,b', '--jobs=2'], 4), { cases: ['a', 'b'], jobs: 2, help: false })
+  assert.deepEqual(parseE2eArgs(['--case', 'a,b', '--jobs', '2'], 4), { cases: ['a', 'b'], jobs: 2, help: false })
+  assert.deepEqual(parseE2eArgs(['--case=a', '--case=b'], 4), { cases: ['a', 'b'], jobs: 4, help: false })
+  assert.deepEqual(parseE2eArgs(['--help'], 4), { cases: [], jobs: 4, help: true })
+
+  const invalid = [
+    ['--case='],
+    ['--case'],
+    ['--case', '  '],
+    ['--case', '--jobs=2'],
+    ['--jobs='],
+    ['--jobs'],
+    ['--jobs', '--case=x'],
+    ['--frobnicate'],
+    ['positional'],
+  ]
+  for (const argv of invalid) {
+    assert.throws(() => parseE2eArgs(argv, 4), (error) => error instanceof Error && error.message.length > 0,
+      `${JSON.stringify(argv)} 必须 fail-loud`)
+  }
+  assert.throws(() => parseE2eArgs(['--frobnicate'], 4), /未知参数 --frobnicate/)
+  assert.throws(() => parseE2eArgs(['positional'], 4), /位置参数/)
 })
 
 test('boundedMap 保持顺序且有界并发（BUG-195 负控）', async () => {

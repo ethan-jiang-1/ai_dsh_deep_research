@@ -214,21 +214,31 @@ export function runF() {
   }
 }
 
-// ── test-placement（BUG-191）：tests/ 落点全集 − 已知子集 = 空 ──
+// ── test-placement（BUG-191 / BUG-200 / BUG-207）：tests/ 落点全集 − 已知子集 = 空 ──
 // 为什么：pack-mirror / test-owner-mirror / test-lanes 只枚举已知子树，未知落点 + 重生成资产账
 // = 全绿（M1/M4 合成）。本门禁把落点规则放进 L0：git ls-files tracked 面，任何测试文件不在
-// 已知 home（含未知深度/顶层平铺）= 红；账本重生成不能把它吸收成「当前状态」。规则正本 =
+// 已知 home（含未知深度/顶层平铺）= 红；符号链接目录（mode 120000）另判——node --test 不跟随它，
+// 放行等于接受一个永不运行的「测试目录」（BUG-207）。规则正本 =
 // scripts/lib/repo/test-placement.mjs；负控 = tests/checks/test-placement.test.mjs +
 // gates.e2e `test-placement-unknown-subtree`（注入 tests/cockpit/misc/… → 点名红）。
 {
   const gate = 'test-placement';
-  const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files', 'tests']);
+  const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files', '-s', 'tests']);
   if (r.status !== 0) {
-    fail(gate, `git ls-files tests 不可用（${String(r.stderr).slice(0, 120)}）——本门禁依赖仓库态，fail-loud`);
+    fail(gate, `git ls-files -s tests 不可用（${String(r.stderr).slice(0, 120)}）——本门禁依赖仓库态，fail-loud`);
   } else {
-    const testPaths = r.stdout.split('\n').filter(Boolean).filter(isTestFile);
+    const entries = r.stdout.split('\n').filter(Boolean).map((line) => {
+      const tab = line.indexOf('\t');
+      return { mode: line.slice(0, tab).split(' ')[0], rel: line.slice(tab + 1) };
+    });
+    const testPaths = entries.filter((entry) => isTestFile(entry.rel)).map((entry) => entry.rel);
     if (testPaths.length === 0) fail(gate, '防空语料：tests/ 扫到 0 个测试文件——扫描面失效');
-    else for (const issue of placementIssues(testPaths)) fail(gate, issue);
+    for (const link of entries.filter((entry) => entry.mode === '120000')) {
+      let target = '';
+      try { target = readlinkSync(join(ROOT, link.rel)); } catch { /* 索引项在盘上不可读时仍按索引报 */ }
+      fail(gate, `${link.rel}: tests 下不得有符号链接（→ ${target || '（不可读）'}）——node --test 不跟随 symlink 目录，位置门禁也不能静默跳过；先移除链接（确需时走显式登记表）`);
+    }
+    if (testPaths.length > 0) for (const issue of placementIssues(testPaths)) fail(gate, issue);
   }
 }
 

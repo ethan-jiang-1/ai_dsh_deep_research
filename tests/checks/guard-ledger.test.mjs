@@ -18,7 +18,9 @@ const D1 = ['003', '009', '010', '012', '013', '018', '022', '024', '026', '027'
 const D2 = ['001', '011', '016', '023', '025', '031', '032', '037', '042', '047', '055', '072', '106', '108', '112', '113', '152']
 const BATCH_AC = Array.from({ length: 24 }, (_, idx) => String(160 + idx))
 const BATCH_D = Array.from({ length: 7 }, (_, idx) => String(184 + idx))
-const SCOPED_IDS = [...D1, ...D2, ...BATCH_AC, ...BATCH_D].map((n) => `BUG-${n}`)
+const BATCH_E = Array.from({ length: 8 }, (_, idx) => String(191 + idx))
+const BATCH_F = Array.from({ length: 10 }, (_, idx) => String(199 + idx))
+const SCOPED_IDS = [...D1, ...D2, ...BATCH_AC, ...BATCH_D, ...BATCH_E, ...BATCH_F].map((n) => `BUG-${n}`)
 
 function claimedBugIdsInTestSource(text) {
   const claimed = new Set()
@@ -26,6 +28,17 @@ function claimedBugIdsInTestSource(text) {
     for (const idMatch of m[2].matchAll(/BUG-\d{3}/g)) claimed.add(idMatch[0])
   }
   return claimed
+}
+
+/** 反向判据：测试标题声称的 BUG-nnn（≥191）必须在台账里——账 → 守卫之外的第二方向。 */
+function unledgeredClaimedBugs({ files, readText, ledgerIds }) {
+  const missing = new Set()
+  for (const file of files) {
+    for (const id of claimedBugIdsInTestSource(readText(file))) {
+      if (Number(id.slice(4)) >= 191 && !ledgerIds.has(id)) missing.add(id)
+    }
+  }
+  return [...missing].sort()
 }
 
 function validateGuardLedger(ledger, { assetByPath, readText, fileExists, requiredIds }) {
@@ -81,10 +94,12 @@ function validateGuardLedger(ledger, { assetByPath, readText, fileExists, requir
   return problems
 }
 
-test('guard ledger 全量对账：72 张卡齐全、与 asset-ledger 零 oracleType 冲突、测试标题逐卡绑定', () => {
+// 负例留证 2026-11-16：BUG-201——删掉台账里的 BUG-191…198（或任一新批守卫）→ 全量对账红；
+// 给守卫加一个未入账的 BUG-199 标题 → 反向判据红。还原 → 绿。
+test('guard ledger 全量对账：90 张卡齐全、反向无未入账守卫、oracleType 零冲突、标题逐卡绑定（BUG-201）', () => {
   assert.equal(LEDGER.version, 1, 'ledger version 必须是 1')
   assert.ok(typeof LEDGER.scope === 'string' && LEDGER.scope !== '', 'scope 必须写清覆盖范围')
-  assert.equal(SCOPED_IDS.length, 72, '目标闭集应为 72 张卡')
+  assert.equal(SCOPED_IDS.length, 90, '目标闭集应为 90 张卡（D-1/D-2/A–F）')
   const sourceCache = new Map()
   const readText = (rel) => {
     if (!sourceCache.has(rel)) sourceCache.set(rel, readFileSync(join(ROOT, rel), 'utf8'))
@@ -97,6 +112,19 @@ test('guard ledger 全量对账：72 张卡齐全、与 asset-ledger 零 oracleT
     requiredIds: SCOPED_IDS,
   })
   assert.deepEqual(problems, [], `guard-ledger 对账失败：\n${problems.join('\n')}`)
+  const files = listTestFiles(ROOT)
+  assert.ok(files.length >= 100, `防空语料：测试文件过少（${files.length}）——反向判据扫描面失效`)
+  const missing = unledgeredClaimedBugs({ files, readText, ledgerIds: new Set(LEDGER.bugs.map((bug) => bug.id)) })
+  assert.deepEqual(missing, [], `守卫标题声称但台账未入账的 BUG-nnn（≥191）：${missing.join(', ')}——新批守卫必须同 diff 入账`)
+})
+
+test('负控：守卫标题声称的 BUG-199 未入账 → 反向判据红（BUG-201）', () => {
+  const missing = unledgeredClaimedBugs({
+    files: ['tests/checks/fake.test.mjs'],
+    readText: () => "test('probe（BUG-199）', () => {})\n",
+    ledgerIds: new Set(),
+  })
+  assert.deepEqual(missing, ['BUG-199'])
 })
 
 test('负控：漏卡、与 asset-ledger 的 oracleType 矛盾、守卫标题未声明 BUG-nnn 均必红', () => {
@@ -141,8 +169,8 @@ test('台账可度量：按 oracleType / status 汇总可见且外部与规范�
   const count = (key) => bugs.reduce((acc, bug) => ((acc[bug[key]] = (acc[bug[key]] || 0) + 1), acc), {})
   const types = count('oracleType')
   const statuses = count('status')
-  assert.equal(bugs.length, 72)
+  assert.equal(bugs.length, 90)
   assert.ok((types.external || 0) >= 20, `external 守卫过少：${JSON.stringify(types)}`)
   assert.ok((types.canonical || 0) >= 20, `canonical 守卫过少：${JSON.stringify(types)}`)
-  assert.equal(statuses.closed, 72, `72 张范围内卡应全部闭环：${JSON.stringify(statuses)}`)
+  assert.equal(statuses.closed, 90, `90 张范围内卡应全部闭环：${JSON.stringify(statuses)}`)
 })

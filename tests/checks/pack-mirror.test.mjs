@@ -18,8 +18,11 @@ import { placementIssues } from '../../scripts/lib/repo/test-placement.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const LIB = join(ROOT, 'packages', 'deep-research-pack', 'src', 'lib')
+const SCRIPTS_LIB = join(ROOT, 'scripts', 'lib')
 const TESTS = join(ROOT, 'tests', 'cockpit', 'lib')
 const RUN_DOMAINS = DOMAINS.filter((d) => d !== 'review')
+// 测试支撑 owner 不是运行时 domain 轴：method-presets 这类跨库测试以 test-infra 为家。
+const TEST_SUPPORT_OWNERS = new Set(['test-infra'])
 
 function walk(dir, filter, out = []) {
   for (const ent of readdirSync(dir, { withFileTypes: true })) {
@@ -30,16 +33,32 @@ function walk(dir, filter, out = []) {
   return out
 }
 
+/** symlink 在 Dirent 二分里 isDirectory()/isFile() 都是 false；单独用 isSymbolicLink 枚举（BUG-176/207）。 */
+function linkedEntries(dir, out = []) {
+  for (const ent of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, ent.name)
+    if (ent.isSymbolicLink()) out.push(p)
+    else if (ent.isDirectory()) linkedEntries(p, out)
+  }
+  return out
+}
+
 const specs = walk(TESTS, (n) => n.endsWith('.spec.mjs'))
 
-// 负例留证 2026-11-16：BUG-191——在 tests/cockpit/misc/ 或 tests/pack/misc/ 放一个 spec →
-// 下方「落点全集 − 已知子集」测试点名「未知落点」；把单 sub 的 spec 放进 tests/cockpit/shared/
-// → 「shared 只收跨 sub」测试红；删除探针 → 绿。账本重生成不解除（落点规则不读账）。
-test('tests 落点全集 − 已知子集 = 空（BUG-191；账本重生成不能吸收）', () => {
+// 负例留证 2026-11-16：BUG-191 / BUG-200 / BUG-205 / BUG-207——在 tests/cockpit/misc/ 或
+// tests/pack/misc/ 放 spec → 「落点全集」红；在 tests/run/ops/deep/ 放深 spec → 同一测试红
+// （深度由 placementIssues 判）；把单 owner spec 放进 tests/cockpit/lib/shared/ → 「shared 只收
+// 跨切」红；在 tests/ 造 symlink 目录 → 「零符号链接」红。删除探针 → 绿。
+test('tests 落点全集 − 已知子集 = 空；深度恰好（BUG-191 / BUG-200；账本重生成不能吸收）', () => {
   const all = walk(join(ROOT, 'tests'), (n) => n.endsWith('.spec.mjs') || n.endsWith('.test.mjs'))
   const paths = all.map((p) => relative(ROOT, p).split('\\').join('/'))
   assert.ok(paths.length >= 100, `防空语料：tests 测试文件过少（${paths.length}）——落点扫描面失效`)
-  assert.deepEqual(placementIssues(paths), [], '存在未被位置规则命名的落点——按 tests/AGENTS 归位（账本重生成不是修法）')
+  assert.deepEqual(placementIssues(paths), [], '存在未被位置规则命名的落点/深度——按 tests/AGENTS 归位（账本重生成不是修法）')
+})
+
+test('tests 下零符号链接目录/文件（BUG-207；node --test 不跟随 = 永不运行）', () => {
+  const links = linkedEntries(join(ROOT, 'tests')).map((p) => relative(ROOT, p).split('\\').join('/'))
+  assert.deepEqual(links, [], `tests 下不得有符号链接：${links.join(', ')}——symlink 目录不会被 node --test 选中，位置门禁也不能静默跳过（BUG-176/207）`)
 })
 
 test('tests/cockpit/shared：只收跨 sub 的 client spec（≥2 个 client 子目录；BUG-191）', () => {
@@ -73,20 +92,28 @@ test('tests/cockpit/lib 根零平铺 spec，且每个 spec 住已知 domain', ()
   }
 })
 
-test('spec 的 pack lib 依赖 domain ∈ {spec 目录, shared}', () => {
+test('spec 的 pack lib 依赖 domain ∈ {spec 目录, shared}；shared 只收跨切（BUG-205）', () => {
   for (const p of specs) {
     const dir = relative(TESTS, p).split('\\').join('/').split('/')[0]
     const { imports } = parseKeylessImports(readFileSync(p, 'utf8'), p)
     const domains = new Set()
+    const scriptOwners = new Set()
     for (const { specifier } of imports) {
       const target = localImportPath(p, specifier)
       if (target === undefined) continue
       const rel = relative(LIB, target).split('\\').join('/')
-      if (rel.startsWith('..') || !rel.endsWith('.ts')) continue
-      domains.add(rel.split('/')[0])
+      if (!rel.startsWith('..') && rel.endsWith('.ts')) domains.add(rel.split('/')[0])
+      const scriptRel = relative(SCRIPTS_LIB, target).split('\\').join('/')
+      if (!scriptRel.startsWith('..') && /\.(mjs|cjs)$/.test(scriptRel)) scriptOwners.add(scriptRel.split('/')[0])
+    }
+    if (dir === 'shared') {
+      const runtimeScriptOwners = [...scriptOwners].filter((owner) => !TEST_SUPPORT_OWNERS.has(owner))
+      assert.ok((domains.size === 0 || (domains.size === 1 && domains.has('shared'))) && runtimeScriptOwners.length === 0,
+        `${relative(ROOT, p)} 住 cockpit/lib/shared/，但依赖 pack domain=${[...domains].sort().join('/') || '（无）'} scripts owner=${runtimeScriptOwners.sort().join('/') || '（无）'}——shared 只收无依赖/仅 shared 或 test-support 的跨切 spec；单 owner spec 归位到对应 domain/owner`)
+      continue
     }
     if (domains.size === 0 || (domains.size === 1 && domains.has('shared'))) continue
-    assert.ok(domains.has(dir) || dir === 'shared',
+    assert.ok(domains.has(dir),
       `${relative(ROOT, p)} 住 ${dir}/，但只依赖 ${[...domains].sort().join('/')}——归位或改登记`)
   }
 })

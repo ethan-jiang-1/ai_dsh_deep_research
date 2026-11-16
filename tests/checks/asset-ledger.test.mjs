@@ -2,6 +2,8 @@
 // 红配方：新增/删除任一 spec/check 不重跑生成器 → 重算对账红；无外部语法解析 import 的测试被伪标为 external → AST 负例红。
 // 负例留证 2026-11-16：BUG-198——把任一 uniqueClaim 里的 tests/… 路径改成不存在文件 → 下方 claim
 // 路径检查点名红；还原 → 绿。
+// 负例留证 2026-11-16：BUG-202——把 claim 的路径换成不存在的 scripts/… 或 docs/…（重生成账本）
+// → 同一检查点名红；旧版只认 tests/ 前缀会绿。还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
@@ -34,11 +36,18 @@ test('每项具备完整六属性（lane/class/cost/uniqueClaim/oracleType/sunse
   }
 })
 
-test('uniqueClaim 里形如 tests/… 的路径 token 必须存在（BUG-198；防空 ≥10 条 claim）', () => {
-  const TOKEN = /tests\/[A-Za-z0-9_./-]+\.(?:mjs|cjs)/g
+test('uniqueClaim 里的仓内路径 token（tests/scripts/docs/…）必须存在（BUG-198 / BUG-202；防空 ≥10 条 claim）', () => {
+  const TOKEN = /(?:scripts|tests|packages|docs|dev|probes|snapshots|notes)\/[A-Za-z0-9_./-]+\.(?:mjs|cjs|ts|tsx|md|json|yml|yaml|sh)/g
   const claimsWithPaths = LEDGER.assets.filter((asset) => asset.uniqueClaim.match(TOKEN) !== null)
+  const prefixes = new Map()
+  for (const asset of LEDGER.assets) {
+    for (const match of asset.uniqueClaim.matchAll(new RegExp(TOKEN.source, TOKEN.flags))) {
+      const prefix = match[0].split('/')[0]
+      prefixes.set(prefix, (prefixes.get(prefix) ?? 0) + 1)
+    }
+  }
   assert.ok(claimsWithPaths.length >= 10,
-    `防空语料：只有 ${claimsWithPaths.length} 条 claim 含 tests/… 路径 token——取样规则变了，先复核本判据`)
+    `防空语料：只有 ${claimsWithPaths.length} 条 claim 含仓内路径 token——取样规则变了，先复核本判据（前缀计数 ${JSON.stringify([...prefixes])}）`)
   const bad = []
   for (const asset of LEDGER.assets) {
     for (const match of asset.uniqueClaim.matchAll(new RegExp(TOKEN.source, TOKEN.flags))) {

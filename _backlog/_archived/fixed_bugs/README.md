@@ -6,6 +6,16 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [BUG-199](BUG-199-offline-gate-promises-resolver-bypass.md) | 离线闸漏 `dns.promises.Resolver`：武装态下 `new Resolver().resolve4()` 仍解析外网 | （补 promises Resolver prototype patch + vm 四形态行为测试；SMOKE_ONLY 指向直测） | 2026-11-16 |
+| [BUG-200](BUG-200-test-placement-unknown-depth-not-enforced.md) | test-placement 的「未知深度 = 红」没实现 | （run/cockpit lib/client 改恰好段数；三门共判；深度注入案例） | 2026-11-16 |
+| [BUG-201](BUG-201-guard-ledger-closed-set-stops-at-190.md) | 守卫台账闭集停在 BUG-190 | （台账扩到 A–F 90 条 + 反向未入账判据；计数由闭集长度推导） | 2026-11-16 |
+| [BUG-202](BUG-202-asset-ledger-claim-path-check-tests-prefix-only.md) | asset-ledger 的 claim 路径检查只认 `tests/…` | （按仓内根前缀闭集验 scripts/docs/packages/… + 前缀计数） | 2026-11-16 |
+| [BUG-203](BUG-203-gates-e2e-empty-and-bare-flag-shapes.md) | gates.e2e flag 形状：空值跑全量、裸 flag 被忽略 | （`parseE2eArgs` 两形状同判；空/缺值/未知/位置参数 exit 2） | 2026-11-16 |
+| [BUG-204](BUG-204-live-doc-prose-stale-paths-ungated.md) | live 文档散文的失效路径无门禁 | （`doc-prose-paths` 纯函数 + doc-paths 散文扫面 + 三处实例修正） | 2026-11-16 |
+| [BUG-205](BUG-205-mirror-shared-escape-hatch.md) | 镜像门禁的 `shared/` 兜底：单 owner spec 藏进 shared | （shared 准入收紧；两个单 owner spec 归位 gates；test-support 显式豁免） | 2026-11-16 |
+| [BUG-206](BUG-206-offline-preload-source-substring-test-and-smoke-only.md) | 离线闸回归是源码子串不执行 install() | （改 vm 行为测试；preload SMOKE_ONLY 理由指向直测） | 2026-11-16 |
+| [BUG-207](BUG-207-tests-symlink-directory-passes-placement-never-runs.md) | tests/ 下的符号链接目录穿过所有位置门禁 | （git mode 120000 + 盘上 `isSymbolicLink()` 双红；symlink 注入案例） | 2026-11-16 |
+| [BUG-208](BUG-208-test-index-tsx-spot-check-nonempty-only.md) | 索引 `.tsx` 独立抽查只验非空不验集合 | （索引测试列 = 独立 importer 集合，行缺/多/少都红） | 2026-11-16 |
 | [BUG-191](BUG-191-placement-gates-unknown-subtree-unruled.md) | 位置门禁只枚举已知子树：未知落点 + 重生成资产账 = 全绿 | （`test-placement` L0 门禁 + `pack-mirror` 全集−已知子集/`shared` 正规则；账本重生成不再吸收） | 2026-11-16 |
 | [BUG-192](BUG-192-snapshot-replay-offline-preload-stale-path.md) | snapshot-replay 的离线预载仍指搬家前路径 | （改 `scripts/lib/harness/` + boot 前缺席 exit 2；`smoke-child-paths` 静态守卫） | 2026-11-16 |
 | [BUG-193](BUG-193-cdp-ask-spawns-moved-probe-path.md) | cdp-ask.entry 启动搬家前的探针路径 | （改 `probes/browser/cdp-probe.mjs` + spawn 前缺席 exit 2；同静态守卫） | 2026-11-16 |

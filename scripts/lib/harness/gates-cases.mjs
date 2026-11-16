@@ -421,6 +421,11 @@ export const CASES = [
   // 本案例的注入报因，防止既有报因把"注入未生效"蒙混成绿。
   { id: 'doc-paths-dangling', gate: 'doc-paths', expect: 'scripts/__missing-probe.mjs',
     mutate: appendTo('docs/project-map.md', '\n路径探针：`scripts/__missing-probe.mjs` 与 `packages/deep-research-pack/__missing__/`\n') },
+  // doc-paths 散文面（BUG-204）：不在反引号里的散路径同样会被 agent 照读。注入追加一条
+  // `scripts/lib/__gone__.mjs` 到 live 文档；副本基线已有 doc-paths 非 PASS 报因，必须带
+  // expect 指名本案例的散文报因。
+  { id: 'doc-paths-prose-dangling', gate: 'doc-paths', expect: '散文路径 scripts/lib/__gone__.mjs',
+    mutate: appendTo('docs/project-map.md', '\n散文路径探针：scripts/lib/__gone__.mjs\n') },
   // doc-drefs（2026-11-03 七维审计）：D 号引用指向没有该锚点的地图页——点进去落空，
   // 而 md-anchors 只校验目标文件里有没有 fragment，不校验"这个 D 号该住 decisions"。
   { id: 'doc-drefs-misdirected', gate: 'doc-drefs',
@@ -812,6 +817,20 @@ export const CASES = [
       mkdirSync(join(dir, 'tests', 'cockpit', 'misc'), { recursive: true });
       writeFileSync(join(dir, 'tests', 'cockpit', 'misc', 'zz-place-probe.spec.mjs'),
         "import { test } from 'node:test'\nimport assert from 'node:assert/strict'\ntest('p', () => { assert.equal(1, 1) })\n");
+    } },
+
+  // test-placement（BUG-200）：已知 owner 之下再套目录 = 未知深度；镜像 1:1（tests/run/<owner>/<file>）
+  // 必须被强制——否则归属轴在深层目录里腐烂，而四个位置门禁都只判首段。
+  { id: 'test-placement-unknown-depth', gate: 'test-placement', mutate: (dir) => {
+      mkdirSync(join(dir, 'tests', 'run', 'ops', 'deep'), { recursive: true });
+      writeFileSync(join(dir, 'tests', 'run', 'ops', 'deep', 'zz-deep.spec.mjs'),
+        "import { test } from 'node:test'\nimport assert from 'node:assert/strict'\ntest('p', () => { assert.equal(1, 1) })\n");
+    } },
+
+  // test-placement（BUG-207）：tests/ 下的 symlink 目录在 Dirent 二分里不可见，node --test 也不跟随；
+  // git mode 120000 是唯一可靠的索引面——门禁必须点名，而不是静默跳过。
+  { id: 'test-placement-symlink-dir', gate: 'test-placement', mutate: (dir) => {
+      symlinkSync('/tmp/gates-e2e-symprobe', join(dir, 'tests', 'run', 'ops', 'linked'));
     } },
 
   // dev/ 运行态回流（dev-runtime-clean）：在源码驱动目录造一个误落位 run bundle——

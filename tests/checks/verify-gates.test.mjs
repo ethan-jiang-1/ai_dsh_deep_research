@@ -100,4 +100,8 @@ test('位置门禁的未知落点有常驻注入案例（BUG-191）', () => {
   const caseIds = new Set(CASES.map((c) => c.id));
   assert.ok(caseIds.has('test-placement-unknown-subtree'),
     'BUG-191：缺未知落点注入案例——落点补集规则没有反证，账本重生成会把它吸收成绿');
+  assert.ok(caseIds.has('test-placement-unknown-depth'),
+    'BUG-200：缺未知深度注入案例——tests/run 的镜像 1:1 没有反证');
+  assert.ok(caseIds.has('test-placement-symlink-dir'),
+    'BUG-207：缺 symlink 注入案例——tests/ 下的不可执行链接目录没有反证');
 });

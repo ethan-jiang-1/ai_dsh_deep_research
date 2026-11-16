@@ -1553,8 +1553,13 @@
     },
     {
       "from": "tests/run/strategy-core.spec.mjs",
-      "to": "tests/run/shared/strategy-core.spec.mjs",
-      "reason": "2026-11-15 test-source-mirror 测试镜像"
+      "to": "tests/run/gates/strategy-core.spec.mjs",
+      "reason": "2026-11-16 BUG-205 shared 归位（经 shared 的最终落点）"
+    },
+    {
+      "from": "tests/run/shared/strategy-core.spec.mjs",
+      "to": "tests/run/gates/strategy-core.spec.mjs",
+      "reason": "2026-11-16 BUG-205 shared 归位"
     },
     {
       "from": "tests/run/stream-diagnostics.spec.mjs",
@@ -1583,8 +1588,13 @@
     },
     {
       "from": "tests/run/verdict-audit-fixture.spec.mjs",
-      "to": "tests/run/shared/verdict-audit-fixture.spec.mjs",
-      "reason": "2026-11-15 test-source-mirror 测试镜像"
+      "to": "tests/run/gates/verdict-audit-fixture.spec.mjs",
+      "reason": "2026-11-16 BUG-205 shared 归位（经 shared 的最终落点）"
+    },
+    {
+      "from": "tests/run/shared/verdict-audit-fixture.spec.mjs",
+      "to": "tests/run/gates/verdict-audit-fixture.spec.mjs",
+      "reason": "2026-11-16 BUG-205 shared 归位"
     },
     {
       "from": "tests/run/verdict-audit.spec.mjs",

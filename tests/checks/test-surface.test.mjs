@@ -29,7 +29,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const LIB = join(ROOT, 'scripts', 'lib')
 const PACK_LIB = join(ROOT, 'packages', 'deep-research-pack', 'src', 'lib')
 
-/** 只可能由 smoke/probe 覆盖的模块（keyless 回归禁浏览器/子进程/端口，见 layering 五件套）。 */
+/** 只能由 smoke/probe 或 vm 沙箱行为测试覆盖的模块（keyless 回归禁真实浏览器/子进程/端口，见 layering 五件套）。 */
 const SMOKE_ONLY = {
   'harness/playwright': 'chromium 定位与启动（纯件 browser-cache 有直测；launch 本身真浏览器档）',
   'harness/port-reclaim': '端口收割：需要真监听端口与系统进程，回归禁；身份纯判据 port-reclaim-policy 有直测',
@@ -37,7 +37,7 @@ const SMOKE_ONLY = {
   'shared/web-harness': '真 web 启动与 RPC 握手：只在 smoke 档跑，回归禁 spawn/网络',
   'shared/zstd-read': 'zstd CLI 解压：keyless 回归禁 spawn，{ok:false} 分支无直测（消费方测试注入 readLog，不触达解压本身）；失败面证据 = 一次性实测 + 消费方的降级处理',
   'channel/hitl-card-driver': '浏览器内 DOM 片段（getComputedStyle / HTMLTextAreaElement / 事件派发）：只能真浏览器跑；判据面在 ask-drive（有直测）',
-  'harness/replay-network-offline': '回放离线闸 preload：只在 dsh 子进程经 NODE_OPTIONS --require 生效，keyless 回归禁 spawn；判据纯件 replay-network-offline-policy 有直测，入口装配证据 = snapshot-replay.entry + smoke-child-paths 静态守卫',
+  'harness/replay-network-offline': '回放离线闸 preload：静态 import 会武装真实进程，故不直引；node:vm 加载并注入假 dns/net 的行为测试见 tests/run/harness/replay-network-offline.spec.mjs（四种 DNS 形态直测），子进程集成 = snapshot-replay.entry',
 }
 
 /** lib 模块全集只在 test-index 的 libModulesOf 一处定义（收 .mjs + .cjs）；本测试复用它，
@@ -82,7 +82,7 @@ function coveredByTests(files) {
   return covered
 }
 
-test('覆盖边界：每个 scripts/lib 模块有直测，或登记为 SMOKE_ONLY 并给出理由', () => {
+test('覆盖边界：每个 scripts/lib 模块有直测，或登记为 SMOKE_ONLY 并给出理由（BUG-196）', () => {
   const modules = libModules()
   const files = testFiles()
   assert.ok(modules.length >= 40, `防空语料：scripts/lib 模块过少（${modules.length}）`)

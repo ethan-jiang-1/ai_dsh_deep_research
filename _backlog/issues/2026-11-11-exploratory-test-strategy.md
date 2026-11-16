@@ -3,64 +3,134 @@ status: 推敲中
 opened: 2026-11-11
 ---
 
-# 推敲：探索性验证账本（exploratory verification）——第十轮 charter：搬家副作用
+# 推敲：探索性验证账本（exploratory verification）——第十一轮 charter：修复后的守卫与新面
 
-> 立卡：2026-11-11 ｜ 状态：推敲中（执行中；第十轮 charter 于 2026-11-15 重定） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-11 ｜ 状态：推敲中（执行中；第十一轮 charter 于 2026-11-16 重定） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
 >
 > **一句话**：探索协议已毕业为常驻方法（[guides/67](../../docs/guides/67-test-strategy.md) +
 > [exploratory-verification](../../.agents/skills/exploratory-verification/SKILL.md)）；本卡 =
-> **逐轮账本 + 当前轮 charter**。第十轮的靶子是**文件搬家**：回归能证明「搬完还绿」，证明不了
-> 「搬的过程中有人顺手改了落点、相对根、消费方或账本口径」。
+> **逐轮账本 + 当前轮 charter**。第十一轮把靶子放在**修复后的类级守卫自身**与第一轮漏掉的面：
+> 新守卫的「承诺 vs 实现」、回归判据的「提及 vs 执行」、生成物对账的「非空 vs 集合」。
 >
-> **当前（2026-11-15 晚）**：前九轮开到 BUG-190（全部修归档）；测试制度 W0–W3、D53/D54/D55 已落地。
-> 2026-11-15 的主干是**四个目录重构批次**（scripts/lib 按 owner、tests 镜像、pack src 按 domain）：
-> 七个 commit（六个执行 rename）**320 个 rename**、约 1.8k 行 import 重写、登记簿 320 条、
-> 两本账 + 索引重生成。**已知三处搬家副作用（外加一处相邻的派生件问题），全部由 review / 发版 /
-> 门禁自测咬出，没有一处由探索或门禁先发现**——这正是本轮要盯的面（证据与判据 = §第十轮 goal）。
+> **当前（2026-11-16 晚）**：批 E（BUG-191–198）与批 F（BUG-199–208）均已修复归档
+> （[批 E Note](../../notes/implemented/2026-11-15-move-side-effect-guards.md) /
+> [批 F Note](../../notes/implemented/2026-11-16-guard-contract-hardening.md)）。批 F 把
+> 新守卫自身的「承诺 vs 实现」收口：深度/shared/symlink、离线闸行为证据、守卫台账、
+> claim 前缀、flag 形状、散文路径、索引集合。
 >
-> **下一步**：批 E（191–198）已于 2026-11-16 全部修复归档（[批 Note](../../notes/implemented/2026-11-15-move-side-effect-guards.md)）；
-> R6（派生件新鲜度）与 R9（构建/注入面）未跑，留给下一轮；真模型批（Y9）仍单独授权。
+> **下一步**：R6/R9 已在第十一轮复跑（见 §第十一轮 goal）；下一轮处理观察项与 Y9 授权。
 
 **问题与期望结果：** 回归能回答「旧行为被改坏没有」，回答不了「新东西在没被写进测试的输入上会不会
 静默放行」。搬家的特殊之处：**它按定义「不该改变行为」**，于是被改坏的东西不会让测试变红——测试跟着
 文件一起搬了。本卡给出的答案 = 一套**搬家的可证伪判据**（§搬家合同）+ 围绕其残差的 charter。找真缺
 陷就开 [bug 卡](../bugs/README.md)，不改产品代码，**不把「没找到」写成「没有 bug」**。
 
-**当前情况（2026-11-15 晚基线）：**
+**当前情况（2026-11-16 基线）：**
 
 - 方法已毕业：guides/67（三环/四账/五关、失败类→最低可见层）+ `exploratory-verification` 技能
   （E1–E6、charter 七件、四态、毕业判据）+ `class-level-guards`（六形态）。
-- 测试制度落地：D53 四车道（`spec`/`e2e`/`entry`/`checks`）；D54 三环四账五关；D55 验证层 oracle
-  独立化；registry 资产账；快照 5 角色 A/B 进 CI；四个 required job 由 `all-checks-passed` 聚合；
-  模型通道手动触发。
-- 基线（2026-11-15 23:2x 本轮实跑）：`pnpm verify` 全绿；`pnpm test` = spec **1358** / checks **198**，
-  0 fail / 0 skip；资产账 213 条（77 run + 46 cockpit + 32 pack + 7 contracts + 48 checks + 3 vendor）。
-  `pnpm typecheck` / `pnpm test:vendor` / 全量 `test:e2e` / `test:entry` 本轮未复跑。
-- 搬家面：四个重构批次（七个 commit、**320 rename**、326 次 rename 事件，含笔记/文档 6 次）；
-  四天三波合计约 **584 次**（11-12 的 51、11-13 的 213、11-15 的 320）；
-  登记簿 [scripts/test-path-redirects.json](../../scripts/test-path-redirects.json) 320 条；
-  两本账与 `tests/INDEX.generated.md` 每步重生成。
+- 测试制度落地：D53 四车道；D54 三环四账五关；D55 验证层 oracle 独立化；registry 资产账；
+  快照 5 角色 A/B 进 CI；四个 required job 由 `all-checks-passed` 聚合；模型通道手动触发。
+- 基线（2026-11-16 08:0x 实跑）：`pnpm verify` 全绿；`pnpm test` = spec **1363** / checks **209**
+  （0 fail / 0 skip）；`pnpm typecheck` 通过；`pnpm test:vendor` 4/4；`gates.e2e` **130** 案例全绿。
+- 搬家与批 E：四个重构批次（320 rename、326 次事件）+ 8 张修复；新守卫 = `test-placement`、
+  `smoke-child-paths`、`gates-cli`；两本账与索引随批 E 重生成。
 - 前九轮：160–190 全部修归档；第 0–66 轮判定见 §覆盖地图与各轮收口；`X6` 仍无证据。
 
 **未决问题：**
 
-- 批 E 8 张（191–198）已修复归档；证据与类级决定见 [批 Note](../../notes/implemented/2026-11-15-move-side-effect-guards.md)。
-- R6（派生件新鲜度：overlay/snapshot 与新源集对账）与 R9（pack 构建/注入面，需一次构建）未跑。
-- 观察未开卡：`shared/` 兜底规则、`navigability-contract` 对 `scripts/lib` 的平铺扫描、
-  `runtime/README.md` 散文路径、`run-lane` 全 SKIP exit 0（旧观察）。
+- 批 E（191–198）与批 F（199–208）均已闭环；证据见两份批 Note。
+- R6/R9 已复跑：`dist-freshness` 负控红、`overlay-fresh` 门在、`pnpm build`/`typecheck`/`vendor` 绿
+  ——本轮无新发现（构建面按现状关闭）。
+- 观察未开卡：`tests/tests` 空目录（untracked，来源未追到）、`smoke-child-paths` 的
+  `resolve(ROOT)`/模板/变量段与非三根扫面（无 live 实例）、`run-lane` 全 SKIP exit 0（旧观察）。
 - 真模型批 Y9（worker 行为）是否批准、预算多少。
 - 本卡继续作为账本，还是下一轮拆成独立卡（当前不拆；账本价值在覆盖地图）。
 
-**下一步：** 批 E 已闭环（8 张归档，见 [批 Note](../../notes/implemented/2026-11-15-move-side-effect-guards.md)）；
-下一轮补 R6/R9，并把 M5/M7/M8 的观察收口（M1/M3/M4/M6 已有类级守卫）。
+**下一步：** 批 F 已闭环（10 张归档，见 [批 F Note](../../notes/implemented/2026-11-16-guard-contract-hardening.md)）；
+下一轮把观察项（`tests/tests` 空目录、`smoke-child-paths` 的 resolve/模板/变量段、`run-lane` exit 0）
+与 Y9 授权收口。
 
-## 阅读顺序（本卡 2.1k 行）
+## 阅读顺序（本卡 2.4k 行）
 
-1. §第十轮 goal（当前要做什么、已探到哪）+ §搬家合同（判据来源）
-2. §覆盖地图（哪些面已探/关闭/空白）
-3. §已知与未决（当前状态）
-4. 历史各节（按主题跳读）：§第六轮…§第九轮 goal → §第 0 轮 pilot → §第 1 轮 charter →
+1. §第十一轮 goal（当前要做什么、已探到哪）
+2. §第十轮 goal + §搬家合同（上一轮的判据来源）
+3. §覆盖地图（哪些面已探/关闭/空白）
+4. §已知与未决（当前状态）
+5. 历史各节（按主题跳读）：§第六轮…§第九轮 goal → §第 0 轮 pilot → §第 1 轮 charter →
    §用户答复 → §执行记录 → §第二轮…第五轮 goal 记录与收口。
+
+## 第十一轮 goal（2026-11-16）：修复后的守卫与新面
+
+**进入**：批 E（BUG-191–198）已修复归档。批 E 的修法把落点、分段路径、索引、覆盖、CLI 输入、
+门禁自测都换成了类级件——**新件本身没有经过探索**（它们只被自己的红证覆盖）。第十一轮先探这些
+新守卫的「承诺 vs 实现」，再补第一轮没跑到的面（R6/R9）与几处旧账（离线闸、文档散文路径）。
+
+| ID | 假设（要杀死的命题） | 最低层 | oracle / 变异 | 预算 | 停止 |
+|---|---|---|---|---|---|
+| T1 | 离线闸对每一种可创建的 DNS/连接形态都拦（含 promises Resolver） | 行为（武装态子进程） | 模块函数 / callback Resolver / promises Resolver 三形态实测；loopback 与非武装对照 | 10 min | **中：[BUG-199](../_archived/fixed_bugs/BUG-199-offline-gate-promises-resolver-bypass.md)（P1）** |
+| T2 | 位置门禁的「未知深度」= 红（承诺与实现一致） | 纯函数 + 实盘 | 4 条深路径 + 实盘 deep spec | 10 min | **中：[BUG-200](../_archived/fixed_bugs/BUG-200-test-placement-unknown-depth-not-enforced.md)** |
+| T3 | 守卫台账覆盖最新一批类级守卫 | 静态 | ledger 的 scope/72/max vs 守卫文件标题 | 5 min | **中：[BUG-201](../_archived/fixed_bugs/BUG-201-guard-ledger-closed-set-stops-at-190.md)** |
+| T4 | 生成物 claim 的路径 token 全前缀可验（不只 `tests/`） | 纯函数 + 重生成 | `scripts/…` vs `tests/…` 注入对照 | 10 min | **中：[BUG-202](../_archived/fixed_bugs/BUG-202-asset-ledger-claim-path-check-tests-prefix-only.md)** |
+| T5 | gates.e2e 的 flag 形状 fail-loud（空值/裸 flag 不静默回退） | CLI | `--case=` 空值实跑；裸 `--case X`/`--jobs 8` 纯函数 | 10 min | **中：[BUG-203](../_archived/fixed_bugs/BUG-203-gates-e2e-empty-and-bare-flag-shapes.md)** |
+| T6 | live 文档的散文路径有车道 | 静态 | 全 live md 的仓内路径 token 扫描 | 10 min | **中：[BUG-204](../_archived/fixed_bugs/BUG-204-live-doc-prose-stale-paths-ungated.md)（2 实例）** |
+| T7 | 镜像门禁的 `shared/` 只收跨切 spec | 纯函数/门禁 | `run/shared` 与 `cockpit/lib/shared` 各一格 | 10 min | **中：[BUG-205](../_archived/fixed_bugs/BUG-205-mirror-shared-escape-hatch.md)（两处）** |
+| T8 | 离线闸的回归判据真的执行入口（不是源码子串） | 门禁自身 | BUG-067 用例 vs 武装实测对照 | 10 min | **中：[BUG-206](../_archived/fixed_bugs/BUG-206-offline-preload-source-substring-test-and-smoke-only.md)** |
+| T9 | tests 下的 symlink 目录不会静默穿过位置门禁 | 门禁 | 仓外 symlink 目录 + git add | 10 min | **中：[BUG-207](../_archived/fixed_bugs/BUG-207-tests-symlink-directory-passes-placement-never-runs.md)** |
+| T10 | 索引的独立抽查验集合（不是「非空」） | 门禁自身 | 合成的部分 importer 过滤 + 重生成 | 10 min | **中：[BUG-208](../_archived/fixed_bugs/BUG-208-test-index-tsx-spot-check-nonempty-only.md)** |
+
+**R6/R9（补第十轮未跑）**：`dist-freshness` 负控（改一个 pack 源 → 点名红、还原 → 绿）通过；
+`overlay-fresh` 门在（`dev/render-overlay.mjs --check`）；`pnpm build` 后 `lib/types` 111 文件 = `src`
+111 模块、`lib/client.js` 产出、`cordis.patch.yml` 目标在场；`pnpm typecheck` / `test:vendor` 绿。
+本轮**无新发现**，构建/派生面按现状关闭（R6/R9 收口）。
+
+### 批 F（2026-11-16 07:5x–08:2x，keyless，0 模型）：10 张卡
+
+| 卡 | charter | 一句话 | 状态 |
+|---|---|---|---|
+| [BUG-199](../_archived/fixed_bugs/BUG-199-offline-gate-promises-resolver-bypass.md) | T1 | 离线闸漏 `dns.promises.Resolver`：武装态下 `new Resolver().resolve4()` 仍解析外网 | 已修 P1 |
+| [BUG-200](../_archived/fixed_bugs/BUG-200-test-placement-unknown-depth-not-enforced.md) | T2 | `test-placement` 的「未知深度 = 红」没实现（run/cockpit lib/client 任意深） | 已修 P2 |
+| [BUG-201](../_archived/fixed_bugs/BUG-201-guard-ledger-closed-set-stops-at-190.md) | T3 | 守卫台账闭集停在 190（72 条），批 E 的 8 卡与三个类级守卫未入账 | 已修 P2 |
+| [BUG-202](../_archived/fixed_bugs/BUG-202-asset-ledger-claim-path-check-tests-prefix-only.md) | T4 | claim 路径检查只认 `tests/…`；`scripts/…` 的失效路径照样固化 | 已修 P2 |
+| [BUG-203](../_archived/fixed_bugs/BUG-203-gates-e2e-empty-and-bare-flag-shapes.md) | T5 | `--case=` 空值静默跑全量（130 案例）；裸 flag 被忽略 | 已修 P2 |
+| [BUG-204](../_archived/fixed_bugs/BUG-204-live-doc-prose-stale-paths-ungated.md) | T6 | live 文档散文的失效路径无门禁（runtime/README、scripts/README 各一处） | 已修 P2 |
+| [BUG-205](../_archived/fixed_bugs/BUG-205-mirror-shared-escape-hatch.md) | T7 | 镜像门禁 `shared/` 兜底：单 owner spec 藏进 shared 无人拦（两处） | 已修 P2 |
+| [BUG-206](../_archived/fixed_bugs/BUG-206-offline-preload-source-substring-test-and-smoke-only.md) | T8 | 离线闸回归是源码子串不执行 install()；preload 还登记 SMOKE_ONLY | 已修 P2 |
+| [BUG-207](../_archived/fixed_bugs/BUG-207-tests-symlink-directory-passes-placement-never-runs.md) | T9 | tests 下的 symlink 目录穿过所有位置门禁、node --test 又不跟 | 已修 P2 |
+| [BUG-208](../_archived/fixed_bugs/BUG-208-test-index-tsx-spot-check-nonempty-only.md) | T10 | 索引 `.tsx` 独立抽查只验非空不验集合：丢一半 importer 仍绿 | 已修 P2 |
+
+**批 F 修复落地（2026-11-16）**：10 张全部 `已修` 并归档；批 Note =
+[2026-11-16-guard-contract-hardening](../../notes/implemented/2026-11-16-guard-contract-hardening.md)。
+验证 = `pnpm verify` 全绿、`pnpm test` spec 1365 / checks 213（0 fail / 0 skip）、
+`gates.e2e` 133 案例全绿（新增 depth / symlink / doc-prose 三例）。
+
+**逐条证据（可重放）**：
+
+- **T1 → 199**：`REPLAY_NETWORK_OFFLINE=1 node --require …replay-network-offline.cjs -e '…' apps/cli/lib/bin.js`；
+  module `dns.promises.resolve4` = ENOTFOUND，`new dns.promises.Resolver().resolve4` = **RESOLVED**；
+  Node 结构事实：`dns.Resolver.prototype.resolve4 !== dns.promises.Resolver.prototype.resolve4`，
+  `new dns.promises.Resolver() instanceof dns.Resolver === false`。
+- **T2 → 200**：`placementIssues([...deep])` 全空；实盘 `tests/run/ops/deep/zz-deep.spec.mjs` →
+  `test-placement` + `test-owner-mirror` + `pack-mirror` **14/14 绿**；evaluation 行却写「未知深度 = 红」。
+- **T3 → 201**：ledger scope 自述止于 190、72 条；守卫文件标题已声称 BUG-191/192/193；反向不查。
+- **T4 → 202**：改 header 为 `scripts/lib/__gone__.mjs` + 重生成 → claim 检查 5/5 绿；同形 `tests/…` → 红。
+- **T5 → 203**：`gates.e2e --case= --jobs=2` → 全量 130 案例全绿（应 exit 2）；裸 `--jobs 8` → fallback 4。
+- **T6 → 204**：`runtime/README.md` 的 `scripts/lib/scene-pack.mjs`（真件 `ops/`）、
+  `scripts/README.md` 的 `tests/run/final-version.spec`（真件 `tests/run/gates/…spec.mjs`）。
+- **T7 → 205**：`tests/run/shared` 放只依赖 gates 的 spec → `test-owner-mirror` 3/3 绿；
+  `tests/cockpit/lib/shared` 放只依赖 gates 的 spec → `pack-mirror` + placement 11/11 绿。
+- **T8 → 206**：BUG-067 用例是 `source.includes(...)`；同树上 T1 实测绕过——子串断言把错误类当覆盖。
+- **T9 → 207**：`ln -s /tmp/symprobe tests/cockpit/misc` + `git add` → `verify --only=test-placement` PASS、
+  `pack-mirror` 8/8 绿；`node --test 'tests/cockpit/**'` → 零个测试被选中。
+- **T10 → 208**：临时在 `importersUnder` 丢掉 `method-library-selection` 的 importer + 重生成 →
+  `test-index` 2/2 绿（行只剩 2/3 importer）。
+
+**基线（本轮）**：`pnpm verify` 全绿；`pnpm test` 1363/209（0/0）；`gates.e2e` 130 案例全绿；
+`pnpm typecheck` 通过；`pnpm test:vendor` 4/4。所有探针已复原（`git status` 仅卡与新卡）。
+
+**观察（未开卡）**：`tests/tests` 空目录（untracked，mtime 11-15 09:02，来源未追到）；
+`smoke-child-paths` 的 `resolve(ROOT)` / 模板串 / 变量段 / 非三根扫面（无 live 实例，Note 已写模板/变量）；
+`run-lane` 全 SKIP exit 0（旧观察）；claim 路径只查存在性、不查 tracked（无 live 实例）。
 
 ## 第十轮 goal（2026-11-15）：搬家副作用
 
@@ -625,18 +695,35 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 | CLI 数值输入（`--jobs`） | 已探 → 已开卡 | R6 邻接：0 案例真跑 + `undefined` 假失败 → [BUG-195](../_archived/fixed_bugs/BUG-195-gates-e2e-adhoc-jobs-value-fake-failures.md) |
 | pack 构建 / 注入面 | 未跑 | R9（需构建；未构建记未跑） |
 
+### 第十一轮新增面（2026-11-16）
+
+| 面 | 状态 | 判定 / 证据 |
+|---|---|---|
+| 离线闸的 promises Resolver | 已探 → 已开卡 | 武装态 `new Resolver().resolve4` 解析外网 → [BUG-199](../_archived/fixed_bugs/BUG-199-offline-gate-promises-resolver-bypass.md)（P1） |
+| 位置门禁的未知深度 | 已探 → 已开卡 | 深路径全绿、文档称红 → [BUG-200](../_archived/fixed_bugs/BUG-200-test-placement-unknown-depth-not-enforced.md) |
+| 守卫台账的最新批覆盖 | 已探 → 已开卡 | 72 条/止于 190、守卫标题已声称 19x → [BUG-201](../_archived/fixed_bugs/BUG-201-guard-ledger-closed-set-stops-at-190.md) |
+| claim 路径的前缀面 | 已探 → 已开卡 | `scripts/…` 注入绿、`tests/…` 红 → [BUG-202](../_archived/fixed_bugs/BUG-202-asset-ledger-claim-path-check-tests-prefix-only.md) |
+| gates.e2e 的 flag 形状 | 已探 → 已开卡 | `--case=` 空值实跑 130 案例 → [BUG-203](../_archived/fixed_bugs/BUG-203-gates-e2e-empty-and-bare-flag-shapes.md) |
+| live 文档散文路径 | 已探 → 已开卡 | 两处旧路径（doc-paths 只扫反引号） → [BUG-204](../_archived/fixed_bugs/BUG-204-live-doc-prose-stale-paths-ungated.md) |
+| 镜像 `shared/` 兜底 | 已探 → 已开卡 | run/shared 与 cockpit lib/shared 两格 → [BUG-205](../_archived/fixed_bugs/BUG-205-mirror-shared-escape-hatch.md) |
+| 离线闸回归判据 | 已探 → 已开卡 | 源码子串不执行 install() + SMOKE_ONLY → [BUG-206](../_archived/fixed_bugs/BUG-206-offline-preload-source-substring-test-and-smoke-only.md) |
+| tests 下的 symlink 目录 | 已探 → 已开卡 | 位置门禁 PASS / node 零个测试被选中 → [BUG-207](../_archived/fixed_bugs/BUG-207-tests-symlink-directory-passes-placement-never-runs.md) |
+| 索引抽查的集合面 | 已探 → 已开卡 | 合成丢 importer 仍绿 → [BUG-208](../_archived/fixed_bugs/BUG-208-test-index-tsx-spot-check-nonempty-only.md) |
+| R6 派生件新鲜度 | 已关闭（本轮） | `dist-freshness` 负控红/还原绿；`overlay-fresh` 门在；构建面见 R9 |
+| R9 构建 / 注入面 | 已关闭（本轮） | `pnpm build` 后 111 = 111；`lib/client.js`/`cordis.patch.yml` 目标在场；typecheck/vendor 绿 |
+
 ## 已知与未决
 
-- **已知**：协议已毕业（guides/67 + 技能 + D54）；前九轮 160–190 全部归档；第 0–66 轮判定见
-  §覆盖地图与各轮收口；`pnpm verify` 全绿、`pnpm test` spec 1358 / checks 198（2026-11-16 复跑）；
-  快照 5 角色 A/B 进 CI。第十轮批 E（2026-11-15/16）开 **8 张卡**：2 张 `修复就绪`（192 P1、193）、
-  6 张 `等人拍板`（191、194、195、196、197、198）；侦察 R0a–R0g 与 charter R1–R8 的结论见上。
-- **未决**：六张 `等人拍板` 待用户放行；192（P1）/193 待落地；R6 / R9 / R7 完整反向图未跑；
-  `shared/` 兜底、`navigability-contract` 平铺扫描、`smoke-imports` 不递归 `.cjs`、`run-lane` 全 SKIP
-  exit 0 四条观察未开卡；Y9（worker 行为）真模型批未授权；安装域默认语言、hook/DOM、world-tree
-  仍空白；真实 GitHub CI / model-smoke 未跑。
+- **已知**：协议已毕业（guides/67 + 技能 + D54）；前九轮 160–190 全部归档；批 E（191–198）
+  已修归档；第十一轮批 F（199–208）已开 **10 张卡**：1 `修复就绪`（199 P1）+ 9 `等人拍板`；
+  第 0–66 轮判定见 §覆盖地图；`pnpm verify` 全绿、`pnpm test` spec 1363 / checks 209（2026-11-16 实跑）、
+  `gates.e2e` 130 案例全绿、`pnpm typecheck` / `test:vendor` 绿；快照 5 角色 A/B 进 CI。
+- **未决**：199（P1）待落地；200–208 待用户放行（门禁/文档合同触面）；R6/R9 本轮复跑无新发现；
+  `tests/tests` 空目录来源未追到；`smoke-child-paths` 的 `resolve(ROOT)`/模板/变量与非三根扫面、
+  claim 只查存在性不查 tracked、`run-lane` 全 SKIP exit 0 三处观察未开卡；Y9 真模型批未授权；
+  安装域默认语言、hook/DOM、world-tree 仍空白；真实 GitHub CI / model-smoke 未跑。
 - **不证**：单条 charter 的结论不外推；X6 单场不证稳定性；探索不证 L4 的语义质量；
-  「搬完全绿」不证「没搬坏」（R0a 只证引用边，不证函数体）。
+  「守卫存在」不证「守卫有效」（本轮 200/206/208 都是这一句的反例）。
 
 ## 覆盖与收益（2026-11-11 收口评估）
 

@@ -76,8 +76,8 @@ R6/R9 的构建面（不在批 E 范围）。
 
 ## 残余风险
 
-- `tests/run/shared/` 仍可在 `shared/` 藏单 owner spec（现有两例依赖 gates+shared）；
-  `test-placement` 只判路径形态，不判 run 的 owner 依赖。
+- `tests/run/shared/` 的单 owner 兜底已于 2026-11-16 收口（shared 准入 = 无依赖/仅 shared/
+  test-support；见 [批 F Note](2026-11-16-guard-contract-hardening.md)）。
 - `smoke-child-paths` 只认 `join(ROOT, <全字面量>)`；模板字符串/变量段仍不在车道内
   （它们不是本次两个实例的形态）。
 - `test-placement` 的已知闭集是手写常量；新增 client 子目录/domain/surface 时需同 diff 更新

@@ -61,7 +61,7 @@
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
-| node-gate.mjs | 判据级：门①②③④ + 门L + 门R（标题重复退化，2026-10-06 起）+ 门A（交付完整性，2026-10-08 起）+ 门C（读者版合同，2026-10-23 起；图例正本 = research-workspace/NODES.md 头部），默认只读，`--write` 才落 bundle 报告——判据核心住 lib/node-gate-core.mjs 聚合及领域模块（本件 = CLI 壳 + zstd reader 注入） | keyless |
+| node-gate.mjs | 判据级：门①②③④ + 门L + 门R（标题重复退化，2026-10-06 起）+ 门A（交付完整性，2026-10-08 起）+ 门C（读者版合同，2026-10-23 起；图例正本 = `packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md` 头部），默认只读，`--write` 才落 bundle 报告——判据核心住 lib/node-gate-core.mjs 聚合及领域模块（本件 = CLI 壳 + zstd reader 注入） | keyless |
 | schema-scan.mjs | 在场级：八节点输出件在场断言（整数契约/日期两态断代；判据核住 lib/schema-scan-core.mjs，本件 = CLI 壳） | keyless |
 | evidence-audit.mjs | URL/摘录/final 链溯源对账；默认只读，`--write` 才落 audit.md——判据核心住 lib/evidence-audit-core.mjs（本件 = CLI 壳 + zstd reader 注入） | keyless（须 source dev/env.sh） |
 | path-hygiene.mjs | run bundle 的 `final/`/`acceptance.md`/`delivered.json`/`provenance/` 本机 home 路径；默认红，`--allow-legacy` 旧场只报告 | keyless |
@@ -139,7 +139,7 @@
 | lib/ops/scene-pack.mjs | scene-capture、scene-pack.spec | 场景包读取/列示纯函数（五件套概要如实——缺件与坏 meta 不静默；mtime 降序） |
 | lib/channel/inject-reconcile.mjs | cdp-probe、inject-reconcile.spec、run-kickoff | 注入消息「落盘对账」判据（BUG-021 正修：日志里出现本条 user/message 才算送达；时间下界防同文假阳） |
 | lib/probes/probe-send-target.mjs | cdp-probe、probe-send-target.spec | 提交按钮判定纯函数（BUG-021 正修：send 家族六标签状态机 + **stop 家族拒点** + composer 邻近窗；页面只读 DOM 与执行点击） |
-| lib/shared/final-version.mjs | final-version.spec、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、run-accept、run-dashboard-core、run-receipt、schema-scan-core、verdict-audit | 终稿版本文件名的唯一判据（纯判据从 pack `src/lib/final-target.ts` 取；目录扫描 = final/ 与 readable-vN）；旧 vN 正则的机械漂移锁 = tests/run/final-version.spec |
+| lib/shared/final-version.mjs | final-version.spec、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、run-accept、run-dashboard-core、run-receipt、schema-scan-core、verdict-audit | 终稿版本文件名的唯一判据（纯判据从 pack `src/lib/final-target.ts` 取；目录扫描 = final/ 与 readable-vN）；旧 vN 正则的机械漂移锁 = `tests/run/gates/final-version.spec.mjs` |
 | lib/shared/probe-status-tab.mjs | cdp-probe、probe-status-tab.spec、session-replay | 右栏「研究状态」页签判定纯函数：胶囊按**标题 span 逐字**匹配（拒绝描述串入 / 近似标题）、页签体只认 `[data-sidebar-right-tab]`（不拿会话正文当观察面） |
 | lib/shared/probe-index.mjs | f-repo、probes/_index.mjs、probe-index.spec、smoke-contract.test | 探针索引纯函数（递归扫描 `probes/`、解析头注六字段、按域分组渲染；门禁 probe-registry 消费同一渲染；索引不复制判据/不证明长文） |
 | lib/channel/run-channel.mjs | run-driver、run-driver-contract.spec | run 通道驱动判据纯函数：web.log → 当前 GUI URL（取最后一条横幅）、浏览器面 verdict → 呈交判决（GREEN / RED / NOT-RUN） |
@@ -154,7 +154,8 @@
 | lib/harness/vendor-artifacts.mjs | cdp-ask.entry、client-hitl.entry、client-load.entry、defaults-probe、discipline-probe、wave-execution-probe、entry-chain-probe、l4-lite.e2e、preset.e2e、session-replay、team-preflight.e2e、vendor-artifacts.spec | vendor 构建产物自检 |
 | lib/repo/backlog-liveness.mjs | backlog-liveness.test、f-repo、staged-change-pairing | 问题卡、缺陷、调研、方法与归档索引的结构合同；被 verify 入口与 keyless 回归消费 |
 | lib/repo/staged-change-pairing.mjs | staged-change-pairing.test、f-repo | 暂存区成对变更判据（归档卡↔Note、ui.expected↔lastRewrite）；纯函数，git 由门禁注入 |
-| lib/repo/test-placement.mjs | f-repo、pack-mirror.test、test-placement.test | tests 落点闭集：全集 − 已知子集 = 空（未知子树/深度/平铺根 = 红；BUG-191） |
+| lib/repo/test-placement.mjs | f-repo、pack-mirror.test、test-owner-mirror.test、test-placement.test | tests 落点闭集：全集 − 已知子集 = 空（未知子树/深度/平铺根 = 红；BUG-191/200） |
+| lib/repo/doc-prose-paths.mjs | a-docs、doc-prose-paths.test | live 文档散文里的仓内路径 token 枚举（剥反引号/围栏/URL；BUG-204） |
 | lib/probes/direct-authorization-boundary.mjs | entry-chain-probe、entry-chain-probe.spec | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |
 | lib/harness/replay-scene.mjs | replay-fixtures.spec、replay-scene.spec、snapshot-replay.entry | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |
 | lib/shared/replay-request.mjs | record-role-fixture、replay-request.spec、snapshot-replay.entry | 组装请求面逐条比较：persona、header 全序列、四处 user/message 注入（含时钟序列）（定向归一化） |
@@ -175,7 +176,7 @@
 | lib/test-infra/method-presets.mjs | library-fold.spec、method-presets.spec | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本 |
 | lib/tools/keyless-imports.mjs | asset-ledger、boot-timer.test、test-index、test-index.test、test-owner-mirror.test、pack-mirror.test、client-surface.test、layering.test、smoke-imports.test、test-lanes.test、test-surface.test | 只读 import 检查（解析器 = typescript 纯函数；company keyless-imports@59551f2 移植）——调用表达式解析 + 本地 import 闭包图 |
 | lib/harness/gates-cases.mjs | gates.e2e、verify-gates.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
-| lib/harness/gates-cli.mjs | gates.e2e、gates-cli.spec | gates.e2e 的数值输入归一（--jobs 正整数，否则 exit 2）与有界并发（BUG-195） |
+| lib/harness/gates-cli.mjs | gates.e2e、gates-cli.spec | gates.e2e 的 flag/数值输入归一（--case/--jobs 两形状，空值/未知参数 exit 2）与有界并发（BUG-195/203） |
 | lib/repo/fix-evidence.mjs | fix-evidence.test、staged-change-pairing、backlog-liveness | bug 修复卡实证合同：改动/红证/绿证 + 可重放红证/测试资产；活跃 修复落地 与归档共用 |
 | lib/tools/workspace-parsers.mjs | ci-workflow、markdown-mask-conformance.spec、note-scan.test、record-ci-oracle、replay-fixtures.spec、verdict-conformance.spec、workspace-parsers.test | 锁定在 `node_modules/.pnpm` 内的外部纯函数解析器加载器（`yaml@2` + `mdast-util-from-markdown@2`；防向上穿透宿主机目录） |
 | lib/repo/note-scan.mjs | c-notes、note-scan.test、markdown-mask-conformance.spec | notes 门禁的 Markdown 块级扫描：复用 `src/lib/markdown-mask.ts` 单一正本，与 `mdast` 直接在测试进程内逐行对账（BUG-169/175/178/179/183/185） |

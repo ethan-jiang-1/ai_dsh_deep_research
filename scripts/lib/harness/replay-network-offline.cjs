@@ -9,7 +9,8 @@
 // 边界：只覆盖 **dsh 主进程内**的网络调用（`isDshMain`）。工具 spawn 的子进程（如 bash 里跑
 // curl）继承 NODE_OPTIONS 但 argv 不命中，故不受控——这是刻意的：boot 期的 pnpm/registry 安装
 // 子进程必须放行；若未来 fixture 用子进程工具，另立 `REPLAY_NETWORK_OFFLINE_CHILDREN=1` 的
-// 更严模式并给安装子进程豁免。DNS 面覆盖 lookup + resolve* + Resolver.prototype.*（含 promises）。
+// 更严模式并给安装子进程豁免。DNS 面覆盖 lookup + resolve* + Resolver.prototype.* +
+// dns.promises.Resolver.prototype.*（promises Resolver 是独立类，不继承 dns.Resolver）。
 'use strict'
 
 const net = require('node:net')
@@ -64,6 +65,15 @@ function install() {
     }
     const resolver = dns.Resolver?.prototype?.[name]
     if (typeof resolver === 'function') dns.Resolver.prototype[name] = rejectResolve(resolver)
+    // Node 22 的 dns.promises.Resolver 是独立类（instanceof dns.Resolver === false），
+    // 必须单独 patch；否则 new dns.promises.Resolver().resolve4() 直接绕过本闸。
+    const promiseResolver = dns.promises?.Resolver?.prototype?.[name]
+    if (typeof promiseResolver === 'function') {
+      dns.promises.Resolver.prototype[name] = async function offlinePromiseResolver(hostname, ...rest) {
+        if (isLoopback(hostname)) return promiseResolver.call(this, hostname, ...rest)
+        throw offlineError('dns', hostname)
+      }
+    }
   }
 
   // TCP/TLS：connect(options) 与 connect(port, host, cb) 两种形态；loopback / unix socket 放行。

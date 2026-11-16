@@ -7,6 +7,7 @@ import { readFileSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, resolve, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { ROOT, fail, gitOnce, note, trackedFiles } from '../context.mjs';
+import { prosePathTokens } from '../../lib/repo/doc-prose-paths.mjs';
 
 export function runA() {
   // live 文档范围：notes/_backlog 是历史层、fixtures 是样本，均不追改；doc-paths/doc-drefs 共用。
@@ -205,6 +206,9 @@ export function runA() {
 // 构建产物（`packages/*/lib/`）不是 fresh-clone 合同：它是 gitignored 构建输出，CI/新 clone 不存在；
 // 文档描述它时按"构建产物"口径放行。存在性由构建与 pack.e2e 证明，不由文档合同证明。
 // 防空语料：解析到的 token 数 < 100 → 红（范围被收窄或抓取正则失效）。
+// 散文面（BUG-204）：live 文档里**不在反引号里**、但形如 `<root>/….<ext>` 的仓内路径同样会被
+// agent 照读；窄带只认仓内根前缀 + 文件扩展名（`scripts/dev` 这类简写无扩展名不在此列），
+// 代码围栏与反引号内已由上一段覆盖/跳过。解析优先级同反引号（仓根/文档目录/vendor）。
 {
   const gate = 'doc-paths';
   const files = liveMdFiles(gate);
@@ -217,6 +221,13 @@ export function runA() {
       ['dev/harness-home', '反例路径：dev-runtime-clean 守则要求它不存在（只作注入样本）'],
     ]);
     const BUILD_OUTPUT = /^packages\/[^/]+\/lib(\/|$)/;
+    const existsForDoc = (p, rel) => {
+      if (BUILD_OUTPUT.test(p) || EXEMPT.has(p)) return true;
+      const candidates = [p, 'vendor/dsh/' + p, ...EXTS.map((e) => p + e)];
+      const fromDoc = join(dirname(rel), p);
+      candidates.push(fromDoc, ...EXTS.map((e) => fromDoc + e));
+      return candidates.some((c) => existsSync(join(ROOT, c)));
+    };
     let checked = 0;
     for (const { rel, text } of files) {
       const lines = text.split('\n');
@@ -233,19 +244,25 @@ export function runA() {
               .filter((x) => !/[<>{}*?…]/.test(x) && !x.includes('$'));
           })();
           for (const p of paths) {
-            if (BUILD_OUTPUT.test(p)) continue;
-            if (EXEMPT.has(p)) continue;
             checked++;
-            const candidates = [p, 'vendor/dsh/' + p, ...EXTS.map((e) => p + e)];
-            const fromDoc = join(dirname(rel), p);
-            candidates.push(fromDoc, ...EXTS.map((e) => fromDoc + e));
-            if (candidates.some((c) => existsSync(join(ROOT, c)))) continue;
+            if (existsForDoc(p, rel)) continue;
             fail(gate, `${rel}:${i + 1} 反引号路径 \`${p}\` 不存在（仓根/文档目录/vendor 均未命中）——散文件路径也是合同；修正路径或改用 Markdown 链接`);
           }
         }
       }
     }
     if (checked < 100) fail(gate, `防空语料：只解析到 ${checked} 条仓内反引号路径（过少 = 扫描面被收窄）`);
+
+    // 散文面：由 doc-prose-paths 纯函数剥离反引号/围栏并枚举；存在性用同一 existsForDoc 解析。
+    let proseChecked = 0;
+    for (const { rel, text } of files) {
+      for (const { line, path: p } of prosePathTokens(text)) {
+        proseChecked++;
+        if (existsForDoc(p, rel)) continue;
+        fail(gate, `${rel}:${line} 散文路径 ${p} 不存在（仓根/文档目录/vendor 均未命中）——live 文档的散文件引用也是合同；修正路径或改用反引号`);
+      }
+    }
+    if (proseChecked < 50) fail(gate, `防空语料：只解析到 ${proseChecked} 条散文仓内路径（过少 = 扫描面被收窄）`);
   }
 }
 

@@ -22,22 +22,25 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cpus } from 'node:os';
 import { CASES, CONTROLS } from '../lib/harness/gates-cases.mjs';
-import { boundedMap, parseJobsArg } from '../lib/harness/gates-cli.mjs';
+import { boundedMap, parseE2eArgs } from '../lib/harness/gates-cli.mjs';
 import { isMain } from '../lib/shared/cli-entry.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const VERIFY_REL = join('scripts', 'verify', 'verify.mjs');
 
-// `--case=<id[,id]>`：只跑指定案例（改一道门禁时不必等 90 多个案例）。
-// `--jobs=<n>`：有界并行（默认 min(4, CPU)）；案例彼此独立，108 个案例串行 ~248s → 并行 ~86s。
+// `--case` / `--jobs`：两种形状（`--name=value` / `--name value`）同判；空值/未知参数 = exit 2。
+// 空 `--case=` 曾静默退化为「没有过滤器」而跑全量，调用方会把它读成「指定案例绿了」（BUG-203）。
+// `--jobs`：有界并行（默认 min(4, CPU)）；案例彼此独立，108 个案例串行 ~248s → 并行 ~86s。
 // 对照组与门禁名集合都按选中案例收窄——被过滤掉的案例既不计红也不计绿（末尾自报"仅跑 N 个"）。
-const caseArgs = process.argv.filter((a) => a.startsWith('--case='));
-const caseNames = caseArgs.flatMap((a) => a.slice('--case='.length).split(',')).map((s) => s.trim()).filter(Boolean);
-const caseFilter = caseNames.length === 0 ? null : new Set(caseNames);
-// 数值输入在进入主流程前归一：非法 --jobs 是「未跑」（exit 2），不是 N 条 undefined 假失败。
-let JOBS;
-try { JOBS = parseJobsArg(process.argv, Math.max(1, Math.min(4, cpus().length))); }
+let ARGS;
+try { ARGS = parseE2eArgs(process.argv.slice(2), Math.max(1, Math.min(4, cpus().length))); }
 catch (error) { console.error(`gates.e2e: ${error.message}`); process.exit(2); }
+if (ARGS.help) {
+  console.log('gates.e2e 用法：--case=<id[,id]>|--case <id[,id]> --jobs=<n>|--jobs <n> [--help]');
+  process.exit(0);
+}
+const caseFilter = ARGS.cases.length === 0 ? null : new Set(ARGS.cases);
+const JOBS = ARGS.jobs;
 
 // ── fixture：tracked 文件副本 + git init/add（git ls-files 驱动的门禁在副本内可用）──
 

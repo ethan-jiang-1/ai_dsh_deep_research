@@ -4,6 +4,8 @@
 // （BUG-194）→ 下方 `.tsx` 独立抽查红。
 // 负例留证 2026-11-16：BUG-194——把 importersUnder 的扩展名集收回 `.ts`（去掉 `.tsx`）→
 // 独立抽查点名 method-library/views 等模块显示「—」；还原 → 绿。
+// 负例留证 2026-11-16：BUG-208——在 importersUnder 临时跳过 method-library-selection 的 spec
+// 并重生成索引 → 索引行少一个 importer，集合对账红（只验非空的旧版会绿）；还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
@@ -56,7 +58,7 @@ test('索引与盘上一致（模块数防空 + 逐字节相等）', () => {
   assert.ok(current.split('\n').filter((l) => l.startsWith('| ')).length >= 80, '索引行过少（防空语料）')
 })
 
-test('`.tsx` client 模块被测试直接 import 时，索引必须有非空测试列（BUG-194 独立抽查）', () => {
+test('`.tsx` client 模块被测试直接 import 时，索引测试列 = 独立扫描集合（BUG-194 / BUG-208）', () => {
   const importers = tsxClientImporters()
   assert.ok(importers.size >= 6, `防空语料：被测试直接 import 的 .tsx client 模块过少（${importers.size}）`)
   const lines = renderTestIndex(ROOT).split('\n')
@@ -67,7 +69,8 @@ test('`.tsx` client 模块被测试直接 import 时，索引必须有非空测�
     const row = section.find((line) => line.startsWith('| ') && line.includes(`\`${module}\` |`))
     assert.ok(row, `索引缺 .tsx client 模块 ${module} 的行（importer：${[...tests].sort().join(', ')}）`)
     const cells = row.split('|').map((cell) => cell.trim())
-    assert.notEqual(cells[3], '—',
-      `索引把 ${module} 显示成「—」，但测试直接 import 了它：${[...tests].sort().join(', ')}——importer 过滤条件又收窄了？`)
+    const indexed = cells[3] === '—' ? [] : [...cells[3].matchAll(/`([^`]+)`/g)].map((match) => match[1])
+    assert.deepEqual(indexed.sort(), [...tests].sort(),
+      `索引 ${module} 的测试列与独立扫描不一致：索引=${JSON.stringify(indexed.sort())} 独立=${JSON.stringify([...tests].sort())}——非空不够，集合必须相等（BUG-208）`)
   }
 })

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "scope": "失败类普查 D-1（24）+ D-2（17）+ 探索批 A–D（BUG-160..190，31）全量闭集；oracleType 与 asset-ledger 同源双向对账",
+  "scope": "失败类普查 D-1（24）+ D-2（17）+ 探索批 A–F（BUG-160..208，49）全量闭集；oracleType 与 asset-ledger 同源双向对账；反向：守卫标题声称的 BUG-nnn（≥191）必须入账",
   "bugs": [
     {
       "id": "BUG-001",
@@ -577,6 +577,150 @@
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "退回缩进文本猜 on: 或漏录 events 字段 → BUG-190 fixture 对账红"
+    },
+    {
+      "id": "BUG-191",
+      "mechanism": "tests/ 落点全集 − 已知子集 = 空；pack-mirror 与 L0 test-placement 共用规则，未知子树/深度/平铺根 = 红",
+      "guard": "tests/checks/pack-mirror.test.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "在 tests/cockpit/misc/ 放 spec → 落点全集测试红；重生成资产账不解除"
+    },
+    {
+      "id": "BUG-192",
+      "mechanism": "snapshot-replay 离线预载路径存在性 + 分段路径静态守卫",
+      "guard": "tests/checks/smoke-child-paths.test.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 OFFLINE_PRELOAD 指回 scripts/lib/replay-network-offline.cjs → 静态守卫红；运行前置 exit 2"
+    },
+    {
+      "id": "BUG-193",
+      "mechanism": "cdp-ask 探针路径存在性 + 分段路径静态守卫",
+      "guard": "tests/checks/smoke-child-paths.test.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 PROBE 指回 scripts/probe/cdp-probe.mjs → 静态守卫红；spawn 前 exit 2"
+    },
+    {
+      "id": "BUG-194",
+      "mechanism": "test-index importer 扩展名闭集含 .tsx + 独立集合抽查",
+      "guard": "tests/checks/test-index.test.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 importersUnder 扩展名收回 .ts 并重生成索引 → 独立抽查红"
+    },
+    {
+      "id": "BUG-195",
+      "mechanism": "gates.e2e --jobs 正整数解析 + boundedMap 非法 limit fail-loud",
+      "guard": "tests/run/harness/gates-cli.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "旧 Math.max(1, Number(x)) 或无校验 boundedMap → invalid 用例红"
+    },
+    {
+      "id": "BUG-196",
+      "mechanism": "scripts/lib 模块全集含 .cjs；preload 登记 SMOKE_ONLY 且 policy 有直测",
+      "guard": "tests/checks/test-surface.test.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "新增无测试 scripts/lib/shared/zz-probe.cjs → 覆盖缺口红"
+    },
+    {
+      "id": "BUG-197",
+      "mechanism": "repo-conventions 的 dev/hooks 扫面有常驻注入案例并由 verify-gates 静态钉住",
+      "guard": "tests/checks/verify-gates.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删 gates-cases 的 repo-conventions-dev-hook-path → 静态钉红；去扫面 → gates.e2e 案例红"
+    },
+    {
+      "id": "BUG-198",
+      "mechanism": "spec 首行自指路径 + asset-ledger claim 中的仓内路径必须存在",
+      "guard": "tests/checks/asset-ledger.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "claim 注入不存在的 tests/… 路径 → 红"
+    },
+    {
+      "id": "BUG-199",
+      "mechanism": "dns.promises.Resolver.prototype.* 与 callback/promises/module 三面同拦（武装态行为测试）",
+      "guard": "tests/run/harness/replay-network-offline.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删 install() 的 dns.promises.Resolver.prototype patch → vm 行为用例红"
+    },
+    {
+      "id": "BUG-200",
+      "mechanism": "tests/run|cockpit lib|cockpit client 的落点深度恰好（未知深度 = 红）",
+      "guard": "tests/checks/pack-mirror.test.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "在 tests/run/ops/deep/ 放 spec → 落点/深度测试红"
+    },
+    {
+      "id": "BUG-201",
+      "mechanism": "守卫台账闭集 = D-1/D-2/A–F，且守卫标题声称的 BUG-nnn（≥191）必须反向入账",
+      "guard": "tests/checks/guard-ledger.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删一条批 E 入账或给守卫加未入账 BUG-199 标题 → 全量/反向判据红"
+    },
+    {
+      "id": "BUG-202",
+      "mechanism": "asset-ledger 的 claim 路径检查按仓内根前缀闭集（scripts/docs/packages/…），不只 tests/",
+      "guard": "tests/checks/asset-ledger.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "claim 注入不存在的 scripts/… 或 docs/… 路径 → 红（旧 tests-only 绿）"
+    },
+    {
+      "id": "BUG-203",
+      "mechanism": "gates.e2e flag 两形状同判（--name=value / --name value），空值/未知/位置参数 exit 2",
+      "guard": "tests/run/harness/gates-cli.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "把 parseE2eArgs 换回只认 = 形态/空值 filter(Boolean) → 形状用例红"
+    },
+    {
+      "id": "BUG-204",
+      "mechanism": "live 文档散文里的仓内路径 token 由 doc-paths 枚举并按同一解析序验证",
+      "guard": "tests/checks/doc-prose-paths.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "散文注入 scripts/lib/__gone__.mjs 到 live 文档 → doc-paths 红"
+    },
+    {
+      "id": "BUG-205",
+      "mechanism": "shared 只收无依赖/仅 shared/test-support 的跨切 spec；单 owner spec 归位",
+      "guard": "tests/checks/test-owner-mirror.test.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "在 tests/run/shared 放只依赖 gates 的 spec → shared 用例红"
+    },
+    {
+      "id": "BUG-206",
+      "mechanism": "离线闸回归 = vm 加载 install() 的行为证据（非源码子串）；SMOKE_ONLY 理由指向直测",
+      "guard": "tests/run/harness/replay-network-offline.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 vm 行为测试换回源码子串或删 promises Resolver patch → BUG-199 用例红"
+    },
+    {
+      "id": "BUG-207",
+      "mechanism": "tests/ 下零符号链接（git mode 120000）+ pack-mirror 盘上 symlink 枚举",
+      "guard": "tests/checks/pack-mirror.test.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "在 tests/ 放 symlink 目录 → 零符号链接测试红；test-placement 门禁同步点名"
+    },
+    {
+      "id": "BUG-208",
+      "mechanism": "索引行的测试列 = 独立 .tsx importer 集合（行缺/多/少都红）",
+      "guard": "tests/checks/test-index.test.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "importersUnder 跳过部分 importer 并重生成索引 → 集合对账红（旧非空判据绿）"
     }
   ]
 }
