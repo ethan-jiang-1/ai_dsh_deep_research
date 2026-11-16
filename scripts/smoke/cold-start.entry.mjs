@@ -48,8 +48,11 @@ let output = ''
 const child = spawn(process.execPath, [join(ROOT, 'dev', 'run-driver.mjs'), 'up', '--bootstrap'], {
   cwd: ROOT, env, stdio: ['ignore', 'pipe', 'pipe'],
 })
-child.stdout.on('data', (chunk) => { output = (output + String(chunk)).slice(-64_000) })
-child.stderr.on('data', (chunk) => { output = (output + String(chunk)).slice(-64_000) })
+// setEncoding：管道 chunk 可落在多字节字符中间，不先解码会撕成 U+FFFD（启动横幅判据假红）。
+child.stdout.setEncoding('utf8')
+child.stderr.setEncoding('utf8')
+child.stdout.on('data', (chunk) => { output = (output + chunk).slice(-64_000) })
+child.stderr.on('data', (chunk) => { output = (output + chunk).slice(-64_000) })
 
 const result = await new Promise((resolveResult) => {
   const timer = setTimeout(() => {

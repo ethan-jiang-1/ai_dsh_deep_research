@@ -83,8 +83,14 @@ function runVerify(dir) {
   return new Promise((resolve) => {
     const child = spawn(process.execPath, [join(dir, VERIFY_REL)], { cwd: dir, stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '';
-    child.stdout.on('data', (chunk) => { out += String(chunk); });
-    child.stderr.on('data', (chunk) => { out += String(chunk); });
+    // UTF-8 边界：管道 chunk 会落在多字节字符中间——不 setEncoding 时 `String(chunk)` 把汉字撕成
+    // U+FFFD，而下方案例判据用**中文 expect** 做 includes（133 案例中有 9 个）。实测（2026-11-16，
+    // Linux 容器复现 Linux CI）：64 KiB 边界撕裂 → `includes` 假、报出「门禁报了红但非本案例报因」
+    // 的随机假红，且失败案例每次不同（glob / missing 轮换）。修复 = 两条流先 setEncoding('utf8')。
+    child.stdout.setEncoding('utf8');
+    child.stderr.setEncoding('utf8');
+    child.stdout.on('data', (chunk) => { out += chunk; });
+    child.stderr.on('data', (chunk) => { out += chunk; });
     child.on('close', (status) => resolve({ status, out }));
   });
 }

@@ -50,6 +50,29 @@ function listEntryRels() {
   return rels.sort();
 }
 
+// 2026-11-16：多字节 chunk 边界假红的类级守卫（Linux CI 实测 gates.e2e 5/133 案例随机红）。
+// 机制：管道 chunk 按字节切，`String(chunk)` / 直接拼接前不 setEncoding('utf8') 会把汉字撕成
+// U+FFFD，随后用中文 expect / includes 判据即「门禁报了红但非本案例报因」的假红；管道缓冲
+// Linux 64 KiB / macOS 16 KiB，边界落点不同 → 同一提交两平台结果不同（暖树绿掩盖 Linux 红）。
+// 反证：删任一消费者的 setEncoding → 本测试点名该文件红；还原 → 绿。
+test('管道输出消费者必须 setEncoding("utf8")（多字节 chunk 边界不得撕裂）', () => {
+  const EXTRA_PIPE_CONSUMERS = [
+    'scripts/lib/shared/web-banner.mjs',
+    'dev/record-role-fixture.mjs',
+  ];
+  const offenders = [];
+  for (const rel of [...listEntryRels(), ...EXTRA_PIPE_CONSUMERS]) {
+    const src = readFileSync(join(ROOT, rel), 'utf8');
+    if (src.includes(".stdout.on('data'") && !src.includes(".stdout.setEncoding('utf8')")) offenders.push(rel);
+  }
+  assert.deepEqual(
+    offenders,
+    [],
+    '这些入口消费子进程管道输出但未 setEncoding("utf8")——多字节字符跨 chunk 边界会撕成 U+FFFD，'
+      + '用中文/非 ASCII 做 includes 判据即假红（先 setEncoding 再累加）',
+  );
+});
+
 test('真模型档 closed set：要求凭据（requireCredentials / .credentials.yaml）的脚本恰为登记名单', () => {
   const requiring = listEntryRels().filter((f) => {
     const src = readFileSync(join(ROOT, f), 'utf8');

@@ -123,9 +123,12 @@ const startJob = (cmd, args, { timeoutMs = T_DEFAULT, killGraceMs = 1_000, ...op
     signalGroup('SIGTERM');
     killTimer ??= setTimeout(() => signalGroup('SIGKILL'), killGraceMs);
   };
-  const append = (chunk) => { output = (output + String(chunk)).slice(-64_000) };
-  child.stdout.on('data', (chunk) => { stdout = (stdout + String(chunk)).slice(-64_000); append(chunk) });
-  child.stderr.on('data', (chunk) => { stderr = (stderr + String(chunk)).slice(-64_000); append(chunk) });
+  // setEncoding：管道 chunk 可落在多字节字符中间，不先解码会撕成 U+FFFD（安装面断言假红）。
+  child.stdout.setEncoding('utf8');
+  child.stderr.setEncoding('utf8');
+  const append = (chunk) => { output = (output + chunk).slice(-64_000) };
+  child.stdout.on('data', (chunk) => { stdout = (stdout + chunk).slice(-64_000); append(chunk) });
+  child.stderr.on('data', (chunk) => { stderr = (stderr + chunk).slice(-64_000); append(chunk) });
   const done = new Promise((resolveDone) => {
     child.once('error', (error) => { outcome = { error }; resolveDone(outcome) });
     child.once('exit', (code, signal) => { outcome = { code, signal } });

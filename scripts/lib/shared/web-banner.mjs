@@ -46,6 +46,9 @@ export function waitForWebBanner(child, { port, profile, timeoutMs, tailChars })
       reject,
       new Error(`web 进程提前退出（code ${String(code)}）${hintSuffix()}\n${output.slice(-tailChars)}`),
     )
+    // setEncoding：管道 chunk 可落在多字节字符中间，不先解码会撕成 U+FFFD（判据匹配假红）。
+    child.stdout.setEncoding('utf8')
+    child.stderr.setEncoding('utf8')
     child.stdout.on('data', onData)
     child.stderr.on('data', onData)
     child.on('exit', onExit)

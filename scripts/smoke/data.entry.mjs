@@ -106,9 +106,12 @@ const findSessionDir = (home, sessionId) => {
 
 const waitFor = (child, pattern, timeoutMs) => new Promise((resolveWait) => {
   let output = ''
+  // setEncoding：管道 chunk 可落在多字节字符中间，不先解码会撕成 U+FFFD（pattern 匹配假红）。
+  child.stdout.setEncoding('utf8')
+  child.stderr.setEncoding('utf8')
   const timer = setTimeout(() => { resolveWait({ ok: false, output, why: 'timeout' }) }, timeoutMs)
   const onData = (chunk) => {
-    output = (output + String(chunk)).slice(-128_000)
+    output = (output + chunk).slice(-128_000)
     if (pattern.test(output)) { clearTimeout(timer); resolveWait({ ok: true, output }) }
   }
   child.stdout.on('data', onData); child.stderr.on('data', onData)

@@ -129,8 +129,11 @@ try {
     detached: true,
   })
   let output = ''
-  child.stdout.on('data', (chunk) => { output = (output + String(chunk)).slice(-64_000) })
-  child.stderr.on('data', (chunk) => { output = (output + String(chunk)).slice(-64_000) })
+  // setEncoding：管道 chunk 可落在多字节字符中间，不先解码会撕成 U+FFFD（首屏文案匹配假红）。
+  child.stdout.setEncoding('utf8')
+  child.stderr.setEncoding('utf8')
+  child.stdout.on('data', (chunk) => { output = (output + chunk).slice(-64_000) })
+  child.stderr.on('data', (chunk) => { output = (output + chunk).slice(-64_000) })
 
   const urlMatch = await new Promise((resolveUrl, rejectUrl) => {
     const timer = setTimeout(() => rejectUrl(new Error(`等待 dsh web URL 超时；输出尾部：\n${output.slice(-2000)}`)), 120_000)

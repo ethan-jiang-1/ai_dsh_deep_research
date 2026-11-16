@@ -208,6 +208,9 @@ try {
 
   const child = spawn(dsh, ['--profile', PROFILE, '--no-open', '--port', '0'], { env, cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] })
   let output = ''
+  // setEncoding：管道 chunk 可落在多字节字符中间，不先解码会撕成 U+FFFD（判据匹配假红）。
+  child.stdout.setEncoding('utf8')
+  child.stderr.setEncoding('utf8')
   child.stdout.on('data', (c) => { output = (output + String(c)).slice(-128_000) })
   child.stderr.on('data', (c) => { output = (output + String(c)).slice(-128_000) })
   const started = await new Promise((resolveStarted) => {

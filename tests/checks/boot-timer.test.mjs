@@ -18,6 +18,10 @@ function makeMockChild() {
   const child = new EventEmitter()
   child.stdout = new EventEmitter()
   child.stderr = new EventEmitter()
+  // 契约（2026-11-16）：waitForWebBanner 先 setEncoding('utf8')，避免多字节 chunk 边界被撕成
+  // U+FFFD；假流提供同名 no-op 即可（行为判据仍看 timer 清理与监听摘除）。
+  child.stdout.setEncoding = () => {}
+  child.stderr.setEncoding = () => {}
   return child
 }
 

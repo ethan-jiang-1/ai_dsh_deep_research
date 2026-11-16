@@ -26,6 +26,9 @@ const dsh = (args) => spawnSync('dsh', args, { encoding: 'utf8', env, timeout: 1
 const add = () => new Promise((resolveAdd) => {
   const child = spawn('dsh', ['plugin', '--profile', PROFILE, 'add', `file:${TARBALL}`], { env, stdio: ['ignore', 'pipe', 'pipe'] })
   let out = ''
+  // setEncoding：管道 chunk 可落在多字节字符中间，不先解码会撕成 U+FFFD（判据匹配假红）。
+  child.stdout.setEncoding('utf8')
+  child.stderr.setEncoding('utf8')
   child.stdout.on('data', (d) => { out = (out + d).slice(-4000) })
   child.stderr.on('data', (d) => { out = (out + d).slice(-4000) })
   child.once('close', (code) => resolveAdd({ code, out }))

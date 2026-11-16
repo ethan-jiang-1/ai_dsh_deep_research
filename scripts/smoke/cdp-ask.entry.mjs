@@ -107,6 +107,9 @@ try {
   let out = '';
   const token = await new Promise((res, rej) => {
     const onData = (c) => { out += String(c); const m = new RegExp(`http://127\\.0\\.0\\.1:${PORT}/\\?token=(\\S+)`).exec(out); if (m !== null) res(m[1]); };
+    // setEncoding：管道 chunk 可落在多字节字符中间，不先解码会撕成 U+FFFD（判据匹配假红）。
+    child.stdout.setEncoding('utf8')
+    child.stderr.setEncoding('utf8')
     child.stdout.on('data', onData);
     child.stderr.on('data', onData);
     child.on('exit', (code) => rej(new Error(`通道提前退出 code=${code}\n${out.slice(-600)}`)));
@@ -136,6 +139,9 @@ try {
     const probe = spawn(process.execPath, [PROBE, `${BASE}/?token=${token}`, '--open-session', TITLE, '--ask', ask, '--sessions', sessionsRoot], { cwd: ROOT, env: scrubbedEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
     let pout = '';
     let perr = '';
+    // setEncoding：管道 chunk 可落在多字节字符中间，不先解码会撕成 U+FFFD（判据匹配假红）。
+    probe.stdout.setEncoding('utf8')
+    probe.stderr.setEncoding('utf8')
     probe.stdout.on('data', (c) => { pout += String(c); });
     probe.stderr.on('data', (c) => { perr += String(c); });
     const code = await new Promise((res) => probe.on('exit', res));
@@ -160,6 +166,9 @@ try {
     const proc = spawn(process.execPath, [join(ROOT, 'dev', 'run-kickoff.mjs'), '--port', String(PORT), '--token', token, '--session', sessionId, '--prompt', RESUME], { cwd: ROOT, env: scrubbedEnv(), stdio: ['ignore', 'pipe', 'pipe'] });
     let outText = '';
     let errText = '';
+    // setEncoding：管道 chunk 可落在多字节字符中间，不先解码会撕成 U+FFFD（判据匹配假红）。
+    proc.stdout.setEncoding('utf8')
+    proc.stderr.setEncoding('utf8')
     proc.stdout.on('data', (c) => { outText += String(c); });
     proc.stderr.on('data', (c) => { errText += String(c); });
     proc.on('exit', (code) => res({ code, outText, errText }));
