@@ -1,6 +1,6 @@
 // live 文档散文路径的纯函数判据（BUG-204 类级：散文里的仓内路径也要能被发现与验证）。
 //
-// 负例留证 2026-11-16：BUG-204——把 `runtime/README.md` 的 `checks/lib/ops/scene-pack.mjs`
+// 负例留证 2026-11-16：BUG-204——把 `runtime/README.md` 的 `checks/lib/analyze/scene-pack.mjs`
 // 改回 `checks/lib/scene-pack.mjs`（或给散文注入不存在路径）→ doc-paths 门禁红；本 spec
 // 的枚举/排除用例同时钉住反引号、围栏与 URL 三类形态。还原 → 绿。
 import { test } from 'node:test'
@@ -14,7 +14,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 
 test('散文路径枚举：识别仓内带扩展名 token，剥反引号/围栏/URL（BUG-204）', () => {
   const text = [
-    '读取判据 = checks/lib/ops/scene-pack.mjs。',
+    '读取判据 = checks/lib/analyze/scene-pack.mjs。',
     '内联代码 `checks/lib/inline.mjs` 不算散文。',
     '```',
     'checks/lib/fenced.mjs',
@@ -25,7 +25,7 @@ test('散文路径枚举：识别仓内带扩展名 token，剥反引号/围栏/
   ].join('\n')
   const tokens = prosePathTokens(text).map((entry) => entry.path)
   assert.deepEqual(tokens, [
-    'checks/lib/ops/scene-pack.mjs',
+    'checks/lib/analyze/scene-pack.mjs',
     'docs/testing.md',
     'tests/run/gates/final-version.spec.mjs',
   ])

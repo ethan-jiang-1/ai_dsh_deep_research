@@ -16,9 +16,9 @@ export const ASSET_COSTS = ['fast-inproc']
 
 const EXTERNAL_PKGS = new Set(['typescript', 'mdast-util-from-markdown', 'yaml'])
 const EXTERNAL_LIBS = new Set([
-  'checks/lib/tools/keyless-imports.mjs',
-  'checks/lib/tools/workspace-parsers.mjs',
-  'checks/lib/tools/ci-workflow.mjs',
+  'checks/lib/test-infra/keyless-imports.mjs',
+  'checks/lib/test-infra/workspace-parsers.mjs',
+  'checks/lib/test-infra/ci-workflow.mjs',
 ])
 const CANONICAL_LIBS = new Set([
   'checks/lib/shared/roles.mjs',

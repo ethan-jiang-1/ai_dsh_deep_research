@@ -8,7 +8,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { h2Titles, maskFencedCode, statusLines } from '../../checks/lib/repo/note-scan.mjs'
-import { fromMarkdown } from '../../checks/lib/tools/workspace-parsers.mjs'
+import { fromMarkdown } from '../../checks/lib/test-infra/workspace-parsers.mjs'
 
 const visible = (masked) => masked.filter((line) => line !== '')
 

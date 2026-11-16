@@ -16,7 +16,7 @@ import { existsSync, readFileSync, renameSync, statSync, writeFileSync } from 'n
 import { basename, dirname, join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { futureDateFindings } from '../lib/ops/bundle-date-sanity.mjs'
+import { futureDateFindings } from '../lib/gates/bundle-date-sanity.mjs'
 import { scanHomePaths } from '../lib/shared/path-hygiene.mjs'
 import { formatSecretFinding, scanSecrets } from '../lib/shared/secret-scan.mjs'
 import { presentedInLogs } from '../lib/shared/node-gate-session-gates.mjs'

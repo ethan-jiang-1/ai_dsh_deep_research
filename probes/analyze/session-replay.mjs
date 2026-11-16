@@ -38,7 +38,7 @@ import { launchChromium, loadChromium } from '../../checks/lib/harness/playwrigh
 import { openSessionById } from '../../checks/lib/shared/web-ui-nav.mjs';
 import { pickStatusTab } from '../../checks/lib/shared/probe-status-tab.mjs';
 import { readSessionEvents } from '../../checks/lib/shared/session-log.mjs';
-import { resolveSessionQuery, sessionMetaOf, formatReplaySummary } from '../../checks/lib/ops/session-replay.mjs';
+import { resolveSessionQuery, sessionMetaOf, formatReplaySummary } from '../../checks/lib/analyze/session-replay.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);

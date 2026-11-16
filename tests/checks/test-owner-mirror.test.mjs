@@ -12,14 +12,14 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localImportPath, parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs'
-import { OWNERS } from '../../checks/lib/tools/test-index.mjs'
+import { localImportPath, parseKeylessImports } from '../../checks/lib/test-infra/keyless-imports.mjs'
+import { OWNERS } from '../../checks/lib/test-infra/test-index.mjs'
 import { placementIssues } from '../../checks/lib/repo/test-placement.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const RUN = join(ROOT, 'tests', 'run')
 const LIB = join(ROOT, 'checks', 'lib')
-const RUN_OWNERS = ['gates', 'ops', 'channel', 'harness', 'probes', 'shared']
+const RUN_OWNERS = ['analyze', 'channel', 'gates', 'harness', 'probes', 'shared']
 
 function walk(dir, filter, out = []) {
   for (const ent of readdirSync(dir, { withFileTypes: true })) {

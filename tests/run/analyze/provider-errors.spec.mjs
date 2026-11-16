@@ -1,4 +1,4 @@
-// tests/run/ops/provider-errors.spec.mjs —— 上游流错误抽取的 keyless 契约（唯一语义源）。
+// tests/run/analyze/provider-errors.spec.mjs —— 上游流错误抽取的 keyless 契约（唯一语义源）。
 //
 // 为什么存在：这类停摆的第一版判据用正则猜（把 JSON 键序写死 → 全库零命中，白查一轮）。改为**解析**
 // 之后，判据的边界（只认 turn/end、不双算 attempt、key 顺序无关、畸形行容忍）必须常驻钉住。
@@ -13,7 +13,7 @@
 // 负例留证 2026-10-13：BUG-022——把 assistant/attempt 的流错误并入终结计数 → 同一回合双算例红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { turnEndErrorsOf, tallyTurnEndErrors, retryEventsOf } from '../../../checks/lib/ops/provider-errors.mjs';
+import { turnEndErrorsOf, tallyTurnEndErrors, retryEventsOf } from '../../../checks/lib/analyze/provider-errors.mjs';
 
 // 真实形态（2026-10-11 实测）：error 对象里 message 在前、code 在后
 const turnEnd = (seq, reason) => JSON.stringify({ type: 'turn/end', seq, time: 1791720000000 + seq, data: { turn: 6, reason } });

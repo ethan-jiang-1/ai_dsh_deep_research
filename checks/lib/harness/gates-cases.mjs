@@ -871,15 +871,15 @@ export const CASES = [
   // test-placement（BUG-200）：已知 owner 之下再套目录 = 未知深度；镜像 1:1（tests/run/<owner>/<file>）
   // 必须被强制——否则归属轴在深层目录里腐烂，而四个位置门禁都只判首段。
   { id: 'test-placement-unknown-depth', gate: 'test-placement', mutate: (dir) => {
-      mkdirSync(join(dir, 'tests', 'run', 'ops', 'deep'), { recursive: true });
-      writeFileSync(join(dir, 'tests', 'run', 'ops', 'deep', 'zz-deep.spec.mjs'),
+      mkdirSync(join(dir, 'tests', 'run', 'analyze', 'deep'), { recursive: true });
+      writeFileSync(join(dir, 'tests', 'run', 'analyze', 'deep', 'zz-deep.spec.mjs'),
         "import { test } from 'node:test'\nimport assert from 'node:assert/strict'\ntest('p', () => { assert.equal(1, 1) })\n");
     } },
 
   // test-placement（BUG-207）：tests/ 下的 symlink 目录在 Dirent 二分里不可见，node --test 也不跟随；
   // git mode 120000 是唯一可靠的索引面——门禁必须点名，而不是静默跳过。
   { id: 'test-placement-symlink-dir', gate: 'test-placement', mutate: (dir) => {
-      symlinkSync('/tmp/gates-e2e-symprobe', join(dir, 'tests', 'run', 'ops', 'linked'));
+      symlinkSync('/tmp/gates-e2e-symprobe', join(dir, 'tests', 'run', 'analyze', 'linked'));
     } },
 
   // tools/ 运行态回流（dev-runtime-clean）：在源码驱动目录造一个误落位 run bundle——

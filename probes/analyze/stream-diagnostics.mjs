@@ -16,7 +16,7 @@
 //   node probes/analyze/stream-diagnostics.mjs --recent 3        # 最近 3 个有模型活动的会话
 //   追加 --json 输出机器可读结果。
 import { readSessionEvents, resolveSessionLog } from '../../checks/lib/shared/session-log.mjs';
-import { analyzeModelAttempts, selectRecentActiveSessions } from '../../checks/lib/ops/stream-diagnostics-core.mjs';
+import { analyzeModelAttempts, selectRecentActiveSessions } from '../../checks/lib/analyze/stream-diagnostics-core.mjs';
 import { readdirSync, statSync, existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';

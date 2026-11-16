@@ -25,7 +25,7 @@ import { fileURLToPath } from 'node:url'
 import { findGroup, sessionLogsInGroup, readSessionEvents } from '../../checks/lib/shared/session-log.mjs'
 import { defaultGroupSubstring } from '../../checks/lib/shared/workspace-root.mjs'
 import { sessionTitleOf } from '../../checks/lib/shared/run-state.mjs'
-import { filterEvents, tailEvents, formatEventLine, readableTitle, stuckOf } from '../../checks/lib/ops/session-events-core.mjs'
+import { filterEvents, tailEvents, formatEventLine, readableTitle, stuckOf } from '../../checks/lib/analyze/session-events-core.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)

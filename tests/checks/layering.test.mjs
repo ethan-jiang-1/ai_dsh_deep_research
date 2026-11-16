@@ -1,7 +1,7 @@
 // 测试分层守卫 — 回归层（tests/）禁止真实模型/浏览器/网络/子进程/密钥依赖（layering 二代）。
 // 定义：docs/evaluation.md §L0；语义移植自 ai_dsh_company tests/harness/layering.spec.ts 四件套
 // （2026-10-09 探查实录与拍板 = _backlog/issues/2026-10-09-layering-v2.md）；解析器 =
-// checks/lib/tools/keyless-imports.mjs（company tools/lib/keyless-imports.mjs@59551f2 移植，
+// checks/lib/test-infra/keyless-imports.mjs（company tools/lib/keyless-imports.mjs@59551f2 移植，
 // typescript 作纯函数解析器——typescript@6.0.3 是本仓既有 root devDep；keyless 判据 =
 // 运行时禁子进程/网络/凭据，npm 解析库不在判例内，company 同款实践）。
 //
@@ -24,7 +24,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { inspectKeylessGraph, parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs';
+import { inspectKeylessGraph, parseKeylessImports } from '../../checks/lib/test-infra/keyless-imports.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const TESTS = join(ROOT, 'tests');

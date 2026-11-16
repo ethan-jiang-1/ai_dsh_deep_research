@@ -10,7 +10,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
 import { waitForWebBanner } from '../../checks/lib/shared/web-banner.mjs'
-import { parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs'
+import { parseKeylessImports } from '../../checks/lib/test-infra/keyless-imports.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 

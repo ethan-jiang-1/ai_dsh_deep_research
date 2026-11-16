@@ -13,14 +13,14 @@
 // （作者第一版就把 JSON 键序写死 → 全库零命中，白查一轮）。
 //
 // 判据（"一次事故 = 一个被错误终结的回合"）与抽取**不在这里**：唯一语义源 =
-// `checks/lib/ops/provider-errors.mjs`（消费方 = 本件与 keyless 契约测试）。缺陷记录 = BUG-022。
+// `checks/lib/analyze/provider-errors.mjs`（消费方 = 本件与 keyless 契约测试）。缺陷记录 = BUG-022。
 //
 // 用法：source tools/env.sh && node probes/analyze/provider-error-stats.mjs [--days 30] [--group <子串>] [--json]
 // 退出码：0 = 正常输出（有没有错不是本工具的判据）/ 2 = 用法或前置错
 import { join, resolve } from 'node:path';
 import { readSessionText, sessionLogsSince } from '../../checks/lib/shared/session-log.mjs';
 import { defaultGroupSubstring } from '../../checks/lib/shared/workspace-root.mjs';
-import { turnEndErrorsOf, tallyTurnEndErrors, retryEventsOf } from '../../checks/lib/ops/provider-errors.mjs';
+import { turnEndErrorsOf, tallyTurnEndErrors, retryEventsOf } from '../../checks/lib/analyze/provider-errors.mjs';
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);

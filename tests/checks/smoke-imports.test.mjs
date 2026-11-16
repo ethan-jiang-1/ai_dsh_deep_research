@@ -6,7 +6,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localImportPath, parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs'
+import { localImportPath, parseKeylessImports } from '../../checks/lib/test-infra/keyless-imports.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SMOKE_DIR = join(ROOT, 'checks', 'smoke')

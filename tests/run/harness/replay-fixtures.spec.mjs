@@ -25,7 +25,7 @@ import { cardTitleOf, parseArgsObject } from '../../../packages/deep-research-pa
 import { foldActivityRows } from '../../../packages/deep-research-pack/src/lib/events/activity-fold.ts'
 import { loadReplayScene } from '../../../checks/lib/harness/replay-scene.mjs'
 import { presetRoles } from '../../../checks/lib/shared/roles.mjs'
-import { yaml } from '../../../checks/lib/tools/workspace-parsers.mjs'
+import { yaml } from '../../../checks/lib/test-infra/workspace-parsers.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 const PACK_DIR = join(ROOT, 'packages', 'deep-research-pack')

@@ -17,7 +17,7 @@
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { sessionsOfBundleCached } from '../../checks/lib/ops/bundle-sessions.mjs'
+import { sessionsOfBundleCached } from '../../checks/lib/analyze/bundle-sessions.mjs'
 import { readZstdText } from '../../checks/lib/shared/zstd-read.mjs'
 import { defaultGroupSubstring, workspaceRoot } from '../../checks/lib/shared/workspace-root.mjs'
 import { resolveSessionLog } from '../../checks/lib/shared/session-log.mjs'

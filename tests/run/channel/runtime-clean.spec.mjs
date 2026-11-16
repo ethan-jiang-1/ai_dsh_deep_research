@@ -8,7 +8,7 @@
 // 把 cutoff 比较改成 <= → “恰在 cutoff 当天”用例红；还原后绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { classifyRuntimePath, planRuntimeCleanup } from '../../../checks/lib/ops/runtime-clean-core.mjs'
+import { classifyRuntimePath, planRuntimeCleanup } from '../../../checks/lib/channel/runtime-clean-core.mjs'
 
 const DAY = 86_400_000
 const NOW = Date.UTC(2026, 10, 4, 0, 0, 0)

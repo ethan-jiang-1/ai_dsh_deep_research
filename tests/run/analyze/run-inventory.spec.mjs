@@ -2,7 +2,7 @@
 // 反证 2026-10-27：把 totals.bytes 改成只加第一项 / 把 oldest 取成最新 → 本文件红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { formatAge, formatBytes, summarizeRuns } from '../../../checks/lib/ops/run-inventory-core.mjs'
+import { formatAge, formatBytes, summarizeRuns } from '../../../checks/lib/analyze/run-inventory-core.mjs'
 
 const day = 24 * 60 * 60 * 1000
 const NOW = Date.parse('2026-10-27T00:00:00Z')

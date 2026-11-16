@@ -7,11 +7,24 @@
 
 | owner | 模块 | 测试 |
 |---|---|---|
+| analyze | `checks/lib/analyze/bundle-sessions` | `tests/run/analyze/bundle-sessions.spec.mjs` |
+| analyze | `checks/lib/analyze/provider-errors` | `tests/run/analyze/provider-errors.spec.mjs` |
+| analyze | `checks/lib/analyze/run-dashboard-core` | `tests/checks/evaluation-contract.test.mjs`<br>`tests/run/analyze/run-dashboard.spec.mjs` |
+| analyze | `checks/lib/analyze/run-dashboard-html` | `tests/run/analyze/run-dashboard.spec.mjs` |
+| analyze | `checks/lib/analyze/run-inventory-core` | `tests/run/analyze/run-inventory.spec.mjs` |
+| analyze | `checks/lib/analyze/scene-pack` | `tests/run/analyze/scene-pack.spec.mjs` |
+| analyze | `checks/lib/analyze/session-events-core` | `tests/run/analyze/session-events.spec.mjs` |
+| analyze | `checks/lib/analyze/session-replay` | `tests/run/analyze/session-replay.spec.mjs` |
+| analyze | `checks/lib/analyze/stream-diagnostics-core` | `tests/run/analyze/stream-diagnostics.spec.mjs` |
+| analyze | `checks/lib/analyze/unconsumed-evidence` | `tests/run/analyze/unconsumed-evidence.spec.mjs` |
 | channel | `checks/lib/channel/ask-drive` | `tests/run/channel/ask-drive.spec.mjs` |
 | channel | `checks/lib/channel/channel-cache` | `tests/run/channel/channel-cache.spec.mjs` |
 | channel | `checks/lib/channel/hitl-card-driver` | — |
 | channel | `checks/lib/channel/inject-reconcile` | `tests/run/channel/inject-reconcile.spec.mjs` |
 | channel | `checks/lib/channel/run-channel` | `tests/run/channel/run-driver-contract.spec.mjs` |
+| channel | `checks/lib/channel/runtime-clean-core` | `tests/run/channel/runtime-clean.spec.mjs` |
+| gates | `checks/lib/gates/acceptance-check` | `tests/run/gates/acceptance-check.spec.mjs` |
+| gates | `checks/lib/gates/bundle-date-sanity` | `tests/run/gates/bundle-date-sanity.spec.mjs` |
 | gates | `checks/lib/gates/evidence-audit-core` | `tests/run/gates/evidence-audit.spec.mjs`<br>`tests/run/gates/provenance.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-core` | `tests/run/gates/node-gate-delivery.spec.mjs`<br>`tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-delivery-gate` | `tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs` |
@@ -39,19 +52,6 @@
 | harness | `checks/lib/harness/run-lock` | `tests/run/harness/run-lock.spec.mjs` |
 | harness | `checks/lib/harness/snapshot-mode` | `tests/checks/snapshot-readonly.test.mjs` |
 | harness | `checks/lib/harness/vendor-artifacts` | `tests/run/harness/vendor-artifacts.spec.mjs` |
-| ops | `checks/lib/ops/acceptance-check` | `tests/run/ops/acceptance-check.spec.mjs` |
-| ops | `checks/lib/ops/bundle-date-sanity` | `tests/run/ops/bundle-date-sanity.spec.mjs` |
-| ops | `checks/lib/ops/bundle-sessions` | `tests/run/ops/bundle-sessions.spec.mjs` |
-| ops | `checks/lib/ops/provider-errors` | `tests/run/ops/provider-errors.spec.mjs` |
-| ops | `checks/lib/ops/run-dashboard-core` | `tests/checks/evaluation-contract.test.mjs`<br>`tests/run/ops/run-dashboard.spec.mjs` |
-| ops | `checks/lib/ops/run-dashboard-html` | `tests/run/ops/run-dashboard.spec.mjs` |
-| ops | `checks/lib/ops/run-inventory-core` | `tests/run/ops/run-inventory.spec.mjs` |
-| ops | `checks/lib/ops/runtime-clean-core` | `tests/run/ops/runtime-clean.spec.mjs` |
-| ops | `checks/lib/ops/scene-pack` | `tests/run/ops/scene-pack.spec.mjs` |
-| ops | `checks/lib/ops/session-events-core` | `tests/run/ops/session-events.spec.mjs` |
-| ops | `checks/lib/ops/session-replay` | `tests/run/ops/session-replay.spec.mjs` |
-| ops | `checks/lib/ops/stream-diagnostics-core` | `tests/run/ops/stream-diagnostics.spec.mjs` |
-| ops | `checks/lib/ops/unconsumed-evidence` | `tests/run/ops/unconsumed-evidence.spec.mjs` |
 | probes | `checks/lib/probes/direct-authorization-boundary` | `tests/run/probes/entry-chain-probe.spec.mjs` |
 | probes | `checks/lib/probes/llm-stream-tee-core` | `tests/run/probes/llm-stream-tee-core.spec.mjs` |
 | probes | `checks/lib/probes/probe-send-target` | `tests/run/probes/probe-send-target.spec.mjs` |
@@ -83,34 +83,34 @@
 | shared | `checks/lib/shared/replay-request` | `tests/run/harness/replay-request.spec.mjs` |
 | shared | `checks/lib/shared/roles` | `tests/pack/contract/role-consumer-matrix.spec.mjs`<br>`tests/pack/fetch-fallback/fetch-fallback-orchestration.spec.mjs`<br>`tests/pack/scripts/presets.spec.mjs`<br>`tests/run/gates/strategy-core.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/harness/replay-scene.spec.mjs` |
 | shared | `checks/lib/shared/run-receipt` | `tests/contracts/run-bundle-charter.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs` |
-| shared | `checks/lib/shared/run-state` | `tests/run/ops/run-state.spec.mjs` |
+| shared | `checks/lib/shared/run-state` | `tests/run/shared/run-state.spec.mjs` |
 | shared | `checks/lib/shared/secret-scan` | `tests/run/shared/secret-scan.spec.mjs` |
-| shared | `checks/lib/shared/session-log` | `tests/run/gates/verdict-audit-fixture.spec.mjs`<br>`tests/run/ops/run-state.spec.mjs`<br>`tests/run/ops/session-log.spec.mjs` |
+| shared | `checks/lib/shared/session-log` | `tests/run/gates/verdict-audit-fixture.spec.mjs`<br>`tests/run/shared/run-state.spec.mjs`<br>`tests/run/shared/session-log.spec.mjs` |
 | shared | `checks/lib/shared/startup-hint` | `tests/run/channel/startup-hint.spec.mjs` |
 | shared | `checks/lib/shared/web-banner` | `tests/checks/boot-timer.test.mjs` |
 | shared | `checks/lib/shared/web-harness` | — |
 | shared | `checks/lib/shared/web-ui-nav` | `tests/checks/web-ui-nav-bilingual.test.mjs`<br>`tests/cockpit/lib/method-library/library-fold.spec.mjs`<br>`tests/run/probes/web-ui-nav.spec.mjs` |
 | shared | `checks/lib/shared/workspace-root` | `tests/run/shared/workspace-root.spec.mjs` |
 | shared | `checks/lib/shared/zstd-read` | — |
+| test-infra | `checks/lib/test-infra/asset-ledger` | `tests/checks/asset-ledger.test.mjs`<br>`tests/checks/guard-ledger.test.mjs` |
+| test-infra | `checks/lib/test-infra/ci-workflow` | `tests/checks/ci-jobs.test.mjs`<br>`tests/checks/ci-workflow-oracle.test.mjs`<br>`tests/checks/ci-workflow.test.mjs`<br>`tests/checks/model-workflow.test.mjs`<br>`tests/checks/smoke-registry.test.mjs` |
+| test-infra | `checks/lib/test-infra/keyless-imports` | `tests/checks/boot-timer.test.mjs`<br>`tests/checks/client-surface.test.mjs`<br>`tests/checks/layering.test.mjs`<br>`tests/checks/pack-mirror.test.mjs`<br>`tests/checks/smoke-imports.test.mjs`<br>`tests/checks/test-index.test.mjs`<br>`tests/checks/test-lanes.test.mjs`<br>`tests/checks/test-owner-mirror.test.mjs`<br>`tests/checks/test-surface.test.mjs` |
 | test-infra | `checks/lib/test-infra/method-presets` | `tests/cockpit/lib/method-library/library-fold.spec.mjs`<br>`tests/cockpit/lib/shared/method-presets.spec.mjs` |
 | test-infra | `checks/lib/test-infra/selftest-library` | `tests/cockpit/lib/method-library/library-fold.spec.mjs` |
 | test-infra | `checks/lib/test-infra/smoke-assets` | `tests/checks/smoke-assets.test.mjs`<br>`tests/checks/smoke-cost-budget.test.mjs`<br>`tests/checks/smoke-oracle-surface.test.mjs`<br>`tests/checks/smoke-registry.test.mjs` |
-| tools | `checks/lib/tools/asset-ledger` | `tests/checks/asset-ledger.test.mjs`<br>`tests/checks/guard-ledger.test.mjs` |
-| tools | `checks/lib/tools/ci-workflow` | `tests/checks/ci-jobs.test.mjs`<br>`tests/checks/ci-workflow-oracle.test.mjs`<br>`tests/checks/ci-workflow.test.mjs`<br>`tests/checks/model-workflow.test.mjs`<br>`tests/checks/smoke-registry.test.mjs` |
-| tools | `checks/lib/tools/keyless-imports` | `tests/checks/boot-timer.test.mjs`<br>`tests/checks/client-surface.test.mjs`<br>`tests/checks/layering.test.mjs`<br>`tests/checks/pack-mirror.test.mjs`<br>`tests/checks/smoke-imports.test.mjs`<br>`tests/checks/test-index.test.mjs`<br>`tests/checks/test-lanes.test.mjs`<br>`tests/checks/test-owner-mirror.test.mjs`<br>`tests/checks/test-surface.test.mjs` |
-| tools | `checks/lib/tools/test-index` | `tests/checks/pack-mirror.test.mjs`<br>`tests/checks/test-index.test.mjs`<br>`tests/checks/test-owner-mirror.test.mjs`<br>`tests/checks/test-surface.test.mjs` |
-| tools | `checks/lib/tools/workspace-parsers` | `tests/checks/note-scan.test.mjs`<br>`tests/checks/workspace-parsers.test.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs`<br>`tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs` |
+| test-infra | `checks/lib/test-infra/test-index` | `tests/checks/pack-mirror.test.mjs`<br>`tests/checks/test-index.test.mjs`<br>`tests/checks/test-owner-mirror.test.mjs`<br>`tests/checks/test-surface.test.mjs` |
+| test-infra | `checks/lib/test-infra/workspace-parsers` | `tests/checks/note-scan.test.mjs`<br>`tests/checks/workspace-parsers.test.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs`<br>`tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs` |
 
 ## pack src/lib（产品面）
 
 | domain | 模块 | 测试 |
 |---|---|---|
-| events | `events/activity-fold` | `tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/ops/activity-fold.spec.mjs` |
+| events | `events/activity-fold` | `tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/shared/activity-fold.spec.mjs` |
 | events | `events/hitl-fold` | `tests/cockpit/lib/events/status-feed.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/channel/hitl-fold.spec.mjs`<br>`tests/run/gates/node-gate-witness.spec.mjs` |
-| events | `events/journal-wire` | `tests/run/ops/journal-wire.spec.mjs` |
-| events | `events/member-activity` | `tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/ops/member-activity-fold.spec.mjs` |
-| events | `events/stream-failure` | `tests/run/ops/stream-failure.spec.mjs` |
-| events | `events/tool-card` | `tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/ops/tool-card.spec.mjs` |
+| events | `events/journal-wire` | `tests/run/shared/journal-wire.spec.mjs` |
+| events | `events/member-activity` | `tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/shared/member-activity-fold.spec.mjs` |
+| events | `events/stream-failure` | `tests/run/shared/stream-failure.spec.mjs` |
+| events | `events/tool-card` | `tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/shared/tool-card.spec.mjs` |
 | method-library | `method-library/library-fold` | `tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/lib/method-library/library-fold.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-codec.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs`<br>`tests/cockpit/lib/method-library/method-library-write.spec.mjs`<br>`tests/cockpit/lib/run/receipt-fold.spec.mjs` |
 | method-library | `method-library/method-draft` | `tests/cockpit/lib/method-library/method-draft.spec.mjs` |
 | method-library | `method-library/method-library-commands` | `tests/cockpit/lib/method-library/method-library-commands.spec.mjs` |
@@ -134,7 +134,7 @@
 | run | `run/receipt-fold` | `tests/cockpit/lib/run/receipt-fold.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | run | `run/rerun-triage` | `tests/cockpit/lib/run/rerun-triage.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/rerun-triage-contract.spec.mjs` |
 | run | `run/run-context` | `tests/cockpit/client/run-source-browser.spec.mjs`<br>`tests/run/gates/run-context-node.spec.mjs`<br>`tests/run/gates/run-context.spec.mjs` |
-| run | `run/run-fold` | `tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/gates/final-version.spec.mjs`<br>`tests/run/ops/run-fold.spec.mjs` |
+| run | `run/run-fold` | `tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/gates/final-version.spec.mjs`<br>`tests/run/shared/run-fold.spec.mjs` |
 | run | `run/run-version` | `tests/cockpit/lib/run/run-version.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/present-version-conformance.spec.mjs` |
 | shared | `shared/config-tables` | `tests/cockpit/client/builtin-display.spec.mjs`<br>`tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/lib/method-library/library-fold.spec.mjs` |
 | shared | `shared/i18n` | `tests/cockpit/client/builtin-display.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |

@@ -5,7 +5,7 @@
 //（git ls-files tracked 面）+ tests/checks/pack-mirror.test.mjs（盘上全量 spec，防账本重生成
 // 把错落点吸收成「当前状态」）。纯函数、零 fs/子进程，负控住 tests/checks/test-placement.test.mjs。
 export const TEST_DOMAINS = ['run', 'cockpit', 'pack', 'contracts', 'checks', 'vendor', 'fixtures']
-export const RUN_OWNERS = ['channel', 'gates', 'harness', 'ops', 'probes', 'shared']
+export const RUN_OWNERS = ['analyze', 'channel', 'gates', 'harness', 'probes', 'shared']
 export const COCKPIT_PARTS = ['lib', 'client', 'shared']
 export const COCKPIT_LIB_DOMAINS = ['run', 'plan', 'events', 'method-library', 'review', 'workspace', 'shared']
 export const CLIENT_SUBS = ['defaults', 'locales', 'method-library', 'research-config', 'research-graph', 'research-status']

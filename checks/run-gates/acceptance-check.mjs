@@ -3,8 +3,8 @@
 //
 // 为什么存在：lib/acceptance-check.mjs 头注承诺"供操作侧收尾核验"（把"收活结论"对账成
 // 机械事实），但仓内此前无 CLI 入口。判据求值与三态语义（PASS/FAIL/UNVERIFIED，判不了的
-// 永不静默放行）**不在这里**：唯一语义源 = checks/lib/ops/acceptance-check.mjs（消费方 = 本件
-// 与 keyless 契约测试 tests/run/ops/acceptance-check.spec.mjs）；行为面 E2E = probes/behavior/discipline-probe.mjs。
+// 永不静默放行）**不在这里**：唯一语义源 = checks/lib/gates/acceptance-check.mjs（消费方 = 本件
+// 与 keyless 契约测试 tests/run/gates/acceptance-check.spec.mjs）；行为面 E2E = probes/behavior/discipline-probe.mjs。
 //
 // 参数形态（按模块语义定，不猜约定位置）：判据是委派方**显式写下的清单**（模块签名 =
 // 数组入参；仓内 run 模板无判据落盘约定）→ 壳参数 = bundle 目录 + 判据 JSON 文件（数组，
@@ -14,7 +14,7 @@
 // 退出码：0 = 全 PASS（至少一条判据）/ 1 = 有 FAIL / UNVERIFIED / 零判据（收活不放行）/ 2 = 用法或前置错
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { acceptanceCheck, acceptanceExitCode } from '../lib/ops/acceptance-check.mjs';
+import { acceptanceCheck, acceptanceExitCode } from '../lib/gates/acceptance-check.mjs';
 
 const positional = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 if (positional.length !== 2) {

@@ -11,7 +11,7 @@
 
 | 目录 | 映射的源代码/面 | 放什么 |
 |---|---|---|
-| `run/` | run 通道、run 状态、HITL、run 门与审计、观察/回放、run-ops/probe | `checks/lib/<owner>/` 的回归；`run/` 内按 owner 分层（`gates/` `ops/` `channel/` `harness/` `probes/` `shared/`），与源码同名 |
+| `run/` | run 通道、run 状态、HITL、run 门与审计、观察/回放、run-ops/probe | `checks/lib/<owner>/` 的回归；`run/` 内按 owner 分层（`analyze/` `gates/` `channel/` `harness/` `probes/` `shared/`），与源码同名 |
 | `cockpit/` | pack client 观察面与其折算 | `client/` = `src/client` 纯逻辑判据；`lib/` = pack `src/lib` 折算回归（组件行为归 client-load 真机档） |
 | `pack/` | pack 结构、preset、导出与部署 | `content/` `startup/` `defaults/` `fetch-fallback/` = 同名 surface；`scripts/` = pack 脚本；`contract/` = 包级产品合同（subject 只涉及本包）；presets/export/deploy 形状 |
 | `contracts/` | 跨仓**产品合同**（run bundle、版本呈现、方法映射等） | `*.spec.mjs`；清单 = 盘上 `contracts/` 目录 |
@@ -31,7 +31,7 @@
   消费。原始运行日志、报告与抓取证据归 `runtime/smoke-workspace/`、`research-workspace/` 的
   `drt_*`/`archive/`，夹具不自动进入默认测试 glob；
 - 真模型/浏览器/网络/子进程检查走独立 smoke；默认回归无凭据可跑。`layering` 守卫五件套 =
-  提及级禁物 + 解析级调用（[lib/keyless-imports](../checks/lib/tools/keyless-imports.mjs)——夹具
+  提及级禁物 + 解析级调用（[lib/keyless-imports](../checks/lib/test-infra/keyless-imports.mjs)——夹具
   字符串不咬）+ import 闭包图（传递引入也红；从 `checks/` 树只许 import `lib/`，pack
   `src/lib` 纯件另由闭包图背书）+ 命令钉 + 有家句。违规样本只住 `fixtures/`，不回头污染域。
 

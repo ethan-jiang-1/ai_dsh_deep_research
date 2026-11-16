@@ -4,7 +4,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { renderTestIndex } from '../../checks/lib/tools/test-index.mjs'
+import { renderTestIndex } from '../../checks/lib/test-infra/test-index.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const OUT = join(ROOT, 'tests/INDEX.generated.md')

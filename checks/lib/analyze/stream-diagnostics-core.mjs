@@ -1,4 +1,4 @@
-// checks/lib/ops/stream-diagnostics-core.mjs — model-activity selection and attempt analysis.
+// checks/lib/analyze/stream-diagnostics-core.mjs — model-activity selection and attempt analysis.
 
 const MODEL_ACTIVITY = new Set([
   'assistant/attempt',

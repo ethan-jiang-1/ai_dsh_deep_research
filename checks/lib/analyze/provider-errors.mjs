@@ -1,4 +1,4 @@
-// checks/lib/ops/provider-errors.mjs —— 模型回合被上游流错误终结的**结构化抽取**（唯一语义源）。
+// checks/lib/analyze/provider-errors.mjs —— 模型回合被上游流错误终结的**结构化抽取**（唯一语义源）。
 //
 // 为什么存在：这类停摆此前只能靠临时正则猜（作者第一版正则把键序写死 → 全库零命中，白查一轮）。
 // 事件形状本身是嵌套 JSON，**解析**才是对的判据（"parse, don't regex"）：

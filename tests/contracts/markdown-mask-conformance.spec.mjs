@@ -5,7 +5,7 @@
 // ③ 把跨行注释闭合后的同行续扫删掉 → `a <!-- x\ny --> <!-- z --> keep` 例红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { fromMarkdown } from '../../checks/lib/tools/workspace-parsers.mjs'
+import { fromMarkdown } from '../../checks/lib/test-infra/workspace-parsers.mjs'
 import { maskFencedCode } from '../../checks/lib/repo/note-scan.mjs'
 import { maskMarkdownLines } from '../../packages/deep-research-pack/src/lib/shared/markdown-mask.ts'
 import { maskReadinessLines } from '../../packages/deep-research-pack/src/lib/review/review-readiness.ts'

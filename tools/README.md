@@ -64,7 +64,7 @@
 
 | 件 | 职责 |
 |---|---|
-| clean/runtime-clean.mjs | 运行区清理：默认 dry-run，`--yes` 才删；白名单容器/实验根 + 子树最新 mtime 保留期（缺省 14 天）；symlink / harness-home / research-workspace / scenes 永不候选（scenes = 证据，人工处理；判据 = checks/lib/ops/runtime-clean-core.mjs） |
+| clean/runtime-clean.mjs | 运行区清理：默认 dry-run，`--yes` 才删；白名单容器/实验根 + 子树最新 mtime 保留期（缺省 14 天）；symlink / harness-home / research-workspace / scenes 永不候选（scenes = 证据，人工处理；判据 = checks/lib/channel/runtime-clean-core.mjs） |
 
 ## hooks/（judge 例外）
 

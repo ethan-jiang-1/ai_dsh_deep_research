@@ -11,8 +11,8 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { libModulesOf, packClientModulesOf, packLibModulesOf, renderTestIndex } from '../../checks/lib/tools/test-index.mjs'
-import { localImportPath, parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs'
+import { libModulesOf, packClientModulesOf, packLibModulesOf, renderTestIndex } from '../../checks/lib/test-infra/test-index.mjs'
+import { localImportPath, parseKeylessImports } from '../../checks/lib/test-infra/keyless-imports.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const INDEX = join(ROOT, 'tests/INDEX.generated.md')

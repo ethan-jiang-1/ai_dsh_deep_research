@@ -29,7 +29,7 @@ test('合法落点全集零问题（BUG-191 负控）', () => {
   assert.ok(good.length >= 10, '防空语料：合法样本过少')
   assert.deepEqual(placementIssues(good), [])
   assert.equal(isTestFile('tests/pack/preset-helpers.mjs'), false)
-  assert.equal(isTestFile('checks/lib/tools/x.spec.mjs'), false)
+  assert.equal(isTestFile('checks/lib/test-infra/x.spec.mjs'), false)
 })
 
 test('未知子树/深度/平铺根逐条点名（BUG-191）', () => {
@@ -44,7 +44,7 @@ test('未知子树/深度/平铺根逐条点名（BUG-191）', () => {
     ['tests/contracts/nested/zz-place-probe.spec.mjs', /只收平铺 \*\.spec\.mjs/],
     ['tests/vendor/nested/zz-place-probe.vendor.spec.mjs', /只收平铺 \*\.vendor\.spec\.mjs/],
     ['tests/pack/contract/nested/zz-place-probe.spec.mjs', /只收平铺 spec/],
-    ['tests/run/ops/deep/zz.spec.mjs', /未知深度/],
+    ['tests/run/analyze/deep/zz.spec.mjs', /未知深度/],
     ['tests/run/gates/a/b/c/x.spec.mjs', /未知深度/],
     ['tests/cockpit/lib/run/deep/x.spec.mjs', /未知深度/],
     ['tests/cockpit/client/defaults/deep/x.spec.mjs', /未知深度/],

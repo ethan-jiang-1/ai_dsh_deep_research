@@ -8,7 +8,7 @@
 // 不证明：交付合格；HTML 永不入库、不是事实源
 // run-dashboard — M2 run 只读观察面（RFC：notes/archived/2026-09-24-m2-run-dashboard.md
 // + debug-dashboard-plus：notes/archived/2026-09-24-debug-dashboard-plus.md）的 CLI 壳：
-// 纯管线（解析→场景→模型，全 fail-soft）住 checks/lib/ops/run-dashboard-core.mjs；HTML 渲染 = checks/lib/ops/run-dashboard-html.mjs
+// 纯管线（解析→场景→模型，全 fail-soft）住 checks/lib/analyze/run-dashboard-core.mjs；HTML 渲染 = checks/lib/analyze/run-dashboard-html.mjs
 // （2026-10-13 下沉——tests 消费纯函数不再 import CLI 入口），本件只管参数、watch 循环、输出写盘。
 //
 // 用法：
@@ -17,8 +17,8 @@
 //   加 --watch --interval <秒> 持续再生成（配合页面 meta refresh；默认 5s）
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { listScenes, sceneState, buildModel, deriveStep, detectHitlWait, readGuiBase, isArchivedScene, isParkedScene } from '../../checks/lib/ops/run-dashboard-core.mjs';
-import { renderHtml } from '../../checks/lib/ops/run-dashboard-html.mjs';
+import { listScenes, sceneState, buildModel, deriveStep, detectHitlWait, readGuiBase, isArchivedScene, isParkedScene } from '../../checks/lib/analyze/run-dashboard-core.mjs';
+import { renderHtml } from '../../checks/lib/analyze/run-dashboard-html.mjs';
 import { isMain } from '../../checks/lib/shared/cli-entry.mjs';
 
 // ── CLI ─────────────────────────────────────────────────────────────────────

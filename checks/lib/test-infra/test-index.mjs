@@ -7,7 +7,7 @@ import { join, relative } from 'node:path'
 import { localImportPath, parseKeylessImports } from './keyless-imports.mjs'
 
 /** checks/lib 的 owner 闭集（与 tests/run/<owner>/ 同名）。 */
-export const OWNERS = ['gates', 'ops', 'channel', 'harness', 'probes', 'repo', 'tools', 'shared', 'test-infra']
+export const OWNERS = ['gates', 'analyze', 'channel', 'harness', 'probes', 'repo', 'shared', 'test-infra']
 
 /** pack src/lib 的 domain 闭集（与 tests/cockpit/lib/<domain>/ 同名）。 */
 export const DOMAINS = ['run', 'plan', 'events', 'method-library', 'review', 'workspace', 'shared']

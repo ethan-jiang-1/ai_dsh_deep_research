@@ -9,8 +9,8 @@ import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import * as assetLedgerMod from '../../checks/lib/tools/asset-ledger.mjs'
-import { ASSET_CLASSES, ASSET_COSTS, ORACLE_TYPES, assetLedgerOf, listTestFiles, oracleTypeOf } from '../../checks/lib/tools/asset-ledger.mjs'
+import * as assetLedgerMod from '../../checks/lib/test-infra/asset-ledger.mjs'
+import { ASSET_CLASSES, ASSET_COSTS, ORACLE_TYPES, assetLedgerOf, listTestFiles, oracleTypeOf } from '../../checks/lib/test-infra/asset-ledger.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const LEDGER = JSON.parse(readFileSync(join(ROOT, 'tests/fixtures/asset-ledger/ledger.json'), 'utf8'))

@@ -12,8 +12,8 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localImportPath, parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs'
-import { DOMAINS } from '../../checks/lib/tools/test-index.mjs'
+import { localImportPath, parseKeylessImports } from '../../checks/lib/test-infra/keyless-imports.mjs'
+import { DOMAINS } from '../../checks/lib/test-infra/test-index.mjs'
 import { placementIssues } from '../../checks/lib/repo/test-placement.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
@@ -46,7 +46,7 @@ function linkedEntries(dir, out = []) {
 const specs = walk(TESTS, (n) => n.endsWith('.spec.mjs'))
 
 // 负例留证 2026-11-16：BUG-191 / BUG-200 / BUG-205 / BUG-207——在 tests/cockpit/misc/ 或
-// tests/pack/misc/ 放 spec → 「落点全集」红；在 tests/run/ops/deep/ 放深 spec → 同一测试红
+// tests/pack/misc/ 放 spec → 「落点全集」红；在 tests/run/analyze/deep/ 放深 spec → 同一测试红
 // （深度由 placementIssues 判）；把单 owner spec 放进 tests/cockpit/lib/shared/ → 「shared 只收
 // 跨切」红；在 tests/ 造 symlink 目录 → 「零符号链接」红。删除探针 → 绿。
 test('tests 落点全集 − 已知子集 = 空；深度恰好（BUG-191 / BUG-200；账本重生成不能吸收）', () => {

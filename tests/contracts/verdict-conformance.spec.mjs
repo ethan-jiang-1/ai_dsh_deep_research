@@ -12,7 +12,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { terminalReadiness } from '../../packages/deep-research-pack/src/lib/review/review-readiness.ts'
 import { readinessOf } from '../../checks/lib/shared/node-gate-contracts.mjs'
-import { fromMarkdown } from '../../checks/lib/tools/workspace-parsers.mjs'
+import { fromMarkdown } from '../../checks/lib/test-infra/workspace-parsers.mjs'
 
 const mdastInlineText = (line) => {
   const tree = fromMarkdown(line)

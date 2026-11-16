@@ -45,7 +45,7 @@
     {
       "id": "BUG-012",
       "mechanism": "仪表盘复用 pack 的 HITL/步骤折算，不造第二状态机",
-      "guard": "tests/run/ops/run-dashboard.spec.mjs",
+      "guard": "tests/run/analyze/run-dashboard.spec.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "让 dashboard 手算状态而不调共享折算 → 对账红"
@@ -77,7 +77,7 @@
     {
       "id": "BUG-022",
       "mechanism": "流终结畸形回合按 turn/end 计一次，attempt 流块不双算",
-      "guard": "tests/run/ops/provider-errors.spec.mjs",
+      "guard": "tests/run/analyze/provider-errors.spec.mjs",
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "把 assistant/attempt 流错误并入终结计数 → 同一回合双算例红"
@@ -85,7 +85,7 @@
     {
       "id": "BUG-023",
       "mechanism": "末位 turn/end 报 MALFORMED_RESPONSE 且无新回合时判流死亡，重试中不误报",
-      "guard": "tests/run/ops/stream-failure.spec.mjs",
+      "guard": "tests/run/shared/stream-failure.spec.mjs",
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "删 MALFORMED_RESPONSE 识别或忽略后续 turn/start → 死亡折算例红"

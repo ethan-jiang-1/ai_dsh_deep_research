@@ -4,7 +4,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { unconsumedEvidence } from '../../../checks/lib/ops/unconsumed-evidence.mjs'
+import { unconsumedEvidence } from '../../../checks/lib/analyze/unconsumed-evidence.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const bundle = (name) => join(HERE, '..', '..', 'fixtures', 'review-aids', name)

@@ -15,7 +15,7 @@
 // 退出码：0 成功（含空工作区）；2 用法/前置缺失。
 import { existsSync, lstatSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { formatAge, formatBytes, summarizeRuns } from '../../checks/lib/ops/run-inventory-core.mjs'
+import { formatAge, formatBytes, summarizeRuns } from '../../checks/lib/analyze/run-inventory-core.mjs'
 
 const argv = process.argv.slice(2)
 const value = (name, fallback = null) => {

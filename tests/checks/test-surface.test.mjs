@@ -22,8 +22,8 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import { join, dirname, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { localImportPath, parseKeylessImports } from '../../checks/lib/tools/keyless-imports.mjs'
-import { libModulesOf } from '../../checks/lib/tools/test-index.mjs'
+import { localImportPath, parseKeylessImports } from '../../checks/lib/test-infra/keyless-imports.mjs'
+import { libModulesOf } from '../../checks/lib/test-infra/test-index.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const LIB = join(ROOT, 'checks', 'lib')

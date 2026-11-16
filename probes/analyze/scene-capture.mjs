@@ -21,7 +21,7 @@ import { mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { launchCdpBrowser } from '../../checks/lib/shared/cdp-driver.mjs'
-import { listScenePacks, readScenePack, PACK_FILES } from '../../checks/lib/ops/scene-pack.mjs'
+import { listScenePacks, readScenePack, PACK_FILES } from '../../checks/lib/analyze/scene-pack.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)

@@ -9,7 +9,7 @@
 // `key: value` 单行标量（扁平映射，重复键后者覆盖）；无 frontmatter 时返回 `{ fm: null, body: text }`
 // ——调用方按 null 走各自的"契约不符"分支，本件不判语义。
 //
-// 消费方：checks/lib/ops/run-dashboard-core.mjs、checks/lib/gates/evidence-audit-core.mjs。
+// 消费方：checks/lib/analyze/run-dashboard-core.mjs、checks/lib/gates/evidence-audit-core.mjs。
 
 /** 拆 frontmatter → `{ fm: Record<string,string> | null, body: string }`。 */
 export function splitFrontmatter(text) {
