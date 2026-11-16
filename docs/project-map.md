@@ -161,7 +161,8 @@ pack 侧：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`（7 个 domain�
 | 职责 | 查哪些入口 | 结果/支撑资产 |
 |---|---|---|
 | 门禁、挂载、安装、浏览器、回放与模型检查 | 上表具名入口 | `tests/` 与 [tests/fixtures taxonomy](../tests/fixtures/README.md) 提供确定性消费路径 |
-| 研究观察与取证（只读） | [watch-run](../probes/analyze/watch-run.mjs)、[run-dashboard](../probes/analyze/run-dashboard.mjs)、[plan-card-stats](../probes/analyze/plan-card-stats.mjs)、[provider-error-stats](../probes/analyze/provider-error-stats.mjs)、[run-kickoff](../tools/channel/run-kickoff.mjs)、[hitl-answer](../tools/channel/hitl-answer.mjs) | `runtime/smoke-workspace/` 放日志与 HTML；会话日志在开发 home；bundle 在研究工作区 |
+| 研究观察与取证（只读） | [watch-run](../probes/analyze/watch-run.mjs)、[run-dashboard](../probes/analyze/run-dashboard.mjs)、[plan-card-stats](../probes/analyze/plan-card-stats.mjs)、[provider-error-stats](../probes/analyze/provider-error-stats.mjs) | `runtime/smoke-workspace/` 放日志与 HTML；会话日志在开发 home；bundle 在研究工作区 |
+| 会话驱动与代答（写） | [run-kickoff](../tools/channel/run-kickoff.mjs)、[hitl-answer](../tools/channel/hitl-answer.mjs) | 建 Lead 会话 / 发 kickoff；HITL provenance 与代答记录写盘（不是只读投影） |
 | 分发生成 | [export-dist](../tools/release/export-dist.mjs) | `_dist/` 生成包与安装手册；安装可用性由 L2 证明 |
 | 环境与生成物 | [env](../tools/env.sh)、[vendor-build](../tools/build/vendor-build.sh)、上方同步生成器 | vendor 构建产物、overlay、包内 content/ |
 | 支撑模块 | `checks/lib/`、pack `src/lib/` | 消费方直接调用接口；测试覆盖纯解析/折算/判据路径 |

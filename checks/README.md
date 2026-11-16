@@ -1,8 +1,8 @@
 # checks/ · 职责索引
 
 > 维护面：**judge**——装裁决入口（`verify/`、`smoke/`、`run-gates/`、`dist/release-check`），
-> 不装只读投影（→ `probes/`）与导出/清理（→ `tools/`）；非面支撑（`lib/`、`test/` runner、support、
-> 配置 JSON）跟消费者住。组级面表见下，逐件例外 = [surface-contract](../docs/guides/68-surface-contract.md)。
+> 不装只读投影（→ `probes/`）与导出/清理（→ `tools/`）；非面支撑：`lib/` 是维护层公共库（judge/show/operate
+> 共享，按消费者域分组）、`test/` runner、support、配置 JSON 与消费者同根。组级面表见下，逐件例外 = [surface-contract](../docs/guides/68-surface-contract.md)。
 >
 > 职责分组：`verify/`、`smoke/`、`test/`、`run-gates/`、`dist/` + `lib/` 支撑库（show 件住 `probes/analyze/`、operate 件住 `tools/`——拆分后本目录只留 judge）；每个盘上入口一行：类 / 证明什么 / 档位。命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)；档位列申报凭据/调用模式，不替代 guides/60 的 `source` 前置；子树纪律 = [AGENTS.md](AGENTS.md)；测试资产分层 = [tests/fixtures taxonomy](../tests/fixtures/README.md)。本索引不改脚本路径与命令。
 
@@ -31,7 +31,7 @@
 
 ## smoke/（分级冒烟）
 
-> CI 归属 = [registry.json](smoke/registry.json)：每个 smoke 必须登记 `ci` 或 `dev-only` + 理由；
+> CI 归属 = [registry.json](smoke/registry.json)：每个 smoke 必须登记 `tier`（`ci` 或 `dev-only`）+ 理由；
 > 机械对账 = [tests/checks/smoke-registry.test.mjs](../tests/checks/smoke-registry.test.mjs)（新增件不登记即红）。
 > 命名即车道：`<target>.e2e.mjs` = 真进程，`<target>.entry.mjs` = 真浏览器/profile/tarball，`<target>.support.mjs` = 支援件；`pnpm test:e2e` / `pnpm test:entry` 由 [test/run-lane.mjs](test/run-lane.mjs) 按 registry 的 `lane` 选跑。
 > `registry.json` 每条另有 `cost` / `uniqueClaim` / `oracle` / `sunset`；契约 = [tests/checks/smoke-oracle-surface.test.mjs](../tests/checks/smoke-oracle-surface.test.mjs)（oracle 可直测或 `none:` 有理由）。

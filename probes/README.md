@@ -23,16 +23,16 @@
 
 ## 目录（按失败面分域，域内平铺）
 
-| 域 | 放什么 | 现有 |
-|---|---|---|
-| `behavior/` | 真模型行为：同一套 boot + RPC + 会话日志 harness | entry-chain / discipline / method-library / rerun-triage / defaults / wave-execution |
-| `browser/` | 真浏览器交互：裸 CDP、GUI 场景 | cdp-probe |
-| `stream/` | 流取证仪器：预载 tee，不判 PASS/FAIL | llm-stream-tee |
-| `analyze/` | run 现场与取证投影（只读）：状态盯场、会话事件、HTML 投影、流诊断、跨场分布、历史回放、场景包、保留期、差集 | watch-run / session-events / run-dashboard / stream-diagnostics / provider-error-stats / plan-card-stats / session-replay / scene-capture / run-inventory / unconsumed-evidence / bundle-sessions |
-| 根 | 门户与生成物：`README.md` / `INDEX.generated.md` / `_index.mjs` | — |
+| 域 | 放什么 |
+|---|---|
+| `behavior/` | 真模型行为：同一套 boot + RPC + 会话日志 harness |
+| `browser/` | 真浏览器交互：裸 CDP、GUI 场景 |
+| `stream/` | 流取证仪器：预载 tee，不判 PASS/FAIL（非面驱动） |
+| `analyze/` | run 现场与取证投影（只读）：状态盯场、会话事件、HTML 投影、流诊断、跨场分布、历史回放、场景包、保留期、差集 |
+| 根 | 门户与生成物：`README.md` / `INDEX.generated.md` / `_index.mjs` |
 
 域是一组**共享 harness、共享证据来源、共享失败模式**的机制；新探针先归现有域，确实不同再建新域。
-域内平铺 `<mechanism>-probe.mjs`，不按 unit/integration 分。
+命名：behavior/browser 域内平铺 `<mechanism>-probe.mjs`；analyze 域是观测器，用 `<mechanism>.mjs`（不判 PASS/FAIL）；stream 是仪器（`.cjs` 预载）。
 
 头注是唯一事实源（`状态` / `一句话` / `何时跑` / `档位` / `判据` / `不证明`；`为什么存在`
-推荐）；取证件同样六字段，`判据` 写「不适用（show）」。索引只投影，不复制长文；`probes/README.md` 只做门户，不手工枚举。
+推荐）；取证件同样六字段，`判据` 写「不适用（show）」。索引只投影，不复制长文；`probes/README.md` 只做门户，件名与件数以索引为准。

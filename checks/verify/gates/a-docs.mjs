@@ -1,4 +1,4 @@
-// a-docs.mjs — 域 A · md 文档卫生：tracked .md 的字节 / 链接 / 锚点 / 措辞合同（门禁列表 = context.gates 的前 7 项）。
+// a-docs.mjs — 域 A · md 文档卫生：tracked .md 的字节 / 链接 / 锚点 / 措辞合同（门禁列表 = context.gates 的 A 域段）。
 //
 // 从 2026-10-27 卫生轮前的单文件 verify.mjs 原样切出（判据与文案逐字未改）；共享助手住
 // ../context.mjs。改本域门禁只需读本文件——域切分 = docs/evaluation.md §L0 表的 A–F 分组。
@@ -288,6 +288,22 @@ export function runA() {
       }
     }
     if (proseChecked < 50) fail(gate, `防空语料：只解析到 ${proseChecked} 条散文仓内路径（过少 = 扫描面被收窄）`);
+
+    // 链接文字里的退役根名（2026-11-17 审计实证：`[probes/run](…)` 目标可解析、文字退役——
+    // 既不在反引号 token 面，也不在带扩展名的散文面，两道扫描都看不见；而 agent 会把标签
+    // 当作入口名去念）。判据 = 标签本身形如退役根路径；同句讨论退役（含「退役/旧根」）放行。
+    for (const { rel, text } of files) {
+      for (const [i, line] of text.split('\n').entries()) {
+        for (const m of line.matchAll(/\[([^\]]+)\]\(([^)\s]+)\)/g)) {
+          const label = m[1].trim();
+          // 标签不带尾斜杠（`probes/run`），故不能复用 RETIRED 的 `/` 后缀形态。
+          if (!/^(?:scripts|dev|probes\/run)(?:\/|$)/.test(label)) continue;
+          if (/退役|旧根|retired/i.test(line)) continue;
+          const hint = label.startsWith('scripts') ? 'checks/' : label.startsWith('dev') ? 'tools/' : 'probes/analyze/';
+          fail(gate, `${rel}:${i + 1} 链接文字是退役根名 \`${label}\`——现行 = ${hint}；标签也是入口名，agent 会照它去找`);
+        }
+      }
+    }
   }
 }
 
@@ -502,6 +518,22 @@ export function runA() {
       if (rel.startsWith('tools/') || rel.startsWith('vendor/')) continue;
       if (!Object.hasOwn(manifest, rel)) fail(gate, `${rel}: 常驻指令文件未登记预算（checks/doc-budgets.json）`);
     }
+  }
+}
+
+// ── surface-claims（维护面声明一致性，2026-11-17）：三个门户 README 首屏的面词 = guides/68 §4
+// 三根面表；只钉可稳定判真假的面词，「装什么/不装什么」散文归交付自审。──
+{
+  const gate = 'surface-claims';
+  const contract = readFileSync(join(ROOT, 'docs', 'guides', '68-surface-contract.md'), 'utf8');
+  for (const [rel, face, root] of [['checks/README.md', 'judge', 'checks/'], ['probes/README.md', 'show', 'probes/'], ['tools/README.md', 'operate', 'tools/']]) {
+    const f = join(ROOT, rel);
+    if (!existsSync(f)) { fail(gate, `${rel} 缺席——维护面门户必须在盘上`); continue; }
+    const head = readFileSync(f, 'utf8').split('\n').slice(0, 12).join('\n');
+    if (!head.includes(`维护面：**${face}**`)) fail(gate, `${rel} 首屏未声明维护面 = ${face}——门户第一屏必须与 guides/68 §4 同词（面词是判据，不是文风）`);
+    const row = contract.split('\n').find((line) => line.startsWith(`| \`${root}\` |`));
+    if (!row) { fail(gate, `guides/68 §4 缺 ${root} 行——三根面表必须逐根在场`); continue; }
+    if (!row.includes(`| ${face}`)) fail(gate, `guides/68 §4 的 ${root} 面不是 ${face}：${row.slice(0, 80)}…——README 与合同页打架`);
   }
 }
 

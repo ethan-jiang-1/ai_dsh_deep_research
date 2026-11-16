@@ -441,6 +441,16 @@ export const CASES = [
   // 本案例钉住守卫：注入退役根路径 → 点名报红；同时注入 vendor/包内 shorthand 作放行对照。
   { id: 'doc-paths-retired-root', gate: 'doc-paths', expect: '退役根名 `scripts/__retired__.mjs`',
     mutate: appendTo('docs/project-map.md', '\n退役根探针：`scripts/__retired__.mjs` 放行对照：`scripts/AGENTS.md`\n') },
+  // 退役根名藏在**链接文字**里（2026-11-17 审计实证：`[probes/run](…)` 目标有效、文字退役；
+  // 反引号 token 面与散文 token 面都看不见它）。标签是 agent 读取的入口名，必须与路径同判。
+  { id: 'doc-paths-retired-label', gate: 'doc-paths', expect: '链接文字是退役根名 `probes/run`',
+    mutate: appendTo('docs/project-map.md', '\n标签探针：[probes/run](../probes/README.md)\n') },
+  // surface-claims（2026-11-17 维护层对齐轮）：门户 README 的面词与 guides/68 §4 面表打架。
+  { id: 'surface-claims-face-drift', gate: 'surface-claims', mutate: (dir) => {
+      const p = join(dir, 'checks', 'README.md');
+      const text = readFileSync(p, 'utf8');
+      writeFileSync(p, text.replace('维护面：**judge**', '维护面：**show**'));
+    } },
   // doc-drefs（2026-11-03 七维审计）：D 号引用指向没有该锚点的地图页——点进去落空，
   // 而 md-anchors 只校验目标文件里有没有 fragment，不校验"这个 D 号该住 decisions"。
   { id: 'doc-drefs-misdirected', gate: 'doc-drefs',

@@ -68,7 +68,7 @@ operate 的两种模式：
 | `tests/` | oracle（非面） | `pnpm test` runner 的回归与门禁自测；服务三面，不是第四面 | 入口件（三面各自的家） |
 | 启动配置 | 非面 | `tools/env.sh`、`tools/record/research.overlay.yml` 等 sourced 环境 / 生成物 | 不是入口，不进面计数 |
 
-非面支撑跟消费者住：`checks/lib/`、`checks/test/` runner、support、配置 JSON（§5）。
+非面支撑：`checks/lib/` 是**维护层公共库**（judge/show/operate 的实现都在这，按消费者域分组；不随单件复制）；`checks/test/` runner、support、配置 JSON 与消费者同根（§5）。
 各根 README 首屏承载同一份定位；本页是规则与例外的单一 home。
 测试层的阅读地图与车道 = [tests/AGENTS.md](../../tests/AGENTS.md)、[guides/67](./67-test-strategy.md)。
 
