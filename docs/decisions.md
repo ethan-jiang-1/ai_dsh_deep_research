@@ -61,6 +61,7 @@
 | <a id="d54"></a>D54 | **测试制度 = 三环四账五关**：先归失败类，再选最低可见层，类级守卫或显式不可机械化 | [67](./guides/67-test-strategy.md) · [Note](../notes/implemented/2026-11-13-test-strategy-operating-model.md) |
 | <a id="d55"></a>D55 | **测试制度 oracle 独立化**：判据锚定独立真值；自指显式入账待迁；修复证据唯一 `json fix-evidence` | [67](./guides/67-test-strategy.md) · [Note](../notes/implemented/2026-11-14-verification-oracle-hardening.md) |
 | <a id="d56"></a>D56 | **决策台账纯路由化（一处事实一个家）**：台账只存 ≤100 字结论 + 活载体路由；参数归 docs/ 合同，理由归 notes/ | [docs/AGENTS](./AGENTS.md) · [Note](../notes/implemented/2026-11-14-decisions-routing-ledger.md) |
+| <a id="d57"></a>D57 | **维护面三分 = judge / show / operate**：判据 = 主要产出什么；`scripts/` 混装不改名，`run-ops/` 以 show 为主 | [68](./guides/68-surface-contract.md) · [Note](../notes/implemented/2026-11-16-maintenance-surface-taxonomy.md) |
 
 ## 已退役
 

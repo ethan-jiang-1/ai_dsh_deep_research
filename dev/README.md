@@ -1,5 +1,8 @@
 # dev/ · 入口说明（环境/构建/同步 × run 通道 × 驱动）
 
+> 维护面：operate（run + act）；`hooks/pre-commit` 是 judge。`env.sh`、预载驱动、vendor 构建配置是非面。
+> 规则 = [surface-contract](../docs/guides/68-surface-contract.md)。
+>
 > 命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)（含 `source dev/env.sh` 前置说明）；run 通道用法 = [Run 指南](../docs/guides/61-run-playbook.md)。本页 = dev/ 每个盘上入口的职责与状态。
 
 ## 环境与构建/同步

@@ -1,6 +1,25 @@
 # scripts/ · 职责索引
 
+> 维护面：**mixed**（judge + show + operate 同住）；组级面表见下，逐件例外 =
+> [surface-contract](../docs/guides/68-surface-contract.md)。
+>
 > 职责分组（2026-10-07 目录治理档 C；2026-11-13 命名对齐加 `test/`）：`verify/`、`smoke/`、`test/`、`run-gates/`、`run-ops/`、`dist/` + `lib/` 支撑库；每个盘上入口一行：类 / 证明什么 / 档位。命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)；档位列申报凭据/调用模式，不替代 guides/60 的 `source` 前置；子树纪律 = [AGENTS.md](AGENTS.md)；测试资产分层 = [tests/fixtures taxonomy](../tests/fixtures/README.md)。本索引不改脚本路径与命令。
+
+## 维护面（组级）
+
+判据 = 主要产出什么：裁决 → judge，证据 → show，持久状态 → operate；规则与逐件例外 =
+[surface-contract](../docs/guides/68-surface-contract.md)。**分组名不预告动词**——`run-ops/` 以 show 为主。
+
+| 组 | 面 | 判定 |
+|---|---|---|
+| `verify/` | judge | L0 结构门禁聚合；红 = 不放行 |
+| `smoke/` | judge（`*.support.mjs` 非面） | 断言红 = 证据面红；support 是夹具/支援件 |
+| `run-gates/` | judge | run bundle 机械门与审计 |
+| `run-ops/` | **mixed** | show = 只读投影/诊断/回放（多数）；judge = run-accept / acceptance-check；operate = runtime-clean |
+| `dist/` | **mixed** | operate = export-dist / market / export-handoff；judge = release-check；`product-manual.md` = 数据 |
+| `test/` | 非面（runner） | 车道调度 |
+| `lib/` | 非面（实现） | 支撑库 |
+| 根面 | 非面（数据/文档） | 门禁消费的配置与登记簿、本索引、子树指令 |
 
 ## verify/（L0 结构门禁）
 

@@ -23,6 +23,7 @@
 | "这次改动该配什么证据 / 算不算够" | [guides/67](./guides/67-test-strategy.md) | 先归失败类，再选最低可见层；五关/四账/三环；命名车道 = D53 |
 | "改插件内容"（角色 / skill / 驾驶舱 / 部署面） | [guides/62](./guides/62-plugin-authoring.md) | 该页 §参与阶梯 + §改动影响面 |
 | "改本仓开发流程或仓库文档"（门禁 / docs / notes / 入口链 / 各 README） | [guides/60 §1](./guides/60-dev-loop.md) | 按工作类型分支（入口链第 3–4 步在此展开） |
+| "这个目录/脚本干嘛的""跑它会不会动盘"（维护面） | [guides/68](./guides/68-surface-contract.md) | 按主要产出判面：裁决 / 证据 / 持久状态；逐件例外在页内 |
 
 **开跑前置**（安装 / 开发两套）
 
@@ -84,6 +85,7 @@
 | [guides/65-run-forms.md](./guides/65-run-forms.md) | 指南 | **运行形态合同**：M1 安装形态 / M1 互操作 / M2 独立开发 / M3 移交；六轴 owner 表；profile 归属与 patch 层；数据卡指针；`engines.dsh` + 团队层钉版；首屏工作区；`DSH_DEV_HOME`/多实例；干净 handoff 与证据矩阵 |
 | [guides/66-probe-playbook.md](./guides/66-probe-playbook.md) | 指南 | **探针**：定义、何时用、头注与索引、新增步骤、证据与边界；根 [probes/](../probes/README.md) 的单一入口 |
 | [guides/67-test-strategy.md](./guides/67-test-strategy.md) | 指南 | **测试策略**：三环/四账/五关；失败类→最低可见层；证据账本与命名车道；不是第六评估面 |
+| [guides/68-surface-contract.md](./guides/68-surface-contract.md) | 指南 | **维护面合同**：judge / show / operate 三分与判定序；本仓目录的面归属与例外清单——「这个入口会不会动我的世界」的单一入口 |
 
 > **编号消歧**：`design/60-intent-carriers.md` 与 `guides/60-dev-loop.md` 同号不同义——design/ 按设计层编号（10 架构 … 60 意图载体），guides/ 按操作手册编号（60 开发环 / 61 run / 62 作者入口 / 63 git 边界 / 64 发布 / 65 运行形态）；引用写全路径。
 

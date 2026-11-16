@@ -55,12 +55,12 @@ notes/                   开发记忆与证据链（见下节）：proposed/（�
                          立项来历 = notes/README §立项来历（台账只做路由、理由归 Note，D56）
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
                          （换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷）；与随包 runtime skills（presets/*/skills/）分家
-probes/                  调试第一入口：真实边界单点探针（behavior/browser/stream 三域；真模型/已起 GUI/仪器）；指南 = docs/guides/66，索引 = probes/INDEX.generated.md（生成物）
-scripts/                 职责分组：verify/（L0 门禁）、smoke/（*.e2e.mjs 真进程 / *.entry.mjs 真入口 / *.support.mjs 支援）、test/（车道 runner）、run-gates/、run-ops/、dist/ + lib/——逐件职责与档位 = scripts/README.md
+probes/                  show · 调试第一入口（behavior / browser / stream 三域；_index 是生成器、stream tee 是驱动——非面，tee 现行仍按探针扫）：真实边界单点探针；指南 = docs/guides/66，索引 = probes/INDEX.generated.md（生成物），面合同 = docs/guides/68
+scripts/                  mixed（judge + show + operate）：judge = verify/、smoke/（*.e2e.mjs / *.entry.mjs）、run-gates/、run-accept、acceptance-check、release-check；show = run-ops/ 多数（只读投影）；operate = dist/ 生成件、runtime-clean；非面 = test/（车道 runner）、lib/、*.support.mjs、配置 JSON、product-manual.md——组级面表与逐件职责/档位 = scripts/README.md，面规则 = docs/guides/68
 tests/                   keyless 回归（node:test；*.spec.mjs = 进程内 spec，checks/*.test.mjs = 门禁自身；layering 守卫五件套——规则见 tests/AGENTS.md）
 snapshots/               场景证据层：整组录制资产 + 场景声明 snapshot.json（消费 = snapshot-replay.entry
                          经 scripts/lib/harness/replay-scene.mjs）；分类与证据边界 = snapshots/README.md
-dev/                     源码驱动与 run 通道：env.sh（双 home + 裸 dsh 拦截 + pre-commit 挂载）、vendor-build.sh（vendor 树构建）、render-overlay（tracked 生成物生成器：overlay）、boot-run.sh（run 通道开跑，自 source env.sh）/ run-driver.mjs（通道驱动与呈交，内部调 boot-run）、run-kickoff / hitl-answer（会话驱动与 HITL 代答）、record-role-fixture（fixture 录制）、research.overlay.yml（**生成物**，勿手改）、hooks/（pre-commit 红灯拦 commit）——逐件职责 = dev/README.md
+dev/                     源码驱动与 run 通道（operate：run+act；hooks/ 是 judge）：env.sh（双 home + 裸 dsh 拦截 + pre-commit 挂载）、vendor-build.sh（vendor 树构建）、render-overlay（tracked 生成物生成器：overlay）、boot-run.sh（run 通道开跑，自 source env.sh）/ run-driver.mjs（通道驱动与呈交，内部调 boot-run）、run-kickoff / hitl-answer（会话驱动与 HITL 代答）、record-role-fixture（fixture 录制）、research.overlay.yml（**生成物**，勿手改）、hooks/（pre-commit 红灯拦 commit）——逐件职责 = dev/README.md，面规则 = docs/guides/68
 runtime/                 运行态区（gitignored）：harness-home/（开发 DSH home：会话/凭据/插件安装）+
                          smoke-workspace/（冒烟与 boot 运行产物）——dev/ 只住源码驱动，跑出来的东西住这里
 _dist/                   对外交付件：安装手册.md（tracked 生成物，生成器 = scripts/dist/export-dist.mjs）
