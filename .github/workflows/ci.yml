@@ -133,6 +133,30 @@ jobs:
           path: runtime/smoke-workspace/client-load-*
           if-no-files-found: warn
 
+      # 失败可诊断（公开可读）：仓库日志需 admin 才能下载，annotation 走 check-runs/annotations
+      # API 无需 admin。把 meta.json 的 lastStep / failures / console / http 失败清单转成 annotation。
+      - name: Publish failure reasons as annotations
+        if: failure()
+        shell: bash
+        run: |
+          shopt -s nullglob
+          files=(runtime/smoke-workspace/client-load-*/meta.json)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error::client-load 失败但没有 meta.json 现场（saveArtifacts 未跑？）"
+            exit 0
+          fi
+          node -e '
+            const fs = require("node:fs");
+            const esc = (s) => String(s).replace(/%/g, "%25").replace(/\r/g, "").replace(/\n/g, "%0A");
+            for (const f of process.argv.slice(1)) {
+              let m;
+              try { m = JSON.parse(fs.readFileSync(f, "utf8")); } catch { continue; }
+              console.log(["::error::" + esc("lastStep=" + (m.lastStep ?? "?") + " | failures=" + ((m.failures ?? []).join(" ;; ")))].join(""));
+              for (const c of (m.consoleErrors ?? []).slice(-3)) console.log("::error::" + esc("console: " + c));
+              for (const h of (m.httpFailures ?? []).slice(0, 3)) console.log("::error::" + esc("http: " + JSON.stringify(h)));
+            }
+          ' "${files[@]}"
+
   snapshot-replay:
     name: snapshot A/B (fresh profile, keyless)
     # 平台合同同 client-load：macOS 实测基线、Linux 只跑 keyless 部署 smoke。回放在 ubuntu 上

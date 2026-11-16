@@ -22,9 +22,8 @@
 - **覆盖面用 `git ls-files` 驱动**（tracked-only）：运行区（`runtime/harness-home/`、`research-workspace/`
   的 `drt_*` 与 `archive/`）不进 L0——否则 pre-commit 会被 run 产物拦红；稀疏态（文件可能缺席）用
   `existsSync` 防御，目录扫描跳过 `.git` 与 `node_modules`。
-- **子进程环境要剥 `GIT_*`**：`git -C <dir>` 在 pre-commit 钩子里会被注入的 `GIT_DIR`
-  覆盖仓库发现（实测两次假红）——需要时传去掉 `GIT_DIR/GIT_INDEX_FILE/GIT_WORK_TREE/
-  GIT_NAMESPACE` 的 env。
+- **子进程环境要剥 `GIT_*`**：`git -C <dir>` 在 pre-commit 钩子里会被注入的 `GIT_DIR` 覆盖仓库发现
+  （实测两次假红）——需要时传去掉 `GIT_DIR/GIT_INDEX_FILE/GIT_WORK_TREE/GIT_NAMESPACE` 的 env。
 - **端口与临时路径自持有**：冒烟/探针脚本各自独占端口（3101/3102/3103…），用完释放；
   一个只在单独运行时通过的脚本是脚本的缺陷。
 
@@ -41,6 +40,7 @@
 - **retry 白名单**：重试只许在真模型/浏览器等外部边界且带理由注释；确定性检查加重试 = 掩盖竞态。
 - **等待显式状态**：等就绪信号/状态迁移/谓词（范本 = watch-run 事件形状判定）；固定 sleep 不是证据。
 - **释放到静默**：kill 后 await 退出码——孤儿进程 = 脚本缺陷（"单独运行才通过"条款的孪生）。
+- **跨平台复现不走 Docker**：迭代判据 = 本机（macOS）直跑 + CI `check-runs`；Docker Desktop（virtiofs/root/镜像缺件）已实测**不忠实**——无 `lsof` 时 `client-load` 在端口预收割即 exit 2、缺系统库时浏览器起不来、缺 CJK 字体时 1px 容差布局断言失真，其红绿只记 U。**仅当「平台特有 + 无本地替代（CI 日志不可读/无该平台机器）+ 已先向用户说明」三条件齐备**才用一次，并在报告标注镜像/挂载与不确定边界。
 
 ## 依赖与分层
 
