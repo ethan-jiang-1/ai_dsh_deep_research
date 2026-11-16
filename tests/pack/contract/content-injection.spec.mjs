@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { CORE_TEMPLATES, templateFiles } from '../template-files.mjs'
+import { CORE_TEMPLATES, templateFiles } from '../template-files-helpers.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')

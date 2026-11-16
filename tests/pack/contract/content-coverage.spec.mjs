@@ -26,7 +26,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { PACK, presetRoles, skillsOf } from '../preset-helpers.mjs';
-import { TEMPLATES_DIR, templateFiles } from '../template-files.mjs';
+import { TEMPLATES_DIR, templateFiles } from '../template-files-helpers.mjs';
 import { OUTPUT_SHAPES } from '../../../checks/lib/gates/protocol-core.mjs';
 
 const CONTENT = join(PACK, 'content');

@@ -18,6 +18,14 @@ export function isTestFile(rel) {
   return norm.endsWith('.spec.mjs') || norm.endsWith('.test.mjs')
 }
 
+/** tests/ 下的非测试模块（读取缝/夹具助手）：不进入默认 glob，但必须按域归位、带 -helpers 后缀。 */
+export function isSupportModule(rel) {
+  const norm = rel.split('\\').join('/')
+  if (!norm.startsWith('tests/') || isTestFile(norm)) return false
+  if (!/\.(?:mjs|cjs)$/.test(norm)) return false
+  return !/^tests\/(?:fixtures|vendor|_tmp)\//.test(norm)
+}
+
 const list = (values) => values.join('/')
 
 /**
@@ -29,7 +37,14 @@ export function placementIssues(paths) {
   const issues = []
   for (const rel of paths) {
     const norm = rel.split('\\').join('/')
-    if (!isTestFile(norm)) continue
+    if (!isTestFile(norm)) {
+      // 非测试模块（读取缝/助手）此前完全不在闭集内：命名与落点可任意漂移，glob 也看不见。
+      if (!isSupportModule(norm)) continue
+      const seg = norm.split('/')
+      if (seg.length < 3) issues.push(`${norm}: tests/ 根不得平铺非测试模块——按域归位（tests/<domain>/…）`)
+      else if (!norm.endsWith('-helpers.mjs')) issues.push(`${norm}: tests/ 非测试模块必须以 -helpers.mjs 结尾（读取缝/夹具助手；由 consumer import，不进默认 glob）`)
+      continue
+    }
     const seg = norm.split('/')
     if (seg.length === 2) {
       issues.push(`${norm}: tests/ 根不得平铺测试——按域归位（${list(TEST_DOMAINS.filter((d) => d !== 'fixtures'))}）`)

@@ -4,7 +4,7 @@
 // ../context.mjs。改本域门禁只需读本文件——域切分 = docs/evaluation.md §L0 表的 A–F 分组。
 
 import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { join, relative, sep, dirname } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { backlogLivenessProblems } from '../../lib/repo/backlog-liveness.mjs';
 import { parseStagedChanges, stagedChangePairingProblems } from '../../lib/repo/staged-change-pairing.mjs';
@@ -238,7 +238,9 @@ export function runF() {
       try { target = readlinkSync(join(ROOT, link.rel)); } catch { /* 索引项在盘上不可读时仍按索引报 */ }
       fail(gate, `${link.rel}: tests 下不得有符号链接（→ ${target || '（不可读）'}）——node --test 不跟随 symlink 目录，位置门禁也不能静默跳过；先移除链接（确需时走显式登记表）`);
     }
-    if (testPaths.length > 0) for (const issue of placementIssues(testPaths)) fail(gate, issue);
+    // 非测试模块（读取缝/助手）也要进闭集：此前只判 spec，带错后缀的 .mjs 可从 glob 里静默漂移。
+    const scanned = entries.filter((entry) => entry.mode !== '120000').map((entry) => entry.rel);
+    if (scanned.length > 0) for (const issue of placementIssues(scanned)) fail(gate, issue);
   }
 }
 
@@ -396,6 +398,91 @@ export function runF() {
       if (!table.includes('dev-parity')) fail(gate, 'parity 表没指向守它的门禁 dev-parity');
     }
   }
+}
+
+// ── call-surface（agent 调用面——2026-11-17）：文档围栏命令 / 探针头注 / CI run 里的仓内路径──
+// 为什么：本仓的调用者是模型。它照 skills/docs 的围栏命令敲、照探针 INDEX 的「何时跑」敲、
+// 照 CI 的 `run:` 跑；这些字符串不在 import 图，也不在 doc-paths 的反引号/散文面（围栏被
+// prose 剥掉），搬文件后断链只能等 agent/CI 真跑时炸，而且可能数天后。判据 = 可执行行里的
+// 仓内路径必须存在；占位符/构建产物/运行区放行（与 doc-paths 同口径）。
+{
+  const gate = 'call-surface';
+  const CMD = /^(?:\$ )?(?:node|bash|sh|source|pnpm|npx|cd)\b/;
+  const PATHS = '(?:packages|checks|tools|docs|tests|snapshots|probes|_dist|research-workspace|\\.agents)\\/[A-Za-z0-9_./-]+';
+  const TOKEN = new RegExp(`(?:^|[\\s"'\`(=\\x60])(${PATHS})`, 'g');
+  const HEADER = new RegExp(`(?:^|[\\s(（：:，,\\x60])(?:node|bash|sh|source|pnpm|npx|cd)\\s+(${PATHS})`, 'g');
+  const EXTS = ['.md', '.mjs', '.sh', '.cjs', '.ts', '.json', '.yml', '.yaml'];
+  const resolvable = (p, rel) => {
+    if (/[<>{}*?$…]/.test(p)) return true;
+    if (/^packages\/[^/]+\/lib(\/|$)/.test(p)) return true;
+    const base = dirname(join(ROOT, rel));
+    const cands = [p, `vendor/dsh/${p}`, ...EXTS.map((e) => p + e)].map((c) => join(ROOT, c));
+    cands.push(join(base, p), ...EXTS.map((e) => join(base, p + e)));
+    return cands.some((c) => existsSync(c));
+  };
+  const tokens = (line, re) => [...line.matchAll(re)].map((m) => m[1].replace(/[.,;:]+$/, ''));
+  const code = (line) => line.replace(/\s+#.*$/, '');
+  let md = 0;
+  const docs = trackedFiles({ gate, glob: '*.md',
+    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f.startsWith('_backlog/') || f.startsWith('tests/fixtures/') || f.startsWith('snapshots/replay/'),
+    emptyMsg: '防空语料：未扫到 live 文档' });
+  if (docs) for (const { rel, text } of docs) {
+    let fence = false;
+    for (const [i, line] of text.split('\n').entries()) {
+      if (line.trimStart().startsWith('```')) { fence = !fence; continue; }
+      if (!fence || !CMD.test(line.trim())) continue;
+      for (const p of tokens(code(line), TOKEN)) {
+        md++;
+        if (!resolvable(p, rel)) fail(gate, `${rel}:${i + 1} 文档命令指向不存在的路径 ${p}——agent 会照它敲；改文档或改路径（生成物则重跑生成器）`);
+      }
+    }
+  }
+  if (md < 40) fail(gate, `防空语料：只解析到 ${md} 条围栏命令（过少 = 扫描面被收窄）`);
+  let probe = 0;
+  if (existsSync(join(ROOT, 'probes'))) for (const abs of walk(join(ROOT, 'probes'))) {
+    if (!/\.(mjs|cjs)$/.test(abs)) continue;
+    const rel = relative(ROOT, abs);
+    for (const [i, line] of readFileSync(abs, 'utf8').split('\n').slice(0, 80).entries()) {
+      if (!/^\s*(?:\/\/|\*)/.test(line)) continue;
+      for (const p of tokens(line, HEADER)) {
+        probe++;
+        if (!resolvable(p, rel)) fail(gate, `${rel}:${i + 1} 头注命令指向不存在的路径 ${p}——INDEX「何时跑」是 agent 入口`);
+      }
+    }
+  }
+  if (probe < 20) fail(gate, `防空语料：只解析到 ${probe} 条探针头注命令（过少 = 扫描面被收窄）`);
+  // 只做行级 run: 抽取（不引 YAML 依赖：gates.e2e 副本不含 node_modules；YAML 合法性归
+  // tests/checks/ci-workflow.test.mjs）。支持内联 `run: cmd` 与 block `run: |`。
+  const runLines = (text) => {
+    const out = []; let blockIndent = null;
+    for (const raw of text.split('\n')) {
+      const line = raw.replace(/\s+#.*$/, '');
+      if (blockIndent !== null) {
+        if (line.trim() === '') continue;
+        const indent = line.match(/^\s*/)[0].length;
+        if (indent > blockIndent) { out.push(line); continue; }
+        blockIndent = null;
+      }
+      const m = line.match(/^\s*(?:-\s*)?run:\s*(.*)$/);
+      if (!m) continue;
+      const value = m[1].trim();
+      if (value === '|' || value === '>') { blockIndent = line.match(/^\s*/)[0].length; continue; }
+      out.push(value);
+    }
+    return out;
+  };
+  let ci = 0;
+  const wfs = trackedFiles({ gate, glob: '.github/workflows/*.yml', emptyMsg: '防空语料：未扫到 CI 工作流' });
+  if (wfs) for (const { rel, text } of wfs) {
+    for (const line of runLines(text)) {
+      if (!CMD.test(line.trim())) continue;
+      for (const p of tokens(code(line), TOKEN)) {
+        ci++;
+        if (!resolvable(p, rel)) fail(gate, `${rel} run: 指向不存在的路径 ${p}——CI 只在真跑时炸，且可能数天后`);
+      }
+    }
+  }
+  if (ci < 15) fail(gate, `防空语料：只解析到 ${ci} 条 CI run 路径（过少 = 扫描面被收窄）`);
 }
 
 }

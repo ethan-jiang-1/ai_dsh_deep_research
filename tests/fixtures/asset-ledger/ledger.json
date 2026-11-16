@@ -183,6 +183,16 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/generated-artifacts.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "generated-artifacts — 生成物头必须与生成器模板一致（2026-11-17 审计）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/guard-ledger.test.mjs",
       "domain": "checks",
       "lane": "checks",
@@ -1199,7 +1209,7 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "template-contract — 模板里“机器/流程真正消费”的键（keyless，key 级）。",
-      "oracleType": "canonical",
+      "oracleType": "self-referential",
       "sunset": "随被测模块删除"
     },
     {

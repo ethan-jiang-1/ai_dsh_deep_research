@@ -1,4 +1,4 @@
-// tests/pack/template-files.mjs —— run bundle 模板集的读取缝（非 spec，不进入发现面）。
+// tests/pack/template-files-helpers.mjs —— run bundle 模板集的读取缝（非 spec，不进入发现面）。
 //
 // 为什么单独成文件：`content-injection` 要证“模板随包”，`content-coverage` 要枚举“模板被消费”；
 // 两处各写一份文件清单就会漂移。这里把**schema 集**与**盘上集**分开：

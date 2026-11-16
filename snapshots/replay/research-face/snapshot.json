@@ -5,6 +5,11 @@
   "workspace": "research-workspace",
   "sessionFormat": 4,
   "mcp": false,
+  "lastRewrite": {
+    "why": "none",
+    "at": "2026-11-17T00:00:00Z",
+    "note": "header-only path fix after root unification (checks/smoke); rendered body unchanged, not a re-record"
+  },
   "roleFace": [
     "lead",
     "scout",
@@ -79,9 +84,5 @@
         "note": "2026-11-14 re-record + runtime-context manual.md aligned to fresh pack mirror (BUG-080 hardening)."
       }
     }
-  ],
-  "lastRewrite": {
-    "why": "_backlog/_archived/settled_issues/2026-11-14-verification-oracle.md",
-    "at": "2026-11-14T06:47:54.742Z"
-  }
+  ]
 }

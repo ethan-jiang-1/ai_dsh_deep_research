@@ -451,6 +451,22 @@ export const CASES = [
       const text = readFileSync(p, 'utf8');
       writeFileSync(p, text.replace('维护面：**judge**', '维护面：**show**'));
     } },
+  // call-surface（2026-11-17）：agent 的三个调用入口——文档围栏 / 探针头注 / CI run——
+  // 各自注入一条死路径。三类分开钉，防"只扫文档"的半覆盖。
+  { id: 'call-surface-fenced-command', gate: 'call-surface',
+    mutate: appendTo('docs/project-map.md', '\n```sh\nnode checks/__missing-probe.mjs\n```\n') },
+  { id: 'call-surface-probe-header', gate: 'call-surface', mutate: (dir) => {
+      const p = join(dir, 'probes', 'analyze', 'watch-run.mjs');
+      writeFileSync(p, '// 何时跑：`node checks/__missing-probe.mjs`\n' + readFileSync(p, 'utf8'));
+    } },
+  { id: 'call-surface-ci-run', gate: 'call-surface', mutate: (dir) => {
+      const p = join(dir, '.github', 'workflows', 'ci.yml');
+      writeFileSync(p, readFileSync(p, 'utf8').replace('pnpm verify', 'node checks/__missing-probe.mjs'));
+    } },
+  // test-placement 非测试模块（2026-11-17）：读取缝/助手带错后缀也能从 glob 静默漂移。
+  { id: 'test-placement-support-module', gate: 'test-placement', mutate: (dir) => {
+      writeFileSync(join(dir, 'tests', 'pack', 'zz-support.mjs'), 'export const x = 1\n');
+    } },
   // doc-drefs（2026-11-03 七维审计）：D 号引用指向没有该锚点的地图页——点进去落空，
   // 而 md-anchors 只校验目标文件里有没有 fragment，不校验"这个 D 号该住 decisions"。
   { id: 'doc-drefs-misdirected', gate: 'doc-drefs',

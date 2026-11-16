@@ -12,7 +12,7 @@
 // 红配方：删 findings.md 的 `- gap:` 行 → 本文件红；删 leads.md 的 `- 状态:` 行 → 本文件红；还原 → 绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { templateText } from '../template-files.mjs';
+import { templateText } from '../template-files-helpers.mjs';
 
 /** 文件 → 被解析器/门禁实际消费的键（命名即申报；新增键先确认有消费者）。 */
 const CONTRACTS = {

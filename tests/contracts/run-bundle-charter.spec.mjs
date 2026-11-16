@@ -12,7 +12,7 @@ import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { SCHEMA_VERSION, RUN_PHASES, createdDateOf, runSchemaOf, schemaIssueOf } from '../../checks/lib/gates/schema-scan-core.mjs'
 import { READ_INTENTS, READ_ORDER } from '../../checks/lib/shared/run-receipt.mjs'
-import { handbookSurface } from '../pack/handbook-surface.mjs'
+import { handbookSurface } from '../pack/handbook-surface-helpers.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')

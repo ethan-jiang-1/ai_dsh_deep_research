@@ -64,3 +64,18 @@ test('已知闭集本身可判且非空（防空语料）', () => {
   assert.ok(CLIENT_SUBS.length >= 6)
   assert.ok(PACK_SURFACES.length >= 6)
 })
+
+// 非测试模块进闭集（2026-11-17 审计）：tests/ 下的读取缝/助手此前不在任何 glob、也不在落点判据里，
+// 后缀与落点可任意漂移；规则 = tests/<domain>/…-helpers.mjs。
+test('非测试模块：落点与 -helpers 后缀（审计 2026-11-17）', () => {
+  const cases = [
+    ['tests/pack/zz-support.mjs', /-helpers\.mjs 结尾/],
+    ['tests/run/gates/zz-support.cjs', /-helpers\.mjs 结尾/],
+    ['tests/zz-support-helpers.mjs', /根不得平铺非测试模块/],
+  ]
+  for (const [path, pattern] of cases) assert.match(placementIssues([path])[0] ?? '', pattern, `${path} 未按预期报红`)
+  assert.deepEqual(placementIssues(['tests/pack/zz-support-helpers.mjs']), [])
+  assert.deepEqual(placementIssues(['tests/run/gates/zz-support-helpers.mjs']), [])
+  // fixtures 内的样本不是模块合同
+  assert.deepEqual(placementIssues(['tests/fixtures/x/zz-support.mjs']), [])
+})
