@@ -9,16 +9,24 @@ import { estimateMessage, estimateToolsTokens } from '@deepseek-ai/dsh-token-met
 
 let messageTokens: number | null = null
 let toolTokens: number | null = null
+let requestJson: string | null = null
 
 /** Drop the captured first request so the next role's first request is priced separately. */
 export function resetCapture(): void {
   messageTokens = null
   toolTokens = null
+  requestJson = null
 }
 
 /** The captured first-request estimate, or null when no request has been captured since reset. */
 export function firstTurnInputEstimate(): { readonly messageTokens: number; readonly toolTokens: number } | null {
   return messageTokens === null || toolTokens === null ? null : { messageTokens, toolTokens }
+}
+
+/** The captured first request's messages serialized, or null before capture. Used to assert the
+ *  research manual is genuinely injected into the assembled request (behavior, not just token shape). */
+export function firstTurnRequestJson(): string | null {
+  return requestJson
 }
 
 class ModelExperienceMockAdapter extends LlmAdapter {
@@ -37,6 +45,7 @@ class ModelExperienceMockAdapter extends LlmAdapter {
     if (messageTokens === null) {
       messageTokens = options.messages.reduce((total, message) => total + estimateMessage(message), 0)
       toolTokens = estimateToolsTokens({ tools: options.tools })
+      requestJson = JSON.stringify(options.messages)
     }
     const text = '已收到研究请求。'
     yield { type: 'block-start', index: 0, blockType: 'text' }

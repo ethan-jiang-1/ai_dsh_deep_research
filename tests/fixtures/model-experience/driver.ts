@@ -9,7 +9,7 @@ import type { SessionId } from '@deepseek-ai/dsh-session'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import type { SessionEvent } from '@deepseek-ai/dsh-session'
 import { estimateMessage, estimateToolsTokens } from '@deepseek-ai/dsh-token-meter/estimate'
-import { resetCapture, firstTurnInputEstimate } from './mock-llm.ts'
+import { resetCapture, firstTurnInputEstimate, firstTurnRequestJson } from './mock-llm.ts'
 import { bootProductionProfile } from '../../../vendor/dsh/packages/test-support/loader-smoke/tests/fixtures/production-profile.ts'
 
 const NAME = 'model-experience-loader-smoke'
@@ -31,6 +31,7 @@ async function priceRole(ctx: Context, role: string, question: string): Promise<
   readonly toolTokens: number
   readonly total: number
   readonly toolNames: readonly string[]
+  readonly requestJson: string
 }> {
   resetCapture()
   const { agent, dispose } = await ctx.agents.create({
@@ -54,6 +55,8 @@ async function priceRole(ctx: Context, role: string, question: string): Promise<
   }
   const captured = firstTurnInputEstimate()
   assert(captured !== null, `mock LLM did not capture the first ${role} request`)
+  const requestJson = firstTurnRequestJson()
+  assert(requestJson !== null, `mock LLM did not capture the first ${role} request messages`)
   const header = events.find((event) => event.type === 'request/header')
   const tools = header?.type === 'request/header' ? header.data.header.tools ?? [] : []
   const headerToolTokens = estimateToolsTokens({ tools })
@@ -64,6 +67,7 @@ async function priceRole(ctx: Context, role: string, question: string): Promise<
     toolTokens: captured.toolTokens,
     total: captured.messageTokens + captured.toolTokens,
     toolNames: tools.map((tool) => tool.name),
+    requestJson,
   }
 }
 
@@ -89,6 +93,9 @@ async function main(): Promise<void> {
     const manual = readFileSync(join(PACK, 'content/manual.md'), 'utf8')
     const manualTokens = estimateMessage({ role: 'user', content: [{ type: 'text', text: manual }] })
     assert(manualTokens > 0, 'manual.md token estimate must be positive')
+    const manualMarker = manual.split('\n')[0]
+    assert(lead.requestJson.includes(manualMarker), 'Lead first request did not actually inject the research manual (D40)')
+    assert(scout.requestJson.includes(manualMarker), 'Scout first request did not actually inject the research manual (D40)')
 
     process.stdout.write(`${JSON.stringify({
       type: 'model-experience.e2e',

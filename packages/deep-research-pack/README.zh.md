@@ -223,19 +223,31 @@ client 行。团队可视化行（`ui-agent-team`）归团队机制层，不在�
 
 ### Method Editor 的方法库操作
 
+#### 模型看到什么
+
 只有 Method Editor Agent 能看到 `method_library_upsert`、`method_library_set_default` 与 `method_library_remove`。每个页面操作都是一条以 `【方法库操作】` 开头的持久用户消息，携带一个 `operationId`、动作与目标名，保存操作还带条目的 SHA-256；保存工具另收到 `operationHash` 与 `defaultAction`，默认/删除工具只收到各自的 action/name。响应给出简短文本加给 client 的 `presentationMeta`。默认标记不属于 `method-draft`；只有显式页面操作能改变它。
 
-**Token 影响。** 一个确定性 Loader 场景用 DSH 固定密度估计器把真实首请求（消息 + 工具 schema）与早先的 upsert/remove schema 对比计价。schema 变化为 +246 token（冒烟断言）；绝对总数 ≈6.8k 随每步时钟注入变化——用 `node scripts/smoke/method-library-tool.e2e.mjs` 重生成，不读固定数。比较性估计，非特定 provider 分词或计费；每个保存请求还含完整方法条目与命令标记。
+#### Token 影响
 
-**KV 缓存。** 工具 schema 在同一请求序列内稳定；逐操作命令文本与方法条目作为用户内容追加，不替换前缀。其他行是组合载体，其模型可见行为由被插入的行包各自拥有。
+一个确定性 Loader 场景用 DSH 固定密度估计器把真实首请求（消息 + 工具 schema）与早先的 upsert/remove schema 对比计价。schema 变化为 +246 token（冒烟断言）；绝对总数 ≈6.8k 随每步时钟注入变化——用 `node scripts/smoke/method-library-tool.e2e.mjs` 重生成，不读固定数。比较性估计，非特定 provider 分词或计费；每个保存请求还含完整方法条目与命令标记。
+
+#### KV 缓存影响
+
+工具 schema 在同一请求序列内稳定；逐操作命令文本与方法条目作为用户内容追加，不替换前缀。其他行是组合载体，其模型可见行为由被插入的行包各自拥有。
 
 ### 研究角色（Lead / Scout）
 
+#### 模型看到什么
+
 每个研究角色的首请求携带其 persona、角色隔离的 skill 描述、工具 schema，以及以 runtime context 注入的研究手册（`content/manual.md`，D40），不落工作区。
 
-**Token 影响。** `node scripts/smoke/model-experience.e2e.mjs` 捕获真实组装的首请求计价。稳定、由包版本决定的面：Lead 工具 schema 6,634 token、Scout 4,999、手册 2,506 ≈ Lead 消息 token 的 50.6%。绝对总数（Lead ≈11.6k、Scout ≈8.7k）随时钟注入变化；用冒烟重生成。比较性估计，非特定 provider 分词或计费。
+#### Token 影响
 
-**KV 缓存。** persona、手册、skill 描述、工具 schema 在同一包版本内稳定（KV 友好前缀）；每步 time-context 读数追加而非替换。手册占 Lead 消息 token 约一半 = T0 常驻成本；内容生长与瘦身复议归 design/70。
+`node scripts/smoke/model-experience.e2e.mjs` 捕获真实组装的首请求计价。稳定、由包版本决定的面：Lead 工具 schema 6,634 token、Scout 4,999、手册 2,506 ≈ Lead 消息 token 的 50.6%。绝对总数（Lead ≈11.6k、Scout ≈8.7k）随时钟注入变化；用冒烟重生成。比较性估计，非特定 provider 分词或计费。
+
+#### KV 缓存影响
+
+persona、手册、skill 描述、工具 schema 在同一包版本内稳定（KV 友好前缀）；每步 time-context 读数追加而非替换。手册占 Lead 消息 token 约一半 = T0 常驻成本；内容生长与瘦身复议归 design/70。
 
 ## 已知限制与延后工作
 
