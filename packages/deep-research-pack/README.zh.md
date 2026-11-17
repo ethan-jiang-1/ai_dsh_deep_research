@@ -7,6 +7,8 @@ kind: "package-bundle"
 
 [English](README.md) | 中文
 
+> 本页是 [English](README.md)（合同正本）的中文投影：两版不一致时以英文版为准。
+
 ## 摘要
 
 本组合包为 DSH profile 增加深度研究（Deep Research）能力：五个角色 preset（Lead、Scout、
