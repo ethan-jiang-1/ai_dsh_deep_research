@@ -5,21 +5,22 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
-import { filesAllowlistIssues, typeEntryPathsOf } from '../../../checks/lib/repo/shipped-surface.mjs'
+import { filesAllowlistIssues } from '../../../checks/lib/repo/shipped-surface.mjs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
+const CLOSURE = JSON.parse(readFileSync(join(ROOT, 'tests', 'fixtures', 'shipped', 'type-closure.json'), 'utf8'))
 
 test('T0 files：入口/patch/preset/种子/脚本都在发布白名单；清单 = exports.types 反投影', () => {
   for (const required of ['cordis.patch.yml', 'presets/**', 'lib/*.js', 'content/**', 'scripts/**', 'locale-method-library/**']) {
     assert.ok(pkg.files?.includes(required), `files 缺 ${required}——tarball 会装后坏`)
   }
   // 发布清单不是「目录全带 + 负模式」：每个公开类型入口逐条列出，无 lib 广模式（BUG-219/228）。
-  assert.deepEqual(filesAllowlistIssues(pkg), [])
-  for (const entry of typeEntryPathsOf(pkg)) assert.ok(pkg.files?.includes(entry), `files 缺公开类型入口 ${entry}`)
+  assert.deepEqual(filesAllowlistIssues(pkg, { typeClosure: CLOSURE.files }), [])
+  for (const entry of CLOSURE.files) assert.ok(pkg.files?.includes(entry), `files 缺公开类型文件 ${entry}`)
   for (const patch of pkg.dsh?.bundle?.patch ?? []) {
     assert.ok(existsSync(join(PACK, patch)), `dsh.bundle.patch 指向不存在的文件：${patch}`)
   }

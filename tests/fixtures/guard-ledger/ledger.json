@@ -842,6 +842,98 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "files 加回 lib/** 或删类型入口 → 发布清单用例红；pack.e2e 集合断言同判"
+    },
+    {
+      "id": "BUG-229",
+      "mechanism": "client bundle 运行时 require React 未声明 peer",
+      "guard": "tests/checks/pack-deps.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删 react peer → 正向用例红；pack.e2e 发布物 require 对账红"
+    },
+    {
+      "id": "BUG-230",
+      "mechanism": "shipped-surface 路径 token 被 ./ ../ 裸根 反斜杠绕过",
+      "guard": "tests/checks/shipped-surface.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 ./checks/x 写进随包文本 → 边界矩阵/文本用例红"
+    },
+    {
+      "id": "BUG-231",
+      "mechanism": "源侧扫描集手工近似（漏 content/**/*.js 与 locale*）",
+      "guard": "tests/checks/shipped-surface.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "从扫描集移除 content/waves/lens-fanout.js → 集合用例红"
+    },
+    {
+      "id": "BUG-232",
+      "mechanism": "row-deps 只看 YAML 行，发布物 require/.d.ts import 不在 peer 账上",
+      "guard": "tests/checks/pack-deps.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "往 lib/client.js 注入未声明 require → pack.e2e/pack-deps 用例红"
+    },
+    {
+      "id": "BUG-233",
+      "mechanism": "cold-start 在仓内 TEMP、走 vendor 源树（依赖可被仓根补齐）",
+      "guard": "tests/checks/clean-room-policy.test.mjs",
+      "oracleType": "self-referential",
+      "status": "provisional",
+      "redRecipe": "把 home 放回仓内 / 解析落仓根 → 纯判据用例红",
+      "trigger": "干净室/manifest 规则改由独立 oracle（真宿主清单或外部解析器）覆盖时，重评为 canonical"
+    },
+    {
+      "id": "BUG-234",
+      "mechanism": "release.entry 只许 runtime/harness-home，不是干净用户现场",
+      "guard": "tests/checks/clean-room-policy.test.mjs",
+      "oracleType": "self-referential",
+      "status": "provisional",
+      "redRecipe": "isOutsideRepo/版本用例红（旧 home 约束）",
+      "trigger": "干净室/manifest 规则改由独立 oracle（真宿主清单或外部解析器）覆盖时，重评为 canonical"
+    },
+    {
+      "id": "BUG-235",
+      "mechanism": "lifecycle 用 PATH 全局 dsh，peer 由全局兜底",
+      "guard": "tests/checks/clean-room-policy.test.mjs",
+      "oracleType": "self-referential",
+      "status": "provisional",
+      "redRecipe": "把 dsh 版本改成 0.3.0 → 版本合同用例红",
+      "trigger": "干净室/manifest 规则改由独立 oracle（真宿主清单或外部解析器）覆盖时，重评为 canonical"
+    },
+    {
+      "id": "BUG-236",
+      "mechanism": "tarball manifest 带 workspace:* devDependencies",
+      "guard": "tests/checks/publish-manifest.test.mjs",
+      "oracleType": "self-referential",
+      "status": "provisional",
+      "redRecipe": "把 devDependencies 留在发布 manifest → strip 用例红；pack.e2e 的 tarball manifest 断言红",
+      "trigger": "干净室/manifest 规则改由独立 oracle（真宿主清单或外部解析器）覆盖时，重评为 canonical"
+    },
+    {
+      "id": "BUG-237",
+      "mechanism": "dev home 旧 profile 可直起并跳过漂移检测",
+      "guard": "tools/channel/run-driver.mjs",
+      "oracleType": "none",
+      "status": "closed",
+      "redRecipe": "DSH_RUN_PROFILE=research 直起 up → fail-loud（--allow-stale-profile 才放行）"
+    },
+    {
+      "id": "BUG-238",
+      "mechanism": "peer ^0.2.1-rc.2 宽于 engines.dsh 闭区间",
+      "guard": "tests/checks/pack-deps.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 DSH 组 peer 改成 ^0.3.0 → 范围用例红"
+    },
+    {
+      "id": "BUG-239",
+      "mechanism": "公开类型入口的相对 import 目标没随包（7 入口 vs 闭包 11）",
+      "guard": "tests/checks/shipped-surface.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "从 files 删一个闭包文件 → 清单用例红；~/. 消费者 tsc 见卡内症状"
     }
   ]
 }

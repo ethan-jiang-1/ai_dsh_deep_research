@@ -9,7 +9,9 @@
 //   ⑤ 运行期用 `readPluginMeta` 读四个 specifier：中英标题/描述/图标真的解析得出来
 //   ⑥ `dsh plugin remove` 后 roster 回到 base + web-app
 //
-// 前置：PATH 上有 dsh 与 pnpm；`_dist` 里同时有本版本 tarball 与 market.json（先跑
+// 干净室默认（BUG-235）：vendor 钉版 dsh（不经 PATH/全局安装），`dsh --version ∈ engines.dsh`；
+// 显式 `--global-dsh` 才用 PATH 上的全局 dsh（会失去版本合同保证，只作对照）。
+// 前置：`_dist` 里同时有本版本 tarball 与 market.json（先跑
 // `node tools/release/export-dist.mjs`）。缺任一 = exit 2（未跑 ≠ 通过）；断言失败 = exit 1。
 // 用法：node checks/smoke/lifecycle.entry.mjs
 import { spawn, spawnSync } from 'node:child_process'
@@ -20,12 +22,15 @@ import { fileURLToPath } from 'node:url'
 import { parseMarketIndex } from '@deepseek-ai/dsh-plugin-market-index'
 import { scrubbedEnv } from '../lib/shared/env.mjs'
 import { artifactFreshness, packInputRoots, packagedInputEntries } from '../lib/shared/artifact-freshness.mjs'
+import { engineIssues, moduleLeakOf, pinnedDshBin } from '../lib/harness/clean-room.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
 const PROFILE = 'lifecycle'
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
-const dsh = process.env.DSH_BIN ?? 'dsh'
+const globalDsh = process.argv.includes('--global-dsh')
+const dsh = process.env.DSH_BIN ?? (globalDsh ? 'dsh' : pinnedDshBin(ROOT))
+if (dsh === null) { console.error('lifecycle.entry: NOT-RUN — vendor 钉版 dsh 缺席（vendor/dsh 未初始化）；或用 --global-dsh / DSH_BIN 显式指定'); process.exit(2) }
 const failures = []
 const check = (name, ok, detail = '') => {
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${ok || detail === '' ? '' : `\n      → ${detail}`}`)
@@ -36,6 +41,9 @@ const tail = (r) => `${r.stdout ?? ''}${r.stderr ?? ''}`.trim().split('\n').slic
 
 const version = spawnSync(dsh, ['--version'], { encoding: 'utf8' })
 if (version.status !== 0) notRun(`找不到 dsh（${dsh}）；用 DSH_BIN 指定`)
+// 干净室版本合同：跑的是不是 engines.dsh 范围内的宿主。
+const engineProblem = engineIssues(ROOT, dsh, pkg, { cwd: ROOT })
+if (engineProblem.length > 0) notRun(engineProblem.join('；'))
 const tarball = process.env.PACK_TARBALL ?? join(ROOT, '_dist', `dsh-deep-research-pack-${pkg.version}.tgz`)
 const marketFile = join(ROOT, '_dist', 'market.json')
 if (!existsSync(tarball)) notRun(`tarball 缺席：${tarball}（先 node tools/release/export-dist.mjs）`)
@@ -191,6 +199,9 @@ try {
 
   writeProbe()
   const addPack = run(['plugin', '--profile', PROFILE, 'add', `file:${tarball}`])
+  // 干净室：模块解析不得从 home 走到仓根 node_modules（那会把缺失 peer 补齐 = 假绿）。
+  const leaks = moduleLeakOf({ home, root: ROOT, names: ['react', 'react-dom', '@deepseek-ai/dsh-client-ui-primitives'] })
+  check('②b 模块解析不经过仓根 node_modules', leaks.length === 0, leaks.join('；'))
   check('③ 装 tarball', addPack.status === 0, tail(addPack))
   const addProbe = run(['plugin', '--profile', PROFILE, 'add', probeDir])
   check('③ 装显示面探针', addProbe.status === 0, tail(addProbe))

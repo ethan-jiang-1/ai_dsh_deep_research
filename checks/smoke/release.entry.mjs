@@ -27,12 +27,13 @@
 
 import { spawn } from 'node:child_process';
 import { scrubbedEnv } from '../lib/shared/env.mjs';
-import { existsSync, lstatSync, readFileSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
+import { cpSync, existsSync, lstatSync, readFileSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
+import { basename, join, relative, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { presetRoles } from '../lib/shared/roles.mjs';
 import { reclaimPort } from '../lib/harness/port-reclaim.mjs';
 import { satisfiesVersion } from '../../packages/deep-research-pack/scripts/lib/version-range.mjs';
+import { cleanHome, engineIssues, isOutsideRepo, moduleLeakOf, pinnedDshBin } from '../lib/harness/clean-room.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
@@ -44,13 +45,27 @@ const T_INSTALL = 180_000;
 const T_DEFAULT = 120_000;
 const T_SMOKE = 300_000;
 
-const home = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null;
-if (!home) {
-  console.error('release.entry: 需要 DSH_HOME（先 source tools/env.sh）');
+// 干净室默认（BUG-234）：仓外 mkdtemp home + vendor 钉版 DSH；显式 --dev-home 才回退到
+// runtime/harness-home（需要既有凭据/模型的端到端用）。
+const devHome = process.argv.includes('--dev-home') || process.env.RELEASE_DEV_HOME === '1';
+const home = devHome
+  ? (process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null)
+  : cleanHome(ROOT, 'dsh-release-home');
+if (home === null) {
+  console.error('release.entry: --dev-home 需要 DSH_HOME（先 source tools/env.sh）');
   process.exit(2);
 }
-if (home !== join(ROOT, 'runtime', 'harness-home')) {
+if (devHome && home !== join(ROOT, 'runtime', 'harness-home')) {
   console.error(`release.entry: refusing non-development DSH_HOME: ${home} (source tools/env.sh)`);
+  process.exit(2);
+}
+const packPkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
+const pinned = pinnedDshBin(ROOT);
+const engineProblems = pinned === null
+  ? ['vendor 钉版 dsh 缺席（vendor/dsh 未初始化）——未跑 ≠ 通过']
+  : engineIssues(ROOT, pinned, packPkg, { cwd: ROOT });
+if (engineProblems.length > 0) {
+  console.error(`release.entry: ${engineProblems.join('；')}`);
   process.exit(2);
 }
 const dshSrc = process.env.DSH_SRC ?? ROOT; // 本仓根 = 安装锚（vendor/dsh submodule 在 workspace）
@@ -73,6 +88,14 @@ const fixedCleanupTargets = new Map([
   ['lock', lockDir],
 ]);
 const assertCleanupTarget = (name, target) => {
+  if (!devHome) {
+    // 干净室模式：允许仓外 home 与其子路径，以及仓内 runtime/ 工具态区；其余拒绝。
+    const runtimeRel = relative(join(ROOT, 'runtime'), resolve(target));
+    if (!isOutsideRepo(ROOT, target) && (runtimeRel.startsWith('..') || runtimeRel === '')) {
+      throw new Error(`release.entry: refusing to clean unexpected ${name} path: ${target}`);
+    }
+    return;
+  }
   const expected = fixedCleanupTargets.get(name);
   // 清理白名单前缀 = runtime/ 工具态区（2026-10-07 运行态区外移：tmp/npm 缓存迁 runtime/smoke-workspace，
   // home 本体钉在 runtime/harness-home——tools/ 前缀是迁移漏改的断链，实测 L2 通道第一步 clean 即崩）
@@ -86,7 +109,13 @@ const assertCleanupTarget = (name, target) => {
   }
 };
 const clean = (name, target) => {
-  assertCleanupTarget(name, target);
+  if (devHome) assertCleanupTarget(name, target);
+  else {
+    const runtimeRel = relative(join(ROOT, 'runtime'), resolve(target));
+    if (!isOutsideRepo(ROOT, target) && (runtimeRel.startsWith('..') || runtimeRel === '')) {
+      throw new Error(`release.entry: refusing to clean unexpected ${name} path: ${target}`);
+    }
+  }
   rmSync(target, { recursive: true, force: true });
 };
 
@@ -181,14 +210,18 @@ try {
 
 let exitCode = 1;
 try {
-  // ① npm pack
+  // ① 用 _dist 的发布 tarball（export-dist 产物：manifest 已剥离 devDependencies，BUG-236）。
+  //    本测试证安装形状，不再自己 npm pack——否则装的是源 manifest（带 workspace 协议）。
   clean('tmp', tmp);
   mkdirSync(tmp, { recursive: true });
-  console.log('① npm pack …');
-  const pack = await run('npm', ['pack', '--cache', npmCache, '--pack-destination', tmp], { cwd: PACK, env: scrubbedEnv(), timeoutMs: T_INSTALL });
-  const tarball = (pack.stdout ?? '').trim().split('\n').pop();
-  step(pack.status === 0 && typeof tarball === 'string' && tarball.endsWith('.tgz') && existsSync(join(tmp, tarball)),
-    `pack 产出 tarball（${tarball ?? '无'}）`, tail(pack));
+  const distTarball = process.env.PACK_TARBALL ?? join(ROOT, '_dist', `dsh-deep-research-pack-${packPkg.version}.tgz`);
+  if (!existsSync(distTarball)) {
+    console.error(`release.entry: NOT-RUN — 发布 tarball 缺席：${distTarball}（先 node tools/release/export-dist.mjs）`);
+    process.exit(2);
+  }
+  const tarball = basename(distTarball);
+  cpSync(distTarball, join(tmp, tarball));
+  step(true, `① 使用发布 tarball（${tarball}）`);
 
   // ② 干净 profile：先删后建（web 模板：自定义 profile 名走默认只有 dsh-base，起不了 web——
   //    company release.md 实证；--from-default-profile web 补齐 dsh-web-app）
@@ -206,6 +239,10 @@ try {
   const add = await run(process.execPath, ['--import', 'tsx/esm', bin, 'plugin', '--profile', PROFILE, 'add', `file:${join(tmp, tarball)}`],
     { cwd: dshSrc, env: scrubbedEnv({ DSH_HOME: home }), timeoutMs: T_INSTALL });
   step(add.status === 0, 'dsh plugin add 安装', tail(add));
+  // 干净室：模块解析不得从 home 走到仓根 node_modules（否则缺失 peer 被补齐 = 假绿）。
+  const leaks = moduleLeakOf({ home, root: ROOT, names: ['react', 'react-dom', '@deepseek-ai/dsh-client-ui-primitives'] });
+  if (devHome) console.log('note  dev-home 模式：模块解析允许经仓根 node_modules（预期；干净室判据只对默认模式生效）');
+  else step(leaks.length === 0, '模块解析不经过仓根 node_modules（干净室）', leaks.join('；'));
 
   // ③b 团队层（N2；手册第二步的一部分；版本 = 运行中的 DSH）
   const TEAM_PKG = '@deepseek-ai/dsh-experimental-agent-team-profile';
@@ -295,5 +332,6 @@ try {
   } else {
     clean('lock', lockDir);
   }
+  if (!devHome) rmSync(home, { recursive: true, force: true });
 }
 process.exitCode = exitCode;

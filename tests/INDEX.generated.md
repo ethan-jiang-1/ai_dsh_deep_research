@@ -21,6 +21,7 @@
 | channel | `checks/lib/channel/channel-cache` | `tests/run/channel/channel-cache.spec.mjs` |
 | channel | `checks/lib/channel/hitl-card-driver` | — |
 | channel | `checks/lib/channel/inject-reconcile` | `tests/run/channel/inject-reconcile.spec.mjs` |
+| channel | `checks/lib/channel/profile-guard` | `tests/checks/profile-guard.test.mjs` |
 | channel | `checks/lib/channel/run-channel` | `tests/run/channel/run-driver-contract.spec.mjs` |
 | channel | `checks/lib/channel/runtime-clean-core` | `tests/run/channel/runtime-clean.spec.mjs` |
 | gates | `checks/lib/gates/acceptance-check` | `tests/run/gates/acceptance-check.spec.mjs` |
@@ -38,6 +39,8 @@
 | gates | `checks/lib/gates/strategy-core` | `tests/run/gates/strategy-core.spec.mjs` |
 | gates | `checks/lib/gates/verdict-audit-core` | `tests/run/gates/verdict-audit-fixture.spec.mjs`<br>`tests/run/gates/verdict-audit.spec.mjs` |
 | harness | `checks/lib/harness/browser-cache` | `tests/run/harness/browser-cache.spec.mjs` |
+| harness | `checks/lib/harness/clean-room` | — |
+| harness | `checks/lib/harness/clean-room-policy` | `tests/checks/clean-room-policy.test.mjs` |
 | harness | `checks/lib/harness/client-load-select` | `tests/run/harness/client-load-select.spec.mjs` |
 | harness | `checks/lib/harness/gates-cases` | `tests/checks/doc-surface-shapes.test.mjs`<br>`tests/checks/verify-gates.test.mjs` |
 | harness | `checks/lib/harness/gates-cli` | `tests/run/harness/gates-cli.spec.mjs` |
@@ -62,6 +65,8 @@
 | repo | `checks/lib/repo/doc-surface` | `tests/checks/doc-surface-shapes.test.mjs` |
 | repo | `checks/lib/repo/fix-evidence` | `tests/checks/fix-evidence.test.mjs` |
 | repo | `checks/lib/repo/note-scan` | `tests/checks/note-scan.test.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs` |
+| repo | `checks/lib/repo/pack-deps` | `tests/checks/pack-deps.test.mjs` |
+| repo | `checks/lib/repo/publish-manifest` | `tests/checks/publish-manifest.test.mjs` |
 | repo | `checks/lib/repo/redirect-ledger` | `tests/checks/redirect-ledger.test.mjs` |
 | repo | `checks/lib/repo/release-anchor` | `tests/checks/release-anchor.test.mjs` |
 | repo | `checks/lib/repo/shipped-surface` | `tests/checks/shipped-surface.test.mjs`<br>`tests/pack/contract/package-contract.spec.mjs` |

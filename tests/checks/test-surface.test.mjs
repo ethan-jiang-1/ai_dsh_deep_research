@@ -32,6 +32,7 @@ const PACK_LIB = join(ROOT, 'packages', 'deep-research-pack', 'src', 'lib')
 /** 只能由 smoke/probe 或 vm 沙箱行为测试覆盖的模块（keyless 回归禁真实浏览器/子进程/端口，见 layering 五件套）。 */
 const SMOKE_ONLY = {
   'harness/playwright': 'chromium 定位与启动（纯件 browser-cache 有直测；launch 本身真浏览器档）',
+  'harness/clean-room': '干净室安装矩阵：mkdtemp home + 钉版 dsh + tarball 安装 + 起 web——全是子进程/真宿主，keyless 回归禁；纯判据（engineIssues/moduleLeakOf）只在真入口跑，规则由 229/232/238 的纯函数测试承担',
   'harness/port-reclaim': '端口收割：需要真监听端口与系统进程，回归禁；身份纯判据 port-reclaim-policy 有直测',
   'shared/cdp-driver': 'Playwright/CDP 驱动：只被 smoke/probe 以真浏览器消费，keyless 回归禁浏览器',
   'shared/web-harness': '真 web 启动与 RPC 握手：只在 smoke 档跑，回归禁 spawn/网络',

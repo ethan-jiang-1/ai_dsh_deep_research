@@ -1,17 +1,17 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-11-17
 ---
 
 # 推敲：运行时依赖与安装边界（2026-11-17 第三轮）
 
-> 立卡：2026-11-17 ｜ 状态：推敲中（第一轮已跑；10 张卡 229–238） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-17 ｜ 状态：已结（第一轮已跑；10 张卡 229–238） ｜ 类型：Task ｜ 结论：10 张卡 + 回归 239 全部修复归档；依赖闭包/干净室/发布 metadata 三条判据落地 ｜ 审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 干净室三入口 ｜ 可关闭：是（2026-11-17）
 >
 > **一句话**：第二轮把「发布文本/集合」收干净了；这一轮追**依赖与安装现场**——运行时 require 的包是否在 peers、
 > 安装测试是否真在干净室、dev home 镜像是否等于当前源、发布 metadata 是否可解析。10 张卡，全部只报不修。
 >
-> 前两轮 = [命名空间搬家](../_archived/settled_issues/2026-11-17-exploratory-namespace-move.md) ·
-> [运行时/开发边界](../_archived/settled_issues/2026-11-17-runtime-dev-boundary.md)（219–228 已由 `f3829bea` 修完归档）。
+> 前两轮 = [命名空间搬家](2026-11-17-exploratory-namespace-move.md) ·
+> [运行时/开发边界](2026-11-17-runtime-dev-boundary.md)（219–228 已由 `f3829bea` 修完归档）。
 
 **问题与期望结果：** 第二轮解决了「发布文本引用 dev」与「发布集合 = 公开合同」，但没有回答：
 - `lib/client.js` 在运行时 `require` 的 React / DSH 包，是否都在 `peerDependencies`？
@@ -39,7 +39,41 @@ opened: 2026-11-17
 - peer 范围是否改成与 engines 同闭区间；`cordis`/`schemastery`/`sqlite` 等非 tag 包需分组。
 - `workspace:*` devDependencies：发布前改写/剥离（pnpm publish）还是 prepack 生成发布 manifest。
 
-**下一步：** 10 张卡待用户/修复 agent 处置；229/232/236/238 触 pack 公共行为/门禁，230 触门禁，233/234/235/231 为测试边界（修复就绪），237 为运行态清理（修复就绪）。本轮不改产品代码。
+**下一步：** 10 张卡 + 回归 239 全部 `修复就绪`（用户 2026-11-17 放行并拍板 6 项），按 §批修复 的 P0–P5 推进。
+
+## 批修复（2026-11-17 用户放行；批 Note 待收口）
+
+用户 2026-11-17 放行全部 5 张 `等人拍板` 卡，并拍板 6 个边界选择；10 张卡 + 复核发现的回归 239 同批修完再写批 Note。
+
+| 决定 | 选定 | 卡 |
+|---|---|---|
+| React 运行时 | 加 peer `react`/`react-dom` `^18.2.0`（与 DSH web 宿主同版），不重复打包 | 229 |
+| 类型面 | 发布类型 = `exports.types` 的**可达相对闭包** = 11 文件（7 入口 + 4 依赖） | 239 |
+| 发布 manifest | 剥离 `devDependencies`（发布包不需要），tarball 零 `workspace:` | 236 |
+| peer 版本 | DSH-tag 组 = `engines.dsh` 同一闭区间；非 tag 组显式分组 | 238 |
+| 旧 profile | 删除 `research`/`wave-pilot`；非默认 profile 直起 fail-loud | 237 |
+| 干净室 | 共享 clean-room helper（仓外 home × 钉版 DSH × tarball），保留显式 dev-home/global 模式 | 233/234/235 |
+
+**实施顺序**：
+
+1. **P0**：基线 + 立回归卡 239（引用 219）。
+2. **P1 守卫自身**：`devRefsOf` 路径归一（`./` `../` 裸根 反斜杠）；源侧扫描集由发布允许集派生
+   （补 `content/**/*.js`、`locale*/**`）；类型集合改判可达闭包（239）。230/231/239。
+3. **P2 依赖闭包**：React peers；DSH 组 peer 范围 = engines；`pack.e2e` 增加「`lib/*.js` 非相对
+   require ∪ 发布 `.d.ts` external import ⊆ peers」正向 + peers 反向使用对账与防空。229/232/238。
+4. **P3 干净室**：`checks/lib/harness/clean-room.mjs`（仓外 mkdtemp、钉版 DSH wrapper、tarball 安装、
+   模块解析祖先不经过 ROOT/node_modules、`dsh --version ∈ engines`）；cold-start/release/lifecycle 接入，
+   保留 `--dev-home` / 全局模式作显式分名。233/234/235。
+5. **P4 元数据/运行态**：发布 manifest 剥离 devDependencies + tarball 断言；删除两个旧 profile +
+   `run-driver` 非默认 profile fail-loud。236/237。
+6. **P5**：批 Note、11 卡归档、issue 收口、全量验收 + 语义自审。
+
+**收口（2026-11-17）**：10 张卡 + 复核发现的回归 239 全部 `已修` 并归档到 [fixed 池](../fixed_bugs/README.md)；
+批 Note = [2026-11-17-runtime-deps-install-boundary](../../../notes/implemented/2026-11-17-runtime-deps-install-boundary.md)。
+依赖闭包 = `checks/lib/repo/pack-deps.mjs`（pack.e2e 真 tarball 上正/反/范围三面）；
+干净室 = `checks/lib/harness/clean-room.mjs` + 三入口（cold-start/release/lifecycle）；
+发布 manifest = staging 剥离 devDependencies（tarball 零 workspace 协议）；类型面 = 可达闭包 11 文件。
+`pnpm verify` / `pnpm test` / `pack.e2e` / 三个干净室入口全绿；红证回放见各卡 `fix-evidence`。
 
 ## 判据：四层
 
@@ -55,16 +89,17 @@ opened: 2026-11-17
 
 | 卡 | 层 | 严重级 | 状态 | 一句话 |
 |---|---|---|---|---|
-| [229](../bugs/BUG-229-client-bundle-react-peer-missing.md) | L1 | P2 | 等人拍板 | `lib/client.js` require React/react-dom/jsx，peer 没声明 |
-| [230](../bugs/BUG-230-shipped-surface-devref-lookbehind-bypass.md) | 守卫 | P2 | 等人拍板 | `devRefsOf` 漏 `./checks`、`../tests`、裸根、`./research-workspace` |
-| [231](../bugs/BUG-231-shipped-surface-source-scan-gaps.md) | 守卫 | P2 | 修复就绪 | 源侧扫描漏 `content/**/*.js` 与 `locale*`——push 绿、nightly 红 |
-| [232](../bugs/BUG-232-row-deps-scope-no-lib-types.md) | L1 | P2 | 等人拍板 | `row-deps` 只查 YAML 行；`pack.e2e` client inject 只查 `@deepseek-ai`，不查 React/类型 |
-| [233](../bugs/BUG-233-cold-start-inside-repo-not-clean-room.md) | L3 | P2 | 修复就绪 | cold-start 的 TEMP 在仓内、走 vendor，缺 peer 由 repo node_modules 补 |
-| [234](../bugs/BUG-234-release-entry-pins-dev-dsh-home.md) | L3 | P2 | 修复就绪 | release.entry 只许 `runtime/harness-home`，不是干净用户现场 |
-| [235](../bugs/BUG-235-lifecycle-uses-global-dsh.md) | L3 | P2 | 修复就绪 | lifecycle 用 PATH 全局 `dsh`/`pnpm`，peer 缺口由全局兜底 |
-| [236](../bugs/BUG-236-tarball-workspace-dev-dependencies.md) | L4 | P2 | 等人拍板 | 发布 tarball 带 14 条 `workspace:*` devDependencies |
-| [237](../bugs/BUG-237-stale-dev-home-profiles.md) | L4 | P2 | 修复就绪 | `research`/`wave-pilot` 镜像停在 0.3.1/0.3.0；直起跳过漂移检测 |
-| [238](../bugs/BUG-238-peer-range-wider-than-engines.md) | L4 | P2 | 等人拍板 | peer `^0.2.1-rc.2` 宽于 engines `<=0.2.1-rc.5` |
+| [229](../fixed_bugs/BUG-229-client-bundle-react-peer-missing.md) | L1 | P2 | 修复就绪 | `lib/client.js` require React/react-dom/jsx，peer 没声明 |
+| [230](../fixed_bugs/BUG-230-shipped-surface-devref-lookbehind-bypass.md) | 守卫 | P2 | 修复就绪 | `devRefsOf` 漏 `./checks`、`../tests`、裸根、`./research-workspace` |
+| [231](../fixed_bugs/BUG-231-shipped-surface-source-scan-gaps.md) | 守卫 | P2 | 修复就绪 | 源侧扫描漏 `content/**/*.js` 与 `locale*`——push 绿、nightly 红 |
+| [232](../fixed_bugs/BUG-232-row-deps-scope-no-lib-types.md) | L1 | P2 | 修复就绪 | `row-deps` 只查 YAML 行；`pack.e2e` client inject 只查 `@deepseek-ai`，不查 React/类型 |
+| [233](../fixed_bugs/BUG-233-cold-start-inside-repo-not-clean-room.md) | L3 | P2 | 修复就绪 | cold-start 的 TEMP 在仓内、走 vendor，缺 peer 由 repo node_modules 补 |
+| [234](../fixed_bugs/BUG-234-release-entry-pins-dev-dsh-home.md) | L3 | P2 | 修复就绪 | release.entry 只许 `runtime/harness-home`，不是干净用户现场 |
+| [235](../fixed_bugs/BUG-235-lifecycle-uses-global-dsh.md) | L3 | P2 | 修复就绪 | lifecycle 用 PATH 全局 `dsh`/`pnpm`，peer 缺口由全局兜底 |
+| [236](../fixed_bugs/BUG-236-tarball-workspace-dev-dependencies.md) | L4 | P2 | 修复就绪 | 发布 tarball 带 14 条 `workspace:*` devDependencies |
+| [237](../fixed_bugs/BUG-237-stale-dev-home-profiles.md) | L4 | P2 | 修复就绪 | `research`/`wave-pilot` 镜像停在 0.3.1/0.3.0；直起跳过漂移检测 |
+| [238](../fixed_bugs/BUG-238-peer-range-wider-than-engines.md) | L4 | P2 | 修复就绪 | peer `^0.2.1-rc.2` 宽于 engines `<=0.2.1-rc.5` |
+| [239](../fixed_bugs/BUG-239-public-type-entry-relative-imports-unshipped.md) | L2 | P2 | 修复就绪 | 公开类型入口的相对 import 目标没随包（回归 219：7 入口 vs 闭包 11） |
 
 **复核已关闭（不另开卡）**：第二轮 219–228 由 `f3829bea` 修复归档；公开类型收窄到 7 个入口，7 个入口只 import
 `cordis`（peer），所以此前「d.ts 缺 client-ui / experimental peer」在**发布面**已不可达（`lib/types` 内部树仍在盘上，

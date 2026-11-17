@@ -1,17 +1,17 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-237：dev home 的 `research` / `wave-pilot` profile 镜像停在 0.3.1 / 0.3.0；直起 `dsh --profile` 跳过漂移检测
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：修复就绪（自授权 P2：运行态清理 + 检查）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（自授权 P2：运行态清理 + 检查） — 结论：删除 research/wave-pilot 旧镜像；run-driver 非默认 profile 直起 fail-loud（profile-guard，keyless 共判）；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-runtime-deps-install-boundary.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 干净室三入口（2026-11-17）
 >
 > 位置：`runtime/harness-home/profiles/{research,wave-pilot}/node_modules/dsh-deep-research-pack`
-> （gitignored 运行态）；相关说明 = [tools/channel/run-driver.mjs](../../tools/channel/run-driver.mjs) 第 28 行
+> （gitignored 运行态）；相关说明 = [tools/channel/run-driver.mjs](../../../tools/channel/run-driver.mjs) 第 28 行
 > 「从不直起 `dsh --profile research`——那会跳过 pack 漂移检测、静默用旧镜像」。
-> 探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-deps-install-boundary.md) 第三轮。
+> 探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-deps-install-boundary.md) 第三轮。
 
 ## 症状
 
@@ -73,3 +73,27 @@ profile 副本由 `dsh plugin add`/镜像流程安装；`boot-run` 的漂移检�
 - 三个 profile 的 pack 版本/指纹与当前源一致，或不存在非默认 profile；
 - 直起非默认 profile 不再能静默跳过漂移检测（fail-loud 或同一门）；
 - `doctor`/`dev-parity` 有对应检查；`pnpm verify`/`test` 绿。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "tools/channel/run-driver.mjs",
+    "checks/lib/channel/profile-guard.mjs",
+    "tests/checks/profile-guard.test.mjs"
+  ],
+  "red": {
+    "command": "DSH_RUN_PROFILE=research node tools/channel/run-driver.mjs up",
+    "exit": 2,
+    "output": "run-driver: profile「research」不是默认 deep-research——直起非默认 profile 会跳过镜像漂移检测（静默用旧插件）；显式 --allow-stale-profile 才继续"
+  },
+  "green": {
+    "command": "test ! -e runtime/harness-home/profiles/research && test ! -e runtime/harness-home/profiles/wave-pilot",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/profile-guard.test.mjs"
+  }
+}
+```

@@ -98,7 +98,7 @@ CLI 退出码 0 并给出警告，而应用内路径以 `not-bundle` 失败。�
 
 在工作区中打开一个会话，提出一个研究问题。Lead 跑 HITL1（类型、深度、语言、可选的业务简报），提出
 方法与计划，然后带领 Scout、Analyst 与 Critic 走完整个 run。HITL2 是交付前的终局审阅。完整操作手册是
-[`_dist/安装手册.md`](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/%E5%AE%89%E8%A3%85%E6%89%8B%E5%86%8C.md)，
+[安装手册](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/%E5%AE%89%E8%A3%85%E6%89%8B%E5%86%8C.md)，
 包内研究手册是 `content/manual.md`（以 runtime context 注入）。
 
 ### 验证

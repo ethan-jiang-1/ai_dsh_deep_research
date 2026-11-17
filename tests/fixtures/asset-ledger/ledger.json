@@ -83,6 +83,16 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/clean-room-policy.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "clean-room-policy.test.mjs — 干净室三判据的纯函数矩阵（BUG-233 / 234 / 235）。",
+      "oracleType": "self-referential",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/cli-entry.test.mjs",
       "domain": "checks",
       "lane": "checks",
@@ -303,6 +313,16 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/pack-deps.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "pack-deps.test.mjs — 发布物依赖闭包判据的纯函数矩阵（BUG-229 / 232 / 238）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/pack-mirror.test.mjs",
       "domain": "checks",
       "lane": "checks",
@@ -320,6 +340,26 @@
       "cost": "fast-inproc",
       "uniqueClaim": "不存在的 booted.stop() 留孤儿进程；修法 = resolveProbePort（预收割失败 → 临时空闲端口）+",
       "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/profile-guard.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "profile-guard.test.mjs — 非默认 profile 守卫的纯判据（BUG-237）。",
+      "oracleType": "self-referential",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/publish-manifest.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "publish-manifest.test.mjs — 发布 manifest 剥离的纯函数矩阵（BUG-236）。",
+      "oracleType": "self-referential",
       "sunset": "随门禁/台账合同退役"
     },
     {
@@ -378,7 +418,7 @@
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "shipped-surface.test.mjs — 发布面自足判据的 keyless 半边（BUG-219…228 类级）。",
+      "uniqueClaim": "shipped-surface.test.mjs — 发布面自足判据的 keyless 半边（BUG-219…239 类级）。",
       "oracleType": "canonical",
       "sunset": "随门禁/台账合同退役"
     },

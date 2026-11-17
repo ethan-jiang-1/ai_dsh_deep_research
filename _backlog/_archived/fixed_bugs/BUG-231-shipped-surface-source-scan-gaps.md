@@ -1,17 +1,17 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-231：`shipped-surface.test` 的源侧扫描漏 `content/**/*.js` 与 `locale*`——push 绿，nightly 才红
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：修复就绪（自授权 P2：测试覆盖）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（自授权 P2：测试覆盖） — 结论：源侧扫描集由 files 允许集派生（覆盖 content/**/*.js 与 locale*），pack.e2e 断言发布文本集 ⊆ 源侧集；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-runtime-deps-install-boundary.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 干净室三入口（2026-11-17）
 >
-> 位置：[tests/checks/shipped-surface.test.mjs](../../tests/checks/shipped-surface.test.mjs) 的
-> `shippedSources()`（第 38–42 行）；对照 = [checks/smoke/pack.e2e.mjs](../../checks/smoke/pack.e2e.mjs)
+> 位置：[tests/checks/shipped-surface.test.mjs](../../../tests/checks/shipped-surface.test.mjs) 的
+> `shippedSources()`（第 38–42 行）；对照 = [checks/smoke/pack.e2e.mjs](../../../checks/smoke/pack.e2e.mjs)
 > 的 `shippedTexts = listed.filter(TEXT)`（第 63 行，nightly 真 tarball）。
-> 探索轮 = [运行时依赖/安装边界卡](../issues/2026-11-17-runtime-deps-install-boundary.md)。
+> 探索轮 = [运行时依赖/安装边界卡](../settled_issues/2026-11-17-runtime-deps-install-boundary.md)。
 
 ## 症状
 
@@ -80,3 +80,27 @@ ls packages/deep-research-pack/locale*                                     # loc
 - 源侧扫描集覆盖 tarball 中所有文本文件（至少 content JS、locale JSON）；集合差为空；
 - 注入 dev 引用到 content JS / locale JSON → `pnpm test` 红（不再只 nightly）；
 - `shipped-surface.test` / `pack.e2e` / `pnpm verify` / `pnpm test` 绿。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/repo/shipped-surface.mjs",
+    "tests/checks/shipped-surface.test.mjs",
+    "checks/smoke/pack.e2e.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/shipped-surface.test.mjs",
+    "exit": 1,
+    "output": "not ok 2 - 源侧扫描集由 files 允许集派生… content 的运行时 .js 必须在源侧扫描集（旧版只收 .md/.json）"
+  },
+  "green": {
+    "command": "node --test tests/checks/shipped-surface.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/shipped-surface.test.mjs"
+  }
+}
+```

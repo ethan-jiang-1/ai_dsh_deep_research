@@ -128,89 +128,95 @@ importers:
         specifier: link:../../vendor/dsh/vendor/cordis
         version: link:../../vendor/dsh/vendor/cordis
       '@deepseek-ai/dsh-agent':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/core/agent
       '@deepseek-ai/dsh-agent-instructions':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/context/agent-instructions
       '@deepseek-ai/dsh-agent-preset':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/preset/agent-preset
       '@deepseek-ai/dsh-agent-preset-registry':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/preset/agent-preset-registry
       '@deepseek-ai/dsh-client-ui-primitives':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/client/ui-primitives
       '@deepseek-ai/dsh-experimental-client-ui-agent-team':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/experimental/client-ui-agent-team
       '@deepseek-ai/dsh-persona':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/preset/persona
       '@deepseek-ai/dsh-session-query-sqlite':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/session-query/session-query-sqlite
       '@deepseek-ai/dsh-skill-filesystem':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/skill/skill-filesystem
       '@deepseek-ai/dsh-time-context':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/context/time-context
       '@deepseek-ai/dsh-tool-ask-user':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/interaction/tool-ask-user
       '@deepseek-ai/dsh-tool-fs':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/fs/tool-fs
       '@deepseek-ai/dsh-tool-fs-search':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/fs/tool-fs-search
       '@deepseek-ai/dsh-tool-goal':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/goal/tool-goal
       '@deepseek-ai/dsh-tool-present':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/deliverables/tool-present
       '@deepseek-ai/dsh-tool-session-query':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/experimental/tool-session-query
       '@deepseek-ai/dsh-tool-skill':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/skill/tool-skill
       '@deepseek-ai/dsh-tool-subagent':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/subagent/tool-subagent
       '@deepseek-ai/dsh-tool-todo':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/todo/tool-todo
       '@deepseek-ai/dsh-tool-web':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/web/tool-web
       '@deepseek-ai/dsh-tool-workflow':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/workflow/tool-workflow
       '@deepseek-ai/dsh-tools':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/core/tools
       '@deepseek-ai/dsh-web':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/web/web
       '@deepseek-ai/dsh-web-deepseek-api':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/web/web-deepseek-api
       '@deepseek-ai/dsh-web-fetch-http':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/web/web-fetch-http
       '@deepseek-ai/dsh-workflow-ptc':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/workflow/workflow-ptc
       '@deepseek-ai/dsh-workspace':
-        specifier: ^0.2.1-rc.2
+        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/workspace/workspace
       '@deepseek-ai/schemastery':
         specifier: link:../../vendor/dsh/vendor/schemastery
         version: link:../../vendor/dsh/vendor/schemastery
+      react:
+        specifier: ^18.2.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@deepseek-ai/dsh-api-remotes':
         specifier: workspace:*

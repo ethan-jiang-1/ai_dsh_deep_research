@@ -13,18 +13,14 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-229](BUG-229-client-bundle-react-peer-missing.md) | 等人拍板 | P2 | client bundle require React/react-dom/jsx，peer 没声明 |
-| [BUG-230](BUG-230-shipped-surface-devref-lookbehind-bypass.md) | 等人拍板 | P2 | `devRefsOf` 漏 `./checks` / `../tests` / 裸根 / `./research-workspace` |
-| [BUG-231](BUG-231-shipped-surface-source-scan-gaps.md) | 修复就绪 | P2 | 源侧扫描漏 `content/**/*.js` 与 `locale*`——push 绿、nightly 红 |
-| [BUG-232](BUG-232-row-deps-scope-no-lib-types.md) | 等人拍板 | P2 | `row-deps` 只查 YAML 行；client inject 只查 `@deepseek-ai`，不查 React/类型 |
-| [BUG-233](BUG-233-cold-start-inside-repo-not-clean-room.md) | 修复就绪 | P2 | cold-start 在仓内、走 vendor；缺 peer 由 repo node_modules 补 |
-| [BUG-234](BUG-234-release-entry-pins-dev-dsh-home.md) | 修复就绪 | P2 | release.entry 只许仓内 dev home，不是干净用户现场 |
-| [BUG-235](BUG-235-lifecycle-uses-global-dsh.md) | 修复就绪 | P2 | lifecycle 用 PATH 全局 `dsh`/`pnpm`，peer 缺口由全局兜底 |
-| [BUG-236](BUG-236-tarball-workspace-dev-dependencies.md) | 等人拍板 | P2 | 发布 tarball 带 14 条 `workspace:*` devDependencies |
-| [BUG-237](BUG-237-stale-dev-home-profiles.md) | 修复就绪 | P2 | `research`/`wave-pilot` 镜像停在 0.3.1/0.3.0；直起跳过漂移检测 |
-| [BUG-238](BUG-238-peer-range-wider-than-engines.md) | 等人拍板 | P2 | peer `^0.2.1-rc.2` 宽于 engines `<=0.2.1-rc.5` |
+| （空） | — | — | 批 G（209–218）/ H（219–228）/ I（229–239）全部归档，见下 |
 
 ## 最近归档
+
+（2026-11-17 批 I 运行时依赖/安装边界闭环（11 张，229–239），批 Note =
+[2026-11-17-runtime-deps-install-boundary](../../notes/implemented/2026-11-17-runtime-deps-install-boundary.md)：
+[BUG-229](../_archived/fixed_bugs/BUG-229-client-bundle-react-peer-missing.md) [BUG-230](../_archived/fixed_bugs/BUG-230-shipped-surface-devref-lookbehind-bypass.md) [BUG-231](../_archived/fixed_bugs/BUG-231-shipped-surface-source-scan-gaps.md) [BUG-232](../_archived/fixed_bugs/BUG-232-row-deps-scope-no-lib-types.md) [BUG-233](../_archived/fixed_bugs/BUG-233-cold-start-inside-repo-not-clean-room.md) [BUG-234](../_archived/fixed_bugs/BUG-234-release-entry-pins-dev-dsh-home.md) [BUG-235](../_archived/fixed_bugs/BUG-235-lifecycle-uses-global-dsh.md) [BUG-236](../_archived/fixed_bugs/BUG-236-tarball-workspace-dev-dependencies.md) [BUG-237](../_archived/fixed_bugs/BUG-237-stale-dev-home-profiles.md) [BUG-238](../_archived/fixed_bugs/BUG-238-peer-range-wider-than-engines.md) [BUG-239](../_archived/fixed_bugs/BUG-239-public-type-entry-relative-imports-unshipped.md)。
+）
 
 （2026-11-17 批 H 发布面自足闭环（10 张，219–228），批 Note =
 [2026-11-17-shipped-boundary-self-contained](../../notes/implemented/2026-11-17-shipped-boundary-self-contained.md)：

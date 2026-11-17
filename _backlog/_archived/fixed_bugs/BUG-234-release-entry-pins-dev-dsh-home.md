@@ -1,16 +1,16 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-234：`release.entry` 把 DSH_HOME 钉在仓内 `runtime/harness-home`，拒绝非开发 home——安装验收不是干净用户现场
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：修复就绪（自授权 P2：测试边界 + 可执行性）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（自授权 P2：测试边界 + 可执行性） — 结论：release.entry 默认仓外 home + 钉版 dsh（--dev-home 保留旧模式）；清理白名单按模式分判；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-runtime-deps-install-boundary.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 干净室三入口（2026-11-17）
 >
-> 位置：[checks/smoke/release.entry.mjs](../../checks/smoke/release.entry.mjs) 第 47–55 行
+> 位置：[checks/smoke/release.entry.mjs](../../../checks/smoke/release.entry.mjs) 第 47–55 行
 > （`DSH_HOME` 必须 = `ROOT/runtime/harness-home`，否则 exit 2）与 `dshSrc = process.env.DSH_SRC ?? ROOT`、
-> `bin = vendor/dsh/.../bin.ts`。探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-deps-install-boundary.md) 第三轮。
+> `bin = vendor/dsh/.../bin.ts`。探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-deps-install-boundary.md) 第三轮。
 
 ## 症状
 
@@ -66,3 +66,28 @@ DSH_HOME=/tmp/whatever node checks/smoke/release.entry.mjs; echo $?   # 2（refu
 - `release.entry` 默认在仓外 home、钉版 DSH 上安装 tarball 并跑验收；
 - 非开发 home 不再被拒绝（或改为显式 `--dev-home`）；`pnpm test:entry`/`test` 绿；
 - peer 缺口在干净室暴露；安装/卸载/roster 断言不回退。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/smoke/release.entry.mjs",
+    "checks/lib/harness/clean-room.mjs",
+    "checks/lib/harness/clean-room-policy.mjs",
+    "tests/checks/clean-room-policy.test.mjs"
+  ],
+  "red": {
+    "command": "DSH_HOME=/tmp/fake-home node checks/smoke/release.entry.mjs --dev-home",
+    "exit": 2,
+    "output": "release.entry: refusing non-development DSH_HOME: /tmp/fake-home (source tools/env.sh)（旧行为：非 dev home 一律拒绝）"
+  },
+  "green": {
+    "command": "node checks/smoke/release.entry.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/clean-room-policy.test.mjs"
+  }
+}
+```

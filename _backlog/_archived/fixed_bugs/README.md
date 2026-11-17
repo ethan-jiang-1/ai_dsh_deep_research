@@ -6,6 +6,17 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [BUG-229](BUG-229-client-bundle-react-peer-missing.md) | client bundle require react/react-dom，peerDependencies 没有 React | （undefined） | 2026-11-17 |
+| [BUG-230](BUG-230-shipped-surface-devref-lookbehind-bypass.md) | shipped-surface 的 devRefsOf 漏 ./ ../ 裸根 反斜杠——一个前缀绕过守卫 | （undefined） | 2026-11-17 |
+| [BUG-231](BUG-231-shipped-surface-source-scan-gaps.md) | 源侧扫描漏 content/**/*.js 与 locale*——push 绿、nightly 红 | （undefined） | 2026-11-17 |
+| [BUG-232](BUG-232-row-deps-scope-no-lib-types.md) | row-deps 只查 YAML 行；发布物 require/.d.ts import 不在 peer 账上 | （undefined） | 2026-11-17 |
+| [BUG-233](BUG-233-cold-start-inside-repo-not-clean-room.md) | cold-start 在仓内跑、走 vendor 源树，依赖可被仓根补齐 | （undefined） | 2026-11-17 |
+| [BUG-234](BUG-234-release-entry-pins-dev-dsh-home.md) | release.entry 只许 runtime/harness-home，不是干净用户现场 | （undefined） | 2026-11-17 |
+| [BUG-235](BUG-235-lifecycle-uses-global-dsh.md) | lifecycle 用 PATH 全局 dsh，peer 缺口由全局兜底 | （undefined） | 2026-11-17 |
+| [BUG-236](BUG-236-tarball-workspace-dev-dependencies.md) | tarball 带 14 条 workspace:* devDependencies | （undefined） | 2026-11-17 |
+| [BUG-237](BUG-237-stale-dev-home-profiles.md) | dev home 旧 profile（0.3.1/0.3.0）可直起并跳过漂移检测 | （undefined） | 2026-11-17 |
+| [BUG-238](BUG-238-peer-range-wider-than-engines.md) | peer ^0.2.1-rc.2 宽于 engines.dsh <=0.2.1-rc.5 | （undefined） | 2026-11-17 |
+| [BUG-239](BUG-239-public-type-entry-relative-imports-unshipped.md) | 公开类型入口的相对 import 目标没随包（7 入口 vs 闭包 11） | （undefined） | 2026-11-17 |
 | [BUG-219](BUG-219-pack-types-unexported-dts-overshipped.md) | tarball 111 个 .d.ts 只有 7 个 exports 类型入口——104 个内部类型随发布物出货 | （undefined） | 2026-11-17 |
 | [BUG-220](BUG-220-pack-readme-user-section-dev-smokes.md) | pack README 用户段让用户跑 node checks/smoke/…（checks/ 不在 tarball） | （undefined） | 2026-11-17 |
 | [BUG-221](BUG-221-runtime-skill-references-dev-check-file.md) | 运行时 skill research-brief 引用 checks/lib/shared/plan-card.mjs（不随包） | （undefined） | 2026-11-17 |

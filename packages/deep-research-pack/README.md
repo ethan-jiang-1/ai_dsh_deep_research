@@ -109,7 +109,7 @@ repaired, and boot checks every bundle again. Do not rely on a version exemption
 Open a session in the workspace and ask a research question. The Lead runs HITL1 (type, depth,
 language, optional business brief), proposes a method and plan, then leads Scout, Analyst, and Critic
 through the run. HITL2 is the final review before delivery. The full operating guide is
-[`_dist/安装手册.md`](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/%E5%AE%89%E8%A3%85%E6%89%8B%E5%86%8C.md)
+[the installation manual](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/%E5%AE%89%E8%A3%85%E6%89%8B%E5%86%8C.md)
 and the in-package research manual is `content/manual.md` (loaded as runtime context).
 
 ### Verify

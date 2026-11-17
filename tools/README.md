@@ -45,6 +45,7 @@
 |---|---|
 | record/record-role-fixture.mjs | 角色组装面 fixture 录制（真模型档一次性；录制品人审入库 + 在场景声明登记 source 身份，此后 keyless 永久回放） |
 | record/record-ci-oracle.mjs | CI 执行面与事件键的外部 oracle 录制（dev-only：真 `yaml@2` + 真 `bash -eo pipefail` + 按目标失败 stub `node`；测试只读 `tests/fixtures/ci-oracle/oracle.json`；`--check` 只比对） |
+| record/record-type-closure.mjs | 公开类型面可达闭包记录（BUG-239）：`exports.types` 入口 + 相对 import 目标 → `tests/fixtures/shipped/type-closure.json`；`--check` 只比对；需先 build |
 | record/record-asset-ledger.mjs | 测试资产组合账生成（spec/check 的 lane/class/cost/uniqueClaim/oracleType/sunset；AST 自动推导 oracleType，测试重算对账，漂移 = 红） |
 | record/render-overlay.mjs | 生成器：从 pack 渲染 `tools/record/research.overlay.yml`（改 pack 后必跑，先于 L1） |
 | record/render-test-index.mjs | 测试 ↔ 源码 owner 索引生成（模块 → owner → 测试；生成物 = tests/INDEX.generated.md；`--check` 只比对） |

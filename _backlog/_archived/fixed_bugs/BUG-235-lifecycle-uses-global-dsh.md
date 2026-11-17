@@ -1,16 +1,16 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-235：`lifecycle.entry` 用 PATH 上的全局 `dsh`/`pnpm`——peer 缺口由全局 DSH 兜底，pinned 版本未验
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：修复就绪（自授权 P2：测试边界）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（自授权 P2：测试边界） — 结论：lifecycle 默认钉版 dsh + dsh --version ∈ engines.dsh；--global-dsh 仅对照；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-runtime-deps-install-boundary.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 干净室三入口（2026-11-17）
 >
-> 位置：[checks/smoke/lifecycle.entry.mjs](../../checks/smoke/lifecycle.entry.mjs) 第 12 行
+> 位置：[checks/smoke/lifecycle.entry.mjs](../../../checks/smoke/lifecycle.entry.mjs) 第 12 行
 > （「前置：PATH 上有 `dsh` 与 `pnpm`」）、第 84–89 行（`mkdtemp(tmpdir())` + `spawn` `dsh`）、
-> 第 193–195 行（`plugin add file:<tarball>`）。探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-deps-install-boundary.md) 第三轮。
+> 第 193–195 行（`plugin add file:<tarball>`）。探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-deps-install-boundary.md) 第三轮。
 
 ## 症状
 
@@ -65,3 +65,28 @@ which dsh; dsh --version   # 全局版本，非 vendor tag
 - 默认生命周期测试使用钉版 DSH（或显式分模式）；`dsh --version` 与 `engines.dsh` 对账；
 - 缺失 peer 在干净室红/接入后绿；`pnpm test:entry`/`test` 绿；
 - 生命周期 apply/dispose/roster 断言不回退。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/smoke/lifecycle.entry.mjs",
+    "checks/lib/harness/clean-room.mjs",
+    "checks/lib/harness/clean-room-policy.mjs",
+    "tests/checks/clean-room-policy.test.mjs"
+  ],
+  "red": {
+    "command": "DSH_BIN=/tmp/fakebin/dsh node checks/smoke/lifecycle.entry.mjs",
+    "exit": 2,
+    "output": "lifecycle.entry: NOT-RUN — dsh --version 9.9.9 ∉ engines.dsh >=0.2.1-rc.2 <=0.2.1-rc.5——安装测试跑的是合同外宿主"
+  },
+  "green": {
+    "command": "node checks/smoke/lifecycle.entry.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/clean-room-policy.test.mjs"
+  }
+}
+```

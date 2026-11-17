@@ -1,16 +1,16 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-238：peer 范围 `^0.2.1-rc.2` 比 `engines.dsh <=0.2.1-rc.5` 宽——peer 可解析到引擎范围外
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（pack 公共行为/版本合同）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行 pack 触面；DSH 组 peer = engines 闭区间，非 tag 组显式分组） — 结论：DSH-tag 组 peer 范围 = engines.dsh 同一闭区间；非 tag 组（cordis/schemastery）保留各自范围；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-runtime-deps-install-boundary.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 干净室三入口（2026-11-17）
 >
-> 位置：[packages/deep-research-pack/package.json](../../packages/deep-research-pack/package.json) 的
+> 位置：[packages/deep-research-pack/package.json](../../../packages/deep-research-pack/package.json) 的
 > `engines.dsh` 与 `peerDependencies`；门禁 = `pack-bundle-compat`（只查 engines 覆盖 vendor，不查 peers）。
-> 探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-deps-install-boundary.md) 第三轮。
+> 探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-deps-install-boundary.md) 第三轮。
 
 ## 症状
 
@@ -42,7 +42,7 @@ node -e "const p=require('./packages/deep-research-pack/package.json'); console.
 - 表面 / 边界：发布 manifest（版本合同）/ ② 静态（semver 范围）
 - DSH 不变量：fail-loud；一个包只能有一个可安装版本集
 - 触及面：pack 公共行为 + 文档合同（engines/peer）
-- 授权：等人拍板（pack 触面）
+- 授权：用户 2026-11-17 放行（pack 触面 → 修复就绪 = P2 修复授权；peer 范围对齐已拍板）
 - 批：运行时/开发边界第三轮（版本合同）
 
 ## 复现
@@ -79,3 +79,28 @@ node -e "const p=require('./packages/deep-research-pack/package.json'); const ob
 - DSH 组 peer 范围 ⊆ engines.dsh；非 DSH 组显式分组；
 - 守卫对 `^0.3.0`/`^0.2.1` 注入红，对合法闭区间绿；
 - `pack-bundle-compat` / `pnpm verify` / `pnpm test` 绿。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/package.json",
+    "checks/lib/repo/pack-deps.mjs",
+    "tests/checks/pack-deps.test.mjs",
+    "checks/smoke/pack.e2e.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/pack-deps.test.mjs",
+    "exit": 1,
+    "output": "not ok 6 - 真实 manifest… peerDependency「@deepseek-ai/dsh-tools」范围 ^0.3.0 ≠ engines.dsh >=0.2.1-rc.2 <=0.2.1-rc.5——同一可安装版本集只能有一个范围"
+  },
+  "green": {
+    "command": "node --test tests/checks/pack-deps.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/pack-deps.test.mjs"
+  }
+}
+```

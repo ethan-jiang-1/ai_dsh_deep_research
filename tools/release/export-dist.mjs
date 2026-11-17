@@ -15,13 +15,14 @@
 
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { localDateStr } from '../../checks/lib/shared/local-date.mjs'
 import { packInputRoots, writeBuildManifest } from '../../checks/lib/shared/artifact-freshness.mjs'
 import { writeMarketIndex } from './market.mjs'
+import { stripDevDependencies } from '../../checks/lib/repo/publish-manifest.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
@@ -55,8 +56,16 @@ try {
     `exit ${built.status}${(built.stderr ?? '').trim() ? `：${built.stderr.trim().split('\n').slice(-2).join(' ')}` : ''}`)
   if (built.status !== 0) throw new Error('构建失败，拒绝打包陈旧 lib/')
   const scratch = mkdtempSync(join(tmpdir(), 'dsh-export-dist-'))
+  // 发布 manifest 收口（BUG-236）：在 staging 副本里剥离 devDependencies，再从副本打包——
+  // 源 package.json 不动（构建仍需要 devDeps），tarball 的 manifest 不带 workspace 协议。
+  const stage = join(scratch, 'stage')
+  cpSync(PACK, stage, {
+    recursive: true,
+    filter: (src) => !src.includes('/node_modules') && !src.includes('/.git'),
+  })
+  writeFileSync(join(stage, 'package.json'), `${JSON.stringify(stripDevDependencies(JSON.parse(readFileSync(join(stage, 'package.json'), 'utf8'))), null, 2)}\n`)
   const packed = spawnSync('npm', ['pack', '--ignore-scripts', '--pack-destination', DIST, '--cache', join(scratch, 'npm-cache')], {
-    cwd: PACK, encoding: 'utf8',
+    cwd: stage, encoding: 'utf8',
   })
   rmSync(scratch, { recursive: true, force: true })
   const packedName = (packed.stdout ?? '').trim().split('\n').filter(Boolean).pop()

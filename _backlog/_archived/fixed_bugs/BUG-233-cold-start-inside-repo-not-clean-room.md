@@ -1,16 +1,16 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-233：cold-start 在仓内跑——TEMP 在 `runtime/smoke-workspace`、启动走 vendor 源码，缺 peer 可由 repo node_modules 补
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：修复就绪（自授权 P2：测试边界 + 可执行性）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（自授权 P2：测试边界 + 可执行性） — 结论：cold-start 改干净室：仓外 home + 钉版 dsh + _dist tarball + 解析祖先不落仓根；浏览器面归 client-load；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-runtime-deps-install-boundary.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 干净室三入口（2026-11-17）
 >
-> 位置：[checks/smoke/cold-start.entry.mjs](../../checks/smoke/cold-start.entry.mjs) 第 21 行
+> 位置：[checks/smoke/cold-start.entry.mjs](../../../checks/smoke/cold-start.entry.mjs) 第 21 行
 > （`TEMP = join(ROOT,'runtime','smoke-workspace',…)`）与第 48 行（`run-driver.mjs up --bootstrap`）；
-> `run-driver` 从 `ROOT/packages` 取 pack、从 `vendor/dsh` 起源码。探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-deps-install-boundary.md) 第三轮。
+> `run-driver` 从 `ROOT/packages` 取 pack、从 `vendor/dsh` 起源码。探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-deps-install-boundary.md) 第三轮。
 
 ## 症状
 
@@ -70,3 +70,28 @@ cold-start 设计目标是「不依赖既有 profile/凭据/会话」，不是�
 - cold-start 的 home/TEMP 在仓外；pack 来自 tarball；依赖解析不经过仓根 `node_modules`；
 - 229/230/231 的缺失 peer 在该测试里暴露（红）或显式接入 peer 后绿；
 - `pnpm test:entry`/`pnpm test` 绿；冷启动仍能起 web 并呈交 URL。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/smoke/cold-start.entry.mjs",
+    "checks/lib/harness/clean-room.mjs",
+    "checks/lib/harness/clean-room-policy.mjs",
+    "tests/checks/clean-room-policy.test.mjs"
+  ],
+  "red": {
+    "command": "NODE_PATH=\"$PWD/node_modules\" node checks/smoke/cold-start.entry.mjs",
+    "exit": 1,
+    "output": "cold-start.entry: 红 — 依赖解析落到仓根 node_modules（不是干净室）：…/node_modules/.pnpm/react@18.3.1/…；…/vendor/dsh/packages/client/ui-primitives/lib/index.js"
+  },
+  "green": {
+    "command": "node checks/smoke/cold-start.entry.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/clean-room-policy.test.mjs"
+  }
+}
+```

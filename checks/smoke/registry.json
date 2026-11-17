@@ -97,9 +97,9 @@
     "tier": "dev-only",
     "reason": "独立 home/profile/端口 + tarball；CI 组合不复现，L2 手工档",
     "cost": "slow",
-    "uniqueClaim": "独立 home/profile/端口/state + tarball + 浏览器 GREEN",
+    "uniqueClaim": "干净室（仓外 home + 钉版 dsh + _dist tarball）安装 + web 启动 + 解析不落仓根",
     "oracle": [
-      "none: 组合/环境传输面，无独立判据核"
+      "tests/checks/clean-room-policy.test.mjs"
     ],
     "sunset": "与 release/install 合并后退役",
     "lane": "entry"
@@ -174,9 +174,9 @@
     "tier": "nightly",
     "job": "deploy",
     "cost": "medium",
-    "uniqueClaim": "market/tarball 显示面 + readPluginMeta + remove 回落",
+    "uniqueClaim": "钉版 dsh（∈ engines.dsh）上装 tarball：market/显示面 + readPluginMeta + remove 回落",
     "oracle": [
-      "none: 发布面传输；manifest 判据归 pack.e2e/package-contract"
+      "tests/checks/clean-room-policy.test.mjs"
     ],
     "sunset": "当发布面退役或与 release.entry 合并时",
     "lane": "entry"
@@ -208,7 +208,7 @@
     "tier": "nightly",
     "job": "deploy",
     "cost": "medium",
-    "uniqueClaim": "tarball 条目/模块表/sha/无 symlink/无安装脚本 + 发布集合（顶层/类型 = exports.types）与随包文本零 dev 引用",
+    "uniqueClaim": "tarball 条目/模块表/sha/无 symlink/无安装脚本 + 发布集合（顶层 / 类型 = exports.types 可达闭包）+ 随包文本零 dev 引用 + manifest 零 devDeps/workspace + 依赖闭包 = peers",
     "oracle": [
       "tests/pack/contract/package-contract.spec.mjs"
     ],
@@ -251,11 +251,11 @@
   },
   "release.entry.mjs": {
     "tier": "dev-only",
-    "reason": "pack→干净 profile→plugin add；L2 安装手工档",
+    "reason": "干净室 L2 安装档（--dev-home 回退仓内）；需真宿主子进程",
     "cost": "slow",
-    "uniqueClaim": "pack→干净 profile→plugin add→安装域挂载→端口释放",
+    "uniqueClaim": "干净室（仓外 home + 钉版 dsh）安装 _dist tarball → 安装域挂载 → 端口释放",
     "oracle": [
-      "none: 安装传输面；安装域挂载判据归 preset.e2e --no-patch"
+      "tests/checks/clean-room-policy.test.mjs"
     ],
     "sunset": "与 install-shape 合并后退役",
     "lane": "entry"

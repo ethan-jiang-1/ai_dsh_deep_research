@@ -1,15 +1,15 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-236：发布 tarball 的 `package.json` 仍带 14 条 `workspace:*` devDependencies
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（pack 公共行为/发布元数据）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行 pack 触面；发布 manifest 剥离 devDependencies） — 结论：export-dist 在 staging 副本剥离 devDependencies 后打包；tarball manifest 零 workspace 协议（pack.e2e 断言）；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-runtime-deps-install-boundary.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 干净室三入口（2026-11-17）
 >
 > 位置：`_dist/dsh-deep-research-pack-0.3.6.tgz` 内的 `package/package.json` 第 168 行起
-> （源 = `packages/deep-research-pack/package.json` 的 `devDependencies`）。探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-deps-install-boundary.md) 第三轮。
+> （源 = `packages/deep-research-pack/package.json` 的 `devDependencies`）。探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-deps-install-boundary.md) 第三轮。
 
 ## 症状
 
@@ -34,7 +34,7 @@ tar -xOf _dist/dsh-deep-research-pack-0.3.6.tgz package/package.json | sed -n '1
 - 表面 / 边界：发布 manifest / ② 静态（tarball package.json）
 - DSH 不变量：可发布性；发布 manifest 的版本声明必须可被标准包管理器解析
 - 触及面：pack 公共行为（发布元数据）
-- 授权：等人拍板（pack 触面）
+- 授权：用户 2026-11-17 放行（pack 触面 → 修复就绪 = P2 修复授权；剥离 devDependencies 已拍板）
 - 批：运行时/开发边界第三轮（发布元数据）
 
 ## 复现
@@ -54,8 +54,8 @@ tar -xOf _dist/dsh-deep-research-pack-0.3.6.tgz package/package.json | grep -c '
 
 ## 牵出的失败类
 
-- 发布面 C2/C11（开发元数据进入发布物）；与 [BUG-219](../_archived/fixed_bugs/BUG-219-pack-types-unexported-dts-overshipped.md) /
-  [BUG-228](../_archived/fixed_bugs/BUG-228-pack-files-broad-allowlist-no-set-assertion.md) 同族的「发布清单未按公开合同收口」。
+- 发布面 C2/C11（开发元数据进入发布物）；与 [BUG-219](BUG-219-pack-types-unexported-dts-overshipped.md) /
+  [BUG-228](BUG-228-pack-files-broad-allowlist-no-set-assertion.md) 同族的「发布清单未按公开合同收口」。
 - 14 条 dev 包清单也让消费者看到内部依赖面（信息面）。
 
 ## 修法
@@ -70,3 +70,28 @@ tar -xOf _dist/dsh-deep-research-pack-0.3.6.tgz package/package.json | grep -c '
 - tarball `package.json` 零 `workspace:*`（devDependencies 可整体剥离或改写为可解析版本）；
 - 新断言在注入 `workspace:*` 时红；`lifecycle`/`release` 绿；
 - `pnpm verify` / `pnpm test` 绿。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "tools/release/export-dist.mjs",
+    "checks/lib/repo/publish-manifest.mjs",
+    "tests/checks/publish-manifest.test.mjs",
+    "checks/smoke/pack.e2e.mjs"
+  ],
+  "red": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 1,
+    "output": "FAIL  tarball manifest 无 devDependencies（发布面剥离，BUG-236） — [\"@deepseek-ai/cordis\", …,\"zod\"]；FAIL tarball manifest 无 workspace 协议 — devDependencies.@deepseek-ai/cordis 仍是 workspace 协议"
+  },
+  "green": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/publish-manifest.test.mjs"
+  }
+}
+```

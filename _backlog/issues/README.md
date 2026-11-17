@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| [2026-11-17-runtime-deps-install-boundary](2026-11-17-runtime-deps-install-boundary.md) | 推敲中 | 运行时依赖与安装边界：client require vs peers、干净室安装、dev home 镜像、tarball metadata、peer vs engines；10 张卡 229–238 |
+| （空） | — | 2026-11-17 三轮探索均已结，见 [_archived/settled_issues](../_archived/settled_issues/README.md) |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

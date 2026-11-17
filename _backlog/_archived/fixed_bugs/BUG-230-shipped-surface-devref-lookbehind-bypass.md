@@ -1,17 +1,17 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-230：`shipped-surface` 的 `devRefsOf` 漏 `./checks`、`../tests`、裸根 `checks/`、`./research-workspace`——新守卫可被一个 `.` 绕过
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行门禁触面；路径 token 归一 + 裸根闭集） — 结论：路径 token 先归一（./ ../ 前导 / 反斜杠）再判根，裸根按开发根闭集判；URL 外部导航不判；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-runtime-deps-install-boundary.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 干净室三入口（2026-11-17）
 >
-> 位置：[checks/lib/repo/shipped-surface.mjs](../../checks/lib/repo/shipped-surface.mjs) 的
+> 位置：[checks/lib/repo/shipped-surface.mjs](../../../checks/lib/repo/shipped-surface.mjs) 的
 > `PATH_TOKEN` lookbehind 与 `tokenIsDevRef`（`rest === ''` 放行）；消费方 =
 > `tests/checks/shipped-surface.test.mjs` + `checks/smoke/pack.e2e.mjs`。
-> 探索轮 = [运行时依赖/安装边界卡](../issues/2026-11-17-runtime-deps-install-boundary.md)。
+> 探索轮 = [运行时依赖/安装边界卡](../settled_issues/2026-11-17-runtime-deps-install-boundary.md)。
 
 ## 症状
 
@@ -35,7 +35,7 @@ devRefsOf('see ./research-workspace/x')      → []
 - 表面 / 边界：发布面门禁 / ② 行为（纯函数）
 - DSH 不变量：fail-loud —— 开发面引用不应因书写前缀而改变判定
 - 触及面：门禁与验收合同（`shipped-surface` 纯函数 + 测试）
-- 授权：等人拍板（门禁触面）
+- 授权：用户 2026-11-17 放行（门禁触面 → 修复就绪 = P2 修复授权）
 - 批：运行时依赖/安装边界（第三轮）
 
 ## 复现
@@ -79,3 +79,26 @@ for (const s of ['see ./checks/x.mjs','see ../tests/y.spec.mjs','see checks/','s
 - 上表 4 形态全部返回 dev ref；反斜杠/前导斜杠同样命中；
 - 运行期词与 `release notes/` 等自然语言用法不误伤（现有正例保持）；
 - `shipped-surface.test` 矩阵先红后绿；`pack.e2e` / `pnpm verify` / `pnpm test` 绿。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/repo/shipped-surface.mjs",
+    "tests/checks/shipped-surface.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/shipped-surface.test.mjs",
+    "exit": 1,
+    "output": "not ok 7 - dev 引用判据的边界… error: '\"see ./checks/x.mjs\" 应判为 dev 引用（前缀不能绕过）'"
+  },
+  "green": {
+    "command": "node --test tests/checks/shipped-surface.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/shipped-surface.test.mjs"
+  }
+}
+```

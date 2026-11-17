@@ -1,0 +1,26 @@
+{
+  "generatedBy": "tools/record/record-type-closure.mjs",
+  "note": "公开类型面 = exports.types 的可达相对闭包（入口 + 相对 import 目标）；files 必须逐条列出；漂移 = 红。",
+  "entries": [
+    "lib/types/client/index.d.ts",
+    "lib/types/content/index.d.ts",
+    "lib/types/defaults/index.d.ts",
+    "lib/types/fetch-fallback/index.d.ts",
+    "lib/types/index.d.ts",
+    "lib/types/method-library-tool.d.ts",
+    "lib/types/startup/index.d.ts"
+  ],
+  "files": [
+    "lib/types/client/index.d.ts",
+    "lib/types/client/locales.d.ts",
+    "lib/types/client/locales/en.d.ts",
+    "lib/types/client/locales/zh.d.ts",
+    "lib/types/content/index.d.ts",
+    "lib/types/defaults/index.d.ts",
+    "lib/types/fetch-fallback/config.d.ts",
+    "lib/types/fetch-fallback/index.d.ts",
+    "lib/types/index.d.ts",
+    "lib/types/method-library-tool.d.ts",
+    "lib/types/startup/index.d.ts"
+  ]
+}
