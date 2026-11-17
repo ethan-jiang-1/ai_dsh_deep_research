@@ -205,6 +205,15 @@ jobs:
       - name: Build pack (pack.e2e needs lib/)
         run: pnpm build
 
+      # 真 Loader 组装面（keyless，确定性 mock LLM）：native system.node 由 vendor-build ⑨
+      # 提供（缓存 v2 携带）。方法库 Host Tool 写读 + 首请求计价两条原 dev-only 冒烟，
+      # 自设进 CI 条件（CI 提供 native 构建）已满足。
+      - name: Method library tool (real Loader, keyless)
+        run: node checks/smoke/method-library-tool.e2e.mjs
+
+      - name: Model experience meter (real Loader, keyless)
+        run: node checks/smoke/model-experience.e2e.mjs
+
       # L1 真挂载（无模型）：roster + 逐角色 session/create + skills 隔离 + boot 页模块表行。
       # 用 vendor 源码基线（bootWeb 起自本仓），无需全局 dsh；DSH_HOME 由 env.sh 隔离。
       - name: L1 preset smoke (real mount, keyless)
@@ -222,9 +231,6 @@ jobs:
           EOF
           chmod +x /tmp/dsh-vendor
           DSH_BIN=/tmp/dsh-vendor node checks/smoke/lifecycle.entry.mjs
-
-      # 方法库 tool smoke 不在此 job：真 Loader 需要 native system 产物（`pnpm build:native`），
-      # CI 无该工具链（2026-11-03 实测：system.node 缺席 → MODULE_NOT_FOUND）。证据 = 开发档。
 
       - name: Doctor (read-only profile/anchor/workspace/credentials)
         run: node checks/smoke/doctor.e2e.mjs

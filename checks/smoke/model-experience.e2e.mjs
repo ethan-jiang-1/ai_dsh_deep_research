@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Keyless real-Loader Model Experience smoke: price the Lead/Scout first request.
 //
-// 前置：vendor 树 native system 产物（同 method-library-tool.e2e）；CI 工具链缺 → 开发档。
+// 前置：vendor 树 native system 产物（同 method-library-tool.e2e；vendor-build ⑨ 提供，
+// nightly deploy job 经缓存 v2 携带，CI 已在跑）。
 // 捕获真实组装的首请求（persona + 手册 runtime context + skill 目录 + 工具 schema），
 // 用 DSH fixed-density estimator 计价；绝对总数含时钟注入运行期变量，稳定面 = 工具 schema
 // 与手册占比。README Model Experience 的数字以本冒烟为生成命令，不写死易漂的绝对总数。

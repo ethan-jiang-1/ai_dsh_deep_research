@@ -143,8 +143,9 @@
   `--list` 显示 tier/cost。全量只在阶段收口/夜间/大改后跑。
 - **同构案例有界并行**：`gates.e2e` 108 个独立注入案例默认 4 并发（`--jobs=<n>`），串行 248s → 并行 86s；
   不删案例、不改判据，只压墙钟。
-- **数量 ratchet**：CI 入口 ≤9、CI slow ≤3、slow 总数 ≤15（`smoke-cost-budget`）；新增 slow/CI 资产先退役/合并一个，
-  或按 D54 改预算并同 diff 说明。
+- **数量 ratchet**：CI 入口 ≤11、CI slow ≤3、slow 总数 ≤15（`smoke-cost-budget`）；新增 slow/CI 资产先退役/合并一个，
+  或按 D54 改预算并同 diff 说明（2026-11-17 9→11：native system.node 随 vendor-build ⑨ 进 CI，
+  method-library-tool / model-experience 两条 keyless 真 Loader 面按其自设进 CI 条件收编，registry 同 diff）。
 - **实测基线（2026-11-13 本机）**：`test:e2e` 6 入口（gates 并行 86s）；`test:entry` 3 入口 **374.7s**
   （client-load seed + lifecycle + snapshot 5 角色 A/B/C）。两者都是诊断车道，不进 pre-commit。
 - **成本看的是每次发现**，不是测试数量或覆盖率；慢而重复的资产比少一个测试更贵。

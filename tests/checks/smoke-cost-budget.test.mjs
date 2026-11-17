@@ -1,5 +1,7 @@
 // 慢资产成本预算（W3-7 后成本治理）——ratchet，只降不升：
-//   CI 入口 ≤ 9、CI `slow` ≤ 3、全部 `slow` ≤ 15（2026-11-13 实测 9/3/15）。
+//   CI 入口 ≤ 11、CI `slow` ≤ 3、全部 `slow` ≤ 15（2026-11-13 实测 9/3/15；
+//   2026-11-17 随 native ⑨ 收编 method-library-tool / model-experience 两条 keyless
+//   真 Loader 面 → 11，D54 同 diff 说明 = guides/67 §8 + CI 分层 Note）。
 // 新增 CI 入口必须先有替代/退役；新增 slow 资产必须先退役一个，或按 D54 改预算并同 diff 说明。
 // 这不是运行时间门禁（时间随机器漂移），是资产数量的硬上限，防「再加一个 E2E 就好了」。
 // 反证：往 registry 加一个 ci/slow 假条目 → 红；删除 → 绿。
@@ -18,7 +20,7 @@ const ci = entries.filter(([, e]) => e.tier === 'ci')
 const ciSlow = ci.filter(([, e]) => e.cost === 'slow')
 const slow = entries.filter(([, e]) => e.cost === 'slow')
 
-const CAP = { ci: 9, ciSlow: 3, slow: 15 }
+const CAP = { ci: 11, ciSlow: 3, slow: 15 }
 
 test('慢资产预算 ratchet：CI 入口 / CI slow / 全部 slow 不超上限', () => {
   const issues = smokeSurfaceIssues(SMOKE)

@@ -172,8 +172,8 @@
     "lane": "entry"
   },
   "method-library-tool.e2e.mjs": {
-    "tier": "dev-only",
-    "reason": "需 native system.node；CI 工具链缺，开发档",
+    "tier": "ci",
+    "job": "deploy",
     "cost": "medium",
     "uniqueClaim": "真 Loader + Method Editor + Host Tool + mock LLM：claim/摘要/默认/删除写读",
     "oracle": [
@@ -184,8 +184,8 @@
     "lane": "e2e"
   },
   "model-experience.e2e.mjs": {
-    "tier": "dev-only",
-    "reason": "需 native system.node；CI 工具链缺，开发档",
+    "tier": "ci",
+    "job": "deploy",
     "cost": "medium",
     "uniqueClaim": "真 Loader 捕获 Lead/Scout 组装首请求（persona+手册 runtime context+skill 目录+工具 schema）并 token-meter 计价：工具 schema token 与手册占比",
     "oracle": [

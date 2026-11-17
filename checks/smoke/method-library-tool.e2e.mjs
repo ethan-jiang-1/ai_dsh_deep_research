@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 // Keyless real-Loader composition smoke for Method Library Host tool writes.
 //
-// 前置：vendor 树的 **native system 产物**（`pnpm --dir vendor/dsh/native/system build:native`）。
-// CI 无该工具链（2026-11-03 实测：system.node 缺席 → MODULE_NOT_FOUND），故不在 CI；证据 = 开发档。
-// 进 CI 的条件 = CI 提供 native 构建或预编译缓存（triggers = _backlog/triggers.md）。
+// 前置：vendor 树的 **native system 产物**（vendor-build.sh ⑨ 提供；nightly deploy job
+// 经缓存 v2 携带，CI 已在跑）。
 import assert from 'node:assert/strict'
 import { mkdir, lstat, symlink } from 'node:fs/promises'
 import { join, dirname, resolve } from 'node:path'
