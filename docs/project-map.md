@@ -132,7 +132,7 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 契约（结构断言） | layering / smoke-contract / evaluation-contract / presets / export-shape / 各门用例 / navigability-contract | `tests/` + `tests/checks/` + [fixtures](../tests/fixtures/README.md) | keyless |
 | 集成（真子系统） | preset.e2e（L1）/ release.entry（L2）/ snapshot-replay / client-load | `checks/` 冒烟族 | keyless（子进程/浏览器，无模型） |
 | 端到端（真模型） | l4-lite / team-preflight / client-hitl；完整 run = L4 全量 | `checks/` 真模型档 | 需凭据 |
-| 单点机制（探针） | entry-chain / discipline / method-library / rerun-triage / cdp / tee | `probes/`（指南 = [guides/66](guides/66-probe-playbook.md)） | 真模型档/连已起 GUI；**不是第六个评估面** |
+| 单点机制（探针） | behavior 六支（entry-chain / discipline / method-library / rerun-triage / defaults / wave-execution）+ browser `cdp-probe`；stream tee 是仪器，不是探针 | `probes/`（指南 = [guides/66](guides/66-probe-playbook.md)） | 真模型档/连已起 GUI；**不是第六个评估面** |
 | 生产审计 | node-gate / schema-scan / evidence-audit（对真实 run bundle） | `checks/` run 门 | keyless |
 
 ### 测试 owner 轴（2026-11-15）
