@@ -25,7 +25,9 @@ const normalizePersona = (text) => text;
 // ① 录制/回放端口必不同（录制 tools/record/record-role-fixture 默认 3105、回放 smoke 默认 3103），
 //    端口是 boot 生成物而非契约内容；② checkout 根随 clone 位置；③ 工作区根嵌在 sandbox 策略句；
 // ④ **profile 安装根**随 DSH_HOME（dev home vs CI temp home）——它指向同一份 pack 内容，
-//    是位置身份，不是模型可见语义；包名后的 content 路径后缀仍逐字比较。
+//    是位置身份，不是模型可见语义；包名后的 content 路径后缀仍逐字比较；
+// ⑤ **会话工作目录**随 clone 位置（2026-11-17：A/B 进 CI 后录制/回放异机——runner cwd 恒异，
+//    2026-10-19 的「不归一」决定只成立于同机录制；该行的句式与在场仍逐字比较，改前缀/删行红）。
 // Policy mode, permissions, tool inventory and all other runtime text remain unchanged.
 const normalizeRuntime = (text) => text
   .replace(/^(Current DeepSeek Harness Web GUI URL: "http:\/\/127\.0\.0\.1:)\d+("\.)$/gm,
@@ -34,6 +36,8 @@ const normalizeRuntime = (text) => text
     '$1"<replay:harness-root>".')
   .replace(/^(Current DSH file policy: workspace-write\. Any available operation enforced by the DSH file sandbox may modify files under the session workspace: )"(?:[^"\\\n]|\\.)*"(\. Some platform temporary areas may also be writable\.)$/gm,
     '$1"<replay:workspace-root>"$2')
+  .replace(/^(Current working directory: )"(?:[^"\\\n]|\\.)*"(\.)$/gm,
+    '$1"<replay:cwd>"$2')
   .replace(/[^\s"'`]*\/profiles\/[^/\s"'`]+\/node_modules\/dsh-deep-research-pack/g,
     '<replay:pack-root>');
 

@@ -90,9 +90,15 @@ test('runtime workspace identity can vary while its exact sandbox and approval r
   assert.ok(workspacePath, 'the recorded sandbox policy embeds a workspace identity');
   context.content[0].text = context.content[0].text.replace(policyLine, policyLine.replace(workspacePath, '"/tmp/replay space/workspace"'));
   assert.equal(verdict(expected, actual, 'runtime-context').ok, true);
-  // 工作目录那一行**不**归一（只归策略句里的槽）：改它必须红。
+  // 工作目录行的**值**与策略句同一身份（clone 位置），同样归一（2026-11-17：A/B 进 CI 后
+  // 录制/回放异机——旧「不归一」决定与 snapshots/README §CI 车道冲突，runner cwd 恒异）；
+  // 句式与该行在场仍是契约：改前缀或删行必须红（见下方反例与 119 行测试）。
   context.content[0].text = (byKind(expected, 'runtime-context').data.content[0].text)
-    .replace(/^Current working directory: ".+"\.$/m, 'Current working directory: "/elsewhere".');
+    .replace(/^(Current working directory: )".+"(\.)$/m, '$1"/home/runner/work/ai_dsh_deep_research/ai_dsh_deep_research/research-workspace"$2');
+  assert.equal(verdict(expected, actual, 'runtime-context').ok, true);
+  // 非路径改动（换行文）仍红。
+  context.content[0].text = (byKind(expected, 'runtime-context').data.content[0].text)
+    .replace(/^Current working directory: /m, 'Current working dir: ');
   assert.equal(verdict(expected, actual, 'runtime-context').ok, false);
   // 策略模式本身是契约内容，不可归一。
   context.content[0].text = byKind(expected, 'runtime-context').data.content[0].text.replace('workspace-write', 'danger-full-access');
@@ -116,7 +122,7 @@ test('persona carries no boot-generated identity and is compared verbatim', () =
   assert.equal(verdict(expected, actual, 'persona').ok, false);
 });
 
-test('runtime-context normalizes only boot-generated GUI port, harness checkout and workspace root', () => {
+test('runtime-context normalizes only boot-generated GUI port, harness checkout, workspace root and cwd', () => {
   const expected = fixture();
   const actual = structuredClone(expected);
   const context = byKind(actual, 'runtime-context').data;
@@ -125,12 +131,16 @@ test('runtime-context normalizes only boot-generated GUI port, harness checkout 
   assert.match(original, /^Current DeepSeek Harness implementation checkout: ".+"\.$/m);
   context.content[0].text = original
     .replace(/^(Current DeepSeek Harness Web GUI URL: "http:\/\/127\.0\.0\.1:)\d+("\.)$/m, '$13999$2')
-    .replace(/^(Current DeepSeek Harness implementation checkout: )".+"\.$/m, '$1"/tmp/dsh.checkout/vendor/dsh/".');
-  assert.notEqual(context.content[0].text, original, 'both boot identities must actually change');
+    .replace(/^(Current DeepSeek Harness implementation checkout: )".+"\.$/m, '$1"/tmp/dsh.checkout/vendor/dsh/".')
+    .replace(/^(Current working directory: )".+"\.$/m, '$1"/home/runner/work/repo/research-workspace".');
+  assert.notEqual(context.content[0].text, original, 'all boot identities must actually change');
   assert.equal(verdict(expected, actual, 'runtime-context').ok, true);
-  // 端口之外的正文改动仍须红（归一化只碰这三个槽，不吞别的差异）。
+  // 端口之外的正文改动仍须红（归一化只碰这些位置身份槽，不吞别的差异）。
   context.content[0].text = original.replace(/^Current working directory: /m, 'Current working dir: ');
   assert.equal(verdict(expected, actual, 'runtime-context').ok, original === context.content[0].text);
+  // 删掉 cwd 行也是红（该行在场本身是契约）。
+  context.content[0].text = original.replace(/^Current working directory: ".+"\.\n/m, '');
+  assert.equal(verdict(expected, actual, 'runtime-context').ok, false);
 });
 
 for (const id of IDS) {

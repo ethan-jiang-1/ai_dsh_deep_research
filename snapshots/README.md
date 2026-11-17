@@ -19,8 +19,9 @@
 **时钟面（`time-context`）比的是结构，不是正文。** 该注入的载荷是墙钟（ISO 时间 + 耗时 + 浏览器时区），
 回放时物理上不可能逐字复现；判据因此定义为"在哪个 turn/step 注入"（`time-context:turn=N;step=M`），
 正文差异不参与比较。这是把该面定义成**可复现的那一半**，不是给确定性面加归一化凑绿——persona、headers、
-工作区指令、skill 目录、运行时上下文仍按逐字全等判。唯一的位置身份归一 = runtime-context 里的
-**profile 安装根**（dev home vs CI temp home 指向同一份 pack 内容；包内 content 后缀仍逐字比较）。
+工作区指令、skill 目录、运行时上下文仍按逐字全等判。运行时上下文里唯一被归一的是**位置身份值**：
+GUI 端口、harness checkout 根、策略句工作区根、会话工作目录（随 clone 位置；录制/回放异机的 CI 形态，
+2026-11-17 起）、profile 安装根——句式与其余正文不动，改前缀或删行仍红。
 
 ## 证据边界
 
