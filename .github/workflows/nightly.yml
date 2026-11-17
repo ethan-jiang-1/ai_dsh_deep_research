@@ -60,7 +60,8 @@ jobs:
             vendor/dsh/packages/*/*/lib
             vendor/dsh/vendor/*/lib
             vendor/dsh/apps/web/dist
-          key: ${{ runner.os }}-vendor-${{ steps.pin.outputs.sha }}
+            vendor/dsh/native/system/packages/*/bin
+          key: ${{ runner.os }}-vendor-v2-${{ steps.pin.outputs.sha }}
 
       - name: Build vendor (pin tree)
         if: steps.vendor-cache.outputs.cache-hit != 'true'
@@ -120,7 +121,8 @@ jobs:
         run: echo "sha=$(git rev-parse HEAD:vendor/dsh)" >> "$GITHUB_OUTPUT"
 
       # vendor 构建产物 gitignored（fresh checkout 没有），但产物只由子模块 pin 决定——
-      # 按 pin SHA 缓存，命中即跳过约 3.5 分钟的构建（pin 不变 = 产物不变）。
+      # 按 pin SHA 缓存，命中即跳过约 3.5 分钟的构建（pin 不变 = 产物不变；v2 = 路径含
+      # native/system/packages/*/bin——session flock 的 fail-closed 依赖，见 vendor-build ⑨）。
       - name: Cache vendor build (pin tree)
         id: vendor-cache
         uses: actions/cache@v4
@@ -129,7 +131,8 @@ jobs:
             vendor/dsh/packages/*/*/lib
             vendor/dsh/vendor/*/lib
             vendor/dsh/apps/web/dist
-          key: ${{ runner.os }}-vendor-${{ steps.pin.outputs.sha }}
+            vendor/dsh/native/system/packages/*/bin
+          key: ${{ runner.os }}-vendor-v2-${{ steps.pin.outputs.sha }}
 
       - name: Build vendor (pin tree)
         if: steps.vendor-cache.outputs.cache-hit != 'true'
@@ -188,7 +191,8 @@ jobs:
             vendor/dsh/packages/*/*/lib
             vendor/dsh/vendor/*/lib
             vendor/dsh/apps/web/dist
-          key: ${{ runner.os }}-vendor-${{ steps.pin.outputs.sha }}
+            vendor/dsh/native/system/packages/*/bin
+          key: ${{ runner.os }}-vendor-v2-${{ steps.pin.outputs.sha }}
 
       - name: Build vendor (pin tree)
         if: steps.vendor-cache.outputs.cache-hit != 'true'

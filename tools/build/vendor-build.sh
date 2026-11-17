@@ -6,11 +6,14 @@
 # `-F` 过滤在本版对 workspace 合成配置无效）。实测过的失败链见
 # notes/implemented/2026-09-25-vendor-pin-bump-017rc2.md。
 #
-# 真正被启动需要的三类产物（0.1.7 起）：
+# 真正被启动需要的四类产物（0.1.7 起）：
 #   ① 逐包 `lib/types/**`（tsc host/client 两遍）——tsdown 与 typert 生成器的输入；
 #   ② `lib/typert.<face>.js`——`typert-loader` 会 import 各贡献包的 `./typert` 子路径；
 #   ③ client 面 `lib/client.js`——client-modules 组合要求（否则启动报
 #      "client bundle not found; run `pnpm run build` before launch"）。
+#   ④ native `system.node`（flock Node-API 绑定，host 平台）——会话文件锁 fail-closed：
+#      缺失时 install 客户端拒锁，client-load 状态页写入 / snapshot-replay 回放回合全部
+#      挂起（2026-11-17 nightly runner 实证 MODULE_NOT_FOUND → 回合 240s 超时）。
 #
 # 用法：bash tools/build/vendor-build.sh [--clean]
 #   --clean 先清陈旧构建状态（`lib/` + `*.tsbuildinfo`）——换 pin 后必做（旧产物会让
@@ -161,4 +164,11 @@ node "$ROOT/tools/build/vendor-typert-emit.mjs" client
 echo "⑧ 前端壳重建（apps/web/dist）…"
 pnpm --filter @deepseek-ai/dsh-web-frontend run build
 
-echo "vendor-build: 完成（vendor tracked 内容未改；构建产物在 gitignored 的 lib/ 与 apps/web/dist）"
+# ⑨ native host addon：只建 host 平台的 flock system.node（musl-gcc 仅 Linux 全量构建才
+#    需要，本步不依赖）。Node 头文件取自运行中的 Node 安装（官方发行包自带 include/node）。
+#    直调 .bin/tsx 而非 `pnpm run`——后者会触发 verifyDepsBeforeRun 的 pre-run install，
+#    在 submodule 布局下撞 lefthook postinstall（同 ①a 头注的 2026-11-03 实测）。
+echo "⑨ native host addon（flock system.node）…"
+"$VENDOR/node_modules/.bin/tsx" native/system/scripts/build.ts --host-addon-only
+
+echo "vendor-build: 完成（vendor tracked 内容未改；构建产物在 gitignored 的 lib/、apps/web/dist 与 native/system/packages/*/bin）"
