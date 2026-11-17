@@ -1,6 +1,6 @@
 # probes/ · 探针（调试第一入口）
 
-> 维护面：**show**——装证据入口（`behavior/` `browser/` 探针、`analyze/` 只读取证投影、`stream/` 预载仪器），不装裁决（→ `checks/`）与持久改动（→ `tools/`）。`_index` 是生成器、stream tee 是驱动——非面（tee 现行仍被 `probe-registry` 按探针扫）；
+> 维护面：**show**——装证据入口（`behavior/` `browser/` 探针、`analyze/` 只读取证投影、`stream/` 预载仪器），不装裁决（→ `checks/`）与持久改动（→ `tools/`）。`_index` 是生成器、stream tee 是驱动——非面（probe-index 按路径排除）；
 > 规则 = [surface-contract](../docs/guides/68-surface-contract.md)。
 >
 > 两类件：**探针** = 真实边界上的单点机制/行为实验（给 PASS/FAIL），补单测与 E2E 之间的归因空白；

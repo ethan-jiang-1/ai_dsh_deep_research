@@ -96,3 +96,18 @@ test('listProbeFiles / scanProbeEntries：递归收探针，跳过 _index.mjs �
 test('listProbeFiles：目录缺席返回空集（防空语料由调用方判红）', () => {
   assert.deepEqual(listProbeFiles(join(tmpdir(), 'definitely-missing-probe-dir-xyz')), []);
 });
+
+// 2026-11-17：stream tee 是非面预载仪器（guides/68 §5），索引/门禁按**路径**排除；
+// 同名文件放在别的域仍是真探针——排除规则不能退化成 basename 黑名单。
+test('listProbeFiles：stream tee 按路径排除，同名探针不受影响', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'probe-index-tee-'));
+  try {
+    mkdirSync(join(dir, 'stream'), { recursive: true });
+    mkdirSync(join(dir, 'behavior'), { recursive: true });
+    writeFileSync(join(dir, 'stream', 'llm-stream-tee.cjs'), '// instrument\n');
+    writeFileSync(join(dir, 'behavior', 'llm-stream-tee.cjs'), HEADER);
+    assert.deepEqual(listProbeFiles(dir), ['behavior/llm-stream-tee.cjs']);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

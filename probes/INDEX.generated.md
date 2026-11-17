@@ -35,9 +35,3 @@
 | 探针 | 一句话 | 档位 | 何时跑 | 状态 |
 |---|---|---|---|---|
 | [cdp-probe.mjs](browser/cdp-probe.mjs) | 驾驶舱显示/点击/会话回复在真实浏览器成立（--ask 以日志落盘为判据） | 连已起 GUI（--ask 按会话档） | 改驾驶舱渲染/交互/页签；run-driver 浏览器判据；BUG-021 回归 | 常驻 |
-
-## stream/（1 支）
-
-| 探针 | 一句话 | 档位 | 何时跑 | 状态 |
-|---|---|---|---|---|
-| [llm-stream-tee.cjs](stream/llm-stream-tee.cjs) | LLM 流异常时留下可离线复判的原始字节/响应头四件套 | 活进程仪器（NODE_OPTIONS 预载；keyless） | 流异常第一动作（MALFORMED/断流/重试风暴）；BUG-022/023/024 复盘 | 常驻 |

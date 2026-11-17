@@ -91,7 +91,7 @@ operate 的两种模式：
 | `checks/smoke/registry.json` | 非面（数据） | 车道登记表 |
 | `checks/doc-budgets.json`、`checks/archived-note-pointers.json`、`checks/test-path-redirects.json` | 非面（数据） | 门禁消费的配置与登记簿 |
 | `probes/_index.mjs` | 非面（生成器） | 索引生成/校验；`probe-registry` 用同一渲染对账 |
-| `probes/stream/llm-stream-tee.cjs` | 非面（驱动） | 预载仪器，判据不适用；现行 `probe-registry` 仍按探针扫（§6） |
+| `probes/stream/llm-stream-tee.cjs` | 非面（驱动） | 预载仪器，判据不适用；probe-index / probe-registry 按路径排除（`NON_PROBE_PATHS`） |
 | `tools/env.sh`、`tools/record/research.overlay.yml` | 非面（配置 / 生成物） | sourced 环境 / `render-overlay` 的产出 |
 | `tools/channel/llm-socket-isolation.cjs` | 非面（驱动） | `NODE_OPTIONS` 预载，socket 隔离 |
 | `tools/build/vendor-host-bundle.config.ts`、`tools/build/vendor-typert-emit.mjs` | 非面（管道件） | `vendor-build.sh` 的构建配置与产物生成 |
@@ -101,9 +101,6 @@ operate 的两种模式：
 
 ## 6. 已知限制与延后工作
 
-- **stream tee 口径差**：`probes/stream/llm-stream-tee.cjs` 按本页是非面（驱动），但
-  `probe-registry` 现行按探针扫它（必须带六字段头注）。统一 = 改
-  `checks/lib/shared/probe-index.mjs` 的非探针清单，属门禁扫描面的行为改动，需红→绿留证。
 - **旧根名只活在 redirect 账本**：`scripts/`、`dev/`、`probes/run/` 已退役；冻结层旧链接经
   `checks/test-path-redirects.json` 解析。老 clone 的 `core.hooksPath` 需重 source `tools/env.sh`
   幂等恢复（hooks-active 门禁会点名未激活态）。

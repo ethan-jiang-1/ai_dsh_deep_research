@@ -50,7 +50,7 @@
 | 门禁红证 | `gates.e2e`：`surface-claims-face-drift`、`doc-paths-retired-label`、`call-surface-fenced-command`、`-probe-header`、`-ci-run`、`test-placement-support-module`、`md-links-chain-cycle` | 逐条注入红 → 还原绿 |
 | 搬家语义差 | 39/39 移动文件反向归一化（路径替换还原）后与 HEAD 逐字一致；唯 `test-index` 的 `OWNERS` 为有意变更 | 0 例外 |
 | 语法 | 18 个迁移 lib `node --check` | 18/18 |
-| 索引 | `render-test-index --check` / `probes/_index.mjs --check` | 一致（19 支） |
+| 索引 | `render-test-index --check` / `probes/_index.mjs --check` | 一致（18 支） |
 | 生成物 | snapshot 金标准头由 `node scripts/…` 修为 `node checks/…`（生成器命令） | 红→绿 |
 | 账本 | 追加 40 条、旧条目零重写；冻结层 307 条链接链式解析 | 绿 |
 | fresh-agent 审计 | 无上下文子代理按入口链走三任务（探针入口 / run-dashboard 核心 / 面分类） | 3 处发现：run-dashboard-core 头注退役名、design/40 导航缺口、guides/60 缺 `source` 前缀 → 已修；pack 注释按计划延后 |

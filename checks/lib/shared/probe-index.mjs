@@ -17,8 +17,11 @@ export const REQUIRED_FIELDS = ['状态', '一句话', '何时跑', '档位', '�
 /** 可选字段（推荐写，门禁不拦）。 */
 export const OPTIONAL_FIELDS = ['为什么存在'];
 
-/** 不是探针的目录内工具（索引与门禁都跳过）。 */
+/** 不是探针的目录内工具（按文件名跳过，任意层）。 */
 export const NON_PROBE_FILES = new Set(['_index.mjs']);
+
+/** 非面驱动（按相对路径跳过：同名的真探针不受影响）。stream tee 是预载仪器，不判 PASS/FAIL。 */
+export const NON_PROBE_PATHS = new Set(['stream/llm-stream-tee.cjs']);
 
 /** 没有域目录时的分组名。 */
 export const UNGROUPED = '（未分组）';
@@ -47,7 +50,9 @@ export function listProbeFiles(dir) {
       if (!entry.isFile()) continue;
       if (!/\.(?:mjs|cjs)$/.test(entry.name)) continue;
       if (NON_PROBE_FILES.has(entry.name)) continue;
-      rels.push(`${prefix}${entry.name}`);
+      const rel = `${prefix}${entry.name}`;
+      if (NON_PROBE_PATHS.has(rel)) continue;
+      rels.push(rel);
     }
   };
   walk(dir);
