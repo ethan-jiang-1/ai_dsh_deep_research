@@ -1,0 +1,38 @@
+#!/usr/bin/env node
+// readme-manual-commands — README 的最短路径命令必须与用户实际拿到的安装手册同源。
+// 为什么：README 给人 5 分钟路径，手册给完整合同；两份都写 `dsh` 命令，漂移会让用户照着
+// README 装到一半发现参数对不上。判据 = README 里每条 `dsh …` 行逐字出现在
+// _dist/安装手册.md（tracked 生成物，用户拿到的那份），不比对源模板（含 {{tarballName}} 占位）。
+// 防空：README 少于 3 条 = 测试空转（最短路径至少要有建 profile / 装包 / 启动三条）。
+// `$DSH_VER` 同守：README 删掉赋值行时 `@$DSH_VER` 会装成空版本，不能仍绿。
+// 反证：首跑红 = README 0 条命令（防空）；漂移反证 = 改一条命令见红，改回绿。
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
+const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
+
+// 只收以 `dsh ` 开头的命令行；行尾 `#` 注释剥掉（命令本身不含 #）；保留引号与占位符原样。
+const dshCommands = (text) => text.split('\n')
+  .map((line) => line.trim())
+  .filter((line) => /^dsh\s/.test(line))
+  .map((line) => line.replace(/\s+#.*$/, ''))
+
+test('README 的最短路径命令与 _dist/安装手册.md 同源', () => {
+  const readmeText = read('README.md')
+  const manualText = read('_dist/安装手册.md')
+  const readme = dshCommands(readmeText)
+  const manual = new Set(dshCommands(manualText))
+  assert.ok(readme.length >= 3, `README 只有 ${readme.length} 条 dsh 命令——最短路径应含建 profile / 装包 / 启动（防空）`)
+  assert.ok(manual.size >= 3, '安装手册缺 dsh 命令——生成物与源模板对不上，先跑 node tools/release/export-dist.mjs')
+  for (const command of readme) {
+    assert.ok(manual.has(command), `README 的命令不在 _dist/安装手册.md：${command}\n—— 两处必须逐字一致；改一条就同 diff 改另一条（源 = tools/release/product-manual.md，记得重导出）`)
+  }
+  if (readme.some((command) => command.includes('$DSH_VER'))) {
+    assert.ok(readmeText.includes('DSH_VER="$(dsh --version)"'), 'README 的团队能力版本赋值行缺席——`@$DSH_VER` 会装成空版本')
+    assert.ok(manualText.includes('DSH_VER="$(dsh --version)"'), '安装手册的团队能力版本赋值行缺席——同一空版本陷阱')
+  }
+})

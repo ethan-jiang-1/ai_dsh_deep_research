@@ -98,7 +98,7 @@ for (const s of ['see ./checks/x.mjs','see ../tests/y.spec.mjs','see checks/','s
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/shipped-surface.test.mjs"
+    "path": "tests/checks/repo/shipped-surface.test.mjs"
   }
 }
 ```

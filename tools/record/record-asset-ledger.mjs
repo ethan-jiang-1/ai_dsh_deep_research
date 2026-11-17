@@ -23,7 +23,7 @@ if (invalid.length > 0) {
 }
 const payload = {
   generatedBy: 'tools/record/record-asset-ledger.mjs',
-  note: '组合账：lane/class/cost/uniqueClaim/oracleType/sunset；oracleType 由 AST 推导（禁手写 OVERRIDES）；self-referential = 下一轮迁移面；覆盖由 tests/checks/asset-ledger.test 重算对账。',
+  note: '组合账：lane/class/cost/uniqueClaim/oracleType/sunset；oracleType 由 AST 推导（禁手写 OVERRIDES）；self-referential = 下一轮迁移面；覆盖由 tests/checks/test-infra/asset-ledger.test 重算对账。',
   assets,
 }
 

@@ -7,7 +7,7 @@
 //
 // 本模块把两件事收口：
 //   ① SHAPES / COMMAND_FORMS = 形态台账（每条 = 一种 agent 能读到的写法 + 拥有它的门禁 + 一条
-//      gates.e2e 案例 id）。tests/checks/doc-surface-shapes.test.mjs 双向对账：台账里的形态必须
+//      gates.e2e 案例 id）。tests/checks/shared/doc-surface-shapes.test.mjs 双向对账：台账里的形态必须
 //      被 scanDocument 真的产出、必须有案例；两个门禁的案例必须能映射回台账。
 //   ② scanDocument / scanCiCommands = 唯一的形态→token 转换（剥离、归一、路径提取）。
 //      消费门禁只消费 token，不再自己写「哪些行是命令」的正则。
@@ -30,7 +30,7 @@ const ROOT_ALT = ROOTS.map((r) => r.replace(/\./g, '\\.')).join('|')
 const EXT = '(?:json|yaml|yml|tsx|mjs|cjs|txt|md|js|ts|sh)'
 
 // 文档形态台账：producer = 产出它的枚举函数；case = gates.e2e 的 CASES id。
-// 兑换规则（tests/checks/doc-surface-shapes.test.mjs）：每种形态必须有合成样本让 producer 真的产出它，
+// 兑换规则（tests/checks/shared/doc-surface-shapes.test.mjs）：每种形态必须有合成样本让 producer 真的产出它，
 // 且案例必须是 owner 门禁名下的一条注入。
 export const SHAPES = Object.freeze([
   { form: 'backtick', producer: 'document', owner: 'doc-paths', case: 'doc-paths-dangling', note: '反引号内联代码里的路径' },

@@ -1,8 +1,8 @@
 // gates-cases.mjs — 门禁自测的注入案例表（纯 fs 注入手法 + CASES/CONTROLS 数据）。
-// 从 checks/smoke/gates.e2e.mjs 拆出（2026-10-09 layering 二代：tests/checks/verify-gates.test.mjs
+// 从 checks/smoke/gates.e2e.mjs 拆出（2026-10-09 layering 二代：tests/checks/harness/verify-gates.test.mjs
 // 静态对账消费本表——驱动面（smoke 道，起子进程）不得被 tests import，案例表因此住 lib；
 // 每 mutate 只做纯 fs 操作，git add 由驱动壳在 mutate 后统一执行，本模块零子进程）。
-// 消费方：checks/smoke/gates.e2e.mjs（真执行体）+ tests/checks/verify-gates.test.mjs（静态对账）。
+// 消费方：checks/smoke/gates.e2e.mjs（真执行体）+ tests/checks/harness/verify-gates.test.mjs（静态对账）。
 import { appendFileSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 
@@ -353,7 +353,7 @@ const linkUntrackedTarget = () => (dir) => {
   appendFileSync(join(dir, 'README.md'), '\n[孤儿探针](runtime/smoke-workspace/orphan-probe.md)\n');
 };
 
-/** 承重门禁抽样（增删同 diff：本表 + tests/checks/verify-gates.test.mjs 无需改——它动态对账本表）。
+/** 承重门禁抽样（增删同 diff：本表 + tests/checks/harness/verify-gates.test.mjs 无需改——它动态对账本表）。
  *  id = 案例唯一标识（同一门禁可有多个注入形态，id 防重复条目）；gate = 期望点名的门禁；
  *  mutate(dir) = 在 fixture 内注入该门禁负责拦的回归（纯 fs——git add 由驱动壳统一执行）。
  *  expect（可选）= 断言红**必须含此子串**；用于"该门禁在副本基线本就非 PASS"的场景——

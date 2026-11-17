@@ -2,10 +2,13 @@
 //
 // 判据 = **全集 − 已知子集 = 空**：每个测试文件必须住在某个被规则命名过的 home；未知子树、
 // 未知深度、根层平铺都红——不是「暂时没人管」。消费者 = verify 门禁 `test-placement`
-//（git ls-files tracked 面）+ tests/checks/pack-mirror.test.mjs（盘上全量 spec，防账本重生成
-// 把错落点吸收成「当前状态」）。纯函数、零 fs/子进程，负控住 tests/checks/test-placement.test.mjs。
+//（git ls-files tracked 面）+ tests/checks/shared/pack-mirror.test.mjs（盘上全量 spec，防账本重生成
+// 把错落点吸收成「当前状态」）。纯函数、零 fs/子进程，负控住 tests/checks/repo/test-placement.test.mjs。
 export const TEST_DOMAINS = ['run', 'cockpit', 'pack', 'contracts', 'checks', 'vendor', 'fixtures']
 export const RUN_OWNERS = ['analyze', 'channel', 'gates', 'harness', 'probes', 'shared']
+/** checks 车道（门禁自身）的 owner 闭集：与 checks/lib/<owner>/ 同名。gates/probes 的
+ *  回归属 tests/run（spec 车道），不在此列——门禁车道只收 repo/test-infra 与跨切合同。 */
+export const CHECK_OWNERS = ['analyze', 'channel', 'harness', 'repo', 'shared', 'test-infra']
 export const COCKPIT_PARTS = ['lib', 'client', 'shared']
 export const COCKPIT_LIB_DOMAINS = ['run', 'plan', 'events', 'method-library', 'review', 'workspace', 'shared']
 export const CLIENT_SUBS = ['defaults', 'locales', 'method-library', 'research-config', 'research-graph', 'research-status']
@@ -47,7 +50,7 @@ export function placementIssues(paths) {
         // 兜底（BUG-216）：tests/ 下既非测试、也非支援模块、也不是文档 → 角色未知。
         // 旧版靠「扩展名不在枚举里」静默 continue——闭集按文件角色判，不按手写扩展名列表判。
         if (/^tests\/(?:fixtures|vendor|_tmp)\//.test(norm) || norm.endsWith('.md')) continue
-        issues.push(`${norm}: tests/ 下的文件必须能被发现（*.spec.mjs / tests/checks/*.test.mjs）或被规则命名（-helpers.<mjs|cjs|ts|tsx|js>）——未知扩展名不得静默落位`)
+        issues.push(`${norm}: tests/ 下的文件必须能被发现（*.spec.mjs / tests/checks/<owner>/*.test.mjs）或被规则命名（-helpers.<mjs|cjs|ts|tsx|js>）——未知扩展名不得静默落位`)
         continue
       }
       const seg = norm.split('/')
@@ -67,8 +70,14 @@ export function placementIssues(paths) {
       continue
     }
     if (domain === 'checks') {
-      if (seg.length !== 3 || !norm.endsWith('.test.mjs')) {
-        issues.push(`${norm}: tests/checks 只收平铺 *.test.mjs（门禁自身）——禁止嵌套目录或别的后缀`)
+      if (!norm.endsWith('.test.mjs')) {
+        issues.push(`${norm}: tests/checks 只收 *.test.mjs（门禁自身）`)
+      } else if (seg.length < 4) {
+        issues.push(`${norm}: tests/checks 下必须再有 owner 目录——已知 = ${list(CHECK_OWNERS)}（与 checks/lib/<owner>/ 同名）`)
+      } else if (seg.length > 4) {
+        issues.push(`${norm}: tests/checks 未知深度（应为 tests/checks/<owner>/<file>；收到 ${seg.length} 段）——按 owner 归位，不建二级目录`)
+      } else if (!CHECK_OWNERS.includes(seg[2])) {
+        issues.push(`${norm}: tests/checks 未知 owner ${seg[2]}——已知 = ${list(CHECK_OWNERS)}；gates/probes 的回归属 tests/run`)
       }
       continue
     }

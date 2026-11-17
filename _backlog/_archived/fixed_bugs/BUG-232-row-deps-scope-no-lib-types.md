@@ -95,7 +95,7 @@ node -e "const p=require('./packages/deep-research-pack/package.json'); console.
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/pack-deps.test.mjs"
+    "path": "tests/checks/repo/pack-deps.test.mjs"
   }
 }
 ```

@@ -2,7 +2,7 @@
 
 > [00-index](./00-index.md) 的路由层：**一处事实一个家**（[D56](#d56)）——每行 ≤100 字结论 + 活载体链接（合同在 docs/，理由与输掉的方案在 notes/）。
 > 行首 `<a id="dN"></a>` 锚点，引用写 `[D18](./decisions.md#d18)`；被完整取代的 D 号移入 [§已退役](#已退役)。
-> 修订既有 D 号 = 触发 notes 取代检查；机械判据 = `tests/checks/decisions-now.test.mjs`（含 16KB 硬顶）。
+> 修订既有 D 号 = 触发 notes 取代检查；机械判据 = `tests/checks/repo/decisions-now.test.mjs`（含 16KB 硬顶）。
 
 ## 已定（写代码前不再讨论）
 

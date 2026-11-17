@@ -104,6 +104,6 @@ exit 2；恢复后前置通过（随后因 dev profile 不在场 exit 2，未跑
   ],
   "red": { "command": "node --import tsx/esm --test tests/checks/smoke-child-paths.test.mjs", "exit": 1, "output": "not ok 1 - 子进程/前置的分段路径字面量全部可解析（BUG-192 / BUG-193 类级守卫）；__child-path-probe.mjs: join(ROOT, 'scripts', 'lib', '__moved-probe__.cjs') -> scripts/lib/__moved-probe__.cjs 不存在" },
   "green": { "command": "node --import tsx/esm --test tests/checks/smoke-child-paths.test.mjs", "exit": 0 },
-  "guard": { "path": "tests/checks/smoke-child-paths.test.mjs" }
+  "guard": { "path": "tests/checks/repo/smoke-child-paths.test.mjs" }
 }
 ```

@@ -94,6 +94,6 @@ assert.notEqual(cells[3], '—', `索引把 ${module} 显示成「—」…`)
   ],
   "red": { "command": "node --import tsx/esm --test tests/checks/test-index.test.mjs", "exit": 1, "output": "not ok 2 - `.tsx` client 模块被测试直接 import 时，索引测试列 = 独立扫描集合（BUG-194 / BUG-208）；索引 method-library/views 的测试列与独立扫描不一致" },
   "green": { "command": "node --import tsx/esm --test tests/checks/test-index.test.mjs", "exit": 0 },
-  "guard": { "path": "tests/checks/test-index.test.mjs" }
+  "guard": { "path": "tests/checks/test-infra/test-index.test.mjs" }
 }
 ```

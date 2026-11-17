@@ -93,7 +93,7 @@ sed -n '142p' docs/guides/67-test-strategy.md  # 只有 --only，无 --all
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/cli-exit-contract.test.mjs"
+    "path": "tests/checks/shared/cli-exit-contract.test.mjs"
   }
 }
 ```

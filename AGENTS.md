@@ -98,7 +98,7 @@ node tools/channel/run-driver.mjs up   # 研究 run 通道（起/复用 + 验浏
 
 档位词汇：**keyless** = 无凭据可跑；preset.e2e 真挂载档无模型调用、不需要 key。
 release.entry 无模型调用，安装验收使用 `--install-only` 跳过模型就绪检查；默认 preflight 仍检查凭据在场；
-**真模型档** = 需凭据并调用模型；`checks/` 入口 closed set 正本 = [smoke-contract](tests/checks/smoke-contract.test.mjs)（成员清单 = 该测试的 REAL_MODEL；本行不复制名单）。`tools/record/record-role-fixture.mjs` 是单独录制工具，完整研究 run 属 L4，均不在该脚本闭集中；档位与验收面见[项目地图](docs/project-map.md)。CDP `--ask` 按当前会话档处理（模式表 = [项目地图](docs/project-map.md)）。
+**真模型档** = 需凭据并调用模型；`checks/` 入口 closed set 正本 = [smoke-contract](tests/checks/shared/smoke-contract.test.mjs)（成员清单 = 该测试的 REAL_MODEL；本行不复制名单）。`tools/record/record-role-fixture.mjs` 是单独录制工具，完整研究 run 属 L4，均不在该脚本闭集中；档位与验收面见[项目地图](docs/project-map.md)。CDP `--ask` 按当前会话档处理（模式表 = [项目地图](docs/project-map.md)）。
 
 L4-lite 真模型冒烟需要 `DEEPSEEK_API_KEY`：开发 home（`runtime/harness-home/.credentials.yaml`）配一次
 即可，永不提交密钥；web 搜索无需独立 key——base 的 `web-search-deepseek` 行 `apiKeyEnv: DEEPSEEK_API_KEY`，与 chat 同一把钥匙（实证：vendor `packages/bundle/base/cordis.patch.yml` 的 web-search-deepseek 行）。
@@ -122,7 +122,7 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 > 新门禁带反证 · docs = 当前合同 · 同 diff 带 Note · 窄证据切片 · 卫生铁律 · 工具态重定向。
 >
 > **证据匹配面**：改动的面 → 证据类型，执行正本 = [guides/60 §2 任务型路由表](docs/guides/60-dev-loop.md)；新契约测试与门禁同 diff 带反证（先看红再交付绿）。单点机制/行为（含模型不按纪律）可疑 → 先看 [probes/](probes/README.md)（指南 = guides/66），别先跑整链。
-> **命名即车道**（[D53](docs/decisions.md#d53)）：测试文件名 = 证据车道——`.spec.mjs` 进程内 / `.e2e.mjs` 真进程 / `.entry.mjs` 真入口 / `tests/checks/*.test.mjs` 门禁；错后缀或错 lane = 红。规则 = [tests/AGENTS](tests/AGENTS.md)。
+> **命名即车道**（[D53](docs/decisions.md#d53)）：测试文件名 = 证据车道——`.spec.mjs` 进程内 / `.e2e.mjs` 真进程 / `.entry.mjs` 真入口 / `tests/checks/*/*.test.mjs` 门禁；错后缀或错 lane = 红。规则 = [tests/AGENTS](tests/AGENTS.md)。
 >
 > **研发宪章**（2026-09-27 用户定调）= [CONTRIBUTING §Development charter](CONTRIBUTING.md#development-charter)：循 DSH 而不发明 · 自主优先并借鉴成熟 DSH 插件（采纳度为信号）· **审阅分层**——机械门禁/审计/判据探针/对抗自审自主做，只在阶段边界请人（REVIEW 是最后手段，不是例行步骤）。
 

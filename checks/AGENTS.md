@@ -14,7 +14,7 @@
 - `verify/context.mjs` 的 `gates` 数组与 [docs/evaluation.md](../docs/evaluation.md) §L0 登记表
   **两处同步**（`gate-ledger-sync` 门禁对账）；每条门禁的反证义务与记录方式 = 头行
   [writing-a-gate 技能](../.agents/skills/writing-a-gate/SKILL.md)正本，此处不复制配方。
-- **门禁自测**：改门禁逻辑必跑 `node checks/smoke/gates.e2e.mjs`（案例表 `CASES` 增删同 diff；`tests/checks/verify-gates.test.mjs` 静态对账案例 ↔ gates 数组）。
+- **门禁自测**：改门禁逻辑必跑 `node checks/smoke/gates.e2e.mjs`（案例表 `CASES` 增删同 diff；`tests/checks/harness/verify-gates.test.mjs` 静态对账案例 ↔ gates 数组）。
 - 失败信息要给出**失败对象 + 违反的规则 + 修正入口**；不确定就 fail-loud，不静默跳过。
 
 ## 范围纪律（实测教训，不是风格偏好）
@@ -50,8 +50,8 @@
 - 投影类脚本（`run-dashboard.mjs`）只读 canonical 会话日志与 bundle 文件，但会写抛弃型 HTML 投影；
   HTML 永不入库、永不手改。
 - **命名即层**（DSH 后缀选层；新增检查先命名）：`tests/**/*.spec.mjs` = 进程内 keyless（`pnpm test:spec`）、
-  `tests/checks/*.test.mjs` = 门禁（`pnpm test:checks`）、`checks/smoke/*.e2e.mjs` = 真进程（`pnpm test:e2e`）、
+  `tests/checks/*/*.test.mjs` = 门禁（`pnpm test:checks`）、`checks/smoke/*.e2e.mjs` = 真进程（`pnpm test:e2e`）、
   `*.entry.mjs` = 真浏览器/profile/tarball（`pnpm test:entry`）、`*.support.mjs` = 支援件不进车道；`*-probe` = 探针
   （`probes/`，guides/66）、`*-gate`/`*-audit`/`*-scan` = run 门；`checks/lib/`、`tests/fixtures/` 在 glob 外由 consumer 消费。
   独立真模型档 = closed set：要求凭据（`requireCredentials`）的 `checks/` 与 `probes/` 入口必须恰为名单
-  （`tests/checks/smoke-contract.test.mjs`；`withModelKey` 是条件透传不作判据）；不发现经现有会话触发模型的路径。
+  （`tests/checks/shared/smoke-contract.test.mjs`；`withModelKey` 是条件透传不作判据）；不发现经现有会话触发模型的路径。

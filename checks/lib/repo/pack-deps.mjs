@@ -8,7 +8,7 @@
 //   ② 反向：`peerDependencies` 的每个包必须在发布物里被用到，或在随包 YAML 行里被点名（否则是死 peer）；
 //   ③ 版本：跟随 DSH tag 的 peer（`@deepseek-ai/dsh-*`）范围必须与 `engines.dsh` **同一字符串**——
 //      一个包只能有一个可安装版本集（`^0.2.1-rc.2` 比 `<=0.2.1-rc.5` 宽是矛盾，BUG-238）。
-// 纯函数、零 fs；文件读取与 tarball 清单由消费方（pack.e2e）提供，纯函数矩阵住 tests/checks/pack-deps.test.mjs。
+// 纯函数、零 fs；文件读取与 tarball 清单由消费方（pack.e2e）提供，纯函数矩阵住 tests/checks/repo/pack-deps.test.mjs。
 
 /** 反引号/引号之外的包名归一：`react/jsx-runtime` → `react`；`@scope/name/sub` → `@scope/name`。 */
 export function packageNameOf(spec) {

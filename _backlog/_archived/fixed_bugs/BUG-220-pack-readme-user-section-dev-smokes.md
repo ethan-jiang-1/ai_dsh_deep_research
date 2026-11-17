@@ -103,7 +103,7 @@ README 的「Token effect」段由包作者维护，把**重生成命令**写成
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/shipped-surface.test.mjs"
+    "path": "tests/checks/repo/shipped-surface.test.mjs"
   }
 }
 ```

@@ -14,7 +14,7 @@
 //   ③ 源侧覆盖：keyless 扫描集由 `files` 允许集派生（不再手工挑目录，BUG-231），并由 pack.e2e
 //      断言「发布文本集 ⊆ 源侧扫描集」。
 //
-// 消费方：tests/checks/shipped-surface.test.mjs（keyless：随包源码文本 + manifest 不动量）
+// 消费方：tests/checks/repo/shipped-surface.test.mjs（keyless：随包源码文本 + manifest 不动量）
 // 与 checks/smoke/pack.e2e.mjs（真 tarball：集合 + 构建产物文本）。纯函数、零 fs/子进程；
 // 树遍历、声明读取与 tarball 读取由消费方注入。
 //

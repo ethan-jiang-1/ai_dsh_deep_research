@@ -1,6 +1,8 @@
 # 测试命名四车道：spec / e2e / entry / checks
 
 > 状态：implemented
+> 历史注记：checks 车道由「`tests/checks/*.test.mjs` 平铺」改为 `tests/checks/<owner>/` owner 镜像
+> （2026-11-18，[checks owner 镜像](2026-11-18-tests-checks-owner-mirror.md)）；后缀/车道判据不变。
 > 关联：[D53](../../docs/decisions.md#d53)；[测试策略制度化程序卡](../../_backlog/_archived/settled_issues/2026-11-13-test-strategy-institutionalization.md)（W0-10）；
 > DSH `.spec.ts` / `.e2e.ts` 约定 = [test-strategy 语料](../../docs/external-materials.md)；
 > 测试栈 = D26（node:test，不迁 vitest）

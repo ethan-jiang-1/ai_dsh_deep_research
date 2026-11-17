@@ -99,6 +99,6 @@ rm tests/cockpit/misc && git rm --cached tests/cockpit/misc >/dev/null
   ],
   "red": { "command": "node --import tsx/esm --test tests/checks/pack-mirror.test.mjs", "exit": 1, "output": "not ok 2 - tests 下零符号链接目录/文件（BUG-207）；tests 下不得有符号链接：tests/run/ops/linked" },
   "green": { "command": "node --import tsx/esm --test tests/checks/pack-mirror.test.mjs", "exit": 0 },
-  "guard": { "path": "tests/checks/pack-mirror.test.mjs" }
+  "guard": { "path": "tests/checks/shared/pack-mirror.test.mjs" }
 }
 ```

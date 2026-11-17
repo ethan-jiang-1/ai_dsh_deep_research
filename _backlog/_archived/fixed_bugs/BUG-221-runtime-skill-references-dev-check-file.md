@@ -91,7 +91,7 @@ tar -tzf _dist/dsh-deep-research-pack-0.3.6.tgz | grep -c 'package/checks/'   # 
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/shipped-surface.test.mjs"
+    "path": "tests/checks/repo/shipped-surface.test.mjs"
   }
 }
 ```

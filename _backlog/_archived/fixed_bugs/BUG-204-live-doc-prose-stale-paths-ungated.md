@@ -107,6 +107,6 @@ ls tests/run/gates/final-version.spec.mjs # 存在
   ],
   "red": { "command": "node scripts/verify/verify.mjs --only=doc-paths", "exit": 1, "output": "[doc-paths] runtime/README.md:22 散文路径 scripts/lib/__gone__.mjs 不存在（仓根/文档目录/vendor 均未命中）" },
   "green": { "command": "node scripts/verify/verify.mjs --only=doc-paths", "exit": 0 },
-  "guard": { "path": "tests/checks/doc-prose-paths.test.mjs" }
+  "guard": { "path": "tests/checks/repo/doc-prose-paths.test.mjs" }
 }
 ```

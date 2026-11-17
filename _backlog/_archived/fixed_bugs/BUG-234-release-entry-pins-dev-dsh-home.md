@@ -87,7 +87,7 @@ DSH_HOME=/tmp/whatever node checks/smoke/release.entry.mjs; echo $?   # 2（refu
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/clean-room-policy.test.mjs"
+    "path": "tests/checks/harness/clean-room-policy.test.mjs"
   }
 }
 ```

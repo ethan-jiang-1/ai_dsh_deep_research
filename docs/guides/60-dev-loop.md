@@ -79,7 +79,7 @@
 | L2 发布面/显示面 | 清单字段、locale/icon、市场索引、安装文档取向 | `node checks/smoke/lifecycle.entry.mjs`（market.json 过 DSH 校验器 → 装 tarball → 本包行 dump → 真启动 → `readPluginMeta` 四行显示面 → remove 回落；缺 `_dist` 产物 exit 2） |
 | L2 安装形状 | profile/安装形状/工作区相关改动 | `node checks/smoke/install-shape.entry.mjs`（原样执行手册的 CLI 装包分支：profile init → plugin add → 真启动；断言 roster 三状态、无 `did not activate`；缺前置 exit 2） |
 | L2 首启 | startup/client 恢复/首屏/StartCard 改动 | `node checks/smoke/product-boot.entry.mjs`（纯 `dsh --profile deep-research` + 真 Web + 浏览器；工作区会话、首屏、目录按钮；无模型；缺前置 exit 2） |
-| L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --import tsx/esm --test tests/checks/evaluation-contract.test.mjs` |
+| L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --import tsx/esm --test tests/checks/analyze/evaluation-contract.test.mjs` |
 | L4 交付 | 里程碑级 | `source tools/env.sh && node checks/smoke/l4-lite.e2e.mjs`（真模型档：需 `DEEPSEEK_API_KEY`，未 source 自拒）/ 完整 run（授权范围） |
 
 **source 口径**：fresh clone 首次跑 L0 前先 `source tools/env.sh`（激活 pre-commit；此后幂等）。表中标 source 的命令必须 source；`lifecycle.entry` / `install-shape.entry` / `product-boot.entry` 自行设定 home、不依赖 source；`checks/run-gates/` 的 `evidence-audit` / `run-accept` 与 `probes/analyze/` 的 `plan-card-stats` / `provider-error-stats` 需要 source（见命令块注记）。
@@ -130,7 +130,7 @@ bash tools/build/vendor-build.sh              # vendor 树构建（换 pin 后�
 pnpm verify                           # L0 结构门禁（keyless，收尾必跑）
 pnpm test                             # L0 keyless 聚合 = test:spec + test:checks（layering ④ 钉形状）
 pnpm test:spec                        # 进程内 spec（tests/{run,cockpit,pack,contracts}/**/*.spec.mjs）
-pnpm test:checks                      # 门禁自身（tests/checks/*.test.mjs）
+pnpm test:checks                      # 门禁自身（tests/checks/*/*.test.mjs）
 pnpm test:e2e                         # 真进程车道（registry lane=e2e，默认 tier=ci；--all 带 dev-only）
 pnpm test:entry                       # 真浏览器/profile/tarball 车道（lane=entry）
 pnpm test:vendor                      # vendor 源码契约（组合层 + 设置 schema；根 tsconfig 的源映射，无需 vendor 构建）
@@ -244,7 +244,7 @@ source tools/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh �
 
 ## 5. 密钥
 
-- 独立真模型档 = `tests/checks/smoke-contract.test.mjs` 的 REAL_MODEL 闭集（成员以测试为准；`tools/record/record-role-fixture.mjs` 是单独录制工具，完整 run 属 L4）；手动 CI 通道 = `.github/workflows/model-smoke.yml`（`workflow_dispatch`；缺 secret 由脚本 preflight exit 2 硬失败；不进 PR）。
+- 独立真模型档 = `tests/checks/shared/smoke-contract.test.mjs` 的 REAL_MODEL 闭集（成员以测试为准；`tools/record/record-role-fixture.mjs` 是单独录制工具，完整 run 属 L4）；手动 CI 通道 = `.github/workflows/model-smoke.yml`（`workflow_dispatch`；缺 secret 由脚本 preflight exit 2 硬失败；不进 PR）。
   调用凭据可在开发 home 配置（根 [AGENTS §密钥](../../AGENTS.md)）。CDP `--ask` 按当前会话档位；
   永不提交密钥；
 - L1 真挂载无模型调用、无凭据可跑；L2 安装验收无模型调用并使用 `--install-only`，默认 doctor 仍检查凭据在场；

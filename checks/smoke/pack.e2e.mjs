@@ -7,7 +7,7 @@
 //   ① 文本：随包文本（README / presets / content / scripts / workers / 构建产物）零 dev 引用；
 //      README 用户段（折叠区外）零开发命令。
 //   ② 集合：tarball 顶层 = 允许集；`lib/types/**/*.d.ts` = `exports.*.types`；`files` 是显式允许集。
-// 负控 = tests/checks/shipped-surface.test.mjs 的纯函数矩阵 + 逐卡红证回放；本件证真实产物。
+// 负控 = tests/checks/repo/shipped-surface.test.mjs 的纯函数矩阵 + 逐卡红证回放；本件证真实产物。
 // 用法：node checks/smoke/pack.e2e.mjs
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'

@@ -86,6 +86,6 @@ policy 由 `tests/run/harness/replay-network-offline.spec.mjs` 直测。
   ],
   "red": { "command": "node --import tsx/esm --test tests/checks/test-surface.test.mjs", "exit": 1, "output": "not ok 1 - 覆盖边界：每个 scripts/lib 模块有直测，或登记为 SMOKE_ONLY 并给出理由；未覆盖：… shared/zz-probe" },
   "green": { "command": "node --import tsx/esm --test tests/checks/test-surface.test.mjs", "exit": 0 },
-  "guard": { "path": "tests/checks/test-surface.test.mjs" }
+  "guard": { "path": "tests/checks/test-infra/test-surface.test.mjs" }
 }
 ```

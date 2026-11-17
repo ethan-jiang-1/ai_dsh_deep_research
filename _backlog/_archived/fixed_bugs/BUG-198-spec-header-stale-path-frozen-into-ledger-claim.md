@@ -108,6 +108,6 @@ PY
   ],
   "red": { "command": "node --import tsx/esm --test tests/checks/asset-ledger.test.mjs", "exit": 1, "output": "not ok 3 - uniqueClaim 里形如 tests/… 的路径 token 必须存在（BUG-198；防空 ≥10 条 claim）；tests/checks/asset-ledger.test.mjs: uniqueClaim -> tests/__fake-claim-path__.spec.mjs（不存在）" },
   "green": { "command": "node --import tsx/esm --test tests/checks/asset-ledger.test.mjs", "exit": 0 },
-  "guard": { "path": "tests/checks/asset-ledger.test.mjs" }
+  "guard": { "path": "tests/checks/test-infra/asset-ledger.test.mjs" }
 }
 ```

@@ -7,7 +7,7 @@ description: Use when adding or changing any user-visible text in the deep-resea
 
 本技能是 **guidance，不是 checklist**。合同正本 = [design/40 §4](../../../docs/design/40-research-cockpit.md)；
 守卫 = `tests/cockpit/client/method-library/locales.spec.mjs`（键集/占位符/en 值/渲染）、`tests/cockpit/shared/i18n.spec.mjs`（折层
-en 零 CJK）、`tests/checks/cjk-source.test.mjs`（源码中文扫描 + 允许清单）。相关技能：
+en 零 CJK）、`tests/checks/repo/cjk-source.test.mjs`（源码中文扫描 + 允许清单）。相关技能：
 [`reviewing-a-delivery`](../reviewing-a-delivery/SKILL.md)。
 
 **判据只有一句：任何界面上出现的东西，同一 diff 里必须有 zh 和 en。** 界面会持续调整，所以这不是

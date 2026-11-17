@@ -95,6 +95,6 @@ grep -n 'method-library/views' tests/INDEX.generated.md
   ],
   "red": { "command": "node --import tsx/esm --test tests/checks/test-index.test.mjs", "exit": 1, "output": "not ok 2 - `.tsx` client 模块被测试直接 import 时，索引必须有非空测试列（BUG-194 独立抽查）；method-library/views 显示成「—」" },
   "green": { "command": "node --import tsx/esm --test tests/checks/test-index.test.mjs", "exit": 0 },
-  "guard": { "path": "tests/checks/test-index.test.mjs" }
+  "guard": { "path": "tests/checks/test-infra/test-index.test.mjs" }
 }
 ```

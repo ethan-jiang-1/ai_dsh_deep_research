@@ -100,7 +100,7 @@ ls packages/deep-research-pack/locale*                                     # loc
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/shipped-surface.test.mjs"
+    "path": "tests/checks/repo/shipped-surface.test.mjs"
   }
 }
 ```

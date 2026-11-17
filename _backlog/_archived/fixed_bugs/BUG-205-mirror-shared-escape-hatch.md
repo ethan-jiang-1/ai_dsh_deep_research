@@ -117,6 +117,6 @@ assert.ok(domains.has(dir) || dir === 'shared', …)
   ],
   "red": { "command": "node --import tsx/esm --test tests/checks/test-owner-mirror.test.mjs", "exit": 1, "output": "not ok 2 - spec 的 lib 依赖 owner ∈ {spec 目录, shared}；shared 只收跨切（BUG-205）；tests/run/shared/zz-owner-probe.spec.mjs 住 shared/，但依赖 gates" },
   "green": { "command": "node --import tsx/esm --test tests/checks/test-owner-mirror.test.mjs", "exit": 0 },
-  "guard": { "path": "tests/checks/test-owner-mirror.test.mjs" }
+  "guard": { "path": "tests/checks/shared/test-owner-mirror.test.mjs" }
 }
 ```

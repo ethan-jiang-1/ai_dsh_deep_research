@@ -125,7 +125,7 @@ CI 分层把「谁挡提交」从「谁在 ci.yml 里」改成「谁在 push 的
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/smoke-registry.test.mjs"
+    "path": "tests/checks/test-infra/smoke-registry.test.mjs"
   }
 }
 ```

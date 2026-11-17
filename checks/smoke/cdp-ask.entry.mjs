@@ -236,6 +236,6 @@ console.log(!allOk
     ? 'cdp-ask.entry: 未跑（阶段③前置缺席：turn 未保持 open）——①② 已绿，③ 未判，未跑 ≠ 通过'
     : 'cdp-ask.entry: ALL PASS（空闲态发出并落盘 + 续跑唤醒落盘 + 在飞态 Queue message 标签命中；在飞态落盘时机不作判据）');
 // verdict 契约：前置缺席 = 2（未跑，优先于全绿）；断言红 = 1；全绿 = 0。
-// 形状由 tests/checks/smoke-contract.test.mjs 钉住（真实字面 = 下一行）。
+// 形状由 tests/checks/shared/smoke-contract.test.mjs 钉住（真实字面 = 下一行）。
 if (allOk && phase3NotRun) process.exit(2);
 process.exit(allOk ? 0 : 1);

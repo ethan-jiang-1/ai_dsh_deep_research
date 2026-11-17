@@ -113,6 +113,6 @@ gates.e2e 案例 = `test-placement-unknown-subtree`。
   ],
   "red": { "command": "node --import tsx/esm --test tests/checks/pack-mirror.test.mjs", "exit": 1, "output": "not ok 1 - tests 落点全集 − 已知子集 = 空（BUG-191；账本重生成不能吸收）" },
   "green": { "command": "node --import tsx/esm --test tests/checks/pack-mirror.test.mjs", "exit": 0 },
-  "guard": { "path": "tests/checks/pack-mirror.test.mjs" }
+  "guard": { "path": "tests/checks/shared/pack-mirror.test.mjs" }
 }
 ```

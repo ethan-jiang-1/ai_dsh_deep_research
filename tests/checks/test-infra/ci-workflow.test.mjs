@@ -1,0 +1,188 @@
+// ci-workflow 契约（BUG-172）——GitHub Actions 的**执行面**子集：
+//   - `jobs:` 键用完整 job id 字符集（下划线/大写可见）；
+//   - step 的 `if: false` / `continue-on-error: true` 不算执行；
+//   - job 不在 `all-checks-passed.needs` 不算 CI 证据；
+//   - 注释 / echo / heredoc 里的路径不算；`run: |` 块里的 node 才算。
+//
+// 反证：把 `executedSmokeFiles` 的 step 条件判断删掉 → if:false 例红；把 needs 过滤删掉 →
+// not-in-needs 例红；把 heredoc 跳过删掉 → heredoc 例红。
+// 负例留证 2026-11-14：BUG-172 / BUG-177——删掉 step `if: false` / `continue-on-error` 过滤或
+//   不剥离 `${{ }}` 外壳 → skipped/continued 例假绿或 `${{ always() }}` 例假红；还原 → 绿。
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { ciWorkflowRunProblems, eventKeys, executedSmokeFiles, jobIds, parseWorkflow } from '../../../checks/lib/test-infra/ci-workflow.mjs'
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
+
+const SYNTHETIC = `
+on:
+  workflow_dispatch:
+  pull_request_target:
+
+jobs:
+  keyless:
+    steps:
+      - name: commented
+        run: "echo 'probe: disabled'" # node checks/smoke/commented.e2e.mjs
+      - name: skipped
+        if: false
+        run: node checks/smoke/skipped.e2e.mjs
+      - name: continued
+        continue-on-error: true
+        run: node checks/smoke/continued.e2e.mjs
+      - name: real
+        run: |
+          echo start
+          node --import tsx/esm checks/smoke/real.e2e.mjs
+      - name: heredoc
+        run: |
+          cat > /tmp/probe <<EOF
+          node checks/smoke/heredoc.e2e.mjs
+          EOF
+  deploy:
+    steps:
+      - run: source tools/env.sh && DSH_SMOKE_REAL=1 node checks/smoke/second.e2e.mjs
+  orphan:
+    steps:
+      - run: node checks/smoke/orphan.e2e.mjs
+  all-checks-passed:
+    if: always()
+    needs: [keyless, deploy]
+    steps:
+      - run: echo done
+`
+
+test('parseWorkflow：jobs 键含下划线/大写，needs 与 on: 键集合可见', () => {
+  const workflow = parseWorkflow(SYNTHETIC)
+  assert.deepEqual(jobIds(workflow), ['keyless', 'deploy', 'orphan', 'all-checks-passed'])
+  assert.deepEqual(eventKeys(workflow), ['workflow_dispatch', 'pull_request_target'])
+  const aggregate = workflow.jobs.find((job) => job.id === 'all-checks-passed')
+  assert.deepEqual(aggregate.needs, ['keyless', 'deploy'])
+  assert.deepEqual(eventKeys(parseWorkflow('on: [push, workflow_dispatch]\n')), ['push', 'workflow_dispatch'])
+  assert.deepEqual(eventKeys(parseWorkflow('on: workflow_dispatch\n')), ['workflow_dispatch'])
+})
+
+test('executedSmokeFiles：只计 needs 内、无跳过条件、run 里真实 node 执行的文件（BUG-172）', () => {
+  assert.deepEqual([...executedSmokeFiles(SYNTHETIC)].sort(), ['real.e2e.mjs', 'second.e2e.mjs'])
+  assert.deepEqual([...executedSmokeFiles('jobs:\n  keyless:\n    steps:\n      - run: node checks/smoke/x.e2e.mjs\n')], [],
+    '无 all-checks-passed = 没有 CI 证据（fail-closed）')
+  assert.deepEqual([...executedSmokeFiles('nonsense')], [], '解析不出 jobs = 空集，不猜')
+})
+
+test('真实工作流：ci ∪ nightly 覆盖必需 smoke；重冒烟必须在某个工作流执行（不许无声消失）', () => {
+  const ciText = readFileSync(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8')
+  const nightlyText = readFileSync(join(ROOT, '.github', 'workflows', 'nightly.yml'), 'utf8')
+  const executed = new Set([...executedSmokeFiles(ciText), ...executedSmokeFiles(nightlyText)])
+  assert.ok(executed.size >= 6, `防空语料：CI 执行面过少（${executed.size}）`)
+  for (const file of ['run-accept.e2e.mjs', 'lifecycle.entry.mjs', 'client-load.entry.mjs', 'snapshot-replay.entry.mjs']) {
+    assert.ok(executed.has(file), `CI 执行面（ci ∪ nightly）应含 ${file}`)
+  }
+  assert.ok(!executed.has('l4-lite.e2e.mjs'), '真模型档不在 keyless CI 执行面')
+  // 2026-11-16 频率分层：慢证据进 nightly（每日 + 手动），push 门禁只留 keyless；
+  // 但两条重冒烟必须在某个 CI 工作流里执行，且 registry 标 ci——不许无声消失。
+  const registry = JSON.parse(readFileSync(join(ROOT, 'checks', 'smoke', 'registry.json'), 'utf8'))
+  for (const file of ['client-load.entry.mjs', 'snapshot-replay.entry.mjs']) {
+    assert.equal(registry[file]?.tier, 'nightly', `${file} 在 nightly 执行面时必须 registry 标 nightly（push 面与夜间面可区分）`)
+  }
+})
+test('表达式归一：${{ }} 外壳不改变 always/true/false 语义（step / continue-on-error / job，BUG-177）', () => {
+  const wf = (ifExpr = '', coe = '') => `on:\n  workflow_dispatch:\njobs:\n  smoke:\n    steps:\n      - name: s\n${ifExpr === '' ? '' : `        if: ${ifExpr}\n`}${coe === '' ? '' : `        continue-on-error: ${coe}\n`}        run: node checks/smoke/foo.e2e.mjs\n  all-checks-passed:\n    needs: [smoke]\n`
+  for (const expr of ['always()', '${{ always() }}', 'true', '${{ true }}']) {
+    assert.deepEqual([...executedSmokeFiles(wf(expr))], ['foo.e2e.mjs'], `step if ${expr}`)
+  }
+  for (const expr of ['false', '${{ false }}', 'failure()']) {
+    assert.deepEqual([...executedSmokeFiles(wf(expr))], [], `step if ${expr}`)
+  }
+  for (const coe of ['true', '${{ true }}']) assert.deepEqual([...executedSmokeFiles(wf('', coe))], [], `coe ${coe}`)
+  for (const coe of ['false', '${{ false }}']) assert.deepEqual([...executedSmokeFiles(wf('', coe))], ['foo.e2e.mjs'], `coe ${coe}`)
+
+  const job = (cond) => `jobs:\n  smoke:\n    if: ${cond}\n    steps:\n      - run: node checks/smoke/foo.e2e.mjs\n  all-checks-passed:\n    needs: [smoke]\n`
+  for (const cond of ['always()', '${{ always() }}', 'true']) assert.deepEqual([...executedSmokeFiles(job(cond))], ['foo.e2e.mjs'], `job if ${cond}`)
+  for (const cond of ['false', '${{ false }}', 'failure()']) assert.deepEqual([...executedSmokeFiles(job(cond))], [], `job if ${cond}`)
+})
+
+test('parseEvents：空映射 / 带 inputs 的 mapping / 行尾注释都算事件', () => {
+  for (const text of [
+    'on:\n  workflow_dispatch: {}\n',
+    'on:\n  workflow_dispatch: { inputs: { x: { type: string } } }\n',
+    'on:\n  workflow_dispatch: # manual\n',
+  ]) {
+    assert.deepEqual(eventKeys(parseWorkflow(text)), ['workflow_dispatch'], text)
+  }
+  assert.deepEqual(eventKeys(parseWorkflow('on:\n  push:\n  workflow_dispatch: {}\n')), ['push', 'workflow_dispatch'])
+})
+
+// 负例留证 2026-11-14：BUG-184——normalizeExpression 先剥 ${{ }} 再 unquote/注释，quoted/注释
+// 表达式漏判；红配方 = 把顺序退回旧实现 → 本组红。
+// 负例留证 2026-11-14：BUG-187——splitCommands 丢运算符、逐段认 node，短路段假绿；
+// 红配方 = 退回字符串数组 → 短路矩阵红。
+// 负例留证 2026-11-14：BUG-190——parseEvents 不展开 inline flow mapping，合法 on: 假红；
+// 红配方 = 删 flowKeys 分支 → flow matrix 红。
+test('表达式外层：引号 / YAML 行尾注释 / ${{ }} 组合都要归一（BUG-184）', () => {
+  const wf = (ifExpr = '', coe = '') => `on:\n  workflow_dispatch:\njobs:\n  smoke:\n    steps:\n      - name: s\n${ifExpr === '' ? '' : `        if: ${ifExpr}\n`}${coe === '' ? '' : `        continue-on-error: ${coe}\n`}        run: node checks/smoke/foo.e2e.mjs\n  all-checks-passed:\n    needs: [smoke]\n`
+  for (const expr of ['"${{ always() }}"', 'always() # comment', '${{ true }} # c']) {
+    assert.deepEqual([...executedSmokeFiles(wf(expr))], ['foo.e2e.mjs'], `if ${expr}`)
+  }
+  for (const coe of ['"${{ true }}"', 'true # comment']) {
+    assert.deepEqual([...executedSmokeFiles(wf('', coe))], [], `coe ${coe}`)
+  }
+  for (const expr of ['"${{ false }}"', 'false # c']) assert.deepEqual([...executedSmokeFiles(wf(expr))], [], `if ${expr}`)
+  assert.deepEqual([...executedSmokeFiles(wf('', 'false # c'))], ['foo.e2e.mjs'], 'coe false # c')
+})
+
+test('shell 短路 / 多位数退出码 / 取反 / 多行 pipefail 失败后不计执行（BUG-187）', () => {
+  const wf = (run) => `on:\n  workflow_dispatch:\njobs:\n  smoke:\n    steps:\n      - name: s\n        run: ${run}\n  all-checks-passed:\n    needs: [smoke]\n`
+  for (const run of [
+    'false && node checks/smoke/foo.e2e.mjs',
+    'exit 10 && node checks/smoke/foo.e2e.mjs',
+    '"! node checks/smoke/foo.e2e.mjs"',
+    '! node checks/smoke/foo.e2e.mjs',
+    'true || node checks/smoke/foo.e2e.mjs',
+    'node checks/smoke/foo.e2e.mjs || true',
+    'node checks/smoke/foo.e2e.mjs &',
+    '|\n          false\n          node checks/smoke/foo.e2e.mjs',
+  ]) {
+    assert.deepEqual([...executedSmokeFiles(wf(run))], [], run)
+  }
+  for (const run of ['node checks/smoke/foo.e2e.mjs', 'node checks/smoke/foo.e2e.mjs && echo ok', 'echo start && node checks/smoke/foo.e2e.mjs']) {
+    assert.deepEqual([...executedSmokeFiles(wf(run))], ['foo.e2e.mjs'], run)
+  }
+})
+
+test('YAML 畸形或重复键 fail-closed（不静默取一个 job 凑绿）', () => {
+  const dup = `on: push\njobs:\n  smoke:\n    steps:\n      - run: node checks/smoke/foo.e2e.mjs\n  smoke:\n    if: false\n    steps:\n      - run: echo noop\n  all-checks-passed:\n    needs: [smoke]\n`
+  assert.deepEqual([...executedSmokeFiles(dup)], [])
+})
+
+test('写入侧规范 run: 门：真实 ci.yml 与 model-smoke.yml 零违规，歧义 shell 包装判红', () => {
+  for (const file of ['ci.yml', 'model-smoke.yml']) {
+    const content = readFileSync(join(ROOT, '.github', 'workflows', file), 'utf8')
+    assert.deepEqual(ciWorkflowRunProblems(content, file), [], `${file} 必须满足规范 smoke run: 形状`)
+  }
+  const badCases = [
+    ['or-swallow', 'jobs:\n  k:\n    steps:\n      - run: node checks/smoke/a.e2e.mjs || true\n'],
+    ['semicolon-chain', 'jobs:\n  k:\n    steps:\n      - run: node checks/smoke/a.e2e.mjs; echo ok\n'],
+    ['negated', 'jobs:\n  k:\n    steps:\n      - run: "! node checks/smoke/a.e2e.mjs"\n'],
+    ['subshell', 'jobs:\n  k:\n    steps:\n      - run: (node checks/smoke/a.e2e.mjs)\n'],
+    ['set-plus-e', 'jobs:\n  k:\n    steps:\n      - run: |\n          set +e\n          node checks/smoke/a.e2e.mjs\n'],
+    ['arbitrary-prefix-and', 'jobs:\n  k:\n    steps:\n      - run: echo hi && node checks/smoke/a.e2e.mjs\n'],
+  ]
+  for (const [name, yml] of badCases) {
+    assert.ok(ciWorkflowRunProblems(yml, name).length > 0, `非规范 smoke run 应判红：${name}`)
+  }
+})
+
+test('on: flow mapping / key 前空格（BUG-190）', () => {
+  for (const text of [
+    'on: { workflow_dispatch: {} }\n',
+    'on: { workflow_dispatch: { inputs: { x: { type: string } } } }\n',
+    'on: { workflow_dispatch: {}, pull_request_target: {} }\n',
+    'on:\n  workflow_dispatch : {}\n',
+  ]) {
+    const expected = text.includes('pull_request_target') ? ['workflow_dispatch', 'pull_request_target'] : ['workflow_dispatch']
+    assert.deepEqual(eventKeys(parseWorkflow(text)), expected, text)
+  }
+})

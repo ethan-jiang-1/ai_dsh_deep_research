@@ -90,7 +90,7 @@ intent: 还原 D55（2026-11-14-verification-oracle）从 D51–D54 与探索批
 对照代码逐条核实，新的结构化 `json fix-evidence` 机制存在 5 个具体漏洞：
 
 1. **绕过链 1（「借壳挂靠」零测试改动假修）**：
-   - [scripts/lib/staged-change-pairing.mjs](../../../../scripts/lib/staged-change-pairing.mjs)（第 118–133 行）：只要 `red.command` 写 `"pnpm test"`（命中 `REPLAYABLE`），就不要求暂存区包含任何 `tests/` 或 `scripts/smoke/` 改动；而 `guard.path` 只查 `exists(ev.guard.path)`。因此新修任何 bug 时填 `"guard": { "path": "tests/checks/layering.test.mjs", "kind": "unit" }` 即可**零新增测试、零 BUG 登记直接过提交门**。
+   - [scripts/lib/staged-change-pairing.mjs](../../../../scripts/lib/staged-change-pairing.mjs)（第 118–133 行）：只要 `red.command` 写 `"pnpm test"`（命中 `REPLAYABLE`），就不要求暂存区包含任何 `tests/` 或 `scripts/smoke/` 改动；而 `guard.path` 只查 `exists(ev.guard.path)`。因此新修任何 bug 时填 `"guard": { "path": "tests/checks/test-infra/layering.test.mjs", "kind": "unit" }` 即可**零新增测试、零 BUG 登记直接过提交门**。
 2. **绕过链 2（归档后删守卫测试文件无人拦）**：
    - [scripts/lib/backlog-liveness.mjs](../../../../scripts/lib/backlog-liveness.mjs)（第 183–185 行）只对活跃 `bugs/` 中 `status === '修复落地'` 的卡调 `fixEvidenceProblems(text)`，既不传盘侧 `exists` 校验 `guard.path`，也不检查 `_archived/fixed_bugs/` 中 `>= CUTOFF` 的已归档卡。提交归档后下一笔 commit 删掉 `guard.path` 指向的测试文件（只要不撞别的 `BUG-nnn` 标题），`pnpm verify` 全绿。
 3. **绕过链 3（`CUTOFF = '2026-11-15'` 造成新旧两头真空）**：

@@ -16,7 +16,7 @@
     "cost": "fast",
     "uniqueClaim": "CLI 退出码三态在真入口可区分：usage/前置缺席 = 2、真失败 = 1、全 SKIP = 2",
     "oracle": [
-      "tests/checks/cli-exit-contract.test.mjs"
+      "tests/checks/shared/cli-exit-contract.test.mjs"
     ],
     "sunset": "当入口退出码可完全由纯函数矩阵覆盖（入口壳不再手写 exit）时退役",
     "lane": "e2e"
@@ -99,7 +99,7 @@
     "cost": "slow",
     "uniqueClaim": "干净室（仓外 home + 钉版 dsh + _dist tarball）安装 + web 启动 + 解析不落仓根",
     "oracle": [
-      "tests/checks/clean-room-policy.test.mjs"
+      "tests/checks/harness/clean-room-policy.test.mjs"
     ],
     "sunset": "与 release/install 合并后退役",
     "lane": "entry"
@@ -132,7 +132,7 @@
     "cost": "slow",
     "uniqueClaim": "注入回归经真实 verify 入口点名报红 + 零注入对照组",
     "oracle": [
-      "tests/checks/verify-gates.test.mjs"
+      "tests/checks/harness/verify-gates.test.mjs"
     ],
     "sunset": "门禁案例并入单测或 verify 自检时退役",
     "lane": "e2e"
@@ -176,7 +176,7 @@
     "cost": "medium",
     "uniqueClaim": "钉版 dsh（∈ engines.dsh）上装 tarball：market/显示面 + readPluginMeta + remove 回落",
     "oracle": [
-      "tests/checks/clean-room-policy.test.mjs"
+      "tests/checks/harness/clean-room-policy.test.mjs"
     ],
     "sunset": "当发布面退役或与 release.entry 合并时",
     "lane": "entry"
@@ -255,7 +255,7 @@
     "cost": "slow",
     "uniqueClaim": "干净室（仓外 home + 钉版 dsh）安装 _dist tarball → 安装域挂载 → 端口释放",
     "oracle": [
-      "tests/checks/clean-room-policy.test.mjs"
+      "tests/checks/harness/clean-room-policy.test.mjs"
     ],
     "sunset": "与 install-shape 合并后退役",
     "lane": "entry"

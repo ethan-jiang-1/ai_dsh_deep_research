@@ -128,7 +128,7 @@ git show 266b216c -- tests/fixtures/asset-ledger/ledger.json | grep -B4 -A2 self
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/asset-ledger.test.mjs"
+    "path": "tests/checks/test-infra/asset-ledger.test.mjs"
   }
 }
 ```

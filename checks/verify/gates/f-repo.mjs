@@ -149,7 +149,7 @@ export function runF() {
   const problems = [];
   let claims = 0;
   // 2026-10-20 起 tests/ 按域分子目录（run/cockpit/pack/contracts）：递归扫描，fixtures/_tmp 除外。
-  // 命名迁移（D53）：spec 车道 = *.spec.mjs；门禁自身 = tests/checks/*.test.mjs。
+  // 命名迁移（D53）：spec 车道 = *.spec.mjs；门禁自身 = tests/checks/*/*.test.mjs。
   // 两个面都要扫——判据测试（*conformance*）住 checks 时也必须交红配方。
   const testsRoot = join(ROOT, 'tests');
   const testFiles = walk(testsRoot).filter((f) => (f.endsWith('.spec.mjs') || (f.endsWith('.test.mjs') && relative(testsRoot, f).startsWith(`checks${sep}`)))
@@ -220,7 +220,7 @@ export function runF() {
 // = 全绿（M1/M4 合成）。本门禁把落点规则放进 L0：git ls-files tracked 面，任何测试文件不在
 // 已知 home（含未知深度/顶层平铺）= 红；符号链接目录（mode 120000）另判——node --test 不跟随它，
 // 放行等于接受一个永不运行的「测试目录」（BUG-207）。规则正本 =
-// checks/lib/repo/test-placement.mjs；负控 = tests/checks/test-placement.test.mjs +
+// checks/lib/repo/test-placement.mjs；负控 = tests/checks/repo/test-placement.test.mjs +
 // gates.e2e `test-placement-unknown-subtree`（注入 tests/cockpit/misc/… → 点名红）。
 {
   const gate = 'test-placement';
@@ -408,7 +408,7 @@ export function runF() {
 // 形态正本 = checks/lib/repo/doc-surface.mjs（scanDocument / scanCiCommands / commandPathsAnywhere）：
 // 命令归一（env 前缀、sudo/env/time、`&&` 链、`./`、heredoc body、四空格缩进、`run: >-` 折叠块）全在
 // 枚举器里；本门禁只消费 token。命令形态台账（COMMAND_FORMS）与 gates.e2e 案例双向对账
-// （tests/checks/doc-surface-shapes.test.mjs）——补一种写法不再需要改这里。
+// （tests/checks/shared/doc-surface-shapes.test.mjs）——补一种写法不再需要改这里。
 {
   const gate = 'call-surface';
   const EXTS = ['.md', '.mjs', '.sh', '.cjs', '.ts', '.json', '.yml', '.yaml'];

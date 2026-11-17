@@ -98,6 +98,6 @@ grep -n "gates.e2e 128" /tmp/gates-e2e.log                 # 全量跑仍报 128
   ],
   "red": { "command": "node scripts/smoke/gates.e2e.mjs --case=repo-conventions-dev-hook-path", "exit": 1, "output": "repo-conventions-dev-hook-path：repo-conventions 报了红但非本案例的报因（去掉 dev/hooks 扫描面后注入不再命中）" },
   "green": { "command": "node scripts/smoke/gates.e2e.mjs --case=repo-conventions-dev-hook-path", "exit": 0 },
-  "guard": { "path": "tests/checks/verify-gates.test.mjs" }
+  "guard": { "path": "tests/checks/harness/verify-gates.test.mjs" }
 }
 ```

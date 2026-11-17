@@ -104,7 +104,7 @@ console.log(placementIssues(['tests/pack/__probe-helpers.ts','tests/pack/sub/__p
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/test-placement.test.mjs"
+    "path": "tests/checks/repo/test-placement.test.mjs"
   }
 }
 ```

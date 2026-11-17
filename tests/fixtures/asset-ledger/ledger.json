@@ -1,209 +1,9 @@
 {
   "generatedBy": "tools/record/record-asset-ledger.mjs",
-  "note": "组合账：lane/class/cost/uniqueClaim/oracleType/sunset；oracleType 由 AST 推导（禁手写 OVERRIDES）；self-referential = 下一轮迁移面；覆盖由 tests/checks/asset-ledger.test 重算对账。",
+  "note": "组合账：lane/class/cost/uniqueClaim/oracleType/sunset；oracleType 由 AST 推导（禁手写 OVERRIDES）；self-referential = 下一轮迁移面；覆盖由 tests/checks/test-infra/asset-ledger.test 重算对账。",
   "assets": [
     {
-      "path": "tests/checks/artifact-freshness.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "artifact-freshness 契约（BUG-174）——`_dist` 产物不早于被它打包的源/构建文件：",
-      "oracleType": "structured",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/asset-ledger.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "红配方：新增/删除任一 spec/check 不重跑生成器 → 重算对账红；无外部语法解析 import 的测试被伪标为 external → AST 负例红。",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/backlog-liveness.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "backlog-liveness 回归 — 问题/缺陷/调研/方法/归档池结构合同的 keyless 断言；",
-      "oracleType": "structured",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/boot-timer.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "waitForWebBanner 纯状态机统一经 settle 清理 timer 并摘除 stdout/stderr/exit 监听。",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/ci-jobs.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "CI 作业清单契约（W3-7）——`.github/workflows/ci.yml` 的必需 job 必须被一个书签式聚合 job 覆盖：",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/ci-workflow-oracle.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tools/record/record-ci-oracle.mjs 用「真 YAML 解析 + 真 bash -eo pipefail + 失败 stub node」录制的",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/ci-workflow.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "ci-workflow 契约（BUG-172）——GitHub Actions 的**执行面**子集：",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/cjk-source.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "cjk-source.spec.mjs — client/lib 源码里的「UI 中文硬编码」扫描守卫（BUG-055 的失败类）。",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/clean-room-policy.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "clean-room-policy.test.mjs — 干净室三判据的纯函数矩阵（BUG-233 / 234 / 235）。",
-      "oracleType": "self-referential",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/cli-entry.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "cli-entry 回归 — symlink-safe CLI 入口判定（keyless，纯 fs 临时夹具）。",
-      "oracleType": "structured",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/cli-exit-contract.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "cli-exit-contract.test.mjs — 退出码契约的纯函数核（checks/lib/shared/cli-exit.mjs）。",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/client-effect-return.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "client 注册回收形状契约（W0-6 的可落地半）——`src/client/index.ts` 里每个",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/client-file-size.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "client-file-size.spec.mjs — 驾驶舱 client 单文件行数上限（2026-11-03 审计 D2 的机械守卫）。",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/client-load-same-source.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "必须直调 hitl-fold.deriveAnchors 与 web-ui-nav.openSessionById。红配方：把 import 换成",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/client-surface.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "client 直测面契约（W0-4 / S1）——`src/client/**/*.ts` 每个纯逻辑件必须被至少一个",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/decisions-now.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "decisions-now.test.mjs — 决策台账只写当前决定（2026-11-03 七维卫生审计 D1-7）。",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/doc-counts.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "doc-counts.test.mjs — count-free 名词闭集的正/负样本（BUG-214 类级）。",
-      "oracleType": "self-referential",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/doc-prose-paths.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "live 文档散文路径的纯函数判据（BUG-204 类级：散文里的仓内路径也要能被发现与验证）。",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/doc-surface-shapes.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "doc-surface-shapes.test.mjs — 文档/命令形态台账 ↔ 枚举器 ↔ gates.e2e 案例的三向对账（类级守卫）。",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/docs-consistency.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "docs-consistency 回归 — 跨文档/盘上的少数高价值事实一致性（keyless 纯 fs）。",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/evaluation-contract.test.mjs",
+      "path": "tests/checks/analyze/evaluation-contract.test.mjs",
       "domain": "checks",
       "lane": "checks",
       "class": "check-gate",
@@ -213,137 +13,7 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
-      "path": "tests/checks/fix-evidence.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "fix-evidence 契约（2026-11-14）——bug 卡的 `## 修复落地` 以 `json fix-evidence` 块为权威：",
-      "oracleType": "structured",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/generated-artifacts.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "generated-artifacts — 生成物头必须与生成器模板一致（2026-11-17 审计）。",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/guard-ledger.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "并与 asset-ledger 的 AST 推导 oracleType 及守卫文件内的 test('...BUG-nnn...') 标题做双向对账。",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/install-copies.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "install-copies — live install docs keep the canonical order and never install the",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/isolation-preload.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "本测试在 node:vm 沙箱里执行 tools/channel/llm-socket-isolation.cjs，注入假 fetch/假 undici：",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/layering.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "测试分层守卫 — 回归层（tests/）禁止真实模型/浏览器/网络/子进程/密钥依赖（layering 二代）。",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/model-workflow.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "真模型档可触发通道契约（W3-7）——model-smoke 只能手动触发，且缺 secret 时 preflight 硬失败。",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/navigability-contract.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "可驾驭性契约回归（D23 判据可检验化的机械面；条目 Note = notes/implemented/2026-10-05-project-navigability-phase1.md）。",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/no-unused-code.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "减法契约：scripts / dev / tests / pack src 里不得留下未使用的 import binding 或未导出的顶层声明。",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/note-scan.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "note-scan 契约（BUG-165 / BUG-175 / BUG-185 / BUG-188）——notes 门禁的块级 Markdown 扫描：",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/pack-deps.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "pack-deps.test.mjs — 发布物依赖闭包判据的纯函数矩阵（BUG-229 / 232 / 238）。",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/pack-mirror.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "pack 镜像契约（2026-11-15 pack-src-test-mirror Step 1）：",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/probe-port-policy.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "不存在的 booted.stop() 留孤儿进程；修法 = resolveProbePort（预收割失败 → 临时空闲端口）+",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/profile-guard.test.mjs",
+      "path": "tests/checks/channel/profile-guard.test.mjs",
       "domain": "checks",
       "lane": "checks",
       "class": "check-gate",
@@ -353,167 +23,27 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
-      "path": "tests/checks/publish-manifest.test.mjs",
+      "path": "tests/checks/harness/clean-room-policy.test.mjs",
       "domain": "checks",
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "publish-manifest.test.mjs — 发布 manifest 剥离的纯函数矩阵（BUG-236）。",
+      "uniqueClaim": "clean-room-policy.test.mjs — 干净室三判据的纯函数矩阵（BUG-233 / 234 / 235）。",
       "oracleType": "self-referential",
       "sunset": "随门禁/台账合同退役"
     },
     {
-      "path": "tests/checks/readme-manual-commands.test.mjs",
+      "path": "tests/checks/harness/probe-port-policy.test.mjs",
       "domain": "checks",
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "README 的最短路径命令与 _dist/安装手册.md 同源",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/redirect-ledger.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "redirect-ledger 契约（2026-11-17 维护层对齐）：账本 append-only 后必须能走链。",
-      "oracleType": "self-referential",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/release-anchor.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "release-anchor — 发布/移交锚的变异矩阵。",
-      "oracleType": "self-referential",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/release-copies.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "release-copies — live install docs must name the current pack version only.",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/script-file-size.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "script-file-size.spec.mjs — 维护层入口脚本的尺寸上限（checks/tools/probes；2026-11-03 第 14 轮审计，2026-11-17 扩范围）。",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/shipped-surface.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "shipped-surface.test.mjs — 发布面自足判据的 keyless 半边（BUG-219…239 类级）。",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/smoke-assets.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "smoke-assets 契约（BUG-176）——`checks/smoke` 顶层分类必须看见 symlink / 目录：",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/smoke-child-paths.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "子进程/前置路径的分段字面量守卫（BUG-192 / BUG-193 类级，M3 非 JS 字面量）。",
+      "uniqueClaim": "不存在的 booted.stop() 留孤儿进程；修法 = resolveProbePort（预收割失败 → 临时空闲端口）+",
       "oracleType": "external",
       "sunset": "随门禁/台账合同退役"
     },
     {
-      "path": "tests/checks/smoke-contract.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "真模型档 verdict 契约机械钉住（checks/AGENTS §冒烟脚本可靠性纪律；test-strategy 语料",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/smoke-cost-budget.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "慢资产成本预算（W3-7 后成本治理）——ratchet，只降不升；2026-11-17 按 D54 拆频率两档：",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/smoke-identifiers.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "本测试用 TypeScript 的 allowJs/checkJs 语义诊断，TS2304/TS2552（找不到名字）即红。",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/smoke-imports.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "漏多行静态引用、动态字面量引用与支援件传递闭包。修法 = 用 TypeScript AST（parseKeylessImports）",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/smoke-lane.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "smoke 车道选择契约（W0-10）——`test:e2e`/`test:entry` 只跑 registry 里对应 lane 的条目：",
-      "oracleType": "self-referential",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/smoke-oracle-surface.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "smoke 资产账契约（W0-3 / S2）——每条 smoke 必须回答四个问题：",
-      "oracleType": "canonical",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/smoke-registry.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "smoke-registry.test.mjs — 每个 smoke 的 CI 归属必须显式（2026-11-03 第 14 轮审计）。",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/snapshot-readonly.test.mjs",
+      "path": "tests/checks/harness/snapshot-readonly.test.mjs",
       "domain": "checks",
       "lane": "checks",
       "class": "check-gate",
@@ -523,67 +53,7 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
-      "path": "tests/checks/staged-change-pairing.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "staged-change-pairing 回归 — D52 的暂存区成对判据（纯函数；git 由门禁注入）。",
-      "oracleType": "structured",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/test-index.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "测试索引对账（2026-11-15 test-source-mirror Step 0b）：tests/INDEX.generated.md 是生成物，",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/test-lanes.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "测试车道与可见性契约（W0-8 / 命名对齐）——四条「静默不跑」的防线：",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/test-owner-mirror.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "owner 镜像契约（2026-11-15 test-source-mirror Step 0b）：",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/test-placement.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "tests/ 落点闭集的纯函数负控（BUG-191：全集 − 已知子集 = 空）。",
-      "oracleType": "self-referential",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/test-surface.test.mjs",
-      "domain": "checks",
-      "lane": "checks",
-      "class": "check-gate",
-      "cost": "fast-inproc",
-      "uniqueClaim": "覆盖边界（2026-10-28 评分轮 Phase D；同日卫生轮扩到 pack 纯件）。",
-      "oracleType": "external",
-      "sunset": "随门禁/台账合同退役"
-    },
-    {
-      "path": "tests/checks/verify-gates.test.mjs",
+      "path": "tests/checks/harness/verify-gates.test.mjs",
       "domain": "checks",
       "lane": "checks",
       "class": "check-gate",
@@ -593,7 +63,387 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
-      "path": "tests/checks/web-ui-nav-bilingual.test.mjs",
+      "path": "tests/checks/repo/backlog-liveness.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "backlog-liveness 回归 — 问题/缺陷/调研/方法/归档池结构合同的 keyless 断言；",
+      "oracleType": "structured",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/cjk-source.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "cjk-source.spec.mjs — client/lib 源码里的「UI 中文硬编码」扫描守卫（BUG-055 的失败类）。",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/client-effect-return.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "client 注册回收形状契约（W0-6 的可落地半）——`src/client/index.ts` 里每个",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/client-file-size.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "client-file-size.spec.mjs — 驾驶舱 client 单文件行数上限（2026-11-03 审计 D2 的机械守卫）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/client-load-same-source.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "必须直调 hitl-fold.deriveAnchors 与 web-ui-nav.openSessionById。红配方：把 import 换成",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/decisions-now.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "decisions-now.test.mjs — 决策台账只写当前决定（2026-11-03 七维卫生审计 D1-7）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/doc-counts.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "doc-counts.test.mjs — count-free 名词闭集的正/负样本（BUG-214 类级）。",
+      "oracleType": "self-referential",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/doc-prose-paths.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "live 文档散文路径的纯函数判据（BUG-204 类级：散文里的仓内路径也要能被发现与验证）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/docs-consistency.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "docs-consistency 回归 — 跨文档/盘上的少数高价值事实一致性（keyless 纯 fs）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/fix-evidence.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "fix-evidence 契约（2026-11-14）——bug 卡的 `## 修复落地` 以 `json fix-evidence` 块为权威：",
+      "oracleType": "structured",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/generated-artifacts.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "generated-artifacts — 生成物头必须与生成器模板一致（2026-11-17 审计）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/install-copies.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "install-copies — live install docs keep the canonical order and never install the",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/isolation-preload.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "本测试在 node:vm 沙箱里执行 tools/channel/llm-socket-isolation.cjs，注入假 fetch/假 undici：",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/navigability-contract.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "可驾驭性契约回归（D23 判据可检验化的机械面；条目 Note = notes/implemented/2026-10-05-project-navigability-phase1.md）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/no-unused-code.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "减法契约：scripts / dev / tests / pack src 里不得留下未使用的 import binding 或未导出的顶层声明。",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/pack-deps.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "pack-deps.test.mjs — 发布物依赖闭包判据的纯函数矩阵（BUG-229 / 232 / 238）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/publish-manifest.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "publish-manifest.test.mjs — 发布 manifest 剥离的纯函数矩阵（BUG-236）。",
+      "oracleType": "self-referential",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/readme-manual-commands.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "README 的最短路径命令与 _dist/安装手册.md 同源",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/redirect-ledger.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "redirect-ledger 契约（2026-11-17 维护层对齐）：账本 append-only 后必须能走链。",
+      "oracleType": "self-referential",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/release-anchor.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "release-anchor — 发布/移交锚的变异矩阵。",
+      "oracleType": "self-referential",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/release-copies.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "release-copies — live install docs must name the current pack version only.",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/script-file-size.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "script-file-size.spec.mjs — 维护层入口脚本的尺寸上限（checks/tools/probes；2026-11-03 第 14 轮审计，2026-11-17 扩范围）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/shipped-surface.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "shipped-surface.test.mjs — 发布面自足判据的 keyless 半边（BUG-219…239 类级）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/smoke-child-paths.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "子进程/前置路径的分段字面量守卫（BUG-192 / BUG-193 类级，M3 非 JS 字面量）。",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/smoke-identifiers.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "本测试用 TypeScript 的 allowJs/checkJs 语义诊断，TS2304/TS2552（找不到名字）即红。",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/smoke-lane.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "smoke 车道选择契约（W0-10）——`test:e2e`/`test:entry` 只跑 registry 里对应 lane 的条目：",
+      "oracleType": "self-referential",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/staged-change-pairing.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "staged-change-pairing 回归 — D52 的暂存区成对判据（纯函数；git 由门禁注入）。",
+      "oracleType": "structured",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/test-placement.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/ 落点闭集的纯函数负控（BUG-191：全集 − 已知子集 = 空）。",
+      "oracleType": "self-referential",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/shared/artifact-freshness.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "artifact-freshness 契约（BUG-174）——`_dist` 产物不早于被它打包的源/构建文件：",
+      "oracleType": "structured",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/shared/boot-timer.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "waitForWebBanner 纯状态机统一经 settle 清理 timer 并摘除 stdout/stderr/exit 监听。",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/shared/cli-entry.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "cli-entry 回归 — symlink-safe CLI 入口判定（keyless，纯 fs 临时夹具）。",
+      "oracleType": "structured",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/shared/cli-exit-contract.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "cli-exit-contract.test.mjs — 退出码契约的纯函数核（checks/lib/shared/cli-exit.mjs）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/shared/doc-surface-shapes.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "doc-surface-shapes.test.mjs — 文档/命令形态台账 ↔ 枚举器 ↔ gates.e2e 案例的三向对账（类级守卫）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/shared/note-scan.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "note-scan 契约（BUG-165 / BUG-175 / BUG-185 / BUG-188）——notes 门禁的块级 Markdown 扫描：",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/shared/pack-mirror.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "pack 镜像契约（2026-11-15 pack-src-test-mirror Step 1）：",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/shared/smoke-contract.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "真模型档 verdict 契约机械钉住（checks/AGENTS §冒烟脚本可靠性纪律；test-strategy 语料",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/shared/test-lanes.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "测试车道与可见性契约（W0-8 / 命名对齐）——四条「静默不跑」的防线：",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/shared/test-owner-mirror.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "owner 镜像契约（2026-11-15 test-source-mirror Step 0b；2026-11-18 扩到 checks 车道）：",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/shared/web-ui-nav-bilingual.test.mjs",
       "domain": "checks",
       "lane": "checks",
       "class": "check-gate",
@@ -603,7 +453,157 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
-      "path": "tests/checks/workspace-parsers.test.mjs",
+      "path": "tests/checks/test-infra/asset-ledger.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "红配方：新增/删除任一 spec/check 不重跑生成器 → 重算对账红；无外部语法解析 import 的测试被伪标为 external → AST 负例红。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/ci-jobs.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "CI 作业清单契约（W3-7）——`.github/workflows/ci.yml` 的必需 job 必须被一个书签式聚合 job 覆盖：",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/ci-workflow-oracle.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tools/record/record-ci-oracle.mjs 用「真 YAML 解析 + 真 bash -eo pipefail + 失败 stub node」录制的",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/ci-workflow.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "ci-workflow 契约（BUG-172）——GitHub Actions 的**执行面**子集：",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/client-surface.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "client 直测面契约（W0-4 / S1）——`src/client/**/*.ts` 每个纯逻辑件必须被至少一个",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/guard-ledger.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "并与 asset-ledger 的 AST 推导 oracleType 及守卫文件内的 test('...BUG-nnn...') 标题做双向对账。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/layering.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "测试分层守卫 — 回归层（tests/）禁止真实模型/浏览器/网络/子进程/密钥依赖（layering 二代）。",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/model-workflow.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "真模型档可触发通道契约（W3-7）——model-smoke 只能手动触发，且缺 secret 时 preflight 硬失败。",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/smoke-assets.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "smoke-assets 契约（BUG-176）——`checks/smoke` 顶层分类必须看见 symlink / 目录：",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/smoke-cost-budget.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "慢资产成本预算（W3-7 后成本治理）——ratchet，只降不升；2026-11-17 按 D54 拆频率两档：",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/smoke-imports.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "漏多行静态引用、动态字面量引用与支援件传递闭包。修法 = 用 TypeScript AST（parseKeylessImports）",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/smoke-oracle-surface.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "smoke 资产账契约（W0-3 / S2）——每条 smoke 必须回答四个问题：",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/smoke-registry.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "smoke-registry.test.mjs — 每个 smoke 的 CI 归属必须显式（2026-11-03 第 14 轮审计）。",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/test-index.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "测试索引对账（2026-11-15 test-source-mirror Step 0b）：tests/INDEX.generated.md 是生成物，",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/test-surface.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "覆盖边界（2026-10-28 评分轮 Phase D；同日卫生轮扩到 pack 纯件）。",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/test-infra/workspace-parsers.test.mjs",
       "domain": "checks",
       "lane": "checks",
       "class": "check-gate",

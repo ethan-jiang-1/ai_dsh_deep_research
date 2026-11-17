@@ -86,7 +86,7 @@ which dsh; dsh --version   # 全局版本，非 vendor tag
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/clean-room-policy.test.mjs"
+    "path": "tests/checks/harness/clean-room-policy.test.mjs"
   }
 }
 ```

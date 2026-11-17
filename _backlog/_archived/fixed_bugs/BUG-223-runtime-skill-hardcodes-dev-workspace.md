@@ -94,7 +94,7 @@ ls research-workspace   # 仓内有；用户工作区没有
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/shipped-surface.test.mjs"
+    "path": "tests/checks/repo/shipped-surface.test.mjs"
   }
 }
 ```

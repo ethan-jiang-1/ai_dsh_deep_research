@@ -215,7 +215,7 @@ export function runA() {
 // 为什么：md-links 只管 Markdown 链接，反引号 / 散文 / 表格 / 围栏路径清单 / HTML href 里的散路径
 // 无人把守；agent 会照它们去读文件，指向空处 = 探索成本 + 误诊。
 // 形态正本 = checks/lib/repo/doc-surface.mjs 的 SHAPES：本门禁只消费 token，不再自己枚举形态；
-// 形态台账 ↔ gates.e2e 案例双向对账（tests/checks/doc-surface-shapes.test.mjs），补一种写法不用改这里。
+// 形态台账 ↔ gates.e2e 案例双向对账（tests/checks/shared/doc-surface-shapes.test.mjs），补一种写法不用改这里。
 // 分工：命令行（围栏 / 缩进 / CI）归 call-surface；本门禁只判路径面。
 // 范围：live 文档（notes/ 历史层、tests/fixtures/ 样本、vendor/、snapshots/replay/ 录制证据除外）；
 // 活指令面（_backlog/methods/*.md + _backlog/triggers.md）同在合同内——它们被技能与根 AGENTS 当

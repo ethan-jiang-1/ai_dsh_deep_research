@@ -112,6 +112,6 @@ rm -rf tests/run/ops/deep
   ],
   "red": { "command": "node --import tsx/esm --test tests/checks/pack-mirror.test.mjs", "exit": 1, "output": "not ok 1 - tests 落点全集 − 已知子集 = 空；深度恰好（BUG-191 / BUG-200；账本重生成不能吸收）；tests/run/ops/deep/zz-deep.spec.mjs: tests/run 未知深度（收到 5 段）" },
   "green": { "command": "node --import tsx/esm --test tests/checks/pack-mirror.test.mjs", "exit": 0 },
-  "guard": { "path": "tests/checks/pack-mirror.test.mjs" }
+  "guard": { "path": "tests/checks/shared/pack-mirror.test.mjs" }
 }
 ```

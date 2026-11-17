@@ -1,6 +1,9 @@
 # 测试子目录按消费者接口分层（owner 轴）
 
 > 状态：implemented
+> 历史注记：决定 3 的「`tests/checks` 平铺（门禁车道）」于 2026-11-18 被
+> [tests/checks owner 镜像](2026-11-18-tests-checks-owner-mirror.md) 取代（改为 `tests/checks/<owner>/`）；
+> 本页其余决定仍有效。
 
 ## 决定
 

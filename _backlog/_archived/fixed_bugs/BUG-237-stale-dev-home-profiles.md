@@ -93,7 +93,7 @@ profile 副本由 `dsh plugin add`/镜像流程安装；`boot-run` 的漂移检�
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/profile-guard.test.mjs"
+    "path": "tests/checks/channel/profile-guard.test.mjs"
   }
 }
 ```

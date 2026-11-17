@@ -91,7 +91,7 @@ cold-start 设计目标是「不依赖既有 profile/凭据/会话」，不是�
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/clean-room-policy.test.mjs"
+    "path": "tests/checks/harness/clean-room-policy.test.mjs"
   }
 }
 ```

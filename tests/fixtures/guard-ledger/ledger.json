@@ -13,7 +13,7 @@
     {
       "id": "BUG-003",
       "mechanism": "回边/描边直调 hitl-fold.deriveAnchors，禁手抄镜像",
-      "guard": "tests/checks/client-load-same-source.test.mjs",
+      "guard": "tests/checks/repo/client-load-same-source.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把 import 换成本地 const deriveAnchors = ... → AST 同源例红"
@@ -21,7 +21,7 @@
     {
       "id": "BUG-009",
       "mechanism": "文档不得把「重启自动终局化」写成既成机制",
-      "guard": "tests/checks/docs-consistency.test.mjs",
+      "guard": "tests/checks/repo/docs-consistency.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把 61 的句子改回「被通道重启终局化」→ 本例红"
@@ -29,7 +29,7 @@
     {
       "id": "BUG-010",
       "mechanism": "回归 import 闭包（含传递引入）零子进程与网络",
-      "guard": "tests/checks/layering.test.mjs",
+      "guard": "tests/checks/test-infra/layering.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "给 tests 注入 child_process/execSync 引用 → AST 闭包图红"
@@ -61,7 +61,7 @@
     {
       "id": "BUG-016",
       "mechanism": "md-links 门禁拦截指向未 git 跟踪文件的本地链接（防本机幻影绿）",
-      "guard": "tests/checks/verify-gates.test.mjs",
+      "guard": "tests/checks/harness/verify-gates.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删 md-links-untracked 案例或放行未跟踪目标 → verify-gates / gates.e2e 红"
@@ -93,7 +93,7 @@
     {
       "id": "BUG-024",
       "mechanism": "LLM 流请求必挂一次性连接池，隔离预载在场可证",
-      "guard": "tests/checks/isolation-preload.test.mjs",
+      "guard": "tests/checks/repo/isolation-preload.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删 dispatcher/Agent 或退回共享连接池 → VM 预载例红"
@@ -125,7 +125,7 @@
     {
       "id": "BUG-028",
       "mechanism": "隔离预载回退分支显式计数并告警，不静默放行",
-      "guard": "tests/checks/isolation-preload.test.mjs",
+      "guard": "tests/checks/repo/isolation-preload.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删 unisolatedCount/告警或把 issued 分支改回落 → 本例红"
@@ -165,7 +165,7 @@
     {
       "id": "BUG-034",
       "mechanism": "浏览器冒烟按 sessionId 显式开会话，禁赖默认首屏视图",
-      "guard": "tests/checks/client-load-same-source.test.mjs",
+      "guard": "tests/checks/repo/client-load-same-source.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删 openSessionById 调用或恢复私有定位器 → AST 例红"
@@ -189,7 +189,7 @@
     {
       "id": "BUG-042",
       "mechanism": "根 AGENTS.md 布局围栏块完整枚举工作区根契约实体",
-      "guard": "tests/checks/docs-consistency.test.mjs",
+      "guard": "tests/checks/repo/docs-consistency.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "从 AGENTS.md 布局块删 method-library.md 或 _abandoned/ → 枚举对账红"
@@ -213,7 +213,7 @@
     {
       "id": "BUG-051",
       "mechanism": "smoke 顶层标识符经 TypeScript 语义绑定器校验（防未声明变量）",
-      "guard": "tests/checks/smoke-identifiers.test.mjs",
+      "guard": "tests/checks/repo/smoke-identifiers.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "在任一 smoke 写未声明标识符 → TS2304 诊断红"
@@ -229,7 +229,7 @@
     {
       "id": "BUG-059",
       "mechanism": "浏览器导航文案定位器显式声明双语归属",
-      "guard": "tests/checks/web-ui-nav-bilingual.test.mjs",
+      "guard": "tests/checks/shared/web-ui-nav-bilingual.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "删 TAB_TEXT/双语常量的英文或中文半 → AST 双语例红"
@@ -237,7 +237,7 @@
     {
       "id": "BUG-061",
       "mechanism": "钉死 locale 的浏览器冒烟禁止残留单语字面量定位器",
-      "guard": "tests/checks/web-ui-nav-bilingual.test.mjs",
+      "guard": "tests/checks/shared/web-ui-nav-bilingual.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "在 client-load 写 getByText 单语中英字面量 → AST 扫描红"
@@ -253,7 +253,7 @@
     {
       "id": "BUG-072",
       "mechanism": "release-vocab 门禁拦退役词「产品内嵌」同时放行合法复合词「产品内容」",
-      "guard": "tests/checks/verify-gates.test.mjs",
+      "guard": "tests/checks/harness/verify-gates.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把负向先行断言 产品内(?!容) 改宽或删正反案例 → verify-gates / gates.e2e 红"
@@ -261,7 +261,7 @@
     {
       "id": "BUG-079",
       "mechanism": "全量 smoke 入口与支援件相对 import 闭包在盘上可解析（含跨行 import）",
-      "guard": "tests/checks/smoke-imports.test.mjs",
+      "guard": "tests/checks/test-infra/smoke-imports.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "把任一 smoke 的单行或跨行相对 import 改成死路径 → AST 闭包红"
@@ -277,7 +277,7 @@
     {
       "id": "BUG-095",
       "mechanism": "waitForWebBanner / bootWeb 在成功、早退、超时三路径均清除超时定时器",
-      "guard": "tests/checks/boot-timer.test.mjs",
+      "guard": "tests/checks/shared/boot-timer.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "删 clearTimeout 或让 bootWeb 绕开 waitForWebBanner → 句柄泄漏/AST 例红"
@@ -317,7 +317,7 @@
     {
       "id": "BUG-136",
       "mechanism": "行为探针遇外部占口自动退避临时空闲端口，finally 杀进程组并复收割",
-      "guard": "tests/checks/probe-port-policy.test.mjs",
+      "guard": "tests/checks/harness/probe-port-policy.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "删 resolveProbePort 回落或删 probes/behavior 的 cleanupBootedProbe → 行为/AST 例红"
@@ -333,7 +333,7 @@
     {
       "id": "BUG-160",
       "mechanism": "smoke-registry 只认 CI run 步骤实际执行的脚本，注释/echo 提及不算覆盖",
-      "guard": "tests/checks/smoke-registry.test.mjs",
+      "guard": "tests/checks/test-infra/smoke-registry.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "退回全文子串匹配脚本名 → 仅 echo/注释提及例红"
@@ -341,7 +341,7 @@
     {
       "id": "BUG-161",
       "mechanism": "ci-jobs 以真实 YAML AST 读取全部合法 job id（含下划线）与 needs 依赖",
-      "guard": "tests/checks/ci-jobs.test.mjs",
+      "guard": "tests/checks/test-infra/ci-jobs.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "退回手写不含下划线的正则切块 → 含下划线 job 漏检例红"
@@ -349,7 +349,7 @@
     {
       "id": "BUG-162",
       "mechanism": "smoke 发现面递归扫描子目录，嵌套脚本不得逃逸注册账与车道",
-      "guard": "tests/checks/smoke-assets.test.mjs",
+      "guard": "tests/checks/test-infra/smoke-assets.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把递归扫描改回单层 readdirSync → 嵌套子目录逃逸例红"
@@ -357,7 +357,7 @@
     {
       "id": "BUG-163",
       "mechanism": "model-smoke.yml 触发事件白名单锁死 workflow_dispatch，拦截 pull_request_target 等变体",
-      "guard": "tests/checks/model-workflow.test.mjs",
+      "guard": "tests/checks/test-infra/model-workflow.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "改用黑名单只禁 push/pull_request → pull_request_target 注入例红"
@@ -365,7 +365,7 @@
     {
       "id": "BUG-164",
       "mechanism": "snapshot-replay 的 --why 参数拒绝把紧随其后的 CLI flag 当作重录理由载体",
-      "guard": "tests/checks/snapshot-readonly.test.mjs",
+      "guard": "tests/checks/harness/snapshot-readonly.test.mjs",
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "去掉 --why 值首字符 - 拦截 → --why --port 放行例红"
@@ -373,7 +373,7 @@
     {
       "id": "BUG-165",
       "mechanism": "note-scan 剥离块引用状态行与否定证据句，并与 mdast AST 标题/段落对账",
-      "guard": "tests/checks/note-scan.test.mjs",
+      "guard": "tests/checks/shared/note-scan.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "不剥 > 引用或把「未实跑」计为正证据 → 引用/否定例红"
@@ -381,7 +381,7 @@
     {
       "id": "BUG-166",
       "mechanism": "note-tree 目录判断先于点文件豁免，拦截隐藏子目录偷藏的 Note",
-      "guard": "tests/checks/verify-gates.test.mjs",
+      "guard": "tests/checks/harness/verify-gates.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "先按 startsWith(.) 跳过目录再判 isDirectory → note-tree-hidden-dir 案例红"
@@ -429,7 +429,7 @@
     {
       "id": "BUG-172",
       "mechanism": "CI 执行面排除 job/step 级 if: false 及 continue-on-error 吞错步骤",
-      "guard": "tests/checks/ci-workflow.test.mjs",
+      "guard": "tests/checks/test-infra/ci-workflow.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "忽略 step.if 或 continue-on-error → 永不执行/吞错步骤算入覆盖例红"
@@ -437,7 +437,7 @@
     {
       "id": "BUG-173",
       "mechanism": "client-effect-return 同时识别点属性与方括号下标形式的 effect 注册调用",
-      "guard": "tests/checks/client-effect-return.test.mjs",
+      "guard": "tests/checks/repo/client-effect-return.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "只检 PropertyAccessExpression 漏 ElementAccessExpression → ctx[\"effect\"] 逃逸例红"
@@ -445,7 +445,7 @@
     {
       "id": "BUG-174",
       "mechanism": "_dist 产物新鲜度同时覆盖 tarball 与源码修改时间，防陈旧包冒充当前构建",
-      "guard": "tests/checks/artifact-freshness.test.mjs",
+      "guard": "tests/checks/shared/artifact-freshness.test.mjs",
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "跳过 tarball 与包源码新鲜度比对 → 陈旧 tgz 放行例红"
@@ -453,7 +453,7 @@
     {
       "id": "BUG-175",
       "mechanism": "note 门禁剥离未闭合/波浪线围栏并拦截点开头隐藏 .md 文件",
-      "guard": "tests/checks/note-scan.test.mjs",
+      "guard": "tests/checks/shared/note-scan.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "不遮罩 ~~~ 或豁免 .hidden.md → 围栏伪标题与隐藏 Note 例红"
@@ -461,7 +461,7 @@
     {
       "id": "BUG-176",
       "mechanism": "smoke 资产扫描用 lstat 显式识别并拒绝符号链接入口，防绕过注册账",
-      "guard": "tests/checks/smoke-assets.test.mjs",
+      "guard": "tests/checks/test-infra/smoke-assets.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "改用跟随目标的 stat 忽略符号链接 → symlink 逃逸例红"
@@ -469,7 +469,7 @@
     {
       "id": "BUG-177",
       "mechanism": "CI if: 表达式经 ${{ }} 剥壳、空白与外层括号归一后判定恒假条件",
-      "guard": "tests/checks/ci-workflow.test.mjs",
+      "guard": "tests/checks/test-infra/ci-workflow.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "只判字面量 false 不剥 ${{ (false) }} → 包装恒假步骤算覆盖例红"
@@ -501,7 +501,7 @@
     {
       "id": "BUG-181",
       "mechanism": "构建产物新鲜度纳入输入文件集合指纹，纯删除源文件同样触发陈旧判定",
-      "guard": "tests/checks/artifact-freshness.test.mjs",
+      "guard": "tests/checks/shared/artifact-freshness.test.mjs",
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "只比最大 mtime 不比文件集清单 → 删文件不触发重编例红"
@@ -509,7 +509,7 @@
     {
       "id": "BUG-182",
       "mechanism": "model-smoke 事件解析复用 ci-workflow 唯一 AST 入口并正确拒绝空映射 on: {}",
-      "guard": "tests/checks/model-workflow.test.mjs",
+      "guard": "tests/checks/test-infra/model-workflow.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "手写第二套 on: 解析或漏判空对象 {} → 空触发器与双实现漂移红"
@@ -525,7 +525,7 @@
     {
       "id": "BUG-184",
       "mechanism": "CI if: 表达式经 yaml AST 剥引号/注释并拒绝恒假字面量冒充条件",
-      "guard": "tests/checks/ci-workflow-oracle.test.mjs",
+      "guard": "tests/checks/test-infra/ci-workflow-oracle.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "退回手写行剥离注释/引号 → ci-oracle fixture 对账红"
@@ -541,7 +541,7 @@
     {
       "id": "BUG-186",
       "mechanism": "fix-evidence 强制结构化 JSON 块以非零红退出码和零绿退出码作唯一判据（禁散文猜词）",
-      "guard": "tests/checks/fix-evidence.test.mjs",
+      "guard": "tests/checks/repo/fix-evidence.test.mjs",
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "放行 red.exit===0、green.exit!==0 或编码重复键 → 结构化证据例红"
@@ -549,7 +549,7 @@
     {
       "id": "BUG-187",
       "mechanism": "CI run: 规范门禁拒绝 ! 取反、短路死分支、后台 & 与 || true 吞错包装",
-      "guard": "tests/checks/ci-workflow-oracle.test.mjs",
+      "guard": "tests/checks/test-infra/ci-workflow-oracle.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "放宽 ciWorkflowRunProblems 白名单或 bash -eo pipefail 对照 → oracle 红"
@@ -557,7 +557,7 @@
     {
       "id": "BUG-188",
       "mechanism": "note 状态行统一识别加粗、下划线与反引号装饰标签并与 mdast 对齐",
-      "guard": "tests/checks/note-scan.test.mjs",
+      "guard": "tests/checks/shared/note-scan.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "状态标签退回只认无装饰裸词 → **状态** 漏检例红"
@@ -565,7 +565,7 @@
     {
       "id": "BUG-189",
       "mechanism": "staged-change-pairing 要求暂存区精确改动路径与绑定该 BUG-nnn 的有效守卫成对出现",
-      "guard": "tests/checks/staged-change-pairing.test.mjs",
+      "guard": "tests/checks/repo/staged-change-pairing.test.mjs",
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "退回目录前缀匹配或允许借未改动的无关旧测试充当 guard.path → 配对例红"
@@ -573,7 +573,7 @@
     {
       "id": "BUG-190",
       "mechanism": "CI on: 触发器由 yaml AST 完整解析标量、序列与行内流映射并纳入录制 oracle",
-      "guard": "tests/checks/ci-workflow-oracle.test.mjs",
+      "guard": "tests/checks/test-infra/ci-workflow-oracle.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "退回缩进文本猜 on: 或漏录 events 字段 → BUG-190 fixture 对账红"
@@ -581,7 +581,7 @@
     {
       "id": "BUG-191",
       "mechanism": "tests/ 落点全集 − 已知子集 = 空；pack-mirror 与 L0 test-placement 共用规则，未知子树/深度/平铺根 = 红",
-      "guard": "tests/checks/pack-mirror.test.mjs",
+      "guard": "tests/checks/shared/pack-mirror.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "在 tests/cockpit/misc/ 放 spec → 落点全集测试红；重生成资产账不解除"
@@ -589,7 +589,7 @@
     {
       "id": "BUG-192",
       "mechanism": "snapshot-replay 离线预载路径存在性 + 分段路径静态守卫",
-      "guard": "tests/checks/smoke-child-paths.test.mjs",
+      "guard": "tests/checks/repo/smoke-child-paths.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "把 OFFLINE_PRELOAD 指回 scripts/lib/replay-network-offline.cjs → 静态守卫红；运行前置 exit 2"
@@ -597,7 +597,7 @@
     {
       "id": "BUG-193",
       "mechanism": "cdp-ask 探针路径存在性 + 分段路径静态守卫",
-      "guard": "tests/checks/smoke-child-paths.test.mjs",
+      "guard": "tests/checks/repo/smoke-child-paths.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "把 PROBE 指回 scripts/probe/cdp-probe.mjs → 静态守卫红；spawn 前 exit 2"
@@ -605,7 +605,7 @@
     {
       "id": "BUG-194",
       "mechanism": "test-index importer 扩展名闭集含 .tsx + 独立集合抽查",
-      "guard": "tests/checks/test-index.test.mjs",
+      "guard": "tests/checks/test-infra/test-index.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "把 importersUnder 扩展名收回 .ts 并重生成索引 → 独立抽查红"
@@ -621,7 +621,7 @@
     {
       "id": "BUG-196",
       "mechanism": "scripts/lib 模块全集含 .cjs；preload 登记 SMOKE_ONLY 且 policy 有直测",
-      "guard": "tests/checks/test-surface.test.mjs",
+      "guard": "tests/checks/test-infra/test-surface.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "新增无测试 scripts/lib/shared/zz-probe.cjs → 覆盖缺口红"
@@ -629,7 +629,7 @@
     {
       "id": "BUG-197",
       "mechanism": "repo-conventions 的 dev/hooks 扫面有常驻注入案例并由 verify-gates 静态钉住",
-      "guard": "tests/checks/verify-gates.test.mjs",
+      "guard": "tests/checks/harness/verify-gates.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删 gates-cases 的 repo-conventions-dev-hook-path → 静态钉红；去扫面 → gates.e2e 案例红"
@@ -637,7 +637,7 @@
     {
       "id": "BUG-198",
       "mechanism": "spec 首行自指路径 + asset-ledger claim 中的仓内路径必须存在",
-      "guard": "tests/checks/asset-ledger.test.mjs",
+      "guard": "tests/checks/test-infra/asset-ledger.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "claim 注入不存在的 tests/… 路径 → 红"
@@ -653,7 +653,7 @@
     {
       "id": "BUG-200",
       "mechanism": "tests/run|cockpit lib|cockpit client 的落点深度恰好（未知深度 = 红）",
-      "guard": "tests/checks/pack-mirror.test.mjs",
+      "guard": "tests/checks/shared/pack-mirror.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "在 tests/run/ops/deep/ 放 spec → 落点/深度测试红"
@@ -661,7 +661,7 @@
     {
       "id": "BUG-201",
       "mechanism": "守卫台账闭集 = D-1/D-2/A–F，且守卫标题声称的 BUG-nnn（≥191）必须反向入账",
-      "guard": "tests/checks/guard-ledger.test.mjs",
+      "guard": "tests/checks/test-infra/guard-ledger.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删一条批 E 入账或给守卫加未入账 BUG-199 标题 → 全量/反向判据红"
@@ -669,7 +669,7 @@
     {
       "id": "BUG-202",
       "mechanism": "asset-ledger 的 claim 路径检查按仓内根前缀闭集（scripts/docs/packages/…），不只 tests/",
-      "guard": "tests/checks/asset-ledger.test.mjs",
+      "guard": "tests/checks/test-infra/asset-ledger.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "claim 注入不存在的 scripts/… 或 docs/… 路径 → 红（旧 tests-only 绿）"
@@ -685,7 +685,7 @@
     {
       "id": "BUG-204",
       "mechanism": "live 文档散文里的仓内路径 token 由 doc-paths 枚举并按同一解析序验证",
-      "guard": "tests/checks/doc-prose-paths.test.mjs",
+      "guard": "tests/checks/repo/doc-prose-paths.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "散文注入 scripts/lib/__gone__.mjs 到 live 文档 → doc-paths 红"
@@ -693,7 +693,7 @@
     {
       "id": "BUG-205",
       "mechanism": "shared 只收无依赖/仅 shared/test-support 的跨切 spec；单 owner spec 归位",
-      "guard": "tests/checks/test-owner-mirror.test.mjs",
+      "guard": "tests/checks/shared/test-owner-mirror.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "在 tests/run/shared 放只依赖 gates 的 spec → shared 用例红"
@@ -709,7 +709,7 @@
     {
       "id": "BUG-207",
       "mechanism": "tests/ 下零符号链接（git mode 120000）+ pack-mirror 盘上 symlink 枚举",
-      "guard": "tests/checks/pack-mirror.test.mjs",
+      "guard": "tests/checks/shared/pack-mirror.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "在 tests/ 放 symlink 目录 → 零符号链接测试红；test-placement 门禁同步点名"
@@ -717,7 +717,7 @@
     {
       "id": "BUG-208",
       "mechanism": "索引行的测试列 = 独立 .tsx importer 集合（行缺/多/少都红）",
-      "guard": "tests/checks/test-index.test.mjs",
+      "guard": "tests/checks/test-infra/test-index.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "importersUnder 跳过部分 importer 并重生成索引 → 集合对账红（旧非空判据绿）"
@@ -725,7 +725,7 @@
     {
       "id": "BUG-209",
       "mechanism": "身份表（CANONICAL/EXTERNAL/STRUCTURED_LIBS）里的死路径静默改变 oracleType 分类，生成器把错吸收成当前状态",
-      "guard": "tests/checks/asset-ledger.test.mjs",
+      "guard": "tests/checks/test-infra/asset-ledger.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把 CANONICAL_LIBS 任一路径改成不存在的名字 → 身份路径存在性用例红（旧实现用同一张表重算，自洽绿）"
@@ -733,7 +733,7 @@
     {
       "id": "BUG-217",
       "mechanism": "车道无匹配条目的失败信息缺修正入口（--all 是带 dev-only 的唯一开关）",
-      "guard": "tests/checks/cli-exit-contract.test.mjs",
+      "guard": "tests/checks/shared/cli-exit-contract.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删 noMatchMessage 的 --all/--list 提示 → 消息用例红；真入口红证 = checks/smoke/cli-exit.e2e.mjs"
@@ -741,7 +741,7 @@
     {
       "id": "BUG-218",
       "mechanism": "车道全 SKIP（一条都没跑）时 runner 仍 exit 0，证据命令被误读为通过",
-      "guard": "tests/checks/cli-exit-contract.test.mjs",
+      "guard": "tests/checks/shared/cli-exit-contract.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "verdictOf 改回「只按 FAIL 数退出」→ 全 SKIP 用例红；真进程红证 = checks/smoke/cli-exit.e2e.mjs"
@@ -749,7 +749,7 @@
     {
       "id": "BUG-215",
       "mechanism": "CI 频率账两义：tier: ci 同时表示 required 与 nightly 挂载，预算单位失真",
-      "guard": "tests/checks/smoke-registry.test.mjs",
+      "guard": "tests/checks/test-infra/smoke-registry.test.mjs",
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "把一条 tier=nightly 的件从 nightly.yml 删掉 → 红；把 ci 件标成 nightly → 双向对账红"
@@ -757,7 +757,7 @@
     {
       "id": "BUG-216",
       "mechanism": "tests/ 非测试模块闭集只认 .mjs/.cjs：.ts/.tsx/.js 助手零规则落位，未知扩展名静默通过",
-      "guard": "tests/checks/test-placement.test.mjs",
+      "guard": "tests/checks/repo/test-placement.test.mjs",
       "oracleType": "self-referential",
       "status": "provisional",
       "redRecipe": "从 SUPPORT_EXT 删掉 .ts → .ts 助手用例红；删未知扩展名兜底 → .py 用例红",
@@ -766,7 +766,7 @@
     {
       "id": "BUG-219",
       "mechanism": "tarball 的 lib/types 111 个 .d.ts 只有 7 个 exports 类型入口（104 内部类型随包）",
-      "guard": "tests/checks/shipped-surface.test.mjs",
+      "guard": "tests/checks/repo/shipped-surface.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把 files 改回 lib/** 或删一个 exports.types 入口 → 发布清单用例红"
@@ -774,7 +774,7 @@
     {
       "id": "BUG-220",
       "mechanism": "pack README 用户段给用户 node checks/…（checks/ 不在 tarball）",
-      "guard": "tests/checks/shipped-surface.test.mjs",
+      "guard": "tests/checks/repo/shipped-surface.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "在 README 折叠区外注入 pnpm build → readme-shape 与 shipped-surface 用例红"
@@ -782,7 +782,7 @@
     {
       "id": "BUG-221",
       "mechanism": "运行时 skill research-brief 引用 checks/lib/shared/plan-card.mjs（不随包）",
-      "guard": "tests/checks/shipped-surface.test.mjs",
+      "guard": "tests/checks/repo/shipped-surface.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "往 skill 注入 checks/lib/__gone__.mjs → 随包文本用例红"
@@ -790,7 +790,7 @@
     {
       "id": "BUG-222",
       "mechanism": "运行时 skill nodes-contract 把开发仓 docs/design/50 当状态合同正本",
-      "guard": "tests/checks/shipped-surface.test.mjs",
+      "guard": "tests/checks/repo/shipped-surface.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把 docs/design/50 写回 skill → 随包文本用例红"
@@ -798,7 +798,7 @@
     {
       "id": "BUG-223",
       "mechanism": "运行时 skill question-patterns 硬编码 research-workspace/（开发实例名）",
-      "guard": "tests/checks/shipped-surface.test.mjs",
+      "guard": "tests/checks/repo/shipped-surface.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把 research-workspace/ 写回 skill → 随包文本用例红"
@@ -806,7 +806,7 @@
     {
       "id": "BUG-224",
       "mechanism": "发布物 lib/client.js 带 tests/checks/_backlog 路径注释",
-      "guard": "tests/checks/shipped-surface.test.mjs",
+      "guard": "tests/checks/repo/shipped-surface.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "往 lib/client.js 注入 checks/lib/__gone__.mjs → pack.e2e 随包文本红；源码注释由本测试扫"
@@ -814,7 +814,7 @@
     {
       "id": "BUG-225",
       "mechanism": "发布物 lib/types/**/*.d.ts 带开发面路径注释",
-      "guard": "tests/checks/shipped-surface.test.mjs",
+      "guard": "tests/checks/repo/shipped-surface.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "往 src 注释注入 tests/__gone__.mjs → 随包文本用例红；构建产物由 pack.e2e 扫"
@@ -822,7 +822,7 @@
     {
       "id": "BUG-226",
       "mechanism": "发布物 scripts/lib 与 cordis/presets 注释带开发面路径",
-      "guard": "tests/checks/shipped-surface.test.mjs",
+      "guard": "tests/checks/repo/shipped-surface.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "往 scripts/lib 注入 tests/__gone__.mjs → 随包文本用例红"
@@ -830,7 +830,7 @@
     {
       "id": "BUG-227",
       "mechanism": "发布面没有「零 dev 引用」守卫（仓内绿 ≠ 发布绿）",
-      "guard": "tests/checks/shipped-surface.test.mjs",
+      "guard": "tests/checks/repo/shipped-surface.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删 shipped-surface.test 或让 pack.e2e 不扫文本 → 本批守卫缺位（反向判据）"
@@ -838,7 +838,7 @@
     {
       "id": "BUG-228",
       "mechanism": "files 广白名单 + pack.e2e 只验必需件在场，无集合对账",
-      "guard": "tests/checks/shipped-surface.test.mjs",
+      "guard": "tests/checks/repo/shipped-surface.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "files 加回 lib/** 或删类型入口 → 发布清单用例红；pack.e2e 集合断言同判"
@@ -846,7 +846,7 @@
     {
       "id": "BUG-229",
       "mechanism": "client bundle 运行时 require React 未声明 peer",
-      "guard": "tests/checks/pack-deps.test.mjs",
+      "guard": "tests/checks/repo/pack-deps.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删 react peer → 正向用例红；pack.e2e 发布物 require 对账红"
@@ -854,7 +854,7 @@
     {
       "id": "BUG-230",
       "mechanism": "shipped-surface 路径 token 被 ./ ../ 裸根 反斜杠绕过",
-      "guard": "tests/checks/shipped-surface.test.mjs",
+      "guard": "tests/checks/repo/shipped-surface.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把 ./checks/x 写进随包文本 → 边界矩阵/文本用例红"
@@ -862,7 +862,7 @@
     {
       "id": "BUG-231",
       "mechanism": "源侧扫描集手工近似（漏 content/**/*.js 与 locale*）",
-      "guard": "tests/checks/shipped-surface.test.mjs",
+      "guard": "tests/checks/repo/shipped-surface.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "从扫描集移除 content/waves/lens-fanout.js → 集合用例红"
@@ -870,7 +870,7 @@
     {
       "id": "BUG-232",
       "mechanism": "row-deps 只看 YAML 行，发布物 require/.d.ts import 不在 peer 账上",
-      "guard": "tests/checks/pack-deps.test.mjs",
+      "guard": "tests/checks/repo/pack-deps.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "往 lib/client.js 注入未声明 require → pack.e2e/pack-deps 用例红"
@@ -878,7 +878,7 @@
     {
       "id": "BUG-233",
       "mechanism": "cold-start 在仓内 TEMP、走 vendor 源树（依赖可被仓根补齐）",
-      "guard": "tests/checks/clean-room-policy.test.mjs",
+      "guard": "tests/checks/harness/clean-room-policy.test.mjs",
       "oracleType": "self-referential",
       "status": "provisional",
       "redRecipe": "把 home 放回仓内 / 解析落仓根 → 纯判据用例红",
@@ -887,7 +887,7 @@
     {
       "id": "BUG-234",
       "mechanism": "release.entry 只许 runtime/harness-home，不是干净用户现场",
-      "guard": "tests/checks/clean-room-policy.test.mjs",
+      "guard": "tests/checks/harness/clean-room-policy.test.mjs",
       "oracleType": "self-referential",
       "status": "provisional",
       "redRecipe": "isOutsideRepo/版本用例红（旧 home 约束）",
@@ -896,7 +896,7 @@
     {
       "id": "BUG-235",
       "mechanism": "lifecycle 用 PATH 全局 dsh，peer 由全局兜底",
-      "guard": "tests/checks/clean-room-policy.test.mjs",
+      "guard": "tests/checks/harness/clean-room-policy.test.mjs",
       "oracleType": "self-referential",
       "status": "provisional",
       "redRecipe": "把 dsh 版本改成 0.3.0 → 版本合同用例红",
@@ -905,7 +905,7 @@
     {
       "id": "BUG-236",
       "mechanism": "tarball manifest 带 workspace:* devDependencies",
-      "guard": "tests/checks/publish-manifest.test.mjs",
+      "guard": "tests/checks/repo/publish-manifest.test.mjs",
       "oracleType": "self-referential",
       "status": "provisional",
       "redRecipe": "把 devDependencies 留在发布 manifest → strip 用例红；pack.e2e 的 tarball manifest 断言红",
@@ -922,7 +922,7 @@
     {
       "id": "BUG-238",
       "mechanism": "peer ^0.2.1-rc.2 宽于 engines.dsh 闭区间",
-      "guard": "tests/checks/pack-deps.test.mjs",
+      "guard": "tests/checks/repo/pack-deps.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把 DSH 组 peer 改成 ^0.3.0 → 范围用例红"
@@ -930,7 +930,7 @@
     {
       "id": "BUG-239",
       "mechanism": "公开类型入口的相对 import 目标没随包（7 入口 vs 闭包 11）",
-      "guard": "tests/checks/shipped-surface.test.mjs",
+      "guard": "tests/checks/repo/shipped-surface.test.mjs",
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "从 files 删一个闭包文件 → 清单用例红；~/. 消费者 tsc 见卡内症状"

@@ -109,7 +109,7 @@ BUG-219 的修法把「公开类型面」定义成 `exports.types` 的入口集�
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/shipped-surface.test.mjs"
+    "path": "tests/checks/repo/shipped-surface.test.mjs"
   }
 }
 ```

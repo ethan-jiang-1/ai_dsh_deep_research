@@ -11,7 +11,7 @@
 //   版本  dsh --version ∈ engines.dsh             ← engineIssues
 //
 // 消费方：checks/smoke/{cold-start,release,lifecycle}.entry.mjs。本文件含子进程 → 只能 smoke 档
-// （tests/checks/test-surface.test.mjs 的 SMOKE_ONLY 登记）；纯判据（engineIssues/moduleLeakOf 的
+// （tests/checks/test-infra/test-surface.test.mjs 的 SMOKE_ONLY 登记）；纯判据（engineIssues/moduleLeakOf 的
 // 版本与祖先判定）由 pack-deps.test 间接覆盖，spawn 行为只在真入口跑。
 
 import { spawn, spawnSync } from 'node:child_process'

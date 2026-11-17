@@ -97,6 +97,6 @@ BUG-nnn（≥191）必须入账，负控用合成 BUG-199 标题。
   ],
   "red": { "command": "node --import tsx/esm --test tests/checks/guard-ledger.test.mjs", "exit": 1, "output": "not ok 1 - guard ledger 全量对账（BUG-201）；缺账：BUG-191" },
   "green": { "command": "node --import tsx/esm --test tests/checks/guard-ledger.test.mjs", "exit": 0 },
-  "guard": { "path": "tests/checks/guard-ledger.test.mjs" }
+  "guard": { "path": "tests/checks/test-infra/guard-ledger.test.mjs" }
 }
 ```

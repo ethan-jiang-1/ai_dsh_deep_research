@@ -3,8 +3,8 @@
 //
 // 为什么生成且禁止手写 OVERRIDES：手写账与硬编码覆盖字典必然随增删和重构腐烂。
 // 本模块用 TypeScript AST（ts.createSourceFile + parseKeylessImports）自动推导每个测试资产的
-// oracleType，由 tools/record/record-asset-ledger.mjs 写盘，tests/checks/asset-ledger.test.mjs 与
-// tests/checks/guard-ledger.test.mjs 双向重算对账（漂移或矛盾 = 红）。
+// oracleType，由 tools/record/record-asset-ledger.mjs 写盘，tests/checks/test-infra/asset-ledger.test.mjs 与
+// tests/checks/test-infra/guard-ledger.test.mjs 双向重算对账（漂移或矛盾 = 红）。
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import ts from 'typescript'
@@ -40,7 +40,7 @@ const STRUCTURED_LIBS = new Set(['tests/fixtures/events.mjs'])
 
 /** 分类/白名单表的身份清单（BUG-209 类级守卫的输入）：表里每个路径都必须在盘上存在。
  *  死路径不产生任何分类失败——它只是让命中的资产静默掉档（读取缝改名后 `canonical` → `self-referential`），
- *  而账本测试用同一张表重算，自洽绿。存在性由 tests/checks/asset-ledger.test.mjs 钉住。 */
+ *  而账本测试用同一张表重算，自洽绿。存在性由 tests/checks/test-infra/asset-ledger.test.mjs 钉住。 */
 export function ledgerTablePaths() {
   return [
     ['EXTERNAL_LIBS', EXTERNAL_LIBS],
@@ -53,7 +53,7 @@ const STRUCTURED_CALL_NAMES = new Set(['mkdtempSync', 'structuredClone', 'queryS
 const STRUCTURED_NEW_NAMES = new Set(['Function', 'AbortController', 'EventEmitter'])
 const STRUCTURED_ENV_PROPS = new Set(['argv', 'staged', 'seq', 'freeMB', 'load1', 'cpuCount'])
 
-/** 递归列出默认发现面的测试文件（tests 下的 *.spec.mjs + tests/checks/*.test.mjs；跳过 fixtures/_tmp）。 */
+/** 递归列出默认发现面的测试文件（tests 下的 *.spec.mjs + tests/checks/<owner>/*.test.mjs；跳过 fixtures/_tmp）。 */
 export function listTestFiles(root) {
   const out = []
   const walk = (dir, rel) => {

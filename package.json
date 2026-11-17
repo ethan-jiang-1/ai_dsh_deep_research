@@ -28,7 +28,7 @@
     "dsh": "node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts",
     "test:coverage": "TSX_TSCONFIG_PATH=\"$(pwd -P)/packages/deep-research-pack/tsconfig.client.json\" node --import tsx/esm --test --experimental-test-coverage 'tests/run/**/*.spec.mjs' 'tests/cockpit/**/*.spec.mjs' 'tests/pack/**/*.spec.mjs' 'tests/contracts/**/*.spec.mjs'",
     "test:spec": "TSX_TSCONFIG_PATH=\"$(pwd -P)/packages/deep-research-pack/tsconfig.client.json\" node --import tsx/esm --test --test-reporter=spec 'tests/run/**/*.spec.mjs' 'tests/cockpit/**/*.spec.mjs' 'tests/pack/**/*.spec.mjs' 'tests/contracts/**/*.spec.mjs'",
-    "test:checks": "TSX_TSCONFIG_PATH=\"$(pwd -P)/packages/deep-research-pack/tsconfig.client.json\" node --import tsx/esm --test --test-reporter=spec 'tests/checks/*.test.mjs'",
+    "test:checks": "TSX_TSCONFIG_PATH=\"$(pwd -P)/packages/deep-research-pack/tsconfig.client.json\" node --import tsx/esm --test --test-reporter=spec 'tests/checks/*/*.test.mjs'",
     "test:e2e": "node checks/test/run-lane.mjs e2e",
     "test:entry": "node checks/test/run-lane.mjs entry"
   },

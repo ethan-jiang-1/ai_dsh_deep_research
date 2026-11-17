@@ -5,7 +5,7 @@
 
 ## 口径
 
-每个 `tests/**/*.spec.mjs` + `tests/checks/*.test.mjs` 一条：
+每个 `tests/**/*.spec.mjs` + `tests/checks/*/*.test.mjs` 一条：
 `path / domain / lane / class / cost / uniqueClaim / oracleType / sunset`。
 
 - `class`：`check-gate`（`tests/checks/`）、`vendor-compat`（`tests/vendor/`）、`contract`（`tests/contracts/`）、`unit-pure`（其余进程内单测）。

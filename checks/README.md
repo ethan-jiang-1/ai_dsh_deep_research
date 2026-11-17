@@ -32,9 +32,9 @@
 ## smoke/（分级冒烟）
 
 > 频率归属 = [registry.json](smoke/registry.json)：每个 smoke 必须登记 `tier`（`ci` = push/required、`nightly` = 夜间承重、`dev-only` = 手动 + 理由）；
-> 机械对账 = [tests/checks/smoke-registry.test.mjs](../tests/checks/smoke-registry.test.mjs)（新增件不登记即红）。
+> 机械对账 = [tests/checks/test-infra/smoke-registry.test.mjs](../tests/checks/test-infra/smoke-registry.test.mjs)（新增件不登记即红）。
 > 命名即车道：`<target>.e2e.mjs` = 真进程，`<target>.entry.mjs` = 真浏览器/profile/tarball，`<target>.support.mjs` = 支援件；`pnpm test:e2e` / `pnpm test:entry` 由 [test/run-lane.mjs](test/run-lane.mjs) 按 registry 的 `lane` 选跑。
-> `registry.json` 每条另有 `cost` / `uniqueClaim` / `oracle` / `sunset`；契约 = [tests/checks/smoke-oracle-surface.test.mjs](../tests/checks/smoke-oracle-surface.test.mjs)（oracle 可直测或 `none:` 有理由）。
+> `registry.json` 每条另有 `cost` / `uniqueClaim` / `oracle` / `sunset`；契约 = [tests/checks/test-infra/smoke-oracle-surface.test.mjs](../tests/checks/test-infra/smoke-oracle-surface.test.mjs)（oracle 可直测或 `none:` 有理由）。
 
 | 件 | 证明什么 | 档位 |
 |---|---|---|
@@ -161,7 +161,7 @@
 | lib/harness/vendor-artifacts.mjs | cdp-ask.entry、client-hitl.entry、client-load.entry、defaults-probe、discipline-probe、wave-execution-probe、entry-chain-probe、l4-lite.e2e、preset.e2e、session-replay、team-preflight.e2e、vendor-artifacts.spec | vendor 构建产物自检 |
 | lib/repo/backlog-liveness.mjs | backlog-liveness.test、f-repo、staged-change-pairing | 问题卡、缺陷、调研、方法与归档索引的结构合同；被 verify 入口与 keyless 回归消费 |
 | lib/repo/staged-change-pairing.mjs | staged-change-pairing.test、f-repo | 暂存区成对变更判据（归档卡↔Note、ui.expected↔lastRewrite）；纯函数，git 由门禁注入 |
-| lib/repo/test-placement.mjs | f-repo、pack-mirror.test、test-owner-mirror.test、test-placement.test | tests 落点闭集：全集 − 已知子集 = 空（未知子树/深度/平铺根 = 红；BUG-191/200） |
+| lib/repo/test-placement.mjs | f-repo、pack-mirror.test、test-lanes.test、test-owner-mirror.test、test-placement.test | tests 落点闭集：全集 − 已知子集 = 空（未知子树/深度/平铺根 = 红；BUG-191/200） |
 | lib/repo/doc-prose-paths.mjs | doc-prose-paths.test | 散文路径枚举薄壳（枚举正本 = doc-surface；BUG-204 的 API 不动） |
 | lib/repo/doc-surface.mjs | a-docs、f-repo、doc-prose-paths、doc-surface-shapes.test | live 文档可读面的唯一枚举器：形态台账（SHAPES / COMMAND_FORMS）↔ 订单案例对账、命令归一（env 前缀 / `./` / 包装器 / `&&` / heredoc / 缩进 / YAML 折叠块）、退役根判据 |
 | lib/repo/doc-counts.mjs | a-docs、doc-counts.test | 资产计数名词闭集（count-free 判据面正本）+ 硬计数 token 抽取 |

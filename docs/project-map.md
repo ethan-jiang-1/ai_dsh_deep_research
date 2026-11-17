@@ -105,14 +105,14 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 |---|---|---|---|
 | L0 门禁 | `pnpm verify`；[verify](../checks/verify/verify.mjs)（入口）+ `verify/gates/`（各域本体） | 无模型；本地 git 与生成器检查子进程 | 结构、链接、预算、同步等机械不变量 |
 | 门禁自测 | [gates.e2e](../checks/smoke/gates.e2e.mjs) | 无模型；git/node 子进程 | 门禁逻辑回归：注入违规经真实 verify 入口点名报红 + 零注入对照组 |
-| 确定性回归 | `pnpm test`（spec + checks）；`tests/**/*.spec.mjs` + `tests/checks/*.test.mjs` | 无模型/浏览器/网络/子进程；导入执行路径另核查，见下方限制 | 纯函数行为、解析、状态折算、渲染输出、审计判据与配置契约 |
+| 确定性回归 | `pnpm test`（spec + checks）；`tests/**/*.spec.mjs` + `tests/checks/*/*.test.mjs` | 无模型/浏览器/网络/子进程；导入执行路径另核查，见下方限制 | 纯函数行为、解析、状态折算、渲染输出、审计判据与配置契约 |
 | 类型检查 | `pnpm typecheck`；pack 的 `tsconfig.*.json` | 需要 vendor 构建产物；不调模型 | pack 双半 TypeScript 类型面（`src/client` + `src/lib` + host 壳） |
 | L1 真实挂载 | [preset.e2e](../checks/smoke/preset.e2e.mjs) | 无模型；`DSH_SMOKE_REAL=1` 才起真 DSH，本地 RPC 与子进程 | roster、逐角色创建会话、skills 可见性/隔离；默认档只预检 |
 | L2 安装 | [release.entry](../checks/smoke/release.entry.mjs) | 无模型调用；npm 安装可能访问网络；`--install-only` 安装检查跳过凭据；默认 doctor 检查凭据在场 | pack → 重建测试 profile → 安装 → doctor → 安装域挂载 |
 | L2 冷启动 | [cold-start.entry](../checks/smoke/cold-start.entry.mjs) | 无模型调用；团队层需 registry/缓存；MCP 关闭 | 独立 home/profile/端口/state → tarball 安装 → 浏览器面 GREEN |
 | 浏览器加载 | [client-load.entry](../checks/smoke/client-load.entry.mjs) | 无模型；真实 web、浏览器、本地通信 | client 装配、页签、渐进面与文件事实对账 |
 | 确定性回放 | [snapshot-replay.entry](../checks/smoke/snapshot-replay.entry.mjs) | 无真模型；全角色真实 DSH/RPC/解压子进程；仅声明渲染期望的场景额外浏览器渲染 | 场景声明驱动的 roleFace 回放完成标记；persona、全部 request/header 与四处 user/message 注入（含时钟序列）逐条一致；声明的渲染金标准 |
-| 真模型档 | [smoke-contract](../tests/checks/smoke-contract.test.mjs) 登记的 REAL_MODEL 闭集（成员以测试为准） | 需要模型凭据；调用模型，部分调用 web 工具 | 角色响应/工具调用、团队机制、导航软断言、纪律行为标记断言、真实 HITL UI 迁移、交互探针端到端；不能替代完整研究质量验收。`tools/record/record-role-fixture.mjs` 是独立录制工具，不属于该闭集；完整研究 run 属 L4。 |
+| 真模型档 | [smoke-contract](../tests/checks/shared/smoke-contract.test.mjs) 登记的 REAL_MODEL 闭集（成员以测试为准） | 需要模型凭据；调用模型，部分调用 web 工具 | 角色响应/工具调用、团队机制、导航软断言、纪律行为标记断言、真实 HITL UI 迁移、交互探针端到端；不能替代完整研究质量验收。`tools/record/record-role-fixture.mjs` 是独立录制工具，不属于该闭集；完整研究 run 属 L4。 |
 | 浏览器交互探针 | [cdp-probe](../probes/browser/cdp-probe.mjs) | 连接已起 GUI；`--ask` 会发送消息并可能触发模型/工具调用 | 指定场景的显示、点击、会话回复；是否调用模型取决于模式与会话 |
 | 偏好库可发现性 | [method-library-probe](../probes/behavior/method-library-probe.mjs) | 真模型档；cwd = 临时研究工作区 | 偏好库文件名/位置、条目数、点名条目缺席时如实说（BUG-042 修复判据的机器化证明） |
 | run 文件审计 | [node-gate](../checks/run-gates/node-gate.mjs)、[schema-scan](../checks/run-gates/schema-scan.mjs)、[evidence-audit](../checks/run-gates/evidence-audit.mjs)、[path-hygiene](../checks/run-gates/path-hygiene.mjs)、[secret-scan](../checks/run-gates/secret-scan.mjs) | 无主动外网请求；压缩日志读取可能用 zstd 子进程 | 节点在场、部分交接判据、URL/摘录/引用链、本机路径、交付物高置信凭据；默认只读，`--write` 才写审计/门报告 |
@@ -135,12 +135,13 @@ L0–L4 是验收的五个面，不是由测试名称推导的传统测试金字
 | 单点机制（探针） | behavior 六支（entry-chain / discipline / method-library / rerun-triage / defaults / wave-execution）+ browser `cdp-probe`；stream tee 是仪器，不是探针 | `probes/`（指南 = [guides/66](guides/66-probe-playbook.md)） | 真模型档/连已起 GUI；**不是第六个评估面** |
 | 生产审计 | node-gate / schema-scan / evidence-audit（对真实 run bundle） | `checks/` run 门 | keyless |
 
-### 测试 owner 轴（2026-11-15）
+### 测试 owner 轴（2026-11-15 run / 2026-11-18 checks）
 
 `tests/run/<owner>/` 与 `checks/lib/<owner>/` 同名（`analyze` / `gates` / `channel` / `harness` /
-`probes` / `shared`）；跨切证据住 `shared/`。模块 → owner → 测试的生成索引 = [tests/INDEX.generated.md](../tests/INDEX.generated.md)；
-镜像契约 = [test-owner-mirror](../tests/checks/test-owner-mirror.test.mjs)。
-pack 侧：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`（7 个 domain），`src/client/<sub>/` ↔ `tests/cockpit/client/<sub>/`，`src/<surface>/` ↔ `tests/pack/<surface>/`、包级合同住 `tests/pack/contract/`（subject 只涉及本包）、跨面产品合同住 `tests/contracts/`（同时钉 ≥2 面）、pack 脚本住 `tests/pack/scripts/`；契约 = [pack-mirror](../tests/checks/pack-mirror.test.mjs)。
+`probes` / `shared`）；门禁车道 `tests/checks/<owner>/` 同样与 `checks/lib/<owner>/` 同名（`analyze` /
+`channel` / `harness` / `repo` / `shared` / `test-infra`；单 owner → 该 owner，2+ → `shared/`，无 import → `repo/`）；跨切证据住 `shared/`。模块 → owner → 测试的生成索引 = [tests/INDEX.generated.md](../tests/INDEX.generated.md)；
+镜像契约 = [test-owner-mirror](../tests/checks/shared/test-owner-mirror.test.mjs)。
+pack 侧：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`（7 个 domain），`src/client/<sub>/` ↔ `tests/cockpit/client/<sub>/`，`src/<surface>/` ↔ `tests/pack/<surface>/`、包级合同住 `tests/pack/contract/`（subject 只涉及本包）、跨面产品合同住 `tests/contracts/`（同时钉 ≥2 面）、pack 脚本住 `tests/pack/scripts/`；契约 = [pack-mirror](../tests/checks/shared/pack-mirror.test.mjs)。
 
 ### 新检查落家序（加一个检查时按序找家，单一入口）
 
@@ -168,7 +169,7 @@ pack 侧：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`（7 个 domain�
 | 支撑模块 | `checks/lib/`、pack `src/lib/` | 消费方直接调用接口；测试覆盖纯解析/折算/判据路径 |
 
 后缀申报检查种类，不能单凭 `smoke`/`probe` 判断是否需要 key。
-`tests/**/*.spec.mjs` + `tests/checks/*.test.mjs` 是 `pnpm test` 的选中范围；`fixtures/` 与 `_tmp/` 除外；fixture 和 lib 不自动成为测试成员。`checks/smoke/*.e2e.mjs|*.entry.mjs` 是独立车道，不冒充默认回归。
+`tests/**/*.spec.mjs` + `tests/checks/*/*.test.mjs` 是 `pnpm test` 的选中范围；`fixtures/` 与 `_tmp/` 除外；fixture 和 lib 不自动成为测试成员。`checks/smoke/*.e2e.mjs|*.entry.mjs` 是独立车道，不冒充默认回归。
 夹具包括人工构造样本与经整理、人审冻结的录制回放语料；未经整理的真实运行日志保留在运行区。
 回放资产由独立 smoke 消费，不能把“pnpm test 绿”理解为“所有回放/浏览器场景已跑”。
 

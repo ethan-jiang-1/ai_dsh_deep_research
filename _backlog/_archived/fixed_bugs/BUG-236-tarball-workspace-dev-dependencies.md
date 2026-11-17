@@ -91,7 +91,7 @@ tar -xOf _dist/dsh-deep-research-pack-0.3.6.tgz package/package.json | grep -c '
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/publish-manifest.test.mjs"
+    "path": "tests/checks/repo/publish-manifest.test.mjs"
   }
 }
 ```

@@ -1,6 +1,6 @@
 # tests/INDEX.generated.md — 测试 ↔ 源码 owner/domain 索引（生成物，勿手改）
 
-> 生成器 = `node tools/record/render-test-index.mjs`；对账 = `tests/checks/test-index.test.mjs`。
+> 生成器 = `node tools/record/render-test-index.mjs`；对账 = `tests/checks/test-infra/test-index.test.mjs`。
 > 维度 = 模块 → owner/domain → 直接 import 它的测试；目录回答「谁在用」，本索引回答「这概念在哪」。
 
 ## checks/lib（研发面）
@@ -9,7 +9,7 @@
 |---|---|---|
 | analyze | `checks/lib/analyze/bundle-sessions` | `tests/run/analyze/bundle-sessions.spec.mjs` |
 | analyze | `checks/lib/analyze/provider-errors` | `tests/run/analyze/provider-errors.spec.mjs` |
-| analyze | `checks/lib/analyze/run-dashboard-core` | `tests/checks/evaluation-contract.test.mjs`<br>`tests/run/analyze/run-dashboard.spec.mjs` |
+| analyze | `checks/lib/analyze/run-dashboard-core` | `tests/checks/analyze/evaluation-contract.test.mjs`<br>`tests/run/analyze/run-dashboard.spec.mjs` |
 | analyze | `checks/lib/analyze/run-dashboard-html` | `tests/run/analyze/run-dashboard.spec.mjs` |
 | analyze | `checks/lib/analyze/run-inventory-core` | `tests/run/analyze/run-inventory.spec.mjs` |
 | analyze | `checks/lib/analyze/scene-pack` | `tests/run/analyze/scene-pack.spec.mjs` |
@@ -21,7 +21,7 @@
 | channel | `checks/lib/channel/channel-cache` | `tests/run/channel/channel-cache.spec.mjs` |
 | channel | `checks/lib/channel/hitl-card-driver` | — |
 | channel | `checks/lib/channel/inject-reconcile` | `tests/run/channel/inject-reconcile.spec.mjs` |
-| channel | `checks/lib/channel/profile-guard` | `tests/checks/profile-guard.test.mjs` |
+| channel | `checks/lib/channel/profile-guard` | `tests/checks/channel/profile-guard.test.mjs` |
 | channel | `checks/lib/channel/run-channel` | `tests/run/channel/run-driver-contract.spec.mjs` |
 | channel | `checks/lib/channel/runtime-clean-core` | `tests/run/channel/runtime-clean.spec.mjs` |
 | gates | `checks/lib/gates/acceptance-check` | `tests/run/gates/acceptance-check.spec.mjs` |
@@ -40,43 +40,43 @@
 | gates | `checks/lib/gates/verdict-audit-core` | `tests/run/gates/verdict-audit-fixture.spec.mjs`<br>`tests/run/gates/verdict-audit.spec.mjs` |
 | harness | `checks/lib/harness/browser-cache` | `tests/run/harness/browser-cache.spec.mjs` |
 | harness | `checks/lib/harness/clean-room` | — |
-| harness | `checks/lib/harness/clean-room-policy` | `tests/checks/clean-room-policy.test.mjs` |
+| harness | `checks/lib/harness/clean-room-policy` | `tests/checks/harness/clean-room-policy.test.mjs` |
 | harness | `checks/lib/harness/client-load-select` | `tests/run/harness/client-load-select.spec.mjs` |
-| harness | `checks/lib/harness/gates-cases` | `tests/checks/doc-surface-shapes.test.mjs`<br>`tests/checks/verify-gates.test.mjs` |
+| harness | `checks/lib/harness/gates-cases` | `tests/checks/harness/verify-gates.test.mjs`<br>`tests/checks/shared/doc-surface-shapes.test.mjs` |
 | harness | `checks/lib/harness/gates-cli` | `tests/run/harness/gates-cli.spec.mjs` |
 | harness | `checks/lib/harness/host-health` | `tests/run/harness/host-health.spec.mjs` |
 | harness | `checks/lib/harness/playwright` | — |
 | harness | `checks/lib/harness/port-reclaim` | — |
-| harness | `checks/lib/harness/port-reclaim-policy` | `tests/checks/probe-port-policy.test.mjs`<br>`tests/run/harness/port-reclaim.spec.mjs` |
+| harness | `checks/lib/harness/port-reclaim-policy` | `tests/checks/harness/probe-port-policy.test.mjs`<br>`tests/run/harness/port-reclaim.spec.mjs` |
 | harness | `checks/lib/harness/replay-network-offline` | — |
 | harness | `checks/lib/harness/replay-network-offline-policy` | `tests/run/harness/replay-network-offline.spec.mjs` |
 | harness | `checks/lib/harness/replay-scene` | `tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/harness/replay-scene.spec.mjs` |
 | harness | `checks/lib/harness/run-accept-fixture` | `tests/run/harness/run-accept-fixture.spec.mjs` |
 | harness | `checks/lib/harness/run-lock` | `tests/run/harness/run-lock.spec.mjs` |
-| harness | `checks/lib/harness/snapshot-mode` | `tests/checks/snapshot-readonly.test.mjs` |
+| harness | `checks/lib/harness/snapshot-mode` | `tests/checks/harness/snapshot-readonly.test.mjs` |
 | harness | `checks/lib/harness/vendor-artifacts` | `tests/run/harness/vendor-artifacts.spec.mjs` |
 | probes | `checks/lib/probes/direct-authorization-boundary` | `tests/run/probes/entry-chain-probe.spec.mjs` |
 | probes | `checks/lib/probes/llm-stream-tee-core` | `tests/run/probes/llm-stream-tee-core.spec.mjs` |
 | probes | `checks/lib/probes/probe-send-target` | `tests/run/probes/probe-send-target.spec.mjs` |
-| repo | `checks/lib/repo/backlog-liveness` | `tests/checks/backlog-liveness.test.mjs` |
+| repo | `checks/lib/repo/backlog-liveness` | `tests/checks/repo/backlog-liveness.test.mjs` |
 | repo | `checks/lib/repo/content-budget` | `tests/pack/contract/content-disclosure.spec.mjs` |
-| repo | `checks/lib/repo/doc-counts` | `tests/checks/doc-counts.test.mjs` |
-| repo | `checks/lib/repo/doc-prose-paths` | `tests/checks/doc-prose-paths.test.mjs` |
-| repo | `checks/lib/repo/doc-surface` | `tests/checks/doc-surface-shapes.test.mjs` |
-| repo | `checks/lib/repo/fix-evidence` | `tests/checks/fix-evidence.test.mjs` |
-| repo | `checks/lib/repo/note-scan` | `tests/checks/note-scan.test.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs` |
-| repo | `checks/lib/repo/pack-deps` | `tests/checks/pack-deps.test.mjs` |
-| repo | `checks/lib/repo/publish-manifest` | `tests/checks/publish-manifest.test.mjs` |
-| repo | `checks/lib/repo/redirect-ledger` | `tests/checks/redirect-ledger.test.mjs` |
-| repo | `checks/lib/repo/release-anchor` | `tests/checks/release-anchor.test.mjs` |
-| repo | `checks/lib/repo/shipped-surface` | `tests/checks/shipped-surface.test.mjs`<br>`tests/pack/contract/package-contract.spec.mjs` |
-| repo | `checks/lib/repo/smoke-lane` | `tests/checks/cli-exit-contract.test.mjs`<br>`tests/checks/smoke-lane.test.mjs` |
-| repo | `checks/lib/repo/staged-change-pairing` | `tests/checks/staged-change-pairing.test.mjs` |
-| repo | `checks/lib/repo/test-placement` | `tests/checks/pack-mirror.test.mjs`<br>`tests/checks/test-owner-mirror.test.mjs`<br>`tests/checks/test-placement.test.mjs` |
-| shared | `checks/lib/shared/artifact-freshness` | `tests/checks/artifact-freshness.test.mjs` |
+| repo | `checks/lib/repo/doc-counts` | `tests/checks/repo/doc-counts.test.mjs` |
+| repo | `checks/lib/repo/doc-prose-paths` | `tests/checks/repo/doc-prose-paths.test.mjs` |
+| repo | `checks/lib/repo/doc-surface` | `tests/checks/shared/doc-surface-shapes.test.mjs` |
+| repo | `checks/lib/repo/fix-evidence` | `tests/checks/repo/fix-evidence.test.mjs` |
+| repo | `checks/lib/repo/note-scan` | `tests/checks/shared/note-scan.test.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs` |
+| repo | `checks/lib/repo/pack-deps` | `tests/checks/repo/pack-deps.test.mjs` |
+| repo | `checks/lib/repo/publish-manifest` | `tests/checks/repo/publish-manifest.test.mjs` |
+| repo | `checks/lib/repo/redirect-ledger` | `tests/checks/repo/redirect-ledger.test.mjs` |
+| repo | `checks/lib/repo/release-anchor` | `tests/checks/repo/release-anchor.test.mjs` |
+| repo | `checks/lib/repo/shipped-surface` | `tests/checks/repo/shipped-surface.test.mjs`<br>`tests/pack/contract/package-contract.spec.mjs` |
+| repo | `checks/lib/repo/smoke-lane` | `tests/checks/repo/smoke-lane.test.mjs`<br>`tests/checks/shared/cli-exit-contract.test.mjs` |
+| repo | `checks/lib/repo/staged-change-pairing` | `tests/checks/repo/staged-change-pairing.test.mjs` |
+| repo | `checks/lib/repo/test-placement` | `tests/checks/repo/test-placement.test.mjs`<br>`tests/checks/shared/pack-mirror.test.mjs`<br>`tests/checks/shared/test-lanes.test.mjs`<br>`tests/checks/shared/test-owner-mirror.test.mjs` |
+| shared | `checks/lib/shared/artifact-freshness` | `tests/checks/shared/artifact-freshness.test.mjs` |
 | shared | `checks/lib/shared/cdp-driver` | — |
-| shared | `checks/lib/shared/cli-entry` | `tests/checks/cli-entry.test.mjs` |
-| shared | `checks/lib/shared/cli-exit` | `tests/checks/cli-exit-contract.test.mjs` |
+| shared | `checks/lib/shared/cli-entry` | `tests/checks/shared/cli-entry.test.mjs` |
+| shared | `checks/lib/shared/cli-exit` | `tests/checks/shared/cli-exit-contract.test.mjs` |
 | shared | `checks/lib/shared/env` | `tests/run/channel/env-credentials.spec.mjs` |
 | shared | `checks/lib/shared/final-version` | `tests/run/gates/final-version.spec.mjs` |
 | shared | `checks/lib/shared/frontmatter` | `tests/run/shared/frontmatter.spec.mjs` |
@@ -86,7 +86,7 @@
 | shared | `checks/lib/shared/node-gate-session-gates` | `tests/run/channel/ask-drive.spec.mjs`<br>`tests/run/gates/node-gate-delivery.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs`<br>`tests/run/gates/node-gate-witness.spec.mjs` |
 | shared | `checks/lib/shared/path-hygiene` | `tests/run/gates/path-hygiene.spec.mjs` |
 | shared | `checks/lib/shared/plan-card` | `tests/run/gates/plan-card.spec.mjs` |
-| shared | `checks/lib/shared/probe-index` | `tests/checks/smoke-contract.test.mjs`<br>`tests/run/probes/probe-index.spec.mjs` |
+| shared | `checks/lib/shared/probe-index` | `tests/checks/shared/smoke-contract.test.mjs`<br>`tests/run/probes/probe-index.spec.mjs` |
 | shared | `checks/lib/shared/probe-status-tab` | `tests/run/probes/probe-status-tab.spec.mjs` |
 | shared | `checks/lib/shared/profile-health` | `tests/run/channel/profile-health.spec.mjs` |
 | shared | `checks/lib/shared/replay-request` | `tests/run/harness/replay-request.spec.mjs` |
@@ -96,19 +96,19 @@
 | shared | `checks/lib/shared/secret-scan` | `tests/run/shared/secret-scan.spec.mjs` |
 | shared | `checks/lib/shared/session-log` | `tests/run/gates/verdict-audit-fixture.spec.mjs`<br>`tests/run/shared/run-state.spec.mjs`<br>`tests/run/shared/session-log.spec.mjs` |
 | shared | `checks/lib/shared/startup-hint` | `tests/run/channel/startup-hint.spec.mjs` |
-| shared | `checks/lib/shared/web-banner` | `tests/checks/boot-timer.test.mjs` |
+| shared | `checks/lib/shared/web-banner` | `tests/checks/shared/boot-timer.test.mjs` |
 | shared | `checks/lib/shared/web-harness` | — |
-| shared | `checks/lib/shared/web-ui-nav` | `tests/checks/web-ui-nav-bilingual.test.mjs`<br>`tests/cockpit/lib/method-library/library-fold.spec.mjs`<br>`tests/run/probes/web-ui-nav.spec.mjs` |
+| shared | `checks/lib/shared/web-ui-nav` | `tests/checks/shared/web-ui-nav-bilingual.test.mjs`<br>`tests/cockpit/lib/method-library/library-fold.spec.mjs`<br>`tests/run/probes/web-ui-nav.spec.mjs` |
 | shared | `checks/lib/shared/workspace-root` | `tests/run/shared/workspace-root.spec.mjs` |
 | shared | `checks/lib/shared/zstd-read` | — |
-| test-infra | `checks/lib/test-infra/asset-ledger` | `tests/checks/asset-ledger.test.mjs`<br>`tests/checks/guard-ledger.test.mjs` |
-| test-infra | `checks/lib/test-infra/ci-workflow` | `tests/checks/ci-jobs.test.mjs`<br>`tests/checks/ci-workflow-oracle.test.mjs`<br>`tests/checks/ci-workflow.test.mjs`<br>`tests/checks/model-workflow.test.mjs`<br>`tests/checks/smoke-registry.test.mjs` |
-| test-infra | `checks/lib/test-infra/keyless-imports` | `tests/checks/boot-timer.test.mjs`<br>`tests/checks/client-surface.test.mjs`<br>`tests/checks/layering.test.mjs`<br>`tests/checks/pack-mirror.test.mjs`<br>`tests/checks/smoke-imports.test.mjs`<br>`tests/checks/test-index.test.mjs`<br>`tests/checks/test-lanes.test.mjs`<br>`tests/checks/test-owner-mirror.test.mjs`<br>`tests/checks/test-surface.test.mjs` |
+| test-infra | `checks/lib/test-infra/asset-ledger` | `tests/checks/test-infra/asset-ledger.test.mjs`<br>`tests/checks/test-infra/guard-ledger.test.mjs` |
+| test-infra | `checks/lib/test-infra/ci-workflow` | `tests/checks/test-infra/ci-jobs.test.mjs`<br>`tests/checks/test-infra/ci-workflow-oracle.test.mjs`<br>`tests/checks/test-infra/ci-workflow.test.mjs`<br>`tests/checks/test-infra/model-workflow.test.mjs`<br>`tests/checks/test-infra/smoke-registry.test.mjs` |
+| test-infra | `checks/lib/test-infra/keyless-imports` | `tests/checks/shared/boot-timer.test.mjs`<br>`tests/checks/shared/pack-mirror.test.mjs`<br>`tests/checks/shared/test-lanes.test.mjs`<br>`tests/checks/shared/test-owner-mirror.test.mjs`<br>`tests/checks/test-infra/client-surface.test.mjs`<br>`tests/checks/test-infra/layering.test.mjs`<br>`tests/checks/test-infra/smoke-imports.test.mjs`<br>`tests/checks/test-infra/test-index.test.mjs`<br>`tests/checks/test-infra/test-surface.test.mjs` |
 | test-infra | `checks/lib/test-infra/method-presets` | `tests/cockpit/lib/method-library/library-fold.spec.mjs`<br>`tests/cockpit/lib/shared/method-presets.spec.mjs` |
 | test-infra | `checks/lib/test-infra/selftest-library` | `tests/cockpit/lib/method-library/library-fold.spec.mjs` |
-| test-infra | `checks/lib/test-infra/smoke-assets` | `tests/checks/smoke-assets.test.mjs`<br>`tests/checks/smoke-cost-budget.test.mjs`<br>`tests/checks/smoke-oracle-surface.test.mjs`<br>`tests/checks/smoke-registry.test.mjs` |
-| test-infra | `checks/lib/test-infra/test-index` | `tests/checks/pack-mirror.test.mjs`<br>`tests/checks/test-index.test.mjs`<br>`tests/checks/test-owner-mirror.test.mjs`<br>`tests/checks/test-surface.test.mjs` |
-| test-infra | `checks/lib/test-infra/workspace-parsers` | `tests/checks/note-scan.test.mjs`<br>`tests/checks/workspace-parsers.test.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs`<br>`tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs` |
+| test-infra | `checks/lib/test-infra/smoke-assets` | `tests/checks/test-infra/smoke-assets.test.mjs`<br>`tests/checks/test-infra/smoke-cost-budget.test.mjs`<br>`tests/checks/test-infra/smoke-oracle-surface.test.mjs`<br>`tests/checks/test-infra/smoke-registry.test.mjs` |
+| test-infra | `checks/lib/test-infra/test-index` | `tests/checks/shared/pack-mirror.test.mjs`<br>`tests/checks/shared/test-owner-mirror.test.mjs`<br>`tests/checks/test-infra/test-index.test.mjs`<br>`tests/checks/test-infra/test-surface.test.mjs` |
+| test-infra | `checks/lib/test-infra/workspace-parsers` | `tests/checks/shared/note-scan.test.mjs`<br>`tests/checks/test-infra/workspace-parsers.test.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs`<br>`tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs` |
 
 ## pack src/lib（产品面）
 

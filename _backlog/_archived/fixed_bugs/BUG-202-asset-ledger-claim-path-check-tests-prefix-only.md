@@ -99,6 +99,6 @@ const TOKEN = /tests\/[A-Za-z0-9_./-]+\.(?:mjs|cjs)/g
   ],
   "red": { "command": "node --import tsx/esm --test tests/checks/asset-ledger.test.mjs", "exit": 1, "output": "not ok 3 - uniqueClaim 里的仓内路径 token（tests/scripts/docs/…）必须存在（BUG-198 / BUG-202）；tests/checks/asset-ledger.test.mjs: uniqueClaim -> scripts/lib/__gone__.mjs（不存在）" },
   "green": { "command": "node --import tsx/esm --test tests/checks/asset-ledger.test.mjs", "exit": 0 },
-  "guard": { "path": "tests/checks/asset-ledger.test.mjs" }
+  "guard": { "path": "tests/checks/test-infra/asset-ledger.test.mjs" }
 }
 ```

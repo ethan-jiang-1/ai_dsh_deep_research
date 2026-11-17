@@ -93,7 +93,7 @@ skill 以「开发仓正本 + 不随包」的方式指路：作者知道文件�
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/shipped-surface.test.mjs"
+    "path": "tests/checks/repo/shipped-surface.test.mjs"
   }
 }
 ```

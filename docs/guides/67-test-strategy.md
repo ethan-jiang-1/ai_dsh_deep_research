@@ -122,7 +122,7 @@
 | 后缀 / 位置 | 车道 | 命令 |
 |---|---|---|
 | `tests/{run,cockpit,pack,contracts}/**/*.spec.mjs` | 进程内核验 | `pnpm test:spec` |
-| `tests/checks/*.test.mjs` | 门禁自身 | `pnpm test:checks` |
+| `tests/checks/<owner>/*.test.mjs` | 门禁自身（owner = `checks/lib/<owner>`） | `pnpm test:checks` |
 | `checks/smoke/*.e2e.mjs` | 真进程 | `pnpm test:e2e` |
 | `checks/smoke/*.entry.mjs` | 真浏览器/profile/tarball | `pnpm test:entry` |
 | `tests/vendor/*.vendor.spec.mjs` | vendor 源契约 | `pnpm test:vendor` |

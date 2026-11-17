@@ -110,7 +110,7 @@ git checkout -- "$DOC"
     "exit": 0
   },
   "guard": {
-    "path": "tests/checks/doc-counts.test.mjs"
+    "path": "tests/checks/repo/doc-counts.test.mjs"
   }
 }
 ```
