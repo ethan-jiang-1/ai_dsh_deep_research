@@ -25,3 +25,37 @@
 - **重冒烟证据**：同提交本地 macOS `snapshot-replay.entry --read-only --layers a,b` → **ALL PASS**（5 场景 A/B）；`client-load.entry --seed` 断言面全 PASS（唯一失败是沙箱禁 `ps` 的收尾收割）。runner 上则红（client-load 3m2x 两次、snapshot 五回合 240s 超时）。
 - `node scripts/verify/verify.mjs` → 全绿；`pnpm test` → 1365 + 214 全绿；`node dev/record-ci-oracle.mjs --check` → 35 fixtures / 0 mismatch。
 - **未验证（如实）**：两条重冒烟在 GitHub runner 上的根因；恢复条件写在 trigger 行。
+
+## runner 红根因与恢复（2026-11-17 补记）
+
+上文「未验证」一项已结：runner 红是**两层根因叠加**，均已修复并在 runner 上红→绿实证。
+
+### 决定
+
+1. **native `system.node` 缺席（client-load 红 + snapshot A 层五回合超时的共同根因）**：runner 只做
+   tsc/tsdown 两遍构建，`/research-defaults` host command 与会话文件锁要 flock addon——缺失时按
+   native 纪律 fail-closed 拒锁，client-load 状态页 ⑤ 写入失败（错误串污染面板文案断言）、回放回合
+   永不落定（240s×5 → 25m job 超时 cancelled）。修法 = `tools/build/vendor-build.sh` 补第 ⑨ 步
+   （直调 vendor tsx 跑 `native/system/scripts/build.ts --host-addon-only`，绕开 submodule 布局下的
+   lefthook postinstall）；nightly 缓存键升 v2 并把 `native/system/packages/*/bin` 加进缓存路径——
+   不升键则 deploy 旧缓存命中、vendor-build 被跳过、红照旧。
+2. **回放 cwd 归一缺席（snapshot B·runtime-context 五场景全红的根因）**：`normalizeRuntime` 声明了
+   端口/checkout 根/策略句工作区根/pack 安装根四个位置身份槽，`Current working directory:` 行漏在
+   集外——2026-10-19「不归一」决定只成立于录制/回放同机；A/B 进 CI 后录制机绝对路径烙在金标准里，
+   runner cwd 恒异即红。修法 = 归一集补第 ⑤ 槽（值归一、句式与该行在场仍逐字，改前缀/删行红），
+   [snapshots/README](../../snapshots/README.md) 判据面正本同 diff 更新。
+3. **顺带收编**：`method-library-tool.e2e` / `model-experience.e2e` 两条 dev-only 的自设进 CI 条件
+   （「CI 提供 native 构建」）由 ⑨ 满足 → 进 nightly deploy（D54 预算 9→11，guides/67 §8 同 diff）。
+
+### 实际跑过的验证
+
+- 单元红→绿：`tests/run/harness/replay-request.spec.mjs` 两处断言先翻转（cwd 异值应绿/前缀改动仍红）
+  → 实现前 2 fail、实现后 47/47 pass。
+- runner 红证：run 43998984443（client-load failure = 状态页 ⑤ MODULE_NOT_FOUND；snapshot cancelled =
+  五回合 240s 超时）。
+- runner 绿证：run 44003750087 client-load 绿（native 修复）；run 44006337324 三 job + 聚合全绿
+  （cwd 修复后 A/B 绿）；run 44007051647 全态绿（deploy 含收编的 method-library-tool /
+  model-experience 两步在 runner 跑通）。
+- 本机全档（同 commit 暖树）：client-load seed / snapshot A/B / install-shape / lifecycle / release /
+  product-boot / cold-start / l4-lite（真模型）八连 ALL PASS；clean clone（/tmp，file-protocol submodule）
+  → install → verify 全绿 → test 绿 → `release-check --receiver` 三项前置缺席如实报（fail-loud）。

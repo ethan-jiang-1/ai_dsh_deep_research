@@ -13,10 +13,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# 快慢分层：每次 push 的 CI 只跑 keyless + deploy（约 5 分钟）。client-load（真浏览器）与
-# snapshot-replay（回放 A/B）是分钟级重冒烟，**不进 push 门禁**——它们在 GitHub runner 上
-# 仍红且根因未定（见 _backlog/triggers.md「Linux 上的真浏览器/回放冒烟」行）；本地按需跑，
-# 冒烟资产仍在 checks/smoke/（registry tier = dev-only）。
+# 快慢分层：push 门禁 = keyless verify + test（约 2 分钟）。client-load（真浏览器）、snapshot-replay
+# （回放 A/B）、typecheck、安装/发布冒烟等重档在 nightly.yml 每日/按需跑（runner 红根因 2026-11-17
+# 已修并实证：native system.node + 回放 cwd 归一，见 CI 分层 Note）；处置行 = _backlog/triggers.md。
 jobs:
   keyless:
     name: keyless verify + tests
