@@ -1,16 +1,16 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-226：发布物脚本与配置注释带开发面路径——`scripts/lib/*` 的 `tests/`、`cordis/presets` 的 `_backlog`/`notes`/`docs`
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：修复就绪（自授权 P2：改注释 + 加扫描）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（自授权 P2：改注释 + 加扫描） — 结论：scripts/lib 与 cordis/presets 注释清 dev 路径；运行期理由保留；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-shipped-boundary-self-contained.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e（2026-11-17）
 >
-> 位置：[packages/deep-research-pack/scripts/lib](../../packages/deep-research-pack/scripts/lib)（随包 runtime 脚本）·
-> [cordis.patch.yml](../../packages/deep-research-pack/cordis.patch.yml) ·
-> `presets/*.patch.yml`；探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-dev-boundary.md) R3。
+> 位置：[packages/deep-research-pack/scripts/lib](../../../packages/deep-research-pack/scripts/lib)（随包 runtime 脚本）·
+> [cordis.patch.yml](../../../packages/deep-research-pack/cordis.patch.yml) ·
+> `presets/*.patch.yml`；探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-dev-boundary.md) R3。
 
 ## 症状
 
@@ -75,3 +75,36 @@ tar -tzf _dist/dsh-deep-research-pack-0.3.6.tgz | grep -E 'package/(scripts|cord
 
 与 [BUG-224](BUG-224-pack-client-bundle-dev-path-comments.md) / [BUG-225](BUG-225-pack-dts-dev-path-comments.md) /
 [BUG-227](BUG-227-pack-boundary-no-shipped-dev-ref-gate.md) 同变更。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/scripts/lib/credentials-status.mjs",
+    "packages/deep-research-pack/scripts/lib/dsh-home.mjs",
+    "packages/deep-research-pack/scripts/lib/install-anchor.mjs",
+    "packages/deep-research-pack/scripts/lib/version-range.mjs",
+    "packages/deep-research-pack/cordis.patch.yml",
+    "packages/deep-research-pack/presets/lead.patch.yml",
+    "packages/deep-research-pack/presets/scout.patch.yml",
+    "packages/deep-research-pack/presets/analyst.patch.yml",
+    "packages/deep-research-pack/presets/critic.patch.yml",
+    "packages/deep-research-pack/presets/method-editor.patch.yml",
+    "checks/lib/repo/shipped-surface.mjs",
+    "tests/checks/shipped-surface.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/shipped-surface.test.mjs",
+    "exit": 1,
+    "output": "scripts/lib/version-range.mjs:6 随包文本引用开发面 tests/pack/scripts/version-range.spec.mjs"
+  },
+  "green": {
+    "command": "node --test tests/checks/shipped-surface.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/shipped-surface.test.mjs"
+  }
+}
+```

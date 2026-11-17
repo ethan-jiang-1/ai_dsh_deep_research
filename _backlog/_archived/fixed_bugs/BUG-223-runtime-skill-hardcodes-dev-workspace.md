@@ -1,15 +1,15 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-223：运行时 skill `question-patterns` 硬编码开发工作区 `research-workspace/`——用户工作区不是这个名字
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（pack 公共行为/模型可见内容）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行 pack 触面；research-workspace/ 改为运行期 workspace 根） — 结论：research-workspace/ → 当前 run 的 workspace 根（用户工作区任意目录）；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-shipped-boundary-self-contained.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e（2026-11-17）
 >
-> 位置：[packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md](../../packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md)
-> 第 225–226 行；探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-dev-boundary.md) R2。
+> 位置：[packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md](../../../packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md)
+> 第 225–226 行；探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-dev-boundary.md) R2。
 
 ## 症状
 
@@ -30,7 +30,7 @@ opened: 2026-11-17
 - 表面 / 边界：运行时 skill（preset 内容）/ ② 静态（文本 + 用户工作区语义）
 - DSH 不变量：model-visible ⟺ logged；运行时指令必须相对运行期概念（bundle/workspace），不能写死开发实例
 - 触及面：pack 公共行为（模型可见内容）
-- 授权：等人拍板（pack 触面）
+- 授权：用户 2026-11-17 放行（pack 触面 → 修复就绪 = P2 修复授权）
 - 批：运行时/开发边界第一轮（R2）
 
 ## 复现
@@ -74,3 +74,27 @@ ls research-workspace   # 仓内有；用户工作区没有
 
 与 [BUG-221](BUG-221-runtime-skill-references-dev-check-file.md) / [BUG-222](BUG-222-runtime-skill-references-dev-design-doc.md)
 同批；如果选择「移出模型可见面」，与 guides/61 的“操作侧”章节同变更。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md",
+    "checks/lib/repo/shipped-surface.mjs",
+    "tests/checks/shipped-surface.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/shipped-surface.test.mjs",
+    "exit": 1,
+    "output": "presets/lead/skills/question-patterns/SKILL.md:225 随包文本引用开发面 research-workspace/"
+  },
+  "green": {
+    "command": "node --test tests/checks/shipped-surface.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/shipped-surface.test.mjs"
+  }
+}
+```

@@ -27,7 +27,7 @@ test('正本门：design/50 在场且承载四类状态合同', () => {
   assert.ok(text.includes('交付判定'), 'design/50 缺交付判定说明');
 });
 
-test('正本门：project-map / 61 链接 design/50，NODES 持纯文本指针', () => {
+test('正本门：project-map / 61 链接 design/50，NODES 指向随包状态合同载体', () => {
   // repo 文档断言链接形态（允许 docs/ 内或 docs/guides/ 的相对前缀）；md-links 门禁保链接可解析
   const linkForm = /\]\((?:\.\.\/)?design\/50-agent-loop-and-state\.md\)/;
   for (const doc of ['docs/project-map.md', 'docs/guides/61-run-playbook.md']) {
@@ -35,7 +35,7 @@ test('正本门：project-map / 61 链接 design/50，NODES 持纯文本指针',
   }
   // NODES.md 随 pack workspace 种子部署到用户侧，不能携带仓内相对链接（种子副本会被
   // md-links 扫描）——断言纯文本指针在场即可
-  assert.ok(read('packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md').includes('design/50-agent-loop-and-state.md'), 'NODES.md 未指向 design/50');
+  assert.ok(read('packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md').includes('content/generic/state-and-recovery.md'), 'NODES.md 未指向随包状态合同载体 content/generic/state-and-recovery.md');
 });
 
 test('导航门：任务入口矩阵逐行完整（六列非空、首选入口可执行），链接目标全部在场', () => {

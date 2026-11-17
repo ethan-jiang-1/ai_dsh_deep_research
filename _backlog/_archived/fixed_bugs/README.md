@@ -6,6 +6,16 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [BUG-219](BUG-219-pack-types-unexported-dts-overshipped.md) | tarball 111 个 .d.ts 只有 7 个 exports 类型入口——104 个内部类型随发布物出货 | （undefined） | 2026-11-17 |
+| [BUG-220](BUG-220-pack-readme-user-section-dev-smokes.md) | pack README 用户段让用户跑 node checks/smoke/…（checks/ 不在 tarball） | （undefined） | 2026-11-17 |
+| [BUG-221](BUG-221-runtime-skill-references-dev-check-file.md) | 运行时 skill research-brief 引用 checks/lib/shared/plan-card.mjs（不随包） | （undefined） | 2026-11-17 |
+| [BUG-222](BUG-222-runtime-skill-references-dev-design-doc.md) | 运行时 skill nodes-contract 把开发仓 docs/design/50 当状态合同正本 | （undefined） | 2026-11-17 |
+| [BUG-223](BUG-223-runtime-skill-hardcodes-dev-workspace.md) | 运行时 skill question-patterns 硬编码开发工作区 research-workspace/ | （undefined） | 2026-11-17 |
+| [BUG-224](BUG-224-pack-client-bundle-dev-path-comments.md) | 发布物 lib/client.js 带 12+ 条开发面路径注释 | （undefined） | 2026-11-17 |
+| [BUG-225](BUG-225-pack-dts-dev-path-comments.md) | 发布物 lib/types 10 个 .d.ts 带开发面路径注释 | （undefined） | 2026-11-17 |
+| [BUG-226](BUG-226-runtime-scripts-config-dev-path-comments.md) | 发布物 scripts/lib 与 cordis/presets 注释带开发面路径 | （undefined） | 2026-11-17 |
+| [BUG-227](BUG-227-pack-boundary-no-shipped-dev-ref-gate.md) | 发布面没有「零 dev 引用」守卫（仓内绿 ≠ 发布绿） | （undefined） | 2026-11-17 |
+| [BUG-228](BUG-228-pack-files-broad-allowlist-no-set-assertion.md) | files 广白名单 + pack.e2e 只验在场，无集合对账 | （undefined） | 2026-11-17 |
 | [BUG-209](BUG-209-asset-ledger-canonical-libs-stale-helper-names.md) | asset-ledger 的分类表仍指旧 helper 名：oracleType 被静默翻成 self-referential | （分类表改 *-helpers + 重生成；身份表路径存在性守卫） | 2026-11-17 |
 | [BUG-210](BUG-210-call-surface-line-start-command-forms.md) | call-surface 只认行首命令词：env 前缀 / ./ / sudo / && 形态的断链静默放行 | （命令归一收口 doc-surface（8 类命令形态）） | 2026-11-17 |
 | [BUG-211](BUG-211-doc-paths-prose-fence-retired-roots.md) | doc-paths 散文/表格/围栏/HTML 面不认退役根 | （形态台账驱动（表格/围栏路径/HTML href/退役根）） | 2026-11-17 |

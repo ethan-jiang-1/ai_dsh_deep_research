@@ -3,7 +3,7 @@
  * 本地 `web-fetch-http` 与 DeepSeek Fetch API 两腿交给 `orchestrate.ts` 的决策流。
  *
  * 为什么是 provider 而不是配置：`ctx.web` 是单 provider 语义，vendor 明文拒绝隐藏的
- * 优先级链（见 notes/implemented/2026-09-27-search-fallback-seam.md）；要让"本地失败 →
+ * 优先级链（见维护者接缝记录，不随包）；要让"本地失败 →
  * API"成为产品行为，只能注册一个**自己的** fetch provider（本包 host 半的第二处代码面，
  * 边界与理由 = D31）。
  *

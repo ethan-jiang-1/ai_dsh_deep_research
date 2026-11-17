@@ -2,7 +2,7 @@
 # 子插件（persona / skills / 工具面 / 时钟）在 config.plugins 内声明。
 # 角色定位（D37 / D2 修订）：方法库页右栏的共创者——把研究方法聊成四字段库条目，不做研究。
 # 工具面 deliberately 无 web / fs / subagent：方法访谈不进研究，也不在右侧展示研究工具卡。
-# 职责与方法论（开发仓，不随包）：docs/design/20-roles.md §method-editor。
+# 职责与方法论依据由维护者文档承接（不随包）；本行只声明运行期组合。
 - insert:
     - id: preset-method-editor
       name: '@deepseek-ai/dsh-agent-preset'

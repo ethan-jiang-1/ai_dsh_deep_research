@@ -11,9 +11,8 @@
  *      与反斜杠转义 `\<!--` 内的 `<!--` 均是字面量，不触发注释剥除；
  *   4. 段落/标题作用域隔离：未闭合的行内 `<!--` 不跨空行或新块吞噬后续标题；闭合行后续多个注释逐段剥除。
  *
- * 消费方：`review-readiness.ts`（pack 双半，零外部依赖）、`checks/lib/repo/note-scan.mjs`（L0 门禁）、
- * `checks/lib/repo/fix-evidence.mjs`。外部真值契约 = `tests/contracts/markdown-mask-conformance.spec.mjs`
- * 直接对照 `mdast-util-from-markdown`。
+ * 消费方：`review-readiness.ts`（pack 双半，零外部依赖）与 L0 文档扫描（门禁/证据块）。
+ * 外部真值契约 = Markdown 掩码一致性回归直接对照 `mdast-util-from-markdown`。
  */
 
 const FENCE_RE = /^( {0,3})(`{3,}|~{3,})(.*)$/

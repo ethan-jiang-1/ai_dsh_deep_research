@@ -2,6 +2,12 @@
 // pack.e2e.mjs — T0 打包形状证据（keyless，不构建、不联网）。
 // `npm pack --dry-run --json --ignore-scripts` 看 tarball 真正会带哪些文件；构建产物必须已在位
 //（bootstrap/prepack 的职责），缺席 exit 2——未跑 ≠ 通过。
+//
+// 两类判据（BUG-227/219/228 类级，纯函数正本 = checks/lib/repo/shipped-surface.mjs）：
+//   ① 文本：随包文本（README / presets / content / scripts / workers / 构建产物）零 dev 引用；
+//      README 用户段（折叠区外）零开发命令。
+//   ② 集合：tarball 顶层 = 允许集；`lib/types/**/*.d.ts` = `exports.*.types`；`files` 是显式允许集。
+// 负控 = tests/checks/shipped-surface.test.mjs 的纯函数矩阵 + 逐卡红证回放；本件证真实产物。
 // 用法：node checks/smoke/pack.e2e.mjs
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
@@ -10,6 +16,9 @@ import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from '../lib/shared/env.mjs'
+import {
+  filesAllowlistIssues, readmeUserSectionIssues, shippedTextIssues, topLevelIssues, typeSetIssues,
+} from '../lib/repo/shipped-surface.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
@@ -41,6 +50,23 @@ for (const forbidden of ['.env', '.credentials' + '.yaml', 'node_modules', '_dis
   check(!listed.some((rel) => rel === forbidden || rel.startsWith(`${forbidden}/`)), `tarball 不含 ${forbidden}`)
 }
 check(pkg.exports?.['./client']?.default === './lib/client.js', 'exports["./client"] 指向已存在的 lib/client.js')
+
+// ── 发布面自足（BUG-227 / 219 / 228）：集合 = 公开合同的反投影；随包文本零 dev 引用 ──
+check(listed.length >= 50, '防空语料：tarball 条目下限', `只列出 ${listed.length} 条——构建产物缺席或 files 被收窄成空`)
+const surfaceProblems = [
+  ...filesAllowlistIssues(pkg),
+  ...topLevelIssues(listed),
+  ...typeSetIssues(listed.filter((rel) => rel.startsWith('lib/types/')), pkg),
+]
+check(surfaceProblems.length === 0, '发布集合 = 允许集 / exports.types', surfaceProblems.slice(0, 6).join('；'))
+const TEXT = /\.(?:md|js|mjs|cjs|ts|tsx|yml|yaml|json)$/
+const shippedTexts = listed.filter((rel) => TEXT.test(rel)).map((rel) => ({ path: rel, text: readFileSync(join(PACK, rel), 'utf8') }))
+check(shippedTexts.length >= 20, '防空语料：随包文本文件下限', `只读到 ${shippedTexts.length} 份——扫描面被收窄`)
+const textProblems = shippedTextIssues(shippedTexts)
+for (const name of ['README.md', 'README.zh.md']) {
+  if (existsSync(join(PACK, name))) textProblems.push(...readmeUserSectionIssues(readFileSync(join(PACK, name), 'utf8')))
+}
+check(textProblems.length === 0, '随包文本零 dev 引用', textProblems.slice(0, 6).join('；'))
 
 // client 模块表（2026-11-03 从 tests/pack/package-contract 迁入）：断言读 lib/client.js，
 // 属构建产物面；keyless 回归必须能 fresh-clone 跑（无 lib/），故由本冒烟拥有——它本就要求

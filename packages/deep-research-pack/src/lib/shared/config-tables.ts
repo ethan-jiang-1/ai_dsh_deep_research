@@ -5,7 +5,7 @@
 //    生命周期无关。放在 700 行的 TSX 里时，改表的人只会去翻页面文件，lib 侧也拿不到它们；
 // ② keyless 测试此前只能 `ts.createSourceFile` 扒 TSX 源码取常量，并被迫断言
 //    「必须保持为可静态对账的数组字面量」——任何视图重构都会让与业务无关的测试红。现在测试
-//    直接 import（tests/cockpit/library-fold）；
+//    直接 import（包外 keyless 回归）；
 // ③ 数据/展示分层：改数据不动组件，改组件不动数据。
 //
 // 同钉（漂移即红）：内置偏好 ↔ skill 方法预设表、判型映射 ↔ skill 同名表、六条底线 ↔ skill
@@ -15,7 +15,7 @@ import type { LibrarySections } from '../method-library/library-fold.ts'
 /** 内置研究偏好（只读；内容正本 = research-brief skill 方法预设表——此处仅投影）。
  *  `summary` = 该表第 2 列「给用户的一句话」——**卡面显示的就是它**（2026-10-16 用户拍板：
  *  面板是用户面，就显示专门为用户写的那句话；四分区详情仍在详情弹窗，不丢信息）。
- *  三处同钉（客户端 ↔ skill 表 ↔ 测试期望），漂移即红：tests/library-fold.spec.mjs。 */
+ *  三处同钉（客户端 ↔ skill 表 ↔ 测试期望），漂移即红（显示名一致性回归）。 */
 export interface BuiltinPreference {
   readonly name: string
   readonly summary: string
@@ -76,7 +76,7 @@ export const BUILTIN_PREFERENCES: readonly BuiltinPreference[] = [
 ]
 
 /** 判型 → 打法映射（**推荐规则正本 = research-brief skill §方法预设 的同名表**；此处是它的
- *  投影——卡面「什么时候用它」与「推荐规则说明位」都由它派生；同钉 = tests/library-fold）。 */
+ *  投影——卡面「什么时候用它」与「推荐规则说明位」都由它派生；同钉 = 显示名一致性回归）。 */
 export const PATTERN_METHOD_RULES: readonly { patterns: string; method: string }[] = [
   { patterns: 'P1 单点事实/状态核查 · P2 数据表/价目核查', method: '事实核查' },
   { patterns: 'P3 领域全景梳理', method: '领域地图' },
@@ -86,18 +86,18 @@ export const PATTERN_METHOD_RULES: readonly { patterns: string; method: string }
 ]
 
 /** 六条共同底线（任何打法都改不掉）——正本 = research-brief skill 的「共同底线（…）」句；
- *  面板只做投影（同钉 = tests/library-fold；防第二份手抄清单）。 */
+ *  面板只做投影（同钉 = 显示名一致性回归；防第二份手抄清单）。 */
 export const BASELINE_DISCIPLINES: readonly string[] = ['来源链', '逐字摘录', '独立信源', '日期校准', '缺口显式', 'readiness']
 
 /** 两个定制入口的指令逐字（**正本 = research-brief skill「两个面板入口的指令形态」**；
- *  同钉 = tests/library-fold 的逐字包含断言）。 */
+ *  同钉 = 显示名一致性回归的逐字包含断言）。 */
 export const DRAFT_INSTRUCTION = '我要新建一条研究打法。请先问我三个问题——① 我这一行的一手来源具体是哪些（点名到机构／数据库／官方页）② 必须带的口径字段是什么（时间／单位／币种／版本等）③ 这份报告给谁看、要什么形态与免责——拿到回答后，按四字段（找来源／怎么核实／报告怎么写／不承诺）起草一条命名条目写入我的偏好库，并一句话回执你写了什么。'
 export const DISTILL_INSTRUCTION = '把本次研究实际采用的做法存成研究偏好——从 question.md 研究方法节、evidence 的来源分级分布与 final.md 的结构归纳出四字段，写入我的偏好库；一句话回执，并说明它与最接近的内置打法的差异在哪。'
 
 /** 领域示范（只读）：一条**厚条目**长什么样——行业差异四处（一手源是谁／口径必带什么／
  *  冲突怎么裁／工件与免责）该写到什么颗粒度。正本 = research-brief skill「领域示范」节，
- *  逐字同钉（tests/library-fold）；它不是按判型推荐的方法，故不进「内置打法」清单。
- *  内容来自外部逐条核实（`_backlog/_archived/research/method-config-ux/2026-10-18-method-config-ux-external.md`）。 */
+ *  逐字同钉（显示名一致性回归）；它不是按判型推荐的方法，故不进「内置打法」清单。
+ *  内容来自外部逐条核实（来源清单由维护者文档承接）。 */
 export const DEMO_ENTRY: { readonly name: string; readonly sections: LibrarySections } = {
   name: '投研尽调（示范）',
   sections: {
@@ -109,7 +109,7 @@ export const DEMO_ENTRY: { readonly name: string; readonly sections: LibrarySect
 }
 
 /** 四分区的固定呈现序与用户语言标签（**逐字 = 库格式与指令载荷**；`library-fold.SECTION_LABELS`
- *  是正本，本常量是它的呈现副本——由 tests/library-fold 的"显示名一致性"断言对钉）。
+ *  是正本，本常量是它的呈现副本——由"显示名一致性"回归对钉）。
  *  2026-10-18 修发现 13：此处曾写「找什么资料／明确不承诺」，与指令里的「找来源／不承诺」不一致。 */
 export const SECTIONS: readonly { key: keyof LibrarySections; label: string }[] = [
   { key: 'source', label: '找来源' },

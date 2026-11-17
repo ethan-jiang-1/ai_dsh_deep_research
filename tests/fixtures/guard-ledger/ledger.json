@@ -762,6 +762,86 @@
       "status": "provisional",
       "redRecipe": "从 SUPPORT_EXT 删掉 .ts → .ts 助手用例红；删未知扩展名兜底 → .py 用例红",
       "trigger": "落点规则改由盘上规则表（非模块内常量）驱动并给独立 oracle 时，重评为 canonical"
+    },
+    {
+      "id": "BUG-219",
+      "mechanism": "tarball 的 lib/types 111 个 .d.ts 只有 7 个 exports 类型入口（104 内部类型随包）",
+      "guard": "tests/checks/shipped-surface.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 files 改回 lib/** 或删一个 exports.types 入口 → 发布清单用例红"
+    },
+    {
+      "id": "BUG-220",
+      "mechanism": "pack README 用户段给用户 node checks/…（checks/ 不在 tarball）",
+      "guard": "tests/checks/shipped-surface.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "在 README 折叠区外注入 pnpm build → readme-shape 与 shipped-surface 用例红"
+    },
+    {
+      "id": "BUG-221",
+      "mechanism": "运行时 skill research-brief 引用 checks/lib/shared/plan-card.mjs（不随包）",
+      "guard": "tests/checks/shipped-surface.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "往 skill 注入 checks/lib/__gone__.mjs → 随包文本用例红"
+    },
+    {
+      "id": "BUG-222",
+      "mechanism": "运行时 skill nodes-contract 把开发仓 docs/design/50 当状态合同正本",
+      "guard": "tests/checks/shipped-surface.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 docs/design/50 写回 skill → 随包文本用例红"
+    },
+    {
+      "id": "BUG-223",
+      "mechanism": "运行时 skill question-patterns 硬编码 research-workspace/（开发实例名）",
+      "guard": "tests/checks/shipped-surface.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 research-workspace/ 写回 skill → 随包文本用例红"
+    },
+    {
+      "id": "BUG-224",
+      "mechanism": "发布物 lib/client.js 带 tests/checks/_backlog 路径注释",
+      "guard": "tests/checks/shipped-surface.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "往 lib/client.js 注入 checks/lib/__gone__.mjs → pack.e2e 随包文本红；源码注释由本测试扫"
+    },
+    {
+      "id": "BUG-225",
+      "mechanism": "发布物 lib/types/**/*.d.ts 带开发面路径注释",
+      "guard": "tests/checks/shipped-surface.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "往 src 注释注入 tests/__gone__.mjs → 随包文本用例红；构建产物由 pack.e2e 扫"
+    },
+    {
+      "id": "BUG-226",
+      "mechanism": "发布物 scripts/lib 与 cordis/presets 注释带开发面路径",
+      "guard": "tests/checks/shipped-surface.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "往 scripts/lib 注入 tests/__gone__.mjs → 随包文本用例红"
+    },
+    {
+      "id": "BUG-227",
+      "mechanism": "发布面没有「零 dev 引用」守卫（仓内绿 ≠ 发布绿）",
+      "guard": "tests/checks/shipped-surface.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删 shipped-surface.test 或让 pack.e2e 不扫文本 → 本批守卫缺位（反向判据）"
+    },
+    {
+      "id": "BUG-228",
+      "mechanism": "files 广白名单 + pack.e2e 只验必需件在场，无集合对账",
+      "guard": "tests/checks/shipped-surface.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "files 加回 lib/** 或删类型入口 → 发布清单用例红；pack.e2e 集合断言同判"
     }
   ]
 }

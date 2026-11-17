@@ -49,7 +49,7 @@
 | run-accept.e2e.mjs | run-accept 全链（合成 bundle+会话日志，真 CLI）：绝对 present 归一、连续两次幂等、bundle 外 present 红不写、final 含 sk- 红不写、`--repair`、`--no-write` 真只读、未知参数 exit 2、整数契约（schema/created → manifest 记版本与日期、repair 保 schema 快照、schema-scan CLI 认新契约） 后绿 | keyless |
 | secret-scan.e2e.mjs | 交付物秘密扫描的范围边界：默认不扫 evidence、`--all` 才扫、`--allow-legacy` 只报告、输出不回显值（纯函数正反例归 tests） | keyless |
 | data.entry.mjs | T5 数据面切片：包目录零写入、假 token 不泄漏、卸载后 workspace 用户文件 + session 日志保留 | keyless（真 web 启动、无模型调用；tarball 需先 export-dist） |
-| pack.e2e.mjs | T0 tarball 形状：入口/patch/preset/content/doctor 在场、exports 可解析、client 模块表（require ↔ `dsh.client.inject` ↔ peers）、无安装脚本/凭据；手册 sha256、两次 npm pack 同 sha、无 symlink/setuid 条目（在场时） | keyless（`npm pack --dry-run --json`；需 lib 已构建——构建产物断言住这里，keyless 回归保持 fresh-clone 可跑） |
+| pack.e2e.mjs | T0 tarball 形状：入口/patch/preset/content/doctor 在场、exports 可解析、client 模块表（require ↔ `dsh.client.inject` ↔ peers）、无安装脚本/凭据；手册 sha256、两次 npm pack 同 sha、无 symlink/setuid 条目（在场时）；**发布面自足：顶层 = 允许集、`lib/types` = `exports.types`、随包文本（含构建产物）零 dev 引用、README 用户段零开发命令** | keyless（`npm pack --dry-run --json`；需 lib 已构建——构建产物断言住这里，keyless 回归保持 fresh-clone 可跑） |
 | user-env.entry.mjs | 已有 bundle + 用户 overlay + session/凭据/workspace 的安装/卸载共存 | keyless（全局 dsh + 本地 tarball） |
 | profile-concurrency.entry.mjs | 两个 `dsh plugin add` + 两个 `remove` 同 profile 并发：至少一个成功、dump 可解析、最终无本包；不留双 bundle/坏 profile | keyless（全局 dsh + tarball） |
 | workspace-isolation.entry.mjs | B4 双实例：两套 home/profile/port/state/workspace 各起通道、各建会话；会话组绑定自己的 W、home/session 互斥、marker 互不可见 | keyless（真 web，不调模型；更慢，约两套 cold start） |
@@ -165,6 +165,7 @@
 | lib/repo/doc-prose-paths.mjs | doc-prose-paths.test | 散文路径枚举薄壳（枚举正本 = doc-surface；BUG-204 的 API 不动） |
 | lib/repo/doc-surface.mjs | a-docs、f-repo、doc-prose-paths、doc-surface-shapes.test | live 文档可读面的唯一枚举器：形态台账（SHAPES / COMMAND_FORMS）↔ 订单案例对账、命令归一（env 前缀 / `./` / 包装器 / `&&` / heredoc / 缩进 / YAML 折叠块）、退役根判据 |
 | lib/repo/doc-counts.mjs | a-docs、doc-counts.test | 资产计数名词闭集（count-free 判据面正本）+ 硬计数 token 抽取 |
+| lib/repo/shipped-surface.mjs | b-pack、package-contract.spec、pack.e2e、shipped-surface.test | 发布面自足判据正本：随包文本零 dev 引用（歧义根只认真实子目录）、README 用户段零开发命令、`files` = `exports.types` 反投影、tarball 顶层/类型集合对账 |
 | lib/repo/redirect-ledger.mjs | a-docs、redirect-ledger.test | 搬家账本链式解析：append-only 后旧条目的 `to` 可再次成为 `from`，解析走到最终落点；环/过深/重复 from fail-loud |
 | lib/probes/direct-authorization-boundary.mjs | entry-chain-probe、entry-chain-probe.spec | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |
 | lib/harness/replay-scene.mjs | replay-fixtures.spec、replay-scene.spec、snapshot-replay.entry | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |

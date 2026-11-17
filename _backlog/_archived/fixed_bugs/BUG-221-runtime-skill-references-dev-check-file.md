@@ -1,16 +1,16 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-221：运行时 skill `research-brief` 让 lead 依赖 `checks/lib/shared/plan-card.mjs`——该文件不随包
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（pack 公共行为/模型可见内容）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行 pack 触面；删实现文件名，改行为描述） — 结论：删实现文件名，改行为描述（计划卡由宿主按标签识别）；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-shipped-boundary-self-contained.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e（2026-11-17）
 >
-> 位置：[packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md](../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md)
+> 位置：[packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md](../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md)
 > 第 76 行；该 skill 随 `presets/**` 进 tarball，会进 lead 的模型上下文。
-> 探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-dev-boundary.md) R2。
+> 探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-dev-boundary.md) R2。
 
 ## 症状
 
@@ -28,7 +28,7 @@ opened: 2026-11-17
 - 表面 / 边界：运行时 skill（preset 内容）/ ② 静态（文本 + 发布物）
 - DSH 不变量：model-visible ⟺ logged；模型可见文本不得依赖未发布的开发面
 - 触及面：pack 公共行为（模型可见内容）
-- 授权：等人拍板（pack 触面）
+- 授权：用户 2026-11-17 放行（pack 触面 → 修复就绪 = P2 修复授权）
 - 批：运行时/开发边界第一轮（R2）
 
 ## 复现
@@ -71,3 +71,27 @@ tar -tzf _dist/dsh-deep-research-pack-0.3.6.tgz | grep -c 'package/checks/'   # 
 
 与 [BUG-220](BUG-220-pack-readme-user-section-dev-smokes.md) / [BUG-222](BUG-222-runtime-skill-references-dev-design-doc.md) /
 [BUG-223](BUG-223-runtime-skill-hardcodes-dev-workspace.md) 同批（发布文本 dev 引用）。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md",
+    "checks/lib/repo/shipped-surface.mjs",
+    "tests/checks/shipped-surface.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/shipped-surface.test.mjs",
+    "exit": 1,
+    "output": "presets/lead/skills/research-brief/SKILL.md:76 随包文本引用开发面 checks/lib/shared/plan-card.mjs"
+  },
+  "green": {
+    "command": "node --test tests/checks/shipped-surface.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/shipped-surface.test.mjs"
+  }
+}
+```

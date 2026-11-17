@@ -168,7 +168,7 @@ export function foldLibrary(text: string | null): readonly LibraryEntry[] {
 }
 
 /** 分区键的用户语言名（指令拼装序 = 呈现序）。**显示标签正本**——客户端 `SECTIONS` 是它的
- *  呈现副本（同一序、同一逐字标签；由 tests/library-fold 的"显示名一致性"断言对钉，2026-10-18
+ *  呈现副本（同一序、同一逐字标签；由"显示名一致性"回归对钉，2026-10-18
  *  修发现 13：面板曾显示「找什么资料／明确不承诺」而指令写「找来源／不承诺」）。 */
 export const SECTION_LABELS: readonly { key: keyof LibrarySections; label: string }[] = [
   { key: 'source', label: '找来源' },

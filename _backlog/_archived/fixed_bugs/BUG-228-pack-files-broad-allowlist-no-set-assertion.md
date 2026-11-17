@@ -1,16 +1,16 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-228：`files` 是广白名单 + 负模式，`pack.e2e` 只验必需件在场——tarball 集合没有对账
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（pack 公共行为）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行 pack 触面；files 显式允许集 + 集合断言） — 结论：files 显式允许集 + pack.e2e 集合断言（顶层/类型 = 公开合同反投影）；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-shipped-boundary-self-contained.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e（2026-11-17）
 >
-> 位置：[packages/deep-research-pack/package.json](../../packages/deep-research-pack/package.json) 的 `files`；
-> [checks/smoke/pack.e2e.mjs](../../checks/smoke/pack.e2e.mjs) 的 `required` 列表。
-> 探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-dev-boundary.md) R1/R4。
+> 位置：[packages/deep-research-pack/package.json](../../../packages/deep-research-pack/package.json) 的 `files`；
+> [checks/smoke/pack.e2e.mjs](../../../checks/smoke/pack.e2e.mjs) 的 `required` 列表。
+> 探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-dev-boundary.md) R1/R4。
 
 ## 症状
 
@@ -33,7 +33,7 @@ README 由 npm 自动包含、不在 `files` 里，也不在任何集合断言�
 - 表面 / 边界：发布清单（files/manifest）/ ② 静态（tarball 集合）
 - DSH 不变量：fail-loud —— 发布集合应与允许集双向相等（多/少都红）
 - 触及面：pack 公共行为（发布内容）
-- 授权：等人拍板（pack 触面）
+- 授权：用户 2026-11-17 放行（pack 触面 → 修复就绪 = P2 修复授权；显式允许集已拍板）
 - 批：运行时/开发边界第一轮（R1/R4）
 
 ## 复现
@@ -75,3 +75,29 @@ tar -tzf _dist/dsh-deep-research-pack-0.3.6.tgz | awk -F/ '{print $2}' | sort | 
 
 与 [BUG-219](BUG-219-pack-types-unexported-dts-overshipped.md) / [BUG-227](BUG-227-pack-boundary-no-shipped-dev-ref-gate.md)
 同一评审：一个定清单、一个扫文本。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/package.json",
+    "checks/lib/repo/shipped-surface.mjs",
+    "tests/checks/shipped-surface.test.mjs",
+    "checks/smoke/pack.e2e.mjs",
+    "tests/pack/contract/package-contract.spec.mjs"
+  ],
+  "red": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 1,
+    "output": "FAIL  发布集合 = 允许集 / exports.types — files 的「lib/**」是广模式；files 缺公开类型入口 lib/types/client/index.d.ts"
+  },
+  "green": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/pack.e2e.mjs"
+  }
+}
+```

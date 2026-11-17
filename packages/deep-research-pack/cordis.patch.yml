@@ -46,8 +46,7 @@
 #    17 会话 / 46 次，lead 与队员都被打中）。此处把该码并入有界重试（maxRetries 5 + 默认退避，
 #    参数与出厂默认同值），其余码原样重述——Loader 方言：replace 行的 config 整体替换、不深合并。
 #    该行在 base 里无 config，故重述无副作用；不含 name（避免新增 peerDependency，只按 id 定向）。
-#    判据与分母 = _backlog/_archived/fixed_bugs/BUG-022-provider-stream-malformed-turn-kill.md；理由 = Note
-#    notes/implemented/2026-10-11-provider-malformed-response-retry.md。
+#    判据与分母：开发仓 notes 里的畸形流实测（不随包）；运行期只需知道该码并入有界重试。
 - id: llm-deepseek
   config:
     retryPolicy:
@@ -70,8 +69,7 @@
 #    searchProvider 会让 fetch 面对 http + deepseek-fetch-api 两个可用 provider →
 #    WEB_PROVIDER_AMBIGUOUS。不含 name（同 llm-deepseek 行：按 id 定向，避免新增 peerDependency）。
 #    回退 provider 由下方 `research-fetch-fallback` 行注册（本包 host 半第二处代码面；边界 =
-#    D31）。实测 = _backlog/research/retrieval-backend/2026-10-27-provider-audit.md；理由与
-#    输掉的方案 = notes/implemented/2026-10-27-{deepseek-search-api-retrieval,fetch-fallback-provider}.md。
+#    D31）。实测、理由与输掉的方案在开发仓 notes（不随包）。
 - id: web
   config:
     searchProvider: deepseek-search-api

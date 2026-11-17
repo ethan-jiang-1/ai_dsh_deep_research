@@ -208,7 +208,7 @@
     "tier": "nightly",
     "job": "deploy",
     "cost": "medium",
-    "uniqueClaim": "tarball 条目/模块表/sha/无 symlink/无安装脚本",
+    "uniqueClaim": "tarball 条目/模块表/sha/无 symlink/无安装脚本 + 发布集合（顶层/类型 = exports.types）与随包文本零 dev 引用",
     "oracle": [
       "tests/pack/contract/package-contract.spec.mjs"
     ],

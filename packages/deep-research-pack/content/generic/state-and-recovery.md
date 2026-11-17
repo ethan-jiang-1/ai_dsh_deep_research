@@ -3,6 +3,12 @@
 > 本文件是 `content/manual.md` §状态头、读序与恢复 的下放细则，由 T0 手册按需指向；不是独立指令面。
 > 路径相对 `research_pack_root`；键义模板 = `content/templates/run/run.md`。
 
+**canonical 与恢复优先级**（四类事实各一个权威源，观察面只是投影）：
+- run bundle 文件 = 研究/交付事实的 canonical（`run.md` → `question.md §Decisions` → `journal.md` → `final/` 最高 `vN`）；
+- session log = 交互事实的 canonical（present / 发送 / 代答以会话事件为准，盘侧副本不夺权）；
+- goal / 任务板 = 任务状态的权威（观察面按它投影，不从 resume 重建）；
+- 观察面 = 只读投影，永不回写事实；恢复顺序 = 本文件「恢复」节。
+
 **五问**：阶段 / 最近拍板 / 最大未闭合 / 下一步 / 交付态。
 
 **按意图读**（读完即停；五问答齐即停）：

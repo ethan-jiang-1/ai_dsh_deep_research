@@ -1,16 +1,16 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-224：发布物 `lib/client.js` 带 12+ 条开发面路径注释（`tests/`、`checks/`、`_backlog/`）
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：修复就绪（自授权 P2：改源注释/构建剥离 + 加扫描）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（自授权 P2：改源注释/构建剥离 + 加扫描） — 结论：12+ 条 dev 路径注释改行为/契约描述；构建产物与源码同扫；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-shipped-boundary-self-contained.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e（2026-11-17）
 >
 > 位置：`packages/deep-research-pack/lib/client.js`（构建产物，gitignored；随 tarball 发布）
 > （构建产物，随 tarball 发布）；源 = `packages/deep-research-pack/src/**`。
-> 探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-dev-boundary.md) R3。
+> 探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-dev-boundary.md) R3。
 
 ## 症状
 
@@ -74,3 +74,43 @@ grep -rhoE '(tests|checks|_backlog)/([A-Za-z0-9_./-]+)' packages/deep-research-p
 
 与 [BUG-225](BUG-225-pack-dts-dev-path-comments.md) / [BUG-226](BUG-226-runtime-scripts-config-dev-path-comments.md)
 同批（发布物文本）；与 [BUG-227](BUG-227-pack-boundary-no-shipped-dev-ref-gate.md) 的守卫同变更。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/client/builtin-display.ts",
+    "packages/deep-research-pack/src/client/delivery-watch.ts",
+    "packages/deep-research-pack/src/client/index.ts",
+    "packages/deep-research-pack/src/client/locales/zh.ts",
+    "packages/deep-research-pack/src/client/research-config/LegacyManagementPane.tsx",
+    "packages/deep-research-pack/src/client/research-config/config-model.ts",
+    "packages/deep-research-pack/src/fetch-fallback/index.ts",
+    "packages/deep-research-pack/src/fetch-fallback/orchestrate.ts",
+    "packages/deep-research-pack/src/fetch-fallback/policy.ts",
+    "packages/deep-research-pack/src/index.ts",
+    "packages/deep-research-pack/src/lib/events/journal-wire.ts",
+    "packages/deep-research-pack/src/lib/method-library/library-fold.ts",
+    "packages/deep-research-pack/src/lib/review/review-readiness.ts",
+    "packages/deep-research-pack/src/lib/shared/config-tables.ts",
+    "packages/deep-research-pack/src/lib/shared/i18n.ts",
+    "packages/deep-research-pack/src/lib/shared/markdown-mask.ts",
+    "checks/lib/repo/shipped-surface.mjs",
+    "tests/checks/shipped-surface.test.mjs",
+    "checks/smoke/pack.e2e.mjs"
+  ],
+  "red": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 1,
+    "output": "FAIL  随包文本零 dev 引用 — lib/client.js:14842 随包文本引用开发面 checks/lib/__gone__.mjs"
+  },
+  "green": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/pack.e2e.mjs"
+  }
+}
+```

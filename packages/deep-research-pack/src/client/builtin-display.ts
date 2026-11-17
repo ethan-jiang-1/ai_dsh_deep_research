@@ -10,7 +10,7 @@
 //     `renderLibraryEntry` / 库写入 / `coach-prompts` / Lead 指令载荷）继续用 config-tables 原文；
 //   · canonical `name` 仍是列表 key / `selectedName` / 查找键——显示名只进 JSX；
 //   · 未登记的名称**fail-soft**：名称原样返回、sections 返回 null、调用方回退 canonical；
-//   · zh 值必须逐字等于 canonical（tests/cockpit/client/builtin-display.spec.mjs 对钉，防显示层漂移）。
+//   · zh 值必须逐字等于 canonical（包外显示层回归对钉，防显示层漂移）。
 import { BUILTIN_PREFERENCES, PATTERN_METHOD_RULES } from '../lib/shared/config-tables.ts'
 import type { LibrarySections } from '../lib/method-library/library-fold.ts'
 import { translateZh, type PackTranslate } from '../lib/shared/i18n.ts'

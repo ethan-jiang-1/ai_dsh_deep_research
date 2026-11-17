@@ -1,17 +1,17 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-220：pack README 的用户段让用户跑 `node checks/smoke/…`——`checks/` 不在 tarball 里
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（pack 公共文档）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行 pack/文档触面：用户段零 dev 命令，维护者折叠段保留） — 结论：README 用户段（折叠区外）零开发命令/路径；readme-shape 与 keyless 测试消费同一判据；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-shipped-boundary-self-contained.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e（2026-11-17）
 >
-> 位置：[packages/deep-research-pack/README.md](../../packages/deep-research-pack/README.md) 第 250/264 行
-> （zh 对应 [README.zh.md](../../packages/deep-research-pack/README.zh.md) 第 234/248 行）；
+> 位置：[packages/deep-research-pack/README.md](../../../packages/deep-research-pack/README.md) 第 250/264 行
+> （zh 对应 [README.zh.md](../../../packages/deep-research-pack/README.zh.md) 第 234/248 行）；
 > 发布物 = `_dist/dsh-deep-research-pack-0.3.6.tgz`（README 由 npm 自动包含）。
-> 探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-dev-boundary.md) R2。
+> 探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-dev-boundary.md) R2。
 
 ## 症状
 
@@ -36,7 +36,7 @@ locale、README），用户按 README 敲会得到 `MODULE_NOT_FOUND`；README �
 - 表面 / 边界：发布文档（pack README）/ ② 静态（README 文本 + tarball 内容）
 - DSH 不变量：fail-loud —— 文档给用户的命令必须在用户可获得的包装里可执行
 - 触及面：pack 公共行为 + 文档合同
-- 授权：等人拍板（pack/文档触面）
+- 授权：用户 2026-11-17 放行（pack/文档触面 → 修复就绪 = P2 修复授权；用户段/维护者段分界已拍板）
 - 批：运行时/开发边界第一轮（R2）
 
 ## 复现
@@ -63,7 +63,7 @@ README 的「Token effect」段由包作者维护，把**重生成命令**写成
 
 ## 修法
 
-1. 用户段删掉 `node checks/...`，改成「维护者重生成见仓库 dev 循环」+ 外部链接；或把该段整体移入
+1. 用户段删掉 `node checks/...`，改为面向用户的结果说明（重生成是维护者动作，见维护者折叠段）——用户 2026-11-17 拍板保留折叠段；原文的分支「整体移入
    `Working context for maintainers` 折叠区；
 2. 维护者段保留但明确「仓库内命令，不随包」；
 3. `readme-shape` 加一条：用户可见段（折叠区之外）不得出现 `node checks/|pnpm |npm pack|tools/|tests/`，
@@ -79,3 +79,31 @@ README 的「Token effect」段由包作者维护，把**重生成命令**写成
 
 与 [BUG-221](BUG-221-runtime-skill-references-dev-check-file.md) 同批（发布文本 dev 引用）；
 建议同一修法评审（"发布文本零 dev 引用"）。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/README.md",
+    "packages/deep-research-pack/README.zh.md",
+    "checks/verify/gates/b-pack.mjs",
+    "checks/lib/repo/shipped-surface.mjs",
+    "tests/checks/shipped-surface.test.mjs",
+    "checks/lib/harness/gates-cases.mjs",
+    "docs/evaluation.md"
+  ],
+  "red": {
+    "command": "node checks/verify/verify.mjs --only=readme-shape",
+    "exit": 1,
+    "output": "README 用户段出现开发命令「`pnpm build」（第 310 行）——维护者动作放 <details> 折叠段"
+  },
+  "green": {
+    "command": "node checks/verify/verify.mjs --only=readme-shape",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/shipped-surface.test.mjs"
+  }
+}
+```

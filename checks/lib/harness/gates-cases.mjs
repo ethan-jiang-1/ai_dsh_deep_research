@@ -500,6 +500,10 @@ export const CASES = [
         '\n  folded-probe:\n    runs-on: ubuntu-latest\n    steps:\n      - run: >-\n          node checks/__missing-probe.mjs\n');
     } },
   // test-placement 非测试模块（2026-11-17）：读取缝/助手带错后缀也能从 glob 静默漂移。
+  // readme-shape 用户段（BUG-220，2026-11-17）：README 随 npm 发布，折叠的维护者段之外不得出现
+  // 开发命令（`pnpm build` / `node checks/…` 的路径不在 tarball 里）。判据正本 = shipped-surface。
+  { id: 'readme-shape-user-section-dev-command', gate: 'readme-shape',
+    mutate: appendTo('packages/deep-research-pack/README.md', '\nProbe: `pnpm build`\n') },
   { id: 'test-placement-support-module', gate: 'test-placement', mutate: (dir) => {
       writeFileSync(join(dir, 'tests', 'pack', 'zz-support.mjs'), 'export const x = 1\n');
     } },

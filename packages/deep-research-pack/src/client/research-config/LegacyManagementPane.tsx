@@ -5,7 +5,7 @@
 // "哪一版在渲染"的判断，四区形态自己的结构在本件里读。
 //
 // 为什么保留而不是删：D25 记录了管理面迁移到「方法库」tab，回滚分支是那次迁移的对照物；
-// 删除属改记录决定，退役条件登记在 `_backlog/triggers.md`。
+// 删除属改记录决定，退役条件登记在维护者触发账（不随包）。
 import type { ReactNode } from 'react'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PackTranslate } from '../../lib/shared/i18n.ts'

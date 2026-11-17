@@ -1,16 +1,16 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-227：发布面没有「零 dev 引用」守卫——`doc-paths`/`call-surface` 验仓内存在，`pack.e2e` 只验必需件在场
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行门禁触面；keyless 源侧 + nightly tarball 双层守卫） — 结论：shipped-surface 双载体守卫：keyless 源侧（pnpm test）+ nightly 真 tarball（pack.e2e）；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-shipped-boundary-self-contained.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e（2026-11-17）
 >
 > 位置：发布面判据缺口。`doc-paths` / `call-surface` 扫仓内 tracked 文本；
-> [checks/smoke/pack.e2e.mjs](../../checks/smoke/pack.e2e.mjs) 只断言 tarball 含必需件（第 37 行）；
-> `readme-shape` / `content-shape` 只查形状。探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-dev-boundary.md) R4。
+> [checks/smoke/pack.e2e.mjs](../../../checks/smoke/pack.e2e.mjs) 只断言 tarball 含必需件（第 37 行）；
+> `readme-shape` / `content-shape` 只查形状。探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-dev-boundary.md) R4。
 
 ## 症状
 
@@ -34,7 +34,7 @@ grep -n "required of" checks/smoke/pack.e2e.mjs                # 只列必需件
 - 表面 / 边界：发布面门禁 / ② 静态（tarball 解包文本）
 - DSH 不变量：fail-loud —— 发布物中不可达的开发引用必须红
 - 触及面：门禁与验收合同（新增发布面扫描测试/门禁）
-- 授权：等人拍板（门禁触面）
+- 授权：用户 2026-11-17 放行（门禁与验收合同触面 → 修复就绪 = P2 修复授权）
 - 批：运行时/开发边界第一轮（R4）
 
 ## 复现
@@ -79,3 +79,30 @@ tar -tzf _dist/dsh-deep-research-pack-0.3.6.tgz | grep -E 'package/(checks|tests
 
 与 [BUG-219](BUG-219-pack-types-unexported-dts-overshipped.md)–[BUG-226](BUG-226-runtime-scripts-config-dev-path-comments.md)
 同一批；建议 219/228 的文件集合断言与 227 的文本断言同一次评审。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/repo/shipped-surface.mjs",
+    "tests/checks/shipped-surface.test.mjs",
+    "checks/smoke/pack.e2e.mjs",
+    "docs/evaluation.md",
+    "checks/README.md",
+    "checks/smoke/registry.json"
+  ],
+  "red": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 1,
+    "output": "FAIL  随包文本零 dev 引用 — lib/client.js:14842 随包文本引用开发面 checks/lib/__gone__.mjs（注入后；旧守卫对同一句全绿）"
+  },
+  "green": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/pack.e2e.mjs"
+  }
+}
+```

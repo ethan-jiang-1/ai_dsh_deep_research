@@ -1,15 +1,15 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-222：运行时 skill `nodes-contract` 把开发仓 `docs/design/50-agent-loop-and-state.md` 写成状态合同正本——该文件不随包
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（pack 公共行为/模型可见内容）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行 pack 触面；状态合同指向随包 content/generic/state-and-recovery.md） — 结论：状态合同指向随包 content/generic/state-and-recovery.md（补 canonical 优先级段）；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-shipped-boundary-self-contained.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e（2026-11-17）
 >
-> 位置：[packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)
-> 第 10–11 行；探索轮 = [运行时/开发边界卡](../issues/2026-11-17-runtime-dev-boundary.md) R2。
+> 位置：[packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md](../../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)
+> 第 10–11 行；探索轮 = [运行时/开发边界卡](../settled_issues/2026-11-17-runtime-dev-boundary.md) R2。
 
 ## 症状
 
@@ -28,7 +28,7 @@ lead 的 `nodes-contract` 是运行时会加载进模型上下文的 skill；它
 - 表面 / 边界：运行时 skill（preset 内容）/ ② 静态（文本 + 发布物）
 - DSH 不变量：model-visible ⟺ logged；模型可见文本必须自足或指向随包载体
 - 触及面：pack 公共行为（模型可见内容）
-- 授权：等人拍板（pack 触面）
+- 授权：用户 2026-11-17 放行（pack 触面 → 修复就绪 = P2 修复授权；随包载体已拍板）
 - 批：运行时/开发边界第一轮（R2）
 
 ## 复现
@@ -71,3 +71,29 @@ skill 以「开发仓正本 + 不随包」的方式指路：作者知道文件�
 
 与 [BUG-221](BUG-221-runtime-skill-references-dev-check-file.md) / [BUG-223](BUG-223-runtime-skill-hardcodes-dev-workspace.md)
 同批（发布文本 dev 引用）；建议先定「模型可见文本自足」的载体规则。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md",
+    "packages/deep-research-pack/content/generic/state-and-recovery.md",
+    "checks/lib/repo/shipped-surface.mjs",
+    "tests/checks/shipped-surface.test.mjs",
+    "tests/checks/navigability-contract.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/shipped-surface.test.mjs",
+    "exit": 1,
+    "output": "presets/lead/skills/nodes-contract/SKILL.md:10 随包文本引用开发面 docs/design/50-agent-loop-and-state.md"
+  },
+  "green": {
+    "command": "node --test tests/checks/shipped-surface.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/shipped-surface.test.mjs"
+  }
+}
+```

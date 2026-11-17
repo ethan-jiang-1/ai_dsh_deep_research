@@ -14,7 +14,7 @@ export const LIBRARY_PATH = 'method-library.md'
 
 
 /** 四字段的执行面（谁读它／在哪生效／管不到什么）——面向用户的诚实边界；证据 = 各 skill 与
- *  操作侧门禁，来源 = 方法配置总卡的执行面表（`_backlog/issues/2026-10-18-research-method-config-ux.md`）。
+ *  操作侧门禁，来源 = 方法配置的执行面表（维护者文档承接）。
  *  文案键按字段分组（`execution{Who,Where,Cannot}{Source,Verify,Report,Limit}`）。 */
 const EXECUTION_KEYS = {
   source: { who: 'executionWhoSource', where: 'executionWhereSource', cannot: 'executionCannotSource' },

@@ -1,6 +1,6 @@
 /**
  * 浏览器半 = **研究驾驶舱（Research Cockpit）** —— 观察面 client 套件的唯一入口（2026-09-28
- * 定名；当前事实正本 = docs/design/40-research-cockpit.md——定位/构成/通道/纪律/验证/边界；
+ * 定名；定位/构成/通道/纪律/验证/边界见维护者设计文档（不随包）；
  * 目录名守 DSH 双半约定 host/client，套件名钉在本头注）。
  *
  * 组成（件名保留，均是驾驶舱里的件）：
@@ -334,7 +334,7 @@ export function apply(ctx: ClientContext): void {
     //   · 按 callId 去重——同一次交付只开一次，用户关掉后不再弹（ui-plan 同规则）；
     //   · 焦点在可编辑元素时不打断——正在写下一条消息的人，眼前的回合尾卡与⑤的门仍在；
     //   · 只对**在屏会话**动作——切会话弹右栏是既有裁决否决过的打扰
-    //     （notes/archived/2026-09-28-right-pane-ux-debt.md §输掉的方案）。
+    //     （维护者复盘 §输掉的方案，不随包）。
     // 这是本包唯一一处"替用户打开东西"：出现时机就是交付本身，别处不再自动弹面。
     scoped.effect(() => watchDelivery({ follow, openFinal, mounted: scoped.sidebarRight.mounted }), 'deep-research-pack: final delivery watcher')
 

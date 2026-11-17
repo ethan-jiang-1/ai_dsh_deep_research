@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| [2026-11-17-runtime-dev-boundary](2026-11-17-runtime-dev-boundary.md) | 推敲中 | 运行时/发布物 vs 开发时刻边界：tarball 类型/清单、README、模型可见 skills、构建/脚本/配置文本、发布面守卫；10 张卡 219–228 |
+| （空） | — | 2026-11-17 两轮探索均已结，见 [_archived/settled_issues](../_archived/settled_issues/README.md) |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

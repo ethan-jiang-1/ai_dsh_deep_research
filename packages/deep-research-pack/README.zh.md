@@ -99,8 +99,7 @@ CLI 退出码 0 并给出警告，而应用内路径以 `not-bundle` 失败。�
 在工作区中打开一个会话，提出一个研究问题。Lead 跑 HITL1（类型、深度、语言、可选的业务简报），提出
 方法与计划，然后带领 Scout、Analyst 与 Critic 走完整个 run。HITL2 是交付前的终局审阅。完整操作手册是
 [`_dist/安装手册.md`](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/%E5%AE%89%E8%A3%85%E6%89%8B%E5%86%8C.md)，
-开发侧的 run 操作手册是
-[`docs/guides/61-run-playbook.md`](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/61-run-playbook.md)。
+包内研究手册是 `content/manual.md`（以 runtime context 注入）。
 
 ### 验证
 
@@ -231,7 +230,7 @@ client 行。团队可视化行（`ui-agent-team`）归团队机制层，不在�
 
 #### Token 影响
 
-一个确定性 Loader 场景用 DSH 固定密度估计器把真实首请求（消息 + 工具 schema）与早先的 upsert/remove schema 对比计价。schema 变化为 +246 token（冒烟断言）；绝对总数 ≈6.8k 随每步时钟注入变化——用 `node checks/smoke/method-library-tool.e2e.mjs` 重生成，不读固定数。比较性估计，非特定 provider 分词或计费；每个保存请求还含完整方法条目与命令标记。
+一个确定性 Loader 场景用 DSH 固定密度估计器把真实首请求（消息 + 工具 schema）与早先的 upsert/remove schema 对比计价。schema 变化为 +246 token（冒烟断言）；绝对总数 ≈6.8k 随每步时钟注入变化——由源仓的维护者冒烟重生成，不读固定数。比较性估计，非特定 provider 分词或计费；每个保存请求还含完整方法条目与命令标记。
 
 #### KV 缓存影响
 
@@ -245,7 +244,7 @@ client 行。团队可视化行（`ui-agent-team`）归团队机制层，不在�
 
 #### Token 影响
 
-`node checks/smoke/model-experience.e2e.mjs` 捕获真实组装的首请求计价。稳定、由包版本决定的面：Lead 工具 schema 6,634 token、Scout 4,999、手册 2,506 ≈ Lead 消息 token 的 50.6%。绝对总数（Lead ≈11.6k、Scout ≈8.7k）随时钟注入变化；用冒烟重生成。比较性估计，非特定 provider 分词或计费。
+源仓的维护者冒烟捕获真实组装的首请求计价。稳定、由包版本决定的面：Lead 工具 schema 6,634 token、Scout 4,999、手册 2,506 ≈ Lead 消息 token 的 50.6%。绝对总数（Lead ≈11.6k、Scout ≈8.7k）随时钟注入变化；用冒烟重生成。比较性估计，非特定 provider 分词或计费。
 
 #### KV 缓存影响
 

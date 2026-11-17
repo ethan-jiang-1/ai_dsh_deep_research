@@ -7,6 +7,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { satisfiesVersion } from '../../../packages/deep-research-pack/scripts/lib/version-range.mjs';
+import { readmeUserSectionIssues } from '../../lib/repo/shipped-surface.mjs';
 import { ROOT, PACK, PRESETS, VENDOR_TAG, fail, walk, walkMany, trackedFiles } from '../context.mjs';
 
 export function runB() {
@@ -462,6 +463,13 @@ export function runB() {
     else if (installAt !== -1 && bootstrapAt > installAt) fail(gate, 'README 把 profile 引导放在 tarball 装包之后——首次安装必须先建 profile（顺序不可反）');
     if (/dsh\.compatibility/.test(readme)) fail(gate, 'README 仍写已删除的 dsh.compatibility 字段（版本合同只有 engines.dsh）');
     if (readme.split('\n').length > 310) fail(gate, `README 超出 310 行预算（当前 ${readme.split('\n').length}）——把维护者/架构内容下沉，不要扩顶`);
+    // 用户段零开发命令/路径（BUG-220）：README 随 npm 发布，折叠的维护者段之外不得给用户
+    // 仓内命令（那些路径不在 tarball 里）。判据正本 = checks/lib/repo/shipped-surface.mjs。
+    for (const problem of readmeUserSectionIssues(readme)) fail(gate, problem);
+  }
+  const readmeZhPath = join(PACK, 'README.zh.md');
+  if (existsSync(readmeZhPath)) {
+    for (const problem of readmeUserSectionIssues(readFileSync(readmeZhPath, 'utf8'))) fail(gate, `README.zh.md: ${problem}`);
   }
   if (!existsSync(manualPath)) fail(gate, '安装手册源 tools/release/product-manual.md 缺席');
   else {

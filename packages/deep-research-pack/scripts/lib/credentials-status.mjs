@@ -1,7 +1,7 @@
 /**
  * credentials-status — preflight 的模型密钥判据（不读值，只判“有没有非空 key”）。
  *
- * DSH 的凭据分层（vendor/.../credentials-local/README）：存储文件 > 启动环境 > 项目 `.env`
+ * DSH 的凭据分层（上游实现，不随包）：存储文件 > 启动环境 > 项目 `.env`
  * > home `.env`。旧 preflight 只看 `.credentials.yaml` 是否存在，空文件也能全绿；也漏掉
  * 项目/home `.env`。本件按同一分层检查非空值，并在文件在场但无 key 时如实说“没有 key”，
  * 而不是“没有凭据文件”。

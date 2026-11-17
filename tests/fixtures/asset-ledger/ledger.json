@@ -373,6 +373,16 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/shipped-surface.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "shipped-surface.test.mjs — 发布面自足判据的 keyless 半边（BUG-219…228 类级）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/smoke-assets.test.mjs",
       "domain": "checks",
       "lane": "checks",
