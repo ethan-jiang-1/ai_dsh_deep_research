@@ -1,19 +1,19 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-215：CI 分层的频率账没进预算——`tier: ci` 现在等于 nightly，docs/67 仍称 required
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（D54 契约歧义 + 文档合同）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行 D54 边界并拍板「拆 tier」） — 结论：tier 拆 ci/nightly + 预算分档 + 工作流双向对账；cli-exit 进 nightly；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-namespace-move-residual-fixes.md)；审查：agent — 红证回放 + 全量 verify/test（2026-11-17）
 >
-> 位置：[checks/smoke/registry.json](../../checks/smoke/registry.json)（11 条 `tier: ci`）·
-> [tests/checks/smoke-cost-budget.test.mjs](../../tests/checks/smoke-cost-budget.test.mjs)（`ci` = `tier === 'ci'`）
-> · [docs/guides/67-test-strategy.md](../../docs/guides/67-test-strategy.md)（「CI required … client-load / snapshot-replay / deploy」）
-> · [.github/workflows/ci.yml](../../.github/workflows/ci.yml)（push 只跑 keyless）与
-> [.github/workflows/nightly.yml](../../.github/workflows/nightly.yml)（11 条 smoke）。
-> 探索轮 = [2026-11-17 卡](../issues/2026-11-17-exploratory-namespace-move.md) N8。
+> 位置：[checks/smoke/registry.json](../../../checks/smoke/registry.json)（11 条 `tier: ci`）·
+> [tests/checks/smoke-cost-budget.test.mjs](../../../tests/checks/smoke-cost-budget.test.mjs)（`ci` = `tier === 'ci'`）
+> · [docs/guides/67-test-strategy.md](../../../docs/guides/67-test-strategy.md)（「CI required … client-load / snapshot-replay / deploy」）
+> · [.github/workflows/ci.yml](../../../.github/workflows/ci.yml)（push 只跑 keyless）与
+> [.github/workflows/nightly.yml](../../../.github/workflows/nightly.yml)（11 条 smoke）。
+> 探索轮 = [2026-11-17 卡](../settled_issues/2026-11-17-exploratory-namespace-move.md) N8。
 
 ## 症状
 
@@ -45,7 +45,7 @@ console.log('push:', [...executedSmokeFiles(ci)].length, 'nightly:', [...execute
 - 表面 / 边界：测试制度（D54 四账）/ ② 静态（YAML + registry + 预算 + 文档）
 - DSH 不变量：fail-loud —— required 与 nightly 必须可区分，「证据仍在门里」不能靠同一个标签
 - 触及面：文档合同（guides/67）+ 门禁与验收合同（smoke-cost-budget / smoke-registry）+ D54
-- 授权：等人拍板（D54 契约边界；是否拆 tier 由用户拍）
+- 授权：用户 2026-11-17 放行（D54 契约边界）并拍板兄弟方案 1「拆 tier」→ 修复就绪 = P2 修复授权
 - 批：2026-11-17 命名空间搬家探索（N8）；M10 车道时延
 
 ## 复现
@@ -79,12 +79,12 @@ CI 分层把「谁挡提交」从「谁在 ci.yml 里」改成「谁在 push 的
 
 ## 修法
 
-二选一（属 D54，需用户拍）：
+用户 2026-11-17 拍板：**选 1（拆 tier）**；方案 2 留作备选记录，不实施。
 
-1. **拆 tier**：`tier: ci` = push/required；新增 `tier: nightly` = 只夜间；`smoke-registry` 分别对
+1. **拆 tier（已选）**：`tier: ci` = push/required；新增 `tier: nightly` = 只夜间；`smoke-registry` 分别对
    `ci.yml` / `nightly.yml` 断言；`smoke-cost-budget` 分列 `required` 与 `nightly` 两个 cap；
-2. **改语义**：保留 `tier: ci` = 任何 CI 挂载，但把预算改名「CI-mounted」并在 guides/67 删掉
-   「required 只留最小集」的表述，明确「push 门禁 0 smoke，nightly 承重」。
+2. **改语义（备选，未选）**：保留 `tier: ci` = 任何 CI 挂载，但把预算改名「CI-mounted」并在 guides/67
+   删掉「required 只留最小集」的表述，明确「push 门禁 0 smoke，nightly 承重」。
 
 不论哪条，`ci-jobs` / `smoke-registry` 的「实际执行」对账继续保留；新增/退役 smoke 时两级都要对。
 
@@ -98,3 +98,34 @@ CI 分层把「谁挡提交」从「谁在 ci.yml 里」改成「谁在 push 的
 
 与 [BUG-214](BUG-214-cost-baseline-108-stale-count-free-vocabulary.md) 同批（测试制度账）；
 决定若改 D54，需同变更写 Note 或改 D54 行。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/smoke/registry.json",
+    ".github/workflows/nightly.yml",
+    "tests/checks/smoke-registry.test.mjs",
+    "tests/checks/smoke-cost-budget.test.mjs",
+    "tests/checks/smoke-lane.test.mjs",
+    "tests/checks/ci-workflow.test.mjs",
+    "checks/lib/repo/smoke-lane.mjs",
+    "docs/guides/67-test-strategy.md",
+    "docs/evaluation.md",
+    "docs/decisions.md"
+  ],
+  "red": {
+    "command": "node --test tests/checks/smoke-registry.test.mjs",
+    "exit": 1,
+    "output": "not ok 2 - smoke registry：…频率归属…；doctor.e2e.mjs 标记 ci（push/required），但 ci.yml 没有可执行步骤"
+  },
+  "green": {
+    "command": "node --test tests/checks/smoke-registry.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/smoke-registry.test.mjs"
+  }
+}
+```

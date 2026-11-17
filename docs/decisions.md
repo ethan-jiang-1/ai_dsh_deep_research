@@ -58,7 +58,7 @@
 | <a id="d51"></a>D51 | **判据不猜，投影不编**：互斥或无法判定 = 红；权威输入 = 结构化事实 | [evaluation](./evaluation.md#verdict-shape) · [Note](../notes/implemented/2026-11-13-verdict-shape.md) |
 | <a id="d52"></a>D52 | **加工环路的实体检查 = 字段 + 门**：判据类卡/Note 必填 `## 判据形状`；收口门看暂存区成对判据 | [60](./guides/60-dev-loop.md) · [judgment-design](../_backlog/methods/judgment-design.md) · [Note](../notes/implemented/2026-11-13-workflow-substance-gates.md) |
 | <a id="d53"></a>D53 | **测试文件名 = 证据车道**：spec / e2e / entry / checks 四后缀；错后缀或错 lane = 红；新增车道 = 新 D 号 | [67 §6](./guides/67-test-strategy.md) · [tests/AGENTS](../tests/AGENTS.md) · [Note](../notes/implemented/2026-11-13-test-naming-lanes.md) |
-| <a id="d54"></a>D54 | **测试制度 = 三环四账五关**：先归失败类，再选最低可见层，类级守卫或显式不可机械化 | [67](./guides/67-test-strategy.md) · [Note](../notes/implemented/2026-11-13-test-strategy-operating-model.md) |
+| <a id="d54"></a>D54 | **测试制度 = 三环四账五关**：先归失败类，再选最低可见层，类级守卫或不可机械化；`tier` = 频率（ci / nightly / dev-only） | [67](./guides/67-test-strategy.md) · [Note](../notes/implemented/2026-11-13-test-strategy-operating-model.md) |
 | <a id="d55"></a>D55 | **测试制度 oracle 独立化**：判据锚定独立真值；自指显式入账待迁；修复证据唯一 `json fix-evidence` | [67](./guides/67-test-strategy.md) · [Note](../notes/implemented/2026-11-14-verification-oracle-hardening.md) |
 | <a id="d56"></a>D56 | **决策台账纯路由化（一处事实一个家）**：台账只存 ≤100 字结论 + 活载体路由；参数归 docs/ 合同，理由归 notes/ | [docs/AGENTS](./AGENTS.md) · [Note](../notes/implemented/2026-11-14-decisions-routing-ledger.md) |
 | <a id="d57"></a>D57 | **维护面三分 = judge / show / operate**：判据 = 主要产出什么；judge 住 `checks/`、show 住 `probes/`、operate 住 `tools/` | [68](./guides/68-surface-contract.md) · [Note](../notes/implemented/2026-11-16-maintenance-surface-taxonomy.md) |

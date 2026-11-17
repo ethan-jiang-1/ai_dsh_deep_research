@@ -3,6 +3,8 @@
 // 负例留证 2026-11-16：BUG-191——`tests/cockpit/misc/x.spec.mjs`、`tests/pack/misc/x.spec.mjs`、
 // `tests/cockpit/lib/x.spec.mjs`、`tests/checks/nested/x.test.mjs` 等未知形态 → 本 spec 逐条红；
 // 合法落点（cockpit/client/<sub>、pack/contract、run/<owner>）→ 绿。还原探针 → 绿。
+// 负例留证 2026-11-17：BUG-216——旧串 `\.(?:mjs|cjs)$` 让 `.ts/.tsx/.js` 助手零规则落位；
+// 红配方 = 把 `.ts` 从 SUPPORT_EXT 删掉（`.ts` 助手用例红），或删未知扩展名兜底（`.py` 用例红）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
@@ -66,16 +68,29 @@ test('已知闭集本身可判且非空（防空语料）', () => {
 })
 
 // 非测试模块进闭集（2026-11-17 审计）：tests/ 下的读取缝/助手此前不在任何 glob、也不在落点判据里，
-// 后缀与落点可任意漂移；规则 = tests/<domain>/…-helpers.mjs。
-test('非测试模块：落点与 -helpers 后缀（审计 2026-11-17）', () => {
+// 后缀与落点可任意漂移；规则 = tests/<domain>/…-helpers.<ext>。扩展名闭集 = mjs/cjs/ts/tsx/js，
+// 未知扩展名兜底红（BUG-216：只认 .mjs/.cjs 时 .ts/.tsx/.js 助手零规则落位）。
+test('非测试模块：落点与 -helpers.<ext> 后缀（审计 2026-11-17 / BUG-216）', () => {
   const cases = [
-    ['tests/pack/zz-support.mjs', /-helpers\.mjs 结尾/],
-    ['tests/run/gates/zz-support.cjs', /-helpers\.mjs 结尾/],
+    ['tests/pack/zz-support.mjs', /-helpers\.<ext> 结尾/],
+    ['tests/run/gates/zz-support.cjs', /-helpers\.<ext> 结尾/],
+    ['tests/pack/zz-support.ts', /-helpers\.<ext> 结尾/],
+    ['tests/pack/zz-support.tsx', /-helpers\.<ext> 结尾/],
+    ['tests/pack/zz-support.js', /-helpers\.<ext> 结尾/],
     ['tests/zz-support-helpers.mjs', /根不得平铺非测试模块/],
+    ['tests/pack/zz-probe.py', /未知扩展名不得静默落位/],
+    ['tests/pack/sub/zz-probe.rs', /未知扩展名不得静默落位/],
   ]
   for (const [path, pattern] of cases) assert.match(placementIssues([path])[0] ?? '', pattern, `${path} 未按预期报红`)
-  assert.deepEqual(placementIssues(['tests/pack/zz-support-helpers.mjs']), [])
-  assert.deepEqual(placementIssues(['tests/run/gates/zz-support-helpers.mjs']), [])
+  for (const path of [
+    'tests/pack/zz-support-helpers.mjs',
+    'tests/pack/zz-support-helpers.ts',
+    'tests/pack/zz-support-helpers.tsx',
+    'tests/pack/zz-support-helpers.js',
+    'tests/run/gates/zz-support-helpers.mjs',
+    'tests/AGENTS.md',
+    'tests/INDEX.generated.md',
+  ]) assert.deepEqual(placementIssues([path]), [], `${path} 应合法`)
   // fixtures 内的样本不是模块合同
   assert.deepEqual(placementIssues(['tests/fixtures/x/zz-support.mjs']), [])
 })

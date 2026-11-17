@@ -20,6 +20,7 @@ import { resolve } from 'node:path';
 import { listScenes, sceneState, buildModel, deriveStep, detectHitlWait, readGuiBase, isArchivedScene, isParkedScene } from '../../checks/lib/analyze/run-dashboard-core.mjs';
 import { renderHtml } from '../../checks/lib/analyze/run-dashboard-html.mjs';
 import { isMain } from '../../checks/lib/shared/cli-entry.mjs';
+import { usageError } from '../../checks/lib/shared/cli-exit.mjs';
 
 // ── CLI ─────────────────────────────────────────────────────────────────────
 
@@ -41,8 +42,7 @@ function main() {
   take('--latest');
   const runDir = args.find((a) => !a.startsWith('--'));
   if (!runDir && !latest) {
-    console.error('用法: run-dashboard.mjs <runDir> [--out <html>] [--watch] [--interval <s>] | --latest [--out <html>]（多场扫描）');
-    process.exit(1);
+    usageError('用法: run-dashboard.mjs <runDir> [--out <html>] [--watch] [--interval <s>] | --latest [--out <html>]（多场扫描）');
   }
   const generate = () => {
     const scenes = listScenes();

@@ -1,17 +1,17 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-210：call-surface 只认行首命令词——env 前缀 / `./` / sudo / `echo &&` 形态的断链静默放行
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行门禁触面；归一面修复，批 Note 待收口） — 结论：命令归一收口到 doc-surface（env 前缀 / ./ / 包装器 / && / require / heredoc / 缩进 / 折叠块）；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-namespace-move-residual-fixes.md)；审查：agent — 红证回放 + 全量 verify/test（2026-11-17）
 >
-> 位置：[checks/verify/gates/f-repo.mjs](../../checks/verify/gates/f-repo.mjs) 的 `call-surface`
-> （`CMD` / `TOKEN` 两个正则 + `runLines`）；文档承诺 = [docs/evaluation.md](../../docs/evaluation.md) §L0
+> 位置：[checks/verify/gates/f-repo.mjs](../../../checks/verify/gates/f-repo.mjs) 的 `call-surface`
+> （`CMD` / `TOKEN` 两个正则 + `runLines`）；文档承诺 = [docs/evaluation.md](../../../docs/evaluation.md) §L0
 > 「live 文档围栏命令 / 探针头注 / CI `run:` 里的仓内路径必须存在」。
-> 探索轮 = [2026-11-17 卡](../issues/2026-11-17-exploratory-namespace-move.md) N1。
+> 探索轮 = [2026-11-17 卡](../settled_issues/2026-11-17-exploratory-namespace-move.md) N1。
 
 ## 症状
 
@@ -37,7 +37,7 @@ agent 照这些行敲会得到 `MODULE_NOT_FOUND`；门禁的绿不覆盖它们�
 - 表面 / 边界：维护面门禁 / ② 行为（门禁自身，注入 + `--only=call-surface`）
 - DSH 不变量：fail-loud —— 可执行行里的断链必须红
 - 触及面：门禁与验收合同（改 `call-surface` 判据 + `gates.e2e` 案例）
-- 授权：等人拍板（门禁与验收合同触面；用户放行后再改）
+- 授权：用户 2026-11-17 放行（门禁与验收合同触面 → 修复就绪 = P2 修复授权）
 - 批：2026-11-17 命名空间搬家探索（N1）
 
 ## 复现
@@ -93,3 +93,28 @@ const TOKEN = new RegExp(`(?:^|[\\s"'\`(=\x60])(${PATHS})`, 'g'); // 路径必�
 
 与 [BUG-209](BUG-209-asset-ledger-canonical-libs-stale-helper-names.md) 同批（2026-11-17 探索），
 但不同机制；批 Note 待本批收口后写。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/repo/doc-surface.mjs",
+    "checks/verify/gates/f-repo.mjs",
+    "checks/lib/harness/gates-cases.mjs",
+    "tests/checks/doc-surface-shapes.test.mjs"
+  ],
+  "red": {
+    "command": "node checks/smoke/gates.e2e.mjs --case=call-surface-env-prefix,call-surface-wrapper,call-surface-and-chain,call-surface-require-qualifier",
+    "exit": 1,
+    "output": "4 处失败：call-surface-env-prefix / -wrapper / -and-chain / -require-qualifier：注入回归未被点名报红"
+  },
+  "green": {
+    "command": "node checks/smoke/gates.e2e.mjs --case=call-surface-env-prefix,call-surface-wrapper,call-surface-and-chain,call-surface-require-qualifier",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/gates.e2e.mjs"
+  }
+}
+```

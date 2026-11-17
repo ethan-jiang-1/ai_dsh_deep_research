@@ -13,18 +13,23 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-209](BUG-209-asset-ledger-canonical-libs-stale-helper-names.md) | 修复就绪 | P2 | asset-ledger 分类表仍指旧 helper 名，读取缝改名后 oracleType 被静默翻成 self-referential |
-| [BUG-210](BUG-210-call-surface-line-start-command-forms.md) | 等人拍板 | P2 | call-surface 只认行首命令词：env 前缀 / `./` / sudo / `echo &&` 形态的断链静默放行 |
-| [BUG-211](BUG-211-doc-paths-prose-fence-retired-roots.md) | 等人拍板 | P2 | doc-paths 散文/表格/围栏/HTML 面不认退役根，`scripts/…` 静默放行 |
-| [BUG-212](BUG-212-live-methods-excluded-retired-roots.md) | 等人拍板 | P2 | 活方法文档（`_backlog/methods` + `triggers.md`）整树被路径门禁豁免，仍写 `scripts/`、`dev/` 命令 |
-| [BUG-213](BUG-213-usage-exit-code-inconsistent.md) | 修复就绪 | P2 | `run-dashboard` / `run-kickoff` 的 usage/前置错误报 1，同族报 2（verdict 契约） |
-| [BUG-214](BUG-214-cost-baseline-108-stale-count-free-vocabulary.md) | 等人拍板 | P2 | 成本基线停在 108 案例（实际 142），`count-free` 四名词词表不含「案例」 |
-| [BUG-215](BUG-215-ci-tier-nightly-required-semantics.md) | 等人拍板 | P2 | `tier: ci` 现在=nightly，预算/docs 仍称 required——频率账两义 |
-| [BUG-216](BUG-216-test-placement-support-module-ts-blind.md) | 等人拍板 | P2 | `test-placement` 的非测试模块闭集只认 `.mjs/.cjs`，`.ts/.tsx/.js` 助手零规则落位 |
-| [BUG-217](BUG-217-run-lane-no-match-lacks-all-hint.md) | 修复就绪 | P2 | `run-lane` 无匹配条目不点 `--all` 修正入口，guides/67 的局部重跑也漏 `--all` |
-| [BUG-218](BUG-218-run-lane-all-skip-exit-zero.md) | 等人拍板 | P2 | `run-lane` 全 SKIP 仍 exit 0——`pnpm test:entry` 会被误读为通过 |
+| （空） | — | — | 2026-11-17 批 G（209–218）全部归档，见下 |
 
 ## 最近归档
+
+（2026-11-17 批 G 命名空间搬家残差闭环（10 张，209–218），批 Note =
+[2026-11-17-namespace-move-residual-fixes](../../notes/implemented/2026-11-17-namespace-move-residual-fixes.md)：
+[209](../_archived/fixed_bugs/BUG-209-asset-ledger-canonical-libs-stale-helper-names.md) 分类表旧名；
+[210](../_archived/fixed_bugs/BUG-210-call-surface-line-start-command-forms.md) call-surface 命令形态；
+[211](../_archived/fixed_bugs/BUG-211-doc-paths-prose-fence-retired-roots.md) doc-paths 形态台账；
+[212](../_archived/fixed_bugs/BUG-212-live-methods-excluded-retired-roots.md) 活指令面；
+[213](../_archived/fixed_bugs/BUG-213-usage-exit-code-inconsistent.md) usage 退出码；
+[214](../_archived/fixed_bugs/BUG-214-cost-baseline-108-stale-count-free-vocabulary.md) 计数词表；
+[215](../_archived/fixed_bugs/BUG-215-ci-tier-nightly-required-semantics.md) tier 拆分；
+[216](../_archived/fixed_bugs/BUG-216-test-placement-support-module-ts-blind.md) 扩展名闭集；
+[217](../_archived/fixed_bugs/BUG-217-run-lane-no-match-lacks-all-hint.md) 修正入口；
+[218](../_archived/fixed_bugs/BUG-218-run-lane-all-skip-exit-zero.md) 全 SKIP 退出码。
+）
 
 （2026-11-16 批 F 守卫契约加固闭环（10 张，199–208），批 Note =
 [2026-11-16-guard-contract-hardening](../../notes/implemented/2026-11-16-guard-contract-hardening.md)：

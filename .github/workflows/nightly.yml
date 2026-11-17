@@ -1,6 +1,7 @@
 # nightly — 分钟级/构建级证据，不挡每次 push（push 门禁 = ci.yml 的 keyless，约 2 分钟）。
-# 内容：vendor 构建 + 安装/生命周期/doctor/tarball（deploy）+ 真浏览器装配（client-load）+
-# 回放 A/B（snapshot-replay）。失败不阻塞 push，但会以本工作流红呈现；处置 = _backlog/triggers.md
+# 内容：vendor 构建 + 安装/生命周期/doctor/CLI 退出码/tarball（deploy）+ 真浏览器装配（client-load）+
+# 回放 A/B（snapshot-replay）。registry 频率 = 本工作流执行面（`tier: nightly`）与 push 面（`tier: ci`）；
+# 失败不阻塞 push，但会以本工作流红呈现；处置 = _backlog/triggers.md
 # 「Linux/GitHub runner 上的真浏览器/回放冒烟」行。
 name: nightly
 
@@ -234,6 +235,11 @@ jobs:
 
       - name: Doctor (read-only profile/anchor/workspace/credentials)
         run: node checks/smoke/doctor.e2e.mjs
+
+      # 入口退出码契约（BUG-213/217/218）：usage/前置 = 2、真失败 = 1、全 SKIP = 2。
+      # 真边界 = 子进程 exit code，默认回归禁子进程（layering），故住 smoke 道。
+      - name: CLI exit contract (keyless)
+        run: node checks/smoke/cli-exit.e2e.mjs
 
       - name: Coverage command (observational)
         run: source tools/env.sh && pnpm test:coverage

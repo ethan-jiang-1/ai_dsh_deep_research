@@ -135,19 +135,22 @@
 - **默认回归必须秒级**：`pnpm test` = spec + checks；重资产不在 pre-commit。
 - **三条装配车道按变更类型触发**：模型可见文本 → snapshot B；客户端 → client-load；安装/发布 →
   lifecycle/release；不要「改一行就跑全链」。
-- **CI required 只保留慢资产的最小集**：当前慢 CI job = `client-load` / `snapshot-replay` / `deploy`
-  （keyless）；`test:e2e`/`test:entry` 全量是诊断车道，不是每次提交的门。
+- **CI 分层 = 频率入账**：push 门 = `ci.yml` 的 keyless（verify + test，0 条 smoke）；重档在 nightly。
+  registry 的 `tier` 就是频率：`ci` = push/required（`smoke-registry` 对 `ci.yml` 断言）、
+  `nightly` = 只夜间（对 `nightly.yml` 断言）、`dev-only` = 手动/诊断（必须写理由）。
+  `test:e2e`/`test:entry` 全量是诊断车道，不是每次提交的门；新增/退役 smoke 时两档都要对账。
 - **新增入口先过成本关**：必须说明替代谁/新失败类/为什么现有层看不见；registry 写 `cost` 与
   `sunset`；不能替代的才新增。没有 `uniqueClaim` 的资产优先退役。
-- **局部重跑**：`pnpm test:e2e --only <substr>` / `pnpm test:entry --only <substr>`；
-  `--list` 显示 tier/cost。全量只在阶段收口/夜间/大改后跑。
-- **同构案例有界并行**：`gates.e2e` 108 个独立注入案例默认 4 并发（`--jobs=<n>`），串行 248s → 并行 86s；
-  不删案例、不改判据，只压墙钟。
-- **数量 ratchet**：CI 入口 ≤11、CI slow ≤3、slow 总数 ≤15（`smoke-cost-budget`）；新增 slow/CI 资产先退役/合并一个，
-  或按 D54 改预算并同 diff 说明（2026-11-17 9→11：native system.node 随 vendor-build ⑨ 进 CI，
-  method-library-tool / model-experience 两条 keyless 真 Loader 面按其自设进 CI 条件收编，registry 同 diff）。
-- **实测基线（2026-11-13 本机）**：`test:e2e` 6 入口（gates 并行 86s）；`test:entry` 3 入口 **374.7s**
-  （client-load seed + lifecycle + snapshot 5 角色 A/B/C）。两者都是诊断车道，不进 pre-commit。
+- **局部重跑**：`pnpm test:e2e --only <substr> [--all]` / `pnpm test:entry --only <substr> [--all]`；
+  `--all` 才带 dev-only 件（默认跑自动挂载面 `tier: ci` ∪ `nightly`），`--list` 显示 tier/cost。全量只在阶段收口/夜间/大改后跑。
+- **未跑 ≠ 通过**：车道一条都没跑（全 SKIP）时 runner exit 2；混合 PASS+SKIP = 0（有证据），有 FAIL = 1。
+- **同构案例有界并行**：`gates.e2e` 的注入案例默认 4 并发（`--jobs=<n>`）；案例数 = `CASES` 正本，
+  用 `--list` 查，文档不写死。不删案例、不改判据，只压墙钟。
+- **数量 ratchet**：required（`tier: ci`）≤3、required slow ≤3、`nightly` ≤12、slow 总数 ≤15
+  （`smoke-cost-budget`）；新增 slow/CI 资产先退役/合并一个，或按 D54 改预算并同 diff 说明。
+  夜间档不消耗 required cap。
+- **墙钟不写进合同**：耗时随机器漂移；基线只在当次报告里写实测命令与结果。
+- **成本看的是每次发现**，不是测试数量或覆盖率；慢而重复的资产比少一个测试更贵。
 - **成本看的是每次发现**，不是测试数量或覆盖率；慢而重复的资产比少一个测试更贵。
 
 ## 7. 反模式

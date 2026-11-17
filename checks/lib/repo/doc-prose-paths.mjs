@@ -1,25 +1,15 @@
-// doc-prose-paths.mjs — live 文档散文里的仓内路径 token 枚举（BUG-204 类级）。
+// doc-prose-paths.mjs — 散文路径枚举的薄壳（枚举正本 = doc-surface.mjs）。
 //
-// 为什么抽出：`doc-paths` 原先只解析反引号 token；散文里的 `checks/lib/…` / `tests/…` 同样
-// 会被 agent 照读，指向空处 = 探索成本 + 误诊。纯函数只做「枚举 + 剥除」，存在性由消费门禁
-// 按统一解析顺序（仓根 / 文档目录 / vendor/dsh）判定；测试可用合成文本钉住围栏/内联代码/
-// URL 三类排除形态。
-const ROOT_PREFIX = '(?:packages|checks|tools|docs|tests|snapshots|_dist|research-workspace)'
-const EXT = '(?:md|mjs|sh|cjs|ts|tsx|json|ya?ml)'
-// 根前缀前不得再接路径字符（排除 `https://x/checks/foo.mjs` 这类 URL 子串）。
-const PROSE_PATH = new RegExp(`(?<![A-Za-z0-9_./-])${ROOT_PREFIX}/[A-Za-z0-9_./-]+\\.${EXT}`, 'g')
+// 为什么留这层：BUG-204 的判据与测试钉在这条 API 上（`prosePathTokens`），而「哪些形态算散文、
+// 怎么剥反引号/围栏」的规则已经收口到 `scanDocument`。这里只做形态过滤 + 形状映射——
+// 不要再在本文件里加提取正则（那会让「形态」重新变成两份事实，正是 BUG-211 的根因）。
+// 保留而非删除的显式决定：已归档 BUG-204 的 guard-ledger 条目指向本模块的直测；
+// 删模块要连带改一张已结卡片的守卫落点，收益（少一个 5 行薄壳）不抵台账改写风险。
+import { scanDocument } from './doc-surface.mjs'
 
-/** 返回 [{ line: 1-based, path }]：剥代码围栏与反引号内联代码后，枚举带扩展名的仓内路径。 */
+/** 返回 [{ line: 1-based, path }]：散文与表格单元里带扩展名的仓内路径。 */
 export function prosePathTokens(text) {
-  const out = []
-  let inFence = false
-  for (const [index, line] of String(text ?? '').split('\n').entries()) {
-    if (line.trimStart().startsWith('```')) { inFence = !inFence; continue }
-    if (inFence) continue
-    const bare = line.replace(/`[^`\n]*`/g, '')
-    for (const match of bare.matchAll(PROSE_PATH)) {
-      out.push({ line: index + 1, path: match[0].replace(/[.,;:]+$/, '') })
-    }
-  }
-  return out
+  return scanDocument(text)
+    .filter((token) => token.kind === 'path' && (token.form === 'prose' || token.form === 'table'))
+    .map((token) => ({ line: token.line, path: token.path }))
 }

@@ -6,6 +6,8 @@
 // checks/smoke 只许顶层普通文件（子目录/symlink 红）。step 解析 = checks/lib/test-infra/ci-workflow.mjs。
 // 负例留证 2026-11-14：BUG-160——旧实现只检查 ci.yml 文本是否提及文件名，注释/echo/未挂 needs 的
 //   smoke 也能冒充 tier=ci；红配方 = 把 executedSmokeFiles 换回 ci.includes(file) → 注释/孤儿例放行。
+// 负例留证 2026-11-17：BUG-215——旧实现把 tier 定义为「ci ∪ nightly 执行」，required 与夜间不可区分；
+//   红配方 = 把一条 tier=nightly 的件从 nightly.yml 删掉（本文件红），或把 ci 件标成 nightly（红）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -28,28 +30,34 @@ test('smoke registry：checks/smoke 只许顶层普通文件——子目录 / sy
   assert.ok(files.length >= 20, `防空语料：checks/smoke 顶层文件过少（${files.length}）`)
 })
 
-test('smoke registry：盘上每个 smoke 都有且只有一条 CI/dev-only 归属（BUG-160）', () => {
+test('smoke registry：盘上每个 smoke 都有且只有一条频率归属（BUG-160 / BUG-215）', () => {
   assert.deepEqual(Object.keys(registry).sort(), files.filter((name) => name.endsWith('.mjs')).sort(),
     'registry 与 checks/smoke/*.mjs 集合必须相等')
-  const executed = new Set([...executedSmokeFiles(ci), ...executedSmokeFiles(nightly)])
+  const ciExecuted = new Set(executedSmokeFiles(ci))
+  const nightlyExecuted = new Set(executedSmokeFiles(nightly))
   for (const [file, entry] of Object.entries(registry)) {
     const lane = file.endsWith('.e2e.mjs') ? 'e2e' : file.endsWith('.entry.mjs') ? 'entry' : file.endsWith('.support.mjs') ? 'support' : null
     assert.ok(lane !== null, `${file} 后缀不是 .e2e.mjs / .entry.mjs / .support.mjs——命名即车道`)
     assert.equal(entry.lane, lane, `${file} 的 registry lane=${String(entry.lane)} 与后缀 ${lane} 不一致`)
     if (lane === 'support') assert.equal(entry.tier, 'dev-only', `${file} 是支援件，不应进 CI 车道`)
     if (entry.tier === 'ci') {
-      assert.ok(executed.has(file), `${file} 标记 ci，但 ci.yml 没有可执行步骤（注释/echo/if:false/continue-on-error 都不算）`)
+      assert.ok(ciExecuted.has(file), `${file} 标记 ci（push/required），但 ci.yml 没有可执行步骤（注释/echo/if:false/continue-on-error 都不算）`)
+    } else if (entry.tier === 'nightly') {
+      assert.ok(nightlyExecuted.has(file), `${file} 标记 nightly，但 nightly.yml 没有可执行步骤——频率声明必须与真实挂载一致`)
     } else if (entry.tier === 'dev-only') {
       assert.ok(typeof entry.reason === 'string' && entry.reason.trim().length >= 8, `${file} 标 dev-only 但没有可读理由`)
+      assert.ok(!ciExecuted.has(file) && !nightlyExecuted.has(file), `${file} 标 dev-only，却被 CI 工作流执行——两义`)
     } else {
-      assert.fail(`${file} 的 tier 非法：${String(entry.tier)}`)
+      assert.fail(`${file} 的 tier 非法：${String(entry.tier)}（ci / nightly / dev-only）`)
     }
   }
 })
 
-test('smoke registry：CI 工作流（ci.yml ∪ nightly.yml）真正执行的每个 smoke 都在 registry 标记 ci', () => {
-  const executed = new Set([...executedSmokeFiles(ci), ...executedSmokeFiles(nightly)])
-  for (const file of executed) {
-    assert.equal(registry[file]?.tier, 'ci', `${file} 在 CI 工作流被执行，但 registry 没标 ci`)
+test('smoke registry：工作流执行面 ↔ 频率标记双向对账（ci.yml 只能跑 ci；nightly.yml 只能跑 nightly）', () => {
+  for (const file of executedSmokeFiles(ci)) {
+    assert.equal(registry[file]?.tier, 'ci', `${file} 在 ci.yml 被执行，但 registry 没标 ci（push 面必须可与夜间区分）`)
+  }
+  for (const file of executedSmokeFiles(nightly)) {
+    assert.equal(registry[file]?.tier, 'nightly', `${file} 在 nightly.yml 被执行，但 registry 没标 nightly`)
   }
 })

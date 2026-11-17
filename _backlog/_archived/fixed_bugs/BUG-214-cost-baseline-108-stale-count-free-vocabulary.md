@@ -1,17 +1,17 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-214：成本基线停在「108 个注入案例 / 86s」——实际 CASES=142，count-free 词表不含「案例」
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（文档合同 + 门禁词表）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行文档与词表触面；计数指正本 + 词表扩容） — 结论：计数名词表扩容（案例），活文档计数改指 CASES 正本，108/248s/86s 清零；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-namespace-move-residual-fixes.md)；审查：agent — 红证回放 + 全量 verify/test（2026-11-17）
 >
-> 位置：[docs/guides/67-test-strategy.md](../../docs/guides/67-test-strategy.md) 的成本节；
-> 同数在 [_backlog/methods/class-level-guards.md](../methods/class-level-guards.md) 与同页 `:814`；
-> 门禁 = [checks/verify/gates/a-docs.mjs](../../checks/verify/gates/a-docs.mjs) 的 `count-free`（第 456 行四名词词表）。
-> 事实源 = `checks/lib/harness/gates-cases.mjs` 的 `CASES`；探索轮 = [2026-11-17 卡](../issues/2026-11-17-exploratory-namespace-move.md) N8/N9。
+> 位置：[docs/guides/67-test-strategy.md](../../../docs/guides/67-test-strategy.md) 的成本节；
+> 同数在 [_backlog/methods/class-level-guards.md](../../methods/class-level-guards.md) 与同页 `:814`；
+> 门禁 = [checks/verify/gates/a-docs.mjs](../../../checks/verify/gates/a-docs.mjs) 的 `count-free`（第 456 行四名词词表）。
+> 事实源 = `checks/lib/harness/gates-cases.mjs` 的 `CASES`；探索轮 = [2026-11-17 卡](../settled_issues/2026-11-17-exploratory-namespace-move.md) N8/N9。
 
 ## 症状
 
@@ -40,7 +40,7 @@ node checks/verify/verify.mjs --only=count-free
 - 表面 / 边界：测试策略文档（成本账）/ ② 静态（文档 + 门禁）
 - DSH 不变量：fail-loud —— 计数必须要么指正本、要么被门禁咬红
 - 触及面：文档合同（guides/67 + methods）+ 门禁与验收合同（count-free 词表）
-- 授权：等人拍板（触面含门禁与文档合同）
+- 授权：用户 2026-11-17 放行（文档合同 + 门禁词表触面 → 修复就绪 = P2 修复授权）
 - 批：2026-11-17 命名空间搬家探索（N8/N9）；前序 = BUG-204 同族的「活文档计数/路径」
 
 ## 复现
@@ -84,3 +84,33 @@ git checkout -- "$DOC"
 ## 修复关联
 
 与 [BUG-215](BUG-215-ci-tier-nightly-required-semantics.md) 同批（测试制度账），建议同一次评审。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/repo/doc-counts.mjs",
+    "checks/verify/gates/a-docs.mjs",
+    "tests/checks/doc-counts.test.mjs",
+    "checks/lib/harness/gates-cases.mjs",
+    "docs/guides/67-test-strategy.md",
+    "_backlog/methods/class-level-guards.md",
+    "_backlog/triggers.md",
+    "checks/smoke/gates.e2e.mjs",
+    "tests/checks/smoke-contract.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/doc-counts.test.mjs",
+    "exit": 1,
+    "output": "not ok 1 - 名词闭集：资产计数名词在场且长词优先（案例/注入案例）"
+  },
+  "green": {
+    "command": "node --test tests/checks/doc-counts.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/doc-counts.test.mjs"
+  }
+}
+```

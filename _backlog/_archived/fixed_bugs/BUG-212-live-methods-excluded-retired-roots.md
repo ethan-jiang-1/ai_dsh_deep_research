@@ -1,19 +1,19 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-212：live 方法文档整树被路径门禁豁免——`_backlog/methods` 与 `triggers.md` 仍写 `scripts/`、`dev/` 命令
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（文档合同 + 门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行文档与门禁触面；先归位内容再加宽扫描面） — 结论：活指令面（methods + triggers）纳入扫描，15 处旧根命令归位现根；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-namespace-move-residual-fixes.md)；审查：agent — 红证回放 + 全量 verify/test（2026-11-17）
 >
-> 位置：门禁排除面 = [checks/verify/gates/a-docs.mjs](../../checks/verify/gates/a-docs.mjs) 的
+> 位置：门禁排除面 = [checks/verify/gates/a-docs.mjs](../../../checks/verify/gates/a-docs.mjs) 的
 > `doc-paths`（`exclude: _backlog/`）与 `call-surface`（同排除）；受影响文档 =
-> [methods/validation-evidence.md](../methods/validation-evidence.md) ·
-> [methods/class-level-guards.md](../methods/class-level-guards.md) ·
-> [methods/bug-to-fix.md](../methods/bug-to-fix.md) · [triggers.md](../triggers.md)。
-> 探索轮 = [2026-11-17 卡](../issues/2026-11-17-exploratory-namespace-move.md) N3。
+> [methods/validation-evidence.md](../../methods/validation-evidence.md) ·
+> [methods/class-level-guards.md](../../methods/class-level-guards.md) ·
+> [methods/bug-to-fix.md](../../methods/bug-to-fix.md) · [triggers.md](../../triggers.md)。
+> 探索轮 = [2026-11-17 卡](../settled_issues/2026-11-17-exploratory-namespace-move.md) N3。
 
 ## 症状
 
@@ -25,7 +25,7 @@ _backlog/methods/validation-evidence.md:21  node scripts/smoke/gates.e2e.mjs
 _backlog/methods/validation-evidence.md:22  DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs
 _backlog/methods/validation-evidence.md:23  node scripts/smoke/client-load.entry.mjs / release.entry.mjs
 _backlog/methods/validation-evidence.md:24  scripts/run-gates/
-_backlog/methods/validation-evidence.md:26  [`scripts/smoke/`](../../scripts/README.md)
+_backlog/methods/validation-evidence.md:26  `scripts/smoke/`（旧链接目标随根名统一失效）
 _backlog/methods/class-level-guards.md:168  scripts/smoke/gates.e2e.mjs
 _backlog/methods/class-level-guards.md:628  scripts/verify/gates/f-repo.mjs:144-184
 _backlog/methods/class-level-guards.md:787  scripts/smoke/
@@ -46,7 +46,7 @@ DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs
 # exit 1: Cannot find module '.../scripts/smoke/preset.e2e.mjs'
 ```
 
-反讽点：第 26 行的**链接** `[`scripts/smoke/`](../../scripts/README.md)` 仍可解析——`md-links` 走
+反讽点：第 26 行的**链接** ``scripts/smoke/`（旧链接目标随根名统一失效）` 仍可解析——`md-links` 走
 搬家账本落到 `checks/README.md`，所以链接林全绿，读起来像活的；命令本身没有账本。
 
 ## 分诊与授权
@@ -55,7 +55,7 @@ DSH_SMOKE_REAL=1 node scripts/smoke/preset.e2e.mjs
 - 表面 / 边界：维护面文档（agent 指令）/ ② 静态（文档 + 门禁）
 - DSH 不变量：fail-loud —— 当前指令里的旧根必须红，而不是靠「目录是过程层」豁免
 - 触及面：文档合同（methods/triggers 是当前指令）+ 门禁与验收合同（排除面）
-- 授权：等人拍板（触面含门禁与文档合同）
+- 授权：用户 2026-11-17 放行（文档合同 + 门禁与验收合同触面 → 修复就绪 = P2 修复授权）
 - 批：2026-11-17 命名空间搬家探索（N3）；M11 指令面/证据面错位
 
 ## 复现
@@ -104,3 +104,31 @@ node scripts/smoke/gates.e2e.mjs --list; echo "exit=$?"   # 1
 
 与 [BUG-211](BUG-211-doc-paths-prose-fence-retired-roots.md) / [BUG-210](BUG-210-call-surface-line-start-command-forms.md)
 同批（文档路径面）；建议同一修法评审后一起落地。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/verify/gates/a-docs.mjs",
+    "checks/verify/gates/f-repo.mjs",
+    "_backlog/methods/validation-evidence.md",
+    "_backlog/methods/class-level-guards.md",
+    "_backlog/methods/bug-to-fix.md",
+    "_backlog/triggers.md",
+    "checks/lib/harness/gates-cases.mjs"
+  ],
+  "red": {
+    "command": "node checks/smoke/gates.e2e.mjs --case=doc-paths-live-methods",
+    "exit": 1,
+    "output": "doc-paths 报了红但非本案例的报因（期望含 \"退役根名 `scripts/__gone__.mjs`\"）——注入未生效或断言被旁路"
+  },
+  "green": {
+    "command": "node checks/smoke/gates.e2e.mjs --case=doc-paths-live-methods",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/gates.e2e.mjs"
+  }
+}
+```

@@ -18,11 +18,16 @@ export function isTestFile(rel) {
   return norm.endsWith('.spec.mjs') || norm.endsWith('.test.mjs')
 }
 
-/** tests/ 下的非测试模块（读取缝/夹具助手）：不进入默认 glob，但必须按域归位、带 -helpers 后缀。 */
+/** tests/ 下的非测试模块（读取缝/夹具助手）：不进入默认 glob，但必须按域归位、带 -helpers 后缀。
+ *  扩展名闭集 = mjs / cjs / ts / tsx / js（本仓 client 侧测试大量 import `.ts` 源，TS 助手是现实形态，
+ *  不是臆测；旧版只认 `.mjs/.cjs` → 未知扩展名静默落位 = BUG-216）。 */
+export const SUPPORT_EXT = /\.(?:mjs|cjs|ts|tsx|js)$/
+export const SUPPORT_SUFFIX = /-helpers\.(?:mjs|cjs|ts|tsx|js)$/
+
 export function isSupportModule(rel) {
   const norm = rel.split('\\').join('/')
   if (!norm.startsWith('tests/') || isTestFile(norm)) return false
-  if (!/\.(?:mjs|cjs)$/.test(norm)) return false
+  if (!SUPPORT_EXT.test(norm)) return false
   return !/^tests\/(?:fixtures|vendor|_tmp)\//.test(norm)
 }
 
@@ -38,11 +43,16 @@ export function placementIssues(paths) {
   for (const rel of paths) {
     const norm = rel.split('\\').join('/')
     if (!isTestFile(norm)) {
-      // 非测试模块（读取缝/助手）此前完全不在闭集内：命名与落点可任意漂移，glob 也看不见。
-      if (!isSupportModule(norm)) continue
+      if (!isSupportModule(norm)) {
+        // 兜底（BUG-216）：tests/ 下既非测试、也非支援模块、也不是文档 → 角色未知。
+        // 旧版靠「扩展名不在枚举里」静默 continue——闭集按文件角色判，不按手写扩展名列表判。
+        if (/^tests\/(?:fixtures|vendor|_tmp)\//.test(norm) || norm.endsWith('.md')) continue
+        issues.push(`${norm}: tests/ 下的文件必须能被发现（*.spec.mjs / tests/checks/*.test.mjs）或被规则命名（-helpers.<mjs|cjs|ts|tsx|js>）——未知扩展名不得静默落位`)
+        continue
+      }
       const seg = norm.split('/')
       if (seg.length < 3) issues.push(`${norm}: tests/ 根不得平铺非测试模块——按域归位（tests/<domain>/…）`)
-      else if (!norm.endsWith('-helpers.mjs')) issues.push(`${norm}: tests/ 非测试模块必须以 -helpers.mjs 结尾（读取缝/夹具助手；由 consumer import，不进默认 glob）`)
+      else if (!SUPPORT_SUFFIX.test(norm)) issues.push(`${norm}: tests/ 非测试模块必须以 -helpers.<ext> 结尾（ext ∈ mjs/cjs/ts/tsx/js；读取缝/夹具助手，由 consumer import，不进默认 glob）`)
       continue
     }
     const seg = norm.split('/')

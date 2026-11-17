@@ -4,13 +4,16 @@
 // 路径检查点名红；还原 → 绿。
 // 负例留证 2026-11-16：BUG-202——把 claim 的路径换成不存在的 checks/… 或 docs/…（重生成账本）
 // → 同一检查点名红；旧版只认 tests/ 前缀会绿。还原 → 绿。
+// 负例留证 2026-11-17：BUG-209——读取缝改名（handbook-surface.mjs → *-helpers.mjs）后分类表仍指旧名，
+// template-contract.spec 的 oracleType 被静默翻成 self-referential；红配方 = 把 CANONICAL_LIBS 任一路径
+// 改成不存在的名字（下方「分类表身份路径必须存在」用例红），还原 → 绿。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import * as assetLedgerMod from '../../checks/lib/test-infra/asset-ledger.mjs'
-import { ASSET_CLASSES, ASSET_COSTS, ORACLE_TYPES, assetLedgerOf, listTestFiles, oracleTypeOf } from '../../checks/lib/test-infra/asset-ledger.mjs'
+import { ASSET_CLASSES, ASSET_COSTS, ORACLE_TYPES, assetLedgerOf, ledgerTablePaths, listTestFiles, oracleTypeOf } from '../../checks/lib/test-infra/asset-ledger.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const LEDGER = JSON.parse(readFileSync(join(ROOT, 'tests/fixtures/asset-ledger/ledger.json'), 'utf8'))
@@ -57,6 +60,17 @@ test('uniqueClaim 里的仓内路径 token（tests/checks/docs/…）必须存�
   assert.deepEqual(bad, [], `生成物把不存在的路径固化成「事实」：\n${bad.join('\n')}`)
 })
 
+
+test('分类/白名单表的身份路径必须存在（BUG-209：死路径静默改变分类）', () => {
+  const entries = ledgerTablePaths()
+  assert.ok(entries.length >= 15, `防空语料：分类表路径过少（${entries.length}）——表的解析规则变了，先复核本判据`)
+  const missing = entries
+    .filter(({ path }) => !existsSync(join(ROOT, path)))
+    .map(({ table, path }) => `${table}: ${path}`)
+  assert.deepEqual(missing, [],
+    `分类表里的死路径不会产生失败，只会让命中资产静默掉档（读取缝改名后 canonical → self-referential）；`
+    + `搬家时同步改表并重生成账本：\n${missing.join('\n')}`)
+})
 
 test('AST 推导负控：无外部解析器 import 不得归为 external；单模块内联样例归为 self-referential', () => {
   const inlineOnly = [

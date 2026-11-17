@@ -22,6 +22,7 @@ import { randomUUID } from 'node:crypto';
 import { readSessionText, resolveSessionLog } from '../../checks/lib/shared/session-log.mjs';
 import { bundleDirOf } from '../../checks/lib/shared/run-state.mjs';
 import { reconcileInjectedMessage } from '../../checks/lib/channel/inject-reconcile.mjs';
+import { usageError } from '../../checks/lib/shared/cli-exit.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const args = process.argv.slice(2);
@@ -39,8 +40,7 @@ const resumeSessionId = flag('--session', null);
 let prompt = flag('--prompt', null);
 if (promptFile) prompt = readFileSync(resolve(process.cwd(), promptFile), 'utf8');
 if (!token) {
-  console.error('缺 --token（web 横幅里的 token）');
-  process.exit(1);
+  usageError('缺 --token（web 横幅里的 token）——未跑 ≠ 失败');
 }
 
 const base = `http://127.0.0.1:${port}`;

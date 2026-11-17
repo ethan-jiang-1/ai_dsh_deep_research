@@ -6,6 +6,16 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [BUG-209](BUG-209-asset-ledger-canonical-libs-stale-helper-names.md) | asset-ledger 的分类表仍指旧 helper 名：oracleType 被静默翻成 self-referential | （分类表改 *-helpers + 重生成；身份表路径存在性守卫） | 2026-11-17 |
+| [BUG-210](BUG-210-call-surface-line-start-command-forms.md) | call-surface 只认行首命令词：env 前缀 / ./ / sudo / && 形态的断链静默放行 | （命令归一收口 doc-surface（8 类命令形态）） | 2026-11-17 |
+| [BUG-211](BUG-211-doc-paths-prose-fence-retired-roots.md) | doc-paths 散文/表格/围栏/HTML 面不认退役根 | （形态台账驱动（表格/围栏路径/HTML href/退役根）） | 2026-11-17 |
+| [BUG-212](BUG-212-live-methods-excluded-retired-roots.md) | 活方法文档（methods + triggers）整树被路径门禁豁免 | （活指令面纳入扫描 + 15 处旧根归位） | 2026-11-17 |
+| [BUG-213](BUG-213-usage-exit-code-inconsistent.md) | usage/前置错误退出码不统一（1 vs 2） | （usage/前置 = exit 2（真失败仍 1）） | 2026-11-17 |
+| [BUG-214](BUG-214-cost-baseline-108-stale-count-free-vocabulary.md) | 成本基线停在 108 案例；count-free 词表不含「案例」 | （计数词表 + 案例；活文档改指 CASES 正本） | 2026-11-17 |
+| [BUG-215](BUG-215-ci-tier-nightly-required-semantics.md) | tier: ci = nightly，预算/docs 仍称 required——频率账两义 | （tier 拆 ci/nightly + 预算分档 + 双向对账） | 2026-11-17 |
+| [BUG-216](BUG-216-test-placement-support-module-ts-blind.md) | test-placement 非测试模块闭集只认 .mjs/.cjs | （闭集扩 .ts/.tsx/.js + 未知扩展名红） | 2026-11-17 |
+| [BUG-217](BUG-217-run-lane-no-match-lacks-all-hint.md) | run-lane 无匹配条目不点 --all 修正入口 | （消息补 --all/--list + guides/67） | 2026-11-17 |
+| [BUG-218](BUG-218-run-lane-all-skip-exit-zero.md) | run-lane 全 SKIP 仍 exit 0（未跑 ≠ 通过） | （全 SKIP = exit 2（三态矩阵）） | 2026-11-17 |
 | [BUG-199](BUG-199-offline-gate-promises-resolver-bypass.md) | 离线闸漏 `dns.promises.Resolver`：武装态下 `new Resolver().resolve4()` 仍解析外网 | （补 promises Resolver prototype patch + vm 四形态行为测试；SMOKE_ONLY 指向直测） | 2026-11-16 |
 | [BUG-200](BUG-200-test-placement-unknown-depth-not-enforced.md) | test-placement 的「未知深度 = 红」没实现 | （run/cockpit lib/client 改恰好段数；三门共判；深度注入案例） | 2026-11-16 |
 | [BUG-201](BUG-201-guard-ledger-closed-set-stops-at-190.md) | 守卫台账闭集停在 BUG-190 | （台账扩到 A–F 90 条 + 反向未入账判据；计数由闭集长度推导） | 2026-11-16 |

@@ -33,7 +33,7 @@ The repo's acceptance axiom is also the bug-fix axiom: **能加载 ≠ 有行为
 | preset row, roster, skills | `presets/<role>.patch.yml` + skills | L1 real mount | `preset.e2e` + `preset-structure` / `role-list-sync` | reading YAML as proof |
 | persona / skill / manual text | pack source + overlay + snapshot | ⑤ assembly + L4-lite | `render-overlay` → L1 → snapshot B → `l4-lite`; restart the run channel | changing the string and calling it behavior |
 | bundle row / provider / fetch fallback | `cordis.patch.yml` + pack code | L1 + L2 | `overlay-fresh` / `row-deps` → L1 → `release.entry` | source-domain green as installed green |
-| startup / defaults / doctor | `src/startup`, `src/defaults`, `scripts/doctor.mjs` | L2 install / first boot | `install-shape.entry` + `product-boot.entry` + `release.entry` | dev channel green as product green |
+| startup / defaults / doctor | `src/startup`, `src/defaults`, `packages/deep-research-pack/scripts/doctor.mjs` | L2 install / first boot | `install-shape.entry` + `product-boot.entry` + `release.entry` | dev channel green as product green |
 | content injection | `src/content` + `content/` | ⑤ assembly + L2 | `content-shape` + `install-shape.entry` / `product-boot.entry` + snapshot B (L4-lite when behavior is the claim) | injected text present but absent from the assembled request |
 | install / release / tarball / profile | pack + `_dist` + profile | L2 real entry | `release.entry` / `lifecycle.entry` / `install-shape.entry` | dev overlay or profile mirror as install |
 | run bundle / delivery gate | run tools + the bundle | real bundle + run gate | `run-accept` / `evidence-audit` / owning `run-gates/` | a fixture or unit test as a real run |
@@ -127,7 +127,7 @@ If the class is unclear, use [judgment-design](judgment-design.md) to make it de
 
 Write `## 修法`: the chosen approach, the layer that owns it (pack source / generated artifact / install form / vendor seam), why the alternatives were rejected, and any follow-up split. A generated artifact is never hand-edited: fix the pack and re-render; a profile mirror is rebuilt by `boot-run`, not patched.
 
-Write `## 修复判据`: the reported case, the adjacent variant(s) that must also pass (or the class decision's reason an instance-only criterion is enough), and the negative/complementary case. A criterion that only names the reported string is a regression, not a class criterion. Choose the guard form at the same time: a permanent test/gate under `tests/` or `scripts/smoke/`, or `notMechanizable` with a trigger. A lower-boundary guard does not guard a higher-boundary bug.
+Write `## 修复判据`: the reported case, the adjacent variant(s) that must also pass (or the class decision's reason an instance-only criterion is enough), and the negative/complementary case. A criterion that only names the reported string is a regression, not a class criterion. Choose the guard form at the same time: a permanent test/gate under `tests/` or `checks/smoke/`, or `notMechanizable` with a trigger. A lower-boundary guard does not guard a higher-boundary bug.
 
 ## 7. Red, then green
 

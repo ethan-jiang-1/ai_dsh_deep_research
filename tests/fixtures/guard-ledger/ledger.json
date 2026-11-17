@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "scope": "失败类普查 D-1（24）+ D-2（17）+ 探索批 A–F（BUG-160..208，49）全量闭集；oracleType 与 asset-ledger 同源双向对账；反向：守卫标题声称的 BUG-nnn（≥191）必须入账",
+  "scope": "失败类普查 D-1（24）+ D-2（17）+ 探索批 A–F（BUG-160..208，49）+ 批 G（BUG-209..218）全量闭集；oracleType 与 asset-ledger 同源双向对账；反向：守卫标题声称的 BUG-nnn（≥191）必须入账",
   "bugs": [
     {
       "id": "BUG-001",
@@ -721,6 +721,47 @@
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "importersUnder 跳过部分 importer 并重生成索引 → 集合对账红（旧非空判据绿）"
+    },
+    {
+      "id": "BUG-209",
+      "mechanism": "身份表（CANONICAL/EXTERNAL/STRUCTURED_LIBS）里的死路径静默改变 oracleType 分类，生成器把错吸收成当前状态",
+      "guard": "tests/checks/asset-ledger.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 CANONICAL_LIBS 任一路径改成不存在的名字 → 身份路径存在性用例红（旧实现用同一张表重算，自洽绿）"
+    },
+    {
+      "id": "BUG-217",
+      "mechanism": "车道无匹配条目的失败信息缺修正入口（--all 是带 dev-only 的唯一开关）",
+      "guard": "tests/checks/cli-exit-contract.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删 noMatchMessage 的 --all/--list 提示 → 消息用例红；真入口红证 = checks/smoke/cli-exit.e2e.mjs"
+    },
+    {
+      "id": "BUG-218",
+      "mechanism": "车道全 SKIP（一条都没跑）时 runner 仍 exit 0，证据命令被误读为通过",
+      "guard": "tests/checks/cli-exit-contract.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "verdictOf 改回「只按 FAIL 数退出」→ 全 SKIP 用例红；真进程红证 = checks/smoke/cli-exit.e2e.mjs"
+    },
+    {
+      "id": "BUG-215",
+      "mechanism": "CI 频率账两义：tier: ci 同时表示 required 与 nightly 挂载，预算单位失真",
+      "guard": "tests/checks/smoke-registry.test.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把一条 tier=nightly 的件从 nightly.yml 删掉 → 红；把 ci 件标成 nightly → 双向对账红"
+    },
+    {
+      "id": "BUG-216",
+      "mechanism": "tests/ 非测试模块闭集只认 .mjs/.cjs：.ts/.tsx/.js 助手零规则落位，未知扩展名静默通过",
+      "guard": "tests/checks/test-placement.test.mjs",
+      "oracleType": "self-referential",
+      "status": "provisional",
+      "redRecipe": "从 SUPPORT_EXT 删掉 .ts → .ts 助手用例红；删未知扩展名兜底 → .py 用例红",
+      "trigger": "落点规则改由盘上规则表（非模块内常量）驱动并给独立 oracle 时，重评为 canonical"
     }
   ]
 }

@@ -26,9 +26,9 @@ const CANONICAL_LIBS = new Set([
   'checks/lib/harness/gates-cases.mjs',
   'checks/lib/harness/replay-scene.mjs',
   'checks/lib/test-infra/smoke-assets.mjs',
-  'tests/pack/handbook-surface.mjs',
+  'tests/pack/handbook-surface-helpers.mjs',
   'tests/pack/preset-helpers.mjs',
-  'tests/pack/template-files.mjs',
+  'tests/pack/template-files-helpers.mjs',
   'packages/deep-research-pack/src/client/locales.ts',
   'packages/deep-research-pack/src/client/research-graph/state-note.ts',
   'packages/deep-research-pack/src/lib/run/brief-fold.ts',
@@ -37,6 +37,17 @@ const STRUCTURED_PKGS = new Set([
   'node:vm', 'vm', 'node:events', 'events', 'node:crypto', 'crypto', 'react', 'react-dom/server',
 ])
 const STRUCTURED_LIBS = new Set(['tests/fixtures/events.mjs'])
+
+/** 分类/白名单表的身份清单（BUG-209 类级守卫的输入）：表里每个路径都必须在盘上存在。
+ *  死路径不产生任何分类失败——它只是让命中的资产静默掉档（读取缝改名后 `canonical` → `self-referential`），
+ *  而账本测试用同一张表重算，自洽绿。存在性由 tests/checks/asset-ledger.test.mjs 钉住。 */
+export function ledgerTablePaths() {
+  return [
+    ['EXTERNAL_LIBS', EXTERNAL_LIBS],
+    ['CANONICAL_LIBS', CANONICAL_LIBS],
+    ['STRUCTURED_LIBS', STRUCTURED_LIBS],
+  ].flatMap(([table, paths]) => [...paths].map((path) => ({ table, path })))
+}
 const FS_READ_NAMES = new Set(['readFileSync', 'readdirSync', 'existsSync', 'lstatSync', 'statSync'])
 const STRUCTURED_CALL_NAMES = new Set(['mkdtempSync', 'structuredClone', 'querySelectorAll', 'dispatchEvent'])
 const STRUCTURED_NEW_NAMES = new Set(['Function', 'AbortController', 'EventEmitter'])

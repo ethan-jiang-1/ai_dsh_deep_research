@@ -1,17 +1,17 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-213：usage / 前置错误的退出码不统一——`run-dashboard` / `run-kickoff` 报 1，同族报 2
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：修复就绪（自授权 P2 修理型：两处 return code + 测试）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（自授权 P2 修理型：两处 return code + 测试） — 结论：usage/前置错误 = exit 2（真失败仍 1），出口收口到 cli-exit；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-namespace-move-residual-fixes.md)；审查：agent — 红证回放 + 全量 verify/test（2026-11-17）
 >
-> 位置：[probes/analyze/run-dashboard.mjs](../../probes/analyze/run-dashboard.mjs)（无参 → `exit(1)`）；
-> [tools/channel/run-kickoff.mjs](../../tools/channel/run-kickoff.mjs)（缺 `--token` → `exit(1)`）。
-> 契约 = [checks/AGENTS.md](../../checks/AGENTS.md)「verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑（前置缺席）」；
-> 探索轮 = [2026-11-17 卡](../issues/2026-11-17-exploratory-namespace-move.md) N4。
+> 位置：[probes/analyze/run-dashboard.mjs](../../../probes/analyze/run-dashboard.mjs)（无参 → `exit(1)`）；
+> [tools/channel/run-kickoff.mjs](../../../tools/channel/run-kickoff.mjs)（缺 `--token` → `exit(1)`）。
+> 契约 = [checks/AGENTS.md](../../../checks/AGENTS.md)「verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑（前置缺席）」；
+> 探索轮 = [2026-11-17 卡](../settled_issues/2026-11-17-exploratory-namespace-move.md) N4。
 
 ## 症状
 
@@ -35,7 +35,7 @@ opened: 2026-11-17
 - DSH 不变量：fail-loud —— 「未跑」必须可与「失败」区分
 - 触及面：none（入口退出码；不改门禁/文档合同）
 - 授权：自授权（P2 修理型）
-- 批：2026-11-17 命名空间搬家探索（N4）；前序 = [BUG-057](../_archived/fixed_bugs/BUG-057-acceptance-check-exit-code-contradicts-verdict-contract.md)（同一契约的机械出口）
+- 批：2026-11-17 命名空间搬家探索（N4）；前序 = [BUG-057](BUG-057-acceptance-check-exit-code-contradicts-verdict-contract.md)（同一契约的机械出口）
 
 ## 复现
 
@@ -79,3 +79,29 @@ node checks/run-gates/run-accept.mjs; echo $?           # 2
 
 与 [BUG-209](BUG-209-asset-ledger-canonical-libs-stale-helper-names.md) 同批（2026-11-17 探索）；
 批 Note 待本批收口后写。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/shared/cli-exit.mjs",
+    "probes/analyze/run-dashboard.mjs",
+    "tools/channel/run-kickoff.mjs",
+    "checks/smoke/cli-exit.e2e.mjs",
+    "checks/smoke/registry.json"
+  ],
+  "red": {
+    "command": "node checks/smoke/cli-exit.e2e.mjs",
+    "exit": 1,
+    "output": "run-dashboard 无参（usage）: exit 1 ≠ 2；run-kickoff 缺 --token（前置缺席）: exit 1 ≠ 2"
+  },
+  "green": {
+    "command": "node checks/smoke/cli-exit.e2e.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/cli-exit.e2e.mjs"
+  }
+}
+```

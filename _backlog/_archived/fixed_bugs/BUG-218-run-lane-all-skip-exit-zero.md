@@ -1,17 +1,17 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-218：run-lane 全 SKIP 仍 exit 0——`pnpm test:entry` 作为证据命令会被误读为通过
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（车道退出码契约；老卡曾有意留作观察）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行并拍板「全 SKIP = exit 2」） — 结论：全 SKIP = exit 2（verdictOf 三态矩阵），run-lane 头注与 guides/67 同步；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-namespace-move-residual-fixes.md)；审查：agent — 红证回放 + 全量 verify/test（2026-11-17）
 >
-> 位置：[checks/test/run-lane.mjs](../../checks/test/run-lane.mjs)（汇总与 `process.exit`）；
-> 契约 = [checks/AGENTS.md](../../checks/AGENTS.md)「verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑（前置缺席）」；
-> 老卡观察 = [2026-11-11 探索卡 §第六/第十轮观察](../_archived/settled_issues/2026-11-11-exploratory-test-strategy.md)（「run-lane 全 SKIP 仍 exit 0」）。
-> 探索轮 = [2026-11-17 卡](../issues/2026-11-17-exploratory-namespace-move.md) N8/M10。
+> 位置：[checks/test/run-lane.mjs](../../../checks/test/run-lane.mjs)（汇总与 `process.exit`）；
+> 契约 = [checks/AGENTS.md](../../../checks/AGENTS.md)「verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑（前置缺席）」；
+> 老卡观察 = [2026-11-11 探索卡 §第六/第十轮观察](../settled_issues/2026-11-11-exploratory-test-strategy.md)（「run-lane 全 SKIP 仍 exit 0」）。
+> 探索轮 = [2026-11-17 卡](../settled_issues/2026-11-17-exploratory-namespace-move.md) N8/M10。
 
 ## 症状
 
@@ -35,7 +35,7 @@ env -u DSH_HOME node checks/test/run-lane.mjs entry --all --only cold-start
 - 表面 / 边界：车道 runner（诊断面）/ ② 行为（退出码）
 - DSH 不变量：fail-loud —— 未跑必须可与通过区分
 - 触及面：none（runner 退出码；不改门禁判据）——但**改的是既有契约选择**，故转 `等人拍板`
-- 授权：等人拍板（老卡 2026-11-14 明确「诊断车道可接受，但退出码会被误读」；是否现在收口由用户拍）
+- 授权：用户 2026-11-17 放行并拍板「全 SKIP = exit 2」→ 修复就绪 = P2 修复授权
 - 批：2026-11-17 命名空间搬家探索（N8/M10）；同族 = [BUG-213](BUG-213-usage-exit-code-inconsistent.md)（usage=2）
 
 ## 复现
@@ -61,15 +61,14 @@ env -u DSH_HOME node checks/test/run-lane.mjs entry --all --only cold-start; ech
 
 ## 修法
 
-二选一（契约选择，故 `等人拍板`）：
+用户 2026-11-17 拍板：**选 1（全 SKIP = exit 2）**。
 
-1. **全 SKIP = 2**：`PASS === 0 && FAIL === 0 && SKIP > 0` → exit 2；混合 PASS+SKIP 仍 0（有证据），
+1. **全 SKIP = 2（已选）**：`PASS === 0 && FAIL === 0 && SKIP > 0` → exit 2；混合 PASS+SKIP 仍 0（有证据），
    有 FAIL → 1；
-2. **任何 SKIP 且无 PASS = 2**（与 1 等价）；或更严：有 SKIP 且无 PASS 时 2，有 SKIP 且有 PASS 时
-   在汇总里标「部分未跑」但 0。
+2. **任何 SKIP 且无 PASS = 2**（与 1 等价；未选，留作备选记录）。
 
-推荐 1（最小语义变化，直接落实「未跑 ≠ 通过」）；同步更新 `run-lane` 头注与 guides/67 §8 的一句话，
-加一个测试（spawn 一个必定 exit 2 的假条目或复用 cold-start 的无 env 形态）。
+已选方案同步更新 `run-lane` 头注与 guides/67 §8 的一句话，加三态矩阵测试（spawn 必定 exit 2 的假条目
+或复用 cold-start 的无 env 形态）。
 
 ## 修复判据
 
@@ -81,3 +80,29 @@ env -u DSH_HOME node checks/test/run-lane.mjs entry --all --only cold-start; ech
 
 与 [BUG-213](BUG-213-usage-exit-code-inconsistent.md) / [BUG-217](BUG-217-run-lane-no-match-lacks-all-hint.md)
 同批（车道/证据出口）；建议同一评审决定「全 SKIP 的退出码」。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/shared/cli-exit.mjs",
+    "checks/test/run-lane.mjs",
+    "tests/checks/cli-exit-contract.test.mjs",
+    "checks/smoke/cli-exit.e2e.mjs",
+    "docs/guides/67-test-strategy.md"
+  ],
+  "red": {
+    "command": "node checks/smoke/cli-exit.e2e.mjs",
+    "exit": 1,
+    "output": "run-lane 全 SKIP（未跑 ≠ 通过）: exit 0 ≠ 2"
+  },
+  "green": {
+    "command": "node checks/smoke/cli-exit.e2e.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/cli-exit.e2e.mjs"
+  }
+}
+```

@@ -85,7 +85,7 @@ test('真实工作流：ci ∪ nightly 覆盖必需 smoke；重冒烟必须在�
   // 但两条重冒烟必须在某个 CI 工作流里执行，且 registry 标 ci——不许无声消失。
   const registry = JSON.parse(readFileSync(join(ROOT, 'checks', 'smoke', 'registry.json'), 'utf8'))
   for (const file of ['client-load.entry.mjs', 'snapshot-replay.entry.mjs']) {
-    assert.equal(registry[file]?.tier, 'ci', `${file} 在 CI 执行面时必须 registry 标 ci`)
+    assert.equal(registry[file]?.tier, 'nightly', `${file} 在 nightly 执行面时必须 registry 标 nightly（push 面与夜间面可区分）`)
   }
 })
 test('表达式归一：${{ }} 外壳不改变 always/true/false 语义（step / continue-on-error / job，BUG-177）', () => {

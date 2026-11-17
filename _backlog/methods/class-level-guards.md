@@ -105,7 +105,7 @@ or `assistant/message` appears」。其余全靠在**标题里写不变量**：
 | `loader-composition.spec.ts:1-4` | 真 Loader 起 `cordis.yml` + 配置值两面跟随 | 无 | 「Proves `allowParallelInProgress` is **real configurability and not a constant**」 |
 
 分工判据一句话：**行为 / 集成 / 生命周期 / 组合，四个面各有一个文件，文件头注写明「真是哪个、假是哪个」**。
-本仓的五台阶（`docs/guides/62:82-88`）是同一个分类轴，但落成「一张表 + 各自载体」，
+本仓的五台阶（`docs/guides/62-plugin-authoring.md:82-88`）是同一个分类轴，但落成「一张表 + 各自载体」，
 没有这个「每件自述真假」的写法。这一点值得抄：**头注里的「真/假对照」是类级守卫的可读性来源**——
 读标题知道守什么，读头注知道这个守卫站在哪一层。
 
@@ -143,7 +143,7 @@ DSH 最接近的替代物是**全仓语法守卫**：`vendor/dsh/scripts/verify-
 「一条语法/结构规则 × 全仓所有匹配文件」。样例 `verify-cordis-config.ts:1-12` 的头注就是一篇
 小型判据设计：说明 Loader 只在 `config` 与 `disabled` 上插值、其余元数据保持静态、表达式留在
 那里是**真值数据**从而静默改变组合——然后对全仓 Cordis YAML 扫这条规则（该守卫由
-`docs/postmortem/0002` 的 Guardrails added 一节催生，见该文 `:36-40`）。
+`vendor/dsh/docs/postmortem/0002-js-expression-disabled-filesystem-tools.md` 的 Guardrails added 一节催生，见该文 `:36-40`）。
 
 对本仓的结论：**「读散文判值」这一类只能自建**，不能抄。可抄的是它的**形状**——
 「一条规则 × 全仓所有文件」= §C 形态 3（消费者清单）的静态版，以及「把不变量写在头注里，
@@ -165,8 +165,8 @@ DSH 最接近的替代物是**全仓语法守卫**：`vendor/dsh/scripts/verify-
    文件内 `for (const x of [...])`（`verdict-conformance.spec.mjs:17-22`、`:72-88`），**等价且零依赖**——
    不需要为「表驱动」引任何东西。
 3. **没有 mutation testing 不代表没有变异**：DSH 的变异在 `gates.e2e` 式「注入回归看红」里
-   （一次性、人工构造），本仓 `scripts/smoke/gates.e2e.mjs` 的 108 个注入案例是同一件事的
-   规模化形态。**这是本仓唯一领先上游的机械面**，值得在写新守卫时优先复用
+   （一次性、人工构造），本仓 `checks/smoke/gates.e2e.mjs` 的注入案例表是同一件事的
+   规模化形态（规模 = `CASES` 正本，`--list` 查，文档不写死）。**这是本仓唯一领先上游的机械面**，值得在写新守卫时优先复用
    （把新门禁也加入注入案例表，而不是只写一条 `assert.throws`）。
 
 ### A.7 小结：DSH 的类级手段分两层
@@ -174,7 +174,7 @@ DSH 最接近的替代物是**全仓语法守卫**：`vendor/dsh/scripts/verify-
 ```
 判据层（读什么值）      → contracts 里的「变体枚举」+ 标题里的 ∀          ← 靠人列全
 执行层（怎么防假绿）    → prove-it-red / negative control / gates         ← 一次性红证
-语法层（全仓规则）      → scripts/verify-*.ts（76 个）                    ← 一条规则 × 全文件
+语法层（全仓规则）      → vendor/dsh/scripts/verify-*.ts                      ← 一条规则 × 全文件
 空间层（穷举输入）      → fast-check，仅 5 个文件，协议形状组件          ← 不用于散文
 ```
 
@@ -201,14 +201,14 @@ DSH 最接近的替代物是**全仓语法守卫**：`vendor/dsh/scripts/verify-
 
 | 文件 | 行/例数 | 主形状 | 副形状 | 缺的那一维 |
 |---|---|---|---|---|
-| `tests/run/review-readiness.spec.mjs` | 233 / 21 | 例子集合 | 边界表、同源对账 | **生成矩阵**（唯一没有的，见 B.1） |
-| `tests/cockpit/library-fold.spec.mjs` | 507 / 41 | 例子集合（夹具电池） | 边界表、单点 round-trip | **语法变体笛卡尔 + fold⇄write 同源**（见 B.2） |
-| `tests/run/node-gate-witness.spec.mjs` | 433 / 29 | 状态交错 | 消费者清单、假绿 oracle | **时刻×绑定的组合矩阵**（见 B.3） |
+| `tests/run/gates/review-readiness.spec.mjs` | 233 / 21 | 例子集合 | 边界表、同源对账 | **生成矩阵**（唯一没有的，见 B.1） |
+| `tests/cockpit/lib/method-library/library-fold.spec.mjs` | 507 / 41 | 例子集合（夹具电池） | 边界表、单点 round-trip | **语法变体笛卡尔 + fold⇄write 同源**（见 B.2） |
+| `tests/run/gates/node-gate-witness.spec.mjs` | 433 / 29 | 状态交错 | 消费者清单、假绿 oracle | **时刻×绑定的组合矩阵**（见 B.3） |
 | `tests/contracts/verdict-conformance.spec.mjs` | 89 / 5 | **不变量 + 笛卡尔矩阵** | 边界表 | **编码变体**（BOM/CRLF/U+3000 不在矩阵里，见 B.4） |
 | `tests/contracts/present-version-conformance.spec.mjs` | 49 / 4 | 不变量 | 同源对账 | **输入空间**（present 条数×路径形态×事件序，见 B.5） |
-| `tests/run/replay-request.spec.mjs` | 360 / 22 | 同源对账 | 假绿 oracle、消费者清单 | **归一化边界的对偶矩阵**（见 B.6） |
-| `tests/pack/method-library-io.spec.mjs` | 102 / 7 | 路径/形态矩阵 | 状态交错 | **空格/unicode/超长 + 读写同源显式对账**（见 B.7） |
-| `tests/run/run-lock.spec.mjs` | 63 / 4 | 状态交错 | 边界表 | **跨进程真并发 + pid 复用长龄**（见 B.8） |
+| `tests/run/harness/replay-request.spec.mjs` | 360 / 22 | 同源对账 | 假绿 oracle、消费者清单 | **归一化边界的对偶矩阵**（见 B.6） |
+| `tests/pack/contract/method-library-io.spec.mjs` | 102 / 7 | 路径/形态矩阵 | 状态交错 | **空格/unicode/超长 + 读写同源显式对账**（见 B.7） |
+| `tests/run/harness/run-lock.spec.mjs` | 63 / 4 | 状态交错 | 边界表 | **跨进程真并发 + pid 复用长龄**（见 B.8） |
 
 ### B.1 `review-readiness.spec.mjs` —— 例子集合 + 跨实现对账，缺矩阵
 
@@ -235,7 +235,7 @@ DSH 最接近的替代物是**全仓语法守卫**：`vendor/dsh/scripts/verify-
 ### B.2 `library-fold.spec.mjs` —— 夹具电池，缺语法笛卡尔与写侧同源
 
 **形状**：41 例。核心是 **「自测例电池」**（`:226-230` 定义、`:233-330` 十个「电池·X」用例）：
-一份 12 条条目的夹具 `SELFTEST_LIBRARY`（单一正本在 `scripts/lib/selftest-library.mjs`，
+一份 12 条条目的夹具 `SELFTEST_LIBRARY`（单一正本在 `checks/lib/test-infra/selftest-library.mjs`，
 与 `client-load.entry` 自测工作区共用），逐条断言。这个形状的价值是**夹具与冒烟共享**，
 防形态漂移——比每个测试自带内联字符串强。
 
@@ -350,7 +350,7 @@ user-question-reply 20 条；reply 正文是 `{answers:[{id,selected:[…]}]}`�
 该归的必须归（否则跨机假红）、不该归的必须逐字（否则真回归被吞）。两方向缺一，归一化就会
 滑向「凑绿」。
 
-**缺口**：`normalizeRuntime` 的三条 replace（`scripts/lib/replay-request.mjs:26-35`）是**逐条例子**，
+**缺口**：`normalizeRuntime` 的三条 replace（`checks/lib/shared/replay-request.mjs:26-35`）是**逐条例子**，
 没有「一个 token 被归一后，同类的另一个 token 也必须被归一」的生成式断言。若上游再加一行
 runtime context（例如 cwd 之外的某个根），第三条 replace 的句式就失配，而测试不会红——
 **这正是 `:30` 注释里已记过一次的失效形态（0.2.1 换 pin 时 persona 归一化变死规则）**。
@@ -398,7 +398,7 @@ runtime context（例如 cwd 之外的某个根），第三条 replace 的句式
 骨架是 `node:test`，零新依赖，符合 `tests/AGENTS.md`（不引测试框架）。
 骨架里的 `entryOf` / `headNameOf` / `outcomeOf` / `writeOwner` / `age` / `readVia` /
 `verdictOf` / `turnEnd` / `walk` / `escapeRe` = 该文件自带的 2–3 行辅助（文件内私有，不进 `lib/`），
-不是待装依赖。`walk` 可直接抄 `scripts/verify/gates/f-repo.mjs` 的递归实现。
+不是待装依赖。`walk` 可直接抄 `checks/verify/gates/f-repo.mjs` 的递归实现。
 
 ### 形态 1：语法/解析矩阵
 
@@ -625,7 +625,7 @@ test('负控：<邻近形态> 必被拒', () => { assert.equal(judge(NEIGHBOR), 
 
 1. **写进模板之前先填完 `## 判据形状` 五行**（`_backlog/methods/judgment-design.md:19-27`：
    Authority / Readers / Bad inputs / Legacy exit / Proof）。填不满 = 类没定清楚，别写矩阵。
-2. **标题里放 BUG-nnn 就要付代价**：`guard-red-record` 门禁（`scripts/verify/gates/f-repo.mjs:144-184`）
+2. **标题里放 BUG-nnn 就要付代价**：`guard-red-record` 门禁（`checks/verify/gates/f-repo.mjs:130-191`）
    要求每个 BUG-nnn 标题配一个 `// 负例留证 YYYY-MM-DD：…BUG-nnn…` 块，且卡必须真实存在
    （双址 `_backlog/bugs/` ∪ `_backlog/_archived/fixed_bugs/`）。**因此类级守卫的正确做法是
    标题写不变量、不写 BUG 号**——BUG 号进留证块。否则一个矩阵文件会挂上七八个 BUG 号，
@@ -737,7 +737,7 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
 
 **成本**：`2×2×5×2 = 40` 个标题 × 一次 upsert + 一次 fold，纯字符串操作，估算 < 50ms。
 放在 `tests/cockpit/`（`tests/AGENTS.md` 的域映射：pack `src/lib` → `cockpit/`），
-或独立成 `tests/cockpit/library-heading-consistency.spec.mjs`——**不要**叫 `*-conformance.spec.mjs`
+或独立成 `tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs`——**不要**叫 `*-conformance.spec.mjs`
 除非你愿意同时交出 `负例留证` 块（`f-repo.mjs:159-164` 会强制）。
 
 **为什么这条能一次咬住 8 个变体，而 41 例的 `library-fold.spec.mjs` 没有**：
@@ -757,9 +757,9 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
 |---|---|---|
 | **矩阵剧场** | 很多行，但改一个 `if` 只让一格红——等价于「一条路径 + 多维装饰」 | 判据：给矩阵每格标注它走的分支；若 > 80% 的格落在同一分支，砍维。`verdict-conformance:72-80` 的 32 格里真正分支只有 2 个（`lead === ''` / 否则），所以它的价值在**负控与期望生成规则**，不在格数——认清这一点才不会继续加维 |
 | **过拟合报出的输入** | 修复提交里新增的用例，全部取自带 BUG 卡的症状表 | **BUG-141 → 150** 是教科书案例：141 的修复把关键词表从 6 个扩到 8 个，新增的两个词正是 141 报告里的「现在/新判定」；150 的四种措辞一个都不在表内。修法 = 类级规则（结构位置），不是扩表 |
-| **把实现当行为** | 断言的对象是源码文本/正则/结构，而非运行结果 | `tests/pack/export-shape.spec.mjs:24`（对源文本 `doesNotMatch(/export\s+default/)`）——它的失效形态已在 `special-topics.md §1.3` 登记。另一类是「断言渲染出的字符串」，但 `library-fold.spec.mjs:391` 断 `renderLibraryEntry` 的输出格式，这是**与 Lead 的契约**（skill 契约要求该形态），不算反模式——**区分标准：这段文本有外部消费者吗** |
+| **把实现当行为** | 断言的对象是源码文本/正则/结构，而非运行结果 | `tests/pack/contract/export-shape.spec.mjs:24`（对源文本 `doesNotMatch(/export\s+default/)`）——它的失效形态已在 `special-topics.md §1.3` 登记。另一类是「断言渲染出的字符串」，但 `library-fold.spec.mjs:391` 断 `renderLibraryEntry` 的输出格式，这是**与 Lead 的契约**（skill 契约要求该形态），不算反模式——**区分标准：这段文本有外部消费者吗** |
 | **夹具迁就谓词** | 修复一并改了夹具，使判据「看起来」通过 | test-asset-fence 的 S0 明确拒绝了这条路：`run-accept` 第 ⑦ 段红的原因是夹具创建了 `review/` 却没有 `review/readiness.json`，**没有**去放宽 `readinessOfSources`，也没有改 `## readiness: PASS` 标题（`_backlog/_archived/settled_issues/2026-11-13-test-asset-fence.md` §方案与取舍：「不改标题：`terminalReadiness` 会剥 `##` 读成 PASS，改标题是误诊」） |
-| **归一化凑绿** | 为了让新录制/新环境通过，给比较器加 replace | `scripts/lib/replay-request.mjs:23` 已把这条堵死（persona 归一化**清零**，而不是「加一条 replace」）；`snapshots/README.md` 写「只许重写、不许放宽比对」；反面教材 = `docs/postmortem/0002`（refresh 把 `UNKNOWN_TOOL` 当成新金标准，「A snapshot refresh is fixture production, not correctness review」） |
+| **归一化凑绿** | 为了让新录制/新环境通过，给比较器加 replace | `checks/lib/shared/replay-request.mjs:23` 已把这条堵死（persona 归一化**清零**，而不是「加一条 replace」）；`snapshots/README.md` 写「只许重写、不许放宽比对」；反面教材 = `vendor/dsh/docs/postmortem/0002-js-expression-disabled-filesystem-tools.md`（refresh 把 `UNKNOWN_TOOL` 当成新金标准，「A snapshot refresh is fixture production, not correctness review」） |
 | **只交付绿** | 没有红过的守卫 | `guard-red-record` 门禁就是为这条存在的（`f-repo.mjs:129-184`）。注意门禁自己声明了边界：「它不制造回归不跑测试，故**不证明留证是真的**」——留证写了但假，门禁看不出。**这是本仓唯一无法机械化的诚实缺口，必须靠人复现一次** |
 
 ---
@@ -784,7 +784,7 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
 | 纯函数矩阵（形态 1/2） | 微秒级 | **< 50ms** | `pnpm test`（快环），单文件 ≤1s |
 | 文件系统矩阵（形态 3/5） | 毫秒级（`mkdtemp` + 几次 syscall） | **< 500ms** | `pnpm test` |
 | 状态交错（形态 4，纯内存） | 毫秒级 | **< 300ms** | `pnpm test` |
-| 状态交错（真子进程） | 百毫秒–秒 | 不适合放矩阵 | 独立 smoke（`scripts/smoke/`，分级申报） |
+| 状态交错（真子进程） | 百毫秒–秒 | 不适合放矩阵 | 独立 smoke（`checks/smoke/`，分级申报） |
 | 假绿 oracle（盘侧真值） | 毫秒 | < 100ms | `pnpm test` |
 
 口径依据：本仓 `pnpm test` 全量 1,407 例 4.4s（`_backlog/_archived/research/test-asset-fence/2026-11-13-test-asset-fence.md:14`，
@@ -798,7 +798,7 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
 | 情形 | 为什么不需要 | 本仓实例 |
 |---|---|---|
 | 纯算术 / 纯折算 | 输入空间连续，代数性质（交换/结合/单位元）比矩阵强 | `src/lib/*-fold.mjs` 的计数类 |
-| **封闭枚举 + 写入方唯一** | 等价类只有一个，矩阵是剧场 | locale key 集合（`tests/pack/client-locale.spec.mjs`）、协议常量 `TOOL_TIMEOUT` |
+| **封闭枚举 + 写入方唯一** | 等价类只有一个，矩阵是剧场 | locale key 集合（`tests/cockpit/client/locales/client-locale.spec.mjs`）、协议常量 `TOOL_TIMEOUT` |
 | **否决式不变量**（X 不能影响 Y） | ∀ 已在命题里，举例即证 | `present-version-conformance.spec.mjs:19`（正文提及任何版本都不算） |
 | 路径来源是受控常量 | 无攻击面 | 仓内 `join(ROOT, …)` 的拼装 |
 | 单次调用契约 | 没有输入变体，只有调用方契约 | `export-shape`（应改成 `unwrapExports` 往返，不是矩阵） |
@@ -811,7 +811,7 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
 |---|---|---|
 | 运行行为（同一函数在不同输入下返回什么） | `tests/`（形态 1/2/4/6） | grep 判不出「猜不猜」（`verdict-conformance.spec.mjs:3` 的原话） |
 | 全仓静态一致性（每个文件都有 X） | `verify/gates/<域>.mjs`（形态 3 的静态版） | 需要跨全仓扫；有 `gates.e2e` 注入案例可复用 |
-| 「守卫本身会不会咬人」 | `gates.e2e` 注入案例表 | 本仓 108 个注入案例（fence 研究 `:77`），**新增门禁必须同 diff 加案例**（`scripts/AGENTS.md` 新增或改门禁节） |
+| 「守卫本身会不会咬人」 | `gates.e2e` 注入案例表 | 本仓注入案例表（`CASES` 正本，`--list` 查），**新增门禁必须同 diff 加案例**（`checks/AGENTS.md` 新增或改门禁节） |
 | 一次性红证（本文件不常驻） | 测试头注的「负例留证」块 | `guard-red-record` 机械对账块的存在，不对账内容真假 |
 
 ---
@@ -823,11 +823,11 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
   （Prove the intended regression 节）、`packages/core/agent-loop/tests/contract-regressions.spec.ts`、
   `packages/todo/tool-todo/tests/*.spec.ts`、`packages/guard/timeout-policy/tests/timeout-policy.spec.ts`、
   `packages/llm/llm/tests/properties.spec.ts`、`packages/schedule/schedule/tests/recurrence.spec.ts`、
-  `packages/settings/settings/tests/editor-failures.spec.ts`、`scripts/verify-cordis-config.ts`、
+  `packages/settings/settings/tests/editor-failures.spec.ts`、`vendor/dsh/scripts/verify-cordis-config.ts`、
   `docs/postmortem/0002-js-expression-disabled-filesystem-tools.md`、`package.json:260`
 - 本仓：`tests/AGENTS.md:44`（不变量 + 变异矩阵）、`_backlog/methods/judgment-design.md`、
-  `scripts/verify/gates/f-repo.mjs:129-184`（`guard-red-record`）、
-  八个样本测试文件、`scripts/lib/replay-request.mjs`、`scripts/lib/run-lock.mjs`、
+  `checks/verify/gates/f-repo.mjs:130-191`（`guard-red-record`）、
+  八个样本测试文件、`checks/lib/shared/replay-request.mjs`、`checks/lib/harness/run-lock.mjs`、
   `packages/deep-research-pack/src/lib/{review-readiness,library-fold,method-library-write}.ts`、
   `_backlog/_archived/fixed_bugs/BUG-{081,085,093,123,124,127,128,138,074,141,150}-*.md`、
   `_backlog/_archived/settled_issues/2026-11-13-test-asset-fence.md`、`_backlog/_archived/research/test-asset-fence/2026-11-13-test-asset-fence.md`

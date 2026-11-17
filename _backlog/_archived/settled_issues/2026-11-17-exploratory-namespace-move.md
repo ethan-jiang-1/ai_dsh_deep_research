@@ -1,17 +1,17 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-11-17
 ---
 
 # 推敲：命名空间搬家后的残差探索（2026-11-17 轮）
 
-> 立卡：2026-11-17 ｜ 状态：推敲中（2026-11-17 第一轮已跑；10 张卡 209–218） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-17 ｜ 状态：已结（2026-11-17 第一轮已跑；10 张卡 209–218） ｜ 类型：Task ｜ 结论：N1–N9 全部有判定；10 张卡 209–218 全部修复归档；去向 = 批 Note；审查：agent — 红证回放 + 全量 verify/test ｜ 可关闭：是（2026-11-17）
 >
 > **一句话**：这两晚不是「文件换个目录」，而是**三个维护根换了名字、加了兼容账本、把重证据移出 push 门**；
 > 回归仍绿，但绿的含义变了。本卡把探索靶子从「旧路径有没有更新」移到「**旧名还被谁消费、新名是否真被用、
 > 证据是否还在门里**」，并给出可证伪的 charter。
 >
-> 前身 = [2026-11-11-exploratory-test-strategy](../_archived/settled_issues/2026-11-11-exploratory-test-strategy.md)
+> 前身 = [2026-11-11-exploratory-test-strategy](2026-11-11-exploratory-test-strategy.md)
 > （第 0–11 轮账本 + 覆盖地图；已归档，只作「已探面」参考，不再续写）。
 
 **问题与期望结果：** 2026-11-16 22:34–11-17 11:06 的 29 个 commit 里发生 257 次 rename：
@@ -30,9 +30,9 @@ opened: 2026-11-17
 
 - **结构事实**：三根（`checks/` judge、`probes/` show、`tools/` operate）+ 子组；`scripts/`、`dev/`、
   `probes/run/` 只作为退役名活在 `checks/test-path-redirects.json`；测试镜像保留、合同桶不改名、结构冻结
-  （[维护层对齐 Note](../../notes/implemented/2026-11-17-maintenance-layer-alignment.md)）。
+  （[维护层对齐 Note](../../../notes/implemented/2026-11-17-maintenance-layer-alignment.md)）。
 - **兼容层**：账本 append-only + 链式解析（预扫时 575 条，本次归档 +1；57 条两跳；`md-links` 实跑
-  307 条链接经账本解析）；活文档不得依赖账本，账本只服务冻结层（[guides/68 §6](../../docs/guides/68-surface-contract.md)）。
+  307 条链接经账本解析）；活文档不得依赖账本，账本只服务冻结层（[guides/68 §6](../../../docs/guides/68-surface-contract.md)）。
 - **证据频率**：push 门 = `keyless`（verify + test，0 条 smoke）；nightly = 11 条 `tier: ci` smoke
   （client-load / snapshot-replay / deploy 的 9 条）；registry 与 `ci ∪ nightly` 双向对账已绿。
 - **基线（2026-11-17 13:4x 实跑）**：`pnpm verify` 全绿；`pnpm test` spec **1366** / checks **220**（0 fail / 0 skip）；
@@ -42,7 +42,7 @@ opened: 2026-11-17
 **未决问题：**
 
 - 预扫候选 P-1（asset-ledger 的分类表仍指旧 helper 名）的严重度与守卫落点；执行时先开卡再修。
-- N8（频率账）若发现 [guides/67 §8](../../docs/guides/67-test-strategy.md) 的「required」声明与实际（nightly）
+- N8（频率账）若发现 [guides/67 §8](../../../docs/guides/67-test-strategy.md) 的「required」声明与实际（nightly）
   不一致：属契约歧义 → 用户/D54，不擅自改边。
 - N3（冻结层作为指令面）若发现 load-bearing 命令，策略收口方式（只查活跃卡？按「是否被 live 文档引用为
   当前步骤」判？）留给执行时的发现决定。
@@ -74,7 +74,7 @@ opened: 2026-11-17
 ## 判据：不变量 6–8 与失败类 M9–M11
 
 前五条搬家不变量（引用面同构 / 非引用变更仅路径 / 落点由规则决定 / 派生账重算 / 路径即合同）
-仍是底座，正本与 M1–M8 见[老卡 §搬家合同](../_archived/settled_issues/2026-11-11-exploratory-test-strategy.md)（冻结）。
+仍是底座，正本与 M1–M8 见[老卡 §搬家合同](2026-11-11-exploratory-test-strategy.md)（冻结）。
 本轮只加「命名空间搬家」多出来的三条：
 
 6. **兼容只服务冻结面**：账本可解析旧名，但活面（docs/根/checks/tools/probes/tests/CI）必须直指现行路径；
@@ -139,30 +139,30 @@ opened: 2026-11-17
 
 | ID | 判定 | 证据 / 卡 |
 |---|---|---|
-| N1 | 已探 → 发现 | call-surface 7 形态漏 → [BUG-210](../bugs/BUG-210-call-surface-line-start-command-forms.md) |
-| N2 | 已探 → 发现 | 散文/表格/围栏/HTML 退役根漏 → [BUG-211](../bugs/BUG-211-doc-paths-prose-fence-retired-roots.md) |
-| N3 | 已探 → 发现 | 活方法文档整树豁免、旧命令 → [BUG-212](../bugs/BUG-212-live-methods-excluded-retired-roots.md) |
-| N4 | 已探 → 发现 | 入口矩阵全绿；usage exit 不一致 → [BUG-213](../bugs/BUG-213-usage-exit-code-inconsistent.md) |
-| N5 | 已探 → 发现 | 派生账无漂移；分类表死路径 → [BUG-209](../bugs/BUG-209-asset-ledger-canonical-libs-stale-helper-names.md) |
+| N1 | 已探 → 发现 | call-surface 7 形态漏 → [BUG-210](../fixed_bugs/BUG-210-call-surface-line-start-command-forms.md) |
+| N2 | 已探 → 发现 | 散文/表格/围栏/HTML 退役根漏 → [BUG-211](../fixed_bugs/BUG-211-doc-paths-prose-fence-retired-roots.md) |
+| N3 | 已探 → 发现 | 活方法文档整树豁免、旧命令 → [BUG-212](../fixed_bugs/BUG-212-live-methods-excluded-retired-roots.md) |
+| N4 | 已探 → 发现 | 入口矩阵全绿；usage exit 不一致 → [BUG-213](../fixed_bugs/BUG-213-usage-exit-code-inconsistent.md) |
+| N5 | 已探 → 发现 | 派生账无漂移；分类表死路径 → [BUG-209](../fixed_bugs/BUG-209-asset-ledger-canonical-libs-stale-helper-names.md) |
 | N6 | 关闭（无发现） | 74 个 ROOT 常量、0 偏差（全树） |
 | N7 | 关闭（既有红证） | `redirect-ledger.test` 4 单测 + `md-links` stale/dangling/live-ledger/cycle 案例；未新增 mutation |
-| N8 | 已探 → 发现 | `tier: ci` = nightly，预算/docs 两义 → [BUG-215](../bugs/BUG-215-ci-tier-nightly-required-semantics.md)；成本计数 → [BUG-214](../bugs/BUG-214-cost-baseline-108-stale-count-free-vocabulary.md)；全 SKIP 退出码 → [BUG-218](../bugs/BUG-218-run-lane-all-skip-exit-zero.md) |
-| N9 | 已探 → 发现 | 面表/例外覆盖完整；108 案例计数漂移 → [BUG-214](../bugs/BUG-214-cost-baseline-108-stale-count-free-vocabulary.md)；`test-placement` TS 盲 → [BUG-216](../bugs/BUG-216-test-placement-support-module-ts-blind.md) |
+| N8 | 已探 → 发现 | `tier: ci` = nightly，预算/docs 两义 → [BUG-215](../fixed_bugs/BUG-215-ci-tier-nightly-required-semantics.md)；成本计数 → [BUG-214](../fixed_bugs/BUG-214-cost-baseline-108-stale-count-free-vocabulary.md)；全 SKIP 退出码 → [BUG-218](../fixed_bugs/BUG-218-run-lane-all-skip-exit-zero.md) |
+| N9 | 已探 → 发现 | 面表/例外覆盖完整；108 案例计数漂移 → [BUG-214](../fixed_bugs/BUG-214-cost-baseline-108-stale-count-free-vocabulary.md)；`test-placement` TS 盲 → [BUG-216](../fixed_bugs/BUG-216-test-placement-support-module-ts-blind.md) |
 
 **本批 10 张卡（209–218）**：
 
 | 卡 | 严重级 | 状态 | 一句话 |
 |---|---|---|---|
-| [209](../bugs/BUG-209-asset-ledger-canonical-libs-stale-helper-names.md) | P2 | 修复就绪 | asset-ledger 分类表旧 helper 名 → oracleType 翻转 |
-| [210](../bugs/BUG-210-call-surface-line-start-command-forms.md) | P2 | 等人拍板 | call-surface 只认行首命令词（7 形态） |
-| [211](../bugs/BUG-211-doc-paths-prose-fence-retired-roots.md) | P2 | 等人拍板 | doc-paths 散文/表格/围栏/HTML 面不认退役根 |
-| [212](../bugs/BUG-212-live-methods-excluded-retired-roots.md) | P2 | 等人拍板 | 活方法文档整树豁免，旧命令仍在 |
-| [213](../bugs/BUG-213-usage-exit-code-inconsistent.md) | P2 | 修复就绪 | run-dashboard / run-kickoff usage exit 1（应 2） |
-| [214](../bugs/BUG-214-cost-baseline-108-stale-count-free-vocabulary.md) | P2 | 等人拍板 | 成本基线 108（实际 142）；count-free 不含「案例」 |
-| [215](../bugs/BUG-215-ci-tier-nightly-required-semantics.md) | P2 | 等人拍板 | tier:ci = nightly，预算/docs 仍称 required |
-| [216](../bugs/BUG-216-test-placement-support-module-ts-blind.md) | P2 | 等人拍板 | test-placement 非测试模块不认 .ts/.tsx/.js |
-| [217](../bugs/BUG-217-run-lane-no-match-lacks-all-hint.md) | P2 | 修复就绪 | run-lane 无匹配不点 --all；guides/67 漏 --all |
-| [218](../bugs/BUG-218-run-lane-all-skip-exit-zero.md) | P2 | 等人拍板 | run-lane 全 SKIP 仍 exit 0（未跑 ≠ 通过） |
+| [209](../fixed_bugs/BUG-209-asset-ledger-canonical-libs-stale-helper-names.md) | P2 | 修复就绪 | asset-ledger 分类表旧 helper 名 → oracleType 翻转 |
+| [210](../fixed_bugs/BUG-210-call-surface-line-start-command-forms.md) | P2 | 等人拍板 | call-surface 只认行首命令词（7 形态） |
+| [211](../fixed_bugs/BUG-211-doc-paths-prose-fence-retired-roots.md) | P2 | 等人拍板 | doc-paths 散文/表格/围栏/HTML 面不认退役根 |
+| [212](../fixed_bugs/BUG-212-live-methods-excluded-retired-roots.md) | P2 | 等人拍板 | 活方法文档整树豁免，旧命令仍在 |
+| [213](../fixed_bugs/BUG-213-usage-exit-code-inconsistent.md) | P2 | 修复就绪 | run-dashboard / run-kickoff usage exit 1（应 2） |
+| [214](../fixed_bugs/BUG-214-cost-baseline-108-stale-count-free-vocabulary.md) | P2 | 修复就绪 | 成本基线 108（实际 142）；count-free 不含「案例」 |
+| [215](../fixed_bugs/BUG-215-ci-tier-nightly-required-semantics.md) | P2 | 修复就绪 | tier:ci = nightly，预算/docs 仍称 required（已拍板拆 tier） |
+| [216](../fixed_bugs/BUG-216-test-placement-support-module-ts-blind.md) | P2 | 修复就绪 | test-placement 非测试模块不认 .ts/.tsx/.js |
+| [217](../fixed_bugs/BUG-217-run-lane-no-match-lacks-all-hint.md) | P2 | 修复就绪 | run-lane 无匹配不点 --all；guides/67 漏 --all |
+| [218](../fixed_bugs/BUG-218-run-lane-all-skip-exit-zero.md) | P2 | 修复就绪 | run-lane 全 SKIP 仍 exit 0（已拍板全 SKIP=2） |
 
 **已跑的装配/入口基线**（全部绿，作为「不是搬家把大面打红」的负对照）：
 `pnpm verify` 全绿；`pnpm test` spec 1366 / checks 220；`pnpm build` / `typecheck` / `test:vendor` 绿；
@@ -179,12 +179,49 @@ opened: 2026-11-17
 - 门户 README / 生成物头 / ROOT 常量 / 派生账均无旧根残留（`checks/README`、`probes/README`、
   `tools/README`、`tests/INDEX.generated.md`、`probes/INDEX.generated.md`、`overlay` 逐件看过）。
 
+## 批修复（2026-11-17 用户放行；批 Note 待收口）
+
+用户 2026-11-17 放行全部 7 张 `等人拍板` 卡，并拍板 4 个契约选择；10 张卡同批修完再写一篇批 Note
+（[bugs/README §批修复](../../bugs/README.md)），每卡仍有自己的 `fix-evidence`。
+
+| 决定 | 选定 | 卡 |
+|---|---|---|
+| CI 频率语义 | 拆 tier：`ci` = push/required，新增 `nightly`；预算分列两 cap | 215 |
+| 全 SKIP 退出码 | exit 2（PASS+SKIP 混合仍 0，有 FAIL 仍 1） | 218 |
+| 非测试模块闭集 | 扩到 `.ts/.tsx/.js`（`-helpers.<ext>`）；`tests/` 下未知扩展名兜底红 | 216 |
+| 围栏路径清单 | 纳入 `doc-paths`（命令仍归 `call-surface`） | 211 |
+
+**实施顺序**（内容先归位，再开宽门禁；契约选择隔离到最后）：
+
+1. **P1 出口契约 + 自授权三张**：新建 `checks/lib/shared/cli-exit.mjs`（0/1/2 + `usageError()`）；
+   209 修分类表并重生成 + 身份表存在性守卫；213 两入口 usage=2；217 错误信息补 `--all`。
+2. **P2 内容归位**：`_backlog/methods/*.md` 与 `triggers.md` 的 15 处旧根改现行根。
+3. **P3 文档面归一器（核心）**：新建 `checks/lib/repo/doc-surface.mjs`（唯一形态枚举器：反引号/
+   散文/表格/围栏/HTML href/链接标签/缩进块/heredoc/YAML 折叠块 + 命令归一：env 前缀、`./`、
+   sudo/env/time、`&&` 链）+ 形态台账（每形态 = 在合同内带 gates.e2e 案例 id，或不在合同带理由）；
+   `call-surface` / `doc-paths` / `count-free` 改为消费它；扫面纳入 `_backlog/methods/*.md` +
+   `triggers.md`；count-free 词表扩容（案例）+ 计数指正本。覆盖 210/211/212(结构)/214。
+4. **P4**：`test-placement` 角色闭集（216）。
+5. **P5**：registry `tier` 拆 `ci`/`nightly` + 预算分列 + workflows 对账 + guides/67 + D54 行（215）。
+6. **P6**：`run-lane` 三态退出码（218）。
+7. **P7**：批 Note、十卡归档、索引/台账、全量验收、语义自审。
+
+**收口（2026-11-17）**：10 张卡全部 `已修` 并归档到 [fixed 池](../fixed_bugs/README.md)；批 Note =
+[2026-11-17-namespace-move-residual-fixes](../../../notes/implemented/2026-11-17-namespace-move-residual-fixes.md)。
+失败类守卫落点：M9（兼容层吸收）→ 身份表路径存在性（asset-ledger）+ 形态台账；
+M10（车道时延）→ tier 频率拆分 + 双向对账 + 全 SKIP=2；
+M11（指令面/证据面错位）→ 活指令面纳入扫描 + 方法文档归位。
+`pnpm verify` / `pnpm test` / `gates.e2e` 全量绿；每卡红证回放记录在卡内 `fix-evidence`。
+
+每张门禁卡的红证 = 先注入旧形态看红（`gates.e2e` 或单测），绿证 = 同一命令 exit 0；门禁改动同 diff
+更新 `docs/evaluation.md` 与 `tests/checks/verify-gates.test.mjs` 的静态对账。
+
 ## 已知与未决
 
-- **已知**：第一轮已跑（N1–N6 + N8/N9；N7 以既有红证关闭）；9 张卡 209–217；`pnpm verify` / `pnpm test` 绿；
+- **已知**：第一轮已跑（N1–N6 + N8/N9；N7 以既有红证关闭）；10 张卡 209–218；`pnpm verify` / `pnpm test` 绿；
   老卡 0–11 轮与覆盖地图已归档，不重开。
-- **未决**：209/213/217 为 `修复就绪`（P2，等修复 agent）；210/211/212/214/215/216/218 触门禁/文档/D54/契约，
-  为 `等人拍板`（等用户放行）；P-1 的守卫落点（表存在性检查）与 214 的 count-free 词表可同一件跟上。
+- **未决**：10 张卡全部 `修复就绪`（用户 2026-11-17 放行其余 7 张并拍板 4 个契约选择），按 §批修复
+  的 P1–P7 顺序推进；P-1 的身份表存在性守卫与 214 的 count-free 词表已在批内。
 - **不证**：「账本绿」不证「旧名没人用」；「nightly 绿」不证「push 安全」；「守卫存在」不证「守卫有效」；
   「没找到」不写「没有 bug」。
 
@@ -228,15 +265,15 @@ gates.e2e 案例；可复用 `checks/lib/**`、`checks/smoke/*`、`probes/analyz
 
 | ID | 面 | 状态 |
 |---|---|---|
-| N1 | call-surface 命令形态 | 已探 → [BUG-210](../bugs/BUG-210-call-surface-line-start-command-forms.md) |
-| N2 | doc-paths 退役名形态 | 已探 → [BUG-211](../bugs/BUG-211-doc-paths-prose-fence-retired-roots.md) |
-| N3 | 冻结层作为指令面 | 已探 → [BUG-212](../bugs/BUG-212-live-methods-excluded-retired-roots.md) |
-| N4 | 被搬入口的文档化调用 | 已探 → [BUG-213](../bugs/BUG-213-usage-exit-code-inconsistent.md)（矩阵本身全绿） |
-| N5 | 派生账重算与吸收（含 P-1） | 已探 → [BUG-209](../bugs/BUG-209-asset-ledger-canonical-libs-stale-helper-names.md)；其余无漂移 |
+| N1 | call-surface 命令形态 | 已探 → [BUG-210](../fixed_bugs/BUG-210-call-surface-line-start-command-forms.md) |
+| N2 | doc-paths 退役名形态 | 已探 → [BUG-211](../fixed_bugs/BUG-211-doc-paths-prose-fence-retired-roots.md) |
+| N3 | 冻结层作为指令面 | 已探 → [BUG-212](../fixed_bugs/BUG-212-live-methods-excluded-retired-roots.md) |
+| N4 | 被搬入口的文档化调用 | 已探 → [BUG-213](../fixed_bugs/BUG-213-usage-exit-code-inconsistent.md)（矩阵本身全绿） |
+| N5 | 派生账重算与吸收（含 P-1） | 已探 → [BUG-209](../fixed_bugs/BUG-209-asset-ledger-canonical-libs-stale-helper-names.md)；其余无漂移 |
 | N6 | 深度常量 | 已关闭（74 常量 0 偏差） |
 | N7 | 账本负控 | 已关闭（既有 4 单测 + 4 案例） |
-| N8 | 频率账/成本账 | 已探 → [BUG-215](../bugs/BUG-215-ci-tier-nightly-required-semantics.md) + [BUG-214](../bugs/BUG-214-cost-baseline-108-stale-count-free-vocabulary.md) |
-| N9 | 面声明/成本计数 | 已探 → [BUG-214](../bugs/BUG-214-cost-baseline-108-stale-count-free-vocabulary.md) + [BUG-216](../bugs/BUG-216-test-placement-support-module-ts-blind.md) |
+| N8 | 频率账/成本账 | 已探 → [BUG-215](../fixed_bugs/BUG-215-ci-tier-nightly-required-semantics.md) + [BUG-214](../fixed_bugs/BUG-214-cost-baseline-108-stale-count-free-vocabulary.md) |
+| N9 | 面声明/成本计数 | 已探 → [BUG-214](../fixed_bugs/BUG-214-cost-baseline-108-stale-count-free-vocabulary.md) + [BUG-216](../fixed_bugs/BUG-216-test-placement-support-module-ts-blind.md) |
 
 ### 移交观察（来自老卡，非本轮靶子）
 
@@ -252,5 +289,5 @@ gates.e2e 案例；可复用 `checks/lib/**`、`checks/smoke/*`、`probes/analyz
 
 ## 判据形状
 
-不适用（本卡不改产品判据；探索判据 = 每条 charter 的 oracle，正本 = [guides/67](../../docs/guides/67-test-strategy.md)
-+ [技能](../../.agents/skills/exploratory-verification/SKILL.md)）。
+不适用（本卡不改产品判据；探索判据 = 每条 charter 的 oracle，正本 = [guides/67](../../../docs/guides/67-test-strategy.md)
++ [技能](../../../.agents/skills/exploratory-verification/SKILL.md)）。

@@ -50,7 +50,7 @@ function listEntryRels() {
   return rels.sort();
 }
 
-// 2026-11-16：多字节 chunk 边界假红的类级守卫（Linux CI 实测 gates.e2e 5/133 案例随机红）。
+// 2026-11-16：多字节 chunk 边界假红的类级守卫（Linux CI 实测 gates.e2e 多案例随机红）。
 // 机制：管道 chunk 按字节切，`String(chunk)` / 直接拼接前不 setEncoding('utf8') 会把汉字撕成
 // U+FFFD，随后用中文 expect / includes 判据即「门禁报了红但非本案例报因」的假红；管道缓冲
 // Linux 64 KiB / macOS 16 KiB，边界落点不同 → 同一提交两平台结果不同（暖树绿掩盖 Linux 红）。

@@ -30,7 +30,7 @@ const VERIFY_REL = join('checks', 'verify', 'verify.mjs');
 
 // `--case` / `--jobs`：两种形状（`--name=value` / `--name value`）同判；空值/未知参数 = exit 2。
 // 空 `--case=` 曾静默退化为「没有过滤器」而跑全量，调用方会把它读成「指定案例绿了」（BUG-203）。
-// `--jobs`：有界并行（默认 min(4, CPU)）；案例彼此独立，108 个案例串行 ~248s → 并行 ~86s。
+// `--jobs`：有界并行（默认 min(4, CPU)）；案例彼此独立，并行只压墙钟（规模 = 案例表正本，不写死）。
 // 对照组与门禁名集合都按选中案例收窄——被过滤掉的案例既不计红也不计绿（末尾自报"仅跑 N 个"）。
 let ARGS;
 try { ARGS = parseE2eArgs(process.argv.slice(2), Math.max(1, Math.min(4, cpus().length))); }
@@ -84,7 +84,7 @@ function runVerify(dir) {
     const child = spawn(process.execPath, [join(dir, VERIFY_REL)], { cwd: dir, stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '';
     // UTF-8 边界：管道 chunk 会落在多字节字符中间——不 setEncoding 时 `String(chunk)` 把汉字撕成
-    // U+FFFD，而下方案例判据用**中文 expect** 做 includes（133 案例中有 9 个）。实测（2026-11-16，
+    // U+FFFD，而下方案例判据用**中文 expect** 做 includes（部分案例的报因是中文）。实测（2026-11-16，
     // Linux 容器复现 Linux CI）：64 KiB 边界撕裂 → `includes` 假、报出「门禁报了红但非本案例报因」
     // 的随机假红，且失败案例每次不同（glob / missing 轮换）。修复 = 两条流先 setEncoding('utf8')。
     child.stdout.setEncoding('utf8');

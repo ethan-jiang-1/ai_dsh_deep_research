@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| [2026-11-17-exploratory-namespace-move](2026-11-17-exploratory-namespace-move.md) | 推敲中 | 命名空间搬家后的残差探索：兼容账本 / 调用面 / 证据频率；charter N1–N9 已设计，预扫 6 格闭合 + 候选 P-1 |
+| （空） | — | 2026-11-17 轮已结，见 [_archived/settled_issues](../_archived/settled_issues/README.md) |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

@@ -7,7 +7,8 @@ import { readFileSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, resolve, relative, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { ROOT, fail, gitOnce, note, trackedFiles } from '../context.mjs';
-import { prosePathTokens } from '../../lib/repo/doc-prose-paths.mjs';
+import { isRetiredRoot, retiredRootHint, scanDocument } from '../../lib/repo/doc-surface.mjs';
+import { COUNT_NOUNS, countFraudTokens } from '../../lib/repo/doc-counts.mjs';
 import { MAX_REDIRECT_DEPTH, indexRedirects, resolveRedirect } from '../../lib/repo/redirect-ledger.mjs';
 
 export function runA() {
@@ -210,38 +211,37 @@ export function runA() {
   }
 }
 
-// ── doc-paths（live 文档反引号里的仓内路径必须存在——2026-11-03 七维卫生审计 D1-2）──
-// 为什么：md-links 只管 Markdown 链接，`` `path` `` 散文件路径无人把守；本轮实测两处腐化
-//（guides/62 的 `research-workspace/templates/run/`、changing-node-topology skill 同款），
-// 另有一批"文件改名后散文仍指旧名"（record-role-fixture 缺 .mjs）同族。反引号路径同样是合同：
-// agent 会照它去读文件，指向空处 = 探索成本 + 误诊。
-// 范围：live 文档（排除 notes/ 历史层、_backlog/ 过程层、tests/fixtures/ 样本、vendor/）；
-// 只解析以仓内已知根开头的 token（packages|checks|tools|docs|tests|snapshots|_dist|research-workspace），
-// 带占位符（<>{ }* ?…）或空格的跳过（示例路径不是事实声明）。
-// 解析优先级：仓根 → 文档所在目录（pack 子树里的 `scripts/doctor.mjs` 这类包内相对写法）→
-// `vendor/dsh/` 前缀（资产文字引用 vendor 路径时省略前缀的既有写法）；无扩展名的 token 另试
+// ── doc-paths（live 文档里的仓内路径必须存在——2026-11-03 七维卫生审计 D1-2）──
+// 为什么：md-links 只管 Markdown 链接，反引号 / 散文 / 表格 / 围栏路径清单 / HTML href 里的散路径
+// 无人把守；agent 会照它们去读文件，指向空处 = 探索成本 + 误诊。
+// 形态正本 = checks/lib/repo/doc-surface.mjs 的 SHAPES：本门禁只消费 token，不再自己枚举形态；
+// 形态台账 ↔ gates.e2e 案例双向对账（tests/checks/doc-surface-shapes.test.mjs），补一种写法不用改这里。
+// 分工：命令行（围栏 / 缩进 / CI）归 call-surface；本门禁只判路径面。
+// 范围：live 文档（notes/ 历史层、tests/fixtures/ 样本、vendor/、snapshots/replay/ 录制证据除外）；
+// 活指令面（_backlog/methods/*.md + _backlog/triggers.md）同在合同内——它们被技能与根 AGENTS 当
+// 当前步骤读（BUG-212：按目录判冻结会把活文档整树豁免）。
+// 解析优先级：仓根 → 文档所在目录（包内相对写法）→ `vendor/dsh/` 前缀；无扩展名再试
 // `.md/.mjs/.sh/.cjs/.ts`（`tools/README` 这类简写）。
 // 外链白名单（必须带理由）：company 仓路径与"守则要求不存在"的反例路径——路径存在性对它们不成立。
-// 构建产物（`packages/*/lib/`）不是 fresh-clone 合同：它是 gitignored 构建输出，CI/新 clone 不存在；
-// 文档描述它时按"构建产物"口径放行。存在性由构建与 pack.e2e 证明，不由文档合同证明。
-// 防空语料：解析到的 token 数 < 100 → 红（范围被收窄或抓取正则失效）。
-// 散文面（BUG-204）：live 文档里**不在反引号里**、但形如 `<root>/….<ext>` 的仓内路径同样会被
-// agent 照读；窄带只认仓内根前缀 + 文件扩展名（`checks/dev` 这类简写无扩展名不在此列），
-// 代码围栏与反引号内已由上一段覆盖/跳过。解析优先级同反引号（仓根/文档目录/vendor）。
+// 构建产物（`packages/*/lib/`）按构建产物口径放行（gitignored，fresh clone 不存在）。
+// 退役根（dev|scripts|probes/run）残留引用点名报红；裸目录名、vendor/包内 shorthand、同句讨论退役放行。
+// 防空语料：路径 token / 散文 token / 文档数 / 活指令文档数 任一低于下限 → 红。
 {
   const gate = 'doc-paths';
-  const files = liveMdFiles(gate);
+  const files = trackedFiles({
+    gate,
+    glob: '*.md',
+    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f.startsWith('tests/fixtures/')
+      || f.startsWith('snapshots/replay/')
+      || (f.startsWith('_backlog/') && !f.startsWith('_backlog/methods/') && f !== '_backlog/triggers.md'),
+    emptyMsg: '防空语料：未扫到任何 live 文档',
+  });
   if (files) {
-    // 收集面 = 现行根 + 退役根（dev|scripts）：退役根必须被显式判红，否则它因不匹配 ROOTS
-    // 而**静默逃检**——2026-11-17 根名统一后实测：runtime/README 的 `dev/env.sh` 绿着漏过去。
-    const ROOTS = /^(packages|checks|tools|docs|tests|snapshots|probes|_dist|research-workspace|dev|scripts)\//;
-    const RETIRED = /^(dev|scripts|probes\/run)\//;
-    const RETIRED_HINT = [[/^scripts\//, 'checks/'], [/^dev\//, 'tools/'], [/^probes\/run\//, 'probes/analyze/']];
+    const EXTS = ['.md', '.mjs', '.sh', '.cjs', '.ts'];
     // 退役根名放行条件：① 裸目录名（讨论退役本身，以 / 结尾）② vendor 源 shorthand
     // （vendor/dsh/scripts/AGENTS.md 等）③ 包内 shorthand（packages/deep-research-pack/scripts/doctor.mjs）。
-    const retiredAllowed = (p) => p.endsWith('/') || ['vendor/dsh/', 'packages/deep-research-pack/']
-      .some((base) => EXTS.concat(['']).some((e) => existsSync(join(ROOT, base + p + e))));
-    const EXTS = ['.md', '.mjs', '.sh', '.cjs', '.ts'];
+    const retiredAllowed = (p) => !p.startsWith('vendor/') && (p.endsWith('/') || ['vendor/dsh/', 'packages/deep-research-pack/']
+      .some((base) => EXTS.concat(['']).some((e) => existsSync(join(ROOT, base + p + e)))));
     const EXEMPT = new Map([
       ['docs/release.md', 'company 仓路径（外部参考，不随本仓）'],
       ['tests/layering.spec.ts', 'company 仓路径（外部参考，不随本仓）'],
@@ -255,63 +255,39 @@ export function runA() {
       candidates.push(fromDoc, ...EXTS.map((e) => fromDoc + e));
       return candidates.some((c) => existsSync(join(ROOT, c)));
     };
-    let checked = 0;
+    const FORM_LABEL = {
+      backtick: '反引号路径', prose: '散文路径', table: '表格路径', 'fence-path': '围栏路径', 'html-href': 'HTML href 路径',
+    };
+    const isInstructionDoc = (f) => f.startsWith('_backlog/methods/') || f === '_backlog/triggers.md';
+    let checked = 0; let proseChecked = 0; let docs = 0; let instructionDocs = 0;
     for (const { rel, text } of files) {
-      const lines = text.split('\n');
-      for (const [i, line] of lines.entries()) {
-        for (const m of line.matchAll(/`([^`\n]+)`/g)) {
-          const token = m[1].trim();
-          const paths = (() => {
-            const p = token.replace(/:\d+(?:-\d+)?$/, '').replace(/[.,;:]+$/, '');
-            if (ROOTS.test(p)) return /[<>{}*?…\s]/.test(p) || p.includes('$') ? [] : [p];
-            // 命令形态（node/bash/source/cd …）里的仓内路径：ROOTS 只认 token 开头，
-            // 曾让 `node checks/smoke/compat-smoke.mjs` 这类已删除脚本静默通过（2026-11-03 复评）。
-            return [...token.matchAll(/(?:^|[\s"'`])((?:packages|checks|tools|docs|tests|snapshots|probes|_dist|research-workspace|dev|scripts)\/[^\s`'"]+)/g)]
-              .map((x) => x[1].replace(/:\d+(?:-\d+)?$/, '').replace(/[.,;:]+$/, ''))
-              .filter((x) => !/[<>{}*?…]/.test(x) && !x.includes('$'));
-          })();
-          for (const p of paths) {
-            checked++;
-            if (RETIRED.test(p)) {
-              if (retiredAllowed(p)) continue;
-              const hint = (RETIRED_HINT.find(([re]) => re.test(p)) ?? [null, ''])[1];
-              fail(gate, `${rel}:${i + 1} 退役根名 \`${p}\`——现行根 = ${hint}（2026-11-17 根名统一；vendor/包内 shorthand 与裸目录名已放行）`);
-              continue;
-            }
-            if (existsForDoc(p, rel)) continue;
-            fail(gate, `${rel}:${i + 1} 反引号路径 \`${p}\` 不存在（仓根/文档目录/vendor 均未命中）——散文件路径也是合同；修正路径或改用 Markdown 链接`);
-          }
+      docs++;
+      if (isInstructionDoc(rel)) instructionDocs++;
+      for (const token of scanDocument(text)) {
+        if (token.kind === 'label') {
+          // 讨论退役用裸目录名（`probes/run/`）；具体文件/无尾斜杠的入口名 = 引用。
+          if (!/^(?:scripts|dev|probes\/run)(?:\/|$)/.test(token.text) || token.text.endsWith('/')) continue;
+          const hint = retiredRootHint(`${token.text}/`);
+          fail(gate, `${rel}:${token.line} 链接文字是退役根名 \`${token.text}\`——现行 = ${hint}；标签也是入口名，agent 会照它去找`);
+          continue;
         }
-      }
-    }
-    if (checked < 100) fail(gate, `防空语料：只解析到 ${checked} 条仓内反引号路径（过少 = 扫描面被收窄）`);
-
-    // 散文面：由 doc-prose-paths 纯函数剥离反引号/围栏并枚举；存在性用同一 existsForDoc 解析。
-    let proseChecked = 0;
-    for (const { rel, text } of files) {
-      for (const { line, path: p } of prosePathTokens(text)) {
-        proseChecked++;
+        if (token.kind !== 'path') continue;
+        const p = token.path;
+        checked++;
+        if (token.form === 'prose' || token.form === 'table') proseChecked++;
+        if (isRetiredRoot(p)) {
+          if (retiredAllowed(p)) continue;
+          fail(gate, `${rel}:${token.line} 退役根名 \`${p}\`——现行根 = ${retiredRootHint(p)}（vendor/包内 shorthand 与裸目录名已放行）`);
+          continue;
+        }
         if (existsForDoc(p, rel)) continue;
-        fail(gate, `${rel}:${line} 散文路径 ${p} 不存在（仓根/文档目录/vendor 均未命中）——live 文档的散文件引用也是合同；修正路径或改用反引号`);
+        fail(gate, `${rel}:${token.line} ${FORM_LABEL[token.form] ?? '路径'} ${p} 不存在（仓根/文档目录/vendor 均未命中）——live 文档的散文件引用也是合同；修正路径或改用 Markdown 链接`);
       }
     }
-    if (proseChecked < 50) fail(gate, `防空语料：只解析到 ${proseChecked} 条散文仓内路径（过少 = 扫描面被收窄）`);
-
-    // 链接文字里的退役根名（2026-11-17 审计实证：`[probes/run](…)` 目标可解析、文字退役——
-    // 既不在反引号 token 面，也不在带扩展名的散文面，两道扫描都看不见；而 agent 会把标签
-    // 当作入口名去念）。判据 = 标签本身形如退役根路径；同句讨论退役（含「退役/旧根」）放行。
-    for (const { rel, text } of files) {
-      for (const [i, line] of text.split('\n').entries()) {
-        for (const m of line.matchAll(/\[([^\]]+)\]\(([^)\s]+)\)/g)) {
-          const label = m[1].trim();
-          // 标签不带尾斜杠（`probes/run`），故不能复用 RETIRED 的 `/` 后缀形态。
-          if (!/^(?:scripts|dev|probes\/run)(?:\/|$)/.test(label)) continue;
-          if (/退役|旧根|retired/i.test(line)) continue;
-          const hint = label.startsWith('scripts') ? 'checks/' : label.startsWith('dev') ? 'tools/' : 'probes/analyze/';
-          fail(gate, `${rel}:${i + 1} 链接文字是退役根名 \`${label}\`——现行 = ${hint}；标签也是入口名，agent 会照它去找`);
-        }
-      }
-    }
+    if (checked < 300) fail(gate, `防空语料：只解析到 ${checked} 条仓内路径 token（过少 = 扫描面被收窄）`);
+    if (proseChecked < 50) fail(gate, `防空语料：只解析到 ${proseChecked} 条散文/表格仓内路径（过少 = 扫描面被收窄）`);
+    if (docs < 100) fail(gate, `防空语料：只扫到 ${docs} 份 live 文档（过少 = 扫描面被收窄）`);
+    if (instructionDocs < 4) fail(gate, `防空语料：只扫到 ${instructionDocs} 份活指令文档（_backlog/methods + triggers.md）——活/冻结按目录判是 BUG-212 的根因`);
   }
 }
 
@@ -435,35 +411,32 @@ export function runA() {
 }
 
 // ── count-free（live 文档不写硬编码计数）──
-// 为什么：门禁数 / tests 数 / 断言数是最易腐的一类自指事实（2026-09-26 清扫实测 5 处写错：
-// tests 数 ×2、note 篇数、源面条数、门禁数——本注释原先照抄这些数字，被本门禁自己咬红，
-// 即为它有效的第一份证据）。计数有正本（gates 数组 / evaluation 台账 / ls），散文里的副本
-// 只会腐烂——一律改成"查正本"。
-// 范围：live 文件（排除 notes/ 历史层、vendor/、pnpm-lock.yaml 与**录制证据**
-// `snapshots/replay/**` / `tests/fixtures/run-state/**`）。录制流是冻结的历史证据，里面是
-// 模型/宿主当时的原文（可能含 `N tests` 一类自指计数）；改夹具来迁就门禁 = 篡改证据。
-// 与 d-vendor 的 vendor-links 录制流豁免同源（2026-09-27 立，2026-10-09 随夹具迁入
-// snapshots/replay/）。防空语料：0 个文件被检查 → 红。
-// 已知边界：只检阿拉伯数字 + 四个名词（门禁/tests/断言/条源面），中文数字与枚举不检
-// （2026-10-20 审计实证：十二件/9 环节/三条/六个 均曾漂移）；关键枚举改指正本，语义面
-// 由 docs-consistency 契约承接。
+// 为什么：门禁数 / tests 数 / 断言数 / 案例数是最易腐的一类自指事实；计数有正本（gates 数组 /
+// evaluation §L0 / CASES / ls），散文副本只会腐烂——一律改成"查正本"。
+// 名词闭集 = COUNT_NOUNS（一处登记）：词表窄于承诺 = 换一个名词就静默逃检（BUG-214：「案例」是
+// 增长最快的资产计数，却不在旧四名词里）。新增资产计数名词时同处登记，不要在别处补正则。
+// 范围：live 文件（notes/、vendor/、pnpm-lock.yaml、录制证据除外）；活指令面（_backlog/methods +
+// triggers.md）同在合同内——它们是当前步骤，不是历史（BUG-212 同源）。
+// 已知边界：中文数字与枚举不检（语义面由 docs-consistency 契约承接）。
+// 防空语料：0 个文件被检查 / 名词表过短 → 红。
 {
   const gate = 'count-free';
+  if (COUNT_NOUNS.length < 5) fail(gate, '防空语料：计数名词表过短——词表本身就是判据面');
   // 枚举四件套收口（形态正本 = trackedFiles 助手头注）；范围与防空语料措辞是本门禁自己的。
   const files = trackedFiles({
     gate,
     exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f === 'pnpm-lock.yaml'
-      || f.startsWith('snapshots/replay/') || f.startsWith('tests/fixtures/run-state/'),
+      || f.startsWith('snapshots/replay/') || f.startsWith('tests/fixtures/run-state/')
+      || (f.startsWith('_backlog/') && !f.startsWith('_backlog/methods/') && f !== '_backlog/triggers.md'),
     emptyMsg: '防空语料：未扫到任何 live 文件',
   });
   if (files) for (const { rel, text } of files) {
-    for (const mm of text.matchAll(/(?<![A-Za-z0-9])[0-9]+ ?(门禁|tests|断言|条源面)/g)) {
-      const line = text.slice(0, mm.index).split('\n').length;
-      fail(gate, `${rel}:${line} 写死计数"${mm[0]}"——计数有正本（gates 数组 / evaluation §L0 / ls），散文改指正本`);
+    for (const token of countFraudTokens(text)) {
+      const line = text.slice(0, token.index).split('\n').length;
+      fail(gate, `${rel}:${line} 写死计数"${token.match}"——计数有正本（gates 数组 / evaluation §L0 / CASES / ls），散文改指正本`);
     }
   }
 }
-
 // ── doc-now-only（live 文档只写 now，不写变更史）──
 // 为什么：docs/AGENTS.md §写作规则明令"写当前状态，不写变更史"，但 2026-09-26 清扫实测 live 文档
 // 里成片出现"已销账 / 修订 → / 曾用 / 首版…已由…替换"——读者会据此以为旧结论仍有效。

@@ -1,16 +1,16 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-209：asset-ledger 的 CANONICAL_LIBS 仍指旧 helper 名——读取缝改名后 oracleType 被静默翻成 self-referential
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：修复就绪（修正分类表 + 重生成；不改变判据）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（修正分类表 + 重生成；不改变判据） — 结论：分类表改 *-helpers 并重生成，template-contract 回到 canonical；新增身份表路径存在性守卫；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-namespace-move-residual-fixes.md)；审查：agent — 红证回放 + 全量 verify/test（2026-11-17）
 >
-> 位置：[checks/lib/test-infra/asset-ledger.mjs](../../checks/lib/test-infra/asset-ledger.mjs) 的
-> `CANONICAL_LIBS`（第 29/31 行）；迁移面 = [tests/fixtures/asset-ledger/ledger.json](../../tests/fixtures/asset-ledger/ledger.json)。
-> 探索轮 = [2026-11-17 卡](../issues/2026-11-17-exploratory-namespace-move.md) 预扫候选 P-1。
+> 位置：[checks/lib/test-infra/asset-ledger.mjs](../../../checks/lib/test-infra/asset-ledger.mjs) 的
+> `CANONICAL_LIBS`（第 29/31 行）；迁移面 = [tests/fixtures/asset-ledger/ledger.json](../../../tests/fixtures/asset-ledger/ledger.json)。
+> 探索轮 = [2026-11-17 卡](../settled_issues/2026-11-17-exploratory-namespace-move.md) 预扫候选 P-1。
 
 ## 症状
 
@@ -108,3 +108,27 @@ git show 266b216c -- tests/fixtures/asset-ledger/ledger.json | grep -B4 -A2 self
 ## 修复关联
 
 修复 commit 待落地；守卫那件若单独做，另开卡并链本卡。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/test-infra/asset-ledger.mjs",
+    "tests/fixtures/asset-ledger/ledger.json",
+    "tests/checks/asset-ledger.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/asset-ledger.test.mjs",
+    "exit": 1,
+    "output": "not ok 4 - 分类/白名单表的身份路径必须存在（BUG-209：死路径静默改变分类）… CANONICAL_LIBS: tests/pack/__gone__.mjs"
+  },
+  "green": {
+    "command": "node --test tests/checks/asset-ledger.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/asset-ledger.test.mjs"
+  }
+}
+```

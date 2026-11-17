@@ -93,6 +93,16 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/cli-exit-contract.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "cli-exit-contract.test.mjs — 退出码契约的纯函数核（checks/lib/shared/cli-exit.mjs）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/client-effect-return.test.mjs",
       "domain": "checks",
       "lane": "checks",
@@ -143,12 +153,32 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/doc-counts.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "doc-counts.test.mjs — count-free 名词闭集的正/负样本（BUG-214 类级）。",
+      "oracleType": "self-referential",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/doc-prose-paths.test.mjs",
       "domain": "checks",
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
       "uniqueClaim": "live 文档散文路径的纯函数判据（BUG-204 类级：散文里的仓内路径也要能被发现与验证）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/doc-surface-shapes.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "doc-surface-shapes.test.mjs — 文档/命令形态台账 ↔ 枚举器 ↔ gates.e2e 案例的三向对账（类级守卫）。",
       "oracleType": "canonical",
       "sunset": "随门禁/台账合同退役"
     },
@@ -378,7 +408,7 @@
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "慢资产成本预算（W3-7 后成本治理）——ratchet，只降不升：",
+      "uniqueClaim": "慢资产成本预算（W3-7 后成本治理）——ratchet，只降不升；2026-11-17 按 D54 拆频率两档：",
       "oracleType": "canonical",
       "sunset": "随门禁/台账合同退役"
     },
@@ -1219,7 +1249,7 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "template-contract — 模板里“机器/流程真正消费”的键（keyless，key 级）。",
-      "oracleType": "self-referential",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {

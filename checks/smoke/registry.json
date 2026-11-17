@@ -11,6 +11,16 @@
     "sunset": "当 client-hitl 的 HITL 代答覆盖发送/排队两路径时退役",
     "lane": "entry"
   },
+  "cli-exit.e2e.mjs": {
+    "tier": "nightly",
+    "cost": "fast",
+    "uniqueClaim": "CLI 退出码三态在真入口可区分：usage/前置缺席 = 2、真失败 = 1、全 SKIP = 2",
+    "oracle": [
+      "tests/checks/cli-exit-contract.test.mjs"
+    ],
+    "sunset": "当入口退出码可完全由纯函数矩阵覆盖（入口壳不再手写 exit）时退役",
+    "lane": "e2e"
+  },
   "client-hitl.entry.mjs": {
     "tier": "dev-only",
     "reason": "真模型档：需要活 HITL 挂起；CI keyless 不跑",
@@ -68,7 +78,7 @@
     "lane": "support"
   },
   "client-load.entry.mjs": {
-    "tier": "ci",
+    "tier": "nightly",
     "cost": "slow",
     "uniqueClaim": "真浏览器驾驶舱装配/页签/渐进面/磁盘真值对账",
     "oracle": [
@@ -106,7 +116,7 @@
     "lane": "entry"
   },
   "doctor.e2e.mjs": {
-    "tier": "ci",
+    "tier": "nightly",
     "job": "deploy",
     "cost": "medium",
     "uniqueClaim": "doctor 只读判据：缺 pack/engines 不匹配/坏设置/不写 profile",
@@ -117,7 +127,7 @@
     "lane": "e2e"
   },
   "gates.e2e.mjs": {
-    "tier": "ci",
+    "tier": "nightly",
     "job": "keyless",
     "cost": "slow",
     "uniqueClaim": "注入回归经真实 verify 入口点名报红 + 零注入对照组",
@@ -128,7 +138,7 @@
     "lane": "e2e"
   },
   "handoff.e2e.mjs": {
-    "tier": "ci",
+    "tier": "nightly",
     "job": "keyless",
     "cost": "fast",
     "uniqueClaim": "export-handoff 产物边界 + HANDOFF 接收指令",
@@ -161,7 +171,7 @@
     "lane": "e2e"
   },
   "lifecycle.entry.mjs": {
-    "tier": "ci",
+    "tier": "nightly",
     "job": "deploy",
     "cost": "medium",
     "uniqueClaim": "market/tarball 显示面 + readPluginMeta + remove 回落",
@@ -172,7 +182,7 @@
     "lane": "entry"
   },
   "method-library-tool.e2e.mjs": {
-    "tier": "ci",
+    "tier": "nightly",
     "job": "deploy",
     "cost": "medium",
     "uniqueClaim": "真 Loader + Method Editor + Host Tool + mock LLM：claim/摘要/默认/删除写读",
@@ -184,7 +194,7 @@
     "lane": "e2e"
   },
   "model-experience.e2e.mjs": {
-    "tier": "ci",
+    "tier": "nightly",
     "job": "deploy",
     "cost": "medium",
     "uniqueClaim": "真 Loader 捕获 Lead/Scout 组装首请求（persona+手册 runtime context+skill 目录+工具 schema）并 token-meter 计价：工具 schema token 与手册占比",
@@ -195,7 +205,7 @@
     "lane": "e2e"
   },
   "pack.e2e.mjs": {
-    "tier": "ci",
+    "tier": "nightly",
     "job": "deploy",
     "cost": "medium",
     "uniqueClaim": "tarball 条目/模块表/sha/无 symlink/无安装脚本",
@@ -206,7 +216,7 @@
     "lane": "e2e"
   },
   "preset.e2e.mjs": {
-    "tier": "ci",
+    "tier": "nightly",
     "job": "deploy",
     "cost": "medium",
     "uniqueClaim": "L1 真挂载：roster + 逐角色会话 + skills 隔离 + boot 页模块表行",
@@ -251,7 +261,7 @@
     "lane": "entry"
   },
   "run-accept.e2e.mjs": {
-    "tier": "ci",
+    "tier": "nightly",
     "job": "keyless",
     "cost": "medium",
     "uniqueClaim": "run-accept 全链：归一/幂等/外部 present/秘密/repair/schema/claim",
@@ -274,7 +284,7 @@
     "lane": "e2e"
   },
   "snapshot-replay.entry.mjs": {
-    "tier": "ci",
+    "tier": "nightly",
     "cost": "slow",
     "uniqueClaim": "A 回放通路 / B 组装请求 diff / C lead 渲染金标准",
     "oracle": [

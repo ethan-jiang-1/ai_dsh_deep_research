@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { backlogLivenessProblems } from '../../lib/repo/backlog-liveness.mjs';
 import { parseStagedChanges, stagedChangePairingProblems } from '../../lib/repo/staged-change-pairing.mjs';
 import { isTestFile, placementIssues } from '../../lib/repo/test-placement.mjs';
+import { commandPathsAnywhere, scanCiCommands, scanDocument } from '../../lib/repo/doc-surface.mjs';
 import { missingProbeFields, renderProbeIndex, scanProbeEntries } from '../../lib/shared/probe-index.mjs';
 import { ROOT, gates, fail, note, walk, gitOnce, trackedFiles } from '../context.mjs';
 
@@ -400,89 +401,63 @@ export function runF() {
   }
 }
 
-// ── call-surface（agent 调用面——2026-11-17）：文档围栏命令 / 探针头注 / CI run 里的仓内路径──
+// ── call-surface（agent 调用面——2026-11-17）：文档命令 / 探针头注 / CI run 里的仓内路径──
 // 为什么：本仓的调用者是模型。它照 skills/docs 的围栏命令敲、照探针 INDEX 的「何时跑」敲、
-// 照 CI 的 `run:` 跑；这些字符串不在 import 图，也不在 doc-paths 的反引号/散文面（围栏被
-// prose 剥掉），搬文件后断链只能等 agent/CI 真跑时炸，而且可能数天后。判据 = 可执行行里的
-// 仓内路径必须存在；占位符/构建产物/运行区放行（与 doc-paths 同口径）。
+// 照 CI 的 `run:` 跑；这些字符串不在 import 图，也不在 doc-paths 的路径面。搬文件后断链只能等
+// agent/CI 真跑时炸，而且可能数天后。判据 = 可执行行里的仓内路径必须存在；占位符/构建产物/运行区放行。
+// 形态正本 = checks/lib/repo/doc-surface.mjs（scanDocument / scanCiCommands / commandPathsAnywhere）：
+// 命令归一（env 前缀、sudo/env/time、`&&` 链、`./`、heredoc body、四空格缩进、`run: >-` 折叠块）全在
+// 枚举器里；本门禁只消费 token。命令形态台账（COMMAND_FORMS）与 gates.e2e 案例双向对账
+// （tests/checks/doc-surface-shapes.test.mjs）——补一种写法不再需要改这里。
 {
   const gate = 'call-surface';
-  const CMD = /^(?:\$ )?(?:node|bash|sh|source|pnpm|npx|cd)\b/;
-  const PATHS = '(?:packages|checks|tools|docs|tests|snapshots|probes|_dist|research-workspace|\\.agents)\\/[A-Za-z0-9_./-]+';
-  const TOKEN = new RegExp(`(?:^|[\\s"'\`(=\\x60])(${PATHS})`, 'g');
-  const HEADER = new RegExp(`(?:^|[\\s(（：:，,\\x60])(?:node|bash|sh|source|pnpm|npx|cd)\\s+(${PATHS})`, 'g');
   const EXTS = ['.md', '.mjs', '.sh', '.cjs', '.ts', '.json', '.yml', '.yaml'];
   const resolvable = (p, rel) => {
-    if (/[<>{}*?$…]/.test(p)) return true;
+    if (/[<>{}*?$…[\]]/.test(p)) return true;
     if (/^packages\/[^/]+\/lib(\/|$)/.test(p)) return true;
     const base = dirname(join(ROOT, rel));
     const cands = [p, `vendor/dsh/${p}`, ...EXTS.map((e) => p + e)].map((c) => join(ROOT, c));
     cands.push(join(base, p), ...EXTS.map((e) => join(base, p + e)));
     return cands.some((c) => existsSync(c));
   };
-  const tokens = (line, re) => [...line.matchAll(re)].map((m) => m[1].replace(/[.,;:]+$/, ''));
-  const code = (line) => line.replace(/\s+#.*$/, '');
+  const liveDoc = (f) => !f.startsWith('vendor/') && !f.startsWith('notes/') && !f.startsWith('tests/fixtures/')
+    && !f.startsWith('snapshots/replay/')
+    && (!f.startsWith('_backlog/') || f.startsWith('_backlog/methods/') || f === '_backlog/triggers.md');
   let md = 0;
-  const docs = trackedFiles({ gate, glob: '*.md',
-    exclude: (f) => f.startsWith('vendor/') || f.startsWith('notes/') || f.startsWith('_backlog/') || f.startsWith('tests/fixtures/') || f.startsWith('snapshots/replay/'),
-    emptyMsg: '防空语料：未扫到 live 文档' });
+  const docs = trackedFiles({ gate, glob: '*.md', exclude: (f) => !liveDoc(f), emptyMsg: '防空语料：未扫到 live 文档' });
   if (docs) for (const { rel, text } of docs) {
-    let fence = false;
-    for (const [i, line] of text.split('\n').entries()) {
-      if (line.trimStart().startsWith('```')) { fence = !fence; continue; }
-      if (!fence || !CMD.test(line.trim())) continue;
-      for (const p of tokens(code(line), TOKEN)) {
+    for (const token of scanDocument(text)) {
+      if (token.kind !== 'command') continue;
+      for (const p of token.paths) {
         md++;
-        if (!resolvable(p, rel)) fail(gate, `${rel}:${i + 1} 文档命令指向不存在的路径 ${p}——agent 会照它敲；改文档或改路径（生成物则重跑生成器）`);
+        if (!resolvable(p, rel)) fail(gate, `${rel}:${token.line} 文档命令（${token.form}）指向不存在的路径 ${p}——agent 会照它敲；改文档或改路径（生成物则重跑生成器）`);
       }
     }
   }
-  if (md < 40) fail(gate, `防空语料：只解析到 ${md} 条围栏命令（过少 = 扫描面被收窄）`);
+  if (md < 40) fail(gate, `防空语料：只解析到 ${md} 条围栏命令路径（过少 = 扫描面被收窄）`);
   let probe = 0;
   if (existsSync(join(ROOT, 'probes'))) for (const abs of walk(join(ROOT, 'probes'))) {
     if (!/\.(mjs|cjs)$/.test(abs)) continue;
     const rel = relative(ROOT, abs);
     for (const [i, line] of readFileSync(abs, 'utf8').split('\n').slice(0, 80).entries()) {
       if (!/^\s*(?:\/\/|\*)/.test(line)) continue;
-      for (const p of tokens(line, HEADER)) {
+      for (const p of commandPathsAnywhere(line)) {
         probe++;
         if (!resolvable(p, rel)) fail(gate, `${rel}:${i + 1} 头注命令指向不存在的路径 ${p}——INDEX「何时跑」是 agent 入口`);
       }
     }
   }
   if (probe < 20) fail(gate, `防空语料：只解析到 ${probe} 条探针头注命令（过少 = 扫描面被收窄）`);
-  // 只做行级 run: 抽取（不引 YAML 依赖：gates.e2e 副本不含 node_modules；YAML 合法性归
-  // tests/checks/ci-workflow.test.mjs）。支持内联 `run: cmd` 与 block `run: |`。
-  const runLines = (text) => {
-    const out = []; let blockIndent = null;
-    for (const raw of text.split('\n')) {
-      const line = raw.replace(/\s+#.*$/, '');
-      if (blockIndent !== null) {
-        if (line.trim() === '') continue;
-        const indent = line.match(/^\s*/)[0].length;
-        if (indent > blockIndent) { out.push(line); continue; }
-        blockIndent = null;
-      }
-      const m = line.match(/^\s*(?:-\s*)?run:\s*(.*)$/);
-      if (!m) continue;
-      const value = m[1].trim();
-      if (value === '|' || value === '>') { blockIndent = line.match(/^\s*/)[0].length; continue; }
-      out.push(value);
-    }
-    return out;
-  };
   let ci = 0;
   const wfs = trackedFiles({ gate, glob: '.github/workflows/*.yml', emptyMsg: '防空语料：未扫到 CI 工作流' });
   if (wfs) for (const { rel, text } of wfs) {
-    for (const line of runLines(text)) {
-      if (!CMD.test(line.trim())) continue;
-      for (const p of tokens(code(line), TOKEN)) {
+    for (const token of scanCiCommands(text)) {
+      for (const p of token.paths) {
         ci++;
-        if (!resolvable(p, rel)) fail(gate, `${rel} run: 指向不存在的路径 ${p}——CI 只在真跑时炸，且可能数天后`);
+        if (!resolvable(p, rel)) fail(gate, `${rel}:${token.line} run: 指向不存在的路径 ${p}——CI 只在真跑时炸，且可能数天后`);
       }
     }
   }
   if (ci < 15) fail(gate, `防空语料：只解析到 ${ci} 条 CI run 路径（过少 = 扫描面被收窄）`);
 }
-
 }

@@ -1,16 +1,16 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-216：test-placement 的非测试模块闭集只认 `.mjs/.cjs`——`.ts/.tsx/.js` 助手可零规则落位
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（用户 2026-11-17 放行门禁触面：扩到 .ts/.tsx/.js + 未知扩展名红） — 结论：支援模块闭集扩到 .ts/.tsx/.js + -helpers.<ext>，未知扩展名兜底红；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-namespace-move-residual-fixes.md)；审查：agent — 红证回放 + 全量 verify/test（2026-11-17）
 >
-> 位置：[checks/lib/repo/test-placement.mjs](../../checks/lib/repo/test-placement.mjs) 的
+> 位置：[checks/lib/repo/test-placement.mjs](../../../checks/lib/repo/test-placement.mjs) 的
 > `isSupportModule` / `placementIssues`；门禁 = `test-placement`；
-> 探索轮 = [2026-11-17 卡](../issues/2026-11-17-exploratory-namespace-move.md) N5 邻接。
+> 探索轮 = [2026-11-17 卡](../settled_issues/2026-11-17-exploratory-namespace-move.md) N5 邻接。
 
 ## 症状
 
@@ -40,8 +40,8 @@ for (const p of ['tests/pack/__probe-helpers.ts','tests/pack/__probe-helpers.tsx
 - 表面 / 边界：tests 落点门禁 / ② 行为（纯函数 + 门禁）
 - DSH 不变量：fail-loud —— 未规则化的落点必须红，而不是因为扩展名不在枚举里静默通过
 - 触及面：门禁与验收合同（`test-placement` 判据 + gates.e2e 案例）
-- 授权：等人拍板（门禁触面）
-- 批：2026-11-17 命名空间搬家探索（N5 邻接）；前序 = [BUG-191](../_archived/fixed_bugs/BUG-191-placement-gates-unknown-subtree-unruled.md) / [BUG-196](../_archived/fixed_bugs/BUG-196-test-surface-cjs-coverage-blind.md)（同族：扩展名盲）
+- 授权：用户 2026-11-17 放行（门禁与验收合同触面 → 修复就绪 = P2 修复授权）
+- 批：2026-11-17 命名空间搬家探索（N5 邻接）；前序 = [BUG-191](BUG-191-placement-gates-unknown-subtree-unruled.md) / [BUG-196](BUG-196-test-surface-cjs-coverage-blind.md)（同族：扩展名盲）
 
 ## 复现
 
@@ -69,8 +69,8 @@ console.log(placementIssues(['tests/pack/__probe-helpers.ts','tests/pack/sub/__p
 
 ## 修法
 
-1. `isSupportModule` 扩到 `.ts/.tsx/.js`，后缀规则按团队选择：统一 `-helpers.ts`/`-helpers.mjs`，
-   或只允许 `.mjs/.cjs` 并显式判「tests 下其它扩展名 = 红」；
+1. `isSupportModule` 扩到 `.ts/.tsx/.js`（用户 2026-11-17 拍板），支援模块后缀统一 `-helpers.<ext>`；
+   `tests/` 下未知扩展名（`.py` 等）兜底报红；
 2. `placementIssues` 加兜底：`tests/` 下既非测试也非支援模块的普通文件（非 fixtures）→ 红并点名；
 3. `gates.e2e` 加 `test-placement-support-ts` 注入案例；`test-placement.test.mjs` 加纯函数矩阵。
 
@@ -83,3 +83,28 @@ console.log(placementIssues(['tests/pack/__probe-helpers.ts','tests/pack/sub/__p
 ## 修复关联
 
 与 [BUG-214](BUG-214-cost-baseline-108-stale-count-free-vocabulary.md) 同批（测试制度），但不同机制。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/repo/test-placement.mjs",
+    "tests/checks/test-placement.test.mjs",
+    "checks/lib/harness/gates-cases.mjs",
+    "docs/evaluation.md"
+  ],
+  "red": {
+    "command": "node --test tests/checks/test-placement.test.mjs",
+    "exit": 1,
+    "output": "not ok 4 - 非测试模块：落点与 -helpers.<ext> 后缀（审计 2026-11-17 / BUG-216）"
+  },
+  "green": {
+    "command": "node --test tests/checks/test-placement.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/test-placement.test.mjs"
+  }
+}
+```

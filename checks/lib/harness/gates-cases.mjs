@@ -445,6 +445,19 @@ export const CASES = [
   // 反引号 token 面与散文 token 面都看不见它）。标签是 agent 读取的入口名，必须与路径同判。
   { id: 'doc-paths-retired-label', gate: 'doc-paths', expect: '链接文字是退役根名 `probes/run`',
     mutate: appendTo('docs/project-map.md', '\n标签探针：[probes/run](../probes/README.md)\n') },
+  // 形态加宽（BUG-211，2026-11-17）：退役根写在**表格单元**里——散文枚举的根集合不含退役根时静默放行。
+  { id: 'doc-paths-table-retired-root', gate: 'doc-paths', expect: '退役根名 `scripts/__gone__.mjs`',
+    mutate: appendTo('docs/project-map.md', '\n| 形态探针 | scripts/__gone__.mjs | 说明 |\n') },
+  // shell 围栏里的**纯路径行**（不是命令）：路径清单同样是 agent 读取面（用户 2026-11-17 拍板纳入）。
+  { id: 'doc-paths-fenced-path-line', gate: 'doc-paths', expect: '退役根名 `scripts/__gone__.mjs`',
+    mutate: appendTo('docs/project-map.md', '\n```sh\nscripts/__gone__.mjs\n```\n') },
+  // HTML href：链接语法之外的第三种可读路径载体。
+  { id: 'doc-paths-html-href', gate: 'doc-paths', expect: '退役根名 `scripts/__gone__.mjs`',
+    mutate: appendTo('docs/project-map.md', '\n<a href="scripts/__gone__.mjs">形态探针</a>\n') },
+  // 活指令面（BUG-212）：_backlog/methods 与 triggers.md 是当前步骤，不是历史证据——按目录整树豁免
+  // 会让「照方法文档敲命令」直接失败。注入到 methods 页必须被点名。
+  { id: 'doc-paths-live-methods', gate: 'doc-paths', expect: '退役根名 `scripts/__gone__.mjs`',
+    mutate: appendTo('_backlog/methods/bug-to-fix.md', '\n活指令探针：`scripts/__gone__.mjs`\n') },
   // surface-claims（2026-11-17 维护层对齐轮）：门户 README 的面词与 guides/68 §4 面表打架。
   { id: 'surface-claims-face-drift', gate: 'surface-claims', mutate: (dir) => {
       const p = join(dir, 'checks', 'README.md');
@@ -463,9 +476,37 @@ export const CASES = [
       const p = join(dir, '.github', 'workflows', 'ci.yml');
       writeFileSync(p, readFileSync(p, 'utf8').replace('pnpm verify', 'node checks/__missing-probe.mjs'));
     } },
+  // 命令形态矩阵（BUG-210，2026-11-17）：只认行首命令词的实现会把 env 前缀 / `./` / 包装器 / `&&` 链 /
+  // require 限定全部静默放行。每形态一条，独立钉（同一归一器，失败互不遮蔽）。
+  { id: 'call-surface-env-prefix', gate: 'call-surface',
+    mutate: appendTo('docs/project-map.md', '\n```sh\nFOO=1 node checks/__missing-probe.mjs\n```\n') },
+  { id: 'call-surface-dot-slash', gate: 'call-surface',
+    mutate: appendTo('docs/project-map.md', '\n```sh\nnode ./checks/__missing-probe.mjs\n```\n') },
+  { id: 'call-surface-wrapper', gate: 'call-surface',
+    mutate: appendTo('docs/project-map.md', '\n```sh\nsudo node checks/__missing-probe.mjs\n```\n') },
+  { id: 'call-surface-and-chain', gate: 'call-surface',
+    mutate: appendTo('docs/project-map.md', '\n```sh\necho x && node checks/__missing-probe.mjs\n```\n') },
+  { id: 'call-surface-require-qualifier', gate: 'call-surface',
+    mutate: appendTo('docs/project-map.md', '\n```sh\nNODE_OPTIONS=--require=checks/__missing-probe.cjs node checks/release/release-check.mjs\n```\n') },
+  // heredoc body 是第二层 shell：body 行必须逐行同判（只认首行 `bash -s` 会放过 body）。
+  { id: 'call-surface-heredoc', gate: 'call-surface',
+    mutate: appendTo('docs/project-map.md', "\n```sh\nbash -s <<'EOF'\nnode ./checks/__missing-probe.mjs\nEOF\n```\n") },
+  // 四空格缩进的可执行行（不在围栏内）：第三种可执行载体。
+  { id: 'call-surface-indented-command', gate: 'call-surface',
+    mutate: appendTo('docs/project-map.md', '\n\n    缩进块说明文字不参与判据。\n\n    node ./checks/__missing-probe.mjs\n') },
+  // YAML 折叠块：`run: >-`（旧 runLines 只认 `|` / `>`，`>-` 整块跳过）。
+  { id: 'call-surface-ci-folded-run', gate: 'call-surface', mutate: (dir) => {
+      appendFileSync(join(dir, '.github', 'workflows', 'ci.yml'),
+        '\n  folded-probe:\n    runs-on: ubuntu-latest\n    steps:\n      - run: >-\n          node checks/__missing-probe.mjs\n');
+    } },
   // test-placement 非测试模块（2026-11-17）：读取缝/助手带错后缀也能从 glob 静默漂移。
   { id: 'test-placement-support-module', gate: 'test-placement', mutate: (dir) => {
       writeFileSync(join(dir, 'tests', 'pack', 'zz-support.mjs'), 'export const x = 1\n');
+    } },
+  // 扩展名闭集（BUG-216，2026-11-17）：`.ts` 助手是现实形态（client 侧测试 import .ts 源），旧闭集只认
+  // `.mjs/.cjs` → TS 助手零规则落位。注入错误后缀的 `.ts` → 点名红；未知扩展名兜底另由纯函数矩阵钉。
+  { id: 'test-placement-support-ts', gate: 'test-placement', mutate: (dir) => {
+      writeFileSync(join(dir, 'tests', 'pack', 'zz-support.ts'), 'export const x = 1\n');
     } },
   // md-links 账本链式化（2026-11-17）：环必须红——链式解析不能静默停在中间态或选一个终点。
   { id: 'md-links-chain-cycle', gate: 'md-links', mutate: (dir) => {
@@ -800,6 +841,11 @@ export const CASES = [
   // count-free 的扫描面包含本文件，写死「数字+名词」字面会咬到真仓的这张表自己。
   { id: 'count-free-hard-count', gate: 'count-free', mutate: (dir) => {
       appendFileSync(join(dir, 'checks', 'README.md'), `\n探针行：本仓现共有 ${21 + 22} 门禁，计数正本 = verify 的 gates 数组。\n`);
+    } },
+  // 词表加宽（BUG-214，2026-11-17）：`案例` 是增长最快的资产计数，旧四名词词表不含它——
+  // 换一个名词就静默逃检。注入「N 个注入案例」必须点名报红。
+  { id: 'count-free-case-noun', gate: 'count-free', mutate: (dir) => {
+      appendFileSync(join(dir, 'checks', 'README.md'), `\n探针行：本仓现共有 ${13 * 11} 个注入案例，计数正本 = CASES。\n`);
     } },
   // doc-now-only：向 live 文档注入变更史措辞（禁词写在 .mjs 源码里合法——该门禁只扫 *.md）。
   { id: 'doc-now-only-changelog-word', gate: 'doc-now-only', mutate: (dir) => {

@@ -1,17 +1,17 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-17
 ---
 
 # BUG-217：run-lane 的「无匹配条目」不点修正入口——dev-only 件要 `--all`，guides/67 的局部重跑也没写
 
-> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：修复就绪（自授权 P2 修理型：错误信息 + 文档一行）
+> 严重级别：P2 ｜ 发现：2026-11-17 ｜ 状态：已修（自授权 P2 修理型：错误信息 + 文档一行） — 结论：无匹配消息补 --all/--list 修正入口；guides/67 局部重跑补 --all；去向：implemented — [批 Note](../../../notes/implemented/2026-11-17-namespace-move-residual-fixes.md)；审查：agent — 红证回放 + 全量 verify/test（2026-11-17）
 >
-> 位置：[checks/test/run-lane.mjs](../../checks/test/run-lane.mjs)（第 24 行错误模板）；
-> 文档 = [docs/guides/67-test-strategy.md](../../docs/guides/67-test-strategy.md)（§8「局部重跑」）；
-> 规则 = [checks/AGENTS.md](../../checks/AGENTS.md)「失败信息要给出失败对象 + 违反的规则 + 修正入口」。
-> 探索轮 = [2026-11-17 卡](../issues/2026-11-17-exploratory-namespace-move.md) N4 邻接。
+> 位置：[checks/test/run-lane.mjs](../../../checks/test/run-lane.mjs)（第 24 行错误模板）；
+> 文档 = [docs/guides/67-test-strategy.md](../../../docs/guides/67-test-strategy.md)（§8「局部重跑」）；
+> 规则 = [checks/AGENTS.md](../../../checks/AGENTS.md)「失败信息要给出失败对象 + 违反的规则 + 修正入口」。
+> 探索轮 = [2026-11-17 卡](../settled_issues/2026-11-17-exploratory-namespace-move.md) N4 邻接。
 
 ## 症状
 
@@ -73,3 +73,27 @@ sed -n '142p' docs/guides/67-test-strategy.md  # 只有 --only，无 --all
 
 与 [BUG-215](BUG-215-ci-tier-nightly-required-semantics.md) 同批（车道/频率账），但一个是语义、
 一个是提示；批 Note 待收口。
+
+## 修复落地（2026-11-17）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/repo/smoke-lane.mjs",
+    "tests/checks/cli-exit-contract.test.mjs",
+    "docs/guides/67-test-strategy.md"
+  ],
+  "red": {
+    "command": "node --test tests/checks/cli-exit-contract.test.mjs",
+    "exit": 1,
+    "output": "not ok 2 - 无匹配条目的失败信息… error: '修正入口：dev-only 件要 --all'"
+  },
+  "green": {
+    "command": "node --test tests/checks/cli-exit-contract.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/cli-exit-contract.test.mjs"
+  }
+}
+```
