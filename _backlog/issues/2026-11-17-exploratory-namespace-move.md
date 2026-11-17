@@ -31,13 +31,13 @@ opened: 2026-11-17
 - **结构事实**：三根（`checks/` judge、`probes/` show、`tools/` operate）+ 子组；`scripts/`、`dev/`、
   `probes/run/` 只作为退役名活在 `checks/test-path-redirects.json`；测试镜像保留、合同桶不改名、结构冻结
   （[维护层对齐 Note](../../notes/implemented/2026-11-17-maintenance-layer-alignment.md)）。
-- **兼容层**：账本 append-only + 链式解析（575 条；57 条两跳；`md-links` 实跑 306 条链接经账本解析）；
-  活文档不得依赖账本，账本只服务冻结层（[guides/68 §6](../../docs/guides/68-surface-contract.md)）。
+- **兼容层**：账本 append-only + 链式解析（预扫时 575 条，本次归档 +1；57 条两跳；`md-links` 实跑
+  307 条链接经账本解析）；活文档不得依赖账本，账本只服务冻结层（[guides/68 §6](../../docs/guides/68-surface-contract.md)）。
 - **证据频率**：push 门 = `keyless`（verify + test，0 条 smoke）；nightly = 11 条 `tier: ci` smoke
   （client-load / snapshot-replay / deploy 的 9 条）；registry 与 `ci ∪ nightly` 双向对账已绿。
 - **基线（2026-11-17 13:4x 实跑）**：`pnpm verify` 全绿；`pnpm test` spec **1366** / checks **220**（0 fail / 0 skip）；
   `pnpm build` / `pnpm typecheck` / `pnpm test:vendor` 绿。
-- **预扫（E1）**：5 格闭合、1 条候选；见 §预扫。
+- **预扫（E1）**：6 格闭合、1 条候选；见 §预扫。
 
 **未决问题：**
 
@@ -96,9 +96,10 @@ opened: 2026-11-17
 |---|---|---|
 | 基线 | `pnpm verify` 绿；`pnpm test` 1366/220；`build`/`typecheck`/`test:vendor` 绿 | 关闭（起点绿） |
 | 账本覆盖 vs 本波 rename | 257 对 rename 逐对解析：200 直接命中、53 经链到最终落点（正确）、4 无条目 = 2 个 `-helpers` 改名 + 1 个配置件的两跳（该件随后被删） | 关闭（覆盖完整；缺的 4 个无 live/冻结 Markdown 链接依赖，verify 绿） |
-| 账本表示能力 | 575 条中 basename 变化的条目 = **0** | 关闭（M8 扩展：账本无法表达「改名」与「删除」，只表达换目录） |
+| 账本表示能力 | 575 条（预扫时）中 basename 变化的条目 = **0** | 关闭（M8 扩展：账本无法表达「改名」与「删除」，只表达换目录） |
 | 删除面 | 本波唯一删除 = `tools/build/vendor-host-typert.config.ts`；引用只剩 archived Note 的代码跨度 + gitignored runtime 脚本 | 关闭（无 live 消费者） |
-| 运营模块的路径字面量 | 排除变异语料/测试夹具后扫 `checks/lib` + `tools` + `probes`：420 条字面量里 2 条死路径，均在 `checks/lib/test-infra/asset-ledger.mjs`（`tests/pack/handbook-surface.mjs`、`tests/pack/template-files.mjs`） | **候选 P-1**（见下） |
+| 老卡遗留的 `tests/tests` 空目录 | 盘上已不存在（11-17 清理） | 关闭（老卡观察） |
+| 运营模块的路径字面量 | 排除变异语料/测试夹具后扫 `checks/lib` + `tools` + `probes`：55 条路径字面量里 2 条死路径，均在 `checks/lib/test-infra/asset-ledger.mjs`（`tests/pack/handbook-surface.mjs`、`tests/pack/template-files.mjs`） | **候选 P-1**（见下） |
 | CI 频率事实 | `ci.yml` 的 `executedSmokeFiles` = 0；nightly = 11 条 `tier: ci`；`smoke-registry` / `ci-jobs` 已按 `ci ∪ nightly` 对账 | 预扫事实（N8 的输入） |
 
 **候选 P-1（预扫已复现，执行时开卡）**：`checks/lib/test-infra/asset-ledger.mjs` 的 `CANONICAL_LIBS`
@@ -113,12 +114,12 @@ opened: 2026-11-17
 
 | ID | 假设（要杀死的命题） | 最低层 | oracle / 变异 | 预算 | 停止 |
 |---|---|---|---|---|---|
-| N1 | `call-surface` 覆盖「能执行」的命令形态：env 前缀 / `./` / `&&` 链 / heredoc / 缩进代码块 / 表格内命令里的坏路径都会红 | 门禁 | 逐形态向 live 文档注入 `node checks/__nope__.mjs`（或等价坏路径）→ `verify --only=call-surface`；负对照 = 行首 `node checks/__nope__.mjs` 必红；还原后绿 | 10 min | 任一形态在坏路径下仍绿 = P2 守卫缺口 |
-| N2 | 退役根名在任何「可读形态」里都红：反引号（含围栏内）/散文有扩展名/散文无扩展名/表格裸词/链接文字；放行只有裸目录名、同句讨论退役、vendor/pack 同形 shorthand | 门禁 + 纯函数 | 逐形态注入 `scripts/__retired__.mjs` / `dev/x` / `probes/run/x`；负对照 = `scripts/`（裸目录名）与 `vendor/dsh/scripts/AGENTS.md` 绿 | 7 min | 任一非放行形态绿 = P2 |
+| N1 | `call-surface` 覆盖它声称的三入口（文档围栏 / CI `run:` / 探针头注）的「能执行」形态：env 前缀 / `./` / `&&` 链 / heredoc / 缩进代码块 / 表格内命令里的坏路径都会红 | 门禁 | 逐形态向 live 文档注入 `node checks/__nope__.mjs`（或等价坏路径）→ `verify --only=call-surface`；同形态补 CI/头注各一例；负对照 = 行首 `node checks/__nope__.mjs` 必红；还原后绿 | 10 min | 任一形态在坏路径下仍绿 = P2 守卫缺口 |
+| N2 | 退役根名在任何**被声明为合同**的可读形态里都红：反引号（含围栏内）/散文有扩展名/表格反引号/链接文字；放行只有裸目录名、同句讨论退役、vendor/pack 同形 shorthand；无扩展名散文是已知边界，只记观察 | 门禁 + 纯函数 | 逐形态注入 `scripts/__retired__.mjs` / `dev/x` / `probes/run/x`；负对照 = `scripts/`（裸目录名）与 `vendor/dsh/scripts/AGENTS.md` 绿 | 7 min | 任一非放行形态绿 = P2（无扩展名散文除外） |
 | N3 | 冻结层（`_backlog/`、`notes/`）里没有**当前会被执行**的命令；活跃卡复现步骤、当前轮 charter 命令、implemented Note 验证节都还指向现盘 | 静态 + 抽样 | 取活跃 bug/issue 卡 + 近 3 篇 implemented Note 的围栏/反引号命令，解析路径存在性；用「卡状态 = 排查中/修复就绪/推敲中」与「live 文档是否把它当当前步骤」区分历史叙述 | 8 min | 一条「当前步骤」路径不存在且照做会失败 = M11 实例（观察或 P2，看是否 load-bearing） |
-| N4 | 第二波（lib 子组 + `checks/release` + tools 子组 + 删配置）之后，每个被搬入口的**文档化只读调用**仍可执行（no-arg 已验不算） | 入口（副作用白名单） | 矩阵：`bootstrap.sh --check`、`render-test-index --check`、`render-overlay --check`、`market --check`、`export-handoff --out /tmp/…`、`runtime-clean`（dry-run）、`run-inventory --workspace`、`acceptance-check` / `run-accept` 无参（应 2）、`release-check`；判据 = exit 0/2 + 输出无 ENOENT/MODULE_NOT_FOUND + 副作用只在 tmp；负对照 = 把一条指向不存在路径应立刻失败 | 14 min | 一个文档化调用非预期失败或写仓外仓内 = P1/P2 |
+| N4 | 第二波（lib 子组 + `checks/release` + tools 子组 + 删配置）之后，每个被搬入口的**文档化只读调用**仍可执行（no-arg 已验不算） | 入口（副作用白名单） | 矩阵：`bootstrap.sh --check`、`render-test-index --check`、`render-overlay --check`、`market --check`、`export-handoff --out /tmp/…`、`runtime-clean`（dry-run）、`run-inventory --workspace`、`acceptance-check` / `run-accept` 无参（应 2）、`release-check`；判据 = exit 码符合脚本声明（0/1/2）+ 输出无 `MODULE_NOT_FOUND` / `ENOENT` / 路径错误 + 副作用只落 tmp / gitignored runtime（bootstrap 的隔离 home 与 hooks 配置属预期）；负对照 = 把一条指向不存在路径应立刻失败 | 14 min | 一个文档化调用出现路径类失败或写仓外仓内 = P1/P2 |
 | N5 | 每个派生账/生成物以现盘为输入；删/改名一个输入会让账红，而不是被重生成吸收 | 生成器 + 纯函数（tmp 输出） | 对 asset-ledger / guard-ledger / test-index / probes 索引 / registry / overlay / `_dist` 手册逐个重算到 tmp 并与盘上比；注入一条 stale 条目看谁吸收；检查分类/白名单表的每个路径存在（收口 P-1） | 10 min | 生成器吸收不存在输入，或分类表含死路径 = M4/M9 实例 |
-| N6 | 257 个被搬文件里，任何「按自身位置算根」的常量都指向仓根（重点 = `tools/* → tools/<sub>/*` 的 24 件、lib 子组 18 件、tests/pack 2 件） | 纯静态（AST/正则） | 枚举 `import.meta.url`+`..`、`BASH_SOURCE`+`/..`、`process.cwd()` 假设，打印解析结果 vs 仓根；负对照 = 人为改深一层应报错 | 7 min | 一个常量解析到非根目录且被当根用 = M2 实例 |
+| N6 | 257 个被搬文件里，任何「按自身位置算根」的常量都指向仓根（重点 = 改变深度的 `tools/* → tools/<sub>/*` 17 件；其余 240 件同深度兜底） | 纯静态（AST/正则） | 枚举 `import.meta.url`+`..`、`BASH_SOURCE`+`/..`、`process.cwd()` 假设，打印解析结果 vs 仓根；负对照 = 人为改深一层应报错 | 7 min | 一个常量解析到非根目录且被当根用 = M2 实例 |
 
 **加时 3 条**（只在核心提前收口时按剩余预算选跑，总墙钟仍 ≤60 min）：
 
@@ -134,7 +135,7 @@ opened: 2026-11-17
 
 ## 已知与未决
 
-- **已知**：基线全绿（见上）；预扫 5 格闭合 + 1 条候选；老卡 0–11 轮与覆盖地图已归档，不重开。
+- **已知**：基线全绿（见上）；预扫 6 格闭合 + 1 条候选；老卡 0–11 轮与覆盖地图已归档，不重开。
 - **未决**：P-1 的严重度与守卫落点；N8 若为契约歧义交用户；N3 的冻结层策略收口方式（发现后定）。
 - **不证**：「账本绿」不证「旧名没人用」；「nightly 绿」不证「push 安全」；「守卫存在」不证「守卫有效」；
   「没找到」不写「没有 bug」。
@@ -191,12 +192,12 @@ gates.e2e 案例；可复用 `checks/lib/**`、`checks/smoke/*`、`probes/analyz
 
 | 观察 | owner / 状态 |
 |---|---|
-| `tests/tests` 空目录（untracked，mtime 11-15 09:02） | 来源未追到；无 live 实例 |
+| `tests/tests` 空目录 | 已消失（11-17 清理）；关闭 |
 | `smoke-child-paths` 的 `resolve(ROOT)` / 模板 / 变量段 | 与 `call-surface` 同边界；N1 邻接 |
 | `run-lane` 全 SKIP exit 0 | 旧观察；契约歧义 |
 | Y9 真模型 worker 行为 | 未授权；单独预算 |
 | 安装域默认语言 / hook-DOM / world-tree | 空白；未冒充已验 |
-| 真实 GitHub CI / model-smoke | 未跑；nightly 首次真跑未见证据 |
+| 真实 GitHub CI / model-smoke | 老卡记未跑；本轮不复核（11-17 提交称 runner 红根因已修并实证） |
 | claim 路径只查存在性、不查 tracked | 无 live 实例；M8 邻接 |
 
 ## 判据形状

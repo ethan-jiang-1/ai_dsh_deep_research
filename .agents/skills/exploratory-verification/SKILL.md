@@ -1,6 +1,6 @@
 ---
 name: exploratory-verification
-description: Use when regression is green but the new behavior's input space is not enumerated — a new parser/judgment/state machine, a batch of "silent fail-open" bugs, or a post-release "what did we not test?" sweep; covers the E1–E6 loop, charter template, four-state outcomes, and graduation into class-level guards.
+description: Use when regression is green but the new behavior's input space is not enumerated — a new parser/judgment/state machine, a namespace/directory rename with a compatibility ledger, a batch of "silent fail-open" bugs, or a post-release "what did we not test?" sweep; covers the E1–E6 loop, charter template, four-state outcomes, and graduation into class-level guards.
 ---
 
 # 探索性验证：从「回归绿」到「找出静默做错的事」

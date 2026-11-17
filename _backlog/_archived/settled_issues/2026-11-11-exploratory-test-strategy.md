@@ -10,6 +10,8 @@ opened: 2026-11-11
 > **归档（2026-11-17）**：场景已变——后续靶子是「根名/命名空间搬家 + 兼容账本 + 证据频率」，判据与 charter 换了正本。
 > 本卡只作已探面与历史证据；不再续写、不再更新覆盖地图。
 >
+> 去向：[2026-11-17-exploratory-namespace-move](../../issues/2026-11-17-exploratory-namespace-move.md)（新账本；本卡只作参考）。
+>
 > **一句话**：探索协议已毕业为常驻方法（[guides/67](../../../docs/guides/67-test-strategy.md) +
 > [exploratory-verification](../../../.agents/skills/exploratory-verification/SKILL.md)）；本卡 =
 > **逐轮账本 + 当前轮 charter**。第十一轮把靶子放在**修复后的类级守卫自身**与第一轮漏掉的面：
