@@ -13,7 +13,16 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| （空） | — | — | 2026-11-17 批 G（209–218）全部归档，见下 |
+| [BUG-219](BUG-219-pack-types-unexported-dts-overshipped.md) | 等人拍板 | P2 | tarball 111 个 `.d.ts` 只有 7 个 exports 类型入口 |
+| [BUG-220](BUG-220-pack-readme-user-section-dev-smokes.md) | 等人拍板 | P2 | pack README 用户段让用户跑 `node checks/smoke/…`（不随包） |
+| [BUG-221](BUG-221-runtime-skill-references-dev-check-file.md) | 等人拍板 | P2 | 运行时 skill 引用 `checks/lib/shared/plan-card.mjs`（不随包） |
+| [BUG-222](BUG-222-runtime-skill-references-dev-design-doc.md) | 等人拍板 | P2 | 运行时 skill 把开发仓 `docs/design/50…` 当状态合同正本 |
+| [BUG-223](BUG-223-runtime-skill-hardcodes-dev-workspace.md) | 等人拍板 | P2 | 运行时 skill 硬编码开发工作区 `research-workspace/` |
+| [BUG-224](BUG-224-pack-client-bundle-dev-path-comments.md) | 修复就绪 | P2 | 发布 `lib/client.js` 带 12+ 条 dev 路径注释 |
+| [BUG-225](BUG-225-pack-dts-dev-path-comments.md) | 修复就绪 | P2 | 发布 `.d.ts` 10 个文件带 dev 路径注释 |
+| [BUG-226](BUG-226-runtime-scripts-config-dev-path-comments.md) | 修复就绪 | P2 | 发布 `scripts/lib` + `cordis/presets` 注释带 dev 路径 |
+| [BUG-227](BUG-227-pack-boundary-no-shipped-dev-ref-gate.md) | 等人拍板 | P2 | 发布面没有「零 dev 引用」守卫 |
+| [BUG-228](BUG-228-pack-files-broad-allowlist-no-set-assertion.md) | 等人拍板 | P2 | `files` 广白名单 + `pack.e2e` 无集合对账 |
 
 ## 最近归档
 
