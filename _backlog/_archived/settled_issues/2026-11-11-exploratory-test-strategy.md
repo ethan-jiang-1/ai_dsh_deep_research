@@ -1,20 +1,23 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-11-11
 ---
 
 # 推敲：探索性验证账本（exploratory verification）——第十一轮 charter：修复后的守卫与新面
 
-> 立卡：2026-11-11 ｜ 状态：推敲中（执行中；第十一轮 charter 于 2026-11-16 重定） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-11 ｜ 状态：已结（2026-11-17 并入 [2026-11-17-exploratory-namespace-move](../../issues/2026-11-17-exploratory-namespace-move.md)；第 0–11 轮账本与覆盖地图冻结为参考） ｜ 类型：Task ｜ 结论倾向：并入已有 ｜ 可关闭：是
 >
-> **一句话**：探索协议已毕业为常驻方法（[guides/67](../../docs/guides/67-test-strategy.md) +
-> [exploratory-verification](../../.agents/skills/exploratory-verification/SKILL.md)）；本卡 =
+> **归档（2026-11-17）**：场景已变——后续靶子是「根名/命名空间搬家 + 兼容账本 + 证据频率」，判据与 charter 换了正本。
+> 本卡只作已探面与历史证据；不再续写、不再更新覆盖地图。
+>
+> **一句话**：探索协议已毕业为常驻方法（[guides/67](../../../docs/guides/67-test-strategy.md) +
+> [exploratory-verification](../../../.agents/skills/exploratory-verification/SKILL.md)）；本卡 =
 > **逐轮账本 + 当前轮 charter**。第十一轮把靶子放在**修复后的类级守卫自身**与第一轮漏掉的面：
 > 新守卫的「承诺 vs 实现」、回归判据的「提及 vs 执行」、生成物对账的「非空 vs 集合」。
 >
 > **当前（2026-11-16 晚）**：批 E（BUG-191–198）与批 F（BUG-199–208）均已修复归档
-> （[批 E Note](../../notes/implemented/2026-11-15-move-side-effect-guards.md) /
-> [批 F Note](../../notes/implemented/2026-11-16-guard-contract-hardening.md)）。批 F 把
+> （[批 E Note](../../../notes/implemented/2026-11-15-move-side-effect-guards.md) /
+> [批 F Note](../../../notes/implemented/2026-11-16-guard-contract-hardening.md)）。批 F 把
 > 新守卫自身的「承诺 vs 实现」收口：深度/shared/symlink、离线闸行为证据、守卫台账、
 > claim 前缀、flag 形状、散文路径、索引集合。
 >
@@ -23,7 +26,7 @@ opened: 2026-11-11
 **问题与期望结果：** 回归能回答「旧行为被改坏没有」，回答不了「新东西在没被写进测试的输入上会不会
 静默放行」。搬家的特殊之处：**它按定义「不该改变行为」**，于是被改坏的东西不会让测试变红——测试跟着
 文件一起搬了。本卡给出的答案 = 一套**搬家的可证伪判据**（§搬家合同）+ 围绕其残差的 charter。找真缺
-陷就开 [bug 卡](../bugs/README.md)，不改产品代码，**不把「没找到」写成「没有 bug」**。
+陷就开 [bug 卡](../../bugs/README.md)，不改产品代码，**不把「没找到」写成「没有 bug」**。
 
 **当前情况（2026-11-16 基线）：**
 
@@ -47,7 +50,7 @@ opened: 2026-11-11
 - 真模型批 Y9（worker 行为）是否批准、预算多少。
 - 本卡继续作为账本，还是下一轮拆成独立卡（当前不拆；账本价值在覆盖地图）。
 
-**下一步：** 批 F 已闭环（10 张归档，见 [批 F Note](../../notes/implemented/2026-11-16-guard-contract-hardening.md)）；
+**下一步：** 批 F 已闭环（10 张归档，见 [批 F Note](../../../notes/implemented/2026-11-16-guard-contract-hardening.md)）；
 下一轮把观察项（`tests/tests` 空目录、`smoke-child-paths` 的 resolve/模板/变量段、`run-lane` exit 0）
 与 Y9 授权收口。
 
@@ -68,16 +71,16 @@ opened: 2026-11-11
 
 | ID | 假设（要杀死的命题） | 最低层 | oracle / 变异 | 预算 | 停止 |
 |---|---|---|---|---|---|
-| T1 | 离线闸对每一种可创建的 DNS/连接形态都拦（含 promises Resolver） | 行为（武装态子进程） | 模块函数 / callback Resolver / promises Resolver 三形态实测；loopback 与非武装对照 | 10 min | **中：[BUG-199](../_archived/fixed_bugs/BUG-199-offline-gate-promises-resolver-bypass.md)（P1）** |
-| T2 | 位置门禁的「未知深度」= 红（承诺与实现一致） | 纯函数 + 实盘 | 4 条深路径 + 实盘 deep spec | 10 min | **中：[BUG-200](../_archived/fixed_bugs/BUG-200-test-placement-unknown-depth-not-enforced.md)** |
-| T3 | 守卫台账覆盖最新一批类级守卫 | 静态 | ledger 的 scope/72/max vs 守卫文件标题 | 5 min | **中：[BUG-201](../_archived/fixed_bugs/BUG-201-guard-ledger-closed-set-stops-at-190.md)** |
-| T4 | 生成物 claim 的路径 token 全前缀可验（不只 `tests/`） | 纯函数 + 重生成 | `scripts/…` vs `tests/…` 注入对照 | 10 min | **中：[BUG-202](../_archived/fixed_bugs/BUG-202-asset-ledger-claim-path-check-tests-prefix-only.md)** |
-| T5 | gates.e2e 的 flag 形状 fail-loud（空值/裸 flag 不静默回退） | CLI | `--case=` 空值实跑；裸 `--case X`/`--jobs 8` 纯函数 | 10 min | **中：[BUG-203](../_archived/fixed_bugs/BUG-203-gates-e2e-empty-and-bare-flag-shapes.md)** |
-| T6 | live 文档的散文路径有车道 | 静态 | 全 live md 的仓内路径 token 扫描 | 10 min | **中：[BUG-204](../_archived/fixed_bugs/BUG-204-live-doc-prose-stale-paths-ungated.md)（2 实例）** |
-| T7 | 镜像门禁的 `shared/` 只收跨切 spec | 纯函数/门禁 | `run/shared` 与 `cockpit/lib/shared` 各一格 | 10 min | **中：[BUG-205](../_archived/fixed_bugs/BUG-205-mirror-shared-escape-hatch.md)（两处）** |
-| T8 | 离线闸的回归判据真的执行入口（不是源码子串） | 门禁自身 | BUG-067 用例 vs 武装实测对照 | 10 min | **中：[BUG-206](../_archived/fixed_bugs/BUG-206-offline-preload-source-substring-test-and-smoke-only.md)** |
-| T9 | tests 下的 symlink 目录不会静默穿过位置门禁 | 门禁 | 仓外 symlink 目录 + git add | 10 min | **中：[BUG-207](../_archived/fixed_bugs/BUG-207-tests-symlink-directory-passes-placement-never-runs.md)** |
-| T10 | 索引的独立抽查验集合（不是「非空」） | 门禁自身 | 合成的部分 importer 过滤 + 重生成 | 10 min | **中：[BUG-208](../_archived/fixed_bugs/BUG-208-test-index-tsx-spot-check-nonempty-only.md)** |
+| T1 | 离线闸对每一种可创建的 DNS/连接形态都拦（含 promises Resolver） | 行为（武装态子进程） | 模块函数 / callback Resolver / promises Resolver 三形态实测；loopback 与非武装对照 | 10 min | **中：[BUG-199](../../_archived/fixed_bugs/BUG-199-offline-gate-promises-resolver-bypass.md)（P1）** |
+| T2 | 位置门禁的「未知深度」= 红（承诺与实现一致） | 纯函数 + 实盘 | 4 条深路径 + 实盘 deep spec | 10 min | **中：[BUG-200](../../_archived/fixed_bugs/BUG-200-test-placement-unknown-depth-not-enforced.md)** |
+| T3 | 守卫台账覆盖最新一批类级守卫 | 静态 | ledger 的 scope/72/max vs 守卫文件标题 | 5 min | **中：[BUG-201](../../_archived/fixed_bugs/BUG-201-guard-ledger-closed-set-stops-at-190.md)** |
+| T4 | 生成物 claim 的路径 token 全前缀可验（不只 `tests/`） | 纯函数 + 重生成 | `scripts/…` vs `tests/…` 注入对照 | 10 min | **中：[BUG-202](../../_archived/fixed_bugs/BUG-202-asset-ledger-claim-path-check-tests-prefix-only.md)** |
+| T5 | gates.e2e 的 flag 形状 fail-loud（空值/裸 flag 不静默回退） | CLI | `--case=` 空值实跑；裸 `--case X`/`--jobs 8` 纯函数 | 10 min | **中：[BUG-203](../../_archived/fixed_bugs/BUG-203-gates-e2e-empty-and-bare-flag-shapes.md)** |
+| T6 | live 文档的散文路径有车道 | 静态 | 全 live md 的仓内路径 token 扫描 | 10 min | **中：[BUG-204](../../_archived/fixed_bugs/BUG-204-live-doc-prose-stale-paths-ungated.md)（2 实例）** |
+| T7 | 镜像门禁的 `shared/` 只收跨切 spec | 纯函数/门禁 | `run/shared` 与 `cockpit/lib/shared` 各一格 | 10 min | **中：[BUG-205](../../_archived/fixed_bugs/BUG-205-mirror-shared-escape-hatch.md)（两处）** |
+| T8 | 离线闸的回归判据真的执行入口（不是源码子串） | 门禁自身 | BUG-067 用例 vs 武装实测对照 | 10 min | **中：[BUG-206](../../_archived/fixed_bugs/BUG-206-offline-preload-source-substring-test-and-smoke-only.md)** |
+| T9 | tests 下的 symlink 目录不会静默穿过位置门禁 | 门禁 | 仓外 symlink 目录 + git add | 10 min | **中：[BUG-207](../../_archived/fixed_bugs/BUG-207-tests-symlink-directory-passes-placement-never-runs.md)** |
+| T10 | 索引的独立抽查验集合（不是「非空」） | 门禁自身 | 合成的部分 importer 过滤 + 重生成 | 10 min | **中：[BUG-208](../../_archived/fixed_bugs/BUG-208-test-index-tsx-spot-check-nonempty-only.md)** |
 
 **R6/R9（补第十轮未跑）**：`dist-freshness` 负控（改一个 pack 源 → 点名红、还原 → 绿）通过；
 `overlay-fresh` 门在（`dev/render-overlay.mjs --check`）；`pnpm build` 后 `lib/types` 111 文件 = `src`
@@ -88,19 +91,19 @@ opened: 2026-11-11
 
 | 卡 | charter | 一句话 | 状态 |
 |---|---|---|---|
-| [BUG-199](../_archived/fixed_bugs/BUG-199-offline-gate-promises-resolver-bypass.md) | T1 | 离线闸漏 `dns.promises.Resolver`：武装态下 `new Resolver().resolve4()` 仍解析外网 | 已修 P1 |
-| [BUG-200](../_archived/fixed_bugs/BUG-200-test-placement-unknown-depth-not-enforced.md) | T2 | `test-placement` 的「未知深度 = 红」没实现（run/cockpit lib/client 任意深） | 已修 P2 |
-| [BUG-201](../_archived/fixed_bugs/BUG-201-guard-ledger-closed-set-stops-at-190.md) | T3 | 守卫台账闭集停在 190（72 条），批 E 的 8 卡与三个类级守卫未入账 | 已修 P2 |
-| [BUG-202](../_archived/fixed_bugs/BUG-202-asset-ledger-claim-path-check-tests-prefix-only.md) | T4 | claim 路径检查只认 `tests/…`；`scripts/…` 的失效路径照样固化 | 已修 P2 |
-| [BUG-203](../_archived/fixed_bugs/BUG-203-gates-e2e-empty-and-bare-flag-shapes.md) | T5 | `--case=` 空值静默跑全量（130 案例）；裸 flag 被忽略 | 已修 P2 |
-| [BUG-204](../_archived/fixed_bugs/BUG-204-live-doc-prose-stale-paths-ungated.md) | T6 | live 文档散文的失效路径无门禁（runtime/README、scripts/README 各一处） | 已修 P2 |
-| [BUG-205](../_archived/fixed_bugs/BUG-205-mirror-shared-escape-hatch.md) | T7 | 镜像门禁 `shared/` 兜底：单 owner spec 藏进 shared 无人拦（两处） | 已修 P2 |
-| [BUG-206](../_archived/fixed_bugs/BUG-206-offline-preload-source-substring-test-and-smoke-only.md) | T8 | 离线闸回归是源码子串不执行 install()；preload 还登记 SMOKE_ONLY | 已修 P2 |
-| [BUG-207](../_archived/fixed_bugs/BUG-207-tests-symlink-directory-passes-placement-never-runs.md) | T9 | tests 下的 symlink 目录穿过所有位置门禁、node --test 又不跟 | 已修 P2 |
-| [BUG-208](../_archived/fixed_bugs/BUG-208-test-index-tsx-spot-check-nonempty-only.md) | T10 | 索引 `.tsx` 独立抽查只验非空不验集合：丢一半 importer 仍绿 | 已修 P2 |
+| [BUG-199](../../_archived/fixed_bugs/BUG-199-offline-gate-promises-resolver-bypass.md) | T1 | 离线闸漏 `dns.promises.Resolver`：武装态下 `new Resolver().resolve4()` 仍解析外网 | 已修 P1 |
+| [BUG-200](../../_archived/fixed_bugs/BUG-200-test-placement-unknown-depth-not-enforced.md) | T2 | `test-placement` 的「未知深度 = 红」没实现（run/cockpit lib/client 任意深） | 已修 P2 |
+| [BUG-201](../../_archived/fixed_bugs/BUG-201-guard-ledger-closed-set-stops-at-190.md) | T3 | 守卫台账闭集停在 190（72 条），批 E 的 8 卡与三个类级守卫未入账 | 已修 P2 |
+| [BUG-202](../../_archived/fixed_bugs/BUG-202-asset-ledger-claim-path-check-tests-prefix-only.md) | T4 | claim 路径检查只认 `tests/…`；`scripts/…` 的失效路径照样固化 | 已修 P2 |
+| [BUG-203](../../_archived/fixed_bugs/BUG-203-gates-e2e-empty-and-bare-flag-shapes.md) | T5 | `--case=` 空值静默跑全量（130 案例）；裸 flag 被忽略 | 已修 P2 |
+| [BUG-204](../../_archived/fixed_bugs/BUG-204-live-doc-prose-stale-paths-ungated.md) | T6 | live 文档散文的失效路径无门禁（runtime/README、scripts/README 各一处） | 已修 P2 |
+| [BUG-205](../../_archived/fixed_bugs/BUG-205-mirror-shared-escape-hatch.md) | T7 | 镜像门禁 `shared/` 兜底：单 owner spec 藏进 shared 无人拦（两处） | 已修 P2 |
+| [BUG-206](../../_archived/fixed_bugs/BUG-206-offline-preload-source-substring-test-and-smoke-only.md) | T8 | 离线闸回归是源码子串不执行 install()；preload 还登记 SMOKE_ONLY | 已修 P2 |
+| [BUG-207](../../_archived/fixed_bugs/BUG-207-tests-symlink-directory-passes-placement-never-runs.md) | T9 | tests 下的 symlink 目录穿过所有位置门禁、node --test 又不跟 | 已修 P2 |
+| [BUG-208](../../_archived/fixed_bugs/BUG-208-test-index-tsx-spot-check-nonempty-only.md) | T10 | 索引 `.tsx` 独立抽查只验非空不验集合：丢一半 importer 仍绿 | 已修 P2 |
 
 **批 F 修复落地（2026-11-16）**：10 张全部 `已修` 并归档；批 Note =
-[2026-11-16-guard-contract-hardening](../../notes/implemented/2026-11-16-guard-contract-hardening.md)。
+[2026-11-16-guard-contract-hardening](../../../notes/implemented/2026-11-16-guard-contract-hardening.md)。
 验证 = `pnpm verify` 全绿、`pnpm test` spec 1365 / checks 213（0 fail / 0 skip）、
 `gates.e2e` 133 案例全绿（新增 depth / symlink / doc-prose 三例）。
 
@@ -196,14 +199,14 @@ opened: 2026-11-11
 
 | ID | 假设（要杀死的命题） | 最低层 | oracle / 变异 | 预算 | 停止 |
 |---|---|---|---|---|---|
-| R1 | 位置门禁覆盖「已知子树之外的任何落点」，而不是只枚举已知子树 | 纯函数/门禁 | `tests/cockpit/misc/`、`tests/pack/misc/`、`tests/cockpit/shared/` 各放一个 spec + 重生成账本 → 应红；负对照 = 放对位置绿 | 15 min | **已探三格：全绿（fail-open）→ [BUG-191](../_archived/fixed_bugs/BUG-191-placement-gates-unknown-subtree-unruled.md)** |
+| R1 | 位置门禁覆盖「已知子树之外的任何落点」，而不是只枚举已知子树 | 纯函数/门禁 | `tests/cockpit/misc/`、`tests/pack/misc/`、`tests/cockpit/shared/` 各放一个 spec + 重生成账本 → 应红；负对照 = 放对位置绿 | 15 min | **已探三格：全绿（fail-open）→ [BUG-191](../../_archived/fixed_bugs/BUG-191-placement-gates-unknown-subtree-unruled.md)** |
 | R2 | 所有「按文件位置算根」的常量搬家后指向同一目录；错了必响 | 纯函数/静态 | 全树 `import.meta.url` + `'..'` 常量清单，逐个打印解析结果与预期根比对；再把两个搬家模块下移一层，看谁静默 | 20 min | **已探：枚举 148 处；两处已知实例已修，无新缺陷（观察）** |
-| R3 | 非 JS 消费面（sh/YAML/JSON/package.json/散文）的搬家路径都被门禁或登记簿接管 | 静态 + 变异 | 登记簿 `from` × 全树字面量（R0c 已跑）；再在 `dev/*.mjs`、`scripts/run-ops/*`、`probes/**` 放坏字面量，看谁红 | 20 min | **已探 → [BUG-192](../_archived/fixed_bugs/BUG-192-snapshot-replay-offline-preload-stale-path.md)、[BUG-193](../_archived/fixed_bugs/BUG-193-cdp-ask-spawns-moved-probe-path.md)（分段字面量）+ 观察** |
-| R4 | 账本/索引生成器能吸收任意新落点，只有位置门禁能拒绝——逐账核对「吸收面 vs 规则面」 | 纯函数 | asset-ledger / guard-ledger / INDEX / smoke registry / design-40 doc registry 各造一个新落点条目 | 20 min | **已探 → 191（账本吸收落点）、[BUG-194](../_archived/fixed_bugs/BUG-194-test-index-drops-tsx-importers.md)（索引吸收过滤器缺陷）** |
+| R3 | 非 JS 消费面（sh/YAML/JSON/package.json/散文）的搬家路径都被门禁或登记簿接管 | 静态 + 变异 | 登记簿 `from` × 全树字面量（R0c 已跑）；再在 `dev/*.mjs`、`scripts/run-ops/*`、`probes/**` 放坏字面量，看谁红 | 20 min | **已探 → [BUG-192](../../_archived/fixed_bugs/BUG-192-snapshot-replay-offline-preload-stale-path.md)、[BUG-193](../../_archived/fixed_bugs/BUG-193-cdp-ask-spawns-moved-probe-path.md)（分段字面量）+ 观察** |
+| R4 | 账本/索引生成器能吸收任意新落点，只有位置门禁能拒绝——逐账核对「吸收面 vs 规则面」 | 纯函数 | asset-ledger / guard-ledger / INDEX / smoke registry / design-40 doc registry 各造一个新落点条目 | 20 min | **已探 → 191（账本吸收落点）、[BUG-194](../../_archived/fixed_bugs/BUG-194-test-index-drops-tsx-importers.md)（索引吸收过滤器缺陷）** |
 | R5 | 登记簿语义与覆盖面：`to` = 内容最终落点；且覆盖全部历史搬家（或显式声明只覆盖最近一波） | 静态 | 320 条按内容 / `git log --follow` 对账；两跳链（如 brief-fold）逐条验证；`git log --diff-filter=R` 全量与冻结层旧名计数对账 | 15 min | **已探：R0f/R0g；语义无错条、断档登记为观察（未开卡）** |
 | R6 | 搬入点的派生件随源集重算；旧产物不会被当当前源 | 静态/入口 | manifest 源文件集 vs HEAD pack 源；`dist-freshness` 负对照（改一个源文件 → 应红） | 15 min | **未跑（R6，下一轮）** |
-| R7 | 每个搬家模块至少有一条测试车道消费者，或显式登记为「无车道」 | 静态/图 | import 图反向：0 spec 可达的模块清单；对照 lane/registry 与 D54 准入 | 15 min | **部分：`.cjs` 面 → [BUG-196](../_archived/fixed_bugs/BUG-196-test-surface-cjs-coverage-blind.md)；反向图未跑** |
-| R8 | 为搬家新加/加宽的门禁自身有反证且无同类空洞 | 门禁自身 | 逐门禁跑红配方；`gates.e2e` 案例 ↔ `context.gates` 对账（含 md-links 重定向三案、repo-conventions 扩面） | 15 min | **已探 → [BUG-197](../_archived/fixed_bugs/BUG-197-repo-conventions-hooks-surface-no-gate-case.md)** |
+| R7 | 每个搬家模块至少有一条测试车道消费者，或显式登记为「无车道」 | 静态/图 | import 图反向：0 spec 可达的模块清单；对照 lane/registry 与 D54 准入 | 15 min | **部分：`.cjs` 面 → [BUG-196](../../_archived/fixed_bugs/BUG-196-test-surface-cjs-coverage-blind.md)；反向图未跑** |
+| R8 | 为搬家新加/加宽的门禁自身有反证且无同类空洞 | 门禁自身 | 逐门禁跑红配方；`gates.e2e` 案例 ↔ `context.gates` 对账（含 md-links 重定向三案、repo-conventions 扩面） | 15 min | **已探 → [BUG-197](../../_archived/fixed_bugs/BUG-197-repo-conventions-hooks-surface-no-gate-case.md)** |
 | R9 | pack 搬家的构建/注入面不受路径影响（tsdown 入口、`exports`、`faces.json`、content 注入、client 模块 id） | 入口（keyless 构建） | `pnpm build` + `pnpm typecheck`；`preset.e2e` / `lifecycle.entry` 消费构建产物；比对 dist 清单 | 20 min | **未跑（R9，需构建）** |
 
 **证据落点**：一次性脚本与输出落 `runtime/`（gitignored，本轮 = `runtime/explore-20261115/`）；
@@ -225,7 +228,7 @@ opened: 2026-11-11
     `vendor-artifacts.mjs` 那处漏了。
   - **R0c 旧路径字面量（live 面）= 已探：1 处观察**：以登记簿 320 条 `from` 扫全部 tracked
     文件（1675）中的文本类，排除 `_backlog/`、`notes/`（冻结层）与登记簿自身后，只剩
-    [runtime/README.md](../../runtime/README.md) 第 9 行把 `scripts/lib/scene-pack.mjs` 写在
+    [runtime/README.md](../../../runtime/README.md) 第 9 行把 `scripts/lib/scene-pack.mjs` 写在
     **无反引号散文**里（`doc-paths` 只解析反引号 token）。→ 观察，owner = runtime/README；
     升格方向 = R3 的散文路径面。
   - **R0d 账本完整性 = 已关闭**：asset-ledger **213 条 = 盘上 213 个 spec/check**（双向零差）；
@@ -253,20 +256,20 @@ opened: 2026-11-11
 
 | 卡 | charter | 一句话 | 状态 |
 |---|---|---|---|
-| [BUG-191](../_archived/fixed_bugs/BUG-191-placement-gates-unknown-subtree-unruled.md) | R1 / R4 | 位置门禁只枚举已知子树：未知落点 + 重生成账本 = 全绿（三格实测） | 已修 P2 |
-| [BUG-192](../_archived/fixed_bugs/BUG-192-snapshot-replay-offline-preload-stale-path.md) | R3 | snapshot-replay 的离线预载仍指 `scripts/lib/replay-network-offline.cjs`（已搬 `harness/`）→ A 层闸没装、required CI job 必红 | 已修 P1 |
-| [BUG-193](../_archived/fixed_bugs/BUG-193-cdp-ask-spawns-moved-probe-path.md) | R3 | cdp-ask.entry spawn `scripts/probe/cdp-probe.mjs`（探针已迁 `probes/browser/`） | 已修 P2 |
-| [BUG-194](../_archived/fixed_bugs/BUG-194-test-index-drops-tsx-importers.md) | R4 / R7 | test-index 的 importer 过滤漏 `.tsx` → 6 个 client 模块永远显示「—」 | 已修 P2 |
-| [BUG-195](../_archived/fixed_bugs/BUG-195-gates-e2e-adhoc-jobs-value-fake-failures.md) | R6 邻接 | gates.e2e `--jobs=abc` → 0 案例真跑，却报 N 处「undefined」失败并留临时目录 | 已修 P2 |
-| [BUG-196](../_archived/fixed_bugs/BUG-196-test-surface-cjs-coverage-blind.md) | R7 | test-surface 的覆盖合同不含 `.cjs` → 新 `.cjs` 可零测试落地 | 已修 P2 |
-| [BUG-197](../_archived/fixed_bugs/BUG-197-repo-conventions-hooks-surface-no-gate-case.md) | R8 | repo-conventions 扩到 `dev/hooks`，`gates.e2e` 无对应注入案例（新扫面零红证） | 已修 P2 |
-| [BUG-198](../_archived/fixed_bugs/BUG-198-spec-header-stale-path-frozen-into-ledger-claim.md) | R3 | 7 个 spec 头注仍是旧路径，被资产账 `uniqueClaim` 固化 | 已修 P2 |
+| [BUG-191](../../_archived/fixed_bugs/BUG-191-placement-gates-unknown-subtree-unruled.md) | R1 / R4 | 位置门禁只枚举已知子树：未知落点 + 重生成账本 = 全绿（三格实测） | 已修 P2 |
+| [BUG-192](../../_archived/fixed_bugs/BUG-192-snapshot-replay-offline-preload-stale-path.md) | R3 | snapshot-replay 的离线预载仍指 `scripts/lib/replay-network-offline.cjs`（已搬 `harness/`）→ A 层闸没装、required CI job 必红 | 已修 P1 |
+| [BUG-193](../../_archived/fixed_bugs/BUG-193-cdp-ask-spawns-moved-probe-path.md) | R3 | cdp-ask.entry spawn `scripts/probe/cdp-probe.mjs`（探针已迁 `probes/browser/`） | 已修 P2 |
+| [BUG-194](../../_archived/fixed_bugs/BUG-194-test-index-drops-tsx-importers.md) | R4 / R7 | test-index 的 importer 过滤漏 `.tsx` → 6 个 client 模块永远显示「—」 | 已修 P2 |
+| [BUG-195](../../_archived/fixed_bugs/BUG-195-gates-e2e-adhoc-jobs-value-fake-failures.md) | R6 邻接 | gates.e2e `--jobs=abc` → 0 案例真跑，却报 N 处「undefined」失败并留临时目录 | 已修 P2 |
+| [BUG-196](../../_archived/fixed_bugs/BUG-196-test-surface-cjs-coverage-blind.md) | R7 | test-surface 的覆盖合同不含 `.cjs` → 新 `.cjs` 可零测试落地 | 已修 P2 |
+| [BUG-197](../../_archived/fixed_bugs/BUG-197-repo-conventions-hooks-surface-no-gate-case.md) | R8 | repo-conventions 扩到 `dev/hooks`，`gates.e2e` 无对应注入案例（新扫面零红证） | 已修 P2 |
+| [BUG-198](../../_archived/fixed_bugs/BUG-198-spec-header-stale-path-frozen-into-ledger-claim.md) | R3 | 7 个 spec 头注仍是旧路径，被资产账 `uniqueClaim` 固化 | 已修 P2 |
 
 **批 E 修复落地（2026-11-16）**：8 张全部 `已修` 并归档；类级守卫 =
 `test-placement`（落点补集）、`smoke-child-paths`（分段路径）、`gates-cli`（数值输入）+
 `test-index`/`test-surface`/`asset-ledger` 的独立抽查。验证 = `pnpm verify` 全绿、
 `pnpm test` spec 1363 / checks 209（0 fail / 0 skip）、`gates.e2e` 130 案例全绿。决定正本 =
-[批 Note](../../notes/implemented/2026-11-15-move-side-effect-guards.md)。
+[批 Note](../../../notes/implemented/2026-11-15-move-side-effect-guards.md)。
 
 **逐条记录（可重放）**：
 
@@ -315,7 +318,7 @@ opened: 2026-11-11
 
 | ID | 假设（要杀死的命题） | 最低层 | oracle / 变异 | 预算 | 停止 |
 |---|---|---|---|---|---|
-| Y1 | registry 标 `ci` = CI 真执行；注释/字符串/`if:false` 不能冒充 | 静态 + 变异 | `smoke-registry`：注释掉 run 行但保留文件名 → 应红 | 5 min | **已修（P2）：[BUG-160](../_archived/fixed_bugs/BUG-160-smoke-registry-mention-not-execution.md)** |
+| Y1 | registry 标 `ci` = CI 真执行；注释/字符串/`if:false` 不能冒充 | 静态 + 变异 | `smoke-registry`：注释掉 run 行但保留文件名 → 应红 | 5 min | **已修（P2）：[BUG-160](../../_archived/fixed_bugs/BUG-160-smoke-registry-mention-not-execution.md)** |
 | Y2 | 车道 runner 的 SKIP 不会被当成 PASS；坏 args/坏前置可区分 | 纯函数 + 进程 | `run-lane` 退出码/汇总；`--only`/`args`；合成 exit 2 与 exit 1 对照 | 10 min | SKIP 仍 exit 0 = 候选（判契约） |
 | Y3 | 快照角色面显式化后，删 case/加角色/子集/legacy 都 fail-loud | 纯函数 + 回放 | `replay-scene` 矩阵；roleFace 子集/重复/外来；`--only`；A/B 只读 | 10 min | 差异需判应然/实然 |
 | Y4 | 装起效果断言验的是装起的产物，不是源码/旧 tarball | 入口 | `lifecycle.entry` ⑤；看 resolve 路径；删注册/换源 → 红 | 10 min | 源码/旧产物仍绿 = 候选 |
@@ -329,21 +332,21 @@ opened: 2026-11-11
 
 | 卡 | 面 | 一句话 | 状态 |
 |---|---|---|---|
-| [BUG-168](../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md) | Z1 旧场 present | 整段载荷找 slug：别的 bundle 的 present + 一句提及即 PASS | 已修 |
-| [BUG-169](../_archived/fixed_bugs/BUG-169-readiness-fenced-code-verdict.md) | 产品边界（readiness） | 代码围栏里的判定当事：示例块可翻转 PASS/FAIL | 已修（P1） |
-| [BUG-170](../_archived/fixed_bugs/BUG-170-readiness-bold-label-not-recognized.md) | 产品边界（readiness） | `**readiness**: FAIL` 被判无判定（合法 Markdown 假红） | 已修 |
-| [BUG-171](../_archived/fixed_bugs/BUG-171-protocol-version-chain-only-previous-snapshot.md) | 产品边界（protocol） | v3 版本链只查 v2：`protocol/v1.json = {}` 仍 PASS | 已修 |
-| [BUG-172](../_archived/fixed_bugs/BUG-172-smoke-registry-if-false-step-counted.md) | Y1/Y7 残余（smoke） | `if: false` 的 run 行仍算执行：跳过的 smoke 仍算 CI 资产 | 已修 |
-| [BUG-176](../_archived/fixed_bugs/BUG-176-smoke-symlink-invisible-to-registry.md) | Y1/Y7 邻接（smoke 枚举） | symlink 在 `Dirent` 二分下不可见：链接资产永不登记/运行 | 已修 |
-| [BUG-173](../_archived/fixed_bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md) | 产品边界（client） | `scoped['effect']` 的无返回回调逃逸静态守卫 | 已修 |
-| [BUG-174](../_archived/fixed_bugs/BUG-174-lifecycle-stale-dist-tarball.md) | Y4 残余（lifecycle） | `_dist` tarball 可陈旧：可能验证旧产物并 ALL PASS | 已修 |
-| [BUG-175](../_archived/fixed_bugs/BUG-175-note-gates-fenced-code-and-hidden-md.md) | 类级残差（notes） | 围栏里的状态/证据夺权；隐藏 `.md` 绕过日期前缀 | 已修 |
+| [BUG-168](../../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md) | Z1 旧场 present | 整段载荷找 slug：别的 bundle 的 present + 一句提及即 PASS | 已修 |
+| [BUG-169](../../_archived/fixed_bugs/BUG-169-readiness-fenced-code-verdict.md) | 产品边界（readiness） | 代码围栏里的判定当事：示例块可翻转 PASS/FAIL | 已修（P1） |
+| [BUG-170](../../_archived/fixed_bugs/BUG-170-readiness-bold-label-not-recognized.md) | 产品边界（readiness） | `**readiness**: FAIL` 被判无判定（合法 Markdown 假红） | 已修 |
+| [BUG-171](../../_archived/fixed_bugs/BUG-171-protocol-version-chain-only-previous-snapshot.md) | 产品边界（protocol） | v3 版本链只查 v2：`protocol/v1.json = {}` 仍 PASS | 已修 |
+| [BUG-172](../../_archived/fixed_bugs/BUG-172-smoke-registry-if-false-step-counted.md) | Y1/Y7 残余（smoke） | `if: false` 的 run 行仍算执行：跳过的 smoke 仍算 CI 资产 | 已修 |
+| [BUG-176](../../_archived/fixed_bugs/BUG-176-smoke-symlink-invisible-to-registry.md) | Y1/Y7 邻接（smoke 枚举） | symlink 在 `Dirent` 二分下不可见：链接资产永不登记/运行 | 已修 |
+| [BUG-173](../../_archived/fixed_bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md) | 产品边界（client） | `scoped['effect']` 的无返回回调逃逸静态守卫 | 已修 |
+| [BUG-174](../../_archived/fixed_bugs/BUG-174-lifecycle-stale-dist-tarball.md) | Y4 残余（lifecycle） | `_dist` tarball 可陈旧：可能验证旧产物并 ALL PASS | 已修 |
+| [BUG-175](../../_archived/fixed_bugs/BUG-175-note-gates-fenced-code-and-hidden-md.md) | 类级残差（notes） | 围栏里的状态/证据夺权；隐藏 `.md` 绕过日期前缀 | 已修 |
 
 **执行记录（滚动）：**
 
 - **2026-11-13 晚**：Y1 已探——把 `ci.yml` 的 `run: ... run-accept.e2e.mjs` 改成
   `run: echo ... # ... run-accept.e2e.mjs`，`smoke-registry` 仍 **2/2 PASS**（文件名子串满足判据）；
-  还原后同判。→ [BUG-160](../_archived/fixed_bugs/BUG-160-smoke-registry-mention-not-execution.md)。
+  还原后同判。→ [BUG-160](../../_archived/fixed_bugs/BUG-160-smoke-registry-mention-not-execution.md)。
 - **2026-11-14 批 A**（keyless，0 模型，约 45 分钟）：Y1 复核 + Y6/Y7 部分 + 隔夜新面（notes 门禁、
   CI 合同、快照模式、方法标题）。新增 **7 张卡（161–167）**，加 BUG-160 共 **8 张已修归档**。
 
@@ -351,27 +354,27 @@ opened: 2026-11-11
 
 | 卡 | 面（charter/邻接） | 一句话 | 状态 |
 |---|---|---|---|
-| [BUG-160](../_archived/fixed_bugs/BUG-160-smoke-registry-mention-not-execution.md) | Y1 registry/CI 执行面 | 注释掉 run 行仍绿（文件名提及冒充执行） | 已修 |
-| [BUG-161](../_archived/fixed_bugs/BUG-161-ci-jobs-job-id-regex-skips-underscore.md) | Y7 CI 聚合 | job 名正则漏下划线/大写 → 新 job 可不在 needs | 已修 |
-| [BUG-162](../_archived/fixed_bugs/BUG-162-nested-smoke-invisible-to-registry-and-lane.md) | Y1/Y7 邻接（registry 枚举） | 嵌套 smoke 永不登记、永不运行 | 已修 |
-| [BUG-163](../_archived/fixed_bugs/BUG-163-model-workflow-pull-request-target-trigger.md) | Y7 with-key 触发面 | `pull_request_target` 仍绿（只禁 pull_request/push） | 已修 |
-| [BUG-164](../_archived/fixed_bugs/BUG-164-snapshot-why-accepts-flag-as-carrier.md) | 邻接（快照模式） | `--why` 接受下一个 flag 当载体 | 已修 |
-| [BUG-165](../_archived/fixed_bugs/BUG-165-note-format-quoted-status-and-negated-evidence.md) | 邻接（新 notes 门禁） | 全文正则把引用状态行/否定节当权威，合法 Note 误杀 | 已修 |
-| [BUG-166](../_archived/fixed_bugs/BUG-166-note-tree-hidden-directory-bypass.md) | 邻接（新 notes 门禁） | 先跳过点目录再判嵌套 → 隐藏嵌套 Note 不可见 | 已修 |
-| [BUG-167](../_archived/fixed_bugs/BUG-167-method-heading-invisible-format-chars-duplicate.md) | 邻接（方法标题 codec） | ZWSP/软连字符等格式字符造同名幽灵条目 | 已修 |
+| [BUG-160](../../_archived/fixed_bugs/BUG-160-smoke-registry-mention-not-execution.md) | Y1 registry/CI 执行面 | 注释掉 run 行仍绿（文件名提及冒充执行） | 已修 |
+| [BUG-161](../../_archived/fixed_bugs/BUG-161-ci-jobs-job-id-regex-skips-underscore.md) | Y7 CI 聚合 | job 名正则漏下划线/大写 → 新 job 可不在 needs | 已修 |
+| [BUG-162](../../_archived/fixed_bugs/BUG-162-nested-smoke-invisible-to-registry-and-lane.md) | Y1/Y7 邻接（registry 枚举） | 嵌套 smoke 永不登记、永不运行 | 已修 |
+| [BUG-163](../../_archived/fixed_bugs/BUG-163-model-workflow-pull-request-target-trigger.md) | Y7 with-key 触发面 | `pull_request_target` 仍绿（只禁 pull_request/push） | 已修 |
+| [BUG-164](../../_archived/fixed_bugs/BUG-164-snapshot-why-accepts-flag-as-carrier.md) | 邻接（快照模式） | `--why` 接受下一个 flag 当载体 | 已修 |
+| [BUG-165](../../_archived/fixed_bugs/BUG-165-note-format-quoted-status-and-negated-evidence.md) | 邻接（新 notes 门禁） | 全文正则把引用状态行/否定节当权威，合法 Note 误杀 | 已修 |
+| [BUG-166](../../_archived/fixed_bugs/BUG-166-note-tree-hidden-directory-bypass.md) | 邻接（新 notes 门禁） | 先跳过点目录再判嵌套 → 隐藏嵌套 Note 不可见 | 已修 |
+| [BUG-167](../../_archived/fixed_bugs/BUG-167-method-heading-invisible-format-chars-duplicate.md) | 邻接（方法标题 codec） | ZWSP/软连字符等格式字符造同名幽灵条目 | 已修 |
 
 **Y 覆盖判定**：Y1 已探（BUG-160）；Y2 观察（见下）；Y3/Y5 未跑；Y4 观察（见下）；Y6 部分
 （registry 27 / CI 9 / CI slow 3 / slow 15 对账一致；`--jobs=abc` 未测）；Y7 已探（161/163，162 邻接）；
 Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（需真模型授权）。
 
-失败类增量已写进 [guides/67 §2](../../docs/guides/67-test-strategy.md)（`2026-11-14 批 A 增量`表：
+失败类增量已写进 [guides/67 §2](../../../docs/guides/67-test-strategy.md)（`2026-11-14 批 A 增量`表：
 类 → 卡 → 共同缺口 → 类级守卫方向）；每张卡在卡内有复现/根因/判据。
 
 **观察（未建卡，owner 待定）：**
 
 - `run-lane` 在**全部条目 exit 2** 时仍以 0 退出（汇总打印 SKIP N）——`SKIP ≠ PASS` 的契约歧义：
   诊断车道可接受，但 `pnpm test:entry` 作为证据命令会被误读。owner = `scripts/test/run-lane.mjs` +
-  [guides/67](../../docs/guides/67-test-strategy.md)。
+  [guides/67](../../../docs/guides/67-test-strategy.md)。
 - `lifecycle.entry` 的 `_dist` tarball 是 2026-11-13 11:54，而 `lib/client.js` 是 18:36；脚本没有
   新鲜度检查，本地跑可能验证旧产物（CI 先跑 `export-dist`，故 CI 不受影响）。owner = lifecycle/export-dist。
 - `smoke-cost-budget` 注释写「28 条」，registry 实际 27 条（`e2e-021rc2` 退役后未改注释）——
@@ -383,9 +386,9 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 
 | 主题 | 正本 |
 |---|---|
-| 三环 / 四账 / 五关；失败类 → 最低可见层；成本预算 | [guides/67](../../docs/guides/67-test-strategy.md) |
-| E1–E6、charter 七件、四态分诊、毕业判据、预算/反模式 | [exploratory-verification](../../.agents/skills/exploratory-verification/SKILL.md) |
-| 类级守卫六形态 | [_backlog/methods/class-level-guards.md](../methods/class-level-guards.md) |
+| 三环 / 四账 / 五关；失败类 → 最低可见层；成本预算 | [guides/67](../../../docs/guides/67-test-strategy.md) |
+| E1–E6、charter 七件、四态分诊、毕业判据、预算/反模式 | [exploratory-verification](../../../.agents/skills/exploratory-verification/SKILL.md) |
+| 类级守卫六形态 | [_backlog/methods/class-level-guards.md](../../methods/class-level-guards.md) |
 | 搬家的可证伪判据（五不变量 + M1–M8 失败类） | 本卡 §搬家合同（正本暂住本卡；R1/R2 类级守卫落地后迁 guides/67 §2） |
 | 本卡 | 历轮账本 + 覆盖地图 + 当前轮 charter；不再复制协议正文 |
 
@@ -402,7 +405,7 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 
 | ID | 假设（要杀死的命题） | 最低层 | oracle / 变异 | 预算 | 停止 |
 |---|---|---|---|---|---|
-| Z1 | 旧场 present 只认路径字段，不认整段载荷里的提及 | 纯函数 | `presentGate` 合成旧场 bundle；present 指向别的 bundle + note 提及本 slug | 10 min | **已探：PASS → [BUG-168](../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md)（P2 等人拍板）** |
+| Z1 | 旧场 present 只认路径字段，不认整段载荷里的提及 | 纯函数 | `presentGate` 合成旧场 bundle；present 指向别的 bundle + note 提及本 slug | 10 min | **已探：PASS → [BUG-168](../../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md)（P2 等人拍板）** |
 | Z2 | 快照 roleFace 的子集/legacy/删 case 都 fail-loud | 纯函数 + 回放 | `replay-scene` 矩阵；`--only`；A/B 只读 | 10 min | **已跑：`replay-scene.spec` 15/15，无新发现** |
 | Z3 | client-load 只选 lead 根；seed/args 与 CI 同源 | 纯函数 + 静态 | `selectBoundSession` 矩阵；grep 标题回退；registry args vs `ci.yml` | 10 min | **已跑：`client-load-select.spec` 1/1；seed 双份 = 观察** |
 | Z4 | 方法库标点/尾部邻接不再造幽灵 | 纯函数 | `foldLibrary`/`upsertMethodEntry` 全角冒号/顿号/尾部矩阵 | 10 min | 绿 = 候选 |
@@ -412,7 +415,7 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 
 - **2026-11-14 Z1**：`presentInLogs` 旧场分支把 present 整段 JSON 做 slug 子串；`drt_other` 的
   present 加一句 `supersedes drt_legacy/main` → `presentGate` **PASS**（应 RED）→
-  [BUG-168](../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md)。
+  [BUG-168](../../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md)。
 - **2026-11-14 Z2/Z3**：`replay-scene.spec` 15/15、`client-load-select.spec` 1/1，无新缺陷；Y3/Y5 关闭。
 - Z4（方法库标点/尾部）未跑；Z5（安装域/hook/world-tree）空白；批 B 7 张（168–174）已开卡，其中 168/169/171 是新增假绿/假红，174 是修复就绪。
 - **观察（不建卡）**：client-load 的 seed 参数在 `registry.json` 的 `args` 与 `ci.yml` 的 client-load 行各有一份字面量；当前同值，但没有契约保证同步（C3 双份事实）。owner = CI/registry；下一次改 fixture路径时先抽共享来源或加 args 对账。
@@ -437,13 +440,13 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 
 | 卡 | 面 | 一句话 | 状态 |
 |---|---|---|---|
-| [BUG-177](../_archived/fixed_bugs/BUG-177-ci-workflow-expression-normalization.md) | Z1 CI 表达式 | `${{ always() }}` 假红、`${{ true }}` continue-on-error 假绿 | 已修 |
-| [BUG-178](../_archived/fixed_bugs/BUG-178-readiness-markdown-containers-and-bold-paren.md) | Z2 readiness 容器 | blockquote/缩进代码翻转终局；加粗括号假红 | 已修（P1） |
-| [BUG-179](../_archived/fixed_bugs/BUG-179-html-comments-not-masked.md) | Z3 HTML 注释 | 注释里的证据/判定被当正文 | 已修（P1） |
-| [BUG-180](../_archived/fixed_bugs/BUG-180-method-heading-duplicate-unknown-segments-dropped.md) | Z4 方法标题 | 未知/重复段静默丢失 | 已修 |
-| [BUG-181](../_archived/fixed_bugs/BUG-181-artifact-freshness-deletion-blind.md) | Z5 产物新鲜度 | 删源文件后旧 tarball 仍 fresh | 已修 |
-| [BUG-182](../_archived/fixed_bugs/BUG-182-model-workflow-duplicate-onkeys-empty-map.md) | Z6 on: 解析 | 第二份 onKeysOf；`{}` 假红 | 等人拍板 |
-| [BUG-183](../_archived/fixed_bugs/BUG-183-note-scan-indented-status-heading.md) | Z7 notes 缩进 | 0–3 空格合法缩进被判缺席 | 已修 |
+| [BUG-177](../../_archived/fixed_bugs/BUG-177-ci-workflow-expression-normalization.md) | Z1 CI 表达式 | `${{ always() }}` 假红、`${{ true }}` continue-on-error 假绿 | 已修 |
+| [BUG-178](../../_archived/fixed_bugs/BUG-178-readiness-markdown-containers-and-bold-paren.md) | Z2 readiness 容器 | blockquote/缩进代码翻转终局；加粗括号假红 | 已修（P1） |
+| [BUG-179](../../_archived/fixed_bugs/BUG-179-html-comments-not-masked.md) | Z3 HTML 注释 | 注释里的证据/判定被当正文 | 已修（P1） |
+| [BUG-180](../../_archived/fixed_bugs/BUG-180-method-heading-duplicate-unknown-segments-dropped.md) | Z4 方法标题 | 未知/重复段静默丢失 | 已修 |
+| [BUG-181](../../_archived/fixed_bugs/BUG-181-artifact-freshness-deletion-blind.md) | Z5 产物新鲜度 | 删源文件后旧 tarball 仍 fresh | 已修 |
+| [BUG-182](../../_archived/fixed_bugs/BUG-182-model-workflow-duplicate-onkeys-empty-map.md) | Z6 on: 解析 | 第二份 onKeysOf；`{}` 假红 | 等人拍板 |
+| [BUG-183](../../_archived/fixed_bugs/BUG-183-note-scan-indented-status-heading.md) | Z7 notes 缩进 | 0–3 空格合法缩进被判缺席 | 已修 |
 
 **执行记录**：2026-11-14 七条 charter 全部跑出可复现结果（复现/红绿证据在卡内）；7 张已开卡。
 未跑：安装域默认语言、hook/DOM、world-tree（持续空白，未冒充已验）。
@@ -467,13 +470,13 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 
 | 卡 | 面 | 一句话 | 状态 |
 |---|---|---|---|
-| [BUG-184](../_archived/fixed_bugs/BUG-184-ci-workflow-quoted-comment-expressions.md) | Z1 表达式 | quoted/带注释的 `${{ }}` 仍假红假绿 | 已修 |
-| [BUG-185](../_archived/fixed_bugs/BUG-185-markdown-mask-html-before-fence.md) | Z2 共享 mask | 先剥注释再剥 fence：围栏里的 `<!--` 吞掉真实内容 | 已修（P1） |
-| [BUG-186](../_archived/fixed_bugs/BUG-186-fix-evidence-negation-and-exit-markers.md) | Z3 修复证据 | 「未失败」/`exit 1`/`exit 0` 都能当红绿证 | 已修 |
-| [BUG-187](../_archived/fixed_bugs/BUG-187-ci-workflow-shell-short-circuit.md) | Z4 shell | `false && node` / `true \|\| node` / `\|\| true` 仍算执行 | 已修 |
-| [BUG-188](../_archived/fixed_bugs/BUG-188-note-scan-bold-status-label.md) | Z5 notes 装饰 | `> **状态**：` 假红 | 已修 |
-| [BUG-189](../_archived/fixed_bugs/BUG-189-fix-evidence-directory-path-prefix.md) | Z6 修复路径 | 目录前缀匹配任意同目录 staged 文件 | 已修 |
-| [BUG-190](../_archived/fixed_bugs/BUG-190-ci-workflow-inline-on-flow-mapping.md) | Z7 on: 形状 | `on: { workflow_dispatch: {} }` 假红 | 已修 |
+| [BUG-184](../../_archived/fixed_bugs/BUG-184-ci-workflow-quoted-comment-expressions.md) | Z1 表达式 | quoted/带注释的 `${{ }}` 仍假红假绿 | 已修 |
+| [BUG-185](../../_archived/fixed_bugs/BUG-185-markdown-mask-html-before-fence.md) | Z2 共享 mask | 先剥注释再剥 fence：围栏里的 `<!--` 吞掉真实内容 | 已修（P1） |
+| [BUG-186](../../_archived/fixed_bugs/BUG-186-fix-evidence-negation-and-exit-markers.md) | Z3 修复证据 | 「未失败」/`exit 1`/`exit 0` 都能当红绿证 | 已修 |
+| [BUG-187](../../_archived/fixed_bugs/BUG-187-ci-workflow-shell-short-circuit.md) | Z4 shell | `false && node` / `true \|\| node` / `\|\| true` 仍算执行 | 已修 |
+| [BUG-188](../../_archived/fixed_bugs/BUG-188-note-scan-bold-status-label.md) | Z5 notes 装饰 | `> **状态**：` 假红 | 已修 |
+| [BUG-189](../../_archived/fixed_bugs/BUG-189-fix-evidence-directory-path-prefix.md) | Z6 修复路径 | 目录前缀匹配任意同目录 staged 文件 | 已修 |
+| [BUG-190](../../_archived/fixed_bugs/BUG-190-ci-workflow-inline-on-flow-mapping.md) | Z7 on: 形状 | `on: { workflow_dispatch: {} }` 假红 | 已修 |
 
 **执行记录**：七条 charter 全部跑出可复现结果；7 张已开卡。未跑：安装域默认语言、hook/DOM、world-tree
 （持续空白，未冒充已验）。
@@ -482,7 +485,7 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 
 | # | 面 | 方法 | 结果 | 判定 |
 |---|---|---|---|---|
-| P1 | `checkStrategy` 策略行对账（D48） | 8 个变异输入跑 `evaluateBundle` | 3 个绿（2 类 fail-open）+ 4 个红（负对照）+ 1 个应绿 | 已开 [BUG-050](../_archived/fixed_bugs/BUG-050-strategy-channel-absent-and-workflow-null-workers.md)（P2） |
+| P1 | `checkStrategy` 策略行对账（D48） | 8 个变异输入跑 `evaluateBundle` | 3 个绿（2 类 fail-open）+ 4 个红（负对照）+ 1 个应绿 | 已开 [BUG-050](../../_archived/fixed_bugs/BUG-050-strategy-channel-absent-and-workflow-null-workers.md)（P2） |
 | P2 | `canonicalize` / `designSha256` | 顶层/嵌套 key 换序、`-0`/`0`、未知键 | hash 全稳定；schema 拒未知键 | 关闭 |
 | P3 | T0 两级预算 | 两个消费点的计数口径 | 同一 `manual` 文本、同一 `.length`；CJK 计 1 | 关闭 |
 | P4 | worker profiles（D47） | 结构契约 + row-deps（读码核对） | 6 条契约测试把守行形态；`preset.e2e` 已把 workers 纳入真挂载 | 关闭（一处观察） |
@@ -491,7 +494,7 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 **成本**：5 个面（3 个实跑 + 2 个静态核对），0 次模型调用，约 15 分钟；证据为一次性脚本
 （运行区 `explore-20261111`，gitignored，可清）。**本轮未跑**：`preset.e2e`、任何 smoke、任何探针。
 
-**两条 shared 前缀**：散文正本 = [D48](../../docs/decisions.md#d48)「plan 头 `- 策略:` 行由
+**两条 shared 前缀**：散文正本 = [D48](../../../docs/decisions.md#d48)「plan 头 `- 策略:` 行由
 `protocol-audit` 对账通道/worker/预算 cap（预算读不出 = 红）」；下面两个 fail-open 都是这句在
 **字段缺席**与**分支不可达**两种情况下的落空。
 
@@ -500,10 +503,10 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 - **输入**：plan 头 `- 策略: worker=research-worker；预算=12 节点/40 cells/L0–L2`（无 `通道=`）。
 - **期望**：至少一条 warn——同一行的 worker 缺席、预算缺席各有一条 warn，通道缺席却零 finding；
   且投影仍产出 `channel=spawn`（由正文猜出），审计据此对账而读者不知道通道是猜的。
-- **合同依据**：[plan 模板](../../packages/deep-research-pack/content/templates/run/plan.md) 的策略行是
+- **合同依据**：[plan 模板](../../../packages/deep-research-pack/content/templates/run/plan.md) 的策略行是
   三字段闭集 `通道=<team|spawn|workflow>；worker=…；门=…；预算=…`；模板要求不等于审计要求，正是缺口所在。
 - **实测**：零 `strategy-*` finding；`strategyOf` 投影 `channel=spawn`。
-- **位置**：[`protocol-audit-core.mjs`](../../scripts/lib/protocol-audit-core.mjs) 的 `checkStrategy`
+- **位置**：[`protocol-audit-core.mjs`](../../../scripts/lib/protocol-audit-core.mjs) 的 `checkStrategy`
   （channel 只有「在场且非法」分支，没有「缺席」分支）。
 - **建议判据**：`通道` 缺席 → warn `strategy-channel-missing`（v1 兼容）；v2 再考虑必填转 red。
 
@@ -525,7 +528,7 @@ Y8 部分（`verify` 全绿；未发现新的计数漂移卡）；Y9 未跑（�
 plan 文本，跑 `evaluateBundle`，只看 `strategy-*` code。
 
 **P4 观察（不是 bug）**：`preset-structure` 门禁只 glob `presets/`，`workers/` 的「行形态」由
-[tests/pack/workers.spec.mjs](../../tests/pack/workers.spec.mjs) 六条契约把守（`row-deps` 已覆盖 workers）。
+[tests/pack/workers.spec.mjs](../../../tests/pack/workers.spec.mjs) 六条契约把守（`row-deps` 已覆盖 workers）。
 契约有家，门禁形状偏窄——owner = `scripts/verify`，本轮不修。
 
 ## 第 1 轮 charter 图（历史，已执行）
@@ -551,7 +554,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - keyless 批总墙钟 ≤60 分钟；真模型批 ≤1 次 boot / ≤6 次调用 / ≤10 分钟；`SKIP ≠ PASS`，`未跑 ≠ 通过`。
 - **不跑 L4 全量**；不重跑 0.3.1 之前的旧矩阵；不把探索结果当回归清单。
 - 未获授权不启动 X6/Y9（真模型 worker 行为）；探索卡不授予任何产品代码修改权（守卫/测试的修改按
-  [bugs 通道](../README.md) 的 P1/P2 规则或用户指示）。
+  [bugs 通道](../../README.md) 的 P1/P2 规则或用户指示）。
 
 ## 验收标准（第 1 轮，历史）
 
@@ -593,30 +596,30 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 | 面 | 状态 | 判定 / 证据 |
 |---|---|---|
-| 策略行对账（`checkStrategy`） | 已探 | 2 类静默 → [BUG-050](../_archived/fixed_bugs/BUG-050-strategy-channel-absent-and-workflow-null-workers.md) |
-| §Protocol 投影对账（`checkProjectionDetails`） | 已探 | 缺席容忍 + 深度表示不一致 → [BUG-049](../_archived/fixed_bugs/BUG-049-protocol-projection-lines-absent-silent.md)、[BUG-048](../_archived/fixed_bugs/BUG-048-protocol-depth-projection-first-pair-only.md) |
+| 策略行对账（`checkStrategy`） | 已探 | 2 类静默 → [BUG-050](../../_archived/fixed_bugs/BUG-050-strategy-channel-absent-and-workflow-null-workers.md) |
+| §Protocol 投影对账（`checkProjectionDetails`） | 已探 | 缺席容忍 + 深度表示不一致 → [BUG-049](../../_archived/fixed_bugs/BUG-049-protocol-projection-lines-absent-silent.md)、[BUG-048](../../_archived/fixed_bugs/BUG-048-protocol-depth-projection-first-pair-only.md) |
 | canonical / design_sha256 | 已关闭 | 第 0 轮 P2（顺序、`-0`、未知键均稳） |
 | T0 两级预算计数 | 已关闭 | 第 0 轮 P3（同文本同口径） |
 | worker profile 结构 / 挂载 | 已关闭（静态） | 第 0 轮 P4（契约测试 + preset.e2e 覆盖） |
 | 回放角色覆盖（角色面） | 已关闭 | 第 0 轮 P5；W1-3 后显式 `roleFace` = 5 席（4 研究 + method-editor）；workers 仍不入研究面 |
-| 回放差分（X4） | 已关闭 | [BUG-051](../_archived/fixed_bugs/BUG-051-replay-smoke-panerows-undeclared.md) 已修；5 角色 A/B 按当前 pack 重录并进 CI（W1-2/W1-3）；C0–C5 复验 |
+| 回放差分（X4） | 已关闭 | [BUG-051](../../_archived/fixed_bugs/BUG-051-replay-smoke-panerows-undeclared.md) 已修；5 角色 A/B 按当前 pack 重录并进 CI（W1-2/W1-3）；C0–C5 复验 |
 | 后验扫场（X5） | 已关闭 | 71 场/3742 文件；provider/stream 无系统性异常 |
-| 真实 bundle 反向验证 | 已探 | 8/8 `protocol-audit PASS`；2 个单深度 → [BUG-048](../_archived/fixed_bugs/BUG-048-protocol-depth-projection-first-pair-only.md) 生产证据 |
+| 真实 bundle 反向验证 | 已探 | 8/8 `protocol-audit PASS`；2 个单深度 → [BUG-048](../../_archived/fixed_bugs/BUG-048-protocol-depth-projection-first-pair-only.md) 生产证据 |
 | 入口 / 交接路径（X7） | 已关闭 | `isMain` 五形态无发现；`handoff.e2e` ALL PASS |
 | GUI typed 输入（X8） | 已关闭（CI 常驻） | `client-load.entry` 进 required CI；seed 74–76 PASS（第 31/32 轮）；第 50 轮 68/4 假红由 BUG-142 解释并已修 |
 | worker 行为（X6） | 未跑 | 真模型批未授权；l4-lite（2026-11-13）覆盖 5 角色，不含 worker profile |
 | 门禁的缺席语义（node-gate N/A 聚合） | 已探 | 观察：空 bundle 全 N/A、exit 0；acceptance 仍由 evidence-audit 兜底 |
-| 已交付 bundle 复核 | 已修（验证） | [BUG-052](../_archived/fixed_bugs/BUG-052-protocol-epoch-day-granularity-retro-red.md)：按回执时间断代，旧交付判「不适用」 |
-| plan 头类判据（plan-ref / 策略行） | 已修（验证） | [BUG-053](../_archived/fixed_bugs/BUG-053-plan-header-claims-first-match-anywhere.md)：改用 `headerBlockOf` |
-| §Protocol 行「在场但读不出」 | 已修（验证） | [BUG-056](../_archived/fixed_bugs/BUG-056-protocol-projection-unreadable-values-silent.md)：数值解析 + `projection-output-unparseable` |
+| 已交付 bundle 复核 | 已修（验证） | [BUG-052](../../_archived/fixed_bugs/BUG-052-protocol-epoch-day-granularity-retro-red.md)：按回执时间断代，旧交付判「不适用」 |
+| plan 头类判据（plan-ref / 策略行） | 已修（验证） | [BUG-053](../../_archived/fixed_bugs/BUG-053-plan-header-claims-first-match-anywhere.md)：改用 `headerBlockOf` |
+| §Protocol 行「在场但读不出」 | 已修（验证） | [BUG-056](../../_archived/fixed_bugs/BUG-056-protocol-projection-unreadable-values-silent.md)：数值解析 + `projection-output-unparseable` |
 | 缓存指纹（channel-cache） | 已关闭 | 全目录遍历，新目录自动入键；无「漏键」 |
 | 交付回执与 audit 解析 | 已关闭 | 门A 解析紧、receiptProblems 校验哈希 |
-| 验收证据载体寿命（acceptance.md） | 已探 | [BUG-062](../_archived/fixed_bugs/BUG-062-acceptance-manual-evidence-overwritten-by-regeneration.md)（重跑/repair 抹掉人工走查） |
-| 预算上限的输入解析（cells） | 已修（验证） | [BUG-054](../_archived/fixed_bugs/BUG-054-cells-cap-count-only-canonical-bullet.md)：`*`/缩进/大写现计 2，超限红 |
+| 验收证据载体寿命（acceptance.md） | 已探 | [BUG-062](../../_archived/fixed_bugs/BUG-062-acceptance-manual-evidence-overwritten-by-regeneration.md)（重跑/repair 抹掉人工走查） |
+| 预算上限的输入解析（cells） | 已修（验证） | [BUG-054](../../_archived/fixed_bugs/BUG-054-cells-cap-count-only-canonical-bullet.md)：`*`/缩进/大写现计 2，超限红 |
 | 裁决冲突（同 claim 相反两条） | 已关闭 | 实际红在 `raw-reparse`；错误码误导，记观察 |
 | CLI 前置错误退出码 | 已关闭 | 8 个 run 门/工具在 bundle 缺席时全 exit 2 |
-| verdict 契约的机械出口 | 已修（验证） | [BUG-057](../_archived/fixed_bugs/BUG-057-acceptance-check-exit-code-contradicts-verdict-contract.md)：FAIL→exit 1 / PASS→0 |
-| plan 图结构（无环合同） | 已探 | [BUG-058](../_archived/fixed_bugs/BUG-058-plan-cycle-has-no-mechanical-check.md)（有环全绿 + 提示误导） |
+| verdict 契约的机械出口 | 已修（验证） | [BUG-057](../../_archived/fixed_bugs/BUG-057-acceptance-check-exit-code-contradicts-verdict-contract.md)：FAIL→exit 1 / PASS→0 |
+| plan 图结构（无环合同） | 已探 | [BUG-058](../../_archived/fixed_bugs/BUG-058-plan-cycle-has-no-mechanical-check.md)（有环全绿 + 提示误导） |
 
 ### 第六轮新增面（2026-11-13 晚）
 
@@ -632,7 +635,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 | 装起效果（lifecycle ⑤） | 已关闭（入口） | content/startup/defaults apply + disposer；25 项 ALL PASS（W1-4）；观察：`_dist` tarball 可陈旧（无新鲜度检查） |
 | 成本 ratchet / 并行门禁 | 已探（静态） | 9/3/15 + `smoke-cost-budget`；gates 108 案例 248s→86s；`--jobs` 非法值未测（Y6）；观察：注释写 28、实际 27 |
 | 安装域默认语言（D49） | 未跑 | 需重新出包后的安装域断言；lifecycle 不查 `locale.preference` |
-| hook/DOM 行为面 | 未跑（已登记 trigger） | W0-6；触发条件在 [triggers](../triggers.md) |
+| hook/DOM 行为面 | 未跑（已登记 trigger） | W0-6；触发条件在 [triggers](../../triggers.md) |
 | world-tree（workspaceFinal） | 未跑（设计） | snapshots/README 设计稿；无场景声称 bundle 终态 |
 | 真实 GitHub CI / model-smoke | 未跑 | 静态契约在场；需 push / 手动 dispatch |
 
@@ -640,12 +643,12 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 | 面 | 状态 | 判定 / 证据 |
 |---|---|---|
-| 旧场 present 证据（legacy 分支） | 已探 | [BUG-168](../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md)：整段载荷子串 → 别的 bundle 的 present + 一句提及即 PASS |
-| readiness 的 Markdown 结构面 | 已探 | [BUG-169](../_archived/fixed_bugs/BUG-169-readiness-fenced-code-verdict.md)（围栏翻转）、[BUG-170](../_archived/fixed_bugs/BUG-170-readiness-bold-label-not-recognized.md)（加粗标签假红） |
-| protocol 版本链（v3） | 已探 | [BUG-171](../_archived/fixed_bugs/BUG-171-protocol-version-chain-only-previous-snapshot.md)：只查 v2，v1 空快照仍 PASS |
-| CI step 跳过面（smoke） | 已修（验证） | [BUG-172](../_archived/fixed_bugs/BUG-172-smoke-registry-if-false-step-counted.md)：step 条件/continue-on-error 不再算执行；[BUG-176](../_archived/fixed_bugs/BUG-176-smoke-symlink-invisible-to-registry.md)：symlink 枚举红 |
-| client-effect 方括号访问 | 已探 | [BUG-173](../_archived/fixed_bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md)：`scoped['effect']` 无返回回调逃逸 |
-| lifecycle 产物新鲜度 | 已探 | [BUG-174](../_archived/fixed_bugs/BUG-174-lifecycle-stale-dist-tarball.md)：`_dist` tarball 可陈旧，无自检 |
+| 旧场 present 证据（legacy 分支） | 已探 | [BUG-168](../../_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md)：整段载荷子串 → 别的 bundle 的 present + 一句提及即 PASS |
+| readiness 的 Markdown 结构面 | 已探 | [BUG-169](../../_archived/fixed_bugs/BUG-169-readiness-fenced-code-verdict.md)（围栏翻转）、[BUG-170](../../_archived/fixed_bugs/BUG-170-readiness-bold-label-not-recognized.md)（加粗标签假红） |
+| protocol 版本链（v3） | 已探 | [BUG-171](../../_archived/fixed_bugs/BUG-171-protocol-version-chain-only-previous-snapshot.md)：只查 v2，v1 空快照仍 PASS |
+| CI step 跳过面（smoke） | 已修（验证） | [BUG-172](../../_archived/fixed_bugs/BUG-172-smoke-registry-if-false-step-counted.md)：step 条件/continue-on-error 不再算执行；[BUG-176](../../_archived/fixed_bugs/BUG-176-smoke-symlink-invisible-to-registry.md)：symlink 枚举红 |
+| client-effect 方括号访问 | 已探 | [BUG-173](../../_archived/fixed_bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md)：`scoped['effect']` 无返回回调逃逸 |
+| lifecycle 产物新鲜度 | 已探 | [BUG-174](../../_archived/fixed_bugs/BUG-174-lifecycle-stale-dist-tarball.md)：`_dist` tarball 可陈旧，无自检 |
 | Y3 roleFace | 已关闭（无发现） | `replay-scene.spec` 15/15；roleFace 子集/重复/外来/legacy 矩阵覆盖 |
 | Y5 client-load 绑定 | 已关闭（无发现） | `client-load-select.spec` 1/1；标题回退受禁；seed 双份 = 观察 |
 | 方法库标点/尾部邻接 | 未跑 | Z4 空白；下轮候选 |
@@ -654,24 +657,24 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 | 面 | 状态 | 判定 / 证据 |
 |---|---|---|
-| ci-workflow 条件表达式 | 已探 | [BUG-177](../_archived/fixed_bugs/BUG-177-ci-workflow-expression-normalization.md)：`${{ always() }}` 假红 / `${{ true }}` 假绿 |
-| readiness Markdown 容器 | 已探 | [BUG-178](../_archived/fixed_bugs/BUG-178-readiness-markdown-containers-and-bold-paren.md)：blockquote/indented code/加粗括号 |
-| HTML 注释块 | 已探 | [BUG-179](../_archived/fixed_bugs/BUG-179-html-comments-not-masked.md)：notes 证据与 readiness 判定都可被注释冒充 |
-| 方法标题未知/重复段 | 已探 | [BUG-180](../_archived/fixed_bugs/BUG-180-method-heading-duplicate-unknown-segments-dropped.md)：编辑丢段 |
-| artifact 新鲜度（文件集） | 已探 | [BUG-181](../_archived/fixed_bugs/BUG-181-artifact-freshness-deletion-blind.md)：删除不被发现 |
-| on: 解析复用 | 已探 | [BUG-182](../_archived/fixed_bugs/BUG-182-model-workflow-duplicate-onkeys-empty-map.md)：第二份 onKeysOf + `{}` 假红 |
-| note-scan 缩进 | 已探 | [BUG-183](../_archived/fixed_bugs/BUG-183-note-scan-indented-status-heading.md)：0–3 空格合法缩进被误杀 |
+| ci-workflow 条件表达式 | 已探 | [BUG-177](../../_archived/fixed_bugs/BUG-177-ci-workflow-expression-normalization.md)：`${{ always() }}` 假红 / `${{ true }}` 假绿 |
+| readiness Markdown 容器 | 已探 | [BUG-178](../../_archived/fixed_bugs/BUG-178-readiness-markdown-containers-and-bold-paren.md)：blockquote/indented code/加粗括号 |
+| HTML 注释块 | 已探 | [BUG-179](../../_archived/fixed_bugs/BUG-179-html-comments-not-masked.md)：notes 证据与 readiness 判定都可被注释冒充 |
+| 方法标题未知/重复段 | 已探 | [BUG-180](../../_archived/fixed_bugs/BUG-180-method-heading-duplicate-unknown-segments-dropped.md)：编辑丢段 |
+| artifact 新鲜度（文件集） | 已探 | [BUG-181](../../_archived/fixed_bugs/BUG-181-artifact-freshness-deletion-blind.md)：删除不被发现 |
+| on: 解析复用 | 已探 | [BUG-182](../../_archived/fixed_bugs/BUG-182-model-workflow-duplicate-onkeys-empty-map.md)：第二份 onKeysOf + `{}` 假红 |
+| note-scan 缩进 | 已探 | [BUG-183](../../_archived/fixed_bugs/BUG-183-note-scan-indented-status-heading.md)：0–3 空格合法缩进被误杀 |
 
 ### 第九轮新增面（2026-11-14）
 
 | 面 | 状态 | 判定 / 证据 |
 |---|---|---|
-| ci-workflow quoted/comment 表达式 | 已探 | [BUG-184](../_archived/fixed_bugs/BUG-184-ci-workflow-quoted-comment-expressions.md)：假红/假绿 |
-| 共享 Markdown mask 顺序 | 已探 | [BUG-185](../_archived/fixed_bugs/BUG-185-markdown-mask-html-before-fence.md)：围栏内 `<!--` 吞真实内容 |
-| fix-evidence marker/路径 | 已探 | [BUG-186](../_archived/fixed_bugs/BUG-186-fix-evidence-negation-and-exit-markers.md)、[BUG-189](../_archived/fixed_bugs/BUG-189-fix-evidence-directory-path-prefix.md)：否定/exit/目录 |
-| ci-workflow shell 短路 | 已探 | [BUG-187](../_archived/fixed_bugs/BUG-187-ci-workflow-shell-short-circuit.md)：短路的 node 段仍算执行 |
-| note-scan 加粗状态标签 | 已探 | [BUG-188](../_archived/fixed_bugs/BUG-188-note-scan-bold-status-label.md)：`> **状态**：` 假红 |
-| on: flow mapping | 已探 | [BUG-190](../_archived/fixed_bugs/BUG-190-ci-workflow-inline-on-flow-mapping.md)：inline mapping 假红 |
+| ci-workflow quoted/comment 表达式 | 已探 | [BUG-184](../../_archived/fixed_bugs/BUG-184-ci-workflow-quoted-comment-expressions.md)：假红/假绿 |
+| 共享 Markdown mask 顺序 | 已探 | [BUG-185](../../_archived/fixed_bugs/BUG-185-markdown-mask-html-before-fence.md)：围栏内 `<!--` 吞真实内容 |
+| fix-evidence marker/路径 | 已探 | [BUG-186](../../_archived/fixed_bugs/BUG-186-fix-evidence-negation-and-exit-markers.md)、[BUG-189](../../_archived/fixed_bugs/BUG-189-fix-evidence-directory-path-prefix.md)：否定/exit/目录 |
+| ci-workflow shell 短路 | 已探 | [BUG-187](../../_archived/fixed_bugs/BUG-187-ci-workflow-shell-short-circuit.md)：短路的 node 段仍算执行 |
+| note-scan 加粗状态标签 | 已探 | [BUG-188](../../_archived/fixed_bugs/BUG-188-note-scan-bold-status-label.md)：`> **状态**：` 假红 |
+| on: flow mapping | 已探 | [BUG-190](../../_archived/fixed_bugs/BUG-190-ci-workflow-inline-on-flow-mapping.md)：inline mapping 假红 |
 
 ### 第十轮新增面（2026-11-15）
 
@@ -679,36 +682,36 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 |---|---|---|
 | import 边同构（六搬家 commit） | 已关闭 | R0a：逐对 base/post + rename 映射，0 条边差 |
 | 搬家 commit 的非 import 源码变更 | 已探 | R0b：只剩路径字面量 + 生成器新增；无逻辑改动 |
-| 旧路径字面量（live 面） | 已探（1 观察） | R0c + R3：分段字面量再抓 2 处 → [BUG-192](../_archived/fixed_bugs/BUG-192-snapshot-replay-offline-preload-stale-path.md)、[BUG-193](../_archived/fixed_bugs/BUG-193-cdp-ask-spawns-moved-probe-path.md)；`runtime/README.md` 散文路径 = 观察 |
+| 旧路径字面量（live 面） | 已探（1 观察） | R0c + R3：分段字面量再抓 2 处 → [BUG-192](../../_archived/fixed_bugs/BUG-192-snapshot-replay-offline-preload-stale-path.md)、[BUG-193](../../_archived/fixed_bugs/BUG-193-cdp-ask-spawns-moved-probe-path.md)；`runtime/README.md` 散文路径 = 观察 |
 | 账本完整性（asset / guard / 索引） | 已关闭 | R0d：213 = 213 双向零差；登记簿 `to` 全在 HEAD |
-| 位置门禁的补集 | 已探 → 已开卡 | R1：三格 + 重生成账本 = 17/0 全绿 → [BUG-191](../_archived/fixed_bugs/BUG-191-placement-gates-unknown-subtree-unruled.md) |
-| 索引 importer 面 | 已探 → 已开卡 | R4/R7：`.tsx` 被过滤 → 6 模块假「—」 → [BUG-194](../_archived/fixed_bugs/BUG-194-test-index-drops-tsx-importers.md) |
+| 位置门禁的补集 | 已探 → 已开卡 | R1：三格 + 重生成账本 = 17/0 全绿 → [BUG-191](../../_archived/fixed_bugs/BUG-191-placement-gates-unknown-subtree-unruled.md) |
+| 索引 importer 面 | 已探 → 已开卡 | R4/R7：`.tsx` 被过滤 → 6 模块假「—」 → [BUG-194](../../_archived/fixed_bugs/BUG-194-test-index-drops-tsx-importers.md) |
 | 登记簿多跳语义 | 已探（观察） | R0f：38 条两跳合并；门禁不验 `to` 语义 |
 | 登记簿的搬家史覆盖 | 已探（观察） | R0g：只覆盖 11-15 一波；冻结层 474 个旧代码跨度无映射（0 条链接） |
 | 深度常量 / 相对根 | 已探（无新发现） | R2：枚举 148 处；两处已知实例已修，撤查 `scripts/lib/*/` 无静默 |
 | 非 JS 字面量消费面 | 已探 → 已开卡 | R3：入口 spawn/preload 两处断链 → 192/193；`dev/*.mjs` / `scripts/run-ops` / `probes` 仍无守卫（观察） |
 | 派生件新鲜度 | 部分 | R6 未跑；`dist-freshness` 三态已落地，overlay / snapshot 未对账 |
-| 无车道消费者的搬家模块 | 部分 → 已开卡 | R7：`.cjs` 面 → [BUG-196](../_archived/fixed_bugs/BUG-196-test-surface-cjs-coverage-blind.md)；完整反向图未跑 |
-| 搬家新门禁的反证 | 已探 → 已开卡 | R8：`dev/hooks` 扫面无注入案例 → [BUG-197](../_archived/fixed_bugs/BUG-197-repo-conventions-hooks-surface-no-gate-case.md) |
+| 无车道消费者的搬家模块 | 部分 → 已开卡 | R7：`.cjs` 面 → [BUG-196](../../_archived/fixed_bugs/BUG-196-test-surface-cjs-coverage-blind.md)；完整反向图未跑 |
+| 搬家新门禁的反证 | 已探 → 已开卡 | R8：`dev/hooks` 扫面无注入案例 → [BUG-197](../../_archived/fixed_bugs/BUG-197-repo-conventions-hooks-surface-no-gate-case.md) |
 | 生成器吸收异常落点 | 已探 → 已开卡 | R1/R4：重跑账本/索引把错落点或错过滤吸收为准 → 191 / 194 |
-| 源码头注 / 账本 claim | 已探 → 已开卡 | R3 邻接：7 处旧路径进 `uniqueClaim` → [BUG-198](../_archived/fixed_bugs/BUG-198-spec-header-stale-path-frozen-into-ledger-claim.md) |
-| CLI 数值输入（`--jobs`） | 已探 → 已开卡 | R6 邻接：0 案例真跑 + `undefined` 假失败 → [BUG-195](../_archived/fixed_bugs/BUG-195-gates-e2e-adhoc-jobs-value-fake-failures.md) |
+| 源码头注 / 账本 claim | 已探 → 已开卡 | R3 邻接：7 处旧路径进 `uniqueClaim` → [BUG-198](../../_archived/fixed_bugs/BUG-198-spec-header-stale-path-frozen-into-ledger-claim.md) |
+| CLI 数值输入（`--jobs`） | 已探 → 已开卡 | R6 邻接：0 案例真跑 + `undefined` 假失败 → [BUG-195](../../_archived/fixed_bugs/BUG-195-gates-e2e-adhoc-jobs-value-fake-failures.md) |
 | pack 构建 / 注入面 | 未跑 | R9（需构建；未构建记未跑） |
 
 ### 第十一轮新增面（2026-11-16）
 
 | 面 | 状态 | 判定 / 证据 |
 |---|---|---|
-| 离线闸的 promises Resolver | 已探 → 已开卡 | 武装态 `new Resolver().resolve4` 解析外网 → [BUG-199](../_archived/fixed_bugs/BUG-199-offline-gate-promises-resolver-bypass.md)（P1） |
-| 位置门禁的未知深度 | 已探 → 已开卡 | 深路径全绿、文档称红 → [BUG-200](../_archived/fixed_bugs/BUG-200-test-placement-unknown-depth-not-enforced.md) |
-| 守卫台账的最新批覆盖 | 已探 → 已开卡 | 72 条/止于 190、守卫标题已声称 19x → [BUG-201](../_archived/fixed_bugs/BUG-201-guard-ledger-closed-set-stops-at-190.md) |
-| claim 路径的前缀面 | 已探 → 已开卡 | `scripts/…` 注入绿、`tests/…` 红 → [BUG-202](../_archived/fixed_bugs/BUG-202-asset-ledger-claim-path-check-tests-prefix-only.md) |
-| gates.e2e 的 flag 形状 | 已探 → 已开卡 | `--case=` 空值实跑 130 案例 → [BUG-203](../_archived/fixed_bugs/BUG-203-gates-e2e-empty-and-bare-flag-shapes.md) |
-| live 文档散文路径 | 已探 → 已开卡 | 两处旧路径（doc-paths 只扫反引号） → [BUG-204](../_archived/fixed_bugs/BUG-204-live-doc-prose-stale-paths-ungated.md) |
-| 镜像 `shared/` 兜底 | 已探 → 已开卡 | run/shared 与 cockpit lib/shared 两格 → [BUG-205](../_archived/fixed_bugs/BUG-205-mirror-shared-escape-hatch.md) |
-| 离线闸回归判据 | 已探 → 已开卡 | 源码子串不执行 install() + SMOKE_ONLY → [BUG-206](../_archived/fixed_bugs/BUG-206-offline-preload-source-substring-test-and-smoke-only.md) |
-| tests 下的 symlink 目录 | 已探 → 已开卡 | 位置门禁 PASS / node 零个测试被选中 → [BUG-207](../_archived/fixed_bugs/BUG-207-tests-symlink-directory-passes-placement-never-runs.md) |
-| 索引抽查的集合面 | 已探 → 已开卡 | 合成丢 importer 仍绿 → [BUG-208](../_archived/fixed_bugs/BUG-208-test-index-tsx-spot-check-nonempty-only.md) |
+| 离线闸的 promises Resolver | 已探 → 已开卡 | 武装态 `new Resolver().resolve4` 解析外网 → [BUG-199](../../_archived/fixed_bugs/BUG-199-offline-gate-promises-resolver-bypass.md)（P1） |
+| 位置门禁的未知深度 | 已探 → 已开卡 | 深路径全绿、文档称红 → [BUG-200](../../_archived/fixed_bugs/BUG-200-test-placement-unknown-depth-not-enforced.md) |
+| 守卫台账的最新批覆盖 | 已探 → 已开卡 | 72 条/止于 190、守卫标题已声称 19x → [BUG-201](../../_archived/fixed_bugs/BUG-201-guard-ledger-closed-set-stops-at-190.md) |
+| claim 路径的前缀面 | 已探 → 已开卡 | `scripts/…` 注入绿、`tests/…` 红 → [BUG-202](../../_archived/fixed_bugs/BUG-202-asset-ledger-claim-path-check-tests-prefix-only.md) |
+| gates.e2e 的 flag 形状 | 已探 → 已开卡 | `--case=` 空值实跑 130 案例 → [BUG-203](../../_archived/fixed_bugs/BUG-203-gates-e2e-empty-and-bare-flag-shapes.md) |
+| live 文档散文路径 | 已探 → 已开卡 | 两处旧路径（doc-paths 只扫反引号） → [BUG-204](../../_archived/fixed_bugs/BUG-204-live-doc-prose-stale-paths-ungated.md) |
+| 镜像 `shared/` 兜底 | 已探 → 已开卡 | run/shared 与 cockpit lib/shared 两格 → [BUG-205](../../_archived/fixed_bugs/BUG-205-mirror-shared-escape-hatch.md) |
+| 离线闸回归判据 | 已探 → 已开卡 | 源码子串不执行 install() + SMOKE_ONLY → [BUG-206](../../_archived/fixed_bugs/BUG-206-offline-preload-source-substring-test-and-smoke-only.md) |
+| tests 下的 symlink 目录 | 已探 → 已开卡 | 位置门禁 PASS / node 零个测试被选中 → [BUG-207](../../_archived/fixed_bugs/BUG-207-tests-symlink-directory-passes-placement-never-runs.md) |
+| 索引抽查的集合面 | 已探 → 已开卡 | 合成丢 importer 仍绿 → [BUG-208](../../_archived/fixed_bugs/BUG-208-test-index-tsx-spot-check-nonempty-only.md) |
 | R6 派生件新鲜度 | 已关闭（本轮） | `dist-freshness` 负控红/还原绿；`overlay-fresh` 门在；构建面见 R9 |
 | R9 构建 / 注入面 | 已关闭（本轮） | `pnpm build` 后 111 = 111；`lib/client.js`/`cordis.patch.yml` 目标在场；typecheck/vendor 绿 |
 
@@ -759,7 +762,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 ### 第 22 轮（2026-11-12 02:0x）：第二轮探索——profile 过期 + i18n 面对账
 
 - **进入**：用户反馈「探索有效、继续」；新 goal 优先今日新面。先做 i18n 静态对账，再跑运行级验证。
-- **发现**：[BUG-066](../_archived/fixed_bugs/BUG-066-research-profile-team-version-drift-banner-timeout.md) **P2**——
+- **发现**：[BUG-066](../../_archived/fixed_bugs/BUG-066-research-profile-team-version-drift-banner-timeout.md) **P2**——
   `research` profile（回放/团队冒烟/录制工具三方依赖）的团队层停在 **rc.2**，runtime 是 **rc.5**：
   `dsh web` 拒绝启动，冒烟以「等待启动横幅超时」收场（原文里才有 incompatible）。三处缺口：
   ① 版本面只修过 `deep-research` 那一份 `profile_ok`（boot-run.sh 注释写着同一事故教训），smoke 的镜像版
@@ -785,7 +788,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   「对话/方法库/研究状态/研究图谱/研究配置/终稿」全在。
 - **i18n 静态面（收口）**：`locales.ts` 521=521、`zh-fold/en-fold` 214=214、占位符逐 key 0 mismatch、
   `t()` 用到的 267 key 全存在；数据面主调用点均显式传 `props.t`。
-- **回放仍被 [BUG-066](../_archived/fixed_bugs/BUG-066-research-profile-team-version-drift-banner-timeout.md) 挡**：
+- **回放仍被 [BUG-066](../../_archived/fixed_bugs/BUG-066-research-profile-team-version-drift-banner-timeout.md) 挡**：
   `research` profile 团队层 rc.2 vs runtime rc.5，`dsh web` 拒绝启动（banner 超时）。等该卡修复或
   重建 profile 后再跑 A/C。
 - **门禁**：`verify` 1 红、`pnpm test` 1 红——均为另一 agent 在办的
@@ -793,7 +796,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 ### 第 24 轮（2026-11-12 02:2x）：离线闸的边界
 
-- **发现**：[BUG-067](../_archived/fixed_bugs/BUG-067-offline-gate-dns-resolve-bypass.md) **P2**——BUG-064 的修复件
+- **发现**：[BUG-067](../../_archived/fixed_bugs/BUG-067-offline-gate-dns-resolve-bypass.md) **P2**——BUG-064 的修复件
   （在办未提交的 `replay-network-offline.cjs`）在**武装态**（argv 命中 `isDshMain`）下实测：
   `fetch` 外网 → ECONNREFUSED ✓、`dns.lookup` → ENOTFOUND ✓、loopback → 200 ✓，但
   **`dns.promises.resolve4('example.com')` 仍解析成功**（172.66.147.243 / 104.20.23.154）——`resolve*`
@@ -801,7 +804,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   当前 fixture（web_search/web_fetch 走 fetch）已被覆盖，所以是边界/承诺问题，不是现行故障。
 - **方法记录**：探针用 `/tmp/fake/apps/cli/lib/bin.js` 让 argv 尾命中 `isDshMain()` 的形态，从而真正
   安装闸门——比单纯 require 模块更能复现真实武装态。
-- **未跑**：回放 A/C（仍被 [BUG-066](../_archived/fixed_bugs/BUG-066-research-profile-team-version-drift-banner-timeout.md)
+- **未跑**：回放 A/C（仍被 [BUG-066](../../_archived/fixed_bugs/BUG-066-research-profile-team-version-drift-banner-timeout.md)
   的 profile 版本挡住）；X6。
 - **下一层**：BUG-066 修复后跑回放；继续 run 通道 boot 序列与 i18n 折叠文案的 en 运行断言。
 
@@ -811,10 +814,10 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   → **A PASS、C0–C5 全 PASS**（C5 逐字命中金标准）。这同时确认了 **BUG-064**（离线闸生效）与
   **BUG-061**（C2 页签 + 渲染金标准）的运行级修复；仍红的三条 B 是 **D48 后快照未重录**（persona/headers/
   runtime-context），属已知的 with-key 项。
-- **自我修正（撤回）**：[归档 BUG-066](../_archived/fixed_bugs/BUG-066-research-profile-team-version-drift-banner-timeout.md)
+- **自我修正（撤回）**：[归档 BUG-066](../../_archived/fixed_bugs/BUG-066-research-profile-team-version-drift-banner-timeout.md)
   的机制句「团队层 rc.2 → dsh 拒绝启动」被三组对照实验证伪（research 无闸 / research+闸 /
   deep-research+闸 全部出横幅）。02:0x 那次 banner 超时仍未复现，原因未定。
-- **新卡**：[BUG-070](../_archived/fixed_bugs/BUG-070-bug066-mechanism-refuted-and-residual-profile-wiring.md) **P2**——
+- **新卡**：[BUG-070](../../_archived/fixed_bugs/BUG-070-bug066-mechanism-refuted-and-residual-profile-wiring.md) **P2**——
   记录上述证伪 + 两处残留：① `team-preflight` 仍 `PROFILE='research'` 且未用 `profile-health`
   （归档 066 状态行称「team-preflight 本就用它」与代码不符）；② `profile-health` 的「先跑 boot-run
   重建」对 `research` 是死路（boot-run 只建 deep-research）。
@@ -828,7 +831,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **现场**：对方已提交三个修复（`948a4e74` 双语产品内容/品牌、`e061ccc9` 根角色身份 + 072、`3ead53c3`
   回放自包含/profile 预检/超时归因）；`verify` **0 红**、`pnpm test` **1233 绿**、构建新鲜。
   072 按建议收窄为 `产品内(?!容)` 并留注释。
-- **新卡**：[BUG-073](../_archived/fixed_bugs/BUG-073-run-lock-creation-window-race.md) **P2**——共用
+- **新卡**：[BUG-073](../../_archived/fixed_bugs/BUG-073-run-lock-creation-window-race.md) **P2**——共用
   `scripts/lib/run-lock.mjs` 的建锁非原子：`mkdir` 与写 `owner.json` 之间的窗口里，并发者把半成品锁
   当陈旧锁接管；创建者随后写回自己的 pid，覆盖新属主 → 两者都以为持有锁，且文件变成失效 pid 后
   第三方可再接管。已用确定性步骤复现（`B acquired = true` → `owner = null, file pid 99999`）。
@@ -838,7 +841,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **X8**：在全绿树上重新起跑（结果见下轮/本节更新）。
 ### 第 28 轮（2026-11-12 04:1x）：解析器变异矩阵抓到 readiness 劫持
 
-- **新卡**：[BUG-074](../_archived/fixed_bugs/BUG-074-readiness-inline-quote-hijack.md) **P1**——readiness 终局解析被
+- **新卡**：[BUG-074](../../_archived/fixed_bugs/BUG-074-readiness-inline-quote-hijack.md) **P1**——readiness 终局解析被
   **行内引用的旧判定**劫持：`旧轮记录：\`readiness: PASS\`；本轮真实终局：readiness: FAIL` → 判 **PASS**
   （fail-open，门A/门②③/run-accept 都吃它）；反向 `- **第 1 轮**：\`readiness: FAIL\` 血统；本轮 readiness: PASS`
   → 判 **FAIL**（误杀）。根因：`stripVerdictDecor` 的「短标签 → 包裹壳 → 行首 readiness」把引用内容
@@ -849,7 +852,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   仅记录「错误文案可更具体（raw 含围栏外文字）」，不建卡。
 - **观察**：D49 默认中文的「用户显式选 English 仍覆盖」目前只有手工验证；`client-load` 已把浏览器钉 zh，
   运行时 en 切换路径没有真浏览器冒烟覆盖，且 Note 自述 L2 安装形态未复跑（bundle patch 改的是安装缺省）。
-- **同一轮再抓一条**：[BUG-075](../_archived/fixed_bugs/BUG-075-hitl2-pending-row-counted-as-decision.md) **P1**——
+- **同一轮再抓一条**：[BUG-075](../../_archived/fixed_bugs/BUG-075-hitl2-pending-row-counted-as-decision.md) **P1**——
   门③ 把「HITL2 **未拍板**」当拍板行：`isHitl2Row` 只做 `/HITL2/` 词面判断；合成 bundle 实测
   「pending-only 行 + 同 run 旧答复」→ 门③ **PASS**（G8 形态 fail-open：v2 未裁决也能放行）。
   根因 = 行判据无决策/否定语义 + 见证不绑最新 ask/版本。
@@ -857,7 +860,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **未跑**：X8 seed 模式（主机 load/cpu 2.87 → NOT-RUN）；X6/快照重录（预算）。
 ### 第 29 轮（2026-11-12 04:3x）：交付链全量扫出假红
 
-- **新卡**：[BUG-076](../_archived/fixed_bugs/BUG-076-schema-scan-whitelist-missing-protocol-artifacts.md) **P2 等人拍板**——
+- **新卡**：[BUG-076](../../_archived/fixed_bugs/BUG-076-schema-scan-whitelist-missing-protocol-artifacts.md) **P2 等人拍板**——
   `schema-scan` 的 D28 顶层白名单漏了今天协议/复核/wave 的 canonical 件：`protocol.json`(8)、`review/`(8)、
   `protocol-audit.md`(5)、`waves/`(4)、`protocol/`(1)；契约期新 run 必红。`run-accept` 不跑该门（不阻塞
   验收），但 L4/发布清单被误判；真违约（`.probe.py` 等）反而被淹没。
@@ -900,7 +903,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **未跑**：X6/快照重录（预算）。
 ### 第 32 轮（2026-11-12 04:4x）：run-accept 全链冒烟抓到硬崩溃
 
-- **新卡**：[BUG-077](../_archived/fixed_bugs/BUG-077-protocol-audit-write-reference-error.md) **P1**——
+- **新卡**：[BUG-077](../../_archived/fixed_bugs/BUG-077-protocol-audit-write-reference-error.md) **P1**——
   `protocol-audit --write` 在 `renderReport` 里引用未 import 的 `PROTOCOL_CONTRACT_DATE`
   （`6a463a20` 删了 import 但模板还在用）→ `ReferenceError` exit 1；`run-accept` 预检全绿后
   **写报告阶段必败**，`protocol-audit.md` 永远写不出、验收被卡死。
@@ -917,7 +920,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   但 manifest 是 ops 目录说明书、无门禁消费，先记观察。
 ### 第 33 轮（2026-11-12 04:5x）：门② 的相对逃逸
 
-- **新卡**：[BUG-078](../_archived/fixed_bugs/BUG-078-portable-bundle-path-relative-escape.md) **P2 等人拍板**——
+- **新卡**：[BUG-078](../../_archived/fixed_bugs/BUG-078-portable-bundle-path-relative-escape.md) **P2 等人拍板**——
   `portableBundlePath` 对相对路径直接放行（不查 `..`），门② `presentGate` 把
   `../drt_x/final/v1.md`（bundle 外）当可移植标签并 **PASS**；绝对外部路径则正确 RED。
   `repairReceiptPaths` 同病：外部相对指针原样保留、`ok=true`、无 action。
@@ -932,7 +935,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **未跑**：077 仍未修（`run-accept.e2e` 红着）；X6/快照重录（预算）。
 ### 第 34 轮（2026-11-12 04:5x）：冒烟清单里躺着一具死尸
 
-- **新卡**：[BUG-079](../_archived/fixed_bugs/BUG-079-user-env-smoke-dead-import-seed-core.md) **P2**——
+- **新卡**：[BUG-079](../../_archived/fixed_bugs/BUG-079-user-env-smoke-dead-import-seed-core.md) **P2**——
   `user-env.entry.mjs` 仍 import D40 S3（`33eea10b`）已删除的
   `packages/.../scripts/lib/seed-core.mjs` → **启动即 ERR_MODULE_NOT_FOUND**；而 `scripts/README.md`
   仍把它列为 keyless 关键面（「已有用户环境共存」）——自 11-01 起零覆盖，`smoke-contract` 只对账
@@ -969,7 +972,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 | 预算= 空值 | warn `strategy-budget-missing` + PASS | ✓（缺字段 = warning） |
 
 结论：protocol-audit 的判据与 D48 笔记逐条吻合，未找到新的假绿/假红；该门唯一缺陷仍是
-[BUG-077](../_archived/fixed_bugs/BUG-077-protocol-audit-write-reference-error.md)（`--write` 崩溃）。
+[BUG-077](../../_archived/fixed_bugs/BUG-077-protocol-audit-write-reference-error.md)（`--write` 崩溃）。
 - **未跑**：077/079 未修；X6/快照重录（预算）。
 ## 第三轮 goal 收口（2026-11-12 05:0x，12 轮用满）
 
@@ -977,12 +980,12 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 | 卡 | 级别 | 一句话 | 状态 |
 |---|---|---|---|
-| [BUG-074](../_archived/fixed_bugs/BUG-074-readiness-inline-quote-hijack.md) | P1 | readiness 终局被行内引用劫持：同行旧 PASS + 真实 FAIL 读成 PASS（反向误杀） | 等人拍板 |
-| [BUG-075](../_archived/fixed_bugs/BUG-075-hitl2-pending-row-counted-as-decision.md) | P1 | 门③ 把「HITL2 未拍板」当拍板行：同 run 旧答复即可放行（G8 fail-open） | 等人拍板 |
-| [BUG-076](../_archived/fixed_bugs/BUG-076-schema-scan-whitelist-missing-protocol-artifacts.md) | P2 | schema-scan 白名单漏 protocol/review/waves/protocol-audit.md → 新契约 run 必红 | 等人拍板 |
-| [BUG-077](../_archived/fixed_bugs/BUG-077-protocol-audit-write-reference-error.md) | P1 | `protocol-audit --write` 缺 import 崩溃 → run-accept 写报告阶段必败 | 修复就绪 |
-| [BUG-078](../_archived/fixed_bugs/BUG-078-portable-bundle-path-relative-escape.md) | P2 | 相对 `..` present 路径绕过 bundle 外拒收（门② PASS） | 等人拍板 |
-| [BUG-079](../_archived/fixed_bugs/BUG-079-user-env-smoke-dead-import-seed-core.md) | P2 | user-env.entry 引用已删除 seed-core → 启动即崩，README 仍宣称覆盖 | 修复就绪 |
+| [BUG-074](../../_archived/fixed_bugs/BUG-074-readiness-inline-quote-hijack.md) | P1 | readiness 终局被行内引用劫持：同行旧 PASS + 真实 FAIL 读成 PASS（反向误杀） | 等人拍板 |
+| [BUG-075](../../_archived/fixed_bugs/BUG-075-hitl2-pending-row-counted-as-decision.md) | P1 | 门③ 把「HITL2 未拍板」当拍板行：同 run 旧答复即可放行（G8 fail-open） | 等人拍板 |
+| [BUG-076](../../_archived/fixed_bugs/BUG-076-schema-scan-whitelist-missing-protocol-artifacts.md) | P2 | schema-scan 白名单漏 protocol/review/waves/protocol-audit.md → 新契约 run 必红 | 等人拍板 |
+| [BUG-077](../../_archived/fixed_bugs/BUG-077-protocol-audit-write-reference-error.md) | P1 | `protocol-audit --write` 缺 import 崩溃 → run-accept 写报告阶段必败 | 修复就绪 |
+| [BUG-078](../../_archived/fixed_bugs/BUG-078-portable-bundle-path-relative-escape.md) | P2 | 相对 `..` present 路径绕过 bundle 外拒收（门② PASS） | 等人拍板 |
+| [BUG-079](../../_archived/fixed_bugs/BUG-079-user-env-smoke-dead-import-seed-core.md) | P2 | user-env.entry 引用已删除 seed-core → 启动即崩，README 仍宣称覆盖 | 修复就绪 |
 
 ### 覆盖增量（本轮跑过的档位/探针）
 
@@ -1010,7 +1013,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 四条都指向**门禁/验收合同**，按 `_backlog/AGENTS` 需要你或评审放行；修复方落 077/079 即可解除验收阻塞。
 ### 第 37 轮（2026-11-13 02:4x）：半角括号绕过 BUG-123 的修复
 
-- **新卡**：[BUG-127](../_archived/fixed_bugs/BUG-127-library-halfwidth-parens-provenance-default.md) **P2 修复就绪**——
+- **新卡**：[BUG-127](../../_archived/fixed_bugs/BUG-127-library-halfwidth-parens-provenance-default.md) **P2 修复就绪**——
   `library-fold` 的标题解析只认全角 `（）`：半角 `## 方法(来源〔默认偏好〕)` 里**括号内的标记被算成真默认**
   且 name 变成 `方法(来源)`；交换文档顺序后 `findDefaultMethod` 会把该条选成库默认（注入错误的
   `research:defaults` 方法默认）。BUG-123/124 的修复只覆盖全角。
@@ -1018,7 +1021,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **下一层**：同族归一助手是否还漏半角（upsert/render 往返）、半角 `〔〕` 与其他全角标点；未跑，记空白。
 ### 第 38 轮（2026-11-13 02:5x）：全角空格让 upsert 变成 dup
 
-- **新卡**：[BUG-128](../_archived/fixed_bugs/BUG-128-method-heading-ideographic-space-duplicate.md) **P2 修复就绪**——
+- **新卡**：[BUG-128](../../_archived/fixed_bugs/BUG-128-method-heading-ideographic-space-duplicate.md) **P2 修复就绪**——
   `methodHeadingPattern` 只把 `[ \t]` 当空白：标题含 **U+3000 全角空格**（中文输入法常见）时 fold 读得出
   name，upsert 却判 `created` → 编辑一次多出一条同名方法；旧条目后续编辑会改错对象，两条都带默认标记时
   普通保存被「多个默认偏好」拒绝。
@@ -1027,7 +1030,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   （全角冒号/顿号）未扫，记空白。
 ### 第 39 轮（2026-11-13 03:0x）：绝对路径的根被丢掉
 
-- **新卡**：[BUG-129](../_archived/fixed_bugs/BUG-129-final-path-drops-absolute-root-alias.md) **P2 修复就绪**——
+- **新卡**：[BUG-129](../../_archived/fixed_bugs/BUG-129-final-path-drops-absolute-root-alias.md) **P2 修复就绪**——
   `finalPathOf` 对绝对路径只留终稿族后缀：`/tmp/other-workspace/drt_x/final.md` 与
   `/ws/../other/drt_x/final/v2.md` 都返回 `drt_x/...`；两个消费方（delivery-watch / useStatusFeed）
   没有原文可校验 → 跨 workspace 同 slug 的 present 会被别名成当前 cwd 的 bundle（打开错文件或静默失败）。
@@ -1035,7 +1038,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **下一层**：`presentInLogs`（旧场非结构化 present）是否有同类根丢弃；未跑，记空白。
 ### 第 40 轮（2026-11-13 03:0x）：D50 的未知键静默失效
 
-- **新卡**：[BUG-131](../_archived/fixed_bugs/BUG-131-defaults-unknown-key-warnings-unsurfaced.md) **P2 修复就绪**——
+- **新卡**：[BUG-131](../../_archived/fixed_bugs/BUG-131-defaults-unknown-key-warnings-unsurfaced.md) **P2 修复就绪**——
   手写 `research-defaults.json` 打错键（`efort` / `audiance`）时：`show` 无任何提示、面板不渲染
   `store.warnings`、下一次写入把未知键**静默删除**。实测 show 输出 `ok revision=3 effort=deep
   output=full_report`（两个错键零提示），set 后文件里错键消失。
@@ -1044,7 +1047,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **下一层**：warnings 的本地化文案与 problems 的视觉区分；未跑，记空白。
 ### 第 41 轮（2026-11-13 03:1x）：expectedRevision 不是 CAS
 
-- **新卡**：[BUG-132](../_archived/fixed_bugs/BUG-132-defaults-expected-revision-race-lost-update.md) **P2 修复就绪**——
+- **新卡**：[BUG-132](../../_archived/fixed_bugs/BUG-132-defaults-expected-revision-race-lost-update.md) **P2 修复就绪**——
   8 进程同时 `set`（同一 `expectedRevision=3`），**首轮就有 2 个返回 `ok revision=4`**：乐观并发的
   「stale 拒绝」只覆盖「读完→写前」的串行交错，**同时读**的写者都通过检查，后写覆盖先写，一次更新
   静默丢失（revision 只 +1）。unset/clear 同构。
@@ -1052,7 +1055,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **下一层**：clear 与 set 的并发（unlink 竞态）未单独实测；记空白。
 ### 第 42 轮（2026-11-13 03:1x）：sanitizePatch 的「拒绝」没落地
 
-- **新卡**：[BUG-133](../_archived/fixed_bugs/BUG-133-sanitize-patch-nested-unknown-keys-silent.md) **P2 修复就绪**——
+- **新卡**：[BUG-133](../../_archived/fixed_bugs/BUG-133-sanitize-patch-nested-unknown-keys-silent.md) **P2 修复就绪**——
   `sanitizePatch` 头注写「output/source 的未知子键拒绝」，实现却把未知子键塞进 warnings 后传 `[]`
   丢弃：`{"output":{"shape":"full_report","audiance":"CFO"}}` → problems=[]、patch 只剩 shape，
   命令 `ok` 写盘（audience 丢）；`{"source":{"familes":[…]}}` → 整条丢、只报 empty-patch（误导）。
@@ -1060,7 +1063,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **下一层**：面板 `store.setPatch` 同样放行（未知子键不进 problems）；warnings 词表与 131 统一；记空白。
 ### 第 43 轮（2026-11-13 03:2x）：门③绑定扫 content
 
-- **新卡**：[BUG-134](../_archived/fixed_bugs/BUG-134-gate-witness-bound-slugs-scans-content.md) **P1 等人拍板**——
+- **新卡**：[BUG-134](../../_archived/fixed_bugs/BUG-134-gate-witness-bound-slugs-scans-content.md) **P1 等人拍板**——
   门侧 `boundSlugsOf` 对整段 `arguments` 做 `drt_<slug>/` 子串扫描；合成会话只写过
   `drt_a/notes.md`、但 content 里提到 `drt_b/final/v1.md` → **drt_b 门③ PASS**（借到了 drt_a 的 HITL2 答复）。
   pack 侧 `slugInArgs` 已修过 BUG-090（只认路径字段），门侧没共享该判据（注释声称同源）。
@@ -1068,7 +1071,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **下一层**：`presentGate` 的会话范围同样受此绑定污染（路径仍需匹配本 bundle，风险较低）；未跑，记空白。
 ### 第 46 轮（2026-11-13 03:4x）：D50 真模型探针 C5 红 + 探针失败路径泄漏
 
-- **新卡**：[BUG-137](../_archived/fixed_bugs/BUG-137-defaults-probe-language-merged-into-defaults-option.md) **P2 等人拍板**——
+- **新卡**：[BUG-137](../../_archived/fixed_bugs/BUG-137-defaults-probe-language-merged-into-defaults-option.md) **P2 等人拍板**——
   `defaults-probe` seeded 场景 C5 失败：HITL1 第三问的选项名写成
   「沿用项目默认：近 12 个月 + official/regulatory + **中文**」——语言被并入「项目默认」选项（D50 明令禁止）。
   auto 场景对照 PASS，说明不是探针一律判红。
@@ -1077,7 +1080,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **未跑**：C5 的多次稳定性采样（需先修 136，避免继续制造孤儿宿主）；记空白。
 ### 第 47 轮（2026-11-13 03:5x）：归一化覆盖不到的尾部 = 幽灵条目
 
-- **新卡**：[BUG-138](../_archived/fixed_bugs/BUG-138-method-heading-unrecognized-suffix-ghost-entry.md) **P2 修复就绪**——
+- **新卡**：[BUG-138](../../_archived/fixed_bugs/BUG-138-method-heading-unrecognized-suffix-ghost-entry.md) **P2 修复就绪**——
   标题带未识别尾部（`[草稿]`、`v2`）时，fold 读得出 name，但 upsert 的白名单正则匹配不到 → **created**
   造出第二条同名；`removeMethodEntry` 只删得掉新的那条，旧条目成**幽灵**（再删返回 false、再编辑又新建）。
   实测：`created [方法, 方法]` → remove `[方法]` → remove again `false`。
@@ -1086,7 +1089,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   改法未实现；记空白。
 ### 第 48 轮（2026-11-13 04:0x）：设置文件的 BOM
 
-- **新卡**：[BUG-139](../_archived/fixed_bugs/BUG-139-defaults-bom-parse-failure.md) **P2 修复就绪**——
+- **新卡**：[BUG-139](../../_archived/fixed_bugs/BUG-139-defaults-bom-parse-failure.md) **P2 修复就绪**——
   `research-defaults.json` 首字节为 UTF-8 BOM 时 `parseDefaults` 直接 `JSON.parse` → `file=parse`：
   面板 invalid、命令拒绝、`research:defaults` prompt 整段不注入，唯一出路是 clear（丢设置）。
   Windows 记事本/PowerShell 的常规「UTF-8 with BOM」即可触发。
@@ -1094,11 +1097,11 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **下一层**：`frontmatter.mjs` 的 BOM 面（工具写入为主，风险低）未改；记空白。
 ### 第 49 轮（2026-11-13 04:1x）：两条 P1 的修复只收窄了词表/关键词
 
-- **[BUG-140](../_archived/fixed_bugs/BUG-140-hitl2-vocabulary-two-way-misclassification.md) P1 等人拍板**——075 修复的
+- **[BUG-140](../../_archived/fixed_bugs/BUG-140-hitl2-vocabulary-two-way-misclassification.md) P1 等人拍板**——075 修复的
   邻接复发：`HITL2 待用户确认（v2）` 不在否定表（表里只有「待确认」）却含决策词「确认」→ 计为拍板行；
   合成 bundle（v1 答复 + v2 pending 行）**门③ PASS**。反向：`无异议/OK/approved/采纳` 不在决策白名单
   → 真拍板被判非行（误杀）。
-- **[BUG-141](../_archived/fixed_bugs/BUG-141-readiness-inline-context-keyword-gap.md) P1 等人拍板**——074 修复的邻接复发：
+- **[BUG-141](../../_archived/fixed_bugs/BUG-141-readiness-inline-context-keyword-gap.md) P1 等人拍板**——074 修复的邻接复发：
   `旧轮真实记录：\`readiness: PASS\`；现在 readiness: FAIL` → **PASS**（旧引用带「真实」、裸写新判定不带
   关键词）；反向 → **FAIL**；引号 PASS + 裸写 FAIL → **null**。
 - **共性**：两处都把语义判断做成了有限词表/上下文窗口；修复方向应是「范围仲裁 + pending 优先/默认」
@@ -1115,16 +1118,16 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   **method-editor**）；它**写过** `drt_cn-us-ai-perception/run.md`（boundBy=write），事件数 ≥60、标题唯一
   → 被选择器当成「真实 run 的绑定会话」。
 - **新卡**：
-  - [BUG-142](../_archived/fixed_bugs/BUG-142-client-load-selects-method-editor-session.md) P2 修复就绪——选择器缺
+  - [BUG-142](../../_archived/fixed_bugs/BUG-142-client-load-selects-method-editor-session.md) P2 修复就绪——选择器缺
     「lead 根」门；method-editor 富会话被选中 → 状态页按 lead 期望判 → **假红**（不是产品渲染回归）。
-  - [BUG-143](../_archived/fixed_bugs/BUG-143-method-editor-root-has-team-lead-tools.md) P2 等人拍板——method-editor
+  - [BUG-143](../../_archived/fixed_bugs/BUG-143-method-editor-root-has-team-lead-tools.md) P2 等人拍板——method-editor
     根会话**仍拿到 Team Lead 全套工具**（实测 spawn_teammate×4 / team_task_create×9 / create_goal×1 /
     写 run.md）；071 的 persona 纠偏没覆盖 method-editor（当时「下一层」原话）。
 - **下一层**：若产品希望 method-editor 能看 run 状态，则 142 的修法改为「按 coach 自己的锚点真值判」；
   143 需产品决定 persona 边界还是 vendor 门控；记空白。
 ### 第 51 轮（2026-11-13 04:3x）：写侧/读侧不成对——代理记账行被打哑
 
-- **新卡**：[BUG-144](../_archived/fixed_bugs/BUG-144-kickoff-provenance-rows-not-counted-as-hitl2.md) **P1 等人拍板**——
+- **新卡**：[BUG-144](../../_archived/fixed_bugs/BUG-144-kickoff-provenance-rows-not-counted-as-hitl2.md) **P1 等人拍板**——
   `run-kickoff` 的官方代理记账行（`closingProvenanceRow` 写入 §Decisions）在 075 修复后不再被
   `isHitl2Row` 认：原话是 `OK`/`继续`/`就按这个吧` 时行内含「交付审阅 + 代理模拟」却无决策词 → false。
   实测：`OK` false、`继续` false、`就按这个吧` false、`同意按现稿交付` true。
@@ -1134,7 +1137,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **下一层**：历史 §Decisions 里的代理行统计（真实语料）未扫；记空白。
 ### 第 52 轮（2026-11-13 04:4x）：人工走查里的二级标题
 
-- **新卡**：[BUG-145](../_archived/fixed_bugs/BUG-145-manual-evidence-subheading-truncation.md) **P2 修复就绪**——
+- **新卡**：[BUG-145](../../_archived/fixed_bugs/BUG-145-manual-evidence-subheading-truncation.md) **P2 修复就绪**——
   `manualEvidenceOf` 以任意 `##` 为节尾：人工走查内含 `## 检查记录` → 返回 **null**（整节丢失）；
   `## 附注` → 尾部被截断。重跑验收/`--repair` 静默覆盖，062 的「保留人工证据」承诺在自由书写下失效。
 - **对照**：纯文本与 `###` 子标题正常保留。
@@ -1152,7 +1155,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   （136 端口自锁未修前不宜再跑，避免继续制造孤儿宿主）。
 ### 第 54 轮（2026-11-13 05:0x）：双语产品 × 中文 HITL 签名
 
-- **新卡**：[BUG-146](../_archived/fixed_bugs/BUG-146-hitl-signatures-chinese-only-bilingual.md) **P2 等人拍板**——
+- **新卡**：[BUG-146](../../_archived/fixed_bugs/BUG-146-hitl-signatures-chinese-only-bilingual.md) **P2 等人拍板**——
   HITL 判型只认中文文案（`研究类型` / `定稿（按现稿交付）`），门侧答复要求 label 含「定稿」：
   英文 HITL2 卡 + 英文答复 → **门③ RED**（答复在但不被认）；`deriveAnchors` → anchor-2 **upcoming**
   （开放交付审阅不显示 pending）。
@@ -1161,7 +1164,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **下一层**：中文旧卡/历史卡回归、英文 idle 卡的 UI 实测；记空白。
 ### 第 55 轮（2026-11-13 05:1x）：全绿输出里的「0 题」假绿
 
-- **新卡**：[BUG-147](../_archived/fixed_bugs/BUG-147-client-hitl-zero-answers-false-green.md) **P2 修复就绪**——
+- **新卡**：[BUG-147](../../_archived/fixed_bugs/BUG-147-client-hitl-zero-answers-false-green.md) **P2 修复就绪**——
   `client-hitl.entry` 全绿（12 PASS），但 ⑤b 明细是「共作答 **0** 题 / 卡共 1 题 · Submit 已点击」；
   断言 `/共作答 \d+ 题/` 把 0 也当通过 → 「挂起卡已答」是假绿（选择器未选中任何项，空提交关闭了回合）。
 - **同轮**：client-hitl 的其余观察（活标题翻转、横幅、右栏自动展开、二次挂起）**实打实 PASS**；
@@ -1169,7 +1172,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **下一层**：`hitl-answer` 为何 0 题（选择器/卡片结构）；空提交是否产品允许；记空白。
 ### 第 56 轮（2026-11-13 05:2x）：短引文不进审计
 
-- **新卡**：[BUG-148](../_archived/fixed_bugs/BUG-148-evidence-short-quotes-not-audited.md) **P2 修复就绪**——
+- **新卡**：[BUG-148](../../_archived/fixed_bugs/BUG-148-evidence-short-quotes-not-audited.md) **P2 修复就绪**——
   evidence-audit 只收集 ≥16 字的 `>` 引文；插入「短句伪造。」（6 字）与一条 23 字伪造，长伪造被
   `[转写不符]` 点名，**短伪造在 audit.md 里 0 次出现**（连 INFO 都没有；`摘录回溯 0/325` 的分母也不含它）。
 - **对照**：长伪造 finding 正确；短引文是「静默丢弃」而非「降级报告」。
@@ -1221,16 +1224,16 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 - **背景**：A 的 `bb0323ac` 修完 136–148 并归档；`verify` 0 红、`test` 1355 绿、构建 03:45 新鲜。
 - **新卡**：
-  - [BUG-149](../_archived/fixed_bugs/BUG-149-hitl2-pending-vocabulary-holes.md) **P1 等人拍板**——140 修复把判据反成
+  - [BUG-149](../../_archived/fixed_bugs/BUG-149-hitl2-pending-vocabulary-holes.md) **P1 等人拍板**——140 修复把判据反成
     「无 pending 即默认拍板」，pending 词表的遗漏被放大：`等回复/未最终裁决/挂起/推迟/待办：等用户/未决/暂不交付/on hold`
     **全部 APPROVE**（仅 `awaiting reply` 命中 await）。
-  - [BUG-150](../_archived/fixed_bugs/BUG-150-readiness-keyword-window-still-hijacked.md) **P1 等人拍板**——141 修复只把
+  - [BUG-150](../../_archived/fixed_bugs/BUG-150-readiness-keyword-window-still-hijacked.md) **P1 等人拍板**——141 修复只把
     关键词表扩到「现在/新判定」；`随后/复核后/结论/本 run` 的裸写 FAIL 仍被旧 PASS 劫持（实测 4/4 PASS）。
 - **修复回归（已验绿）**：145 人工走查含 `##` 完整保留；146 英文 HITL2 门③ PASS；148 短引文产出 finding。
 - **共性**：两处都在用**有限词表**做语义判断；修复方向应是「默认 fail-closed / 范围仲裁」，而不是继续加词。
 ### 第 58 轮（2026-11-13 05:1x）：147 修成了假红
 
-- **新卡**：[BUG-151](../_archived/fixed_bugs/BUG-151-client-hitl-click-count-false-red.md) **P2 修复就绪**——
+- **新卡**：[BUG-151](../../_archived/fixed_bugs/BUG-151-client-hitl-click-count-false-red.md) **P2 修复就绪**——
   147 用「点击计数 ≥1」判已答；但 Recommended 预选卡无需点击，答案批已落地
   （盘侧 `selected:["要 (Recommended)"]`）→ `client-hitl --port 3143` **⑤b FAIL（共作答 0 题）**，
   10 PASS / 2 FAIL。hitl-answer 自己的注释早写明「点击计数不可作判据」——修法选错了判据层。
@@ -1238,7 +1241,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **共性**：代理指标（点击计数/关键词/词表）代替盘侧事实——最近的修复反复在这条线上翻车。
 ### 第 59 轮（2026-11-13 05:2x）：X8 仍红——是负载假红？
 
-- **新卡**：[BUG-152](../_archived/fixed_bugs/BUG-152-client-load-unhealthy-host-assertion-red.md) **P2 修复就绪**——
+- **新卡**：[BUG-152](../../_archived/fixed_bugs/BUG-152-client-load-unhealthy-host-assertion-red.md) **P2 修复就绪**——
   142 的选择器修复已验（本轮 boundSession 是 **lead**，marker「处理已写入文件记录，采用」），但 X8 仍
   **68 PASS / 4 FAIL**；失败现场 `meta.json`：`reason=assertions`、`hostHealth=NO（load 15.45 / load/cpu 1.54）`、
   断连 0 次。收口判据 `isHostUnhealthyVerdict` 只在**连接死亡/pageLost** 时转 NOT-RUN → 负载下的
@@ -1258,14 +1261,14 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **未跑（主机 load 24 时不做浏览器/真模型）**：X8 健康窗口复跑、team-preflight/X6、151 的 client-hitl 复跑。
 ### 第 61 轮（2026-11-13 05:4x）：版本快照只查在场
 
-- **新卡**：[BUG-153](../_archived/fixed_bugs/BUG-153-protocol-snapshot-presence-only-not-content.md) **P2 等人拍板**——
+- **新卡**：[BUG-153](../../_archived/fixed_bugs/BUG-153-protocol-snapshot-presence-only-not-content.md) **P2 等人拍板**——
   protocol v2 + `protocol/v1.json = {}` → `protocol-audit` **PASS**：历史快照只查文件在场，schema/版本/
   设计指纹全未校验（D46 的「协议版本链」可被占位文件冒充）。
 - **对照**：当前版本的设计指纹（`protocol-audit.md` 的 vN design_sha256）已核；历史版本没有任何核对。
 - **下一层**：v3 多级链（只查 v{n-1} 是否足够）、真实 bundle 的 v1 快照内容复核；记空白。
 ### 第 62 轮（2026-11-13 06:0x）：交付清单漏了新证据体
 
-- **新卡**：[BUG-154](../_archived/fixed_bugs/BUG-154-manifest-roles-missing-new-artifacts.md) **P2 修复就绪**——
+- **新卡**：[BUG-154](../../_archived/fixed_bugs/BUG-154-manifest-roles-missing-new-artifacts.md) **P2 修复就绪**——
   `buildManifest` 在新契约 bundle 上：`protocol.json`/`protocol-audit.md` 角色 **unknown**；
   `review/`（claims/verdicts）与 `waves/`、`protocol/vN.json` **完全不在 manifest**（无哈希）——
   D44/D46 的核心证据不在交付可校验清单内。
@@ -1273,14 +1276,14 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **下一层**：目录清单的数量上限/分节设计、run-accept 的 manifest 生成路径复跑；记空白。
 ### 第 63 轮（2026-11-13 06:1x）：人工证据的边界又错了
 
-- **新卡**：[BUG-155](../_archived/fixed_bugs/BUG-155-manual-evidence-known-titles-are-table-labels.md) **P2 修复就绪**——
+- **新卡**：[BUG-155](../../_archived/fixed_bugs/BUG-155-manual-evidence-known-titles-are-table-labels.md) **P2 修复就绪**——
   145 的截断表 `{检查, 回执, 清单, 读者版}` 来自 acceptance **表格行标签**，而生成器根本没有 `##` 节：
   人工在走查里写 `## 检查`/`## 清单` → `manualEvidenceOf` 返回 **null**（整节丢失）。
 - **实测**：生成的 acceptance `## ` 标题数 = 0；四个通用标题全部 null；只有 145 的 `## 检查记录` 保留。
 - **下一层**：历史 acceptance 的人工节位置分布、`--repair` 后的字节级保留；记空白。
 ### 第 64 轮（2026-11-13 06:2x）：门③的版本级 fail-open
 
-- **新卡**：[BUG-156](../_archived/fixed_bugs/BUG-156-hitl2-gate-no-version-pairing-pending-filtered.md) **P1 等人拍板**——
+- **新卡**：[BUG-156](../../_archived/fixed_bugs/BUG-156-hitl2-gate-no-version-pairing-pending-filtered.md) **P1 等人拍板**——
   §Decisions 同时有旧拍板行（v1 定稿）与最新 pending 行（v2 待用户确认）时：pending 行被
   `isHitl2Row` 过滤 → 旧行 + 旧答复满足门③ → **PASS**（v2 未拍板仍放行）。把 pending 写成「未决」更糟：
   149 的词表不含它，被当拍板行（同样 PASS）。
@@ -1290,10 +1293,10 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 ### 第 65 轮（2026-11-13 06:3x）：证据出处/必要输入缺席 = warning
 
 - **新卡**：
-  - [BUG-157](../_archived/fixed_bugs/BUG-157-verdicts-missing-session-only-warning.md) **P1 等人拍板**——verdicts 的
+  - [BUG-157](../../_archived/fixed_bugs/BUG-157-verdicts-missing-session-only-warning.md) **P1 等人拍板**——verdicts 的
     `batch.session` 指向不存在的会话时 `problems=[]`（仅 `session-missing` warning）→ 伪裁决可过 audit；
     原文/身份/深度/父会话四条判据同时失效。
-  - [BUG-158](../_archived/fixed_bugs/BUG-158-verdict-audit-review-missing-only-warning.md) **P2 等人拍板**——review.md
+  - [BUG-158](../../_archived/fixed_bugs/BUG-158-verdict-audit-review-missing-only-warning.md) **P2 等人拍板**——review.md
     整缺时 critical `unverifiable` 不产生红（`review-missing`/`unverified-critical` 都 warning）；同场景
     有「坏 review」反而红（`review-round-ref`），即「文件越缺越绿」。交付整体由 node-gate 兜底（实测红），
     但 verdict-audit 的独立 PASS 不可信。
@@ -1301,7 +1304,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **累计**：本 goal **10 条（149–158）**，目标达成。
 ### 第 66 轮（2026-11-13 06:4x）：claim 的证据指针没人管
 
-- **新卡**：[BUG-159](../_archived/fixed_bugs/BUG-159-claims-evidence-topics-not-validated.md) **P2 等人拍板**——
+- **新卡**：[BUG-159](../../_archived/fixed_bugs/BUG-159-claims-evidence-topics-not-validated.md) **P2 等人拍板**——
   claims 的 `evidence`/`topics` 从不与盘上对账：`evidence/nope.md`、`/Users/...`、`topics:["T9"]`
   全部 `problems=[]`；把 `/Users/...` 写进 `review/claims.json` 后 `schema-scan` 仍 **green**
   （内容扫描只对 `.md` 生效）。与 154（review/ 不入清单）叠加，三层都没拦住。
@@ -1313,17 +1316,17 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 | 卡 | 级别 | 一句话 |
 |---|---|---|
-| [149](../_archived/fixed_bugs/BUG-149-hitl2-pending-vocabulary-holes.md) | P1 | 140 反成默认拍板：等回复/未最终裁决/挂起/推迟/未决/on hold 全 APPROVE |
-| [150](../_archived/fixed_bugs/BUG-150-readiness-keyword-window-still-hijacked.md) | P1 | 141 只扩关键词：随后/复核后/结论/本 run 的裸写 FAIL 仍被旧 PASS 劫持 |
-| [151](../_archived/fixed_bugs/BUG-151-client-hitl-click-count-false-red.md) | P2 | 147 用点击计数：Recommended 预选卡答案已落地却判红（client-hitl ⑤b 假红） |
-| [152](../_archived/fixed_bugs/BUG-152-client-load-unhealthy-host-assertion-red.md) | P2 | client-load 的 host-health 收口只认连接死亡——负载下断言失败仍判 FAILURE |
-| [153](../_archived/fixed_bugs/BUG-153-protocol-snapshot-presence-only-not-content.md) | P2 | protocol 版本快照只查在场：`v1.json = {}` 也 PASS |
-| [154](../_archived/fixed_bugs/BUG-154-manifest-roles-missing-new-artifacts.md) | P2 | manifest 角色表未登记 protocol.json/protocol-audit.md；review//waves/ 不入清单 |
-| [155](../_archived/fixed_bugs/BUG-155-manual-evidence-known-titles-are-table-labels.md) | P2 | 人工走查的「已知节」来自表格标签——`## 检查/## 清单` 整节丢失 |
-| [156](../_archived/fixed_bugs/BUG-156-hitl2-gate-no-version-pairing-pending-filtered.md) | P1 | 门③过滤 pending 后，旧拍板行+旧答复仍放行新版本（无版本配对） |
-| [157](../_archived/fixed_bugs/BUG-157-verdicts-missing-session-only-warning.md) | P1 | verdicts 的 batch.session 不存在只 warning——伪造裁决可过 |
-| [158](../_archived/fixed_bugs/BUG-158-verdict-audit-review-missing-only-warning.md) | P2 | review.md 整缺时 critical unverifiable 不红（node-gate 兜底） |
-| [159](../_archived/fixed_bugs/BUG-159-claims-evidence-topics-not-validated.md) | P2 | claims 的 evidence/topics 未与盘上对账；schema-scan 只扫 .md |
+| [149](../../_archived/fixed_bugs/BUG-149-hitl2-pending-vocabulary-holes.md) | P1 | 140 反成默认拍板：等回复/未最终裁决/挂起/推迟/未决/on hold 全 APPROVE |
+| [150](../../_archived/fixed_bugs/BUG-150-readiness-keyword-window-still-hijacked.md) | P1 | 141 只扩关键词：随后/复核后/结论/本 run 的裸写 FAIL 仍被旧 PASS 劫持 |
+| [151](../../_archived/fixed_bugs/BUG-151-client-hitl-click-count-false-red.md) | P2 | 147 用点击计数：Recommended 预选卡答案已落地却判红（client-hitl ⑤b 假红） |
+| [152](../../_archived/fixed_bugs/BUG-152-client-load-unhealthy-host-assertion-red.md) | P2 | client-load 的 host-health 收口只认连接死亡——负载下断言失败仍判 FAILURE |
+| [153](../../_archived/fixed_bugs/BUG-153-protocol-snapshot-presence-only-not-content.md) | P2 | protocol 版本快照只查在场：`v1.json = {}` 也 PASS |
+| [154](../../_archived/fixed_bugs/BUG-154-manifest-roles-missing-new-artifacts.md) | P2 | manifest 角色表未登记 protocol.json/protocol-audit.md；review//waves/ 不入清单 |
+| [155](../../_archived/fixed_bugs/BUG-155-manual-evidence-known-titles-are-table-labels.md) | P2 | 人工走查的「已知节」来自表格标签——`## 检查/## 清单` 整节丢失 |
+| [156](../../_archived/fixed_bugs/BUG-156-hitl2-gate-no-version-pairing-pending-filtered.md) | P1 | 门③过滤 pending 后，旧拍板行+旧答复仍放行新版本（无版本配对） |
+| [157](../../_archived/fixed_bugs/BUG-157-verdicts-missing-session-only-warning.md) | P1 | verdicts 的 batch.session 不存在只 warning——伪造裁决可过 |
+| [158](../../_archived/fixed_bugs/BUG-158-verdict-audit-review-missing-only-warning.md) | P2 | review.md 整缺时 critical unverifiable 不红（node-gate 兜底） |
+| [159](../../_archived/fixed_bugs/BUG-159-claims-evidence-topics-not-validated.md) | P2 | claims 的 evidence/topics 未与盘上对账；schema-scan 只扫 .md |
 
 ### 已验绿的修复回归（139/136/137/142/143/144/145/146/148/130）
 
@@ -1373,11 +1376,11 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **进入**：X1 投影四处 + X2 Protocol 边界。方法 = 纯函数矩阵：官方生成器输出 × 逐行删除/变形 × 期望红；
   负对照（已知该红的输入）同场跑。0 模型、秒级、总耗时约 15 分钟。
 - **发现（3 张 bug 卡）**：
-  - [BUG-048](../_archived/fixed_bugs/BUG-048-protocol-depth-projection-first-pair-only.md) **P1**：深度投影只解析首对 →
+  - [BUG-048](../../_archived/fixed_bugs/BUG-048-protocol-depth-projection-first-pair-only.md) **P1**：深度投影只解析首对 →
     deep 档（`L1,L2,L3`）用官方生成器投影即假红；单深度 `['L3']` 则整段漏检。真 run 交付审计会被误拦。
-  - [BUG-049](../_archived/fixed_bugs/BUG-049-protocol-projection-lines-absent-silent.md) **P2**：§Protocol 的
+  - [BUG-049](../../_archived/fixed_bugs/BUG-049-protocol-projection-lines-absent-silent.md) **P2**：§Protocol 的
     `来源/投入/输出` 行缺席时零 finding（只对在场行对账）；同节 plan 缺席也只剩 warning。
-  - [BUG-050](../_archived/fixed_bugs/BUG-050-strategy-channel-absent-and-workflow-null-workers.md) **P2**：策略行通道缺席
+  - [BUG-050](../../_archived/fixed_bugs/BUG-050-strategy-channel-absent-and-workflow-null-workers.md) **P2**：策略行通道缺席
     无提示（worker/预算各有 warn）；`通道=workflow` 且无 Wave 节时期望 worker 为 null，worker 对账被
     静默跳过。
 - **关闭假设（有负对照）**：standard 档 + 完整投影绿；端点写法 `L1–L3` 绿；cells 天花板按
@@ -1390,7 +1393,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 ### 第 2 轮（2026-11-11）：回放差分 + 后验扫场 + 生产数据反证
 
 - **X4 回放差分**（keyless，`--face research-face`）：lead 场景 3 条红。
-  - [BUG-051](../_archived/fixed_bugs/BUG-051-replay-smoke-panerows-undeclared.md) **P2**（新发现）：`snapshot-replay.entry`
+  - [BUG-051](../../_archived/fixed_bugs/BUG-051-replay-smoke-panerows-undeclared.md) **P2**（新发现）：`snapshot-replay.entry`
     的 C3/C5 引用 `paneRows`，而该变量与采集块在提交 `1f15379` 被整块删除 → 渲染金标准断言永远抛
     ReferenceError、`--update-expected` 同样不可用。归因到提交级。
   - **快照过期（观察，非 bug）**：lead 的 `B·persona` 红，diff 正是 D48 的「深度与篇幅 + 输出形态」合并
@@ -1415,7 +1418,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 - **X7 补跑（闭合）**：`handoff.e2e` **ALL PASS**（HANDOFF 含 git init / gitlink 40 位 SHA /
   submodule update / pnpm install；无运行态、凭据、run 数据）。入口面本轮无发现。
-- **发现**：[BUG-052](../_archived/fixed_bugs/BUG-052-protocol-epoch-day-granularity-retro-red.md) **P2**——已交付
+- **发现**：[BUG-052](../../_archived/fixed_bugs/BUG-052-protocol-epoch-day-granularity-retro-red.md) **P2**——已交付
   bundle `drt_api-context-caching-ds-openai`（交付 01:10，D46 落地 10:01）今天被 `protocol-audit`
   判红 `[no-protocol] 契约日后缺 protocol.json`（exit 1），与 `delivered.json` 的 `gate PASS` 矛盾；
   根因 = 契约日与 epoch 都只到日粒度，`epoch >= CONTRACT_DATE` 把同日早场追溯成新契约。这与 D46 Note
@@ -1435,7 +1438,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 - **BUG-052 扩证**：node-gate 的六道门优先用整数 `schema:` 断代，不吃日期（`isPreContract` 见 schema 即
   按现行契约），所以同日窗口只落在 protocol-audit 与同形的 verdict-audit（今天无第二实例）；已回填该卡。
-- **发现**：[BUG-053](../_archived/fixed_bugs/BUG-053-plan-header-claims-first-match-anywhere.md) **P2**——plan-ref 与
+- **发现**：[BUG-053](../../_archived/fixed_bugs/BUG-053-plan-header-claims-first-match-anywhere.md) **P2**——plan-ref 与
   策略行两条「头」判据都用全文首匹配：缺 `> protocol: v1` 头但正文一句 `- 修订记录：protocol: v1 仍适用`
   → 绿；策略行写进 `## 备注` 正文（无 `>`）→ 绿（连 `strategy-missing` 都没有）。与 BUG-048/049/050
   同族：散文说「头/必须/在场」，实现用「全文出现过」近似。
@@ -1446,7 +1449,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 ### 第 5 轮（2026-11-11）：同一函数的更强形态 + 缓存/回执面排除
 
-- **[BUG-049](../_archived/fixed_bugs/BUG-049-protocol-projection-lines-absent-silent.md) 扩证（第二形态）**：行**在场但
+- **[BUG-049](../../_archived/fixed_bugs/BUG-049-protocol-projection-lines-absent-silent.md) 扩证（第二形态）**：行**在场但
   读不出**同样静默——`投入：18 节点 / 18 cells`（无 `≤`，与 JSON 12/8 不符）→ 无 finding；
   `输出：…分节 = decision`（缺 risks、无 `sections =`）→ 无 finding。三处读法都要求额外格式前提，
   前提不满足整段跳过（对照：生成器原样绿）。修法 = 在场 + 可解析都要 fail-loud，与
@@ -1469,7 +1472,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 ### 第 11 轮（2026-11-11）：文案断言的 locale 归属
 
-- **发现**：[BUG-059](../_archived/fixed_bugs/BUG-059-replay-locator-hardcodes-zh-locale-owned-labels.md) **P2**——
+- **发现**：[BUG-059](../../_archived/fixed_bugs/BUG-059-replay-locator-hardcodes-zh-locale-owned-labels.md) **P2**——
   回放冒烟的 guide 胶囊定位器写死中文 `/研究状态/`，而客户端文案已随 locale（同一环境可见页签是
   **英文 `Method library`**，Playwright 默认 en-US）→ C2 必红，C3（0 行）/C5（金标准）连带，
   **渲染金标准守卫在 en-US 环境整片失效**。同仓 `client-load.entry` 已有正确写法（双语正则 + 注释
@@ -1481,31 +1484,31 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 ### 第 12 轮（2026-11-11）：观察面证据为何长期不可达
 
-- **发现**：[BUG-060](../_archived/fixed_bugs/BUG-060-host-health-freemem-macos-underreports.md) **P2**——`host-health` 的
+- **发现**：[BUG-060](../../_archived/fixed_bugs/BUG-060-host-health-freemem-macos-underreports.md) **P2**——`host-health` 的
   free 判据用 `os.freemem()`（macOS 只报 free pages），实测 182MB < 512MB 阈值判「不健康」，而同一时刻
   `vm_stat` 的 inactive+free+speculative ≈ 6.9GB 可回收、load/cpu = 0.88——**误报**。后果：`client-load.entry`
   在开发机上常态 NOT-RUN（X8 长期不可达），且真实产品红可能被 `isHostUnhealthyVerdict` 收口成环境红。
   修复方向 = 平台相关可用量（macOS: free+inactive+speculative；Linux: MemAvailable），阈值语义写清。
-- **[BUG-059](../_archived/fixed_bugs/BUG-059-replay-locator-hardcodes-zh-locale-owned-labels.md) 扩证到代码层**：
+- **[BUG-059](../../_archived/fixed_bugs/BUG-059-replay-locator-hardcodes-zh-locale-owned-labels.md) 扩证到代码层**：
   `launchChromium()` = `chromium.launch()`（无 locale）+ `newPage()`（无 context 选项）= Playwright 默认
   `en-US`；同批脚本的 locale-owned 文案定位器清单已列进卡（client-load-final.support / client-load.entry），
   修一处不必再逐条踩。
 - **未跑**：X6 真模型；X8 仍被主机健康判据挡住（本卡）。
 ### 第 13 轮（2026-11-11）：locale 修好后的残余
 
-- **[BUG-059](../_archived/fixed_bugs/BUG-059-replay-locator-hardcodes-zh-locale-owned-labels.md) 修复已验证**：双语定位器 +
+- **[BUG-059](../../_archived/fixed_bugs/BUG-059-replay-locator-hardcodes-zh-locale-owned-labels.md) 修复已验证**：双语定位器 +
   `newPage({ locale })` 钉住，金标准头注写明「locale: zh-CN，本金标准不是 en-US 转录」——本轮复跑页签 chrome
   已是中文（新会话/插件/方法库）。
-- **新卡 + 当轮定性**：[BUG-061](../_archived/fixed_bugs/BUG-061-replay-c2-guide-capsule-missing-after-locale-pin.md)
+- **新卡 + 当轮定性**：[BUG-061](../../_archived/fixed_bugs/BUG-061-replay-c2-guide-capsule-missing-after-locale-pin.md)
   **修复就绪**——locale 修好之后 C2 仍红，根因已证到 vendor 文案键：回放钉了 `zh-CN`，但右栏展开按钮
   仍用英文 `getByRole('button', { name: 'Open right sidebar' })`，而 vendor `chrome.expandAria` 的
   zh 是 **「打开右侧边栏」** → `count() === 0` → 右栏没展开 → guide 胶囊不可见 → C3/C5 连带。
   同批 `client-load.entry` 明确保持 en-US 且注释了理由——两条策略各自自洽，**混用**才出事。
   三条初始假设（流程/注册/场景）已作撤回记录留在卡上。
-- **未跑**：X6 真模型；X8 仍被 [BUG-060](../_archived/fixed_bugs/BUG-060-host-health-freemem-macos-underreports.md) 挡住。
+- **未跑**：X6 真模型；X8 仍被 [BUG-060](../../_archived/fixed_bugs/BUG-060-host-health-freemem-macos-underreports.md) 挡住。
 ### 第 14 轮（2026-11-11）：观察面放行后的第一跑
 
-- **[BUG-060](../_archived/fixed_bugs/BUG-060-host-health-freemem-macos-underreports.md) 修复已验证**：`host-health` 新增
+- **[BUG-060](../../_archived/fixed_bugs/BUG-060-host-health-freemem-macos-underreports.md) 修复已验证**：`host-health` 新增
   平台采集——macOS 读 `vm_stat` 的 free+inactive+speculative+purgeable（`availableMemoryMBFromVmStat`），
   Linux 读 `MemAvailable`（回退 MemFree+Buffers+Cached）；本机实测 available = **7616MB** → healthy
   （此前 `os.freemem()` 182MB → unhealthy）。纯函数单测 10 例绿（含「读不出 → null」的 fail-loud 反例）。
@@ -1519,11 +1522,11 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 ### 第 21 轮（2026-11-11）：验收证据与 UI 常量的修复验证
 
-- **[BUG-062](../_archived/fixed_bugs/BUG-062-acceptance-manual-evidence-overwritten-by-regeneration.md)
+- **[BUG-062](../../_archived/fixed_bugs/BUG-062-acceptance-manual-evidence-overwritten-by-regeneration.md)
   修复已验证**：新增 `manualEvidenceOf` / `withManualEvidence`；`--repair` 实测 action =
   「acceptance.md: 保留人工走查节（旧机械回执删除）」，修后文件仍含 ③④ 两条记录；重跑验收的
   splice 路径也保留。L4 人工证据不再被机械重算抹掉。
-- **[BUG-063](../_archived/fixed_bugs/BUG-063-web-ui-nav-chrome-copy-english-only.md) 修复已验证**：
+- **[BUG-063](../../_archived/fixed_bugs/BUG-063-web-ui-nav-chrome-copy-english-only.md) 修复已验证**：
   `SHOW_MORE_SESSIONS_PATTERN = 'Show \\d+ more sessions|展开其余 \\d+ 个会话'`；
   `PREVIEW_NOTICE_HEADING = 'Preview Notice|预览版说明'` 且 `continue` 候选补 `继续`；消费方
   `dismissPreviewNotice` 已同步改成 `new RegExp(headingSource)`（只改常量不改匹配会两种语言都失配，
@@ -1542,7 +1545,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **未跑**：X6 真模型。
 ### 第 19 轮（2026-11-11）：dev 环的缓存身份
 
-- **发现**：[BUG-065](../_archived/fixed_bugs/BUG-065-run-driver-cache-key-omits-dev-overlay.md) **P2**——`run-driver` 的
+- **发现**：[BUG-065](../../_archived/fixed_bugs/BUG-065-run-driver-cache-key-omits-dev-overlay.md) **P2**——`run-driver` 的
   GREEN 缓存键只含 pack 指纹 + runtime 构建（纯函数实测 `any@p1@source` 与 overlay 无关），而
   `dev/research.overlay.yml` / `dev/boot-run.sh` 决定被探测页面的内容：只改外壳不改 pack → 键不变 →
   30 分钟内命中旧 GREEN，**dev 环最常用路径上可能看到假绿**。修法 = 键里加 dev 外壳指纹 + payload 写清身份。
@@ -1551,7 +1554,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **未跑**：X6 真模型。
 ### 第 18 轮（2026-11-11）：回放 A 层为什么间歇挂
 
-- **发现**：[BUG-064](../_archived/fixed_bugs/BUG-064-replay-a-layer-not-self-contained-tool-stall.md)（排查中，P2）——
+- **发现**：[BUG-064](../../_archived/fixed_bugs/BUG-064-replay-a-layer-not-self-contained-tool-stall.md)（排查中，P2）——
   lead 场景 A 层在静默窗口仍 240s 超时；盘上现场显示失败会话**停在第一个 `tool/call web_search`**
   （19 事件，无 tool/result / 无 turn/end），而同日 23:47:26 另一场回放完整成功（67 事件 / 7 步 /
   turn/end completed）。根因方向三条：① `llm-replay` 只回放 LLM chunk、**工具照真执行**，检索 API 一挂
@@ -1563,7 +1566,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **未跑**：X6 真模型。
 ### 第 17 轮（2026-11-11）：同一失败类的共享常量面
 
-- **发现**：[BUG-063](../_archived/fixed_bugs/BUG-063-web-ui-nav-chrome-copy-english-only.md) **P2**——`web-ui-nav` 的
+- **发现**：[BUG-063](../../_archived/fixed_bugs/BUG-063-web-ui-nav-chrome-copy-english-only.md) **P2**——`web-ui-nav` 的
   `TAB_TEXT` 已双语，但 `SHOW_MORE_SESSIONS_PATTERN`（`Show \d+ more sessions`）与
   `PREVIEW_NOTICE_HEADING`（`Preview Notice`）/`PREVIEW_NOTICE_CONTINUE`（缺 `继续`）仍英文单语。
   vendor zh 文案 = 「展开其余 N 个会话」/「预览版说明」/「继续」；zh UI 下 `cdp-probe` 的展开调用
@@ -1574,7 +1577,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **未跑**：X6 真模型。
 ### 第 16 轮（2026-11-11）：验收证据的载体寿命
 
-- **发现**：[BUG-062](../_archived/fixed_bugs/BUG-062-acceptance-manual-evidence-overwritten-by-regeneration.md) **P2**——
+- **发现**：[BUG-062](../../_archived/fixed_bugs/BUG-062-acceptance-manual-evidence-overwritten-by-regeneration.md) **P2**——
   `acceptance.md` 同时是 `run-accept` 的生成物与 L4 人工走查（③④）的**唯一**记录载体：
   `run-accept.mjs:228` 每次绿都整文件覆盖，`--repair` 直接删除它（注释称「可再生产物」）；而生成器
   不产出「人工走查」节 —— 人工证据被抹后**不会回来**。已用 `repairReceiptPaths` 纯函数复现：
@@ -1587,7 +1590,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **未跑**：X6 真模型。
 ### 第 15 轮（2026-11-11）：并发窗口下的诚实记账
 
-- **[BUG-061](../_archived/fixed_bugs/BUG-061-replay-c2-guide-capsule-missing-after-locale-pin.md) 代码级已修**
+- **[BUG-061](../../_archived/fixed_bugs/BUG-061-replay-c2-guide-capsule-missing-after-locale-pin.md) 代码级已修**
   （`/Open right sidebar|打开右侧边栏/i`），但**运行级未验成**：复跑 lead 场景时 A 层 240s 超时
   （canned 回放未走通），同窗口存在另一 agent 的 client-load 实例与一个**孤儿 host**（pid 55222 仍监听
   3109，其 runner pid 33393 已死）共享同一 dev home——**不把并发环境归因成产品缺陷**，等静默窗口再验。
@@ -1602,31 +1605,31 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 ### 第 10 轮（2026-11-11）：图结构合同的机械面
 
-- **发现**：[BUG-058](../_archived/fixed_bugs/BUG-058-plan-cycle-has-no-mechanical-check.md) **P2**——plan 模板成文「图必须无环」，
+- **发现**：[BUG-058](../../_archived/fixed_bugs/BUG-058-plan-cycle-has-no-mechanical-check.md) **P2**——plan 模板成文「图必须无环」，
   但**有环 plan 在交付审计里零 finding**：`waveCountOf` 返回 null（唯一检测点），`checkEffortContract` 的
   `waves !== null` 把它当「无需检查」；`planIssuesOf` 没有 cycle kind，还会把环报成「按 deps 重编号」
   （误导方向）。与已修的 BUG-050 同族：**null 哨兵同时表示「无对象」与「无需对账」**。
 - **对照**：无环 plan 同输入零 finding（应当如此）；审计的其余判据不受影响。
-- **[BUG-057](../_archived/fixed_bugs/BUG-057-acceptance-check-exit-code-contradicts-verdict-contract.md) 已被修复并归档
+- **[BUG-057](../../_archived/fixed_bugs/BUG-057-acceptance-check-exit-code-contradicts-verdict-contract.md) 已被修复并归档
   （验证）**：`FAIL` → exit 1、`PASS` → exit 0（复跑实得）。工具退出码回到 verdict 契约。
 - **现场补充**：run-ops 的三个「目标不存在」入口（`run-inventory --workspace`、`watch-run --group`、
   `session-events <不存在>`）均 exit 2 + 明确文案，符合 verdict 契约——无发现。
-- **[BUG-058](../_archived/fixed_bugs/BUG-058-plan-cycle-has-no-mechanical-check.md) 已在本轮内被修复并归档
+- **[BUG-058](../../_archived/fixed_bugs/BUG-058-plan-cycle-has-no-mechanical-check.md) 已在本轮内被修复并归档
   （验证）**：有环 plan → `red plan-cycle`；`planIssuesOf` 新增 `cycle` kind（文案明确「重编号不能解环」）；
   无环对照仍绿。修复前复现脚本 `runtime/explore-20261111/plan-cycle.mjs` 可继续当回归用例。
 - **未跑**：X8（client 半仍被改）、X6 真模型。
 ### 第 7 轮（2026-11-11）：修复回归验证（另一 agent 的落地）
 
 - **048/049/050 已由另一 agent 修复并归档**。我用本卡自带复现脚本逐条回归（**只验不修**）：
-  - [BUG-048](../_archived/fixed_bugs/BUG-048-protocol-depth-projection-first-pair-only.md)：deep 三深度 +
+  - [BUG-048](../../_archived/fixed_bugs/BUG-048-protocol-depth-projection-first-pair-only.md)：deep 三深度 +
     生成器投影 → 绿（假红消失）；单深度 `L3` 但投影写 `L1–L3` → **red**（漏检消失）；非连续集合由
     新编解码写成 `L1 / L3`、端点区间仍按闭区间读——生成器与检查器共用 `depthsTextOf/depthsOfText`，对称。
-  - [BUG-050](../_archived/fixed_bugs/BUG-050-strategy-channel-absent-and-workflow-null-workers.md)：
+  - [BUG-050](../../_archived/fixed_bugs/BUG-050-strategy-channel-absent-and-workflow-null-workers.md)：
     通道缺席 → `warn strategy-channel-missing`；`通道=workflow` 无 Wave → `red strategy-workflow-without-wave`
     （worker 不符另红）；负对照仍红。
-  - [BUG-049](../_archived/fixed_bugs/BUG-049-protocol-projection-lines-absent-silent.md)：三行缺席 →
+  - [BUG-049](../../_archived/fixed_bugs/BUG-049-protocol-projection-lines-absent-silent.md)：三行缺席 →
     `warn projection-*-missing`（v1 兼容）——**缺席半已修**。
-- **新卡**：[BUG-056](../_archived/fixed_bugs/BUG-056-protocol-projection-unreadable-values-silent.md) **P2**——同一函数的
+- **新卡**：[BUG-056](../../_archived/fixed_bugs/BUG-056-protocol-projection-unreadable-values-silent.md) **P2**——同一函数的
   **解析半**仍未覆盖：`投入：18 节点 / 18 cells`（无 `≤`）与 `输出：…sections: decision`（无 `=`）在修复后
   仍零 finding。按「已修卡不重开、回归 = 新卡」建卡（编号从 055 改为 056：并发 agent 先占了 055）。
 - **回放复跑（修复中的 paneRows）**：崩溃消失，C3/C5 变成真断言；仍红 = `B·persona`（D48 后快照待重录）+
@@ -1634,8 +1637,8 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **未跑**：X8（client 半仍被改）、X6 真模型。
 ### 第 8 轮（2026-11-11）：verdict 契约与「未跑 ≠ 通过」的机械出口
 
-- **发现**：[BUG-057](../_archived/fixed_bugs/BUG-057-acceptance-check-exit-code-contradicts-verdict-contract.md) **P2**——
-  `acceptance-check` 的退出码与全仓 verdict 契约（[scripts/AGENTS](../../scripts/AGENTS.md)）相反：
+- **发现**：[BUG-057](../../_archived/fixed_bugs/BUG-057-acceptance-check-exit-code-contradicts-verdict-contract.md) **P2**——
+  `acceptance-check` 的退出码与全仓 verdict 契约（[scripts/AGENTS](../../../scripts/AGENTS.md)）相反：
   `FAIL`、`UNVERIFIED`、`noCriteria` 全部 exit 0（只有文本三态可区分）。该工具的存在理由就是把「收活结论」
   对账成机械事实，而机械事实的通用出口是退出码——agent/CI 一旦用 `$?` 判收活即 false acceptance 主路径。
 - **关闭假设（有证据，不建卡）**：
@@ -1651,22 +1654,22 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **未跑**：X8（client 半仍被改）、X6 真模型；BUG-054 的修复（`lensScanOf`）尚未落地。
 ### 第 9 轮（2026-11-11）：052/053/054 修复回归（另一 agent 的落地）
 
-- [BUG-052](../_archived/fixed_bugs/BUG-052-protocol-epoch-day-granularity-retro-red.md) **已验证**：
+- [BUG-052](../../_archived/fixed_bugs/BUG-052-protocol-epoch-day-granularity-retro-red.md) **已验证**：
   `protocol-audit` 对已交付 bundle 输出「不适用（交付回执早于契约落地时刻 acceptedAt=…）」exit 0——
   按回执时间断代，正是卡里的首选修法；同日早场不再追溯判红。
-- [BUG-053](../_archived/fixed_bugs/BUG-053-plan-header-claims-first-match-anywhere.md) **已验证**：
+- [BUG-053](../../_archived/fixed_bugs/BUG-053-plan-header-claims-first-match-anywhere.md) **已验证**：
   策略行与 plan-ref 都改用 `headerBlockOf`（首个 `##` 之前）；正文 `## 备注` 的同形策略行 → 现在
   `warn strategy-missing`。残余：**无任何 `##` 分节**的 plan 里，首行提及仍在「头块」内被接受——
   与注释成文定义（头 = 首个 `##` 之前）一致，属可接受近似，不另建卡。
-- [BUG-054](../_archived/fixed_bugs/BUG-054-cells-cap-count-only-canonical-bullet.md) **已验证**：
+- [BUG-054](../../_archived/fixed_bugs/BUG-054-cells-cap-count-only-canonical-bullet.md) **已验证**：
   `*` / `+` / 缩进 / 大写 `Lenses:` 均计 2（原为 0）；quick 档 4 lens 星号写法 → 现在 `red effort-contract`。
-- [BUG-056](../_archived/fixed_bugs/BUG-056-protocol-projection-unreadable-values-silent.md) **已验证**（同一批修复）：
+- [BUG-056](../../_archived/fixed_bugs/BUG-056-protocol-projection-unreadable-values-silent.md) **已验证**（同一批修复）：
   `18 节点 / 18 cells`（无 `≤`）→ `red projection-number`（数值被解析并对账）；英文单位数值正确 → 绿；
   `分节 = decision` → `red projection-output-unparseable`；`sections: decision` → `red projection-output`
   （缺 risks）。**解析半已收口**，卡待修复方归档。
 - **BUG-051 修复的可观察证据**：回放冒烟 C3 从 ReferenceError 变为真断言（0 行），C5 真比对——
   卡由修复方归档，不代移。
-- **仍开放（我的新卡）**：[BUG-057](../_archived/fixed_bugs/BUG-057-acceptance-check-exit-code-contradicts-verdict-contract.md)
+- **仍开放（我的新卡）**：[BUG-057](../../_archived/fixed_bugs/BUG-057-acceptance-check-exit-code-contradicts-verdict-contract.md)
   复测仍 exit 0（FAIL/UNVERIFIED/noCriteria），待拍板。
 - **未跑**：X8（client 半仍被改）、X6 真模型。
 
@@ -1680,7 +1683,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 ### 第 6 轮（2026-11-11）：预算上限的输入解析
 
-- **发现**：[BUG-054](../_archived/fixed_bugs/BUG-054-cells-cap-count-only-canonical-bullet.md) **P1**——`countCellsOf`
+- **发现**：[BUG-054](../../_archived/fixed_bugs/BUG-054-cells-cap-count-only-canonical-bullet.md) **P1**——`countCellsOf`
   只认行首 `- lenses:`（小写、无缩进）：`* lenses:` / `+` / 缩进 / `Lenses:` 一律计 0，而
   `checkEffortContract` 只在 `cells > cap` 时红 → **quick 档 4 lens 用星号写 = 零 finding**（模板写法
   同输入正常红，对照有效）。`lensIdsOf` 同盲区（两处各写一份正则）。生产数据：10 个真实 topics 全用
@@ -1710,14 +1713,14 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 
 ### N2（02:2x）离线闸边界 → BUG-067
 - 武装态探针：fetch 外网 ECONNREFUSED、lookup ENOTFOUND、loopback 200，但 **`dns.resolve4` 仍成功**；
-  子进程工具不受控 → [BUG-067](../_archived/fixed_bugs/BUG-067-offline-gate-dns-resolve-bypass.md)。
+  子进程工具不受控 → [BUG-067](../../_archived/fixed_bugs/BUG-067-offline-gate-dns-resolve-bypass.md)。
 - 修复方随后补齐 resolve*/Resolver 并归档（已验证）。
 
 ### N3（02:2x）回放闭环 + 自我修正 → BUG-070
 - 回放 lead：**A PASS，C0–C5 全 PASS**（C5 逐字命中金标准）→ 064/061 运行级确认。
 - 三组对照 boot 实验（research 无闸 / research+闸 / deep-research+闸）全部成功出横幅 →
   **BUG-066 的「版本漂移必然拒绝启动」被证伪**，按纪律另开
-  [BUG-070](../_archived/fixed_bugs/BUG-070-bug066-mechanism-refuted-and-residual-profile-wiring.md)
+  [BUG-070](../../_archived/fixed_bugs/BUG-070-bug066-mechanism-refuted-and-residual-profile-wiring.md)
   记录撤回 + 残留；修复方随后收口残留（team-preflight 切 deep-research、profile-health 按档给指令）并归档。
 
 ### N4（02:3x）scout 场景暴露 Team 身份注入 → BUG-071
@@ -1725,7 +1728,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `You are the Team Lead named "lead".` + `Agent Teams is available in this session …`**，且
   `request/header.tools` 含 **8 个 Team 工具**（spawn_teammate / wait_agent / interrupt_agent /
   list_agents / team_task_*×4）。
-- [BUG-071](../_archived/fixed_bugs/BUG-071-root-scout-injected-team-lead-identity.md) P2 等人拍板：接受并写契约 /
+- [BUG-071](../../_archived/fixed_bugs/BUG-071-root-scout-injected-team-lead-identity.md) P2 等人拍板：接受并写契约 /
   按根角色门控 / persona 纠偏，三选一。
 - 机理：vendor `tool-agent-team` 在 profile 级启用、不按 preset 门控；设计只成文了「worker 看得到 Team
   工具」，未成文「根 scout 被标成 Team Lead」。
@@ -1767,7 +1770,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **071 的 persona 纠偏已在运行级验证**：scout 场景 A PASS；B·persona 的 actual 已含
   「Team 工具可能在本根会话可见（宿主 Team 机制），但组队不是你的通道：并行只用 subagent；不要调用
   spawn_teammate / team_task_*」——与基线差异正是这段新增（基线待重录）。
-- **新卡**：[BUG-072](../_archived/fixed_bugs/BUG-072-release-vocab-substring-false-positive-product-content.md) **P2**——
+- **新卡**：[BUG-072](../../_archived/fixed_bugs/BUG-072-release-vocab-substring-false-positive-product-content.md) **P2**——
   `release-vocab` 用裸子串匹配退役词，`产品内` 误伤 `产品内容`（新文案指南第 300 行），verify 红。
   修复二选一：收窄门禁词（带负向断言）或改文档措辞；同表其他词未见实例（terms/evaluation 的枚举行带
   `term-policy: allow`）。
@@ -1810,7 +1813,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **证据**：`runtime/explore-20261112/name-parenthesis.mjs` 实测输出——`投研尽调（我的口径）`
   → fold 名 `投研尽调`、provenance `我的口径`、claim 0；ASCII 括号对照 claim 1。
   UI 名称占位符 `src/client/locales/zh.ts:200` 正是 `投研尽调（我的口径）`。
-- **判定**：**发现** → [BUG-081](../_archived/fixed_bugs/BUG-081-method-name-parenthesis-provenance-collision.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-081](../../_archived/fixed_bugs/BUG-081-method-name-parenthesis-provenance-collision.md)（P2，排查中；未改产品代码）。
 - **下一层**：同一 claim/写入族的其它语法边界（`〔〕`、零宽字符、旧库 provenance 歧义）；
   以及 `method_library_set_default/remove` 的名称比对；未跑，记空白。
 
@@ -1825,7 +1828,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **证据**：无标记但 provenance 含「默认偏好实验」→ `isDefault:true`；写路径
   `textHasMarker:false` / `savedIsDefault:true` / `expectedDefault:false` →
   `wouldFailToolReadback:true`（文件已写、工具报回读失败）。
-- **判定**：**发现** → [BUG-082](../_archived/fixed_bugs/BUG-082-default-marker-substring-false-positive.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-082](../../_archived/fixed_bugs/BUG-082-default-marker-substring-false-positive.md)（P2，排查中；未改产品代码）。
 - **下一层**：旧格式 `- 默认偏好:` 行、marker 重复/全角空白；`findDefaultMethod` 的消费面
   （`research:defaults` 注入）是否把误判放大；未跑，记空白。
 
@@ -1837,7 +1840,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/tab-heading-default.mjs`
 - **证据**：`##\t方法甲\t〔默认偏好〕` → fold name/isDefault 正常；clear `changed:false` 且仍默认；
   set 抛「库里没有」；`defaultCount` 漏计。
-- **判定**：**发现** → [BUG-083](../_archived/fixed_bugs/BUG-083-tab-heading-default-inconsistency.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-083](../../_archived/fixed_bugs/BUG-083-tab-heading-default-inconsistency.md)（P2，排查中；未改产品代码）。
 - **下一层**：前导空格 heading、`##\r`、全角空格；`matchingHeadingLines` 与 `renderLibraryEntry`
   的规范化是否同源；未跑，记空白。
 
@@ -1851,7 +1854,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `- phase: review` → false。另：`- phase: review` + 正文/代码块裸 `phase: accepted` → true
   （`runtime/explore-20261112/source-phase-false-positive.mjs`）——同谓词假阳。模板行 = `content/templates/run/run.md:8`；判据 =
   `method-library-source.ts:32`；fixture 注释明说裸行才能匹配。
-- **判定**：**发现** → [BUG-084](../_archived/fixed_bugs/BUG-084-source-phase-bullet-mismatch.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-084](../../_archived/fixed_bugs/BUG-084-source-phase-bullet-mismatch.md)（P2，排查中；未改产品代码）。
 - **下一层**：run.md 其它状态键（`delivered`/`parked`/`next`）的模板↔解析一致性；未跑，记空白。
 
 ### N15：heading marker/provenance 顺序读写不对称 → BUG-085
@@ -1862,7 +1865,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/marker-before-provenance.mjs`
 - **证据**：反序标题 `## 方法甲〔默认偏好〕（...）` → fold 正常；upsert 返回 `action:"created"`，
   写后同名条目 **2** 条（一默认一非默认）；正序不在同一路径。
-- **判定**：**发现** → [BUG-085](../_archived/fixed_bugs/BUG-085-marker-provenance-order-duplicate.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-085](../../_archived/fixed_bugs/BUG-085-marker-provenance-order-duplicate.md)（P2，排查中；未改产品代码）。
 - **下一层**：marker 在 name 前、多个 marker、全角空白；以及 `matchingHeadingLines` 的
   provenance 括号内含 `）` 的切分；未跑，记空白。
 
@@ -1874,7 +1877,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/config-feed-session-race.mjs`
 - **证据**：`reads ["s1","s2"]`；切到 s2 后先 `新会话方法`，旧 s1 的 120ms 慢读 resolve 后
   变成 `旧会话方法`（`bug:true`）。hook 的 effect 无 cleanup，`reload` 在 await 后无条件 setState。
-- **判定**：**发现** → [BUG-086](../_archived/fixed_bugs/BUG-086-config-feed-session-race.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-086](../../_archived/fixed_bugs/BUG-086-config-feed-session-race.md)（P2，排查中；未改产品代码）。
 - **下一层**：`useStatusFeed`/`useGraphFeed`/`useDraftState` 的同类 epoch/abort 面；真实 workspaceFiles
   延迟分布；未跑，记空白。
 
@@ -1886,7 +1889,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/status-feed-session-stale.mjs`
 - **证据**：s1 后 `events:1/rows:0/seen:true`；切 s2 后仍是 `events:1/rows:0/seen:true`（`stale:true`）。
   effect 只重置 refs，未清 state。
-- **判定**：**发现** → [BUG-087](../_archived/fixed_bugs/BUG-087-status-feed-session-stale.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-087](../../_archived/fixed_bugs/BUG-087-status-feed-session-stale.md)（P2，排查中；未改产品代码）。
 - **下一层**：`face`/`hitl`/`unbound` 的真实时序窗口；上层是否 keyed remount；未跑，记空白。
 
 ### N18：配置页签 1000 行库静默截断 → BUG-088
@@ -1897,7 +1900,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/config-library-truncation.mjs`
 - **证据**：1001 行库、remote `eof:false`、`readText(limit=1000)` 返回 1000 行；
   `hasLastLine:false`、`readState:"ok"`、`silentlyTruncated:true`。
-- **判定**：**发现** → [BUG-088](../_archived/fixed_bugs/BUG-088-config-library-1000-line-truncation.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-088](../../_archived/fixed_bugs/BUG-088-config-library-1000-line-truncation.md)（P2，排查中；未改产品代码）。
 - **下一层**：主库 `readLibrary` 20 页上限、其它 `readText` 调用点（question/preview）的截断面；未跑，记空白。
 
 ### N19：run 枚举部分 unreadable 静默降级 → BUG-089
@@ -1907,7 +1910,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：`node --import tsx/esm runtime/explore-20261112/list-runs-partial-unreadable.mjs`
 - **证据**：root 有 `drt_root-run`，archive 返回 `unreadable/EACCES`；结果仍 `ok:true` 且只含
   root（`silentPartial:true`），无 error/warning。
-- **判定**：**发现** → [BUG-089](../_archived/fixed_bugs/BUG-089-list-runs-partial-unreadable.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-089](../../_archived/fixed_bugs/BUG-089-list-runs-partial-unreadable.md)（P2，排查中；未改产品代码）。
 - **下一层**：三个消费门禁（schema-scan/node-gate/evidence-audit）的 partial 处理；`other`/symlink
   目录的发现语义；未跑，记空白。
 
@@ -1920,7 +1923,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **证据**：`write({file_path:'notes.md', content:'compare with drt_other-run/run.md'})` →
   `{slug:'other-run',boundBy:'write'}`；`not_drt_fake/` 也命中；`grep` pattern 产生 read 绑定。
   只有真实 `drt_real-run/run.md` 路径才应命中。
-- **判定**：**发现** → [BUG-090](../_archived/fixed_bugs/BUG-090-bundle-bind-content-false-positive.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-090](../../_archived/fixed_bugs/BUG-090-bundle-bind-content-false-positive.md)（P2，排查中；未改产品代码）。
 - **下一层**：`bindingTrust` 的 write 强绑定消费链（状态/配置/终稿）、多工具参数形态；未跑，记空白。
 
 ### N21：replay 收尾谓词 any-turn 假绿 → BUG-091
@@ -1930,7 +1933,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：`node --import tsx/esm runtime/explore-20261112/turn-completed-any-turn.mjs`
 - **证据**：单回合 completed → true；completed 后再开新回合（未结束）→ true；completed 后
   新回合 failed → true。后两者当前回合未完成。
-- **判定**：**发现** → [BUG-091](../_archived/fixed_bugs/BUG-091-turn-completed-any-turn.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-091](../../_archived/fixed_bugs/BUG-091-turn-completed-any-turn.md)（P2，排查中；未改产品代码）。
 - **下一层**：`snapshot-replay.entry` A 层 + `record-role-fixture` 的真实多 turn 形态；
   `turnOpenOf` 等「计数型」时序谓词；未跑，记空白。
 
@@ -1942,7 +1945,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/defaults-double-read-failure.mjs`
 - **证据**：`phase:"ready"`、`value:{schema,revision:0}`、`problems:[]`、`methodRead:"error"`、
   `buttonWouldSayAuto:true`。双失败被渲染成「没有默认」。
-- **判定**：**发现** → [BUG-092](../_archived/fixed_bugs/BUG-092-defaults-double-read-failure-auto.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-092](../../_archived/fixed_bugs/BUG-092-defaults-double-read-failure-auto.md)（P2，排查中；未改产品代码）。
 - **下一层**：按钮/面板对 unreadable 的视觉态；`listDir` 失败但文件可读的单失败形态；未跑，记空白。
 
 ### N23：方法库四字段 bullet/冒号变体 → BUG-093
@@ -1953,7 +1956,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/library-section-bullets.mjs`
 - **证据**：canonical 四字段有值、summary `a`；`*`/`+`/两格缩进/全角冒号四种变体 sections 全 null、
   summary null。
-- **判定**：**发现** → [BUG-093](../_archived/fixed_bugs/BUG-093-library-section-bullet-variants.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-093](../../_archived/fixed_bugs/BUG-093-library-section-bullet-variants.md)（P2，排查中；未改产品代码）。
 - **下一层**：旧格式 `调查要求`/`适用说明` 的兼容、section-like 行的 warning、写回 canonical 的
   round-trip；未跑，记空白。
 
@@ -1965,7 +1968,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/anchor-final-vs-present.mjs`
 - **证据**：`deriveAnchors([], {question:true, delivered:true})` → anchor-2 `passed`；
   `latestFinalDelivery([])` → `null`；useStatusFeed 的 `face.delivered = names.has('final.md')`。
-- **判定**：**发现** → [BUG-094](../_archived/fixed_bugs/BUG-094-hitl2-anchor-final-vs-present.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-094](../../_archived/fixed_bugs/BUG-094-hitl2-anchor-final-vs-present.md)（P2，排查中；未改产品代码）。
 - **下一层**：HITL1 的 question.md 是否也有类似的「在场≠拍板」双源；真实 run 时序；未跑，记空白。
 
 ### N25：bootWeb 成功路径 timer 未清理 → BUG-095
@@ -1975,7 +1978,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：`node --import tsx/esm runtime/explore-20261112/boot-web-timer-leak.mjs`
 - **证据**：banner 成功 `token:"fake-token"` 后仍有 `activeTimeouts:1`（timeoutMs 5000）。
   成功路径没有 clearTimeout；当前脚本 process.exit 掩盖了它。
-- **判定**：**发现** → [BUG-095](../_archived/fixed_bugs/BUG-095-boot-web-timer-leak.md)（P3，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-095](../../_archived/fixed_bugs/BUG-095-boot-web-timer-leak.md)（P3，排查中；未改产品代码）。
 - **下一层**：失败/child-exit 路径的 timer 清理、stdout/stderr listener 回收；未跑，记空白。
 
 ### N26：HITL2 被当 kickoff → BUG-096
@@ -1986,7 +1989,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/hitl2-counts-as-kickoff.mjs`
 - **证据**：read `drt_resumed/run.md` + HITL2 ask（`定稿（按现稿交付）`）+ 已答；
   binding `{slug:'resumed',boundBy:'read',kickoffSeen:true}`；trust `suppressed/kickoff`。
-- **判定**：**发现** → [BUG-096](../_archived/fixed_bugs/BUG-096-hitl2-counts-as-kickoff.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-096](../../_archived/fixed_bugs/BUG-096-hitl2-counts-as-kickoff.md)（P2，排查中；未改产品代码）。
 - **下一层**：HITL1/HITL2 判型与 binding-trust 的 pending/kickoff 政策交叉；未跑，记空白。
 
 ### N27：方法库跨会话 lost update → BUG-097
@@ -1997,7 +2000,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/method-library-lost-update.mjs`
 - **证据**：A/B 都读 base，A 写 `{方法A}`、B 写 `{方法B}`；最终 entries 只有 `{方法B}`，
   `lostA:true`。工具无锁/无 revision CAS。
-- **判定**：**发现** → [BUG-097](../_archived/fixed_bugs/BUG-097-method-library-lost-update.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-097](../../_archived/fixed_bugs/BUG-097-method-library-lost-update.md)（P2，排查中；未改产品代码）。
 - **下一层**：真实双标签页并发、set-default/remove 的同类交错、写文件原子性；未跑，记空白。
 
 ### N28：方法库写非原子 → BUG-098
@@ -2009,7 +2012,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   99/168/226；`grep -n "renameSync\|mkdtemp\|tmp"` → 无输出。
 - **证据**：三处直接 `writeFileSync(path, ..., 'utf8')`，无临时文件/rename；对照 defaults
   command 已原子写。
-- **判定**：**发现** → [BUG-098](../_archived/fixed_bugs/BUG-098-method-library-non-atomic-write.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-098](../../_archived/fixed_bugs/BUG-098-method-library-non-atomic-write.md)（P2，排查中；未改产品代码）。
 - **下一层**：可控失败注入、backup 恢复、文件系统 rename 语义；未跑，记空白。
 
 ### N29：run source picker 读失败当空列表 → BUG-099
@@ -2019,7 +2022,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/run-source-list-error-as-empty.mjs`
 - **证据**：`{"status":"runNoFinal","eligible":false}`——final 读失败被渲染成「没有 final」。
-- **判定**：**发现** → [BUG-099](../_archived/fixed_bugs/BUG-099-run-source-list-error-as-empty.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-099](../../_archived/fixed_bugs/BUG-099-run-source-list-error-as-empty.md)（P2，排查中；未改产品代码）。
 - **下一层**：根清单 null、`sourceReadFailure` 的 catch 路径、真实 workspaceFiles 分布；未跑，记空白。
 
 ### N30：final.md 同名目录被当交付 → BUG-100
@@ -2029,7 +2032,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：`node --import tsx/esm runtime/explore-20261112/final-md-directory-as-delivered.mjs`
 - **证据**：`names` 含 final.md、`finalEntryType:"directory"`、`consumerNamesHasFinal:true`、
   `read('final.md')` → missing。消费面 `names.has` / `existsSync` 不校验类型。
-- **判定**：**发现** → [BUG-100](../_archived/fixed_bugs/BUG-100-final-md-directory-as-delivered.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-100](../../_archived/fixed_bugs/BUG-100-final-md-directory-as-delivered.md)（P2，排查中；未改产品代码）。
 - **下一层**：question/review/plan 的同类目录/symlink 形态、终稿页签打开行为；未跑，记空白。
 
 ### N31：present 非终稿族路径被当交付版本 → BUG-101
@@ -2040,7 +2043,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/present-version-non-bundle.mjs`
 - **证据**：present `notes/final/v9.md` → delivery null、deliveredVersion 9、faceState none、
   faceLabel `v9 已交付`（contradiction true）。
-- **判定**：**发现** → [BUG-101](../_archived/fixed_bugs/BUG-101-present-version-non-bundle.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-101](../../_archived/fixed_bugs/BUG-101-present-version-non-bundle.md)（P2，排查中；未改产品代码）。
 - **下一层**：同事件多文件/真假族混合、readable-vN、present 跨事件 max；未跑，记空白。
 
 ### N32：plan 正文版本引用覆盖头部声明 → BUG-102
@@ -2051,7 +2054,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/plan-version-body-overrides-header.mjs`
 - **证据**：头部 `图版本：v2` + 正文「旧版图版本：v1」→ currentPlanVersion 1、
   versionConflicted false。
-- **判定**：**发现** → [BUG-102](../_archived/fixed_bugs/BUG-102-plan-version-body-overrides-header.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-102](../../_archived/fixed_bugs/BUG-102-plan-version-body-overrides-header.md)（P2，排查中；未改产品代码）。
 - **下一层**：头部 Markdown 形态（代码块/引用/无 ##）、recorded 斜杠解析；未跑，记空白。
 
 ### N33：present 版本 max vs 最后事件 → BUG-103
@@ -2062,7 +2065,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/present-version-max-vs-last.mjs`
 - **证据**：present v2（turn2）后 present v1（turn3）；latestFinalDelivery 指 v1，
   latestPresentedFinalVersion=2（contradiction true）。
-- **判定**：**发现** → [BUG-103](../_archived/fixed_bugs/BUG-103-present-version-max-vs-last.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-103](../../_archived/fixed_bugs/BUG-103-present-version-max-vs-last.md)（P2，排查中；未改产品代码）。
 - **下一层**：同事件多文件/读者版、turn/callId 缺失、rollback 语义；未跑，记空白。
 
 ### N34：port-reclaim 杀任意 listener → BUG-104
@@ -2073,7 +2076,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `node --import tsx/esm runtime/explore-20261112/port-reclaim-kills-any-listener.mjs`
 - **证据**：before pid 65694 → reclaimed null、childExited true、signalCode SIGKILL、
   killedArbitraryListener true。
-- **判定**：**发现** → [BUG-104](../_archived/fixed_bugs/BUG-104-port-reclaim-kills-any-listener.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-104](../../_archived/fixed_bugs/BUG-104-port-reclaim-kills-any-listener.md)（P2，排查中；未改产品代码）。
 - **下一层**：ps/cmdline 身份校验、pid 锁、端口占用 fail-loud；未跑，记空白。
 
 ### N35：rerun kind 边界过宽 → BUG-105
@@ -2084,7 +2087,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/rerun-kind-suffix-match.mjs`
 - **证据**：`polish-extra` → rerun.kind `polish`、state rerun-in-progress；
   `structural-extra` → `structural`；合法 `polish` 正常。
-- **判定**：**发现** → [BUG-105](../_archived/fixed_bugs/BUG-105-rerun-kind-suffix-match.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-105](../../_archived/fixed_bugs/BUG-105-rerun-kind-suffix-match.md)（P2，排查中；未改产品代码）。
 - **下一层**：全角分隔/大小写/evidence-expansion 后缀；未跑，记空白。
 
 ### N36：早期回合哨兵污染 A 层 → BUG-106
@@ -2094,7 +2097,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：`node --import tsx/esm runtime/explore-20261112/sentinel-any-history.mjs`
 - **证据**：currentDone true；oldDoneThenOpen true；oldDoneThenFailed true（后两者当前回合
   无哨兵）。
-- **判定**：**发现** → [BUG-106](../_archived/fixed_bugs/BUG-106-sentinel-any-history.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-106](../../_archived/fixed_bugs/BUG-106-sentinel-any-history.md)（P2，排查中；未改产品代码）。
 - **下一层**：与 BUG-091 的 turnCompleted 组合、多 turn 回放/录制真实样本；未跑，记空白。
 
 ### N37：defaults 写 pending 期间静默丢弃 → BUG-107
@@ -2105,7 +2108,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/defaults-pending-drop.mjs`
 - **证据**：commandsBeforeRelease 1 / total 1；第二次 output.shape 未应用；outcome 只有第一次的 ok。
-- **判定**：**发现** → [BUG-107](../_archived/fixed_bugs/BUG-107-defaults-pending-drop.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-107](../../_archived/fixed_bugs/BUG-107-defaults-pending-drop.md)（P2，排查中；未改产品代码）。
 - **下一层**：真实面板 blur→select 事件顺序、跨轴合并语义、host revision；未跑，记空白。
 
 ### N38：config feed 交互态跨会话残留 → BUG-108
@@ -2115,7 +2118,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/config-feed-receipt-stale.mjs`
 - **证据**：afterSend 与 afterSwitch 的 receipt 都是 `sent/receiptSent`；staleReceipt true。
-- **判定**：**发现** → [BUG-108](../_archived/fixed_bugs/BUG-108-config-feed-interaction-state-stale.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-108](../../_archived/fixed_bugs/BUG-108-config-feed-interaction-state-stale.md)（P2，排查中；未改产品代码）。
 - **下一层**：receiptDiff/replied/轮询晚到、删除确认/菜单的完整 UI 影响；未跑，记空白。
 
 ### N39：来源回执目录被当文件 → BUG-109
@@ -2125,7 +2128,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/run-source-delivered-dir-eligible.mjs`
 - **证据**：`{"status":"eligibleRun","eligible":true}`，deliveredRecord 命中目录。
-- **判定**：**发现** → [BUG-109](../_archived/fixed_bugs/BUG-109-run-source-delivered-dir-eligible.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-109](../../_archived/fixed_bugs/BUG-109-run-source-delivered-dir-eligible.md)（P2，排查中；未改产品代码）。
 - **下一层**：acceptance.md 同类、其它名字在场消费面、真实畸形 bundle；未跑，记空白。
 
 ### N40：run source symlink 越界 → BUG-110
@@ -2136,7 +2139,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `node --import tsx/esm runtime/explore-20261112/run-source-symlink-escape.mjs`
 - **证据**：drt_evil -> outside；list 见 question.md；openRun 读 `OUTSIDE SECRET`；escaped true。
   run-context 只做词法 `..`/绝对路径检查，nodeRunSource 跟随 symlink。
-- **判定**：**发现** → [BUG-110](../_archived/fixed_bugs/BUG-110-run-source-symlink-escape.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-110](../../_archived/fixed_bugs/BUG-110-run-source-symlink-escape.md)（P2，排查中；未改产品代码）。
 - **下一层**：symlink 文件（非根）、browserRunSource 语义、写路径 symlink；未跑，记空白。
 
 ### N41：方法库写 symlink 越界 → BUG-111
@@ -2147,7 +2150,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/method-library-symlink-write-escape.mjs`
 - **证据**：method-library.md -> outside-target.md；写入后 outsideChanged true、
   outsideHasEntry true；symlink 仍保留。
-- **判定**：**发现** → [BUG-111](../_archived/fixed_bugs/BUG-111-method-library-symlink-write-escape.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-111](../../_archived/fixed_bugs/BUG-111-method-library-symlink-write-escape.md)（P2，排查中；未改产品代码）。
 - **下一层**：目录 symlink、hardlink、写后回读的边界；未跑，记空白。
 
 ### N42：plan recorded 斜杠字段假阳 → BUG-112
@@ -2158,7 +2161,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/plan-recorded-slash-false-positive.mjs`
 - **证据**：头部 v3 + 正文 `- 参考 / v1 / 旧方案示例` → recorded 1、versionConflicted true、
   label「版本声明不一致」。
-- **判定**：**发现** → [BUG-112](../_archived/fixed_bugs/BUG-112-plan-recorded-slash-false-positive.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-112](../../_archived/fixed_bugs/BUG-112-plan-recorded-slash-false-positive.md)（P2，排查中；未改产品代码）。
 - **下一层**：记录节上下文、真实重写记录形态；未跑，记空白。
 
 ### N43：port-reclaim 身份 overmatch → BUG-113
@@ -2167,7 +2170,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **最低层**：纯函数 `isOwnListener`；无子进程。
 - **实际命令**：`node --import tsx/esm runtime/explore-20261112/port-own-listener-overmatch.mjs`
 - **证据**：`node .../ai_dsh_deep_research/scripts/my-server.mjs` own=true；`tail -f .../ai_dsh_deep_research/...` own=true。
-- **判定**：**发现** → [BUG-113](../_archived/fixed_bugs/BUG-113-port-own-listener-overmatch.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-113](../../_archived/fixed_bugs/BUG-113-port-own-listener-overmatch.md)（P2，排查中；未改产品代码）。
 - **下一层**：argv 解析/pid 锁身份；未跑，记空白。
 
 ### N44：方法库锁释放删新锁 → BUG-114
@@ -2177,7 +2180,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/method-lock-release-stale-owner.mjs`
 - **证据**：A 返回后 lockStillExists=false（C 锁被删），bug true。
-- **判定**：**发现** → [BUG-114](../_archived/fixed_bugs/BUG-114-method-lock-release-stale-owner.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-114](../../_archived/fixed_bugs/BUG-114-method-lock-release-stale-owner.md)（P2，排查中；未改产品代码）。
 - **下一层**：真实 >30s 写停顿、flock/租约语义；未跑，记空白。
 
 ### N45：BUG-081 修复后名称占位符仍非法 → BUG-115
@@ -2188,7 +2191,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/name-placeholder-invalid-after-fix.mjs`
 - **证据**：zh placeholder `投研尽调（我的口径）` 被 `methodNameIssue` 拒绝；
   en placeholder ASCII 括号通过；zhPlaceholderInvalid true。
-- **判定**：**发现** → [BUG-115](../_archived/fixed_bugs/BUG-115-name-placeholder-invalid-after-fix.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-115](../../_archived/fixed_bugs/BUG-115-name-placeholder-invalid-after-fix.md)（P2，排查中；未改产品代码）。
 - **下一层**：其它用户可见示例名（coach prompt/内置内容）的合法性；未跑，记空白。
 
 ### N46：最后一条 present 无版本仍报旧版本 → BUG-116
@@ -2199,7 +2202,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/present-version-last-unversioned.mjs`
 - **证据**：present v2 后 present final.md → latestFinalDelivery final.md（turn3），
   latestPresentedVersion 2；mismatch true。
-- **判定**：**发现** → [BUG-116](../_archived/fixed_bugs/BUG-116-present-version-last-unversioned.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-116](../../_archived/fixed_bugs/BUG-116-present-version-last-unversioned.md)（P2，排查中；未改产品代码）。
 - **下一层**：同事件 reader/vN、真实 re-present 形态；未跑，记空白。
 
 ### N47：status feed trust/face 跨会话残留 → BUG-117
@@ -2209,7 +2212,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/status-feed-trust-stale.mjs`
 - **证据**：afterS1/afterS2 trust 都是 bound/old；events 0；staleTrust true。
-- **判定**：**发现** → [BUG-117](../_archived/fixed_bugs/BUG-117-status-feed-trust-stale.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-117](../../_archived/fixed_bugs/BUG-117-status-feed-trust-stale.md)（P2，排查中；未改产品代码）。
 - **下一层**：face/unbound 的真实时序、member summaries；未跑，记空白。
 
 ### N48：status leads/findings 目录被当文件 → BUG-118
@@ -2218,7 +2221,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **最低层**：纯函数/源码（openRun entries 目录 + view.hasFile）。
 - **实际命令**：`node --import tsx/esm runtime/explore-20261112/status-leads-findings-directory.mjs`
 - **证据**：namesHasLeads true / hasFileLeads false；findings 同。
-- **判定**：**发现** → [BUG-118](../_archived/fixed_bugs/BUG-118-status-leads-findings-directory.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-118](../../_archived/fixed_bugs/BUG-118-status-leads-findings-directory.md)（P2，排查中；未改产品代码）。
 - **下一层**：其它 names.has 消费面；未跑，记空白。
 
 ### N49：config adoption 跨会话残留 → BUG-119
@@ -2228,7 +2231,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/config-feed-adoption-stale.mjs`
 - **证据**：afterS1/afterS2 adoption 都是 unrecorded；staleAdoption true。
-- **判定**：**发现** → [BUG-119](../_archived/fixed_bugs/BUG-119-config-feed-adoption-stale.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-119](../../_archived/fixed_bugs/BUG-119-config-feed-adoption-stale.md)（P2，排查中；未改产品代码）。
 - **下一层**：真实首帧延迟、keyed remount；未跑，记空白。
 
 ### N50：方法库 hardlink 读越界 → BUG-120
@@ -2238,7 +2241,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/method-library-hardlink-read-escape.mjs`
 - **证据**：hardlink 外部 `OUTSIDE SECRET`；escapedRead true；写 rename 后 outside 仍原样。
-- **判定**：**发现** → [BUG-120](../_archived/fixed_bugs/BUG-120-method-library-hardlink-read-escape.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-120](../../_archived/fixed_bugs/BUG-120-method-library-hardlink-read-escape.md)（P2，排查中；未改产品代码）。
 - **下一层**：nlink>1 策略、NFS/跨设备语义；未跑，记空白。
 
 ### N51：phase 行尾注释被拒 → BUG-121
@@ -2247,7 +2250,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **最低层**：纯函数（`isCompletedMethodSourceRun`）。
 - **实际命令**：`node --import tsx/esm runtime/explore-20261112/source-phase-trailing-comment.mjs`
 - **证据**：裸/`- phase:` accepted true；带 `# done` / 模板注释 false。
-- **判定**：**发现** → [BUG-121](../_archived/fixed_bugs/BUG-121-source-phase-trailing-comment.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-121](../../_archived/fixed_bugs/BUG-121-source-phase-trailing-comment.md)（P2，排查中；未改产品代码）。
 - **下一层**：其它行尾装饰、真实 run.md 注释；未跑，记空白。
 
 ### N52：finalPathOf 嵌套非 bundle 后缀 → BUG-122
@@ -2256,7 +2259,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **最低层**：纯函数（`finalPathOf`）。
 - **实际命令**：`node --import tsx/esm runtime/explore-20261112/final-path-nested-non-bundle.mjs`
 - **证据**：notes/drt_x/final.md → drt_x/final.md；drafts/drt_x/final/v2.md → drt_x/final/v2.md。
-- **判定**：**发现** → [BUG-122](../_archived/fixed_bugs/BUG-122-final-path-nested-non-bundle.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-122](../../_archived/fixed_bugs/BUG-122-final-path-nested-non-bundle.md)（P2，排查中；未改产品代码）。
 - **下一层**：绝对路径工作区根校验、真实 present 分布；未跑，记空白。
 
 ### N53：默认标记在 provenance 里被误判 → BUG-123
@@ -2266,7 +2269,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/library-default-marker-in-provenance.mjs`
 - **证据**：`## 方法（〔默认偏好〕）` → provenance 标记、isDefault true；真实标记/无标记对照符合。
-- **判定**：**发现** → [BUG-123](../_archived/fixed_bugs/BUG-123-default-marker-in-provenance.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-123](../../_archived/fixed_bugs/BUG-123-default-marker-in-provenance.md)（P2，排查中；未改产品代码）。
 - **下一层**：其他 title 段（多标记/全角空白）、默认消费链；未跑，记空白。
 
 ### N54：heading 段间空白被 upsert 漏认 → BUG-124
@@ -2276,7 +2279,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/heading-whitespace-between-segments.mjs`
 - **证据**：无空格 updated/1 条；`## 方法（来源） 〔默认偏好〕` 与 `## 方法 （来源）` created/2 条同名。
-- **判定**：**发现** → [BUG-124](../_archived/fixed_bugs/BUG-124-heading-whitespace-between-segments.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-124](../../_archived/fixed_bugs/BUG-124-heading-whitespace-between-segments.md)（P2，排查中；未改产品代码）。
 - **下一层**：全角空白/多空格/换行 heading；未跑，记空白。
 
 ### N55：无 `##` plan 版本取 last → BUG-125
@@ -2287,7 +2290,7 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/plan-no-heading-version-last.mjs`
 - **证据**：无 `##`、头 v2、正文「旧版图版本：v1」→ runVersionCurrent 1 / planIndexVersion v1；
   expected 2。
-- **判定**：**发现** → [BUG-125](../_archived/fixed_bugs/BUG-125-plan-no-heading-version-last.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-125](../../_archived/fixed_bugs/BUG-125-plan-no-heading-version-last.md)（P2，排查中；未改产品代码）。
 - **下一层**：共享版本解析/多版本 header；未跑，记空白。
 
 ### N56：方法库锁活 pid 被当陈旧 → BUG-126
@@ -2297,12 +2300,12 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
 - **实际命令**：
   `TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm runtime/explore-20261112/method-lock-stale-live-pid.mjs`
 - **证据**：pidAlive true、oldLockTakenOver true、bug true。
-- **判定**：**发现** → [BUG-126](../_archived/fixed_bugs/BUG-126-method-lock-stale-live-pid.md)（P2，排查中；未改产品代码）。
+- **判定**：**发现** → [BUG-126](../../_archived/fixed_bugs/BUG-126-method-lock-stale-live-pid.md)（P2，排查中；未改产品代码）。
 - **下一层**：pid 复用/心跳/flock 语义；未跑，记空白。
 
 ### 第 10 轮（2026-11-14）：验证层换 oracle 后的邻接变体复扫
 
-- **charter**：S2a/S2b/S2c（[verification-oracle](../_archived/settled_issues/2026-11-14-verification-oracle.md)）之后，验证层的声明面
+- **charter**：S2a/S2b/S2c（[verification-oracle](../../_archived/settled_issues/2026-11-14-verification-oracle.md)）之后，验证层的声明面
   （Markdown mask / CI 执行面 / fix-evidence）是否还有探索能稳定打出的邻接变体；目标 = 0 新变体，
   或每个发现都归因到「还没换 oracle」的面。
 - **最低层**：纯函数（`maskFencedCode` / `executedSmokeFiles` / `fixEvidenceProblems`）+ 录制 oracle 差分。
@@ -2314,5 +2317,5 @@ keyless 批（X1–X5、X7、X8）不调模型、不改产品代码，可自主�
   36/36、29/29、fix-evidence 10/10，**声明面 0 新邻接变体**。
 - **未换 oracle 的面**：note-scan 的 HTML/富装饰（S2d 规范形拒写，不猜）；staged-change-pairing 的
   路径归一（精确匹配，宁红不猜）。
-- **下一层**：194 个 `self-referential` 测试资产的组合迁移（[asset-ledger](../../tests/fixtures/asset-ledger/README.md)
+- **下一层**：194 个 `self-referential` 测试资产的组合迁移（[asset-ledger](../../../tests/fixtures/asset-ledger/README.md)
   可见）；真模型/浏览器档仍是里程碑。

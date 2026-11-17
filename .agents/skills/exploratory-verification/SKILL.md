@@ -7,12 +7,13 @@ description: Use when regression is green but the new behavior's input space is 
 
 本技能是 **guidance**，不是 checklist。策略总图 = [guides/67](../../../docs/guides/67-test-strategy.md)；
 类级守卫形态 = [class-level-guards](../../../_backlog/methods/class-level-guards.md)；探针 = [guides/66](../../../docs/guides/66-probe-playbook.md)；
-逐轮账本与覆盖地图 = [探索卡](../../../_backlog/issues/2026-11-11-exploratory-test-strategy.md)；
-当前轮 charter 也在该卡 §第六轮 goal。
+历轮账本与覆盖地图 = [探索卡·第 0–11 轮](../../../_backlog/_archived/settled_issues/2026-11-11-exploratory-test-strategy.md)（冻结）；
+当前轮 = [命名空间搬家卡](../../../_backlog/issues/2026-11-17-exploratory-namespace-move.md)。
 
 ## 1. 什么时候用
 
 - 新机制/新判据/新解析器落地，回归只覆盖了 happy path；
+- 根名/目录命名空间搬家（三根重命名、兼容账本、退役根）：旧名仍可解析，回归的绿不再等于「新名被用」；
 - 一批 BUG 有共同气味（静默接受、邻接变体、消费者遗漏、双份事实）；
 - 发布后问「哪些输入我们根本没写进测试」；
 - 同类复发第 2 次——先探索一类，再考虑加门禁。
@@ -86,4 +87,5 @@ ID｜假设（要杀死的命题）｜最低可观察层｜oracle 与变异/场�
 - 用探索代替回归，或把探索发现直接塞进回归（实例修）；
 - 在最低层能答的问题上跑 L4；用模型自述当证据；
 - 只写 bug 卡不写守卫；只写守卫不登记失败类账本；
+- 把兼容层当安全网：账本只证明旧名可解析，不证明新名被用、证据还在门里；
 - 把「没找到」写成「没有 bug」；把空假设当毕业。

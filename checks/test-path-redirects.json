@@ -2715,6 +2715,7 @@
     {"from": "tests/run/ops/session-log.spec.mjs", "to": "tests/run/shared/session-log.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
     {"from": "tests/run/ops/stream-failure.spec.mjs", "to": "tests/run/shared/stream-failure.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
     {"from": "tests/run/ops/tool-card.spec.mjs", "to": "tests/run/shared/tool-card.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "checks/dist/release-check.mjs", "to": "checks/release/release-check.mjs", "reason": "2026-11-17 维护层对齐：checks/dist → checks/release（与 _dist 交付物去撞名）"}
+    {"from": "checks/dist/release-check.mjs", "to": "checks/release/release-check.mjs", "reason": "2026-11-17 维护层对齐：checks/dist → checks/release（与 _dist 交付物去撞名）"},
+    {"from": "_backlog/issues/2026-11-11-exploratory-test-strategy.md", "to": "_backlog/_archived/settled_issues/2026-11-11-exploratory-test-strategy.md", "reason": "2026-11-17 探索账本换卡：老卡归档为参考，新卡 2026-11-17-exploratory-namespace-move"}
   ]
 }
