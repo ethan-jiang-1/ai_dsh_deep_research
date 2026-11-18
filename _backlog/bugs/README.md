@@ -13,7 +13,26 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| （空） | — | — | 批 G/H/I/J/K/L/M/N（209–319）全部归档，见下 |
+| [BUG-320](BUG-320-boot-run-drift-only-lock-regression.md) | 修复就绪 | P2 | drift-only 在活通道持锁时必失败 |
+| [BUG-321](BUG-321-boot-run-stale-lock-no-recovery.md) | 修复就绪 | P2 | boot-run 锁无 stale 回收 |
+| [BUG-322](BUG-322-start-lock-stale-reclaim-race.md) | 修复就绪 | P2 | stale 回收竞态可双拿锁 |
+| [BUG-323](BUG-323-start-lock-future-timestamp-blocks.md) | 修复就绪 | P2 | 未来时间锁永不过期 |
+| [BUG-324](BUG-324-start-lock-10min-steals-long-boot.md) | 修复就绪 | P2 | 10min stale 抢长启动 |
+| [BUG-325](BUG-325-start-lock-release-removes-new-owner.md) | 修复就绪 | P2 | 旧持有者 release 删新锁 |
+| [BUG-326](BUG-326-run-driver-boot-run-two-locks.md) | 修复就绪 | P2 | run-driver/boot-run 两把锁 |
+| [BUG-327](BUG-327-probe-cache-mcp-read-write-key-mismatch.md) | 修复就绪 | P2 | probe 读写键 MCP 不一致 |
+| [BUG-328](BUG-328-plan-snapshot-same-text-only.md) | 等人拍板 | P2 | plan 快照只拒同文本 |
+| [BUG-329](BUG-329-threshold-critical-scope-null.md) | 等人拍板 | P2 | claims 缺时 threshold 退全部 |
+| [BUG-330](BUG-330-output-length-heuristic-still.md) | 等人拍板 | P2 | 长度仍启发式 |
+| [BUG-331](BUG-331-start-lock-owner-write-failure-leaks.md) | 修复就绪 | P2 | owner 写失败留锁 |
+| [BUG-332](BUG-332-start-lock-no-pid-liveness.md) | 修复就绪 | P2 | 只按时间不按 pid |
+| [BUG-333](BUG-333-run-driver-port-nan.md) | 修复就绪 | P2 | --port NaN/0 未校验 |
+| [BUG-334](BUG-334-cold-start-port-env-nan.md) | 修复就绪 | P2 | COLD_START_PORT NaN |
+| [BUG-335](BUG-335-snapshot-port-nan.md) | 修复就绪 | P2 | snapshot --port NaN |
+| [BUG-336](BUG-336-client-load-port-nan.md) | 修复就绪 | P2 | client-load --port NaN |
+| [BUG-337](BUG-337-boot-run-port-invalid.md) | 修复就绪 | P2 | DSH_RUN_PORT 未校验 |
+| [BUG-338](BUG-338-pick-free-port-toctou.md) | 修复就绪 | P2 | pickFreePort TOCTOU |
+| [BUG-339](BUG-339-boot-run-trap-removes-new-lock.md) | 修复就绪 | P2 | trap 删新锁 |
 
 ## 最近归档
 

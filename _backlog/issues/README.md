@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| （空） | — | 2026-11-19 第 8 轮已结，见 [_archived/settled_issues](../_archived/settled_issues/README.md) |
+| [2026-11-19-low-confidence-40](2026-11-19-low-confidence-40.md) | 推敲中 | 低置信区 20 卡（第 9 轮）：锁/端口/缓存读写并发残差；320–339 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
