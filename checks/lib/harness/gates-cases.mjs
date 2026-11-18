@@ -785,7 +785,7 @@ export const CASES = [
   } },
   // D52 / D55：判据测试（*conformance.test.mjs 与 *conformance.spec.mjs）即使标题不带 BUG 号，也必须给红配方。
   { id: 'guard-red-record-conformance-no-block', gate: 'guard-red-record', mutate: (dir) => {
-    writeFileSync(join(dir, 'tests', 'checks', 'probe-conformance.test.mjs'), "import test from 'node:test';\n\ntest('probe', () => {});\n");
+    writeFileSync(join(dir, 'tests', 'checks', 'repo', 'probe-conformance.test.mjs'), "import test from 'node:test';\n\ntest('probe', () => {});\n");
   } },
   { id: 'guard-red-record-conformance-spec-no-block', gate: 'guard-red-record', mutate: (dir) => {
     writeFileSync(join(dir, 'tests', 'contracts', 'probe-conformance.spec.mjs'), "import test from 'node:test';\n\ntest('probe', () => {});\n");
