@@ -90,7 +90,25 @@ opened: 2026-11-18
 | probe 缓存键 | 已探 → 1 卡 | 259 |
 | 快照 A/B/C | 已关闭 | B/C 全绿；profile 重建后无过期 |
 | 模板 JSON schema | 已关闭 | protocol-core 值域/形状绿 |
+| 生成账本/类型闭包/索引 | 已关闭 | probes 18 支一致；test-index up to date；pack.e2e 类型闭包绿 |
+| 客户端 locale/keys | 已关闭 | i18n/client-locale/cjk-source 通过 |
+| 安装/clean-room | 已关闭 | cold-start 6.6s GREEN；pack.e2e 86 |
 | claims/verdicts | 已关闭 | 逐字/finalRef/coverage/readiness 已有门 |
+
+## 覆盖面补记（goal 轮，2026-11-18）
+
+- **生成账本 / 类型闭包 / 索引**：`probes/_index.mjs --check` 一致（18 支）；`render-test-index --check`
+  up to date；`pack.e2e` 类型闭包/夹具/86 条目绿；asset-ledger / guard-ledger 测试绿；`pnpm verify` 绿。
+  未发现新 bug，关闭。
+- **客户端 locale / keys**：`i18n.spec` / `client-locale.spec` / `cjk-source.test` 通过（裸 `node --test`
+  不加载 tsx loader 时会在 `views.tsx` 报 `ERR_UNKNOWN_FILE_EXTENSION`，这是命令缺 loader，不是产品 bug；
+  `pnpm test:spec` 用 tsx loader）。未发现新 bug，关闭。
+- **快照 A/B/C**：重建 dev profile 后 B/C ALL PASS；第一次 exit 2 = profile 镜像漂移（14 项），按提示重建后
+  通过——不是快照过期。关闭。
+- **安装 / clean-room**：`cold-start` 6.6s GREEN（仓外 home + 钉版 DSH + tarball）；240–249 已修；
+  `pack.e2e` 86 条目绿。关闭。
+- **运行时缓存 / 并发**：259 是唯一新卡（probe 缓存键不含 driver）；profile 守卫/直起已由 237/242/243 覆盖。
+- 本轮 10 张卡（250–259）即完整；生成/账本/locale 面没有为凑数开卡。
 
 ## 验收标准
 
