@@ -13,7 +13,26 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| （空） | — | — | 批 G/H/I/J/K（209–259）全部归档，见下 |
+| [BUG-260](BUG-260-findings-support-evidence-existence-skips-without-lens.md) | 等人拍板 | P2 | 无 lens 时 findings 支撑证据存在性整段跳过 |
+| [BUG-261](BUG-261-findings-lens-gaps-presence-file-global.md) | 等人拍板 | P2 | 一个块有 lens_gaps 替所有缺行块背书 |
+| [BUG-262](BUG-262-findings-lens-gaps-empty-file-global-false-red.md) | 等人拍板 | P2 | 一个块 `[]` 误伤其它「无」块 |
+| [BUG-263](BUG-263-findings-duplicate-f-id.md) | 等人拍板 | P2 | 重复 F# 不报 |
+| [BUG-264](BUG-264-topics-duplicate-t-id-overwrite.md) | 等人拍板 | P2 | 重复 T# 被 Map 静默覆盖 |
+| [BUG-265](BUG-265-topics-depends-on-no-consumer.md) | 等人拍板 | P2 | topics depends_on 无消费者 |
+| [BUG-266](BUG-266-topics-must-answer-count-ungated.md) | 等人拍板 | P2 | must_answer 2–5 只被仪表盘计数 |
+| [BUG-267](BUG-267-plan-graph-issues-ui-only.md) | 等人拍板 | P2 | plan 环/悬空/重号只 UI 提示 |
+| [BUG-268](BUG-268-plan-fields-owner-kind-lifecycle-ungated.md) | 等人拍板 | P2 | plan owner/kind/lifecycle/剩余工作无门 |
+| [BUG-269](BUG-269-run-state-phase-field-cross-checks.md) | 等人拍板 | P2 | run next/delivered/parked 只浅检 |
+| [BUG-270](BUG-270-claims-verdict-urls-not-validated.md) | 等人拍板 | P2 | claims/verdict URL 只查字符串数组 |
+| [BUG-271](BUG-271-protocol-evidence-threshold-unenforced.md) | 等人拍板 | P2 | evidence_threshold 无下游 |
+| [BUG-272](BUG-272-protocol-output-length-unenforced.md) | 等人拍板 | P2 | output.length 无 final 字数检查 |
+| [BUG-273](BUG-273-protocol-gates-claim-verification-unused.md) | 等人拍板 | P2 | claim_verification/critic 声明不生效 |
+| [BUG-274](BUG-274-verdict-duplicate-conflict-warn-only.md) | 等人拍板 | P2 | 同 claim 冲突裁决只 warn |
+| [BUG-275](BUG-275-claims-zero-critical-warn-only.md) | 等人拍板 | P2 | 零 critical 只 warn，覆盖门空转 |
+| [BUG-276](BUG-276-method-library-sha-unverified.md) | 等人拍板 | P2 | library_fields_sha256 不自算 |
+| [BUG-277](BUG-277-topics-lenses-unknown-id.md) | 等人拍板 | P2 | topics.lenses 不校验真实 lens id |
+| [BUG-278](BUG-278-protocol-waves-max-warn-only.md) | 等人拍板 | P2 | waves_max 只 warn |
+| [BUG-279](BUG-279-evidence-supports-unknown-topic.md) | 等人拍板 | P2 | supports 指向不存在的 T# 不报 |
 
 ## 最近归档
 
