@@ -13,7 +13,26 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| （空） | — | — | 批 G/H/I/J/K/L（209–279）全部归档，见下 |
+| [BUG-280](BUG-280-plan-gate-malformed-table-pass.md) | 等人拍板 | P2 | plan 表畸形/缺席时 planGate PASS 0 节点 |
+| [BUG-281](BUG-281-plan-gate-version-absent.md) | 等人拍板 | P2 | plan 缺图版本时版本链整段跳过 |
+| [BUG-282](BUG-282-plan-gate-columns-unchecked.md) | 等人拍板 | P2 | plan 表 question/output/acceptance/budget/depth/task_id 可空 |
+| [BUG-283](BUG-283-plan-gate-wave-task-unchecked.md) | 等人拍板 | P2 | Wave 执行/task_id/plan-only 无门 |
+| [BUG-284](BUG-284-plan-gate-remaining-content-shallow.md) | 等人拍板 | P2 | 剩余工作只查标题 |
+| [BUG-285](BUG-285-plan-gate-snapshot-content-unchecked.md) | 等人拍板 | P2 | 图版本快照只查在场 |
+| [BUG-286](BUG-286-claims-critical-exemption-any-string.md) | 等人拍板 | P2 | critical_exemption 任意非空字符串 |
+| [BUG-287](BUG-287-protocol-critic-light-no-behavior.md) | 等人拍板 | P2 | critic light 与 report 同判 |
+| [BUG-288](BUG-288-review-coverage-structural-only.md) | 等人拍板 | P2 | review 覆盖表仍结构判据 |
+| [BUG-289](BUG-289-method-library-path-bundle-parent.md) | 等人拍板 | P2 | 方法库按 bundle 父目录定位，假红 |
+| [BUG-290](BUG-290-skill-golden-pack-only.md) | 修复就绪 | P2 | skill 金标准只覆盖随包 15 份 |
+| [BUG-291](BUG-291-snapshot-c-only-lead.md) | 修复就绪 | P2 | snapshot C 只有 lead |
+| [BUG-292](BUG-292-client-load-role-picker-only.md) | 修复就绪 | P2 | client-load 只验角色选择器 |
+| [BUG-293](BUG-293-agents-skill-golden-missing.md) | 修复就绪 | P2 | .agents/skills 无 skill 金标准 |
+| [BUG-294](BUG-294-snapshot-render-cases-only-lead.md) | 修复就绪 | P2 | renderExpected 只有 lead |
+| [BUG-295](BUG-295-client-load-method-editor-missing.md) | 修复就绪 | P2 | client-load 不含 method-editor |
+| [BUG-296](BUG-296-probe-cache-profile-omitted.md) | 修复就绪 | P2 | probe 缓存键不含 profile |
+| [BUG-297](BUG-297-probe-cache-bootstrap-omitted.md) | 修复就绪 | P2 | probe 缓存键不含 bootstrap |
+| [BUG-298](BUG-298-channel-cache-mtime-size-only.md) | 修复就绪 | P2 | pack 指纹只含 size/mtime |
+| [BUG-299](BUG-299-probe-cache-workspace-omitted.md) | 修复就绪 | P2 | probe 缓存键不含 workspace |
 
 ## 最近归档
 
