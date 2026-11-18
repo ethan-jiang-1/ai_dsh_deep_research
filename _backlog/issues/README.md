@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| （空） | — | 2026-11-18 第 7 轮已结，见 [_archived/settled_issues](../_archived/settled_issues/README.md) |
+| [2026-11-18-low-confidence-30](2026-11-18-low-confidence-30.md) | 推敲中 | 低置信区 20 卡（第 8 轮）：plan 门剩余/方法库 N/A/缓存身份/并发与端口；300–319 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
