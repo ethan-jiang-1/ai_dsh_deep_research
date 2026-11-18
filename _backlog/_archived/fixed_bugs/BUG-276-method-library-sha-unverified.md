@@ -1,17 +1,21 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-276：method.library_fields_sha256 只校验 64 位 hex——从不与工作区方法库实际字段对账
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：library_fields_sha256 从工作区方法库重算
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`checks/lib/gates/protocol-core.mjs:362–363`（只 `SHA256.test`）；模板 =
 > `content/templates/run/protocol.json` 的 `method.library_fields_sha256`；
 > 方法库正本 = `packages/deep-research-pack/src/lib/method-library/*` 与工作区 `method-library.md`。
-> 探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -68,3 +72,28 @@ grep -rn 'library_fields_sha256' checks packages/deep-research-pack/src | head
 
 - sha 由正本重算并比对；漂移/伪造 → 红；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/protocol-audit-core.mjs",
+    "checks/run-gates/protocol-audit.mjs",
+    "tests/run/gates/protocol-core.spec.mjs",
+    "checks/run-gates/run-accept.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/protocol-core.spec.mjs",
+    "exit": 1,
+    "output": "not ok 39 - method.library_fields_sha256：从方法库字段重算（BUG-276）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/protocol-core.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/protocol-core.spec.mjs"
+  }
+}
+```

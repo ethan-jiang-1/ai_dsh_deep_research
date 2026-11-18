@@ -1,17 +1,21 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-272：protocol 的 `output.length.min/max` 只校验数字形状——final 可以只有 10 个字
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：output.length 按分词/pages 计 final 长度
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`checks/lib/gates/protocol-core.mjs:448–455`（只校验 min/max 是非负整数、min≤max、unit 闭集）；
 > `final.md`/reader 门没有按 protocol.length 计字数；模板 = `content/templates/run/protocol.json`
 > （`length: { min: 1200, max: 1600, unit: words }`）。
-> 探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -66,3 +70,28 @@ grep -rn 'output.length\|length.min\|length.max' checks packages/deep-research-p
 
 - final 长度与 protocol.length 对账；越界 → 红；
 - quick_factual/旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/protocol-audit-core.mjs",
+    "checks/run-gates/protocol-audit.mjs",
+    "tests/run/gates/protocol-core.spec.mjs",
+    "checks/run-gates/run-accept.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/protocol-core.spec.mjs",
+    "exit": 1,
+    "output": "not ok 38 - output.length：final 低于 min → 红（BUG-272）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/protocol-core.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/protocol-core.spec.mjs"
+  }
+}
+```

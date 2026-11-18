@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-265：topics 的 `depends_on` 只有模板/技能在说——没有任何代码读它
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：depends_on 图校验：未知/自依赖/环红；门 T 消费
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`packages/deep-research-pack/content/templates/run/topics.md:12,21`（`- depends_on:`）；
 > 消费面 = `checks` / `packages/deep-research-pack/src`（`grep depends_on` 只命中模板与 nodes-contract 技能）。
-> 探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -68,3 +72,26 @@ D28 的 topic 图字段只进了模板与立项技能；`parseTopicsOf`（findin
 
 - depends_on 有解析器、有图校验、有消费；非法图 → 红；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/findings-core.mjs",
+    "tests/run/gates/topics-contract.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/topics-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 3 - BUG-265：depends_on 未知/自依赖/环 → 红"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/topics-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/topics-contract.spec.mjs"
+  }
+}
+```

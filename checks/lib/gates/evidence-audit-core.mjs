@@ -12,6 +12,7 @@ import { basename, join } from 'node:path'
 import { splitFrontmatter } from '../shared/frontmatter.mjs'
 import { provenanceOf, sha256OfFile } from './provenance.mjs'
 import { lensScanOf } from './protocol-core.mjs'
+import { parseTopicsReport } from './findings-core.mjs'
 
 /** evidence 八字段（模板/手册正本；BUG-250）：审计必须逐一消费，不允许“模板有键、审计没读”。 */
 export const EVIDENCE_FIELDS = Object.freeze(['source_url', 'retrieved_at', 'quality', 'found_by', 'supports', 'lens', 'source_tier', 'publisher'])
@@ -210,7 +211,9 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = skipUnreadableL
   const evidence = []
   // 本次 run 的 lens 集合（topics.md 的 `- lenses:` 行；缺席 = 不判越界，只判字段在场）。
   const topicsPath = join(bundleDir, 'topics.md')
-  const topicsLenses = existsSync(topicsPath) ? lensScanOf(readFileSync(topicsPath, 'utf8')).ids : []
+  const topicsText = existsSync(topicsPath) ? readFileSync(topicsPath, 'utf8') : ''
+  const topicsLenses = topicsText === '' ? [] : lensScanOf(topicsText).ids
+  const topicIds = topicsText === '' ? new Set() : new Set(parseTopicsReport(topicsText).topics.keys())
   if (existsSync(evDir)) {
     for (const f of readdirSync(evDir).filter((x) => x.endsWith('.md')).sort()) {
       const raw = readFileSync(join(evDir, f), 'utf8')
@@ -255,6 +258,11 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = skipUnreadableL
         const publisher = scalarOf(fm.publisher)
         if (publisher !== '' && !isPublisherDomain(publisher)) {
           findings.push({ level: 'MAJOR', file: f, kind: '值域非法', detail: `publisher=${publisher} 不是注册域（host.tld；localhost 例外）` })
+        }
+        for (const m of String(fm.supports ?? '').matchAll(/T\d+/g)) {
+          if (topicIds.size > 0 && !topicIds.has(m[0])) {
+            findings.push({ level: 'MAJOR', file: f, kind: 'supports 越界', detail: `supports ${m[0]} 不在 topics.md` })
+          }
         }
         const lens = scalarOf(fm.lens)
         if (lens !== '' && topicsLenses.length > 0 && !topicsLenses.includes(lens)) {

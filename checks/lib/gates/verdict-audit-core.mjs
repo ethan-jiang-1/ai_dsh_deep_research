@@ -42,6 +42,12 @@ export const normalizeVerbatim = (s) => String(s ?? '').replace(/\s+$/u, '')
 /** 文本 sha256（claims / verdicts 文件哈希的唯一实现；门禁报告消费）。 */
 export const sha256Text = (text) => createHash('sha256').update(String(text ?? ''), 'utf8').digest('hex')
 
+/** http(s) URL 校验（BUG-270）：非 http(s)/不可解析 = false。 */
+export const isHttpUrl = (value) => {
+  if (typeof value !== 'string' || value.trim() === '') return false
+  try { const u = new URL(value); return u.protocol === 'http:' || u.protocol === 'https:' } catch { return false }
+}
+
 const parseJson = (text, code) => {
   if (typeof text !== 'string' || text.trim() === '') return { value: null, problems: [{ code, detail: '文件为空' }] }
   try {
@@ -60,10 +66,11 @@ export function parseClaims(text) {
   if (value === null) return { value: null, problems }
   if (!isPlainObject(value)) return { value: null, problems: [{ code: 'claims-invalid', detail: '顶层必须是对象' }] }
   for (const key of Object.keys(value)) {
-    if (!['version', 'finalRef', 'claims'].includes(key)) problems.push({ code: 'claims-invalid', detail: `未知字段 ${key}（形状 = version/finalRef/claims）` })
+    if (!['version', 'finalRef', 'claims', 'critical_exemption'].includes(key)) problems.push({ code: 'claims-invalid', detail: `未知字段 ${key}（形状 = version/finalRef/claims[/critical_exemption]）` })
   }
   if (value.version !== 1) problems.push({ code: 'claims-invalid', detail: `version 必须是 1（实际 ${JSON.stringify(value.version)}）` })
   if (!Number.isSafeInteger(value.finalRef) || value.finalRef < 1) problems.push({ code: 'claims-invalid', detail: 'finalRef 必须是 final/v<N> 的正整数 N' })
+  if (value.critical_exemption !== undefined && value.critical_exemption !== null && (typeof value.critical_exemption !== 'string' || value.critical_exemption.trim() === '')) problems.push({ code: 'claims-invalid', detail: 'critical_exemption 必须是非空字符串（无 critical 的显式理由）' })
   if (!Array.isArray(value.claims) || value.claims.length === 0) {
     problems.push({ code: 'claims-invalid', detail: 'claims 必须是非空数组' })
     return { value: null, problems }
@@ -84,6 +91,10 @@ export function parseClaims(text) {
     for (const key of ['topics', 'evidence', 'urls']) {
       if (raw[key] !== undefined && !isStringArray(raw[key])) problems.push({ code: 'claims-invalid', detail: `${where}.${key} 必须是字符串数组` })
     }
+    if (isStringArray(raw.urls)) {
+      for (const url of raw.urls) if (!isHttpUrl(url)) problems.push({ code: 'claims-invalid', detail: `${where}.urls 含非 http(s) URL：${String(url)}` })
+      if (new Set(raw.urls).size !== raw.urls.length) problems.push({ code: 'claims-invalid', detail: `${where}.urls 有重复` })
+    }
     claims.push({
       id: raw.id,
       text: raw.text,
@@ -94,7 +105,7 @@ export function parseClaims(text) {
     })
   }
   if (problems.length > 0) return { value: null, problems }
-  return { value: { finalRef: value.finalRef, claims }, problems }
+  return { value: { finalRef: value.finalRef, claims, criticalExemption: value.critical_exemption ?? null }, problems }
 }
 
 /**
@@ -142,6 +153,10 @@ export function parseVerdicts(text) {
     if (!nonEmptyString(raw.claim_id)) problems.push({ code: 'verdicts-invalid', detail: `${where}.claim_id 必须是非空字符串` })
     if (!Number.isSafeInteger(raw.batch)) problems.push({ code: 'verdicts-invalid', detail: `${where}.batch 必须是整数批次下标` })
     if (raw.rechecked_urls !== undefined && !isStringArray(raw.rechecked_urls)) problems.push({ code: 'verdicts-invalid', detail: `${where}.rechecked_urls 必须是字符串数组` })
+    if (isStringArray(raw.rechecked_urls)) {
+      for (const url of raw.rechecked_urls) if (!isHttpUrl(url)) problems.push({ code: 'verdicts-invalid', detail: `${where}.rechecked_urls 含非 http(s) URL：${String(url)}` })
+      if (new Set(raw.rechecked_urls).size !== raw.rechecked_urls.length) problems.push({ code: 'verdicts-invalid', detail: `${where}.rechecked_urls 有重复` })
+    }
     if (raw.source_tier_ok !== undefined && typeof raw.source_tier_ok !== 'boolean') problems.push({ code: 'verdicts-invalid', detail: `${where}.source_tier_ok 必须是布尔` })
     verdicts.push({
       claim_id: raw.claim_id,
@@ -303,7 +318,10 @@ export function auditClaimVerdicts({
     }
   }
   stats.critical = claims.filter((c) => c.critical).length
-  if (stats.critical === 0) warn('no-critical', 'claim 表没有一条 critical——「全都不关键」通常是表做漏了（覆盖判据只看 critical）')
+  if (stats.critical === 0) {
+    if (claimsParsed.value.criticalExemption !== null) warn('no-critical', `claim 表零 critical，显式豁免：${claimsParsed.value.criticalExemption}`)
+    else add('no-critical', 'claim 表没有一条 critical 且无 critical_exemption——「全都不关键」通常是表做漏了（覆盖判据只看 critical）')
+  }
 
   if (Number.isSafeInteger(finalVersion) && finalVersion !== finalRef) {
     add('claims-stale', `claims.finalRef = v${finalRef}，盘上最高 final = v${finalVersion}——claim 表对的是旧稿`)
@@ -353,14 +371,16 @@ export function auditClaimVerdicts({
   const cursor = new Map()
   for (const round of parsedRounds) {
     const where = `verdicts-r${round.round}.json`
-    const seenClaims = new Set()
+    const seenClaims = new Map()
     for (const verdict of round.verdicts) {
       const claim = byId.get(verdict.claim_id)
       if (claim === undefined) {
         add('verdict-orphan', `${where}：裁决指向不存在的 claim ${verdict.claim_id}`)
       }
-      if (seenClaims.has(verdict.claim_id)) warn('verdict-duplicate', `${where}：${verdict.claim_id} 有多条裁决（取并集判覆盖，冲突需语义审）`)
-      seenClaims.add(verdict.claim_id)
+      if (seenClaims.has(verdict.claim_id)) {
+        if (seenClaims.get(verdict.claim_id) === verdict.verdict) warn('verdict-duplicate', `${where}：${verdict.claim_id} 有重复的同值裁决`)
+        else add('verdict-conflict', `${where}：${verdict.claim_id} 有多条互相冲突的裁决（${seenClaims.get(verdict.claim_id)} vs ${verdict.verdict}）`)
+      } else seenClaims.set(verdict.claim_id, verdict.verdict)
       if (!VERDICT_VALUES.includes(verdict.verdict)) {
         add('verdict-invalid', `${where}：${verdict.claim_id} 的 verdict ${JSON.stringify(verdict.verdict)} 不是 ${VERDICT_VALUES.join('/')}`)
       }

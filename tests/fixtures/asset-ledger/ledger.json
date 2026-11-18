@@ -1843,6 +1843,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/run/gates/plan-gate.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "plan-gate.spec.mjs — plan 图硬结构/字段/剩余工作（BUG-267 / 268；keyless，tsx loader）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/run/gates/protocol-core.spec.mjs",
       "domain": "run",
       "lane": "spec",
@@ -1940,6 +1950,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "strategy-core.spec.mjs — Strategy 投影（K/O/G/B）的纯派生回归。",
       "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/topics-contract.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "topics-contract.spec.mjs — topics 的 ID/图/数量/lens 闭集（BUG-264 / 265 / 266 / 277；keyless）。",
+      "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
     {

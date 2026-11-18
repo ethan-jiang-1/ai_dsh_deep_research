@@ -27,11 +27,12 @@
 | gates | `checks/lib/gates/acceptance-check` | `tests/run/gates/acceptance-check.spec.mjs` |
 | gates | `checks/lib/gates/bundle-date-sanity` | `tests/run/gates/bundle-date-sanity.spec.mjs` |
 | gates | `checks/lib/gates/evidence-audit-core` | `tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/evidence-audit.spec.mjs`<br>`tests/run/gates/provenance.spec.mjs` |
-| gates | `checks/lib/gates/findings-core` | `tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/findings-contract.spec.mjs` |
+| gates | `checks/lib/gates/findings-core` | `tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/topics-contract.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-core` | `tests/run/gates/node-gate-delivery.spec.mjs`<br>`tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-delivery-gate` | `tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-reader-gate` | `tests/run/gates/node-gate-reader.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-run-gates` | `tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs` |
+| gates | `checks/lib/gates/plan-gate` | `tests/run/gates/plan-gate.spec.mjs` |
 | gates | `checks/lib/gates/protocol-audit-core` | `tests/run/gates/protocol-core.spec.mjs` |
 | gates | `checks/lib/gates/protocol-core` | `tests/pack/contract/content-coverage.spec.mjs`<br>`tests/pack/defaults/research-defaults.spec.mjs`<br>`tests/run/gates/protocol-core.spec.mjs` |
 | gates | `checks/lib/gates/provenance` | `tests/run/gates/provenance.spec.mjs` |

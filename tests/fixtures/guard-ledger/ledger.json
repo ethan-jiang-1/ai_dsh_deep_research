@@ -1092,6 +1092,166 @@
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "从键/闭包去掉驱动源 → 用例红"
+    },
+    {
+      "id": "BUG-260",
+      "mechanism": "findings 支撑证据存在性被 lens 条件吞掉",
+      "guard": "tests/run/gates/findings-contract.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "无 lens + missing evidence → 红"
+    },
+    {
+      "id": "BUG-261",
+      "mechanism": "lens_gaps 存在性用文件级正则，缺行块被掩盖",
+      "guard": "tests/run/gates/findings-contract.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "F2 缺 lens_gaps → 红"
+    },
+    {
+      "id": "BUG-262",
+      "mechanism": "lens_gaps [] 文件级误伤其他「无」块",
+      "guard": "tests/run/gates/findings-contract.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "F1 [] / F2 无 → 只报 F1"
+    },
+    {
+      "id": "BUG-263",
+      "mechanism": "重复 F# 不报",
+      "guard": "tests/run/gates/findings-contract.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "两个 F1 → 红"
+    },
+    {
+      "id": "BUG-264",
+      "mechanism": "重复 T# 被 Map 覆盖",
+      "guard": "tests/run/gates/topics-contract.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "两个 T1 → 红"
+    },
+    {
+      "id": "BUG-265",
+      "mechanism": "topics depends_on 无消费者",
+      "guard": "tests/run/gates/topics-contract.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "未知/自依赖/环 → 红"
+    },
+    {
+      "id": "BUG-266",
+      "mechanism": "must_answer 2–5 无门",
+      "guard": "tests/run/gates/topics-contract.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "0/6 问 → 红"
+    },
+    {
+      "id": "BUG-267",
+      "mechanism": "plan 图错误只 UI 提示",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "环/悬空/重号 → 门 P 红"
+    },
+    {
+      "id": "BUG-268",
+      "mechanism": "plan owner/kind/lifecycle/剩余工作无门",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "ghost/whatever/dead/缺节 → 红"
+    },
+    {
+      "id": "BUG-269",
+      "mechanism": "run.md phase 字段只浅检",
+      "guard": "tests/run/gates/schema-scan.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "phase 与 next/delivered/parked 矛盾 → 红"
+    },
+    {
+      "id": "BUG-270",
+      "mechanism": "claims/verdicts URL 只验字符串数组",
+      "guard": "tests/run/gates/verdict-audit.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "javascript:/非 URL/重复 → 红"
+    },
+    {
+      "id": "BUG-271",
+      "mechanism": "evidence_threshold 无下游",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "threshold A + quality C → 红"
+    },
+    {
+      "id": "BUG-272",
+      "mechanism": "output.length 无 final 消费者",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "final < min → 红"
+    },
+    {
+      "id": "BUG-273",
+      "mechanism": "protocol gates 配置不生效",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "claim_verification/critic 策略测试红（关闭接线）"
+    },
+    {
+      "id": "BUG-274",
+      "mechanism": "同 claim 冲突裁决只 warn",
+      "guard": "tests/run/gates/verdict-audit.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "supported+unsupported → 红"
+    },
+    {
+      "id": "BUG-275",
+      "mechanism": "zero critical 只 warn",
+      "guard": "tests/run/gates/verdict-audit.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "全 false 无豁免 → 红"
+    },
+    {
+      "id": "BUG-276",
+      "mechanism": "library_fields_sha256 不重算",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "全 0/漂移 → 红"
+    },
+    {
+      "id": "BUG-277",
+      "mechanism": "topics.lenses 不校验真实 id",
+      "guard": "tests/run/gates/topics-contract.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "bogus → 红"
+    },
+    {
+      "id": "BUG-278",
+      "mechanism": "waves_max 只 warn",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "超预算 → 红"
+    },
+    {
+      "id": "BUG-279",
+      "mechanism": "evidence.supports 不校验 T# 存在",
+      "guard": "tests/run/gates/evidence-audit.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "supports T999 → 红"
     }
   ]
 }

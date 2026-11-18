@@ -22,6 +22,7 @@ import { formatSecretFinding, scanSecrets } from '../lib/shared/secret-scan.mjs'
 import { presentedInLogs } from '../lib/shared/node-gate-session-gates.mjs'
 import { finalVersionsIn } from '../lib/shared/final-version.mjs'
 import { epochDateOf, runSchemaOf } from '../lib/gates/schema-scan-core.mjs'
+import { claimVerificationRequired } from '../lib/gates/protocol-core.mjs'
 import { buildDelivered, buildManifest, corpusRootLabel, renderAcceptance, repairReceiptPaths, sha256Text, shouldWriteReceipts, withManualEvidence } from '../lib/shared/run-receipt.mjs'
 import { readZstdText } from '../lib/shared/zstd-read.mjs'
 
@@ -97,10 +98,24 @@ const readLog = (p) => {
 }
 
 // 预检：门禁/审计都 --no-write；红跑不写 bundle（observation 只读）。
-const preGate = run('node-gate 预检（--no-write）', 'checks/run-gates/node-gate.mjs', [bundle, '--sessions', sessions, '--no-write'])
+// 协议 gates 策略（BUG-273）：claim_verification=off 或 critic ∉ {claim,both} 时跳过 claim 裁决，
+// 但必须有显式 approval_basis 解释豁免；否则 fail-loud。
+let protocolGates = null
+try { protocolGates = JSON.parse(readFileSync(join(bundle, 'protocol.json'), 'utf8')) } catch { protocolGates = null }
+const verifyClaims = claimVerificationRequired(protocolGates?.gates)
+const requireReview = protocolGates?.gates?.critic !== 'none'
+if (!verifyClaims || !requireReview) {
+  const basis = String(protocolGates?.approval_basis ?? '').trim()
+  if (basis === '') {
+    console.error('run-accept: RED——protocol.gates 声明跳过 claim 验证（claim_verification=off 或 critic ∉ {claim,both}），但 approval_basis 为空；补批准依据再跑')
+    process.exit(1)
+  }
+  console.log(`  PASS claim 裁决按 protocol.gates 豁免（approval_basis=${basis}）`)
+}
+const preGate = run('node-gate 预检（--no-write）', 'checks/run-gates/node-gate.mjs', [bundle, '--sessions', sessions, '--no-write', ...(requireReview ? [] : ['--no-review'])])
 const preAudit = run('evidence-audit 预检（--no-write）', 'checks/run-gates/evidence-audit.mjs', [bundle, '--sessions', sessions, '--no-write'])
 // claim 级裁决（新契约 run 强制；旧 bundle / quick_factual / 契约日前 = 不适用，exit 0）。
-const preVerdict = run('verdict-audit 预检（--no-write）', 'checks/run-gates/verdict-audit.mjs', [bundle, '--sessions', sessions, '--no-write'])
+const preVerdict = verifyClaims ? run('verdict-audit 预检（--no-write）', 'checks/run-gates/verdict-audit.mjs', [bundle, '--sessions', sessions, '--no-write']) : { status: 0 }
 // Protocol（研究设计）审计：契约日后强制；旧 bundle = 不适用，exit 0。
 const preProtocol = run('protocol-audit 预检（--no-write）', 'checks/run-gates/protocol-audit.mjs', [bundle, '--no-write'])
 // 交付门：新 bundle 的本机 home 路径必须为零；旧契约 bundle 按 D28 epoch 豁免只报告。
@@ -128,9 +143,9 @@ if (flag('--no-write')) {
 }
 
 // 绿后才落盘：真实门禁/审计 + 回执。
-const gate = run('node-gate（门 A/交付两门）', 'checks/run-gates/node-gate.mjs', [bundle, '--sessions', sessions, '--write'])
+const gate = run('node-gate（门 A/交付两门）', 'checks/run-gates/node-gate.mjs', [bundle, '--sessions', sessions, '--write', ...(requireReview ? [] : ['--no-review'])])
 const audit = run('evidence-audit（溯源 + audit.md）', 'checks/run-gates/evidence-audit.mjs', [bundle, '--sessions', sessions, '--write'])
-const verdict = run('verdict-audit（claim 覆盖）', 'checks/run-gates/verdict-audit.mjs', [bundle, '--sessions', sessions, '--write'])
+const verdict = verifyClaims ? run('verdict-audit（claim 覆盖）', 'checks/run-gates/verdict-audit.mjs', [bundle, '--sessions', sessions, '--write']) : { status: 0 }
 const protocol = run('protocol-audit（Protocol 工件）', 'checks/run-gates/protocol-audit.mjs', [bundle, '--write'])
 const auditPath = join(bundle, 'audit.md')
 const auditText = existsSync(auditPath) ? readFileSync(auditPath, 'utf8') : ''

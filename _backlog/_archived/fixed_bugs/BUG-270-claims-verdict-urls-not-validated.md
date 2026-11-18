@@ -1,17 +1,21 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-270：claims.urls / verdicts.rechecked_urls 只验“字符串数组”——`javascript:`、非 URL、重复都过
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：URL 只认 http(s)+去重
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`checks/lib/gates/verdict-audit-core.mjs:84–86`（claims 只 `isStringArray`）、
 > `:144`（rechecked_urls 只 `isStringArray`）、`:373–375`（只判非空）；模板 =
 > `content/templates/run/claims.json` / `verdicts.json`。
-> 探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -74,3 +78,28 @@ console.log(parseVerdicts(JSON.stringify({version:1,round:1,batches:[{session:'s
 
 - URL 字段非 http(s)/重复 → 红；合法 → 绿；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/verdict-audit-core.mjs",
+    "tests/run/gates/verdict-audit.spec.mjs",
+    "packages/deep-research-pack/content/templates/run/claims.json",
+    "packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/verdict-audit.spec.mjs",
+    "exit": 1,
+    "output": "not ok 36 - URL 字段只认 http(s)、去重（BUG-270）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/verdict-audit.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/verdict-audit.spec.mjs"
+  }
+}
+```

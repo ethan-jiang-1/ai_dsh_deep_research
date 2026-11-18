@@ -1,17 +1,21 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-260：findings 的支撑证据路径只在“有 lens”时才查——无 lens 的 run 可引用不存在的 evidence
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
 >
-> 位置：[checks/lib/gates/findings-core.mjs](../../checks/lib/gates/findings-core.mjs) 的
+> 结论：支撑证据存在性脱离 lens 条件；所有 findings 都查
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
+>
+> 位置：[checks/lib/gates/findings-core.mjs](../../../checks/lib/gates/findings-core.mjs) 的
 > `findingsContractIssues`（`if (allLenses.size > 0 && block.evidence.length > 0)` 才进入存在性检查）；
 > 模板 = `content/templates/run/findings.md` 的 `- 支撑证据: evidence/<file>.md`。
-> 探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -71,3 +75,27 @@ sed -n '/allLenses.size > 0/,/^  }/p' checks/lib/gates/findings-core.mjs
 
 - 任意 run 的 findings 支撑证据不存在 → 红；合法路径绿；
 - 旧场按断代；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/findings-core.mjs",
+    "tests/run/gates/findings-contract.spec.mjs",
+    "tests/run/gates/evidence-audit.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 5 - BUG-260：无 lens 时支撑证据不存在也红"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/findings-contract.spec.mjs"
+  }
+}
+```

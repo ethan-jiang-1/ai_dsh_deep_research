@@ -1,17 +1,21 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-277：topics 的 `lenses` 只被当字符串集合——不校验是否为真实 lens id（`bogus` 可全链路通过）
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：LENS_IDS 与 content/lenses 单一正本
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`checks/lib/gates/findings-core.mjs` 的 `parseTopicsOf`（`lenses` 只 `listOf`）；
 > `checks/lib/gates/evidence-audit-core.mjs:261` 只校验 evidence.lens ∈ topics.lenses；
 > 真实 lens 正本 = `packages/deep-research-pack/content/lenses/*.md`（8 个 id）。
-> 探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -65,3 +69,26 @@ grep -rn 'lenses' checks/lib/gates/findings-core.mjs checks/lib/gates/evidence-a
 
 - 未知 lens id 全链路红；真实 id 绿；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/findings-core.mjs",
+    "tests/run/gates/topics-contract.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/topics-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 2 - BUG-264 / BUG-266 / BUG-277：不是真实 lens id"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/topics-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/topics-contract.spec.mjs"
+  }
+}
+```

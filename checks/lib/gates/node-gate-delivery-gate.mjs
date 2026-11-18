@@ -26,7 +26,7 @@ import { reviewContractIssues } from './review-contract.mjs'
  * v1 记账拍板后落——拍板前 A2 的 v1 缺席 = 预期态（同门②/④），交付后复跑全绿。
  * @returns { status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail }
  */
-export function deliveryGate(bundleDir, auditDate) {
+export function deliveryGate(bundleDir, auditDate, { requireReview = true } = {}) {
   const finalPath = join(bundleDir, 'final.md')
   if (!existsSync(finalPath)) {
     return { status: 'N/A', detail: 'final.md 不在场——门A 无对象（bundle 未到交付段）' }
@@ -53,12 +53,12 @@ export function deliveryGate(bundleDir, auditDate) {
   const escalationAdjudicated = escalationNoted && qTextA1
     .split('\n')
     .some((l) => /^\s*-/.test(l) && isHitl2Mention(l))
-  if (delivered && hasReview && !reviewPass && !escalationAdjudicated) {
+  if (requireReview && delivered && hasReview && !reviewPass && !escalationAdjudicated) {
     problems.push(
       `final/ 版本记账在场（${versionFiles.join(', ')}）而 review readiness 非 PASS——交付越过审查前置（NODES 第 6 行：PASS = HITL2 前置；修正 = 补审查轮使 readiness 判 PASS，或按处置流程显式记账）`,
     )
   }
-  if (delivered && !hasReview && !quickFactual) {
+  if (requireReview && delivered && !hasReview && !quickFactual) {
     problems.push('final/ 版本记账在场而 review.md 缺席（非 quick_factual 豁免形态）——审查前置整缺的交付（修正 = 补 review.md 判 readiness，或按处置流程显式记账）')
   }
   // A2 交付件齐——触发 = reviewPass（审查放行，记账+审计 owed；拍板前 v1 缺席 = 预期态，同门②/④）

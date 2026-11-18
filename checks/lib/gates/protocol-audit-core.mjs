@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 // protocol-audit-core.mjs — Protocol 的**bundle 级判据**：effort 合同 / §Protocol 投影 / 批准链 /
 // plan 引用 / audit hash / 版本快照 + 投影与卡文。无 IO；schema 半在 protocol-core.mjs。
 //
@@ -13,6 +14,7 @@ import {
   PROTOCOL_CONTRACT_DATE,
   SHAPE_LABELS,
   auditHashOf,
+  canonicalize,
   decisionsProtocolVersionOf,
   depthsOfText,
   depthsTextOf,
@@ -62,6 +64,9 @@ export function evaluateBundle(input) {
     topicsText = '',
     auditText = '',
     finalText = '',
+    evidences = [],
+    methodLibraryEntry = null,
+    runKind = '',
     hasSnapshot = false,
     snapshot = null,
     snapshots = null,
@@ -76,6 +81,9 @@ export function evaluateBundle(input) {
     ...checkEffortContract(protocol, planText, topicsText),
     ...checkProjection(protocol, questionText),
     ...checkFinalSections(protocol, finalText),
+    ...checkEvidenceThreshold(protocol, evidences, runKind),
+    ...checkOutputLength(protocol, finalText, runKind),
+    ...checkMethodLibrary(protocol, methodLibraryEntry),
     ...checkStrategy(protocol, planText, topicsText),
     ...checkProtocolStatus(protocol, questionText),
     ...checkPlanRef(protocol, planText),
@@ -114,7 +122,9 @@ function checkEffortContract(protocol, planText, topicsText) {
   if (waves === null) {
     out.push(red('plan-cycle', 'plan 依赖图有环，不可执行——审查回边用版本化节点（repair-rN / review-rN），重编号不能解环'))
   } else if (waves > protocol.effort.waves_max) {
-    out.push(warn('effort-contract', `Wave 层数 ${waves} > waves_max ${protocol.effort.waves_max}（不拦交付）`))
+    const waived = Array.isArray(protocol.deviations) && protocol.deviations.some((d) => /effort\.waves_max/.test(String(d?.dimension ?? '')))
+    if (waived) out.push(warn('effort-contract', `Wave 层数 ${waves} > waves_max ${protocol.effort.waves_max}（deviations 已显式批准）`))
+    else out.push(red('effort-contract', `Wave 层数 ${waves} > waves_max ${protocol.effort.waves_max}——超预算需 protocol.deviations 显式批准（BUG-278）`))
   }
   return out
 }
@@ -403,4 +413,65 @@ export function checkFinalSections(protocol, finalText) {
     if (!headings.has(expected)) issues.push(red('final-sections', `final 缺 protocol.output.sections「${section}」对应的 H2「${expected}」`))
   }
   return issues
+}
+
+/** 证据门槛 vs evidence.quality（BUG-271）；quick_factual 豁免。 */
+export function checkEvidenceThreshold(protocol, evidences, runKind = '') {
+  if (runKind === 'quick_factual') return []
+  const threshold = protocol?.gates?.evidence_threshold
+  const rank = { A: 4, B: 3, C: 2, D: 1 }
+  if (!(threshold in rank)) return []
+  const out = []
+  for (const ev of evidences) {
+    const q = String(ev.quality ?? '').trim()
+    if (!(q in rank)) continue
+    if (rank[q] < rank[threshold]) out.push(red('evidence-threshold', `${ev.file} 的 quality=${q} 低于 protocol.gates.evidence_threshold=${threshold}（BUG-271）`))
+  }
+  return out
+}
+
+/** final 长度 vs output.length（BUG-272；words 用 Intl.Segmenter，pages 按非空行/50）。 */
+export function countLength(text, unit) {
+  const source = String(text ?? '')
+  if (unit === 'pages') {
+    const lines = source.split('\n').filter((line) => line.trim() !== '').length
+    return Math.max(0, Math.ceil(lines / 50))
+  }
+  const segmenter = new Intl.Segmenter('zh', { granularity: 'word' })
+  let count = 0
+  for (const part of segmenter.segment(source)) if (part.isWordLike) count += 1
+  return count
+}
+
+export function checkOutputLength(protocol, finalText, runKind = '') {
+  if (runKind === 'quick_factual') return []
+  if (String(finalText ?? '').trim() === '') return []
+  const { min, max, unit } = protocol?.output?.length ?? {}
+  if (!['words', 'pages'].includes(unit)) return []
+  const actual = countLength(finalText, unit)
+  const out = []
+  if (Number.isSafeInteger(min) && actual < min) out.push(red('output-length', `final 长度 ${actual} ${unit} < min ${min}（BUG-272）`))
+  if (Number.isSafeInteger(max) && actual > max) out.push(red('output-length', `final 长度 ${actual} ${unit} > max ${max}（BUG-272）`))
+  return out
+}
+
+/** 方法库字段 sha 重算（BUG-276）：entry = {name, fields}；null = 无库可核。 */
+export function libraryFieldsSha(fields) {
+  return createHash('sha256').update(canonicalize(fields), 'utf8').digest('hex')
+}
+
+export function checkMethodLibrary(protocol, entry) {
+  const method = protocol?.method
+  if (method?.library_fields_sha256 === null || method?.library_fields_sha256 === undefined) return []
+  if (method?.library_name === null || method?.library_name === undefined) {
+    return [red('method-library', 'method.library_fields_sha256 非 null 但 library_name 为 null（BUG-276）')]
+  }
+  if (entry === null || entry === undefined) {
+    return [red('method-library', `方法库里找不到「${method.library_name}」——library_fields_sha256 无法重算（BUG-276）`)]
+  }
+  const actual = libraryFieldsSha(entry.fields)
+  if (actual !== method.library_fields_sha256) {
+    return [red('method-library', `library_fields_sha256 与工作区方法库「${method.library_name}」不一致（protocol=${method.library_fields_sha256.slice(0, 12)}… / 实算=${actual.slice(0, 12)}…；BUG-276）`)]
+  }
+  return []
 }

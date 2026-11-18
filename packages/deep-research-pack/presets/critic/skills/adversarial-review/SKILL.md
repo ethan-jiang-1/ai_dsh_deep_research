@@ -162,7 +162,8 @@ PASS 放宽判据**（readiness 判据不降同款），也不得静默略过未
 ```
 
 **PASS 只在零 CRITICAL 且判据全勾时给出**；拿不准的项标出来让主编决定，不要替主编放水。
-若历史轮的 CRITICAL 已在本轮闭合、但仍留在 review.md 的 CRITICAL 节（可追溯），在终局块写一行
+claims.json 允许 `critical_exemption: "<理由>"`：只有当本次 run 确实没有任何 critical 结论且理由成立时，
+零 critical 才降为警告；不写理由 = 红。若历史轮的 CRITICAL 已在本轮闭合、但仍留在 review.md 的 CRITICAL 节（可追溯），在终局块写一行
 `resolved-critical: C1, C2`（全部闭合写 `all`）——门禁只认这条结构化解释；PASS + 未解释的
 `- C#` = 红（散文里的“已闭合”不算）。
 

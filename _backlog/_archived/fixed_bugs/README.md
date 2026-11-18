@@ -6,6 +6,26 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [260](BUG-260-findings-support-evidence-existence-skips-without-lens.md) | findings 支撑证据存在性被 lens 条件吞掉 | （证据存在性脱离 lens） | 2026-11-18 |
+| [261](BUG-261-findings-lens-gaps-presence-file-global.md) | lens_gaps 存在性用文件级正则，缺行块被掩盖 | （lens_gaps 块级） | 2026-11-18 |
+| [262](BUG-262-findings-lens-gaps-empty-file-global-false-red.md) | lens_gaps [] 文件级误伤其他「无」块 | （[] 块级） | 2026-11-18 |
+| [263](BUG-263-findings-duplicate-f-id.md) | 重复 F# 不报 | （F# 唯一） | 2026-11-18 |
+| [264](BUG-264-topics-duplicate-t-id-overwrite.md) | 重复 T# 被 Map 覆盖 | （T# 唯一） | 2026-11-18 |
+| [265](BUG-265-topics-depends-on-no-consumer.md) | topics depends_on 无消费者 | （depends_on 图） | 2026-11-18 |
+| [266](BUG-266-topics-must-answer-count-ungated.md) | must_answer 2–5 无门 | （must_answer 2–5） | 2026-11-18 |
+| [267](BUG-267-plan-graph-issues-ui-only.md) | plan 图错误只 UI 提示 | （plan-gate 硬结构） | 2026-11-18 |
+| [268](BUG-268-plan-fields-owner-kind-lifecycle-ungated.md) | plan owner/kind/lifecycle/剩余工作无门 | （plan 字段/剩余工作） | 2026-11-18 |
+| [269](BUG-269-run-state-phase-field-cross-checks.md) | run.md phase 字段只浅检 | （phase 矩阵） | 2026-11-18 |
+| [270](BUG-270-claims-verdict-urls-not-validated.md) | claims/verdicts URL 只验字符串数组 | （URL http(s)+去重） | 2026-11-18 |
+| [271](BUG-271-protocol-evidence-threshold-unenforced.md) | evidence_threshold 无下游 | （threshold 对账） | 2026-11-18 |
+| [272](BUG-272-protocol-output-length-unenforced.md) | output.length 无 final 消费者 | （长度分词计数） | 2026-11-18 |
+| [273](BUG-273-protocol-gates-claim-verification-unused.md) | protocol gates 配置不生效 | （gates 接线） | 2026-11-18 |
+| [274](BUG-274-verdict-duplicate-conflict-warn-only.md) | 同 claim 冲突裁决只 warn | （冲突裁决红） | 2026-11-18 |
+| [275](BUG-275-claims-zero-critical-warn-only.md) | zero critical 只 warn | （zero-critical 豁免） | 2026-11-18 |
+| [276](BUG-276-method-library-sha-unverified.md) | library_fields_sha256 不重算 | （method sha 重算） | 2026-11-18 |
+| [277](BUG-277-topics-lenses-unknown-id.md) | topics.lenses 不校验真实 id | （LENS_IDS） | 2026-11-18 |
+| [278](BUG-278-protocol-waves-max-warn-only.md) | waves_max 只 warn | （waves 超预算红） | 2026-11-18 |
+| [279](BUG-279-evidence-supports-unknown-topic.md) | evidence.supports 不校验 T# 存在 | （supports 外键） | 2026-11-18 |
 | [250](BUG-250-evidence-lens-field-not-audited.md) | evidence 八字段的 lens 从未被审计 | （lens 必填 + topics 集合对账） | 2026-11-18 |
 | [251](BUG-251-evidence-quality-tier-value-domains.md) | quality/source_tier 只查在场，不查值域 | （quality/tier/publisher 闭集） | 2026-11-18 |
 | [252](BUG-252-findings-gap-four-states-ungated.md) | findings gap 四态只查非空 | （gap 四态 + 门 F） | 2026-11-18 |

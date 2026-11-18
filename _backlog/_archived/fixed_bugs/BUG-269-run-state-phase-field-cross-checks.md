@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-269：run.md 的 next/delivered/parked 只做“非空/终态”浅检——active phase 可写 `next: none`
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：run.md phase×next/delivered/parked 矩阵
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`checks/lib/gates/schema-scan-core.mjs:244–253`（`next` 只正则非空；`delivered` 只在 accepted
 > 阶段判 none）；模板 = `content/templates/run/run.md:8–11`（next 可执行；delivered 指针；parked 原因/复活）。
-> 探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -71,3 +75,26 @@ sed -n '244,253p' checks/lib/gates/schema-scan-core.mjs
 
 - phase 与 next/delivered/parked 矛盾 → 红；一致 → 绿；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/schema-scan-core.mjs",
+    "tests/run/gates/schema-scan.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/schema-scan.spec.mjs",
+    "exit": 1,
+    "output": "not ok 31 - phase 与 next/delivered/parked 矛盾 → 核心违约（BUG-269）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/schema-scan.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/schema-scan.spec.mjs"
+  }
+}
+```

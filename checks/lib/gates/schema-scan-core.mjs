@@ -242,8 +242,32 @@ export function scanBundle(bundleDir) {
     const phaseMatch = /^\s*[-*]?\s*phase\s*[:：]\s*([a-z][a-z-]*)\b/m.exec(run)
     if (phaseMatch === null || !RUN_PHASES.includes(phaseMatch[1])) core.push('run.md 的 phase 缺失或不在闭集（D28）')
     if (!/^\s*[-*]?\s*next\s*[:：]\s*\S/m.test(run)) core.push('run.md 缺 next（D28）')
-    // 交付段一致性（卡 §10 B1）：phase 声明交付/已验收 ⇒ 事实侧必须齐（版本账 + 终局块）。
+    // phase × next/delivered/parked 矩阵（BUG-269）：状态头字段必须与 phase 一致，
+    // 不能 active 写 next: none、delivery 写 delivered: none、非停放写 parked 原因。
     const phase = phaseMatch?.[1]
+    if (phase !== undefined) {
+      const nextValue = /^\s*[-*]?\s*next\s*[:：]\s*(.+)$/m.exec(run)?.[1]?.trim() ?? ''
+      const delivered = /^\s*[-*]?\s*delivered\s*[:：]\s*(.+)$/m.exec(run)?.[1]?.trim() ?? ''
+      const parked = /^\s*[-*]?\s*parked\s*[:：]\s*(.+)$/m.exec(run)?.[1]?.trim() ?? ''
+      const clean = (v) => v.replace(/\s+#.*$/, '').trim()
+      const isNone = (v) => clean(v) === '' || /^none$/i.test(clean(v))
+      if (['briefing', 'research', 'synthesis', 'review'].includes(phase)) {
+        if (isNone(nextValue)) core.push(`run.md phase=${phase} 但 next 为 none/空——active 段必须有可执行的下一步（D28）`)
+        if (!isNone(delivered)) core.push(`run.md phase=${phase} 但 delivered=${delivered}——非交付期必须 none（D28）`)
+        if (!isNone(parked)) core.push(`run.md phase=${phase} 但 parked=${parked}——非停放期必须 none（D28）`)
+      } else if (phase === 'delivery') {
+        if (isNone(delivered)) core.push('run.md phase=delivery 但 delivered 仍为 none——交付段必须有回执指针（D28）')
+        if (!isNone(parked)) core.push(`run.md phase=delivery 但 parked=${parked}——非停放期必须 none（D28）`)
+      } else if (phase === 'accepted') {
+        if (isNone(delivered)) core.push('run.md phase=accepted 但 delivered 仍为 none（D28）')
+        if (!isNone(nextValue) && !/^none$/i.test(nextValue)) core.push('run.md phase=accepted 但 next 不是 none（终态）')
+        if (!isNone(parked)) core.push(`run.md phase=accepted 但 parked=${parked}——非停放期必须 none（D28）`)
+      } else if (phase === 'parked') {
+        if (isNone(parked)) core.push('run.md phase=parked 但 parked 为空/none——停放必须有原因与复活条件（D28）')
+        if (!isNone(delivered)) core.push('run.md phase=parked 但 delivered 非 none（未交付）')
+      }
+    }
+    // 交付段一致性（卡 §10 B1）：phase 声明交付/已验收 ⇒ 事实侧必须齐（版本账 + 终局块）。
     if (phase === 'delivery' || phase === 'accepted') {
       const finalDirNow = join(bundleDir, 'final')
       const hasVersion = hasFinalVersion(finalDirNow)

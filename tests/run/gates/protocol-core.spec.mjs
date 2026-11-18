@@ -673,3 +673,62 @@ test('final 覆盖 protocol.output.sections 的映射节；缺节红（BUG-255�
   assert.match(custom[0].message, /foo/)
   assert.deepEqual(checkFinalSections(protocol, ''), [], 'final 缺席不在此判（交付门管）')
 })
+
+// 负例留证 2026-11-18：BUG-271 / BUG-272 / BUG-276 / BUG-278——低质证据、过短 final、sha 漂移、waves 超预算各自红。
+// ── BUG-271 / 272 / 276 / 278：protocol 承诺的下游消费 ────────────────────────
+test('evidence_threshold：evidence quality 低于门槛 → 红（BUG-271）', () => {
+  const protocol = baseProtocol({ gates: { ...baseProtocol().gates, evidence_threshold: 'A' } })
+  const findings = evaluateBundle({
+    protocol, questionText: questionOf(protocol), planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false,
+    evidences: [{ file: 'evidence/e.md', quality: 'C' }],
+  })
+  assert.ok(has(findings, 'evidence-threshold'))
+  const ok = evaluateBundle({
+    protocol, questionText: questionOf(protocol), planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false,
+    evidences: [{ file: 'evidence/e.md', quality: 'A' }],
+  })
+  assert.ok(!has(ok, 'evidence-threshold'))
+})
+
+test('output.length：final 低于 min → 红；区间内 → 绿（BUG-272）', () => {
+  const protocol = baseProtocol({ output: { ...baseProtocol().output, length: { min: 50, max: 120, unit: 'words' } } })
+  const short = '# Final\n\n## 决策摘要\n\n## 备选与取舍\n\n## 关键依据\n\n## 目前不能判断\n\n短。\n'
+  const findings = evaluateBundle({ protocol, questionText: questionOf(protocol), planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false, finalText: short })
+  assert.ok(has(findings, 'output-length'))
+  const long = short + '\n' + Array.from({ length: 70 }, () => '词').join(' ')
+  const ok = evaluateBundle({ protocol, questionText: questionOf(protocol), planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false, finalText: long })
+  assert.ok(!has(ok, 'output-length'))
+})
+
+test('method.library_fields_sha256：从方法库字段重算；漂移 → 红（BUG-276）', async () => {
+  const { libraryFieldsSha } = await import('../../../checks/lib/gates/protocol-audit-core.mjs')
+  const fields = { source: '官方页', verify: '交叉', report: '对比表', limit: '不替用户决定' }
+  const sha = libraryFieldsSha(fields)
+  const protocol = baseProtocol({ method: { ...baseProtocol().method, kind: 'library', library_name: '格局调研', library_fields_sha256: sha } })
+  const ok = evaluateBundle({ protocol, questionText: questionOf(protocol), planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false, methodLibraryEntry: { name: '格局调研', fields } })
+  assert.ok(!has(ok, 'method-library'))
+  const drift = evaluateBundle({ protocol, questionText: questionOf(protocol), planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false, methodLibraryEntry: { name: '格局调研', fields: { ...fields, source: '改过' } } })
+  assert.ok(has(drift, 'method-library'))
+})
+
+test('waves 超预算 → 红；deviations 显式批准 → 不拦（BUG-278）', () => {
+  const protocol = baseProtocol({ effort: { ...baseProtocol().effort, waves_max: 0 } })
+  const red = evaluateBundle({ protocol, questionText: questionOf(protocol), planText: planOf(1), topicsText: topicsOf(1), auditText: '', hasSnapshot: false })
+  assert.ok(has(red, 'effort-contract'))
+  const waived = baseProtocol({
+    effort: { ...baseProtocol().effort, waves_max: 0 },
+    deviations: [{ dimension: 'effort.waves_max', from: 6, to: 1, why: '用户批准扩 wave', authority: 'user' }],
+  })
+  const ok = evaluateBundle({ protocol: waived, questionText: questionOf(waived), planText: planOf(1), topicsText: topicsOf(1), auditText: '', hasSnapshot: false })
+  assert.ok(!has(ok, 'effort-contract'))
+})
+
+// 负例留证 2026-11-18：BUG-273——claim_verification=off / critic=report|none|light 时 claim 裁决豁免（需 approval_basis）。
+test('gates.claim_verification/critic → claim 裁决是否必需（BUG-273）', async () => {
+  const { claimVerificationRequired } = await import('../../../checks/lib/gates/protocol-core.mjs')
+  assert.equal(claimVerificationRequired({ claim_verification: 'on', critic: 'both' }), true)
+  assert.equal(claimVerificationRequired({ claim_verification: 'on', critic: 'claim' }), true)
+  assert.equal(claimVerificationRequired({ claim_verification: 'off', critic: 'both' }), false)
+  assert.equal(claimVerificationRequired({ claim_verification: 'on', critic: 'report' }), false)
+  assert.equal(claimVerificationRequired({ claim_verification: 'on', critic: 'none' }), false)
+})

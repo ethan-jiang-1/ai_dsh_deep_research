@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-266：topics 的 `must_answer` 2–5 问只被仪表盘计数——0 问/9 问都过门
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：must_answer 2–5 进门 T
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`packages/deep-research-pack/content/templates/run/topics.md:3`（2–5 问）、
 > `packages/deep-research-pack/content/manual.md:26`；消费 = `checks/lib/analyze/run-dashboard-core.mjs`
-> （只数条数，无 2–5 判据）。探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> （只数条数，无 2–5 判据）。探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -63,3 +67,26 @@ grep -rn 'must_answer' packages/deep-research-pack/src checks packages/deep-rese
 
 - must_answer 数量越界 → 红；合法 → 绿；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/findings-core.mjs",
+    "tests/run/gates/topics-contract.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/topics-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 2 - BUG-264 / BUG-266 / BUG-277：must_answer 数量"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/topics-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/topics-contract.spec.mjs"
+  }
+}
+```

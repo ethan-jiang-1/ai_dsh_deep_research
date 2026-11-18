@@ -6,7 +6,7 @@
       "session": "<critic child 的 sessionId（subagent 工具结果里的 childId）>",
       "preset": "critic",
       "depth": 1,
-      "raw": "[{\"claim_id\":\"C1\",\"verdict\":\"supported\",\"quote\":\"<原文里支持/反驳的那一句>\",\"reason\":\"<一句话>\",\"rechecked_urls\":[\"https://<重抓过的 URL>\"],\"source_tier_ok\":true}]"
+      "raw": "[{\"claim_id\":\"C1\",\"verdict\":\"supported\",\"quote\":\"<原文里支持/反驳的那一句>\",\"reason\":\"<一句话>\",\"rechecked_urls\":[\"https://example.com/rechecked-source\"],\"source_tier_ok\":true}]"
     }
   ],
   "verdicts": [
@@ -16,7 +16,7 @@
       "verdict": "supported",
       "quote": "<原文里支持/反驳的那一句>",
       "reason": "<一句话>",
-      "rechecked_urls": ["https://<重抓过的 URL>"],
+      "rechecked_urls": ["https://example.com/rechecked-source"],
       "source_tier_ok": true
     }
   ]

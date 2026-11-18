@@ -1,17 +1,21 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-268：plan 的 owner_role / kind / lifecycle / `## 剩余工作` / 重写记录没有机械消费者
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：plan owner/kind/lifecycle/剩余工作/版本快照进门 P
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`content/templates/run/plan.md`（节点表列 + 剩余工作 + 重写记录）、
 > `presets/lead/skills/nodes-contract/SKILL.md:35`（“在场时必须有 `## 剩余工作`”）；
 > 消费 = `plan-index.ts`（解析但不校验 owner/kind/lifecycle），`node-gate` 不读。
-> 探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -67,3 +71,28 @@ version/delivery/reader。`nodes-contract` 的字段承诺没有门。
 
 - plan 字段闭集/在场/版本链有 gate；非法 → 红；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/plan-gate.mjs",
+    "checks/lib/gates/node-gate-core.mjs",
+    "checks/run-gates/node-gate.mjs",
+    "tests/run/gates/plan-gate.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/plan-gate.spec.mjs",
+    "exit": 1,
+    "output": "not ok 3 - owner/kind/lifecycle 非法、缺剩余工作、图版本缺快照 → RED（BUG-268）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/plan-gate.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/plan-gate.spec.mjs"
+  }
+}
+```

@@ -408,3 +408,32 @@ test('BUG-076 D28 白名单：协议 / claim 复核 / wave 新 canonical 件不�
     }
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
+
+// 负例留证 2026-11-18：BUG-269——active next none / delivery delivered none / 非停放 parked 原因 / 终态 next 非 none 各自红。
+// ── BUG-269：phase × next/delivered/parked 矩阵 ────────────────────────────────
+test('phase 与 next/delivered/parked 矛盾 → 核心违约；一致 → 绿（BUG-269）', () => {
+  const run = (phase, next, delivered, parked) =>
+    `# Run\n- schema: 2\n- created: 2026-11-18\n- phase: ${phase}\n- next: ${next}\n- delivered: ${delivered}\n- parked: ${parked}\n`;
+  const cases = [
+    ['research', 'none', 'none', 'none', 'next 为 none'],
+    ['delivery', 'HITL2', 'none', 'none', '交付段必须有回执'],
+    ['research', 'W1', 'none', '用户暂停', '非停放期必须 none'],
+    ['parked', 'none', 'none', 'none', '停放必须有原因'],
+    ['accepted', 'W1', 'v1 @ t', 'none', 'next 不是 none'],
+  ];
+  for (const [phase, next, delivered, parked, needle] of cases) {
+    const { dir, cleanup } = mkSchemaRun('- schema: 2')
+    try {
+      writeFileSync(join(dir, 'run.md'), run(phase, next, delivered, parked))
+      const row = scanBundle(dir)
+      assert.ok(row.core.some((c) => c.includes(needle)), `${phase}: ${row.core.join(' | ')}`)
+    } finally { cleanup() }
+  }
+  const ok = mkSchemaRun('- schema: 2')
+  try {
+    writeFileSync(join(ok.dir, 'run.md'), run('research', 'W1', 'none', 'none'))
+    assert.deepEqual(scanBundle(ok.dir).core, [])
+    writeFileSync(join(ok.dir, 'run.md'), run('parked', 'none', 'none', '用户暂停：等待预算'))
+    assert.deepEqual(scanBundle(ok.dir).core, [])
+  } finally { ok.cleanup() }
+})

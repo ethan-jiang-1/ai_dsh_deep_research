@@ -1,21 +1,21 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-11-18
 ---
 
 # 推敲：低置信区 20 卡——run 合同的字段/值域/外键/浅检（2026-11-18 第 6 轮）
 
-> 立卡：2026-11-18 ｜ 状态：推敲中（20 张卡 260–279） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-18 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是｜ 结论：20 卡（260–279）全部修复归档；块级/值域/外键/图/预算/URL 判据接上消费者 ｜ 审查：agent — 红证回放 + 全量 verify/test/pack.e2e ｜ 可关闭：是（2026-11-18）
 >
 > **一句话**：路径/安装/语义字段的上一批修完后，这一轮专挖 **run 合同里“字段存在但判据浅”** 的剩余：
 > 支撑证据、块级 lens、重复 ID、topic 图、plan 图、run 状态、protocol 预算/长度/threshold、claims/verdicts 冲突。
 > 20 张卡，全部只报不修。
 >
-> 前序 = [命名空间搬家](../_archived/settled_issues/2026-11-17-exploratory-namespace-move.md) ·
-> [运行时/开发边界](../_archived/settled_issues/2026-11-17-runtime-dev-boundary.md) ·
-> [运行时依赖/安装](../_archived/settled_issues/2026-11-17-runtime-deps-install-boundary.md) ·
-> [搬家残差 II](../_archived/settled_issues/2026-11-18-move-residuals.md) ·
-> [模型可见语义](../_archived/settled_issues/2026-11-18-model-visible-semantics.md)（209–259 已修复归档）。
+> 前序 = [命名空间搬家](2026-11-17-exploratory-namespace-move.md) ·
+> [运行时/开发边界](2026-11-17-runtime-dev-boundary.md) ·
+> [运行时依赖/安装](2026-11-17-runtime-deps-install-boundary.md) ·
+> [搬家残差 II](2026-11-18-move-residuals.md) ·
+> [模型可见语义](2026-11-18-model-visible-semantics.md)（209–259 已修复归档）。
 
 **问题与期望结果：** 上一轮把“模板字段有没有消费者”补了一批；这一轮往下挖一层：
 **消费者存在，但只做了形状/非空/文件级检查**。典型：
@@ -51,26 +51,26 @@ opened: 2026-11-18
 
 | 卡 | 组 | 严重级 | 状态 | 一句话 |
 |---|---|---|---|---|
-| [260](../bugs/BUG-260-findings-support-evidence-existence-skips-without-lens.md) | findings | P2 | 等人拍板 | 无 lens 时支撑证据存在性整段跳过 |
-| [261](../bugs/BUG-261-findings-lens-gaps-presence-file-global.md) | findings | P2 | 等人拍板 | 一个块有 lens_gaps 替所有缺行块背书 |
-| [262](../bugs/BUG-262-findings-lens-gaps-empty-file-global-false-red.md) | findings | P2 | 等人拍板 | 一个块 `[]` 误伤其它「无」块 |
-| [263](../bugs/BUG-263-findings-duplicate-f-id.md) | findings | P2 | 等人拍板 | 重复 F# 不报 |
-| [264](../bugs/BUG-264-topics-duplicate-t-id-overwrite.md) | topics | P2 | 等人拍板 | 重复 T# 被 Map 静默覆盖 |
-| [265](../bugs/BUG-265-topics-depends-on-no-consumer.md) | topics | P2 | 等人拍板 | depends_on 无任何消费者 |
-| [266](../bugs/BUG-266-topics-must-answer-count-ungated.md) | topics | P2 | 等人拍板 | must_answer 2–5 只被仪表盘计数 |
-| [267](../bugs/BUG-267-plan-graph-issues-ui-only.md) | plan | P2 | 等人拍板 | plan 环/悬空/重号只 UI 提示 |
-| [268](../bugs/BUG-268-plan-fields-owner-kind-lifecycle-ungated.md) | plan | P2 | 等人拍板 | owner/kind/lifecycle/剩余工作无门 |
-| [269](../bugs/BUG-269-run-state-phase-field-cross-checks.md) | run | P2 | 等人拍板 | next/delivered/parked 只浅检 |
-| [270](../bugs/BUG-270-claims-verdict-urls-not-validated.md) | claims | P2 | 等人拍板 | URL 字段只查字符串数组 |
-| [271](../bugs/BUG-271-protocol-evidence-threshold-unenforced.md) | protocol | P2 | 等人拍板 | evidence_threshold 无下游 |
-| [272](../bugs/BUG-272-protocol-output-length-unenforced.md) | protocol | P2 | 等人拍板 | output.length 无 final 字数检查 |
-| [273](../bugs/BUG-273-protocol-gates-claim-verification-unused.md) | protocol | P2 | 等人拍板 | claim_verification/critic 声明不生效 |
-| [274](../bugs/BUG-274-verdict-duplicate-conflict-warn-only.md) | verdicts | P2 | 等人拍板 | 同 claim 冲突裁决只 warn |
-| [275](../bugs/BUG-275-claims-zero-critical-warn-only.md) | claims | P2 | 等人拍板 | 零 critical 只 warn，覆盖门空转 |
-| [276](../bugs/BUG-276-method-library-sha-unverified.md) | protocol | P2 | 等人拍板 | library_fields_sha256 不自算 |
-| [277](../bugs/BUG-277-topics-lenses-unknown-id.md) | lens | P2 | 等人拍板 | topics.lenses 不校验真实 lens id |
-| [278](../bugs/BUG-278-protocol-waves-max-warn-only.md) | protocol | P2 | 等人拍板 | waves_max 只 warn |
-| [279](../bugs/BUG-279-evidence-supports-unknown-topic.md) | evidence | P2 | 等人拍板 | supports 指向不存在的 T# 不报 |
+| [260](../fixed_bugs/BUG-260-findings-support-evidence-existence-skips-without-lens.md) | findings | P2 | 等人拍板 | 无 lens 时支撑证据存在性整段跳过 |
+| [261](../fixed_bugs/BUG-261-findings-lens-gaps-presence-file-global.md) | findings | P2 | 等人拍板 | 一个块有 lens_gaps 替所有缺行块背书 |
+| [262](../fixed_bugs/BUG-262-findings-lens-gaps-empty-file-global-false-red.md) | findings | P2 | 等人拍板 | 一个块 `[]` 误伤其它「无」块 |
+| [263](../fixed_bugs/BUG-263-findings-duplicate-f-id.md) | findings | P2 | 等人拍板 | 重复 F# 不报 |
+| [264](../fixed_bugs/BUG-264-topics-duplicate-t-id-overwrite.md) | topics | P2 | 等人拍板 | 重复 T# 被 Map 静默覆盖 |
+| [265](../fixed_bugs/BUG-265-topics-depends-on-no-consumer.md) | topics | P2 | 等人拍板 | depends_on 无任何消费者 |
+| [266](../fixed_bugs/BUG-266-topics-must-answer-count-ungated.md) | topics | P2 | 等人拍板 | must_answer 2–5 只被仪表盘计数 |
+| [267](../fixed_bugs/BUG-267-plan-graph-issues-ui-only.md) | plan | P2 | 等人拍板 | plan 环/悬空/重号只 UI 提示 |
+| [268](../fixed_bugs/BUG-268-plan-fields-owner-kind-lifecycle-ungated.md) | plan | P2 | 等人拍板 | owner/kind/lifecycle/剩余工作无门 |
+| [269](../fixed_bugs/BUG-269-run-state-phase-field-cross-checks.md) | run | P2 | 等人拍板 | next/delivered/parked 只浅检 |
+| [270](../fixed_bugs/BUG-270-claims-verdict-urls-not-validated.md) | claims | P2 | 等人拍板 | URL 字段只查字符串数组 |
+| [271](../fixed_bugs/BUG-271-protocol-evidence-threshold-unenforced.md) | protocol | P2 | 等人拍板 | evidence_threshold 无下游 |
+| [272](../fixed_bugs/BUG-272-protocol-output-length-unenforced.md) | protocol | P2 | 等人拍板 | output.length 无 final 字数检查 |
+| [273](../fixed_bugs/BUG-273-protocol-gates-claim-verification-unused.md) | protocol | P2 | 等人拍板 | claim_verification/critic 声明不生效 |
+| [274](../fixed_bugs/BUG-274-verdict-duplicate-conflict-warn-only.md) | verdicts | P2 | 等人拍板 | 同 claim 冲突裁决只 warn |
+| [275](../fixed_bugs/BUG-275-claims-zero-critical-warn-only.md) | claims | P2 | 等人拍板 | 零 critical 只 warn，覆盖门空转 |
+| [276](../fixed_bugs/BUG-276-method-library-sha-unverified.md) | protocol | P2 | 等人拍板 | library_fields_sha256 不自算 |
+| [277](../fixed_bugs/BUG-277-topics-lenses-unknown-id.md) | lens | P2 | 等人拍板 | topics.lenses 不校验真实 lens id |
+| [278](../fixed_bugs/BUG-278-protocol-waves-max-warn-only.md) | protocol | P2 | 等人拍板 | waves_max 只 warn |
+| [279](../fixed_bugs/BUG-279-evidence-supports-unknown-topic.md) | evidence | P2 | 等人拍板 | supports 指向不存在的 T# 不报 |
 
 ## 基线与负对照
 
@@ -97,6 +97,29 @@ opened: 2026-11-18
 | claims/verdicts | 已探 → 3 卡 | 270 / 274 / 275 |
 | protocol 预算/长度/配置 | 已探 → 5 卡 | 271–273 / 276 / 278 |
 | runtime/client/ledger/gates 自测 | 侦察线待回（本轮 20 已足） | 下一轮继续 |
+
+## 批修复（2026-11-18 用户放行 20 张）
+
+用户决定：独立 plan-gate、protocol gates 接线改变流程、final 长度用 Intl.Segmenter、
+冲突/零 critical/waves 改红+显式豁免、method sha 从工作区重算、旧场只严新交付。
+
+| 阶段 | 内容 | 卡 |
+|---|---|---|
+| P1 | findings 块级：证据存在性脱离 lens、lens_gaps 按块、重复 F# | 260–263 |
+| P2 | topics：重复 T#、depends_on 图、must_answer 2–5、LENS_IDS、supports 外键 | 264–266/277/279 |
+| P3 | 独立 plan-gate：硬结构 + owner/kind/lifecycle/剩余工作/版本快照 | 267/268 |
+| P4 | run.md phase×next/delivered/parked 矩阵 | 269 |
+| P5 | claims/verdicts：URL http(s)+去重、冲突红、zero-critical 红+critical_exemption | 270/274/275 |
+| P6 | protocol：threshold、final 长度、gates 接线、method sha、waves 红 | 271–273/276/278 |
+| P7 | 批 Note / 20 卡归档 / 全量验证 | 全部 |
+
+## 收口（2026-11-18）
+
+20 张卡全部 `已修` 并归档到 [fixed 池](../fixed_bugs/README.md)；批 Note =
+[2026-11-18-low-confidence-20](../../../notes/implemented/2026-11-18-low-confidence-20.md)。
+findings 块级、topics 图/数量/lens、plan 独立门、run phase 矩阵、claims/verdicts URL/冲突/
+zero-critical、protocol threshold/length/gates/method sha/waves 全部接上消费者。
+`pnpm verify` / `pnpm test` / `pack.e2e` 绿；红证回放见各卡 `fix-evidence`。
 
 ## 验收标准
 

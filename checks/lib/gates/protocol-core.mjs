@@ -492,3 +492,9 @@ function validateApproval(out, protocol) {
   if (quick && protocol.approval_basis !== 'auto') out.push(red('approval-basis', 'quick（hitl1=none）必须 approval_basis=auto'))
   if (!quick && protocol.approval_basis === 'auto') out.push(red('approval-basis', '非 quick 不能 approval_basis=auto'))
 }
+
+/** claim 级裁决是否必须跑（BUG-273）：claim_verification=off 或 critic ∉ {claim,both} → 不跑。 */
+export function claimVerificationRequired(gates) {
+  if (gates?.claim_verification === 'off') return false
+  return gates?.critic === 'claim' || gates?.critic === 'both'
+}

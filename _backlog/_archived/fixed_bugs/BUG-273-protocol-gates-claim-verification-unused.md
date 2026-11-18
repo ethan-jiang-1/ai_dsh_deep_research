@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-273：protocol 的 `gates.claim_verification` / `gates.critic` 没有消费者——声明 on/off 不改变门禁
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：claim_verification/critic 接线
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`checks/lib/gates/protocol-core.mjs:85–86`（critic 五值、claim_verification on/off 闭集）；
 > `checks/run-gates/verdict-audit.mjs` / `run-accept` 不看这两个字段；模板 =
-> `content/templates/run/protocol.json`。探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> `content/templates/run/protocol.json`。探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -68,3 +72,28 @@ protocol 的 `gates` 被当作 HITL1 的设计展示；`verdict-audit`/`run-acce
 
 - 两个 gate 字段改变实际流程，或被显式标只读；
 - 测试覆盖 on/off、none/light；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/protocol-audit-core.mjs",
+    "checks/run-gates/protocol-audit.mjs",
+    "tests/run/gates/protocol-core.spec.mjs",
+    "checks/run-gates/run-accept.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/protocol-core.spec.mjs",
+    "exit": 1,
+    "output": "not ok 41 - gates.claim_verification/critic → claim 裁决是否必需（BUG-273）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/protocol-core.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/protocol-core.spec.mjs"
+  }
+}
+```

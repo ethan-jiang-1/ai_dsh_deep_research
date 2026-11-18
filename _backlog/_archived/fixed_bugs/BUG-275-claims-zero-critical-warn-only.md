@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-275：claims 可以零 critical——只 WARN，覆盖门因此无对象，交付仍可 PASS
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：zero-critical 红；critical_exemption 显式豁免
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`checks/lib/gates/verdict-audit-core.mjs:305–306`（`stats.critical === 0` 只 `warn('no-critical')`）；
 > 覆盖判据只遍历 `claim.critical`；模板 = `content/templates/run/claims.json`（`critical: true` 示例）。
-> 探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -67,3 +71,28 @@ node checks/run-gates/verdict-audit.mjs <bundle> --sessions <dir>
 
 - zero critical 不再静默 PASS；有理由的豁免可绿；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/verdict-audit-core.mjs",
+    "tests/run/gates/verdict-audit.spec.mjs",
+    "packages/deep-research-pack/content/templates/run/claims.json",
+    "packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/verdict-audit.spec.mjs",
+    "exit": 1,
+    "output": "not ok 34 - claim 表没有 critical → no-critical 红（BUG-275）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/verdict-audit.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/verdict-audit.spec.mjs"
+  }
+}
+```

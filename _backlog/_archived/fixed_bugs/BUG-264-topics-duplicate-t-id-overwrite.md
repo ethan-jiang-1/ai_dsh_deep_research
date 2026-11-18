@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-264：topics 的重复 T# 被 Map 静默覆盖——后出现的 role/lenses 顶掉先出现的
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
 >
-> 位置：[checks/lib/gates/findings-core.mjs](../../checks/lib/gates/findings-core.mjs) 的
+> 结论：重复 T# 红
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
+>
+> 位置：[checks/lib/gates/findings-core.mjs](../../../checks/lib/gates/findings-core.mjs) 的
 > `parseTopicsOf`（`topics.set(h[1], cur)`）；消费 = `findings-core` / `node-gate` 的 coverage/lens。
-> 模板 = `content/templates/run/topics.md`。探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 模板 = `content/templates/run/topics.md`。探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -70,3 +74,26 @@ console.log([...parseTopicsOf('## T1\n- scope_role: primary\n## T1\n- scope_role
 ## 修复判据
 
 - 重复 T# → 红；唯一 → 绿；旧场按断代；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/findings-core.mjs",
+    "tests/run/gates/topics-contract.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/topics-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 2 - BUG-264 / BUG-266 / BUG-277：重复 T#"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/topics-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/topics-contract.spec.mjs"
+  }
+}
+```

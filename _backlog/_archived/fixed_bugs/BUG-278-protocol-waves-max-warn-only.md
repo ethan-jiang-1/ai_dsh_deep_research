@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-278：protocol 的 `effort.waves_max` 只 WARN——plan 可以无限加 Wave 层，预算不拦
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：waves 超预算红；deviations 显式批准
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`checks/lib/gates/protocol-audit-core.mjs:109–117`（`waves > waves_max` 只 `warn`，
 > 注释“不拦交付”）；`protocol-core` 只校验 waves_max 是非负整数/band 参考 warning；
-> 模板 = `content/templates/run/protocol.json`。探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 模板 = `content/templates/run/protocol.json`。探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -67,3 +71,28 @@ sed -n '109,118p' checks/lib/gates/protocol-audit-core.mjs
 
 - Wave 超预算 → 红；合法 → 绿；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/protocol-audit-core.mjs",
+    "checks/run-gates/protocol-audit.mjs",
+    "tests/run/gates/protocol-core.spec.mjs",
+    "checks/run-gates/run-accept.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/protocol-core.spec.mjs",
+    "exit": 1,
+    "output": "not ok 40 - waves 超预算 → 红（BUG-278）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/protocol-core.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/protocol-core.spec.mjs"
+  }
+}
+```

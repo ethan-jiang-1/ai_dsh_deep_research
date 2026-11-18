@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-274：同一 claim 的多条冲突裁决只 WARN——supported + unsupported 可同时存在并交付
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：同 claim 冲突裁决红；同值重复仅警告
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`checks/lib/gates/verdict-audit-core.mjs:362`（重复 claim 只 `warn('verdict-duplicate')`）；
 > 覆盖判据取并集；模板 = `content/templates/run/verdicts.json`。
-> 探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -66,3 +70,28 @@ coverage 用并集，冲突不影响覆盖。
 
 - 冲突裁决 → 红；唯一/显式仲裁 → 绿；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/verdict-audit-core.mjs",
+    "tests/run/gates/verdict-audit.spec.mjs",
+    "packages/deep-research-pack/content/templates/run/claims.json",
+    "packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/verdict-audit.spec.mjs",
+    "exit": 1,
+    "output": "not ok 37 - 同 claim 不同裁决 → verdict-conflict 红（BUG-274）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/verdict-audit.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/verdict-audit.spec.mjs"
+  }
+}
+```

@@ -347,3 +347,13 @@ test('BUG-251：quality/source_tier/publisher 值域非法 = MAJOR；合法值/�
   r = auditBundle(bundle, sessions);
   assert.equal(r.findings.filter((f) => f.kind === '值域非法').length, 2, 'localhost 合法（只剩 quality/tier 两条）');
 }));
+
+// 负例留证 2026-11-18：BUG-279——把 evidence.supports 改成 T999 → supports 越界 MAJOR；还原 → 绿。
+test('BUG-279：evidence.supports 指向不存在的 T# → MAJOR', () => withTmpCleanup(() => {
+  const { bundle, sessions } = fixture();
+  let r = auditBundle(bundle, sessions);
+  assert.equal(r.findings.filter((f) => f.kind === 'supports 越界').length, 0, '合法夹具 supports T1');
+  editEvidence(bundle, 'ev-a.md', (s) => s.replace('supports: T1', 'supports: T999'));
+  r = auditBundle(bundle, sessions);
+  assert.equal(r.findings.filter((f) => f.kind === 'supports 越界').length, 1);
+}));

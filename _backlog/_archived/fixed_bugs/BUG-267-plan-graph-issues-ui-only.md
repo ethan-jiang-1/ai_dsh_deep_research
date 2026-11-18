@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-267：plan 的图结构问题只有驾驶舱提示——环/悬空 dep/重号不阻断任何交付门
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：plan 硬结构进独立 plan-gate
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`packages/deep-research-pack/src/lib/plan/plan-index.ts` 的 `planIssuesOf`（注释明说“只读稳定性提示，
 > 不是 node-gate”）；唯一消费 = `src/client/ResearchGraphTab.tsx:130`（UI 提示）+ 测试。
-> 探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -68,3 +72,28 @@ grep -n 'planIssuesOf' packages/deep-research-pack/src/lib/plan/plan-index.ts sr
 
 - 硬结构错误阻断 run 门；软提示不误伤；
 - `pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/plan-gate.mjs",
+    "checks/lib/gates/node-gate-core.mjs",
+    "checks/run-gates/node-gate.mjs",
+    "tests/run/gates/plan-gate.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/plan-gate.spec.mjs",
+    "exit": 1,
+    "output": "not ok 2 - 环/悬空/重号/自依赖 → RED（BUG-267）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/plan-gate.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/plan-gate.spec.mjs"
+  }
+}
+```

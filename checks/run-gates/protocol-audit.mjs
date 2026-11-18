@@ -152,6 +152,36 @@ if (isMain(import.meta.url)) {
   }
   const hasSnapshot = snapshots.some((entry) => entry.present)
   const snapshot = snapshots.length > 0 ? snapshots[snapshots.length - 1].value : null
+  const evidenceDir = join(bundle, 'evidence')
+  const evidences = existsSync(evidenceDir)
+    ? readdirSync(evidenceDir).filter((f) => f.endsWith('.md')).map((file) => {
+      const { fm } = splitFrontmatter(readIf(join(evidenceDir, file)))
+      return { file: 'evidence/' + file, quality: fm?.quality ?? '' }
+    })
+    : []
+  const libraryPath = join(bundle, '..', 'method-library.md')
+  let methodLibraryEntry = null
+  if (protocol.method?.library_name !== null && protocol.method?.library_name !== undefined && existsSync(libraryPath)) {
+    const libText = readIf(libraryPath)
+    const name = String(protocol.method.library_name)
+    const lines = libText.split('\n')
+    const start = lines.findIndex((line) => line.startsWith('## ' + name))
+    const section = start === -1 ? '' : (() => {
+      const out = []
+      for (let i = start + 1; i < lines.length; i += 1) {
+        if (/^##\s/.test(lines[i])) break
+        out.push(lines[i])
+      }
+      return out.join('\n')
+    })()
+    const labels = { 找来源: 'source', 怎么核实: 'verify', 报告怎么写: 'report', 不承诺: 'limit' }
+    const fields = {}
+    for (const [label, key] of Object.entries(labels)) {
+      const m = new RegExp('^-\\s*' + label + '\\s*[:：]\\s*(.+)$', 'm').exec(section)
+      if (m) fields[key] = m[1].trim()
+    }
+    if (Object.keys(fields).length > 0) methodLibraryEntry = { name, fields }
+  }
   const findings = evaluateBundle({
     protocol,
     questionText: readIf(join(bundle, 'question.md')),
@@ -166,6 +196,9 @@ if (isMain(import.meta.url)) {
       const versions = finalVersionsIn(dir)
       return versions.length > 0 ? readIf(join(dir, `v${versions[versions.length - 1]}.md`)) : ''
     })(),
+    evidences,
+    methodLibraryEntry,
+    runKind: type,
     hasSnapshot,
     snapshot,
     snapshots,

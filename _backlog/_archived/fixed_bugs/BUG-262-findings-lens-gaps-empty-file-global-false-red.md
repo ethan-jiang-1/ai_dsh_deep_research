@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-262：findings 的 `lens_gaps: []` 检测也是文件级——一个块写 `[]`，另一个写「无」的块被误判
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
 >
-> 位置：[checks/lib/gates/findings-core.mjs](../../checks/lib/gates/findings-core.mjs) 的
+> 结论：lens_gaps [] 按块判，「无」块不误伤
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
+>
+> 位置：[checks/lib/gates/findings-core.mjs](../../../checks/lib/gates/findings-core.mjs) 的
 > `if (block.lensGaps.length === 0 && /^\s*-\s*lens_gaps\s*[:：]\s*\[\s*\]\s*$/m.test(text))`；
-> 模板 = `content/templates/run/findings.md`。探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 模板 = `content/templates/run/findings.md`。探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -66,3 +70,27 @@ node --input-type=module -e "…findingsContractIssues(tmpBundle)…"
 
 - `[]` 只使该块红；“无”不误伤；
 - 旧场按断代；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/findings-core.mjs",
+    "tests/run/gates/findings-contract.spec.mjs",
+    "tests/run/gates/evidence-audit.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 6 - BUG-261 / BUG-262：只有 F1 的 [] 该报"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/findings-contract.spec.mjs"
+  }
+}
+```

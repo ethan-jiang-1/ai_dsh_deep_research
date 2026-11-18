@@ -1,17 +1,21 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-279：evidence 的 `supports` 只被当分组键——指向不存在的 T# 也照样过
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：evidence.supports 必须指向存在的 T#
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`checks/lib/gates/evidence-audit-core.mjs` 的 supports 使用（按 topic 分组/单域提示）；
 > `findings-core` 用 `fm.supports` 找 topics.lenses，但 topics 不存在时静默空；
 > 模板 = `content/templates/run/evidence-entry.md`（`supports: T1`）。
-> 探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -63,3 +67,27 @@ evidence-audit 的 topic 维度只用于“单域提示/覆盖分组”，没有
 
 - 未知 supports → 红；合法 → 绿；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/findings-core.mjs",
+    "tests/run/gates/findings-contract.spec.mjs",
+    "tests/run/gates/evidence-audit.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 20 - BUG-279：evidence.supports 指向不存在的 T# → MAJOR"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/findings-contract.spec.mjs"
+  }
+}
+```

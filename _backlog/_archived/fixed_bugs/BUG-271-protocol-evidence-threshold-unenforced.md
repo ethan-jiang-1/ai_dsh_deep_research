@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-271：protocol 的 `gates.evidence_threshold` 只校验值域——从不与 evidence 的 quality 对账
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：evidence_threshold 与 evidence.quality 对账
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`checks/lib/gates/protocol-core.mjs:84`（A/B/C 闭集）与 `checks/lib/gates/protocol-core.mjs`
 > 的 gates 校验；`evidence-audit-core.mjs` 有 quality 值域但没有 threshold 消费；模板 =
-> `content/templates/run/protocol.json`。探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> `content/templates/run/protocol.json`。探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -64,3 +68,28 @@ grep -rn evidence_threshold checks packages/deep-research-pack/src | head
 
 - threshold 与 evidence quality 对账；低质 → 红；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/protocol-audit-core.mjs",
+    "checks/run-gates/protocol-audit.mjs",
+    "tests/run/gates/protocol-core.spec.mjs",
+    "checks/run-gates/run-accept.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/protocol-core.spec.mjs",
+    "exit": 1,
+    "output": "not ok 37 - evidence_threshold：evidence quality 低于门槛 → 红（BUG-271）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/protocol-core.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/protocol-core.spec.mjs"
+  }
+}
+```

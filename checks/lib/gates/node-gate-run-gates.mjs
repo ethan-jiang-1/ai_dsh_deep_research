@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { contractEpochOf, runSchemaOf, runType } from './schema-scan-core.mjs'
 import { finalVersionsIn } from '../shared/final-version.mjs'
 import { HEADING_CONTRACT_DATE, LEADS_CONTRACT_DATE, PRE_CONTRACT_NOTE, VERSION_CONTRACT_DATE, decisionsLines, isPreContract } from '../shared/node-gate-contracts.mjs'
-import { findingsContractIssues, SCOPE_ROLES } from './findings-core.mjs'
+import { findingsContractIssues, SCOPE_ROLES, topicsContractIssues } from './findings-core.mjs'
 
 /**
  * 门 L（leads 交接门，可导入；keyless）。断代日期可注入（tests——夹具 mtime 不可靠）。
@@ -275,4 +275,12 @@ export function findingsGate(bundleDir) {
   if (issues === null) return { status: 'N/A', detail: 'findings.md 不在场——门 F 无对象（在场级归 schema-scan）' }
   if (issues.length > 0) return { status: 'RED', detail: issues.slice(0, 8).join('；') }
   return { status: 'PASS', detail: 'gap 四态合法；lens_gaps 与 topics/evidence 差集一致' }
+}
+
+/** 门 T（topics 结构；BUG-264/265/266/277）：重复 T# / must_answer 2–5 / depends_on 图 / lens 闭集。 */
+export function topicsGate(bundleDir) {
+  const issues = topicsContractIssues(bundleDir)
+  if (issues === null) return { status: 'N/A', detail: 'topics.md 不在场——门 T 无对象（在场级归 schema-scan）' }
+  if (issues.length > 0) return { status: 'RED', detail: issues.slice(0, 8).join('；') }
+  return { status: 'PASS', detail: 'T# 唯一；must_answer 2–5；depends_on 图无环/无悬空；lens id 合法' }
 }

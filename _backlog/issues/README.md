@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| [2026-11-18-low-confidence-20](2026-11-18-low-confidence-20.md) | 推敲中 | 低置信区 20 卡：run 合同的字段/值域/外键/浅检（findings/topics/plan/run/protocol/claims/verdicts）；260–279 |
+| （空） | — | 2026-11-18 低置信区轮已结，见 [_archived/settled_issues](../_archived/settled_issues/README.md) |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

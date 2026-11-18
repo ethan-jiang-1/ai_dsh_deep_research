@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-263：findings 的重复 F# 不报——两个 F1 各自通过，仪表盘/引用只认一个
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
 >
-> 位置：[checks/lib/gates/findings-core.mjs](../../checks/lib/gates/findings-core.mjs) 的
+> 结论：重复 F# 红（引用主键唯一）
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
+>
+> 位置：[checks/lib/gates/findings-core.mjs](../../../checks/lib/gates/findings-core.mjs) 的
 > `parseFindingsOf` / `findingsContractIssues`（无 duplicate-id 判据）；模板 = `content/templates/run/findings.md`。
-> 探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -67,3 +71,27 @@ console.log(parseFindingsOf('## F1: a\n- gap: supported\n## F1: b\n- gap: suppor
 ## 修复判据
 
 - 重复 F# → 红；唯一 → 绿；旧场按断代；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/findings-core.mjs",
+    "tests/run/gates/findings-contract.spec.mjs",
+    "tests/run/gates/evidence-audit.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 7 - BUG-263：重复 F# 红"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/findings-contract.spec.mjs"
+  }
+}
+```

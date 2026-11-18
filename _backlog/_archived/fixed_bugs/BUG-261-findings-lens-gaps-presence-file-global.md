@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-261：findings 的 `lens_gaps` 存在性检查是文件级正则——一个块的合法行替所有缺行块背书
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
 >
-> 位置：[checks/lib/gates/findings-core.mjs](../../checks/lib/gates/findings-core.mjs) 的
+> 结论：lens_gaps 缺行按块判，不再被别块背书
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
+>
+> 位置：[checks/lib/gates/findings-core.mjs](../../../checks/lib/gates/findings-core.mjs) 的
 > `if (block.lenses.length > 0 && !/^\s*-\s*lens_gaps\s*[:：]/m.test(text))`；
-> 模板 = `content/templates/run/findings.md`。探索轮 = [20 卡低置信区](../issues/2026-11-18-low-confidence-20.md)。
+> 模板 = `content/templates/run/findings.md`。探索轮 = [20 卡低置信区](../settled_issues/2026-11-18-low-confidence-20.md)。
 
 ## 症状
 
@@ -65,3 +69,27 @@ node --input-type=module -e "…findingsContractIssues(tmpBundle)…"
 
 - 缺行块必红，不被同文件其它块掩盖；
 - 旧场按断代；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/findings-core.mjs",
+    "tests/run/gates/findings-contract.spec.mjs",
+    "tests/run/gates/evidence-audit.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 6 - BUG-261 / BUG-262：F2 有 lenses 但缺 lens_gaps"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/findings-contract.spec.mjs"
+  }
+}
+```

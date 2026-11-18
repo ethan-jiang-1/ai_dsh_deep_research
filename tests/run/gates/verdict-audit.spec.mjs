@@ -254,10 +254,15 @@ test('BUG-157 交付期会话日志不可读 → session-missing 红（不假装
   assert.ok(codes(result).includes('session-missing'))
 })
 
-test('claim 表没有 critical → no-critical 警告（覆盖判据仍绿）', () => {
-  const result = auditClaimVerdicts(fixture({ claims: [{ ...C1, critical: false }, C2] }))
-  assert.deepEqual(result.problems, [])
-  assert.ok(warnCodes(result).includes('no-critical'))
+test('claim 表没有 critical → no-critical 红；带 critical_exemption 才降为警告（BUG-275）', () => {
+  const noCritical = [{ ...C1, critical: false }, C2]
+  const result = auditClaimVerdicts(fixture({ claims: noCritical }))
+  assert.ok(codes(result).includes('no-critical'))
+  const exempt = JSON.parse(claimsTextOf(noCritical))
+  exempt.critical_exemption = '本 run 全部为事实性核对，无 critical 结论'
+  const waived = auditClaimVerdicts(fixture({ claimsText: JSON.stringify(exempt) }))
+  assert.ok(!codes(waived).includes('no-critical'))
+  assert.ok(warnCodes(waived).includes('no-critical'))
 })
 
 test('final 不可读 → final-missing 警告，不做原文核对', () => {
@@ -315,4 +320,23 @@ test('BUG-159 claims evidence/topics：不存在/绝对路径/不存在 topic �
   assert.ok(codes(result).includes('claim-topic'))
   const absolute = auditClaimVerdicts({ ...fixture({ claims: [{ ...C1, evidence: ['/Users/me/secret.md'] }] }), bundleFiles: [], topicsText: '## T1\n' })
   assert.ok(codes(absolute).includes('claim-evidence'))
+})
+
+// 负例留证 2026-11-18：BUG-270 / BUG-274 / BUG-275——非 http(s)/重复 URL、冲突裁决、zero-critical 无豁免各自红。
+// ── BUG-270 / 274 / 275：URL / 冲突 / zero-critical（2026-11-18）──────────────
+test('URL 字段只认 http(s)、去重（BUG-270）', () => {
+  const bad = JSON.parse(claimsTextOf([C1]))
+  bad.claims[0].urls = ['javascript:alert(1)', 'not-a-url', 'https://example.com/a', 'https://example.com/a']
+  const result = auditClaimVerdicts(fixture({ claimsText: JSON.stringify(bad) }))
+  assert.ok(codes(result).includes('claims-invalid'))
+  assert.ok(result.problems.some((p) => /非 http\(s\)|重复/.test(p.detail)))
+})
+
+test('同 claim 不同裁决 → verdict-conflict 红；同值重复只警告（BUG-274）', () => {
+  const base = { claim_id: 'C1', batch: 0, quote: 'q', reason: 'r', rechecked_urls: ['https://example.com/a'] }
+  const conflict = auditClaimVerdicts(fixture({ verdicts: [{ ...base, verdict: 'supported' }, { ...base, verdict: 'unsupported' }] }))
+  assert.ok(codes(conflict).includes('verdict-conflict'))
+  const same = auditClaimVerdicts(fixture({ verdicts: [{ ...base, verdict: 'supported' }, { ...base, verdict: 'supported' }] }))
+  assert.ok(!codes(same).includes('verdict-conflict'))
+  assert.ok(warnCodes(same).includes('verdict-duplicate'))
 })

@@ -1,6 +1,7 @@
 {
   "version": 1,
   "finalRef": 1,
+  "critical_exemption": null,
   "claims": [
     {
       "id": "C1",
@@ -8,7 +9,7 @@
       "critical": true,
       "topics": ["T1"],
       "evidence": ["evidence/<id>.md"],
-      "urls": ["https://<claim 依赖的 URL>"]
+      "urls": ["https://example.com/claim-source"]
     }
   ]
 }

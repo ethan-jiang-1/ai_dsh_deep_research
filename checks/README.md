@@ -115,7 +115,7 @@
 | 模块 | 被谁消费 | 说明 |
 |---|---|---|
 | lib/repo/content-budget.mjs | e-workspace、content-disclosure.spec | 常驻面预算唯一正本：T0 两级（下放 10,000 / 硬顶 12,288）+ lead persona/合计的 char/byte/token |
-| lib/shared/roles.mjs | discipline-probe、doctor.e2e、fetch-fallback-orchestration.spec、l4-lite.e2e、preset.e2e、presets.spec、release.entry、replay-fixtures.spec、replay-scene.spec、role-consumer-matrix.spec、snapshot-replay.entry、strategy-core.spec、team-preflight.e2e | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
+| lib/shared/roles.mjs | discipline-probe、doctor.e2e、fetch-fallback-orchestration.spec、l4-lite.e2e、preset.e2e、presets.spec、release.entry、replay-fixtures.spec、replay-scene.spec、role-consumer-matrix.spec、snapshot-replay.entry、strategy-core.spec、team-preflight.e2e、plan-gate | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
 | lib/shared/cli-entry.mjs | export-handoff、gates.e2e、market、run-dashboard、protocol-audit、schema-scan、verdict-audit、node-gate、evidence-audit、channel-cache、run-driver、vendor-artifacts、release-check、cli-entry.test | symlink-safe CLI 入口判定（realpath 归一；macOS `/tmp` → `/private/tmp` 下不静默） |
 | lib/shared/cli-exit.mjs | run-dashboard、run-kickoff、run-lane、cli-exit-contract.test | 退出码契约唯一出口：`EXIT` 0/1/2 + `usageError`（usage/前置 = 2）+ `verdictOf`（全 SKIP = 2；有 FAIL = 1；有 PASS 的混合 = 0） |
 | lib/repo/release-anchor.mjs | release-check、release-anchor.test | 发布/移交锚纯判据：版本/tag 类型/commit、工作树、manual sha、build-manifest sha、artifact freshness；配套 `release-check --handoff` |
@@ -131,7 +131,7 @@
 | lib/probes/llm-stream-tee-core.mjs | llm-stream-tee-core.spec | LLM 流 tee 的捕获判定（主机子串，fail-closed）与凭据头脱敏（预载壳 = probes/stream/llm-stream-tee.cjs——CJS require 面不在 .mjs 对账图内，壳本体是活进程仪器不设 keyless 自测） |
 | lib/analyze/provider-errors.mjs | provider-error-stats、provider-errors.spec | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
 | lib/shared/plan-card.mjs | node-gate-session-gates、plan-card-stats、plan-card.spec | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
-| lib/gates/protocol-core.mjs | content-coverage.spec、protocol-audit、protocol-audit-core、protocol-core.spec、research-defaults.spec、strategy-core、evidence-audit-core | Protocol **schema 半**：枚举/canonical/hash/validateProtocol/§研究方法 与 §Decisions 解析（无 IO；口径 = 核验 §6 + 表达层补篇 §4–§7） |
+| lib/gates/protocol-core.mjs | content-coverage.spec、protocol-audit、protocol-audit-core、protocol-core.spec、research-defaults.spec、strategy-core、evidence-audit-core、run-accept | Protocol **schema 半**：枚举/canonical/hash/validateProtocol/§研究方法 与 §Decisions 解析（无 IO；口径 = 核验 §6 + 表达层补篇 §4–§7） |
 | lib/gates/protocol-audit-core.mjs | protocol-audit、protocol-core.spec、run-accept.e2e | Protocol **bundle 级判据**：effort 合同/投影/策略行投影（通道/worker/预算 cap；fail-loud）/批准链/plan 引用/audit hash/版本快照 + `projectionOf`/卡文（无 IO） |
 | lib/gates/strategy-core.mjs | protocol-audit-core、strategy-core.spec | Strategy 投影（K/O/G/B）纯派生：Protocol + plan + topics → 通道/worker/角色/拓扑/门/预算；不读模型/会话 |
 | lib/analyze/stream-diagnostics-core.mjs | stream-diagnostics、stream-diagnostics.spec | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
@@ -167,8 +167,9 @@
 | lib/repo/doc-counts.mjs | a-docs、doc-counts.test | 资产计数名词闭集（count-free 判据面正本）+ 硬计数 token 抽取 |
 | lib/shared/skill-golden.mjs | record-skill-golden、skill-golden.test | skill 正文 sha256 清单与漂移判据（快照 B 只比 catalog） |
 | lib/channel/profile-guard.mjs | run-driver、profile-guard.test | run-driver 的非默认 profile 守卫：默认 profile 放行，其余 fail-loud（显式 `--allow-stale-profile` 才继续） |
-| lib/gates/findings-core.mjs | node-gate-run-gates、review-contract、findings-contract.spec、template-contract.spec | findings gap 四态 / lenses / lens_gaps 差集 / scope_role 闭集 |
+| lib/gates/findings-core.mjs | evidence-audit-core、node-gate-run-gates、review-contract、findings-contract.spec、template-contract.spec、topics-contract.spec | findings gap 四态 / lenses / lens_gaps 差集 / scope_role 闭集 |
 | lib/gates/review-contract.mjs | node-gate-delivery-gate、review-contract.spec | review 覆盖表（topic × lens）+ CRITICAL 与 readiness 交叉 |
+| lib/gates/plan-gate.mjs | node-gate-core、plan-gate.spec | plan 图硬结构（环/悬空/重号/自依赖）+ owner/kind/lifecycle/剩余工作/版本快照 |
 | lib/repo/pack-deps.mjs | pack.e2e、pack-deps.test | 发布物依赖闭包 = peers：require/动态 import()/.d.ts import 正向、死 peer 反向（host-row 显式 allowlist）、DSH-tag peer 范围 = engines.dsh |
 | lib/repo/publish-manifest.mjs | export-dist、pack.e2e、publish-manifest.test | 发布 manifest 收口：剥离 devDependencies/scripts + workspace 协议检查 |
 | lib/harness/clean-room.mjs | cold-start.entry、release.entry、lifecycle.entry | 干净室安装矩阵：仓外 home / 钉版 dsh / tarball 安装 / 解析祖先 / 版本合同 / 起 web |

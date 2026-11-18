@@ -3,7 +3,8 @@
 import { basename } from 'node:path'
 import { deliveryGate } from './node-gate-delivery-gate.mjs'
 import { emptyOnUnreadableLogReader, hitlAskGate, hitl2RowGate, presentGate, scanWitnessLogs } from '../shared/node-gate-session-gates.mjs'
-import { findingsGate, headingGate, leadsGate, versionGate } from './node-gate-run-gates.mjs'
+import { findingsGate, headingGate, leadsGate, topicsGate, versionGate } from './node-gate-run-gates.mjs'
+import { planGate } from './plan-gate.mjs'
 import { readerGate } from './node-gate-reader-gate.mjs'
 import { epochDateOf } from './schema-scan-core.mjs'
 
@@ -22,12 +23,14 @@ export function gateBundle(bundleDir, sessionsRoot, opts = {}) {
     present,
     leads: leadsGate(bundleDir, opts.leadsDate),
     findings: findingsGate(bundleDir),
+    topics: topicsGate(bundleDir),
+    plan: planGate(bundleDir),
     version: versionGate(bundleDir, opts.versionDate),
     degeneration: headingGate(bundleDir, opts.headingDate),
-    delivery: deliveryGate(bundleDir, opts.auditDate),
+    delivery: deliveryGate(bundleDir, opts.auditDate, { requireReview: opts.requireReview !== false }),
     reader: readerGate(bundleDir, { asOf: opts.readerDate }),
   }
-  const all = [gates.hitlAsk, hitl2Row, present, gates.leads, gates.findings, gates.version, gates.degeneration, gates.delivery, gates.reader]
+  const all = [gates.hitlAsk, hitl2Row, present, gates.leads, gates.findings, gates.topics, gates.plan, gates.version, gates.degeneration, gates.delivery, gates.reader]
   const red = all.some((gate) => gate.status === 'RED')
   const unattested = all.some((gate) => gate.status === 'UNATTESTED')
   return { gates, red, unattested }
