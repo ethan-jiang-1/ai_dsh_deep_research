@@ -1,16 +1,16 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-314：clean-room cold-start 是 dev-only，nightly 不跑——唯一“仓外 home + tarball”安装证据只在手动
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：修复就绪（测试覆盖）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-19）— 结论：cold-start 进 nightly（cap 13，D54）；去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-low-confidence-30.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 证据：`checks/smoke/registry.json` 的 `cold-start.entry.mjs` = `tier: dev-only`，reason
 > “独立 home/profile/端口 + tarball；CI 组合不复现，L2 手工档”；nightly 只有 deploy/client-load/
-> snapshot 等条目。探索轮 = [低置信区 20 卡（第 8 轮）](../issues/2026-11-18-low-confidence-30.md)。
+> snapshot 等条目。探索轮 = [低置信区 20 卡（第 8 轮）](../settled_issues/2026-11-18-low-confidence-30.md)。
 
 ## 症状
 
@@ -33,3 +33,27 @@ registry 频率把 cold-start 定为手工档（CI 组合不复现）；`release
 
 - nightly 有一条仓外 home + tarball + 钉版 DSH 的冷启动证据（或显式周期性手动记录）；
 - 失败有 URL/日志；`pnpm test` 绿。
+
+## 修复落地（2026-11-19）
+
+```json fix-evidence
+{
+  "changes": [
+    ".github/workflows/nightly.yml",
+    "checks/smoke/registry.json",
+    "tests/checks/test-infra/smoke-cost-budget.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/test-infra/smoke-cost-budget.test.mjs",
+    "exit": 1,
+    "output": "error: 'nightly 13 > 12——夜间承重先退役/合并一个，或按 D54 改预算'"
+  },
+  "green": {
+    "command": "node --test tests/checks/test-infra/smoke-cost-budget.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/test-infra/smoke-cost-budget.test.mjs"
+  }
+}
+```

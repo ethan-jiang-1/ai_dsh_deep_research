@@ -13,28 +13,14 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-300](BUG-300-plan-owner-role-missing.md) | 等人拍板 | P2 | plan active 节点缺 owner_role 不报 |
-| [BUG-301](BUG-301-plan-kind-missing.md) | 等人拍板 | P2 | plan active 节点缺 kind 不报 |
-| [BUG-302](BUG-302-plan-task-id-missing.md) | 等人拍板 | P2 | plan active 节点缺 task_id 不报 |
-| [BUG-303](BUG-303-plan-remaining-none-with-active.md) | 等人拍板 | P2 | 剩余工作 - 无 与 active 节点共存 |
-| [BUG-304](BUG-304-plan-wave-section-nodes-unchecked.md) | 等人拍板 | P2 | Wave 执行声明层无节点也 PASS |
-| [BUG-305](BUG-305-plan-snapshot-content-version-only.md) | 等人拍板 | P2 | 前版快照只比图版本 |
-| [BUG-306](BUG-306-plan-plan-only-outside-wave.md) | 等人拍板 | P2 | 非 Wave 节点可写 plan-only |
-| [BUG-307](BUG-307-method-library-entry-undefined-na.md) | 等人拍板 | P2 | 声明 library 但缺库文件按 N/A |
-| [BUG-308](BUG-308-probe-cache-mcp-omitted.md) | 等人拍板 | P2 | probe 缓存键不含 MCP_PLAYWRIGHT |
-| [BUG-309](BUG-309-run-driver-no-up-lock.md) | 等人拍板 | P2 | run-driver up 无互斥 |
-| [BUG-310](BUG-310-boot-run-no-start-lock.md) | 等人拍板 | P2 | boot-run 端口检查/启动非原子 |
-| [BUG-311](BUG-311-review-coverage-count-evidence-only.md) | 等人拍板 | P2 | 覆盖表 N 卡只按 evidence 文件数 |
-| [BUG-312](BUG-312-evidence-threshold-all-evidence.md) | 等人拍板 | P2 | threshold 对全部 evidence 逐卡比 |
-| [BUG-313](BUG-313-output-length-heuristic.md) | 等人拍板 | P2 | output.length 用 Segmenter/非空行估算 |
-| [BUG-314](BUG-314-cold-start-not-nightly.md) | 修复就绪 | P2 | cold-start 干净室仅 dev-only 手动 |
-| [BUG-315](BUG-315-cold-start-fixed-port.md) | 修复就绪 | P2 | cold-start 固定 3129 |
-| [BUG-316](BUG-316-snapshot-fixed-port.md) | 修复就绪 | P2 | snapshot 默认 3103 |
-| [BUG-317](BUG-317-client-load-fixed-port.md) | 修复就绪 | P2 | client-load 默认 3109 |
-| [BUG-318](BUG-318-channel-cache-symlink-ignored.md) | 修复就绪 | P2 | pack 指纹跳过 symlink |
-| [BUG-319](BUG-319-probe-cache-write-nonatomic.md) | 修复就绪 | P2 | probe 缓存直接覆盖写 |
+| （空） | — | — | 批 G/H/I/J/K/L/M/N（209–319）全部归档，见下 |
 
 ## 最近归档
+
+（2026-11-19 批 N 第 8 轮（300–319），批 Note =
+[2026-11-18-low-confidence-30](../../notes/implemented/2026-11-18-low-confidence-30.md)：
+[300](../_archived/fixed_bugs/BUG-300-plan-owner-role-missing.md) [301](../_archived/fixed_bugs/BUG-301-plan-kind-missing.md) [302](../_archived/fixed_bugs/BUG-302-plan-task-id-missing.md) [303](../_archived/fixed_bugs/BUG-303-plan-remaining-none-with-active.md) [304](../_archived/fixed_bugs/BUG-304-plan-wave-section-nodes-unchecked.md) [305](../_archived/fixed_bugs/BUG-305-plan-snapshot-content-version-only.md) [306](../_archived/fixed_bugs/BUG-306-plan-plan-only-outside-wave.md) [307](../_archived/fixed_bugs/BUG-307-method-library-entry-undefined-na.md) [308](../_archived/fixed_bugs/BUG-308-probe-cache-mcp-omitted.md) [309](../_archived/fixed_bugs/BUG-309-run-driver-no-up-lock.md) [310](../_archived/fixed_bugs/BUG-310-boot-run-no-start-lock.md) [311](../_archived/fixed_bugs/BUG-311-review-coverage-count-evidence-only.md) [312](../_archived/fixed_bugs/BUG-312-evidence-threshold-all-evidence.md) [313](../_archived/fixed_bugs/BUG-313-output-length-heuristic.md) [314](../_archived/fixed_bugs/BUG-314-cold-start-not-nightly.md) [315](../_archived/fixed_bugs/BUG-315-cold-start-fixed-port.md) [316](../_archived/fixed_bugs/BUG-316-snapshot-fixed-port.md) [317](../_archived/fixed_bugs/BUG-317-client-load-fixed-port.md) [318](../_archived/fixed_bugs/BUG-318-channel-cache-symlink-ignored.md) [319](../_archived/fixed_bugs/BUG-319-probe-cache-write-nonatomic.md)。
+）
 
 （2026-11-18 批 M 低置信区第 7 轮（280–299），批 Note =
 [2026-11-18-low-confidence-20-round2](../../notes/implemented/2026-11-18-low-confidence-20-round2.md)：

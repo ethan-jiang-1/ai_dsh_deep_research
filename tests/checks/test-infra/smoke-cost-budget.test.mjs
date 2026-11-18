@@ -1,5 +1,5 @@
 // 慢资产成本预算（W3-7 后成本治理）——ratchet，只降不升；2026-11-17 按 D54 拆频率两档：
-//   required（tier: ci）= push 面 ≤ 3、required slow ≤ 3；nightly（tier: nightly）≤ 12；全部 slow ≤ 15。
+//   required（tier: ci）= push 面 ≤ 3、required slow ≤ 3；nightly（tier: nightly）≤ 13；全部 slow ≤ 15。
 //   拆分理由：CI 分层后 push 门只跑 keyless（0 条 smoke），旧「CI 入口 ≤ 11」实际约束的是夜间资产，
 //   required 与 nightly 共用一词 = 预算单位失真（BUG-215）。夜间档不消耗 required cap。
 // 新增 required 入口必须先有替代/退役；新增 slow 资产必须先退役一个，或按 D54 改预算并同 diff 说明。
@@ -21,7 +21,9 @@ const requiredSlow = required.filter(([, e]) => e.cost === 'slow')
 const nightly = entries.filter(([, e]) => e.tier === 'nightly')
 const slow = entries.filter(([, e]) => e.cost === 'slow')
 
-const CAP = { required: 3, requiredSlow: 3, nightly: 12, slow: 15 }
+// 2026-11-19 BUG-314：cold-start（仓外 home + tarball）从 dev-only 升 nightly，nightly 12→13；
+// D54：clean-room 是发布前唯一完整安装证据，新增替代 = release.entry 的干净室档（未合并）。
+const CAP = { required: 3, requiredSlow: 3, nightly: 13, slow: 15 }
 
 test('慢资产预算 ratchet：required / nightly / slow 分档不超上限', () => {
   const issues = smokeSurfaceIssues(SMOKE)

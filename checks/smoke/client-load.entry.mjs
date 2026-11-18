@@ -37,7 +37,7 @@
 // 同款——boot 起自本仓，行包名经根 node_modules 解析到 pack 源码树，浏览器经
 // exports["./client"] 取已构建的 lib/client.js）。
 // 前置：source tools/env.sh；pack 已构建（lib/client.js 在位——boot 前自检会拦）。
-// 用法：node --import tsx/esm checks/smoke/client-load.entry.mjs [--port 3109] [--session <既有会话标题>] [--seed <dir|name>]
+// 用法：node --import tsx/esm checks/smoke/client-load.entry.mjs [--port <free>] [--session <既有会话标题>] [--seed <dir|name>]
 // 前置（B-min 起）：dev home 里有至少一个**绑定 run bundle 的带历史会话**（跑过一场 run 即有——
 // 渐进面断言的磁盘认证源；未绑定会话负样本可选，snapshot-replay 冒烟产生）。
 // `--seed <dir|name>`（2026-11-03，issue 2026-11-03-client-load-smoke-not-in-ci）：先把
@@ -57,6 +57,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from '../lib/shared/env.mjs'
 import { rolePickerIssues } from '../lib/harness/role-picker.mjs'
+import { pickFreePort } from '../lib/harness/port-reclaim.mjs'
 import { reclaimPort } from '../lib/harness/port-reclaim.mjs'
 import { authenticate, bootWeb, makeRpc } from '../lib/shared/web-harness.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/harness/vendor-artifacts.mjs'
@@ -82,7 +83,9 @@ const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`)
   return i === -1 ? fallback : process.argv[i + 1]
 }
-const PORT = Number(arg('port', '3109'))
+const PORT_ARG = arg('port', null)
+const PORT = PORT_ARG === null ? await pickFreePort() : Number(PORT_ARG)
+if (PORT === null) { console.error('client-load.entry: 找不到空闲端口'); process.exit(2) }
 // 既有会话默认 = 盘侧最新绑定会话（惰性解析——由下方参考模块选择；硬编码标题会
 // 随会话积累腐烂，BUG-002 清扫轮实测假红）。--session 仍可显式指定。
 const SESSION_TITLE_ARG = arg('session', null)

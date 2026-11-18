@@ -674,6 +674,7 @@ test('final 覆盖 protocol.output.sections 的映射节；缺节红（BUG-255�
   assert.deepEqual(checkFinalSections(protocol, ''), [], 'final 缺席不在此判（交付门管）')
 })
 
+// 负例留证 2026-11-19：BUG-307 / BUG-312 / BUG-313——缺库红、threshold 只查 critical、长度剔除代码/URL/表格。
 // 负例留证 2026-11-18：BUG-271 / BUG-272 / BUG-273 / BUG-276 / BUG-278 / BUG-287 / BUG-289——低质证据、过短 final、sha 漂移、waves 超预算各自红。
 // ── BUG-271 / 272 / 276 / 278：protocol 承诺的下游消费 ────────────────────────
 test('evidence_threshold：evidence quality 低于门槛 → 红（BUG-271）', () => {
@@ -743,9 +744,27 @@ test('gates.critic light/report/none/claim/both → claim 政策（BUG-287）', 
   assert.equal(claimPolicyOf({ claim_verification: 'on', critic: 'both' }), 'full')
 })
 
-test('BUG-289：方法库缺失（undefined）= N/A；库在但条目缺（null）= 红', async () => {
+test('BUG-289 / BUG-307：方法库缺失——sha 非 null 红；sha null 才 N/A；库在条目缺红', async () => {
   const { checkMethodLibrary } = await import('../../../checks/lib/gates/protocol-audit-core.mjs')
   const protocol = baseProtocol({ method: { ...baseProtocol().method, kind: 'library', library_name: '格局调研', library_fields_sha256: '0'.repeat(64) } })
-  assert.deepEqual(checkMethodLibrary(protocol, undefined), [])
+  assert.equal(checkMethodLibrary(protocol, undefined).length, 1, '声明 sha 但缺库 → 红（307）')
   assert.equal(checkMethodLibrary(protocol, null).length, 1)
+  const noSha = baseProtocol({ method: { ...baseProtocol().method, kind: 'library', library_name: '格局调研', library_fields_sha256: null } })
+  assert.deepEqual(checkMethodLibrary(noSha, undefined), [], '未声明 sha 的 library_name 才可 N/A')
+})
+
+test('BUG-312：threshold 只查 critical claims 的证据；非关键低质不误红', () => {
+  const protocol = baseProtocol({ gates: { ...baseProtocol().gates, evidence_threshold: 'A' } })
+  const evidences = [{ file: 'evidence/critical.md', quality: 'C' }, { file: 'evidence/background.md', quality: 'C' }]
+  const scoped = evaluateBundle({ protocol, questionText: questionOf(protocol), planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false, evidences, criticalEvidence: ['evidence/critical.md'] })
+  assert.equal(scoped.filter((f) => f.code === 'evidence-threshold').length, 1)
+  const all = evaluateBundle({ protocol, questionText: questionOf(protocol), planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false, evidences, criticalEvidence: null })
+  assert.equal(all.filter((f) => f.code === 'evidence-threshold').length, 2)
+})
+
+test('BUG-313：长度只计散文，代码/URL/表格不计', async () => {
+  const { countLength } = await import('../../../checks/lib/gates/protocol-audit-core.mjs')
+  const prose = '这是 一段 中文 散文'
+  const noisy = prose + '\n\n\`\`\`\nconst x = 1\n\`\`\`\n\nhttps://example.com/very/long/path\n\n| a | b |\n|---|---|\n| 1 | 2 |\n'
+  assert.equal(countLength(prose, 'words'), countLength(noisy, 'words'))
 })

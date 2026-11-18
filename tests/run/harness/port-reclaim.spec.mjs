@@ -24,3 +24,13 @@ test('BUG-104 / BUG-113 只认本仓 DSH web 命令行；仓内无关 listener �
   assert.equal(isOwnListener('node unrelated-service.js'), false)
   assert.equal(isOwnListener(''), false)
 })
+
+// 负例留证 2026-11-19：BUG-315 / BUG-316 / BUG-317——三个入口缺省必须取空闲端口（静态契约）。
+test('入口端口缺省 = pickFreePort，不再有 3129/3103/3109 固定缺省（BUG-315 / BUG-316 / BUG-317）', () => {
+  const files = ['checks/smoke/cold-start.entry.mjs', 'checks/smoke/snapshot-replay.entry.mjs', 'checks/smoke/client-load.entry.mjs']
+  for (const rel of files) {
+    const text = readFileSync(join(ROOT, rel), 'utf8')
+    assert.match(text, /pickFreePort/, `${rel} 必须用 pickFreePort`)
+    assert.doesNotMatch(text, /'31(?:29|03|09)'/, `${rel} 不得再有固定端口缺省`)
+  }
+})

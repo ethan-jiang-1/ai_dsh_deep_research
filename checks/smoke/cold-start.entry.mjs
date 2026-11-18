@@ -16,7 +16,7 @@ import { existsSync, readFileSync, rmSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { authenticate } from '../lib/shared/web-harness.mjs'
-import { reclaimPort } from '../lib/harness/port-reclaim.mjs'
+import { pickFreePort, reclaimPort } from '../lib/harness/port-reclaim.mjs'
 import {
   cleanHome, engineIssues, initWebProfile, installTarball, moduleLeakOf, pinnedDshBin, startWeb, stopWeb,
 } from '../lib/harness/clean-room.mjs'
@@ -24,7 +24,8 @@ import { peerNamesOf } from '../lib/harness/clean-room-policy.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
-const PORT = Number(process.env.COLD_START_PORT ?? '3129')
+const PORT = process.env.COLD_START_PORT ? Number(process.env.COLD_START_PORT) : await pickFreePort()
+if (PORT === null) { console.error('cold-start.entry: 找不到空闲端口'); process.exit(2) }
 const PROFILE = 'cold-start'
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
 const tarball = process.env.PACK_TARBALL ?? join(ROOT, '_dist', `dsh-deep-research-pack-${pkg.version}.tgz`)

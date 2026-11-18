@@ -23,15 +23,15 @@
 
 | id | parent | lifecycle | kind | question | owner_role | deps | output | acceptance | budget | depth | task_id |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| W1.1 | — | active | broad-scan | <宽搜证据可能在哪儿> | scout | — | leads.md §T1 | 覆盖记录齐 + 每个 primary topic 有建议挖深 | 3 query 家族 | L1 | |
-| W2.1 | — | active | deep-dive | <深挖哪个 claim> | analyst | W1.1 | evidence/t1-*.md | 深度记录齐 + ≥2 独立或显式单源 + 反例 | 2 轮 | L1 | |
-| W2.2 | — | active | deep-dive | <并行的第二条深挖> | analyst | W1.1 | evidence/t2-*.md | 同上；与 W2.1 独立来源 | 2 轮 | L1 | |
-| W3.1 | — | active | cross-check | <单源/矛盾/反例> | analyst | W2.1,W2.2 | evidence/t1-cross-*.md | 反例 query+结果 + 口径 | 1 轮 | L2 | |
-| W4.1 | — | active | synthesis | <综合成 findings/final> | lead | W3.1 | findings.md + final.md | 每个 finding 有 [来源:] + gap 四态 | — | L1 | |
-| W5.1 | — | active | review | <对抗审查> | critic | W4.1 | review.md | readiness 判据逐条 + 回边 ≤3 | — | L1 | |
+| W1.1 | — | active | broad-scan | <宽搜证据可能在哪儿> | scout | — | leads.md §T1 | 覆盖记录齐 + 每个 primary topic 有建议挖深 | 3 query 家族 | L1 | — |
+| W2.1 | — | active | deep-dive | <深挖哪个 claim> | analyst | W1.1 | evidence/t1-*.md | 深度记录齐 + ≥2 独立或显式单源 + 反例 | 2 轮 | L1 | plan-only |
+| W2.2 | — | active | deep-dive | <并行的第二条深挖> | analyst | W1.1 | evidence/t2-*.md | 同上；与 W2.1 独立来源 | 2 轮 | L1 | plan-only |
+| W3.1 | — | active | cross-check | <单源/矛盾/反例> | analyst | W2.1,W2.2 | evidence/t1-cross-*.md | 反例 query+结果 + 口径 | 1 轮 | L2 | — |
+| W4.1 | — | active | synthesis | <综合成 findings/final> | lead | W3.1 | findings.md + final.md | 每个 finding 有 [来源:] + gap 四态 | — | L1 | — |
+| W5.1 | — | active | review | <对抗审查> | critic | W4.1 | review.md | readiness 判据逐条 + 回边 ≤3 | — | L1 | — |
 
 <!-- 组内拆解示例（不升成新 Wave）：
-| W2.1.1 | W2.1 | active | fetch | <W2.1 内部的逐字摘录> | analyst | — | evidence/t1-*.md | 七字段 + 口径 | 1 次 fetch | L2 | |
+| W2.1.1 | W2.1 | active | fetch | <W2.1 内部的逐字摘录> | analyst | — | evidence/t1-*.md | 七字段 + 口径 | 1 次 fetch | L2 | — |
 -->
 
 ## Wave 分组（计算值，不写进 id/表）

@@ -166,6 +166,7 @@
 | lib/repo/doc-surface.mjs | a-docs、f-repo、doc-prose-paths、doc-surface-shapes.test | live 文档可读面的唯一枚举器：形态台账（SHAPES / COMMAND_FORMS）↔ 订单案例对账、命令归一（env 前缀 / `./` / 包装器 / `&&` / heredoc / 缩进 / YAML 折叠块）、退役根判据 |
 | lib/repo/doc-counts.mjs | a-docs、doc-counts.test | 资产计数名词闭集（count-free 判据面正本）+ 硬计数 token 抽取 |
 | lib/shared/skill-golden.mjs | record-skill-golden、skill-golden.test | skill 正文 sha256 清单与漂移判据（快照 B 只比 catalog） |
+| lib/channel/start-lock.mjs | run-driver、start-lock.test | 启动互斥：原子 mkdir + owner.json + stale 回收（run-driver up / boot-run.sh 共用文案） |
 | lib/channel/profile-guard.mjs | run-driver、profile-guard.test | run-driver 的非默认 profile 守卫：默认 profile 放行，其余 fail-loud（显式 `--allow-stale-profile` 才继续） |
 | lib/gates/findings-core.mjs | evidence-audit-core、node-gate-run-gates、review-contract、findings-contract.spec、template-contract.spec、topics-contract.spec | findings gap 四态 / lenses / lens_gaps 差集 / scope_role 闭集 |
 | lib/gates/review-contract.mjs | node-gate-delivery-gate、review-contract.spec | review 覆盖表（topic × lens）+ CRITICAL 与 readiness 交叉 |
@@ -186,11 +187,11 @@
 | lib/shared/profile-health.mjs | profile-health.spec、record-role-fixture、snapshot-replay.entry、team-preflight.e2e | dev profile 版本与镜像新鲜度预检：团队层版本 == 运行时 dsh 版本且安装副本关键文件与包源一致；缺席/落后/陈旧 → 明确 exit 2 + 重建指令（BUG-066/080） |
 | lib/shared/startup-hint.mjs | startup-hint.spec、web-banner | boot 失败归因：识别日志里的 incompatible/exemption，指出 profile 未随 pin 重钉（BUG-066） |
 | lib/harness/client-load-select.mjs | client-load-reference.support、client-load-select.spec | client-load 绑定会话选择（只认 lead 根；防富 coach 会话假红，BUG-142） |
-| lib/harness/port-reclaim-policy.mjs | port-reclaim、port-reclaim.spec、probe-port-policy.test | 端口 listener 身份纯判据与行为探针退避/整组收割纯编排（只认本仓 DSH web；遇占口回落临时端口；无子进程依赖，BUG-104/113/136） |
+| lib/harness/port-reclaim-policy.mjs | port-reclaim、probe-port-policy.test、port-reclaim.spec | 端口 listener 身份纯判据与行为探针退避/整组收割纯编排（只认本仓 DSH web；遇占口回落临时端口；无子进程依赖，BUG-104/113/136） |
 | lib/harness/run-lock.mjs | client-load.entry、run-lock.spec、snapshot-replay.entry | 冒烟脚本进程级运行锁：存活拒跑、陈旧锁接管、释放（共享 DSH_HOME 的脚本互斥） |
 | lib/harness/replay-network-offline.cjs | snapshot-replay.entry | 回放 A 层离线闸 preload：非 loopback DNS(lookup/resolve*)/connect 立即失败；只作用于 dsh 主进程（BUG-064/067） |
 | lib/harness/replay-network-offline-policy.cjs | replay-network-offline.spec | 离线闸纯判据（isLoopback/isDshMain；无 node:net 依赖，测试可直引） |
-| lib/harness/port-reclaim.mjs | client-load.entry、cold-start.entry、data.entry、defaults-probe、discipline-probe、entry-chain-probe、method-library-probe、preset.e2e、product-boot.entry、release.entry、rerun-triage-probe、wave-execution-probe、workspace-isolation.entry | 端口收割执行器与探针端口准备/整组清理（按端口杀 + 三轮验证释放 + 占口回落空闲端口，BUG-136） |
+| lib/harness/port-reclaim.mjs | client-load.entry、cold-start.entry、data.entry、defaults-probe、discipline-probe、entry-chain-probe、method-library-probe、preset.e2e、product-boot.entry、release.entry、rerun-triage-probe、wave-execution-probe、workspace-isolation.entry、snapshot-replay.entry | 端口收割执行器与探针端口准备/整组清理（按端口杀 + 三轮验证释放 + 占口回落空闲端口，BUG-136） |
 | lib/shared/path-hygiene.mjs | node-gate-session-gates、path-hygiene、path-hygiene.spec、run-accept、run-receipt | 本机 home 路径纯文本检测（Unix/macOS/Windows 前缀；行号）+ `portableBundlePath`（bundle 内绝对路径 → `drt_<slug>/…` 可移植标签；bundle 外 → null） |
 | lib/shared/secret-scan.mjs | run-accept、secret-scan、secret-scan.spec | 高置信凭据形态检测（sk-/ghp_/AKIA/PRIVATE KEY/Bearer）；只报 path/line/kind，不回显原文 |
 | lib/test-infra/selftest-library.mjs | library-fold.spec | 「研究配置」面板/library-fold 自测例库单一正本：12 形态条目（四字段/部分/空值/旧格式/混居/重名/空条目/杂项行/续行/缩进），两处共用防形态漂移 |

@@ -65,6 +65,7 @@ export function evaluateBundle(input) {
     auditText = '',
     finalText = '',
     evidences = [],
+    criticalEvidence = null,
     methodLibraryEntry = null,
     runKind = '',
     hasSnapshot = false,
@@ -81,7 +82,7 @@ export function evaluateBundle(input) {
     ...checkEffortContract(protocol, planText, topicsText),
     ...checkProjection(protocol, questionText),
     ...checkFinalSections(protocol, finalText),
-    ...checkEvidenceThreshold(protocol, evidences, runKind),
+    ...checkEvidenceThreshold(protocol, evidences, runKind, criticalEvidence),
     ...checkOutputLength(protocol, finalText, runKind),
     ...checkMethodLibrary(protocol, methodLibraryEntry),
     ...checkStrategy(protocol, planText, topicsText),
@@ -416,13 +417,14 @@ export function checkFinalSections(protocol, finalText) {
 }
 
 /** 证据门槛 vs evidence.quality（BUG-271）；quick_factual 豁免。 */
-export function checkEvidenceThreshold(protocol, evidences, runKind = '') {
+export function checkEvidenceThreshold(protocol, evidences, runKind = '', criticalEvidence = null) {
   if (runKind === 'quick_factual') return []
   const threshold = protocol?.gates?.evidence_threshold
   const rank = { A: 4, B: 3, C: 2, D: 1 }
   if (!(threshold in rank)) return []
   const out = []
-  for (const ev of evidences) {
+  const scoped = criticalEvidence === null ? evidences : evidences.filter((ev) => criticalEvidence.includes(ev.file))
+  for (const ev of scoped) {
     const q = String(ev.quality ?? '').trim()
     if (!(q in rank)) continue
     if (rank[q] < rank[threshold]) out.push(red('evidence-threshold', `${ev.file} 的 quality=${q} 低于 protocol.gates.evidence_threshold=${threshold}（BUG-271）`))
@@ -432,7 +434,12 @@ export function checkEvidenceThreshold(protocol, evidences, runKind = '') {
 
 /** final 长度 vs output.length（BUG-272；words 用 Intl.Segmenter，pages 按非空行/50）。 */
 export function countLength(text, unit) {
+  // 只计散文：剔除 fenced code、inline code、URL、markdown 表格（BUG-313）。
   const source = String(text ?? '')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/https?:\/\/\S+/g, ' ')
+    .split('\n').filter((line) => !/^\s*\|/.test(line)).join('\n')
   if (unit === 'pages') {
     const lines = source.split('\n').filter((line) => line.trim() !== '').length
     return Math.max(0, Math.ceil(lines / 50))
@@ -466,7 +473,9 @@ export function checkMethodLibrary(protocol, entry) {
   if (method?.library_name === null || method?.library_name === undefined) {
     return [red('method-library', 'method.library_fields_sha256 非 null 但 library_name 为 null（BUG-276）')]
   }
-  if (entry === undefined) return []
+  if (entry === undefined) {
+    return [red('method-library', `声明 library_fields_sha256 但候选路径找不到方法库文件（library=${method.library_name}；BUG-307）`)]
+  }
   if (entry === null) {
     return [red('method-library', `方法库里找不到「${method.library_name}」——library_fields_sha256 无法重算（BUG-276）`)]
   }

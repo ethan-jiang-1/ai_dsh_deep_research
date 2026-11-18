@@ -27,7 +27,7 @@
 // 录制：新角色或重录用 `node --import tsx/esm tools/record/record-role-fixture.mjs --role <r>`
 // （with-key 一次，之后 keyless 永久回放；录制品人审后入库，并在场景声明登记 source 身份）。
 //
-// 用法：source tools/env.sh && node checks/smoke/snapshot-replay.entry.mjs [--port 3103] [--read-only] [--layers a,b,c] [--update-expected --why <载体>] [--scenario <id>] [--face <name>]
+// 用法：source tools/env.sh && node checks/smoke/snapshot-replay.entry.mjs [--port <free>] [--read-only] [--layers a,b,c] [--update-expected --why <载体>] [--scenario <id>] [--face <name>]
 //   --scenario <id> 在每个选中场景集内都必须在场（缺席即 fail-loud exit 2，不静默缩场景）。
 // 红证（实录）：改 fixture 内一条 assistant 文本 → A 红；改 fixture persona/注入文本或工具 schema
 //   一词 → 对应 B 条红；改 fixture 一条 web_search 查询词 → C 红；各自还原 → 绿。
@@ -48,6 +48,7 @@ import { dismissPreviewNotice, openSessionById } from '../lib/shared/web-ui-nav.
 import { profileLayerIssues, runtimeVersionOf } from '../lib/shared/profile-health.mjs';
 import { acquireRunLock, releaseRunLock } from '../lib/harness/run-lock.mjs';
 import { resolveSnapshotMode } from '../lib/harness/snapshot-mode.mjs';
+import { pickFreePort } from '../lib/harness/port-reclaim.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
@@ -55,7 +56,9 @@ const arg = (name, fallback) => {
   return i === -1 ? fallback : argvOf(i);
 };
 const argvOf = (i) => process.argv[i + 1];
-const PORT = Number(arg('port', '3103'));
+const PORT_ARG = arg('port', null);
+const PORT = PORT_ARG === null ? await pickFreePort() : Number(PORT_ARG);
+if (PORT === null) { console.error('snapshot-replay.entry: 找不到空闲端口'); process.exit(2); }
 const ONLY = arg('scenario'); // --scenario <id> 单场景跑（红证定向/迭代用；缺省全场景）
 const FACE_ONLY = arg('face'); // --face <name> 定向单场景集（全名）；缺省 = 发现全部场景集逐场景跑
 let snapshotMode;

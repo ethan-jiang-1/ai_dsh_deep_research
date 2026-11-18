@@ -56,7 +56,11 @@ export function coverageIssues(bundleDir) {
       const lens = scalarOf(fm.lens)
       for (const m of String(fm.supports ?? '').matchAll(/T\d+/g)) {
         const key = m[0] + '|' + lens
-        counts.set(key, (counts.get(key) ?? 0) + 1)
+        const bucket = counts.get(key) ?? { total: 0, A: 0, B: 0 }
+        bucket.total += 1
+        const quality = scalarOf(fm.quality)
+        if (quality === 'A' || quality === 'B') bucket[quality] += 1
+        counts.set(key, bucket)
       }
     }
   }
@@ -80,8 +84,12 @@ export function coverageIssues(bundleDir) {
         continue
       }
       if (declared !== undefined) {
-        const actual = counts.get(id + '|' + scalarOf(header[i])) ?? 0
-        if (Number(declared) !== actual) issues.push(`${id}/${scalarOf(header[i])} 声明 ${declared} 卡，盘上实际 ${actual} 卡`)
+        const bucket = counts.get(id + '|' + scalarOf(header[i])) ?? { total: 0, A: 0, B: 0 }
+        if (Number(declared) !== bucket.total) issues.push(`${id}/${scalarOf(header[i])} 声明 ${declared} 卡，盘上实际 ${bucket.total} 卡`)
+        const q = /A(\d+)\s*\/\s*B(\d+)/i.exec(cell)
+        if (q !== null && (Number(q[1]) !== bucket.A || Number(q[2]) !== bucket.B)) {
+          issues.push(`${id}/${scalarOf(header[i])} 声明 A${q[1]}/B${q[2]}，盘上实际 A${bucket.A}/B${bucket.B}`)
+        }
       }
       for (const m of cell.matchAll(/evidence\/[A-Za-z0-9_.-]+\.md/g)) {
         const p = join(bundleDir, m[0])

@@ -233,6 +233,10 @@ jobs:
           chmod +x /tmp/dsh-vendor
           DSH_BIN=/tmp/dsh-vendor node checks/smoke/lifecycle.entry.mjs
 
+      # L2 干净室冷启动（仓外 home + 钉版 DSH + tarball；BUG-314：从 dev-only 升 nightly）。
+      - name: L2 clean-room cold start
+        run: DSH_BIN=/tmp/dsh-vendor node checks/smoke/cold-start.entry.mjs
+
       - name: Doctor (read-only profile/anchor/workspace/credentials)
         run: node checks/smoke/doctor.e2e.mjs
 

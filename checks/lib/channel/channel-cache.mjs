@@ -12,7 +12,7 @@
 //   · 键必须含身份：pack 源或 runtime 构建改动一律 miss；`--force-probe` 永久绕过；
 //   · `probe` 子命令永远真验。
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, readlinkSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { isMain } from '../shared/cli-entry.mjs'
 
@@ -28,8 +28,8 @@ export const PROBE_CACHE_TTL_MS = 30 * 60 * 1000
  * @returns {string} sha256 hex
  */
 export function packFingerprint(entries) {
-  // 内容哈希优先（BUG-298）：同 size/mtime 的内容替换也必须失效；旧条目无 sha256 时回退。
-  const lines = [...entries].map((e) => `${e.rel}\0${e.sha256 ?? `${e.size}\0${Math.trunc(e.mtimeMs)}`}`).sort()
+  // 内容哈希优先（BUG-298）；symlink 目标也入键（BUG-318）；旧条目无 sha256 时回退。
+  const lines = [...entries].map((e) => `${e.rel}\0${e.link ?? ''}\0${e.sha256 ?? `${e.size}\0${Math.trunc(e.mtimeMs)}`}`).sort()
   return createHash('sha256').update(lines.join('\n')).digest('hex')
 }
 
@@ -45,7 +45,13 @@ export function collectPackEntries(root, rel = '', out = []) {
     if (SKIP_DIRS.has(entry.name)) continue
     const childRel = rel === '' ? entry.name : `${rel}/${entry.name}`
     if (entry.isDirectory()) collectPackEntries(root, childRel, out)
-    else if (entry.isFile()) {
+    else if (entry.isSymbolicLink()) {
+      const abs = join(root, childRel)
+      const link = readlinkSync(abs)
+      let sha256 = ''
+      try { sha256 = createHash('sha256').update(readFileSync(abs)).digest('hex') } catch { sha256 = '' }
+      out.push({ rel: childRel, size: 0, mtimeMs: 0, sha256, link })
+    } else if (entry.isFile()) {
       const stat = statSync(join(root, childRel))
       const sha256 = createHash('sha256').update(readFileSync(join(root, childRel))).digest('hex')
       out.push({ rel: childRel, size: stat.size, mtimeMs: stat.mtimeMs, sha256 })
@@ -180,6 +186,13 @@ export function probeSourceFingerprint(root, entry = 'tools/channel/run-driver.m
 }
 
 /** probe 身份（BUG-296/297/299）：profile/bootstrap/workspace 必须进缓存键。 */
-export function probeIdentityOf({ profile, bootstrap = false, workspace = '' }) {
-  return [profile ?? '', bootstrap ? '1' : '0', workspace ?? ''].join('|')
+export function probeIdentityOf({ profile, bootstrap = false, workspace = '', mcp = '' }) {
+  return [profile ?? '', bootstrap ? '1' : '0', workspace ?? '', mcp ?? ''].join('|')
+}
+
+/** 原子写 JSON（BUG-319）：同目录临时文件 + rename，读方不会看到半文件。 */
+export function writeJsonAtomic(path, value) {
+  const tmp = path + '.' + process.pid + '.' + Math.random().toString(36).slice(2) + '.tmp'
+  writeFileSync(tmp, JSON.stringify(value, null, 2))
+  renameSync(tmp, path)
 }

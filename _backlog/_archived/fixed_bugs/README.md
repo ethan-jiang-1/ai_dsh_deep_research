@@ -6,6 +6,26 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [300](BUG-300-plan-owner-role-missing.md) | plan active 缺 owner_role | （owner 必填） | 2026-11-19 |
+| [301](BUG-301-plan-kind-missing.md) | plan active 缺 kind | （kind 必填） | 2026-11-19 |
+| [302](BUG-302-plan-task-id-missing.md) | plan active 缺 task_id | （task_id 必填（—）） | 2026-11-19 |
+| [303](BUG-303-plan-remaining-none-with-active.md) | 剩余工作 - 无 与 active 共存 | （- 无 冲突红） | 2026-11-19 |
+| [304](BUG-304-plan-wave-section-nodes-unchecked.md) | Wave 层无节点 | （Wave 层有节点） | 2026-11-19 |
+| [305](BUG-305-plan-snapshot-content-version-only.md) | 快照只比版本 | （快照非当前） | 2026-11-19 |
+| [306](BUG-306-plan-plan-only-outside-wave.md) | 非 Wave plan-only | （plan-only 限 Wave） | 2026-11-19 |
+| [307](BUG-307-method-library-entry-undefined-na.md) | 声明 library 缺库 N/A | （缺库红（sha）） | 2026-11-19 |
+| [308](BUG-308-probe-cache-mcp-omitted.md) | probe 键缺 MCP | （MCP 入键） | 2026-11-19 |
+| [309](BUG-309-run-driver-no-up-lock.md) | run-driver up 无锁 | （up 锁） | 2026-11-19 |
+| [310](BUG-310-boot-run-no-start-lock.md) | boot-run 无锁 | （boot 锁） | 2026-11-19 |
+| [311](BUG-311-review-coverage-count-evidence-only.md) | 覆盖表只按 evidence 数 | （A/B 分档） | 2026-11-19 |
+| [312](BUG-312-evidence-threshold-all-evidence.md) | threshold 对全部 evidence | （critical 作用域） | 2026-11-19 |
+| [313](BUG-313-output-length-heuristic.md) | 长度含代码/URL/表格 | （散文计数） | 2026-11-19 |
+| [314](BUG-314-cold-start-not-nightly.md) | cold-start dev-only | （nightly + cap 13） | 2026-11-19 |
+| [315](BUG-315-cold-start-fixed-port.md) | cold-start 固定端口 | （动态端口） | 2026-11-19 |
+| [316](BUG-316-snapshot-fixed-port.md) | snapshot 固定端口 | （动态端口） | 2026-11-19 |
+| [317](BUG-317-client-load-fixed-port.md) | client-load 固定端口 | （动态端口） | 2026-11-19 |
+| [318](BUG-318-channel-cache-symlink-ignored.md) | pack 指纹跳过 symlink | （symlink 入指纹） | 2026-11-19 |
+| [319](BUG-319-probe-cache-write-nonatomic.md) | probe 缓存非原子写 | （原子写） | 2026-11-19 |
 | [280](BUG-280-plan-gate-malformed-table-pass.md) | plan 表畸形/缺席时 planGate PASS 0 节点 | （畸形表红） | 2026-11-18 |
 | [281](BUG-281-plan-gate-version-absent.md) | plan 缺图版本时版本链跳过 | （版本必填） | 2026-11-18 |
 | [282](BUG-282-plan-gate-columns-unchecked.md) | plan 列 question/output/acceptance/budget/depth 可空 | （列必填/值域） | 2026-11-18 |

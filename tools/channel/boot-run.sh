@@ -18,6 +18,7 @@ set -euo pipefail
 #    这是 boot 面护栏；L0 门禁刻意不依赖构建产物（新 clone 未构建时 verify 仍应秒级绿）。
 node "$ROOT/checks/lib/harness/vendor-artifacts.mjs"
 
+BOOT_LOCK=""
 PROFILE="${DSH_RUN_PROFILE:-deep-research}"
 # Non-default profile starts skip the mirror drift check (stale plugin would silently load, BUG-243):
 # fail loud unless the caller explicitly opts in (same meaning as run-driver --allow-stale-profile).
@@ -32,6 +33,13 @@ PORT="${DSH_RUN_PORT:-3083}"
 STATE_DIR="${DSH_RUN_STATE_DIR:-$ROOT/runtime/smoke-workspace}"
 mkdir -p "$STATE_DIR"
 STATE_DIR="$(cd "$STATE_DIR" && pwd)"
+# 启动互斥（BUG-310）：mkdir 原子；第二个实例 fail-loud，不竞争同一端口/状态根。
+BOOT_LOCK="$STATE_DIR/boot-run.lock"
+if ! mkdir "$BOOT_LOCK" 2>/dev/null; then
+  echo "boot-run: 另一实例持锁（$BOOT_LOCK）——确认无实例后删除该目录重试" >&2
+  exit 2
+fi
+trap 'rmdir "$BOOT_LOCK" 2>/dev/null || true' EXIT INT TERM
 WORKSPACE="${DSH_RUN_WORKSPACE:-${DEEP_RESEARCH_WORKSPACE:-$ROOT/research-workspace}}"
 export DEEP_RESEARCH_WORKSPACE="$WORKSPACE"
 

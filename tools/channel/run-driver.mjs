@@ -35,8 +35,9 @@ import { fileURLToPath } from 'node:url';
 import { isMain } from '../../checks/lib/shared/cli-entry.mjs';
 import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../../checks/lib/channel/run-channel.mjs';
 import { profileGuardDecision } from '../../checks/lib/channel/profile-guard.mjs';
-import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey, probeIdentityOf, probeSourceFingerprint } from '../../checks/lib/channel/channel-cache.mjs';
+import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey, probeIdentityOf, probeSourceFingerprint, writeJsonAtomic } from '../../checks/lib/channel/channel-cache.mjs';
 import { authenticate } from '../../checks/lib/shared/web-harness.mjs';
+import { acquireStartLock } from '../../checks/lib/channel/start-lock.mjs';
 
 export { guiUrlFromWebLog, runDriverVerdict };
 
@@ -275,6 +276,9 @@ const noProbe = has('--no-probe');
 const forceProbe = has('--force-probe');
 const expectFace = arg('--expect-face', undefined);
 const requireData = has('--require-data');
+const startLock = acquireStartLock(join(STATE_DIR, 'run-driver-up.lock'));
+if (!startLock.ok) { console.error(`run-driver: ${startLock.reason}`); process.exit(2); }
+process.on('exit', () => startLock.release());
 
 let state = channelState();
 let drift = null;
@@ -362,7 +366,7 @@ if (noProbe) {
 if (!forceProbe && drift?.clean === true) {
   const cached = readProbeCache();
   const packId = packFingerprint(collectPackEntries(PACK_DIR));
-  const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: `${devShellFingerprint()}:${probeSourceFingerprint(ROOT)}:${probeIdentityOf({ profile: wantProfile, bootstrap: wantBootstrap, workspace: RUN_WORKSPACE })}` })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
+  const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: `${devShellFingerprint()}:${probeSourceFingerprint(ROOT)}:${probeIdentityOf({ profile: wantProfile, bootstrap: wantBootstrap, workspace: RUN_WORKSPACE, mcp: process.env.MCP_PLAYWRIGHT ?? '' })}` })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
   const hit = probeCacheHit({ entry: cached, key, now: Date.now() });
   if (hit.hit) {
     const ready = await httpReady(state.url);
@@ -399,7 +403,7 @@ if (submitted) {
   try {
     const packId = packFingerprint(collectPackEntries(PACK_DIR));
     const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: `${devShellFingerprint()}:${probeSourceFingerprint(ROOT)}:${probeIdentityOf({ profile: wantProfile, bootstrap: wantBootstrap, workspace: RUN_WORKSPACE })}` })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
-    writeFileSync(PROBE_CACHE, JSON.stringify({ key, at: new Date().toISOString(), level: v.level, payload }, null, 2));
+    writeJsonAtomic(PROBE_CACHE, { key, at: new Date().toISOString(), level: v.level, payload });
   } catch {}
 }
 console.log('──────────────────────────── 呈交块 ────────────────────────────');

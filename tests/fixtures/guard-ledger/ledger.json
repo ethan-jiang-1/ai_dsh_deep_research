@@ -1412,6 +1412,166 @@
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "workspace 变 → 身份变"
+    },
+    {
+      "id": "BUG-300",
+      "mechanism": "plan active 缺 owner_role",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "缺 owner → 红"
+    },
+    {
+      "id": "BUG-301",
+      "mechanism": "plan active 缺 kind",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "缺 kind → 红"
+    },
+    {
+      "id": "BUG-302",
+      "mechanism": "plan active 缺 task_id",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "空 task_id → 红"
+    },
+    {
+      "id": "BUG-303",
+      "mechanism": "剩余工作 - 无 与 active 共存",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "- 无 + active → 红"
+    },
+    {
+      "id": "BUG-304",
+      "mechanism": "Wave 层无节点",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "W9 无节点 → 红"
+    },
+    {
+      "id": "BUG-305",
+      "mechanism": "快照只比版本",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "快照与当前相同 → 红"
+    },
+    {
+      "id": "BUG-306",
+      "mechanism": "非 Wave plan-only",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "plan-only 越界 → 红"
+    },
+    {
+      "id": "BUG-307",
+      "mechanism": "声明 library 缺库 N/A",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "sha 非 null + undefined → 红"
+    },
+    {
+      "id": "BUG-308",
+      "mechanism": "probe 键缺 MCP",
+      "guard": "tests/run/channel/channel-cache.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "MCP 变 → 身份变"
+    },
+    {
+      "id": "BUG-309",
+      "mechanism": "run-driver up 无锁",
+      "guard": "tests/checks/channel/start-lock.test.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "第二次 acquire → 失败"
+    },
+    {
+      "id": "BUG-310",
+      "mechanism": "boot-run 无锁",
+      "guard": "tests/checks/channel/start-lock.test.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "同 309（共享锁）"
+    },
+    {
+      "id": "BUG-311",
+      "mechanism": "覆盖表只按 evidence 数",
+      "guard": "tests/run/gates/review-contract.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "A/B 分档不符 → 红"
+    },
+    {
+      "id": "BUG-312",
+      "mechanism": "threshold 对全部 evidence",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "criticalEvidence 作用域"
+    },
+    {
+      "id": "BUG-313",
+      "mechanism": "长度估算含代码/URL/表格",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "噪声文本计数不变"
+    },
+    {
+      "id": "BUG-314",
+      "mechanism": "cold-start dev-only",
+      "guard": ".github/workflows/nightly.yml",
+      "oracleType": "none",
+      "status": "closed",
+      "redRecipe": "registry tier=nightly + workflow step"
+    },
+    {
+      "id": "BUG-315",
+      "mechanism": "cold-start 固定端口",
+      "guard": "tests/run/harness/port-reclaim.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "pickFreePort 用例"
+    },
+    {
+      "id": "BUG-316",
+      "mechanism": "snapshot 固定端口",
+      "guard": "tests/run/harness/port-reclaim.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "同 315"
+    },
+    {
+      "id": "BUG-317",
+      "mechanism": "client-load 固定端口",
+      "guard": "tests/run/harness/port-reclaim.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "同 315"
+    },
+    {
+      "id": "BUG-318",
+      "mechanism": "pack 指纹跳过 symlink",
+      "guard": "tests/run/channel/channel-cache.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "link 目标入指纹"
+    },
+    {
+      "id": "BUG-319",
+      "mechanism": "probe 缓存非原子写",
+      "guard": "tests/run/channel/channel-cache.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "writeJsonAtomic 无 tmp 残留"
     }
   ]
 }

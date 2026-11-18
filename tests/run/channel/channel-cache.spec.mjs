@@ -6,7 +6,7 @@
 // key 比较删掉 → 本文件红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
@@ -17,6 +17,7 @@ import {
   probeCacheKey,
   importClosureHash,
   probeIdentityOf,
+  writeJsonAtomic,
   readShippedCache,
   writeShippedCache,
 } from '../../../checks/lib/channel/channel-cache.mjs'
@@ -133,6 +134,7 @@ test('import 闭包哈希：跟随相对 import/动态 import，内容变则变�
   assert.equal(hashOf({ 'tools/channel/run-driver.mjs': '// no imports\n' }).length, 16)
 })
 
+// 负例留证 2026-11-19：BUG-308 / BUG-318 / BUG-319——MCP 身份、symlink 入指纹、原子写。
 // 负例留证 2026-11-18：BUG-296 / BUG-297 / BUG-298 / BUG-299——身份/内容哈希变化必须 miss。
 // ── 缓存身份 ─────────────────────────────────────────────
 test('packFingerprint：内容 sha256 变化即变（同 size/mtime 也不行）（BUG-298）', () => {
@@ -147,4 +149,38 @@ test('probeIdentityOf：profile/bootstrap/workspace 任一变化都改变身份�
   assert.notEqual(base, probeIdentityOf({ profile: 'deep-research', bootstrap: true, workspace: '/ws' }))
   assert.notEqual(base, probeIdentityOf({ profile: 'deep-research', bootstrap: false, workspace: '/other' }))
   assert.equal(base, probeIdentityOf({ profile: 'deep-research', bootstrap: false, workspace: '/ws' }))
+})
+
+test('BUG-308：MCP 开关改变 probe 身份', () => {
+  const base = probeIdentityOf({ profile: 'p', bootstrap: false, workspace: '/ws', mcp: '0' })
+  assert.notEqual(base, probeIdentityOf({ profile: 'p', bootstrap: false, workspace: '/ws', mcp: '1' }))
+})
+
+test('BUG-318：symlink 的目标/内容进入 pack 指纹', () => {
+  const a = [{ rel: 'link', size: 0, mtimeMs: 0, sha256: 'a'.repeat(64), link: 'target-a' }]
+  const b = [{ rel: 'link', size: 0, mtimeMs: 0, sha256: 'a'.repeat(64), link: 'target-b' }]
+  assert.notEqual(packFingerprint(a), packFingerprint(b))
+})
+
+test('BUG-319：writeJsonAtomic 写入可读 JSON，且不留下临时文件', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'atomic-'))
+  try {
+    const file = join(dir, 'cache.json')
+    writeJsonAtomic(file, { key: 'k', n: 1 })
+    assert.deepEqual(JSON.parse(readFileSync(file, 'utf8')), { key: 'k', n: 1 })
+    assert.deepEqual(readdirSync(dir).filter((n) => n.endsWith('.tmp')), [])
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('BUG-318：collectPackEntries 收录 symlink 并哈希目标内容', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pack-symlink-'))
+  try {
+    writeFileSync(join(dir, 'target.md'), 'content\n')
+    symlinkSync('target.md', join(dir, 'link.md'))
+    const entries = collectPackEntries(dir)
+    const link = entries.find((e) => e.rel === 'link.md')
+    assert.ok(link, 'symlink 必须入条目')
+    assert.equal(link.link, 'target.md')
+    assert.match(link.sha256, /^[0-9a-f]{64}$/)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
 })

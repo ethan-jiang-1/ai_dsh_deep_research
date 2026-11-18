@@ -24,6 +24,7 @@
 | channel | `checks/lib/channel/profile-guard` | `tests/checks/channel/profile-guard.test.mjs` |
 | channel | `checks/lib/channel/run-channel` | `tests/run/channel/run-driver-contract.spec.mjs` |
 | channel | `checks/lib/channel/runtime-clean-core` | `tests/run/channel/runtime-clean.spec.mjs` |
+| channel | `checks/lib/channel/start-lock` | `tests/checks/channel/start-lock.test.mjs` |
 | gates | `checks/lib/gates/acceptance-check` | `tests/run/gates/acceptance-check.spec.mjs` |
 | gates | `checks/lib/gates/bundle-date-sanity` | `tests/run/gates/bundle-date-sanity.spec.mjs` |
 | gates | `checks/lib/gates/evidence-audit-core` | `tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/evidence-audit.spec.mjs`<br>`tests/run/gates/provenance.spec.mjs` |

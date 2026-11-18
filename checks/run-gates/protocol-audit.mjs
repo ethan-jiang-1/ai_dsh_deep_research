@@ -159,6 +159,14 @@ if (isMain(import.meta.url)) {
       return { file: 'evidence/' + file, quality: fm?.quality ?? '' }
     })
     : []
+  const claimsPath = join(bundle, 'review', 'claims.json')
+  let criticalEvidence = null
+  if (existsSync(claimsPath)) {
+    try {
+      const claims = JSON.parse(readFileSync(claimsPath, 'utf8'))?.claims ?? []
+      criticalEvidence = [...new Set(claims.filter((claim) => claim?.critical === true).flatMap((claim) => claim?.evidence ?? []))]
+    } catch { criticalEvidence = null }
+  }
   const libraryPath = join(bundle, '..', 'method-library.md')
   let methodLibraryEntry
   const candidates = [libraryPath, join(bundle, '..', '..', 'method-library.md')]
@@ -202,6 +210,7 @@ if (isMain(import.meta.url)) {
       return versions.length > 0 ? readIf(join(dir, `v${versions[versions.length - 1]}.md`)) : ''
     })(),
     evidences,
+    criticalEvidence,
     methodLibraryEntry,
     runKind: type,
     hasSnapshot,

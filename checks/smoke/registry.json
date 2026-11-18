@@ -94,15 +94,16 @@
     "job": "client-load"
   },
   "cold-start.entry.mjs": {
-    "tier": "dev-only",
-    "reason": "独立 home/profile/端口 + tarball；CI 组合不复现，L2 手工档",
+    "tier": "nightly",
+    "reason": "干净室安装（仓外 home + tarball）——nightly 跑，失败可诊断",
     "cost": "slow",
     "uniqueClaim": "干净室（仓外 home + 钉版 dsh + _dist tarball）安装 + web 启动 + 解析不落仓根",
     "oracle": [
       "tests/checks/harness/clean-room-policy.test.mjs"
     ],
     "sunset": "与 release/install 合并后退役",
-    "lane": "entry"
+    "lane": "entry",
+    "job": "deploy"
   },
   "data.entry.mjs": {
     "tier": "dev-only",

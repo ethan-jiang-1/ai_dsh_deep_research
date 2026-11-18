@@ -1,5 +1,6 @@
 // review-contract.spec.mjs — review 覆盖表与 severity 交叉（BUG-254 / 257）。
 //
+// 负例留证 2026-11-19：BUG-311——A/B 分档与盘上 quality 不符红。
 // 负例留证 2026-11-18：BUG-254 / BUG-257 / BUG-288——删覆盖表 → 红；表里引用不存在/不匹配的 evidence → 红；— 格无 gap/n-a → 红；
 // review 有 C1 且 readiness PASS → 红；加 `resolved-critical: C1` → 绿。
 import { test } from 'node:test'
@@ -61,5 +62,13 @@ test('BUG-288：格内声明卡数与盘上 evidence 数不一致 → 红；无�
     assert.ok(coverageIssues(dir).some((i) => i.includes('声明 2 卡') && i.includes('实际 1 卡')))
     writeFileSync(join(dir, 'review.md'), '# Review\n\n## 覆盖表（topic × lens）\n\n| topic | official | academic |\n|---|---|---|\n| T1 | 有卡 | —（gap: x） |\n')
     assert.ok(coverageIssues(dir).some((i) => i.includes('既无「N 卡」计数也无 evidence 引用')))
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('BUG-311：格内 A/B 分档与盘上 quality 不符 → 红', () => {
+  const dir = fixture()
+  try {
+    writeFileSync(join(dir, 'review.md'), '# Review\n\n## 覆盖表（topic × lens）\n\n| topic | official | academic |\n|---|---|---|\n| T1 | 1 卡（A0/B1） evidence/ev-a.md | —（gap: x） |\n')
+    assert.ok(coverageIssues(dir).some((i) => i.includes('声明 A0/B1') && i.includes('实际 A1/B0')))
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
