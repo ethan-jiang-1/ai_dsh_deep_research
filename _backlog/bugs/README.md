@@ -13,7 +13,16 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| （空） | — | — | 批 G/H/I/J（209–239）全部归档，见下 |
+| [BUG-250](BUG-250-evidence-lens-field-not-audited.md) | 等人拍板 | P2 | evidence 八字段里的 `lens` 从未被审计 |
+| [BUG-251](BUG-251-evidence-quality-tier-value-domains.md) | 等人拍板 | P2 | `quality: Z` / `source_tier: foo` 只查在场 |
+| [BUG-252](BUG-252-findings-gap-four-states-ungated.md) | 等人拍板 | P2 | findings `gap` 四态只查非空 |
+| [BUG-253](BUG-253-topics-scope-role-unknown-escapes-coverage.md) | 等人拍板 | P2 | `scope_role` 拼错静默逃出 L2 覆盖 |
+| [BUG-254](BUG-254-review-lens-coverage-table-ungated.md) | 等人拍板 | P2 | critic 要求 topic×lens 表，门禁不读 |
+| [BUG-255](BUG-255-protocol-output-sections-not-in-final.md) | 等人拍板 | P2 | `output.sections` 只对 question 投影，final 可换节 |
+| [BUG-256](BUG-256-findings-lens-gaps-no-consumer.md) | 等人拍板 | P2 | findings `lens_gaps` 无消费者 |
+| [BUG-257](BUG-257-review-severity-not-cross-checked-with-audit.md) | 等人拍板 | P2 | review CRITICAL/MAJOR 与 audit.md 不交叉 |
+| [BUG-258](BUG-258-snapshot-skill-body-not-covered.md) | 修复就绪 | P2 | snapshot B 只比 skill-catalog，不比正文 |
+| [BUG-259](BUG-259-probe-cache-key-excludes-driver.md) | 修复就绪 | P2 | probe 缓存键不含 run-driver/探针实现 |
 
 ## 最近归档
 

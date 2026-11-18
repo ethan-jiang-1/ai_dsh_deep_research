@@ -7,6 +7,7 @@
 | 卡 | 状态 | 一句话 |
 |---|---|---|
 | [2026-11-18-gate-self-test-cost](2026-11-18-gate-self-test-cost.md) | 等人拍板 | gates.e2e 333s：日常不该跑全量，发布门才做完整自测；B/预算已拍板，两层方案待确认 |
+| [2026-11-18-model-visible-semantics](2026-11-18-model-visible-semantics.md) | 推敲中 | 模型可见语义的“发了但没验”面：evidence 八字段/值域、findings gap/lens_gaps、scope_role、review 覆盖表/severity、output.sections、skill 正文、probe 缓存键；10 张卡 250–259 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
