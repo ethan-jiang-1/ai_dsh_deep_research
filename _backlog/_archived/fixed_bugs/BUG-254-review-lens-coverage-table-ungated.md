@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-254：critic 技能要求 review.md 有 `topic × lens` 覆盖表，但没有任何门禁核对这张表
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：review topic×lens 覆盖表结构判据 + evidence 引用/列 lens 对账 + 空格解释
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-model-visible-semantics.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`presets/critic/skills/adversarial-review/SKILL.md:80`（“review.md 终局块必须有 topic × lens 覆盖表”）
 > 与 `:83`（找不到卡 = 表造假 MAJOR）；消费面 = `checks/lib/gates/*`（无 lens 校验）。
-> 探索轮 = [模型可见语义卡](../issues/2026-11-18-model-visible-semantics.md)。
+> 探索轮 = [模型可见语义卡](../settled_issues/2026-11-18-model-visible-semantics.md)。
 
 ## 症状
 
@@ -67,3 +71,28 @@ D18/驾驶舱的 lens 覆盖表加在 critic skill 与 review 模板说明里，
 
 - review.md 缺覆盖表或格指向不存在/不匹配 evidence → 红；合法表绿；
 - 旧场按断代；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/review-contract.mjs",
+    "checks/lib/gates/node-gate-delivery-gate.mjs",
+    "tests/run/gates/review-contract.spec.mjs",
+    "packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/review-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 2 - 缺表 / 假引用 / lens 不匹配…（关闭 coverageIssues 后红）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/review-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/review-contract.spec.mjs"
+  }
+}
+```

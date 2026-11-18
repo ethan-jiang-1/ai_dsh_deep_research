@@ -35,7 +35,7 @@ import { fileURLToPath } from 'node:url';
 import { isMain } from '../../checks/lib/shared/cli-entry.mjs';
 import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../../checks/lib/channel/run-channel.mjs';
 import { profileGuardDecision } from '../../checks/lib/channel/profile-guard.mjs';
-import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey } from '../../checks/lib/channel/channel-cache.mjs';
+import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey, probeSourceFingerprint } from '../../checks/lib/channel/channel-cache.mjs';
 import { authenticate } from '../../checks/lib/shared/web-harness.mjs';
 
 export { guiUrlFromWebLog, runDriverVerdict };
@@ -361,14 +361,14 @@ if (noProbe) {
 if (!forceProbe && drift?.clean === true) {
   const cached = readProbeCache();
   const packId = packFingerprint(collectPackEntries(PACK_DIR));
-  const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: devShellFingerprint() })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
+  const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: `${devShellFingerprint()}:${probeSourceFingerprint(ROOT)}` })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
   const hit = probeCacheHit({ entry: cached, key, now: Date.now() });
   if (hit.hit) {
     const ready = await httpReady(state.url);
     if (ready.ok) {
       const ageS = Math.round((hit.ageMs ?? 0) / 1000);
-      const payload = { ...cached.payload, url: state.url, port: state.port, cached: true, cacheAgeMs: hit.ageMs, reason: `缓存命中（同一 pack 源 + runtime 构建 + dev 外壳；${ageS}s 前 GREEN）——--force-probe 可强制重验` };
-      console.log(`run-driver: 验证缓存命中（${ageS}s 前 GREEN，同一 pack 源 + runtime 构建 + dev 外壳；--force-probe 可强制重验）`);
+      const payload = { ...cached.payload, url: state.url, port: state.port, cached: true, cacheAgeMs: hit.ageMs, reason: `缓存命中（同一 pack 源 + runtime 构建 + dev 外壳 + 探针驱动源；${ageS}s 前 GREEN）——--force-probe 可强制重验` };
+      console.log(`run-driver: 验证缓存命中（${ageS}s 前 GREEN，同一 pack 源 + runtime 构建 + dev 外壳 + 探针驱动源；--force-probe 可强制重验）`);
       console.log('──────────────────────────── 呈交块（缓存）────────────────────────────');
       console.log(`通道 URL：${state.url}`);
       console.log(`浏览器面：GREEN（缓存，${ageS}s 前；HTTP 就绪 ${ready.detail}）`);
@@ -397,7 +397,7 @@ if (submitted) {
   // 只缓存 GREEN（键 = pack 指纹 + runtime 构建 + 断言参数；冷启动可复用）；红/未跑永不入缓存。
   try {
     const packId = packFingerprint(collectPackEntries(PACK_DIR));
-    const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: devShellFingerprint() })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
+    const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: `${devShellFingerprint()}:${probeSourceFingerprint(ROOT)}` })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
     writeFileSync(PROBE_CACHE, JSON.stringify({ key, at: new Date().toISOString(), level: v.level, payload }, null, 2));
   } catch {}
 }

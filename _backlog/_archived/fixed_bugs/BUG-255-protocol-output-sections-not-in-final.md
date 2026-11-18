@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-255：`protocol.output.sections` 只对 question.md 的投影对账——final.md 可以完全换一套节名
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
 >
-> 位置：[checks/lib/gates/protocol-audit-core.mjs](../../checks/lib/gates/protocol-audit-core.mjs) 第 160–176 行
+> 结论：protocol.output.sections→final H2 显式映射；final 缺节红
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-model-visible-semantics.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
+>
+> 位置：[checks/lib/gates/protocol-audit-core.mjs](../../../checks/lib/gates/protocol-audit-core.mjs) 第 160–176 行
 > （只检查 question.md §Protocol 的“输出”行含每个 section）；`protocol-core` 只校验 sections 非空/不重复。
-> 探索轮 = [模型可见语义卡](../issues/2026-11-18-model-visible-semantics.md)。
+> 探索轮 = [模型可见语义卡](../settled_issues/2026-11-18-model-visible-semantics.md)。
 
 ## 症状
 
@@ -72,3 +76,27 @@ grep -n '决策摘要\|备选与取舍' packages/deep-research-pack/content/temp
 
 - protocol.sections 在 final 可达；缺/多可按契约判红；合法模板绿；
 - 旧场按断代；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/protocol-audit-core.mjs",
+    "checks/run-gates/protocol-audit.mjs",
+    "tests/run/gates/protocol-core.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/protocol-core.spec.mjs",
+    "exit": 1,
+    "output": "not ok 35 - final 覆盖 protocol.output.sections 的映射节…（关闭 checkFinalSections 后红）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/protocol-core.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/protocol-core.spec.mjs"
+  }
+}
+```

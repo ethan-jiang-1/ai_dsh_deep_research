@@ -26,14 +26,16 @@
 | channel | `checks/lib/channel/runtime-clean-core` | `tests/run/channel/runtime-clean.spec.mjs` |
 | gates | `checks/lib/gates/acceptance-check` | `tests/run/gates/acceptance-check.spec.mjs` |
 | gates | `checks/lib/gates/bundle-date-sanity` | `tests/run/gates/bundle-date-sanity.spec.mjs` |
-| gates | `checks/lib/gates/evidence-audit-core` | `tests/run/gates/evidence-audit.spec.mjs`<br>`tests/run/gates/provenance.spec.mjs` |
+| gates | `checks/lib/gates/evidence-audit-core` | `tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/evidence-audit.spec.mjs`<br>`tests/run/gates/provenance.spec.mjs` |
+| gates | `checks/lib/gates/findings-core` | `tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/findings-contract.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-core` | `tests/run/gates/node-gate-delivery.spec.mjs`<br>`tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-delivery-gate` | `tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-reader-gate` | `tests/run/gates/node-gate-reader.spec.mjs` |
-| gates | `checks/lib/gates/node-gate-run-gates` | `tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs` |
+| gates | `checks/lib/gates/node-gate-run-gates` | `tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs` |
 | gates | `checks/lib/gates/protocol-audit-core` | `tests/run/gates/protocol-core.spec.mjs` |
 | gates | `checks/lib/gates/protocol-core` | `tests/pack/contract/content-coverage.spec.mjs`<br>`tests/pack/defaults/research-defaults.spec.mjs`<br>`tests/run/gates/protocol-core.spec.mjs` |
 | gates | `checks/lib/gates/provenance` | `tests/run/gates/provenance.spec.mjs` |
+| gates | `checks/lib/gates/review-contract` | `tests/run/gates/review-contract.spec.mjs` |
 | gates | `checks/lib/gates/run-source-node` | `tests/run/gates/run-context-node.spec.mjs` |
 | gates | `checks/lib/gates/schema-scan-core` | `tests/contracts/run-bundle-charter.spec.mjs`<br>`tests/run/gates/node-gate-contracts.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs`<br>`tests/run/gates/schema-scan.spec.mjs` |
 | gates | `checks/lib/gates/strategy-core` | `tests/run/gates/strategy-core.spec.mjs` |
@@ -95,6 +97,7 @@
 | shared | `checks/lib/shared/run-state` | `tests/run/shared/run-state.spec.mjs` |
 | shared | `checks/lib/shared/secret-scan` | `tests/run/shared/secret-scan.spec.mjs` |
 | shared | `checks/lib/shared/session-log` | `tests/run/gates/verdict-audit-fixture.spec.mjs`<br>`tests/run/shared/run-state.spec.mjs`<br>`tests/run/shared/session-log.spec.mjs` |
+| shared | `checks/lib/shared/skill-golden` | `tests/checks/shared/skill-golden.test.mjs` |
 | shared | `checks/lib/shared/startup-hint` | `tests/run/channel/startup-hint.spec.mjs` |
 | shared | `checks/lib/shared/web-banner` | `tests/checks/shared/boot-timer.test.mjs` |
 | shared | `checks/lib/shared/web-harness` | — |

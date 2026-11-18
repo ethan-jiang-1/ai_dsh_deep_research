@@ -6,6 +6,7 @@ import { finalVersionsIn } from '../shared/final-version.mjs'
 import { AUDIT_CONTRACT_DATE, isPreContract, readinessOfBundle, auditCriticalCount } from '../shared/node-gate-contracts.mjs'
 import { isHitl2Mention } from '../shared/node-gate-session-gates.mjs'
 import { receiptProblems } from '../shared/run-receipt.mjs'
+import { reviewContractIssues } from './review-contract.mjs'
 
 /**
  * 门A（交付完整性门，可导入；keyless；RFC 2026-10-07-delivery-criteria-mechanization）。
@@ -40,6 +41,7 @@ export function deliveryGate(bundleDir, auditDate) {
   const quickFactual = runType(bundleDir) === 'quick_factual'
   const delivered = versionFiles.length > 0
   const problems = []
+  if (hasReview) problems.push(...reviewContractIssues(bundleDir, { readinessPass: reviewPass }))
   // A1 的**升级路径**（BUG-039，2026-10-18 端到端实测）：readiness FAIL 且审查轮用尽时，手册与
   // brief-fold 的既定处置 = 「审查未决项已按上限升级到本次审阅——由你裁决」；此时 §Decisions 有
   // HITL2 拍板行（含代理代答 provenance）= 处置已显式记账 → 不判"越过审查前置"（原来只写在修正

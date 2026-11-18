@@ -27,17 +27,26 @@ test('parseJobsArg 对 NaN/Infinity/小数/0/负数/非数字 fail-loud 并点�
   }
 })
 
-test('parseE2eArgs：--case/--jobs 两种形状同判，空值/缺值/未知参数/位置参数 fail-loud（BUG-203）', () => {
-  assert.deepEqual(parseE2eArgs(['--case=a,b', '--jobs=2'], 4), { cases: ['a', 'b'], jobs: 2, help: false })
-  assert.deepEqual(parseE2eArgs(['--case', 'a,b', '--jobs', '2'], 4), { cases: ['a', 'b'], jobs: 2, help: false })
-  assert.deepEqual(parseE2eArgs(['--case=a', '--case=b'], 4), { cases: ['a', 'b'], jobs: 4, help: false })
-  assert.deepEqual(parseE2eArgs(['--help'], 4), { cases: [], jobs: 4, help: true })
+test('parseE2eArgs：--case/--gate/--jobs 两种形状同判，空值/缺值/未知参数/位置参数 fail-loud（BUG-203）', () => {
+  assert.deepEqual(parseE2eArgs(['--case=a,b', '--jobs=2'], 4), { cases: ['a', 'b'], gates: [], jobs: 2, help: false })
+  assert.deepEqual(parseE2eArgs(['--case', 'a,b', '--jobs', '2'], 4), { cases: ['a', 'b'], gates: [], jobs: 2, help: false })
+  assert.deepEqual(parseE2eArgs(['--case=a', '--case=b'], 4), { cases: ['a', 'b'], gates: [], jobs: 4, help: false })
+  assert.deepEqual(parseE2eArgs(['--help'], 4), { cases: [], gates: [], jobs: 4, help: true })
+  // --gate（2026-11-18 选择面）：形状与 --case 同判；与 --case 并存时两个列表各自独立收
+  assert.deepEqual(parseE2eArgs(['--gate=md-links'], 4), { cases: [], gates: ['md-links'], jobs: 4, help: false })
+  assert.deepEqual(parseE2eArgs(['--gate', 'a,b', '--jobs', '2'], 4), { cases: [], gates: ['a', 'b'], jobs: 2, help: false })
+  assert.deepEqual(parseE2eArgs(['--gate=a', '--gate=b', '--case=x'], 4), { cases: ['x'], gates: ['a', 'b'], jobs: 4, help: false })
 
   const invalid = [
     ['--case='],
     ['--case'],
     ['--case', '  '],
     ['--case', '--jobs=2'],
+    ['--gate='],
+    ['--gate'],
+    ['--gate', '  '],
+    ['--gate', '--jobs=2'],
+    ['--gate=a,,b'],
     ['--jobs='],
     ['--jobs'],
     ['--jobs', '--case=x'],

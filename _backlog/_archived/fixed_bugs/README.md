@@ -6,6 +6,16 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [250](BUG-250-evidence-lens-field-not-audited.md) | evidence 八字段的 lens 从未被审计 | （lens 必填 + topics 集合对账） | 2026-11-18 |
+| [251](BUG-251-evidence-quality-tier-value-domains.md) | quality/source_tier 只查在场，不查值域 | （quality/tier/publisher 闭集） | 2026-11-18 |
+| [252](BUG-252-findings-gap-four-states-ungated.md) | findings gap 四态只查非空 | （gap 四态 + 门 F） | 2026-11-18 |
+| [253](BUG-253-topics-scope-role-unknown-escapes-coverage.md) | scope_role 未知值静默逃出覆盖门 | （scope_role 四值先校验） | 2026-11-18 |
+| [254](BUG-254-review-lens-coverage-table-ungated.md) | review topic×lens 覆盖表无门禁 | （覆盖表结构判据） | 2026-11-18 |
+| [255](BUG-255-protocol-output-sections-not-in-final.md) | protocol.output.sections 只对 question 投影 | （protocol→final 映射对账） | 2026-11-18 |
+| [256](BUG-256-findings-lens-gaps-no-consumer.md) | findings lens_gaps 无消费者 | （lens_gaps 差集消费者） | 2026-11-18 |
+| [257](BUG-257-review-severity-not-cross-checked-with-audit.md) | review CRITICAL 与 audit/readiness 不交叉 | （severity 严格交叉 + resolved） | 2026-11-18 |
+| [258](BUG-258-snapshot-skill-body-not-covered.md) | snapshot B 只比 catalog，不比 SKILL.md 正文 | （SKILL.md sha256 金标准） | 2026-11-18 |
+| [259](BUG-259-probe-cache-key-excludes-driver.md) | probe 缓存键不含 run-driver/探针实现 | （缓存键 import 闭包） | 2026-11-18 |
 | [240](BUG-240-clean-room-module-leak-base-home-root.md) | clean-room 的 moduleLeakOf 从 home 根解析，profile 内仓内泄漏看不见 | （按 profile 解析 + 全 peer 探测） | 2026-11-18 |
 | [241](BUG-241-clean-room-leak-names-hardcoded.md) | 干净室只探测 3 个包名，新增 peer 不覆盖 | （peer 全量派生 + 三入口共用） | 2026-11-18 |
 | [242](BUG-242-run-driver-profile-flag-bypasses-guard.md) | run-driver 守卫只看 env/default，不看 --profile | （判实际 --profile） | 2026-11-18 |

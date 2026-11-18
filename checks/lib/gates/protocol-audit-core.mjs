@@ -37,6 +37,15 @@ const isStringArray = (value) => Array.isArray(value) && value.every((item) => t
 /** 是否要求本 bundle 带 protocol.json（CLI 与测试共用这一份）：
  *  `forced` 强制；无 run.md = 旧 bundle；交付回执早于契约落地时刻 = legacy（同日早场，BUG-052）；
  *  其余按 epoch 日期；无 acceptedAt 可依 → 从严（不许同日全豁免）。 */
+/** protocol.output.sections → final 的中文 H2 映射（单一正本；未列出的 section 用原名）。 */
+export const FINAL_SECTION_OF = Object.freeze({
+  decision: '决策摘要',
+  options: '备选与取舍',
+  criteria: '关键依据',
+  tradeoffs: '备选与取舍',
+  risks: '目前不能判断',
+})
+
 export function requiredByProtocolContract({ hasRunMd = true, epoch = null, acceptedAt = null, forced = false } = {}) {
   if (forced) return true
   if (!hasRunMd) return false
@@ -52,6 +61,7 @@ export function evaluateBundle(input) {
     planText = '',
     topicsText = '',
     auditText = '',
+    finalText = '',
     hasSnapshot = false,
     snapshot = null,
     snapshots = null,
@@ -65,6 +75,7 @@ export function evaluateBundle(input) {
     ...shape,
     ...checkEffortContract(protocol, planText, topicsText),
     ...checkProjection(protocol, questionText),
+    ...checkFinalSections(protocol, finalText),
     ...checkStrategy(protocol, planText, topicsText),
     ...checkProtocolStatus(protocol, questionText),
     ...checkPlanRef(protocol, planText),
@@ -380,4 +391,16 @@ export function cardLinesOf({ protocol, question, decision, authorizedWave = nul
 /** 卡文全文（\n 连接）。 */
 export function cardTextOf(options) {
   return cardLinesOf(options).join('\n')
+}
+
+/** final 的 H2 集合必须覆盖 protocol.output.sections 的映射节（BUG-255；final 缺席 = 不判，交付门管在场）。 */
+export function checkFinalSections(protocol, finalText) {
+  if (String(finalText ?? '').trim() === '') return []
+  const headings = new Set([...String(finalText).matchAll(/^##\s+(.+)$/gm)].map((m) => m[1].trim()))
+  const issues = []
+  for (const section of protocol.output.sections) {
+    const expected = FINAL_SECTION_OF[section] ?? section
+    if (!headings.has(expected)) issues.push(red('final-sections', `final 缺 protocol.output.sections「${section}」对应的 H2「${expected}」`))
+  }
+  return issues
 }

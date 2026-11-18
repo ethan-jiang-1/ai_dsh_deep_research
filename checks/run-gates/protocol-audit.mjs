@@ -158,6 +158,14 @@ if (isMain(import.meta.url)) {
     planText: readIf(join(bundle, 'plan.md')),
     topicsText: readIf(join(bundle, 'topics.md')),
     auditText: readIf(join(bundle, 'protocol-audit.md')),
+    finalText: (() => {
+      const root = join(bundle, 'final.md')
+      if (existsSync(root)) return readIf(root)
+      const dir = join(bundle, 'final')
+      if (!existsSync(dir)) return ''
+      const versions = finalVersionsIn(dir)
+      return versions.length > 0 ? readIf(join(dir, `v${versions[versions.length - 1]}.md`)) : ''
+    })(),
     hasSnapshot,
     snapshot,
     snapshots,

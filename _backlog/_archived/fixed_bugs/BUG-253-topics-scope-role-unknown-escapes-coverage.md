@@ -1,17 +1,21 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-253：topics 的 `scope_role` 只消费 primary/comparison——未知/拼错角色静默逃出 L2 覆盖门
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
 >
-> 位置：[checks/lib/gates/node-gate-run-gates.mjs](../../checks/lib/gates/node-gate-run-gates.mjs) 第 99–128 行
+> 结论：scope_role 四值先校验再算覆盖；未知/大小写错红
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-model-visible-semantics.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
+>
+> 位置：[checks/lib/gates/node-gate-run-gates.mjs](../../../checks/lib/gates/node-gate-run-gates.mjs) 第 99–128 行
 > （`role === 'primary' || role === 'comparison'`）；模板/技能值域 =
 > `presets/lead/skills/research-brief/SKILL.md:59`（primary/synthesis/comparison/supporting）。
-> 探索轮 = [模型可见语义卡](../issues/2026-11-18-model-visible-semantics.md)。
+> 探索轮 = [模型可见语义卡](../settled_issues/2026-11-18-model-visible-semantics.md)。
 
 ## 症状
 
@@ -69,3 +73,28 @@ grep -n 'scope_role' packages/deep-research-pack/presets/lead/skills/research-br
 
 - 未知/大小写错 → 红；primary/comparison 必覆盖；supporting/synthesis 合法豁免；
 - 旧场按断代；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/findings-core.mjs",
+    "checks/lib/gates/node-gate-run-gates.mjs",
+    "tests/run/gates/findings-contract.spec.mjs",
+    "tests/pack/contract/template-contract.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 4 - scope_role 非法/大小写错 → 门 L 红…（关闭 scope_role 校验后红）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/findings-contract.spec.mjs"
+  }
+}
+```

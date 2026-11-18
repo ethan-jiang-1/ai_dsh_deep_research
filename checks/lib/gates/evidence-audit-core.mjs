@@ -11,6 +11,25 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { splitFrontmatter } from '../shared/frontmatter.mjs'
 import { provenanceOf, sha256OfFile } from './provenance.mjs'
+import { lensScanOf } from './protocol-core.mjs'
+
+/** evidence 八字段（模板/手册正本；BUG-250）：审计必须逐一消费，不允许“模板有键、审计没读”。 */
+export const EVIDENCE_FIELDS = Object.freeze(['source_url', 'retrieved_at', 'quality', 'found_by', 'supports', 'lens', 'source_tier', 'publisher'])
+/** 硬六字段（缺 = MAJOR）；source_tier/publisher 是软二（缺 = INFO 未分级，不否决有效性）。 */
+export const EVIDENCE_HARD_FIELDS = Object.freeze(['source_url', 'retrieved_at', 'quality', 'found_by', 'supports', 'lens'])
+/** quality 闭集（手册 A–D；BUG-251）。 */
+export const QUALITY_VALUES = Object.freeze(['A', 'B', 'C', 'D'])
+/** source_tier 闭集（primary/secondary/tertiary/weak；BUG-251）。 */
+export const TIER_VALUES = Object.freeze(['primary', 'secondary', 'tertiary', 'weak'])
+
+/** publisher 至少是 host.tld（localhost 例外）；纯主机名如 digital-strategy.ec.europa.eu 合法。 */
+export function isPublisherDomain(value) {
+  const v = String(value ?? '').trim()
+  if (v === 'localhost') return true
+  return /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/i.test(v)
+}
+
+const scalarOf = (value) => String(value ?? '').trim().replace(/^['"]|['"]$/g, '')
 
 /** 纯日志 reader：.jsonl 直读；.zstd 报线索后返回 null（跳过该文件，语料缺失偏红方向）。
  *  zstd CLI 解压由驱动壳注入，本模块零子进程。 */
@@ -189,6 +208,9 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = skipUnreadableL
   const evDir = join(bundleDir, 'evidence')
   const findings = []
   const evidence = []
+  // 本次 run 的 lens 集合（topics.md 的 `- lenses:` 行；缺席 = 不判越界，只判字段在场）。
+  const topicsPath = join(bundleDir, 'topics.md')
+  const topicsLenses = existsSync(topicsPath) ? lensScanOf(readFileSync(topicsPath, 'utf8')).ids : []
   if (existsSync(evDir)) {
     for (const f of readdirSync(evDir).filter((x) => x.endsWith('.md')).sort()) {
       const raw = readFileSync(join(evDir, f), 'utf8')
@@ -218,10 +240,26 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = skipUnreadableL
       }
       if (!fm) findings.push({ level: 'MAJOR', file: f, kind: '契约不符', detail: '无 frontmatter（硬五字段全缺）——存量散文式证据卡' })
       else {
-        for (const k of ['source_url', 'retrieved_at', 'quality', 'found_by', 'supports']) {
-          if (!fm[k]) findings.push({ level: 'MAJOR', file: f, kind: '契约不符', detail: `缺硬字段 ${k}` })
+        for (const k of EVIDENCE_HARD_FIELDS) {
+          if (!fm[k]) findings.push({ level: 'MAJOR', file: f, kind: '契约不符', detail: `缺字段 ${k}` })
         }
         if (!fm.source_tier || !fm.publisher) findings.push({ level: 'INFO', file: f, kind: '未分级', detail: '软二字段（source_tier/publisher）缺失' })
+        const quality = scalarOf(fm.quality)
+        if (quality !== '' && !QUALITY_VALUES.includes(quality)) {
+          findings.push({ level: 'MAJOR', file: f, kind: '值域非法', detail: `quality=${quality} ∉ {${QUALITY_VALUES.join('/')}}` })
+        }
+        const tier = scalarOf(fm.source_tier)
+        if (tier !== '' && !TIER_VALUES.includes(tier)) {
+          findings.push({ level: 'MAJOR', file: f, kind: '值域非法', detail: `source_tier=${tier} ∉ {${TIER_VALUES.join('/')}}` })
+        }
+        const publisher = scalarOf(fm.publisher)
+        if (publisher !== '' && !isPublisherDomain(publisher)) {
+          findings.push({ level: 'MAJOR', file: f, kind: '值域非法', detail: `publisher=${publisher} 不是注册域（host.tld；localhost 例外）` })
+        }
+        const lens = scalarOf(fm.lens)
+        if (lens !== '' && topicsLenses.length > 0 && !topicsLenses.includes(lens)) {
+          findings.push({ level: 'MAJOR', file: f, kind: 'lens 越界', detail: `lens=${lens} 不在 topics.md 的 lenses 集合（${topicsLenses.join('/')}）` })
+        }
       }
       evidence.push(rec)
     }

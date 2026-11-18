@@ -1,17 +1,17 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-258：snapshot B 只比 skill-catalog，不比 SKILL.md 正文——skill 文案回归不会被任何回放抓到
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：修复就绪（自授权 P2：测试覆盖）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）— 结论：SKILL.md 正文 sha256 金标准 + 重录工具；快照 B 边界写清；去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-model-visible-semantics.md)；审查：agent — 红证回放 + 全量 verify/test + pack.e2e
 >
-> 位置：[checks/lib/shared/replay-request.mjs](../../checks/lib/shared/replay-request.mjs) 第 95 行
+> 位置：[checks/lib/shared/replay-request.mjs](../../../checks/lib/shared/replay-request.mjs) 第 95 行
 > （`JUDGED_KINDS = system-prompt / agent-instructions / skill-catalog / runtime-context / time-context`）；
-> 文档边界 = [snapshots/README.md](../../snapshots/README.md) 第 17/22 行（“skill 目录”）。
-> 探索轮 = [模型可见语义卡](../issues/2026-11-18-model-visible-semantics.md)。
+> 文档边界 = [snapshots/README.md](../../../snapshots/README.md) 第 17/22 行（“skill 目录”）。
+> 探索轮 = [模型可见语义卡](../settled_issues/2026-11-18-model-visible-semantics.md)。
 
 ## 症状
 
@@ -66,3 +66,31 @@ B 的比对面来自 **request injections**（catalog 是注入面），skill �
 
 - skill 正文有金标准/哈希，正文变化 → 红；还原绿；
 - 不把 catalog 与正文混为一份；`pnpm test` / snapshot-replay 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/shared/skill-golden.mjs",
+    "tools/record/record-skill-golden.mjs",
+    "tests/checks/shared/skill-golden.test.mjs",
+    "tests/fixtures/skill-golden/manifest.json",
+    "snapshots/README.md",
+    "tests/fixtures/README.md",
+    "tools/README.md"
+  ],
+  "red": {
+    "command": "node --test tests/checks/shared/skill-golden.test.mjs",
+    "exit": 1,
+    "output": "not ok 1 - skill 正文 = 金标准哈希…（篡改 manifest 哈希后红）"
+  },
+  "green": {
+    "command": "node --test tests/checks/shared/skill-golden.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/shared/skill-golden.test.mjs"
+  }
+}
+```

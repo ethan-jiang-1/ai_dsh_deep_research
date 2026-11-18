@@ -1,16 +1,20 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-256：findings 的 `lens_gaps` 没有任何消费者——空/假 gap 表不影响任何门
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
+>
+> 结论：findings lens_gaps 必填且与 topics−evidence 差集一致；门 F
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-model-visible-semantics.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
 >
 > 位置：`packages/deep-research-pack/content/templates/run/findings.md:9`（`lens_gaps:`）；
 > 消费面 = `checks/lib/gates/*` / `checks/run-gates/*`（无 `lens_gaps` 解析）。
-> 探索轮 = [模型可见语义卡](../issues/2026-11-18-model-visible-semantics.md)。
+> 探索轮 = [模型可见语义卡](../settled_issues/2026-11-18-model-visible-semantics.md)。
 
 ## 症状
 
@@ -71,3 +75,29 @@ grep -rn 'lens_gaps' checks packages/deep-research-pack/src --include='*.mjs' --
 
 - 有 lens 的 run 的 findings lens_gaps 与 topics/evidence 对账；缺/假 → 红；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/findings-core.mjs",
+    "checks/lib/gates/node-gate-run-gates.mjs",
+    "checks/run-gates/node-gate.mjs",
+    "checks/lib/gates/node-gate-core.mjs",
+    "tests/run/gates/findings-contract.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 2 / not ok 3 - lens_gaps 空列表与差集不一致…（关闭 lens_gaps 检查后红）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/findings-contract.spec.mjs"
+  }
+}
+```

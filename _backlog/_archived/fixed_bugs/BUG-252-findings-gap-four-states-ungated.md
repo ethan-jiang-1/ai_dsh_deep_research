@@ -1,17 +1,21 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-252：findings 的 `gap` 四态只查“有个非空值”——`gap: maybe` 照样过
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
 >
-> 位置：[tests/pack/contract/template-contract.spec.mjs](../../tests/pack/contract/template-contract.spec.mjs) 第 35 行
+> 结论：gap 四态进 findings-core + 门 F；未知状态红
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-model-visible-semantics.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
+>
+> 位置：[tests/pack/contract/template-contract.spec.mjs](../../../tests/pack/contract/template-contract.spec.mjs) 第 35 行
 > （`/^-\s*gap\s*[:：]\s*\S+/m`）；模板 = `content/templates/run/findings.md:10`
 > （`gap: supported | needs_search | contradicted | insufficient`）。
-> 探索轮 = [模型可见语义卡](../issues/2026-11-18-model-visible-semantics.md)。
+> 探索轮 = [模型可见语义卡](../settled_issues/2026-11-18-model-visible-semantics.md)。
 
 ## 症状
 
@@ -65,3 +69,30 @@ grep -rn "gap" checks/lib/gates checks/run-gates | head    # 无四态校验
 
 - 非四态 gap → 红；四态合法 → 绿；
 - 旧场不误伤；`pnpm test` 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/findings-core.mjs",
+    "checks/lib/gates/node-gate-run-gates.mjs",
+    "checks/run-gates/node-gate.mjs",
+    "checks/lib/gates/node-gate-core.mjs",
+    "tests/run/gates/findings-contract.spec.mjs",
+    "tests/pack/contract/template-contract.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 2 - gap: maybe…（关闭 gap 四态检查后，gap「maybe」用例红）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/findings-contract.spec.mjs"
+  }
+}
+```

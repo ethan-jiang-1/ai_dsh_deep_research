@@ -1,20 +1,20 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-11-18
 ---
 
 # 推敲：模型可见语义的「发了但没验」面（2026-11-18 第 5 轮）
 
-> 立卡：2026-11-18 ｜ 状态：推敲中（第一轮已跑；10 张卡 250–259） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-18 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是｜ 结论：10 卡（250–259）全部修复归档；模板字段/值域/review/protocol/skill 正文/缓存键接上消费者 ｜ 审查：agent — 红证回放 + 全量 verify/test/pack.e2e ｜ 可关闭：是（2026-11-18）
 >
 > **一句话**：路径/集合/安装面的 bug 已经修完；这一轮专挑**模型可见但机械判据薄**的语义面：
 > 模板声明的字段有没有消费者、值域有没有闭集、critic 的覆盖表有没有门、skill 正文有没有金标准、
 > probe 缓存键有没有覆盖探针自己。10 张卡，只报不修。
 >
-> 前序 = [命名空间搬家](../_archived/settled_issues/2026-11-17-exploratory-namespace-move.md) ·
-> [运行时/开发边界](../_archived/settled_issues/2026-11-17-runtime-dev-boundary.md) ·
-> [运行时依赖/安装](../_archived/settled_issues/2026-11-17-runtime-deps-install-boundary.md) ·
-> [搬家残差 II](../_archived/settled_issues/2026-11-18-move-residuals.md)（209–249 已修复归档）。
+> 前序 = [命名空间搬家](2026-11-17-exploratory-namespace-move.md) ·
+> [运行时/开发边界](2026-11-17-runtime-dev-boundary.md) ·
+> [运行时依赖/安装](2026-11-17-runtime-deps-install-boundary.md) ·
+> [搬家残差 II](2026-11-18-move-residuals.md)（209–249 已修复归档）。
 
 **问题与期望结果：** 过去几轮把“发布物/路径/依赖/安装”收得很紧，但**模板/技能/审计**里还有一类
 “声明了但没人验”的语义：
@@ -57,16 +57,16 @@ opened: 2026-11-18
 
 | 卡 | 层 | 严重级 | 状态 | 一句话 |
 |---|---|---|---|---|
-| [250](../bugs/BUG-250-evidence-lens-field-not-audited.md) | 字段 | P2 | 等人拍板 | evidence 八字段里的 `lens` 从未被审计 |
-| [251](../bugs/BUG-251-evidence-quality-tier-value-domains.md) | 值域 | P2 | 等人拍板 | `quality: Z` / `source_tier: foo` 只查在场 |
-| [252](../bugs/BUG-252-findings-gap-four-states-ungated.md) | 值域 | P2 | 等人拍板 | findings `gap` 四态只查非空 |
-| [253](../bugs/BUG-253-topics-scope-role-unknown-escapes-coverage.md) | 值域 | P2 | 等人拍板 | `scope_role` 拼错静默逃出 L2 覆盖 |
-| [254](../bugs/BUG-254-review-lens-coverage-table-ungated.md) | review | P2 | 等人拍板 | critic 要求 topic×lens 表，门禁不读 |
-| [255](../bugs/BUG-255-protocol-output-sections-not-in-final.md) | 输出 | P2 | 等人拍板 | `output.sections` 只对 question 投影，final 可换节 |
-| [256](../bugs/BUG-256-findings-lens-gaps-no-consumer.md) | lens | P2 | 等人拍板 | findings `lens_gaps` 无消费者 |
-| [257](../bugs/BUG-257-review-severity-not-cross-checked-with-audit.md) | review | P2 | 等人拍板 | review CRITICAL/MAJOR 与 audit.md 不交叉 |
-| [258](../bugs/BUG-258-snapshot-skill-body-not-covered.md) | 覆盖 | P2 | 修复就绪 | snapshot B 只比 skill-catalog，不比正文 |
-| [259](../bugs/BUG-259-probe-cache-key-excludes-driver.md) | 运行态 | P2 | 修复就绪 | probe 缓存键不含 run-driver/探针实现 |
+| [250](../fixed_bugs/BUG-250-evidence-lens-field-not-audited.md) | 字段 | P2 | 等人拍板 | evidence 八字段里的 `lens` 从未被审计 |
+| [251](../fixed_bugs/BUG-251-evidence-quality-tier-value-domains.md) | 值域 | P2 | 等人拍板 | `quality: Z` / `source_tier: foo` 只查在场 |
+| [252](../fixed_bugs/BUG-252-findings-gap-four-states-ungated.md) | 值域 | P2 | 等人拍板 | findings `gap` 四态只查非空 |
+| [253](../fixed_bugs/BUG-253-topics-scope-role-unknown-escapes-coverage.md) | 值域 | P2 | 等人拍板 | `scope_role` 拼错静默逃出 L2 覆盖 |
+| [254](../fixed_bugs/BUG-254-review-lens-coverage-table-ungated.md) | review | P2 | 等人拍板 | critic 要求 topic×lens 表，门禁不读 |
+| [255](../fixed_bugs/BUG-255-protocol-output-sections-not-in-final.md) | 输出 | P2 | 等人拍板 | `output.sections` 只对 question 投影，final 可换节 |
+| [256](../fixed_bugs/BUG-256-findings-lens-gaps-no-consumer.md) | lens | P2 | 等人拍板 | findings `lens_gaps` 无消费者 |
+| [257](../fixed_bugs/BUG-257-review-severity-not-cross-checked-with-audit.md) | review | P2 | 等人拍板 | review CRITICAL/MAJOR 与 audit.md 不交叉 |
+| [258](../fixed_bugs/BUG-258-snapshot-skill-body-not-covered.md) | 覆盖 | P2 | 修复就绪 | snapshot B 只比 skill-catalog，不比正文 |
+| [259](../fixed_bugs/BUG-259-probe-cache-key-excludes-driver.md) | 运行态 | P2 | 修复就绪 | probe 缓存键不含 run-driver/探针实现 |
 
 ## 基线与负对照
 
@@ -109,6 +109,28 @@ opened: 2026-11-18
   `pack.e2e` 86 条目绿。关闭。
 - **运行时缓存 / 并发**：259 是唯一新卡（probe 缓存键不含 driver）；profile 守卫/直起已由 237/242/243 覆盖。
 - 本轮 10 张卡（250–259）即完整；生成/账本/locale 面没有为凑数开卡。
+
+## 批修复（2026-11-18 用户放行 250–257）
+
+用户决定：模板/技能声明的字段全部按机械契约；protocol 为骨架 + 显式最终映射；review severity
+严格交叉；skill 正文 hash 清单；probe 缓存键 import 闭包；旧场只严新交付。
+
+| 阶段 | 内容 | 卡 |
+|---|---|---|
+| P1 | evidence 八字段：lens 入审计 + topics 集合对账；quality/source_tier/publisher 闭集 | 250/251 |
+| P2 | findings gap 四态 + lens_gaps 差集；topics scope_role 四值闭集 | 252/256/253 |
+| P3 | review 覆盖表结构判据 + CRITICAL 与 readiness 交叉（resolved-critical） | 254/257 |
+| P4 | protocol.output.sections → final H2 显式映射 | 255 |
+| P5 | skill 正文 sha256 金标准 + 重录工具 | 258 |
+| P6 | probe 缓存键 = run-driver import 闭包 | 259 |
+
+## 收口（2026-11-18）
+
+10 张卡全部 `已修` 并归档到 [fixed 池](../fixed_bugs/README.md)；批 Note =
+[2026-11-18-model-visible-semantics](../../../notes/implemented/2026-11-18-model-visible-semantics.md)。
+evidence 八字段/值域、findings gap/lens_gaps、scope_role、review 覆盖表/severity、
+protocol→final 映射、skill 正文 hash、probe 缓存键全部接上机械消费者。
+`pnpm verify` / `pnpm test` / `pack.e2e` 绿；红证回放见各卡 `fix-evidence`。
 
 ## 验收标准
 

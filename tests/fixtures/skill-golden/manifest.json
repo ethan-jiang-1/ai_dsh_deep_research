@@ -1,0 +1,65 @@
+{
+  "generatedBy": "tools/record/record-skill-golden.mjs",
+  "skills": [
+    {
+      "path": "packages/deep-research-pack/presets/analyst/skills/evidence-extraction/SKILL.md",
+      "sha256": "83b6a9b86d977ba1a1b6f22e06860e3864312d29d711db62fb292216a5cf098d"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/analyst/skills/wave-execution/SKILL.md",
+      "sha256": "2d0ae0e869feb67da16e0d2c8d026445cbb02fb233f418a0b400bee9db30abf7"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md",
+      "sha256": "48a88707215111ede0b078c8419daab1076adda45aefcc6e05734a5077bf4ba2"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/critic/skills/claim-verdict/SKILL.md",
+      "sha256": "81659530e326452d23b35e67fb33f8d1c37401b2b5bc803418b2f36871ba0235"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md",
+      "sha256": "7be02d96b6362753f2902e0a247ab2e902837ceff3324dbadb93978bedecadb9"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md",
+      "sha256": "3f114d7080574883e58368cbaeab150f94f426721fbac6ebf76bca59ff386d21"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/lead/skills/reader-final/SKILL.md",
+      "sha256": "975c7e8c641f024936030ea64b1f55282a00fc416bdebb61101ec704e17d6619"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/lead/skills/rerun-triage/SKILL.md",
+      "sha256": "bb684337be819bbafa64e08d85f8fbc33a8d938256ce617131a83300cc13778d"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md",
+      "sha256": "0301a51f1fd1d5248965cb7f36e5152cd5da4c5940bddb9a4c1a85ccec7b043b"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md",
+      "sha256": "b743f0d38bd060c39f38f39f9d2fb6b7b6ccf01a54b8642dc97fd146a5b19cab"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md",
+      "sha256": "67bb4e1e5da7b7efb42fc14abdbe613c1983b25134ab22ecc5a288bbecd77849"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md",
+      "sha256": "9e023edbc93eb6e0aba6b07b5a18ae959390aa36b1440966eb7bb200bb750773"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/method-editor/skills/method-from-run/SKILL.md",
+      "sha256": "11885fcfa7961f8b69e94bc19ac9ca6664ac010e6795a9530cbe2c24f43a2a0e"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/method-editor/skills/method-interview/SKILL.md",
+      "sha256": "7339fc95ce6285de20894da45b577e3520f0f277525a2c8211cc52802ccf96b2"
+    },
+    {
+      "path": "packages/deep-research-pack/presets/scout/skills/lead-mapping/SKILL.md",
+      "sha256": "586adfc08b4861fd46dbe4ec8bd2f25b63b2ae0f04c28fda26d1bd4519b36b31"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { contractEpochOf, runSchemaOf, runType } from './schema-scan-core.mjs'
 import { finalVersionsIn } from '../shared/final-version.mjs'
 import { HEADING_CONTRACT_DATE, LEADS_CONTRACT_DATE, PRE_CONTRACT_NOTE, VERSION_CONTRACT_DATE, decisionsLines, isPreContract } from '../shared/node-gate-contracts.mjs'
+import { findingsContractIssues, SCOPE_ROLES } from './findings-core.mjs'
 
 /**
  * 门 L（leads 交接门，可导入；keyless）。断代日期可注入（tests——夹具 mtime 不可靠）。
@@ -118,7 +119,11 @@ export function leadsGate(bundleDir, leadsDate) {
       const idM = s.heading.match(/^(T\d+)\b/)
       if (!idM) continue
       const roleM = s.body.join('\n').match(/^\s*-\s*scope_role[:：]\s*(\S+)/m)
-      const role = roleM ? roleM[1].toLowerCase() : ''
+      const rawRole = roleM ? roleM[1] : ''
+      const role = rawRole.toLowerCase()
+      if (rawRole !== '' && !SCOPE_ROLES.includes(rawRole)) {
+        problems.push(`topics ${idM[1]} 的 scope_role「${rawRole}」非法（合法 = ${SCOPE_ROLES.join('/')}；未知值不得静默当 supporting）`)
+      }
       if (role === 'primary' || role === 'comparison') {
         requiredCount++
         if (!covered.has(idM[1])) gaps.push(idM[1])
@@ -259,4 +264,15 @@ export function headingGate(bundleDir, headingDate) {
       '修正 = lead 收口去重或重跑该节（本门只守 verbatim 标题重复，不防近似改写/正文循环/无标题退化）' +
       (pre ? PRE_CONTRACT_NOTE : ''),
   }
+}
+
+/**
+ * 门 F（findings 契约；BUG-252/256）：gap 四态 + lens_gaps 显式且与 topics/evidence 差集一致。
+ * findings.md 缺席 = N/A（在场级归 schema-scan，不越界双判）。
+ */
+export function findingsGate(bundleDir) {
+  const issues = findingsContractIssues(bundleDir)
+  if (issues === null) return { status: 'N/A', detail: 'findings.md 不在场——门 F 无对象（在场级归 schema-scan）' }
+  if (issues.length > 0) return { status: 'RED', detail: issues.slice(0, 8).join('；') }
+  return { status: 'PASS', detail: 'gap 四态合法；lens_gaps 与 topics/evidence 差集一致' }
 }

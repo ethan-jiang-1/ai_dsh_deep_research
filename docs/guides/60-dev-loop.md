@@ -98,7 +98,7 @@
 | **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../design/40-research-cockpit.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` + **可见文案 zh/en 键**（任何界面文本 day-one 双语，步骤 = [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)） | `pnpm build` → `client-load.entry`（改挂起显性化再跑 `client-hitl.entry`） | L0 + client-load.entry | 同上 | 真浏览器断言全绿 |
 | 改 `src/lib/` 纯函数 / 类型面（pack 两半的编译面） | 对应 `src/lib` / `src/client` 类型位 | `pnpm typecheck` → `pnpm test`（typecheck 前置 = vendor 构建产物在场） | L0 + typecheck | 同上 | typecheck + 对应测试绿 |
 | **新增/修改机器判据**（门禁/审计/交付决定从散文里判值） | 设计卡 `## 判据形状` + 判据测试（不变量+矩阵） | 先写变异矩阵（红）→ 实现 → L0 | L0 + 判据测试 | 判据形状 + 反证 | 歧义会红 + 矩阵绿 |
-| 加 / 改机械门禁 | `context.mjs` gates 数组 + 该域 `verify/gates/<域>.mjs` + `evaluation.md` §L0 台账（案例表有增删再动 `gates.e2e.mjs`） | **注入回归红 → 还原 → 绿** → gates.e2e | L0 + gates.e2e | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + gates.e2e 绿 |
+| 加 / 改机械门禁 | `context.mjs` gates 数组 + 该域 `verify/gates/<域>.mjs` + `evaluation.md` §L0 台账（案例表有增删再动 `gates.e2e.mjs`） | **注入回归红 → 还原 → 绿** → `gates.e2e --gate=<改的门禁>` | L0 + `gates.e2e --gate=<改的门禁>`（日常只跑该门禁的案例；全量 = 发布档，见下） | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + `--gate` 绿 |
 | 改 run 通道工具 / 审计门（run-driver / boot-run / watch-run / hitl-answer / run-dashboard / evidence-audit / node-gate / schema-scan / snapshot-replay） | 对应 `checks/` / `tools/` / `probes/` 脚本 | — | L0 + 对应 `tests/<domain>/*.spec.mjs` 契约测试必跑（用例即其反证记录） | 判据变更才写 Note | 对应契约测试绿 |
 | 改 checks/lib 支撑模块 / dev 基建本体（`lib/*.mjs`、env.sh、render-overlay） | 支撑模块 + 其**全部消费方**（消费面 grep：roles.mjs 的角色枚举消费方、render-overlay → `overlay-fresh`、run-state → watch-run/hitl-answer/run-dashboard） | 消费方门禁在同 diff 复跑 | L0 + lib 对应契约测试 | 判据变更才写 Note | 消费方门禁与契约测试绿 |
 | 查/加探针（真实边界单点证据） | `probes/` 头注 + `probes/INDEX.generated.md` | `node probes/_index.mjs --write` → 跑探针本体 | L0 + 目标探针（真模型档需凭据） | 头注/索引变更才写 | 索引门绿 + 探针红→绿 |
@@ -113,6 +113,20 @@
 > skill 正文不进组装请求，其证据 = L1 可见面 + L4-lite 行为。有意变更 → 红 = 已捕获：走重录场景
 > （真模型档，同 diff 更新 `snapshot.json` 的 source 身份）或 `--update-expected` 重写金标准 + 人审
 > ——金标准只许重写，不许放宽比对或归一化凑绿（fix fixtures, not normalizers）。
+
+**门禁分层（日常轻、发布重——本层是"跑什么/什么时候跑"的唯一 owner）**：
+
+| 层 | 何时 | 跑什么 | 量级 |
+|---|---|---|---|
+| 日常 commit | 每次 commit（pre-commit hook） | `git diff --check` + `pnpm verify` + `pnpm test` | ~15s |
+| 日常改门禁 | 动了 `checks/verify/gates/**`、`context.mjs`、`gates-cases.mjs` | `node checks/smoke/gates.e2e.mjs --gate=<改的门禁>`（只跑该门禁的案例；`--case` 可再收窄） | 十几秒 |
+| 发布 / nightly | 发布候选、nightly CI | 全量门禁自测 + 干净室入口（pack.e2e / cold-start / lifecycle / release）+ `release-check` | 分钟级，可接受 |
+
+- **日常不跑发布档**：不跑全量 `gates.e2e`、不跑 `*.entry.mjs`、不为一次 commit 等 CI；重档不是"更彻底的自审"，
+  是证据面换档——日常证"改动面没破"，发布证"全量面仍绿"。
+- 改门禁时的 `--gate` 就是日常档：案例只断言目标门禁，所以跑该门禁的案例即可；全量留给发布门。
+- 发布档的存在不改变日常判定：`pnpm verify` + `pnpm test` 绿 = 可提交（hook 同款）。
+
 
 **值级改动**（只改一个配置**值**，如超时/阈值/开关）：本仓**没有值级断言**——门禁只证结构，L1 只证
 "还能挂载"。所以 done 只能证到"仍挂载 + 文档同步"；要可证伪就**同 diff 补一条断言**（进 `tests/` 或
@@ -135,7 +149,7 @@ pnpm test:e2e                         # 真进程车道（registry lane=e2e，�
 pnpm test:entry                       # 真浏览器/profile/tarball 车道（lane=entry）
 pnpm test:vendor                      # vendor 源码契约（组合层 + 设置 schema；根 tsconfig 的源映射，无需 vendor 构建）
 pnpm typecheck                        # pack 双半 TS 类型检查（tsc -b；CI deploy job 必跑——keyless job 不装 vendor 产物；本地前置 = vendor 构建产物在场，fresh clone 的 L0 不跑）
-node checks/smoke/gates.e2e.mjs    # 门禁自测（keyless：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组；改门禁逻辑必跑；迭代可用 --case=<id>）
+node checks/smoke/gates.e2e.mjs --gate=<改的门禁>    # 门禁自测（keyless：临时副本注入回归经真实 verify 入口点名报红 + 零注入对照组；**日常改门禁只跑该门禁的案例**；--case=<id> 再收窄；省略两个 flag = 全量 = 发布/nightly 档）
 node tools/record/render-overlay.mjs            # 生成物：从 pack 渲染 tools/record/research.overlay.yml（改 pack 后必跑，且**必须先于 L1**）
 source tools/env.sh                     # ⚠ 双 home + 裸 dsh 拦截（DSH_HOME=runtime/harness-home）；下列 L1/L2 必须先 source，否则脚本自拒 exit 2
 node checks/smoke/preset.e2e.mjs         # L1 预检（keyless）；DSH_SMOKE_REAL=1 真挂载档（keyless：roster+逐角色建会话+skills 隔离；--profile <p> --no-patch 切安装域通道）

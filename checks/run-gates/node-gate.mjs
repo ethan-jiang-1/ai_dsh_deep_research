@@ -113,16 +113,18 @@ if (isMain(import.meta.url)) {
 | ③ §Decisions 拍板行 | ${gates.hitl2Row.status} | ${gates.hitl2Row.detail} |
 | ② present 声明 | ${gates.present.status} | ${gates.present.detail} |
 | L leads 交接 | ${gates.leads.status} | ${gates.leads.detail} |
+| F findings 契约 | ${gates.findings.status} | ${gates.findings.detail} |
 | ④ 版本记账 | ${gates.version.status} | ${gates.version.detail} |
 | R 标题重复 | ${gates.degeneration.status} | ${gates.degeneration.detail} |
 | A 交付完整性 | ${gates.delivery.status} | ${gates.delivery.detail} |
 | C 读者版合同 | ${gates.reader.status} | ${gates.reader.detail} |
 `
-  console.log(`node-gate: ${basename(bundleDir)} ｜ 门① HITL 锚点 = ${gates.hitlAsk.status} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status} ｜ 门④ 版本记账 = ${gates.version.status} ｜ 门R 标题重复 = ${gates.degeneration.status} ｜ 门A 交付完整性 = ${gates.delivery.status} ｜ 门C 读者版合同 = ${gates.reader.status}`)
+  console.log(`node-gate: ${basename(bundleDir)} ｜ 门① HITL 锚点 = ${gates.hitlAsk.status} ｜ 门③ §Decisions 拍板行 = ${gates.hitl2Row.status} ｜ 门② present 声明 = ${gates.present.status} ｜ 门L leads 交接 = ${gates.leads.status} ｜ 门F findings 契约 = ${gates.findings.status} ｜ 门④ 版本记账 = ${gates.version.status} ｜ 门R 标题重复 = ${gates.degeneration.status} ｜ 门A 交付完整性 = ${gates.delivery.status} ｜ 门C 读者版合同 = ${gates.reader.status}`)
   console.log(`  ① ${gates.hitlAsk.detail}`)
   console.log(`  ③ ${gates.hitl2Row.detail}`)
   console.log(`  ② ${gates.present.detail}`)
   console.log(`  L ${gates.leads.detail}`)
+  console.log(`  F ${gates.findings.detail}`)
   console.log(`  ④ ${gates.version.detail}`)
   console.log(`  R ${gates.degeneration.detail}`)
   console.log(`  A ${gates.delivery.detail}`)

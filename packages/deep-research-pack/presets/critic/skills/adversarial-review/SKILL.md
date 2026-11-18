@@ -150,7 +150,9 @@ PASS 放宽判据**（readiness 判据不降同款），也不得静默略过未
 - [ ] （有 protocol.json 时）Protocol 兑现：shape / source / deviations / 版本一致
 ```
 
-**有 lens 时**，终局块另附覆盖表（`—` 只在同行写了 `gap：` / `n/a：` 时合法）：
+**有 lens 时**，终局块另附覆盖表（表头必须是 `topic` + 至少一个 lens 列；每个 lens-bearing topic
+必须有一行；`—` 只在同行写了 `gap：` / `n/a：` 时合法；格里引用 `evidence/*.md` 时该卡
+`lens` 必须等于所在列）：
 
 ```
 ## 覆盖表（topic × lens）
@@ -160,6 +162,9 @@ PASS 放宽判据**（readiness 判据不降同款），也不得静默略过未
 ```
 
 **PASS 只在零 CRITICAL 且判据全勾时给出**；拿不准的项标出来让主编决定，不要替主编放水。
+若历史轮的 CRITICAL 已在本轮闭合、但仍留在 review.md 的 CRITICAL 节（可追溯），在终局块写一行
+`resolved-critical: C1, C2`（全部闭合写 `all`）——门禁只认这条结构化解释；PASS + 未解释的
+`- C#` = 红（散文里的“已闭合”不算）。
 
 ## 反模式
 

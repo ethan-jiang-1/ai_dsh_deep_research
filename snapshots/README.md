@@ -25,6 +25,8 @@ GUI 端口、harness checkout 根、策略句工作区根、会话工作目录�
 
 ## 证据边界
 
+**skill 正文（on-demand 加载的 SKILL.md）不在 B 的比对面**：B 比的是 skill-catalog（名称/描述/路径）。正文金标准 = [tests/fixtures/skill-golden/manifest.json](../tests/fixtures/skill-golden/manifest.json)（每份 SKILL.md 的 sha256；消费 = [skill-golden.test.mjs](../tests/checks/shared/skill-golden.test.mjs)，重录 = `node tools/record/record-skill-golden.mjs`）。改正文必须显式重录并把 diff 带进评审。
+
 固定模型流的回放证明的是：这份转录下的真实装配、循环、日志与已声明效果。它**不**向模型发请求，因此**不**证明真实模型会遵守新写的 persona 或 skill，也推不出未录制行为。真实模型行为由独立真模型档证据承担（[密钥与档位](../AGENTS.md)）。
 
 `ui.expected.md` 一类的期望文件只有在**独立编写**且被判据实际消费时才是 oracle；从回放渲染直接重写只是刷新金标准，必须人审，并且只许重写、不许放宽比对或加归一化凑绿。

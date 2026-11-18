@@ -413,6 +413,16 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/shared/skill-golden.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "skill-golden.test.mjs — skill 正文 sha256 金标准（BUG-258）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/shared/smoke-contract.test.mjs",
       "domain": "checks",
       "lane": "checks",
@@ -1743,6 +1753,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/run/gates/findings-contract.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "findings-contract.spec.mjs — findings gap 四态 / lens_gaps 消费者 / scope_role 闭集（BUG-252 / 256 / 253）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/run/gates/node-gate-contracts.spec.mjs",
       "domain": "run",
       "lane": "spec",
@@ -1850,6 +1870,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "readiness-declaration.spec.mjs — 结构化审查声明（D51）：门禁以 review/readiness.json 为准。",
       "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/review-contract.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "review-contract.spec.mjs — review 覆盖表与 severity 交叉（BUG-254 / 257）。",
+      "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
     {

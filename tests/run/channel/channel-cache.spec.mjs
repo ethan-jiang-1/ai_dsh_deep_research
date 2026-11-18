@@ -15,6 +15,7 @@ import {
   packFingerprint,
   probeCacheHit,
   probeCacheKey,
+  importClosureHash,
   readShippedCache,
   writeShippedCache,
 } from '../../../checks/lib/channel/channel-cache.mjs'
@@ -105,4 +106,28 @@ test('BUG-065 probeCacheKey：dev 外壳身份参与键（extra 不同 → miss�
     'dev 外壳指纹不同必须得到不同键',
   )
   assert.equal(probeCacheKey({ ...base, extra: '' }), 'any@f@r', '空 extra 不改变旧键')
+})
+
+// ── BUG-259：探针缓存键覆盖驱动 import 闭包 ─────────────────────────────────────
+// 负例留证 2026-11-18：BUG-259——从键里去掉驱动闭包或让 importClosureHash 不跟随相对 import → 用例红；还原 → 绿。
+test('import 闭包哈希：跟随相对 import/动态 import，内容变则变，同内容稳定（BUG-259）', () => {
+  const files = {
+    'tools/channel/run-driver.mjs': "import { x } from './a.mjs'\nconst y = await import('./b.js')\n",
+    'tools/channel/a.mjs': "export { z } from '../shared/c.mjs'\n",
+    'tools/channel/b.js': "import './d'\n",
+    'tools/channel/d.mjs': 'export const d = 1\n',
+    'tools/shared/c.mjs': 'export const z = 1\n',
+  }
+  const hashOf = (f) => importClosureHash({
+    root: '/r',
+    entry: 'tools/channel/run-driver.mjs',
+    read: (rel) => { if (!(rel in f)) throw new Error('missing'); return f[rel] },
+    exists: (rel) => rel in f,
+  })
+  const base = hashOf(files)
+  assert.equal(base, hashOf({ ...files }), '同内容稳定')
+  assert.notEqual(base, hashOf({ ...files, 'tools/shared/c.mjs': 'export const z = 2\n' }), '闭包内内容变 → 变')
+  assert.notEqual(base, hashOf({ ...files, 'tools/channel/a.mjs': files['tools/channel/a.mjs'] + '// x\n' }), '入口依赖变 → 变')
+  assert.notEqual(base, hashOf({ ...files, 'tools/channel/run-driver.mjs': files['tools/channel/run-driver.mjs'] + '// probe\n' }), '驱动自身变 → 变')
+  assert.equal(hashOf({ 'tools/channel/run-driver.mjs': '// no imports\n' }).length, 16)
 })

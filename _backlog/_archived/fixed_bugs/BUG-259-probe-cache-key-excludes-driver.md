@@ -1,16 +1,16 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-259：probe 缓存键只含 3 个 dev-shell 文件——run-driver 的探针逻辑变化仍命中旧 GREEN
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：修复就绪（自授权 P2：运行态缓存）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）— 结论：probe 缓存键 = run-driver 本地 import 闭包；驱动/缓存实现变即 miss；去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-model-visible-semantics.md)；审查：agent — 红证回放 + 全量 verify/test + pack.e2e
 >
-> 位置：[tools/channel/run-driver.mjs](../../tools/channel/run-driver.mjs) 第 54–78 行
-> （`PROBE_CACHE` / `DEV_SHELL_FILES`）；键实现 = [checks/lib/channel/channel-cache.mjs](../../checks/lib/channel/channel-cache.mjs)。
-> 探索轮 = [模型可见语义卡](../issues/2026-11-18-model-visible-semantics.md)。
+> 位置：[tools/channel/run-driver.mjs](../../../tools/channel/run-driver.mjs) 第 54–78 行
+> （`PROBE_CACHE` / `DEV_SHELL_FILES`）；键实现 = [checks/lib/channel/channel-cache.mjs](../../../checks/lib/channel/channel-cache.mjs)。
+> 探索轮 = [模型可见语义卡](../settled_issues/2026-11-18-model-visible-semantics.md)。
 
 ## 症状
 
@@ -72,3 +72,27 @@ grep -n 'DEV_SHELL_FILES' -A 5 tools/channel/run-driver.mjs
 
 - 改 run-driver/探针实现 → probe-cache miss（强制重验）；同 pack/runtime/驱动 → hit；
 - `--force-probe` 仍可用；`pnpm test` 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/channel/channel-cache.mjs",
+    "tools/channel/run-driver.mjs",
+    "tests/run/channel/channel-cache.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/channel/channel-cache.spec.mjs",
+    "exit": 1,
+    "output": "not ok 1 - tests/run/channel/channel-cache.spec.mjs（关闭 import 闭包递归后用例红）"
+  },
+  "green": {
+    "command": "node --test tests/run/channel/channel-cache.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/channel/channel-cache.spec.mjs"
+  }
+}
+```

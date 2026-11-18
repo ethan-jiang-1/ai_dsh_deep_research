@@ -28,7 +28,7 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
   `修复就绪` = P1/P2 修复授权（P0/触面 → `等人拍板`）。
 - `待落地` 只选去向（`proposed` RFC / `implemented` Note），不写 implemented Note；收件/写入时机 =
   [notes/AGENTS.md](notes/AGENTS.md)；落地 = [guides/60](docs/guides/60-dev-loop.md)。
-- 审查/验收：机械不跳；语义自审按风险；用户按重要性出场；`审查：跳过` 不写成 verified。
+- 审查/验收：机械不跳；**日常 commit 链 = verify + tests（≈15s），不跑 gates.e2e / 干净室入口 / 发布档，也不等 CI；改门禁只跑该门禁的案例，全量只在发布/nightly**（分层 = [guides/60](docs/guides/60-dev-loop.md) §门禁分层）；语义自审按风险；用户按重要性出场；`审查：跳过` 不写成 verified。
 - 归档：卡与去向载体同变更（Note / RFC / triggers / none）；延后项落 [triggers](_backlog/triggers.md)。
 - **修复证据**：bug 翻 `修复落地/已修` 必须写 `json fix-evidence` 块（changes/red/green/guard，`exit` 为 oracle；旧卡 < 2026-11-15 grandfather）并与代码/测试同变更；只改状态/移动卡 = 假修（机械面 = `staged-change-pairing`；规则 = [_backlog/AGENTS.md](_backlog/AGENTS.md)）。
 

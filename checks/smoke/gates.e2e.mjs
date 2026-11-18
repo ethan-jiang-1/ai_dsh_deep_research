@@ -14,6 +14,18 @@
 // 失败时保留临时目录并打印路径（语料 verify.spec.mjs 先例）；全绿即清理。
 // mutate 后统一 `git add -A`：tracked-only 门禁（git ls-files 驱动）要看见注入的新文件；
 // gitignored 文件（runtime/ 探针）天然不入——md-links-untracked 案例正靠它恒 untracked。
+//
+// 选择面（2026-11-18，用户定调「日常迭代不跑重档」）：`--gate=<门禁名[,名]>` 按案例表每行已有的
+// `gate` 字段过滤；`--case=<id[,id]>` 按 id 过滤；两者同时给取交集。改哪道门禁就只跑哪道门禁的
+// 案例（日常口，量级 seconds）；**全量只在发布/nightly 跑**（分层正本 = docs/guides/60 §门禁分层）。
+// 选择只改「跑哪些」，不改任何案例的断言；被过滤掉的案例既不计红也不计绿（末尾自报「仅跑 N 个」）。
+//
+// 建仓面（2026-11-18）：fixture **复用**，不再一案例一克隆。K 个 worker 各持一份**已 commit** 的
+// 基线副本；每案例前 `git reset --hard` + `git clean -fdx` 并断言工作树干净——复位不干净即
+// fail-loud（只会假红，不会假绿）；失败现场另存一份副本。实测全量从 ~237s 降到 ~105s（jobs=4）；
+// 把 clone 改异步、jobs 提到可用核数反而更慢（受 I/O 限制，10 并发下每案例 13.6s），故 jobs 默认 4。
+//   为什么必须 commit：无 commit 时 HEAD 是 unborn，`git reset --hard` 清空索引，随后的
+//   `git clean -fdx` 会把整棵树当未跟踪文件删掉（2026-11-18 实测）。
 
 import { spawn, spawnSync } from 'node:child_process';
 import { cpSync, lstatSync, mkdirSync, mkdtempSync, readlinkSync, rmSync, symlinkSync } from 'node:fs';
@@ -21,35 +33,37 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cpus } from 'node:os';
-import { CASES, CONTROLS } from '../lib/harness/gates-cases.mjs';
+import { CASES, CONTROLS, NO_CASE_GATES } from '../lib/harness/gates-cases.mjs';
 import { boundedMap, parseE2eArgs } from '../lib/harness/gates-cli.mjs';
 import { isMain } from '../lib/shared/cli-entry.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const VERIFY_REL = join('checks', 'verify', 'verify.mjs');
 
-// `--case` / `--jobs`：两种形状（`--name=value` / `--name value`）同判；空值/未知参数 = exit 2。
+// `--case` / `--gate` / `--jobs`：两种形状（`--name=value` / `--name value`）同判；空值/未知参数 = exit 2。
 // 空 `--case=` 曾静默退化为「没有过滤器」而跑全量，调用方会把它读成「指定案例绿了」（BUG-203）。
-// `--jobs`：有界并行（默认 min(4, CPU)）；案例彼此独立，并行只压墙钟（规模 = 案例表正本，不写死）。
+// `--jobs`：有界并行（默认 min(4, CPU)——4 是实测甜点，见头注建仓面）；案例彼此独立。
 // 对照组与门禁名集合都按选中案例收窄——被过滤掉的案例既不计红也不计绿（末尾自报"仅跑 N 个"）。
 let ARGS;
 try { ARGS = parseE2eArgs(process.argv.slice(2), Math.max(1, Math.min(4, cpus().length))); }
 catch (error) { console.error(`gates.e2e: ${error.message}`); process.exit(2); }
 if (ARGS.help) {
-  console.log('gates.e2e 用法：--case=<id[,id]>|--case <id[,id]> --jobs=<n>|--jobs <n> [--help]');
+  console.log('gates.e2e 用法：--gate=<门禁名[,名]> | --case=<id[,id]> [--jobs=<n>] [--help]');
+  console.log('  改门禁逻辑 → --gate=<改的门禁>（只跑该门禁的案例）；全量（发布/nightly）省略两者。');
   process.exit(0);
 }
 const caseFilter = ARGS.cases.length === 0 ? null : new Set(ARGS.cases);
+const gateFilter = ARGS.gates.length === 0 ? null : new Set(ARGS.gates);
 const JOBS = ARGS.jobs;
 
-// ── fixture：tracked 文件副本 + git init/add（git ls-files 驱动的门禁在副本内可用）──
+// ── fixture：tracked 文件副本 + git init/add/commit（git ls-files 驱动的门禁在副本内可用）──
 
 function git(dir, args) {
   return spawnSync('git', args, { cwd: dir, encoding: 'utf8' });
 }
 
-function buildFixture() {
-  const tmp = mkdtempSync(join(tmpdir(), 'gates.e2e-'));
+function buildFixture(dir) {
+  mkdirSync(dir, { recursive: true });
   const ls = git(ROOT, ['ls-files', '-z']);
   if (ls.status !== 0) throw new Error(`git ls-files 失败：${String(ls.stderr).slice(0, 200)}`);
   const files = [...new Set([...ls.stdout.split('\0').filter(Boolean), 'checks/lib/repo/backlog-liveness.mjs'])];
@@ -58,7 +72,7 @@ function buildFixture() {
     const src = join(ROOT, f);
     const st = lstatSync(src);
     if (st.isDirectory()) continue; // submodule gitlink（vendor/dsh）——副本不需要其内容，vendor 类门禁在 fixture 内按缺席处理
-    const dst = join(tmp, f);
+    const dst = join(dir, f);
     mkdirSync(dirname(dst), { recursive: true });
     if (st.isSymbolicLink()) symlinkSync(readlinkSync(src), dst); // symlink 原样保真（CLAUDE.md → AGENTS.md 等）
     else cpSync(src, dst);
@@ -66,20 +80,56 @@ function buildFixture() {
   // 副本 = tracked 全量，等价 fresh clone（BUG-016 修复后 tracked md 零运行区链接——曾有的
   // 18 条 digest 链接已转反引号路径，md-links 加宽断言把守该类不再回来；旧版在此处的
   // "运行区链接目标补拷"临时对冲随之移除）。
-  const r1 = git(tmp, ['init', '-q']);
-  const r2 = git(tmp, ['add', '-A']);
-  if (r1.status !== 0 || r2.status !== 0) throw new Error(`fixture git init/add 失败：${r1.stderr || r2.stderr}`);
-  return tmp;
+  const r1 = git(dir, ['init', '-q']);
+  const r2 = git(dir, ['add', '-A']);
+  // 复用前提：HEAD 必须存在（见头注「为什么必须 commit」）——身份只用于本副本，不入任何制品。
+  const r3 = git(dir, ['-c', 'user.email=gates.e2e@invalid', '-c', 'user.name=gates.e2e', 'commit', '-qm', 'fixture']);
+  if (r1.status !== 0 || r2.status !== 0 || r3.status !== 0) {
+    throw new Error(`fixture git init/add/commit 失败：${r1.stderr || r2.stderr || r3.stderr}`);
+  }
+  return dir;
 }
 
-const cloneFixture = (base, name) => {
-  const dir = join(dirname(base), `${name}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`);
-  cpSync(base, dir, { recursive: true, verbatimSymlinks: true });
-  return dir;
-};
+const cloneFixture = (base, dir) => { cpSync(base, dir, { recursive: true, verbatimSymlinks: true }); return dir; };
+
+/** 案例前复位：把上一条案例的注入（改文件 / 新文件 / 删除）精确还原。不干净 = fail-loud。
+ *  必须异步：复位是三次整树 git 扫描，同步调用会和旧版 clone 一样阻塞事件循环、把并发压成串行
+ *  （2026-11-18 实测：同步版全量比异步版慢 2×）。 */
+async function resetFixture(dir) {
+  const r1 = await gitAsync(dir, ['reset', '--hard', '-q']);
+  const r2 = await gitAsync(dir, ['clean', '-fdxq']);
+  const st = await gitAsync(dir, ['status', '--porcelain']);
+  if (r1.status !== 0 || r2.status !== 0) throw new Error(`fixture 复位失败：${r1.err || r2.err}`);
+  if (st.status !== 0) throw new Error(`fixture 复位后 git status 不可用：${st.err}`);
+  if (st.out.trim() !== '') throw new Error(`fixture 复位不干净（上一条案例的注入未还原）：${st.out.slice(0, 300)}`);
+}
+
+/** 异步 git（进池后不再阻塞事件循环）：两个输出都收，判据与错误消息各自取用。 */
+function gitAsync(dir, args) {
+  return new Promise((res) => {
+    const child = spawn('git', args, { cwd: dir, stdio: ['ignore', 'pipe', 'pipe'] });
+    let out = '';
+    let err = '';
+    child.stdout.setEncoding('utf8');
+    child.stderr.setEncoding('utf8');
+    child.stdout.on('data', (chunk) => { out += chunk; });
+    child.stderr.on('data', (chunk) => { err += chunk; });
+    child.on('close', (status) => res({ status, out, err }));
+  });
+}
+
+/** fixture 池：worker 取一份独占，用完归还（并发上限 = JOBS ≤ 池大小，acquire 不会饿死）。 */
+function createPool(dirs) {
+  const free = [...dirs];
+  const waiters = [];
+  return {
+    acquire: () => (free.length > 0 ? Promise.resolve(free.pop()) : new Promise((res) => waiters.push(res))),
+    release: (dir) => { const next = waiters.shift(); if (next) next(dir); else free.push(dir); },
+  };
+}
 
 function runVerify(dir) {
-  // 异步 spawn + 有界并发：案例彼此独立（各自 clone + git add），串行跑 108 个也慢。
+  // 异步 spawn + 有界并发：案例彼此独立（各自独占一份 fixture）。
   return new Promise((resolve) => {
     const child = spawn(process.execPath, [join(dir, VERIFY_REL)], { cwd: dir, stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '';
@@ -104,7 +154,8 @@ function gateVerdict(out, verdict, gate) {
 // ── 主流程 ──
 
 async function main() {
-  const keep = [];
+  let work = null;
+  const kept = [];
   try {
     if (caseFilter !== null) {
       const known = new Set([...CASES, ...CONTROLS].map((c) => c.id));
@@ -114,16 +165,48 @@ async function main() {
         process.exit(2);
       }
     }
-    const cases = caseFilter === null ? CASES : CASES.filter((c) => caseFilter.has(c.id));
-    const controls = caseFilter === null ? CONTROLS : CONTROLS.filter((c) => caseFilter.has(c.id));
-    const base = buildFixture();
-    keep.push(base);
+    if (gateFilter !== null) {
+      const withCases = new Set([...CASES, ...CONTROLS].map((c) => c.gate));
+      const noCase = new Map(NO_CASE_GATES.map((entry) => [entry.gate, entry.reason]));
+      const unknown = [...gateFilter].filter((g) => !withCases.has(g) && !noCase.has(g));
+      if (unknown.length > 0) {
+        console.error(`gates.e2e: --gate 里有未登记的门禁：${unknown.join(', ')}（门禁名单正本 = checks/verify/context.mjs 的 gates；案例表 = checks/lib/harness/gates-cases.mjs）`);
+        process.exit(2);
+      }
+      const withoutCases = [...gateFilter].filter((g) => !withCases.has(g));
+      if (withoutCases.length > 0) {
+        // 结构性不适的门禁（submodule / 本机 git config / gitignored 制品）没有常驻案例：
+        // 反证 = 一次性红录（docs/evaluation.md §L0 反证列），不是本入口能跑的。
+        console.error(`gates.e2e: --gate 选中的门禁没有注入案例：${withoutCases.map((g) => `${g}（${noCase.get(g)}）`).join('；')}——反证 = 一次性红录（docs/evaluation.md §L0）`);
+        process.exit(2);
+      }
+    }
+    const byGate = (c) => gateFilter === null || gateFilter.has(c.gate);
+    const byCase = (c) => caseFilter === null || caseFilter.has(c.id);
+    const cases = CASES.filter((c) => byCase(c) && byGate(c));
+    const controls = CONTROLS.filter((c) => byCase(c) && byGate(c));
+    if (cases.length === 0 && controls.length === 0) {
+      console.error('gates.e2e: --case 与 --gate 组合没有选中任何案例（两个过滤器取交集）');
+      process.exit(2);
+    }
+
     const failures = [];
+    work = mkdtempSync(join(tmpdir(), 'gates.e2e-'));
+    const fixtures = [buildFixture(join(work, 'base'))];
+    const poolSize = Math.max(1, Math.min(JOBS, cases.length + controls.length + 1));
+    for (let i = 1; i < poolSize; i += 1) fixtures.push(cloneFixture(fixtures[0], join(work, `w${i}`)));
+    const pool = createPool(fixtures);
+    const snapshot = (dir, label) => {
+      const dst = join(work, 'kept', label);
+      cpSync(dir, dst, { recursive: true, verbatimSymlinks: true });
+      kept.push(dst);
+      return dst;
+    };
 
     // 对照组：零注入 → 案例门禁全 PASS（防断言空转：副本基线本身红 = 断言无效）
-    const controlDir = cloneFixture(base, 'control');
-    keep.push(controlDir);
+    const controlDir = await pool.acquire();
     const control = await runVerify(controlDir);
+    pool.release(controlDir);
     if (!/verify: 全绿|处失败/.test(control.out)) failures.push(`对照组：verify 未跑完（status=${control.status}）`);
     for (const { id, gate, expect } of cases) {
       // 判据行锚定（gateVerdict 助手）：verify 每个门禁恰打一行 `${verdict}  ${gate}`（实测），
@@ -143,35 +226,45 @@ async function main() {
     }
 
     const controlResults = await boundedMap(controls, JOBS, async ({ id, gate, mutate }) => {
-      const dir = cloneFixture(base, `control-${id}`);
-      mutate(dir);
-      git(dir, ['add', '-A']); // tracked-only 门禁要看见注入的新文件（gitignored 探针天然不入）
-      const { status, out } = await runVerify(dir);
-      const failed = !/verify: 全绿|处失败/.test(out) || !gateVerdict(out, 'PASS', gate);
-      if (failed) { keep.push(dir); return `${id}: valid shape did not pass ${gate} (status=${status})`; }
-      rmSync(dir, { recursive: true, force: true });
-      return null;
+      const dir = await pool.acquire();
+      try {
+        await resetFixture(dir);
+        mutate(dir);
+        const added = await gitAsync(dir, ['add', '-A']); // tracked-only 门禁要看见注入的新文件（gitignored 探针天然不入）
+        if (added.status !== 0) { snapshot(dir, `control-${id}`); return `${id}: git add 失败（${added.err.slice(0, 200)}）`; }
+        const { status, out } = await runVerify(dir);
+        const failed = !/verify: 全绿|处失败/.test(out) || !gateVerdict(out, 'PASS', gate);
+        if (failed) { snapshot(dir, `control-${id}`); return `${id}: valid shape did not pass ${gate} (status=${status})`; }
+        return null;
+      } finally {
+        pool.release(dir);
+      }
     });
     for (const failure of controlResults) if (typeof failure === 'string') failures.push(failure);
 
     // 案例组：注入 → 目标门禁点名红（带 expect 时须命中该报因）
     const caseResults = await boundedMap(cases, JOBS, async ({ id, gate, mutate, expect }) => {
-      const dir = cloneFixture(base, `case-${id}`);
-      mutate(dir);
-      git(dir, ['add', '-A']); // 同上：mutate 的新文件统一入 tracked 集（案例 mutate 本身是纯 fs）
-      const { status, out } = await runVerify(dir);
-      let failure = null;
-      if (!/verify: 全绿|处失败/.test(out)) failure = `${id}：verify 未跑完（status=${status}）`;
-      else if (!gateVerdict(out, 'FAIL', gate)) failure = `${id}：注入回归未被点名报红——对照组合格而此处不红 = 门禁钝化或注入未生效（案例侧；先确认 mutate 真的改了文件、且该文件在被扫面内）`;
-      else if (expect && !out.includes(expect)) failure = `${id}：${gate} 报了红但**非本案例的报因**（期望含 ${JSON.stringify(expect)}）——注入未生效或断言被旁路`;
-      if (failure !== null) { keep.push(dir); return failure; }
-      rmSync(dir, { recursive: true, force: true });
-      return null;
+      const dir = await pool.acquire();
+      try {
+        await resetFixture(dir);
+        mutate(dir);
+        const added = await gitAsync(dir, ['add', '-A']); // 同上：mutate 的新文件统一入 tracked 集（案例 mutate 本身是纯 fs）
+        if (added.status !== 0) { snapshot(dir, `case-${id}`); return `${id}：git add 失败（${added.err.slice(0, 200)}）`; }
+        const { status, out } = await runVerify(dir);
+        let failure = null;
+        if (!/verify: 全绿|处失败/.test(out)) failure = `${id}：verify 未跑完（status=${status}）`;
+        else if (!gateVerdict(out, 'FAIL', gate)) failure = `${id}：注入回归未被点名报红——对照组合格而此处不红 = 门禁钝化或注入未生效（案例侧；先确认 mutate 真的改了文件、且该文件在被扫面内）`;
+        else if (expect && !out.includes(expect)) failure = `${id}：${gate} 报了红但**非本案例的报因**（期望含 ${JSON.stringify(expect)}）——注入未生效或断言被旁路`;
+        if (failure !== null) { snapshot(dir, `case-${id}`); return failure; }
+        return null;
+      } finally {
+        pool.release(dir);
+      }
     });
     for (const failure of caseResults) if (typeof failure === 'string') failures.push(failure);
 
     // 真进程外部 oracle 对账：全量跑时同步核验 CI 执行面与真 bash -eo pipefail 录制件一致（D55 AC2）
-    if (caseFilter === null) {
+    if (caseFilter === null && gateFilter === null) {
       const ciOracle = spawnSync(process.execPath, [join(ROOT, 'tools', 'record', 'record-ci-oracle.mjs'), '--check'], {
         cwd: ROOT,
         encoding: 'utf8',
@@ -184,16 +277,18 @@ async function main() {
     if (failures.length > 0) {
       console.error(`gates.e2e: ${failures.length} 处失败：`);
       for (const f of failures) console.error(`  - ${f}`);
-      console.error(`\n临时目录保留复查：${keep.join('\n')}`);
+      console.error(`\n现场保留复查：${work}\n（失败案例另存一份完整副本于其中 kept/；其余 fixture 未删）`);
       process.exit(1);
     }
-    console.log(caseFilter === null
-      ? `gates.e2e: 全绿（对照组零注入全 PASS + ${CASES.length} 个注入案例均被点名报红）`
-      : `gates.e2e: 全绿（--case 仅跑 ${cases.length} 个注入案例 + ${controls.length} 个对照；其余未计）`);
-    for (const d of keep) rmSync(d, { recursive: true, force: true });
+    const selected = caseFilter !== null || gateFilter !== null;
+    console.log(selected
+      ? `gates.e2e: 全绿（--case/--gate 仅跑 ${cases.length} 个注入案例 + ${controls.length} 个对照；其余未计）`
+      : `gates.e2e: 全绿（对照组零注入全 PASS + ${CASES.length} 个注入案例均被点名报红）`);
+    for (const d of kept) rmSync(d, { recursive: true, force: true });
+    rmSync(work, { recursive: true, force: true });
     process.exit(0);
   } catch (e) {
-    console.error(`gates.e2e: 未跑（前置缺席）——${e.message}\n临时目录保留复查：${keep.join('\n') || '（无）'}`);
+    console.error(`gates.e2e: 未跑（前置缺席）——${e.message}\n现场保留复查：${work ?? '（无）'}${kept.length > 0 ? `\n${kept.join('\n')}` : ''}`);
     process.exit(2);
   }
 }

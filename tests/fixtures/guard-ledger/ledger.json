@@ -1012,6 +1012,86 @@
       "status": "provisional",
       "redRecipe": "关闭 stripScripts 重导出 → pack.e2e manifest 断言红",
       "trigger": "干净室/守卫/manifest 规则改由独立 oracle（真宿主清单或外部解析器）覆盖时，重评为 canonical"
+    },
+    {
+      "id": "BUG-250",
+      "mechanism": "evidence 八字段里的 lens 从未被审计",
+      "guard": "tests/run/gates/evidence-audit.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删 lens 必填 → 缺 lens 用例红"
+    },
+    {
+      "id": "BUG-251",
+      "mechanism": "quality/source_tier 只查在场，不查值域",
+      "guard": "tests/run/gates/evidence-audit.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 quality 改成 Z → 值域用例红"
+    },
+    {
+      "id": "BUG-252",
+      "mechanism": "findings gap 四态只查非空",
+      "guard": "tests/run/gates/findings-contract.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 gap 改成 maybe → findings 用例红"
+    },
+    {
+      "id": "BUG-253",
+      "mechanism": "scope_role 未知值静默逃出覆盖门",
+      "guard": "tests/run/gates/findings-contract.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 scope_role 改成 Primary → 门 L 红"
+    },
+    {
+      "id": "BUG-254",
+      "mechanism": "review 覆盖表无门禁",
+      "guard": "tests/run/gates/review-contract.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "删覆盖表/假引用 → 用例红"
+    },
+    {
+      "id": "BUG-255",
+      "mechanism": "protocol.output.sections 只对 question 投影",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删 final 映射检查 → 用例红"
+    },
+    {
+      "id": "BUG-256",
+      "mechanism": "findings lens_gaps 无消费者",
+      "guard": "tests/run/gates/findings-contract.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "lens_gaps 写 [] 或与差集不符 → 用例红"
+    },
+    {
+      "id": "BUG-257",
+      "mechanism": "review CRITICAL 与 audit/readiness 不交叉",
+      "guard": "tests/run/gates/review-contract.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "C1 + readiness PASS 无 resolved → 用例红"
+    },
+    {
+      "id": "BUG-258",
+      "mechanism": "snapshot B 只比 catalog，不比 SKILL.md 正文",
+      "guard": "tests/checks/shared/skill-golden.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "改任一 SKILL.md 正文 → 金标准用例红"
+    },
+    {
+      "id": "BUG-259",
+      "mechanism": "probe 缓存键不含 run-driver/探针实现",
+      "guard": "tests/run/channel/channel-cache.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "从键/闭包去掉驱动源 → 用例红"
     }
   ]
 }

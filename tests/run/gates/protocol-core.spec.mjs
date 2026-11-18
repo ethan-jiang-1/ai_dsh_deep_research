@@ -656,3 +656,20 @@ test('BUG-171 协议版本链：v3 逐份校验 v1/v2；v1={} / 缺 v1 → 红',
   ] })
   assert.equal(has(good, 'protocol-snapshot'), false, JSON.stringify(good.filter((f) => f.level === 'red')))
 })
+
+// 负例留证 2026-11-18：BUG-255——删映射检查或把 final 映射节删掉 → 用例红；还原 → 绿。
+// ── BUG-255：protocol.output.sections → final H2（2026-11-18）────────────────────
+test('final 覆盖 protocol.output.sections 的映射节；缺节红（BUG-255）', async () => {
+  const { checkFinalSections } = await import('../../../checks/lib/gates/protocol-audit-core.mjs')
+  const protocol = { output: { sections: ['decision', 'options', 'criteria', 'tradeoffs', 'risks'] } }
+  const good = '# Final\n\n## 决策摘要\n\n## 备选与取舍\n\n## 关键依据\n\n## 目前不能判断\n'
+  assert.deepEqual(checkFinalSections(protocol, good), [])
+  const bad = good.replace('## 决策摘要\n', '')
+  const red = checkFinalSections(protocol, bad)
+  assert.equal(red.length, 1)
+  assert.match(red[0].message, /decision/)
+  const custom = checkFinalSections({ output: { sections: ['foo'] } }, '# Final\n\n## 决策摘要\n')
+  assert.equal(custom.length, 1)
+  assert.match(custom[0].message, /foo/)
+  assert.deepEqual(checkFinalSections(protocol, ''), [], 'final 缺席不在此判（交付门管）')
+})

@@ -14,7 +14,7 @@
 - `verify/context.mjs` 的 `gates` 数组与 [docs/evaluation.md](../docs/evaluation.md) §L0 登记表
   **两处同步**（`gate-ledger-sync` 门禁对账）；每条门禁的反证义务与记录方式 = 头行
   [writing-a-gate 技能](../.agents/skills/writing-a-gate/SKILL.md)正本，此处不复制配方。
-- **门禁自测**：改门禁逻辑必跑 `node checks/smoke/gates.e2e.mjs`（案例表 `CASES` 增删同 diff；`tests/checks/harness/verify-gates.test.mjs` 静态对账案例 ↔ gates 数组）。
+- **门禁自测**：改门禁逻辑必跑 `node checks/smoke/gates.e2e.mjs --gate=<改的门禁>`（**日常只跑该门禁的案例**；全量只在发布/nightly——重档不属于日常迭代，见 [guides/60 §门禁分层](../docs/guides/60-dev-loop.md)）。案例表 `CASES` 增删同 diff；`tests/checks/harness/verify-gates.test.mjs` 静态对账案例 ↔ gates 数组。
 - 失败信息要给出**失败对象 + 违反的规则 + 修正入口**；不确定就 fail-loud，不静默跳过。
 
 ## 范围纪律（实测教训，不是风格偏好）

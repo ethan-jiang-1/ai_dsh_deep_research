@@ -1,17 +1,21 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-257：review.md 的 CRITICAL/MAJOR 清单与 audit.md 的 CRITICAL 计数不交叉核对
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
 >
-> 位置：交付门 = [checks/lib/gates/node-gate-delivery-gate.mjs](../../checks/lib/gates/node-gate-delivery-gate.mjs)
+> 结论：review CRITICAL 与 readiness 严格交叉；resolved-critical 结构化解释
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-model-visible-semantics.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
+>
+> 位置：交付门 = [checks/lib/gates/node-gate-delivery-gate.mjs](../../../checks/lib/gates/node-gate-delivery-gate.mjs)
 > 第 68–83 行（只读 audit.md 的 CRITICAL=0）；`presets/critic/skills/adversarial-review/SKILL.md`
 > 要求 review.md 写 CRITICAL/MAJOR 清单；`run-accept` 只消费 audit.md。
-> 探索轮 = [模型可见语义卡](../issues/2026-11-18-model-visible-semantics.md)。
+> 探索轮 = [模型可见语义卡](../settled_issues/2026-11-18-model-visible-semantics.md)。
 
 ## 症状
 
@@ -65,3 +69,28 @@ verdicts；`node-gate-delivery` 只读 audit.md。没有「review 的 CRITICAL �
 
 - review severity 与 audit/readiness 交叉核对；矛盾 → 红；
 - 合法解释/旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/review-contract.mjs",
+    "checks/lib/gates/node-gate-delivery-gate.mjs",
+    "tests/run/gates/review-contract.spec.mjs",
+    "packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/review-contract.spec.mjs",
+    "exit": 1,
+    "output": "not ok 3 - readiness PASS 且有未解释 C1 → 红…（关闭 severityIssues 后红）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/review-contract.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/review-contract.spec.mjs"
+  }
+}
+```

@@ -1,17 +1,21 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-250：evidence 八字段合同里的 `lens` 从未被审计——缺 `lens` 的证据卡照样过 evidence-audit
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
 >
-> 位置：[checks/lib/gates/evidence-audit-core.mjs](../../checks/lib/gates/evidence-audit-core.mjs) 第 219–225 行
+> 结论：lens 入 evidence 硬字段 + 与 topics lenses 集合对账（越界 MAJOR）
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-model-visible-semantics.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
+>
+> 位置：[checks/lib/gates/evidence-audit-core.mjs](../../../checks/lib/gates/evidence-audit-core.mjs) 第 219–225 行
 > （硬五字段 + 软二字段）；合同 = `content/manual.md:136`（八字段）、`content/templates/run/evidence-entry.md`
 > （含 `lens`）、`presets/analyst/skills/evidence-extraction/SKILL.md`（`lens: <id>`）。
-> 探索轮 = [模型可见语义卡](../issues/2026-11-18-model-visible-semantics.md)。
+> 探索轮 = [模型可见语义卡](../settled_issues/2026-11-18-model-visible-semantics.md)。
 
 ## 症状
 
@@ -74,3 +78,27 @@ node checks/run-gates/evidence-audit.mjs <fixture-bundle> --sessions <dir>   # �
 
 - 无 `lens` 或 `lens` 不在 topics 集合 → evidence-audit 红；合法卡绿；
 - 旧场按断代不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/evidence-audit-core.mjs",
+    "tests/run/gates/evidence-audit.spec.mjs",
+    "tests/pack/contract/template-contract.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/evidence-audit.spec.mjs",
+    "exit": 1,
+    "output": "not ok 18 - BUG-250：缺 lens = MAJOR…（从硬字段删 lens 后，缺 lens 用例红）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/evidence-audit.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/evidence-audit.spec.mjs"
+  }
+}
+```

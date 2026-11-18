@@ -1,6 +1,7 @@
 // evidence-audit 回归 — 溯源审计三断言（keyless，纯 .jsonl 夹具直调 auditBundle——
 // tests/ 层禁子进程，zstd 路径由真实 bundle 的基线审计覆盖，不进 L0）。
 // 红证形态：伪造 source_url / final 断链 / 反引号占位豁免 / 契约不符分级。
+// 负例留证 2026-11-18：BUG-250 / BUG-251——删 lens 必填或值域闭集 → 对应用例红；还原 → 绿。
 // 负例留证 2026-10-16：BUG-029——先写测试后实现，三条新测试全红（伪造链接清单多出 ev-enc/ev-mcp）。
 //   注入①`urlsOf` 去容错解码副本（`[text, decodePct(text)]` → `[text]`）→ 13/14 红（编码形态回到伪造）；
 //   注入②`isMcpTool` 恒 false（MCP 结果不进语料）→ 13/14 红（ev-mcp 判「域名与 URL 都未出现」）；
@@ -54,7 +55,7 @@ function fixture({ forged = false, brokenRef = false, derived = false } = {}) {
   writeFileSync(join(sessions, 'session.v4.jsonl'), log);
   // 证据文件 A：契约完整 + URL 可溯源 + 摘录可回溯
   const urlA = forged ? 'https://forged.example.com/never-fetched' : realUrl;
-  writeFileSync(join(bundle, 'evidence', 'ev-a.md'), `---\nsource_url: ${urlA}\nretrieved_at: 2026-09-25\nquality: A\nfound_by: analyst\nsupports: T1\nsource_tier: primary\npublisher: example.com\n---\n\n# A\n\n## 原文摘录\n\n> SPECrate2017_int_base = 228 见 ${realUrl}\n\n## 解读\n\n初步判断。\n`);
+  writeFileSync(join(bundle, 'evidence', 'ev-a.md'), `---\nsource_url: ${urlA}\nretrieved_at: 2026-09-25\nquality: A\nfound_by: analyst\nsupports: T1\nlens: official\nsource_tier: primary\npublisher: example.com\n---\n\n# A\n\n## 原文摘录\n\n> SPECrate2017_int_base = 228 见 ${realUrl}\n\n## 解读\n\n初步判断。\n`);
   // 证据文件 B：无 frontmatter（存量散文式）——契约不符 MAJOR；正文 URL 可溯源
   // derived=true → 同域但路径是派生态（域名抓过、该路径没抓过）——应判 MAJOR「仅域名可溯源」，不是伪造
   const urlB = derived ? 'https://blog.example.org/post-y-never-fetched' : 'https://blog.example.org/post-x';
@@ -62,6 +63,7 @@ function fixture({ forged = false, brokenRef = false, derived = false } = {}) {
   // final：A 引用正常；按需断链；头部占位说明（反引号内——豁免）
   const broken = brokenRef ? '\n结论X [来源: evidence/not-exist.md]' : '';
   writeFileSync(join(bundle, 'final.md'), `# Final\n\n格式说明：每条附 \`[来源: evidence/xx.md]\`。\n\n结论 [来源: evidence/ev-a.md]${broken}\n`);
+  writeFileSync(join(bundle, 'topics.md'), '# Topics\n\n## T1: fixture\n\n- scope_role: primary\n- lenses: [official]\n');
   return { bundle, sessions, realUrl };
 }
 
@@ -312,3 +314,36 @@ test('BUG-148 短引文不静默：进 shortQuotes 统计并产 INFO finding', (
   assert.ok(r.findings.some((f) => f.kind === '短引文未回溯' && f.detail.includes('短句伪造')))
   assert.match(r.report, /短引文 1 条未回溯/)
 }))
+
+// ── BUG-250 / 251：八字段与值域（2026-11-18）──────────────────────────────────
+function editEvidence(bundle, file, fn) {
+  const p = join(bundle, 'evidence', file);
+  writeFileSync(p, fn(readFileSync(p, 'utf8')));
+}
+
+test('BUG-250：缺 lens = MAJOR；lens 不在 topics 集合 = MAJOR；合法 lens 绿', () => withTmpCleanup(() => {
+  const { bundle, sessions } = fixture();
+  let r = auditBundle(bundle, sessions);
+  assert.equal(r.findings.filter((f) => f.kind === '契约不符' && f.detail === '缺字段 lens').length, 0, '合法夹具不缺 lens');
+  editEvidence(bundle, 'ev-a.md', (s) => s.replace('lens: official\n', ''));
+  r = auditBundle(bundle, sessions);
+  assert.equal(r.findings.filter((f) => f.kind === '契约不符' && f.detail === '缺字段 lens').length, 1, '缺 lens 必须报');
+  editEvidence(bundle, 'ev-a.md', (s) => s.replace('quality: A', 'quality: A\nlens: bogus'));
+  r = auditBundle(bundle, sessions);
+  assert.equal(r.findings.filter((f) => f.kind === 'lens 越界').length, 1, 'lens 越界必须报');
+}));
+
+test('BUG-251：quality/source_tier/publisher 值域非法 = MAJOR；合法值/域名绿', () => withTmpCleanup(() => {
+  const { bundle, sessions } = fixture();
+  let r = auditBundle(bundle, sessions);
+  assert.equal(r.findings.filter((f) => f.kind === '值域非法').length, 0, '合法夹具无值域 finding');
+  editEvidence(bundle, 'ev-a.md', (s) => s.replace('quality: A', 'quality: Z').replace('source_tier: primary', 'source_tier: foo').replace('publisher: example.com', 'publisher: not_a_domain'));
+  r = auditBundle(bundle, sessions);
+  const details = r.findings.filter((f) => f.kind === '值域非法').map((f) => f.detail).join('；');
+  assert.match(details, /quality=Z/);
+  assert.match(details, /source_tier=foo/);
+  assert.match(details, /publisher=not_a_domain/);
+  editEvidence(bundle, 'ev-a.md', (s) => s.replace('publisher: not_a_domain', 'publisher: localhost'));
+  r = auditBundle(bundle, sessions);
+  assert.equal(r.findings.filter((f) => f.kind === '值域非法').length, 2, 'localhost 合法（只剩 quality/tier 两条）');
+}));

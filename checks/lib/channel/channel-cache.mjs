@@ -12,7 +12,7 @@
 //   · 键必须含身份：pack 源或 runtime 构建改动一律 miss；`--force-probe` 永久绕过；
 //   · `probe` 子命令永远真验。
 import { createHash } from 'node:crypto'
-import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { isMain } from '../shared/cli-entry.mjs'
 
@@ -127,4 +127,52 @@ if (isCli) {
     console.error('usage: channel-cache.mjs fingerprint <packDir> | read <cachePath> <key> | save <cachePath> <key>')
     process.exit(2)
   }
+}
+
+/**
+ * 本地 import 闭包哈希（BUG-259）：从入口文件出发，递归跟随相对 import/export-from/动态 import，
+ * 把每个文件的相对路径 + 内容纳入 sha256。探针断言/缓存键实现自身变化 → 键变化 → miss。
+ * 只跟随**相对** specifier（node:/包名不展开；它们不在本仓探针逻辑里）。
+ * @param {{ root: string, entry: string, read: (rel: string) => string, exists: (rel: string) => boolean }} input
+ * @returns {string} 16 字符 hex
+ */
+export function importClosureHash({ root, entry, read, exists }) {
+  const seen = new Set()
+  const files = []
+  const resolveSpec = (fromRel, spec) => {
+    const base = join(root, dirname(fromRel), spec)
+    const candidates = [base, `${base}.mjs`, `${base}.js`, `${base}.ts`, join(base, 'index.mjs'), join(base, 'index.js'), join(base, 'index.ts')]
+    for (const candidate of candidates) {
+      const rel = candidate.startsWith(`${root}/`) || candidate === root ? candidate.slice(root.length + 1) : candidate
+      if (exists(rel)) return rel.split('\\').join('/')
+    }
+    return null
+  }
+  const walk = (rel) => {
+    if (seen.has(rel)) return
+    seen.add(rel)
+    let text
+    try { text = read(rel) } catch { return }
+    files.push({ rel, text })
+    for (const m of text.matchAll(/(?:from|import)\s*\(?\s*['"](\.[^'"]+)['"]/g)) {
+      const target = resolveSpec(rel, m[1])
+      if (target !== null) walk(target)
+    }
+  }
+  walk(entry)
+  const hash = createHash('sha256')
+  for (const file of [...files].sort((a, b) => a.rel.localeCompare(b.rel))) {
+    hash.update(file.rel).update('\0').update(file.text).update('\0')
+  }
+  return hash.digest('hex').slice(0, 16)
+}
+
+/** 盘上入口的 import 闭包哈希（run-driver 用；入口相对库根）。 */
+export function probeSourceFingerprint(root, entry = 'tools/channel/run-driver.mjs') {
+  return importClosureHash({
+    root,
+    entry,
+    read: (rel) => readFileSync(join(root, rel), 'utf8'),
+    exists: (rel) => existsSync(join(root, rel)),
+  })
 }

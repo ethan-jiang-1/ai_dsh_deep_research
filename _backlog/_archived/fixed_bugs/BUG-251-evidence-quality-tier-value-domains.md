@@ -1,17 +1,21 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-251：evidence 的 `quality` / `source_tier` 只查“在场”，不查值域——`quality: Z`、`source_tier: foo` 照样过
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）
 >
-> 位置：[checks/lib/gates/evidence-audit-core.mjs](../../checks/lib/gates/evidence-audit-core.mjs) 第 219–225 行
+> 结论：quality A–D / source_tier 五档 / publisher 注册域闭集；模板与审计共用常量
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-model-visible-semantics.md)
+> 审查：agent — 红证回放 + 全量 verify/test/pack.e2e
+>
+> 位置：[checks/lib/gates/evidence-audit-core.mjs](../../../checks/lib/gates/evidence-audit-core.mjs) 第 219–225 行
 > （只 `if (!fm[k])`）；合同 = `content/manual.md:136,153–154`（quality A–D、source_tier 五档）、
 > `presets/analyst/skills/evidence-extraction/SKILL.md:22`（`quality: A|B|C|D`）。
-> 探索轮 = [模型可见语义卡](../issues/2026-11-18-model-visible-semantics.md)。
+> 探索轮 = [模型可见语义卡](../settled_issues/2026-11-18-model-visible-semantics.md)。
 
 ## 症状
 
@@ -68,3 +72,27 @@ grep -n 'quality.*A–D\|source_tier 唯一正本\|primary/secondary' packages/d
 
 - 非法 quality/source_tier → evidence-audit 红；合法值绿；
 - 旧场不误伤；`pnpm test` / run-gates 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/evidence-audit-core.mjs",
+    "tests/run/gates/evidence-audit.spec.mjs",
+    "tests/pack/contract/template-contract.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/evidence-audit.spec.mjs",
+    "exit": 1,
+    "output": "not ok 19 - BUG-251：quality/source_tier/publisher 值域非法 = MAJOR…（关闭值域检查后红）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/evidence-audit.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/run/gates/evidence-audit.spec.mjs"
+  }
+}
+```
