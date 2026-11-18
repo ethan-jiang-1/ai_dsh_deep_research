@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| （空） | — | 2026-11-18 探索轮已结，见 [_archived/settled_issues](../_archived/settled_issues/README.md) |
+| [2026-11-18-gate-self-test-cost](2026-11-18-gate-self-test-cost.md) | 等人拍板 | gates.e2e 333s：日常不该跑全量，发布门才做完整自测；B/预算已拍板，两层方案待确认 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
