@@ -466,7 +466,8 @@ export function checkMethodLibrary(protocol, entry) {
   if (method?.library_name === null || method?.library_name === undefined) {
     return [red('method-library', 'method.library_fields_sha256 非 null 但 library_name 为 null（BUG-276）')]
   }
-  if (entry === null || entry === undefined) {
+  if (entry === undefined) return []
+  if (entry === null) {
     return [red('method-library', `方法库里找不到「${method.library_name}」——library_fields_sha256 无法重算（BUG-276）`)]
   }
   const actual = libraryFieldsSha(entry.fields)

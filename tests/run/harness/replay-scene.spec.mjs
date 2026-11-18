@@ -294,3 +294,16 @@ test('discoverReplayFaces：空根 / 根缺席 / symlink 场景集 → fail-loud
   assert.throws(() => discoverReplayFaces(join(root, 'empty-root')), /zero scene sets/i, '零场景集 = 空语料，不静默绿');
   assert.throws(() => discoverReplayFaces(join(root, 'absent-root')), /cannot read/i);
 });
+
+// 负例留证 2026-11-18：BUG-291 / BUG-294——C 渲染是场景级：lead case 必须有 renderExpected，
+// 其余角色不强制（逐角色 C 是重复证据）。删 lead 的 renderExpected → 本用例红。
+test('research-face：C 渲染金标准是场景级（lead 必须有，其余不强制）', () => {
+  const loaded = loadReplayScene(join(ROOT, 'snapshots', 'replay', 'research-face'), presetRoles(ROOT));
+  const lead = loaded.cases.find((item) => item.id === 'lead');
+  assert.ok(lead.renderExpected !== null, 'lead 必须有 renderExpected（场景级 C 的载体）');
+  for (const item of loaded.cases) {
+    if (item.id !== 'lead' && item.renderExpected !== null) {
+      assert.ok(item.renderExpected.endsWith('.md'), `${item.id} 若声明 C 必须是 md`);
+    }
+  }
+})

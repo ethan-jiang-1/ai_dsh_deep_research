@@ -53,6 +53,11 @@
   cells = T1×official, T1×quant, T2×practitioner, T2×adversarial；
   报告 = waves/W2.json
 
+## 剩余工作
+
+<!-- 未完成节点 + owner + next；全部完成写 `- 无`。在场时必须有本节（nodes-contract）。 -->
+- 无
+
 ## 重写记录
 
 <!-- append-only，最新在上；每次加/扩/拆/并/改边/重派一行：

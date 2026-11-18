@@ -54,6 +54,7 @@
 | harness | `checks/lib/harness/replay-network-offline` | — |
 | harness | `checks/lib/harness/replay-network-offline-policy` | `tests/run/harness/replay-network-offline.spec.mjs` |
 | harness | `checks/lib/harness/replay-scene` | `tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/harness/replay-scene.spec.mjs` |
+| harness | `checks/lib/harness/role-picker` | `tests/checks/harness/role-picker.test.mjs` |
 | harness | `checks/lib/harness/run-accept-fixture` | `tests/run/harness/run-accept-fixture.spec.mjs` |
 | harness | `checks/lib/harness/run-lock` | `tests/run/harness/run-lock.spec.mjs` |
 | harness | `checks/lib/harness/snapshot-mode` | `tests/checks/harness/snapshot-readonly.test.mjs` |

@@ -70,7 +70,10 @@ export function parseClaims(text) {
   }
   if (value.version !== 1) problems.push({ code: 'claims-invalid', detail: `version 必须是 1（实际 ${JSON.stringify(value.version)}）` })
   if (!Number.isSafeInteger(value.finalRef) || value.finalRef < 1) problems.push({ code: 'claims-invalid', detail: 'finalRef 必须是 final/v<N> 的正整数 N' })
-  if (value.critical_exemption !== undefined && value.critical_exemption !== null && (typeof value.critical_exemption !== 'string' || value.critical_exemption.trim() === '')) problems.push({ code: 'claims-invalid', detail: 'critical_exemption 必须是非空字符串（无 critical 的显式理由）' })
+  if (value.critical_exemption !== undefined && value.critical_exemption !== null) {
+    const reason = typeof value.critical_exemption === 'string' ? value.critical_exemption.trim() : ''
+    if (reason.length < 20 || !/(critical|关键|无关键|理由)/i.test(reason)) problems.push({ code: 'claims-invalid', detail: 'critical_exemption 必须 ≥20 字且说明“为何没有 critical/关键结论”（不能写 x 绕过）' })
+  }
   if (!Array.isArray(value.claims) || value.claims.length === 0) {
     problems.push({ code: 'claims-invalid', detail: 'claims 必须是非空数组' })
     return { value: null, problems }

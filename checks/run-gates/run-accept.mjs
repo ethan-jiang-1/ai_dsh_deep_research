@@ -22,7 +22,7 @@ import { formatSecretFinding, scanSecrets } from '../lib/shared/secret-scan.mjs'
 import { presentedInLogs } from '../lib/shared/node-gate-session-gates.mjs'
 import { finalVersionsIn } from '../lib/shared/final-version.mjs'
 import { epochDateOf, runSchemaOf } from '../lib/gates/schema-scan-core.mjs'
-import { claimVerificationRequired } from '../lib/gates/protocol-core.mjs'
+import { claimPolicyOf } from '../lib/gates/protocol-core.mjs'
 import { buildDelivered, buildManifest, corpusRootLabel, renderAcceptance, repairReceiptPaths, sha256Text, shouldWriteReceipts, withManualEvidence } from '../lib/shared/run-receipt.mjs'
 import { readZstdText } from '../lib/shared/zstd-read.mjs'
 
@@ -102,8 +102,14 @@ const readLog = (p) => {
 // 但必须有显式 approval_basis 解释豁免；否则 fail-loud。
 let protocolGates = null
 try { protocolGates = JSON.parse(readFileSync(join(bundle, 'protocol.json'), 'utf8')) } catch { protocolGates = null }
-const verifyClaims = claimVerificationRequired(protocolGates?.gates)
+const claimPolicy = protocolGates === null ? 'full' : claimPolicyOf(protocolGates.gates)
+const verifyClaims = claimPolicy === 'full'
+const claimsRequired = claimPolicy === 'claims'
 const requireReview = protocolGates?.gates?.critic !== 'none'
+if (claimsRequired && !existsSync(join(bundle, 'review', 'claims.json'))) {
+  console.error('run-accept: RED——protocol.gates.critic=light 要求 review/claims.json 在场（轻量审查仍要有 claim 清单），但文件缺席')
+  process.exit(1)
+}
 if (!verifyClaims || !requireReview) {
   const basis = String(protocolGates?.approval_basis ?? '').trim()
   if (basis === '') {

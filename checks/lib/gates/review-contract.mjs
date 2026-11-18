@@ -6,7 +6,7 @@
 //      必须指向真实文件且 `lens` 属于该 topic 的 lenses；`—`/空 格必须同行有 gap/n-a 解释；
 //   ② review 的 CRITICAL 清单：readiness PASS 时不得有未解释的 CRITICAL；
 //      解释 = 显式 `resolved-critical: C1, C2`（或 all）行——只认结构，不认散文。
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { splitFrontmatter } from '../shared/frontmatter.mjs'
 import { parseTopicsOf } from './findings-core.mjs'
@@ -46,6 +46,20 @@ export function coverageIssues(bundleDir) {
   if (lensTopics.length === 0) return []
   const lines = linesOf(bundleDir)
   if (lines === null) return ['review.md 缺席——覆盖表无从判（交付门同时判 review 在场）']
+  // 实际卡数：topic × lens 的 evidence 计数（BUG-288）；表内写「N 卡」时必须与盘上一致。
+  const evidenceDir = join(bundleDir, 'evidence')
+  const counts = new Map()
+  if (existsSync(evidenceDir)) {
+    for (const file of readdirSync(evidenceDir).filter((n) => n.endsWith('.md'))) {
+      const { fm } = splitFrontmatter(readFileSync(join(evidenceDir, file), 'utf8'))
+      if (fm === null) continue
+      const lens = scalarOf(fm.lens)
+      for (const m of String(fm.supports ?? '').matchAll(/T\d+/g)) {
+        const key = m[0] + '|' + lens
+        counts.set(key, (counts.get(key) ?? 0) + 1)
+      }
+    }
+  }
   const rows = coverageTableOf(lines.join('\n'))
   if (rows === null) return ['有 lens 的 run 缺 topic × lens 覆盖表（表头须含 topic 与 lens）']
   const header = rows[0]
@@ -56,9 +70,18 @@ export function coverageIssues(bundleDir) {
     if (row === undefined) { issues.push(`覆盖表缺 topic ${id} 的行`); continue }
     for (const i of lensCols) {
       const cell = scalarOf(row[i])
-      if (cell === '' || cell === '—' || cell === '-') {
+      if (cell === '' || /^[—-]/.test(cell)) {
         if (!/gap|n\/a|不适用/i.test(row.join(' '))) issues.push(`${id} 的 lens 格为空/— 但没有 gap/n-a 解释`)
         continue
+      }
+      const declared = /(\d+)\s*卡/.exec(cell)?.[1]
+      if (declared === undefined && !/evidence\//.test(cell)) {
+        issues.push(`${id}/${scalarOf(header[i])} 的格既无「N 卡」计数也无 evidence 引用（无法核）`)
+        continue
+      }
+      if (declared !== undefined) {
+        const actual = counts.get(id + '|' + scalarOf(header[i])) ?? 0
+        if (Number(declared) !== actual) issues.push(`${id}/${scalarOf(header[i])} 声明 ${declared} 卡，盘上实际 ${actual} 卡`)
       }
       for (const m of cell.matchAll(/evidence\/[A-Za-z0-9_.-]+\.md/g)) {
         const p = join(bundleDir, m[0])

@@ -170,6 +170,7 @@
 | lib/gates/findings-core.mjs | evidence-audit-core、node-gate-run-gates、review-contract、findings-contract.spec、template-contract.spec、topics-contract.spec | findings gap 四态 / lenses / lens_gaps 差集 / scope_role 闭集 |
 | lib/gates/review-contract.mjs | node-gate-delivery-gate、review-contract.spec | review 覆盖表（topic × lens）+ CRITICAL 与 readiness 交叉 |
 | lib/gates/plan-gate.mjs | node-gate-core、plan-gate.spec | plan 图硬结构（环/悬空/重号/自依赖）+ owner/kind/lifecycle/剩余工作/版本快照 |
+| lib/harness/role-picker.mjs | client-load.entry、role-picker.test | 角色选择器纯判据：四研究角色连续相邻 + Method Editor（D37）；逐角色 C 归场景级 |
 | lib/repo/pack-deps.mjs | pack.e2e、pack-deps.test | 发布物依赖闭包 = peers：require/动态 import()/.d.ts import 正向、死 peer 反向（host-row 显式 allowlist）、DSH-tag peer 范围 = engines.dsh |
 | lib/repo/publish-manifest.mjs | export-dist、pack.e2e、publish-manifest.test | 发布 manifest 收口：剥离 devDependencies/scripts + workspace 协议检查 |
 | lib/harness/clean-room.mjs | cold-start.entry、release.entry、lifecycle.entry | 干净室安装矩阵：仓外 home / 钉版 dsh / tarball 安装 / 解析祖先 / 版本合同 / 起 web |

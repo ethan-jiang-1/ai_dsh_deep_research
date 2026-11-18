@@ -28,7 +28,8 @@ export const PROBE_CACHE_TTL_MS = 30 * 60 * 1000
  * @returns {string} sha256 hex
  */
 export function packFingerprint(entries) {
-  const lines = [...entries].map((e) => `${e.rel}\0${e.size}\0${Math.trunc(e.mtimeMs)}`).sort()
+  // 内容哈希优先（BUG-298）：同 size/mtime 的内容替换也必须失效；旧条目无 sha256 时回退。
+  const lines = [...entries].map((e) => `${e.rel}\0${e.sha256 ?? `${e.size}\0${Math.trunc(e.mtimeMs)}`}`).sort()
   return createHash('sha256').update(lines.join('\n')).digest('hex')
 }
 
@@ -46,7 +47,8 @@ export function collectPackEntries(root, rel = '', out = []) {
     if (entry.isDirectory()) collectPackEntries(root, childRel, out)
     else if (entry.isFile()) {
       const stat = statSync(join(root, childRel))
-      out.push({ rel: childRel, size: stat.size, mtimeMs: stat.mtimeMs })
+      const sha256 = createHash('sha256').update(readFileSync(join(root, childRel))).digest('hex')
+      out.push({ rel: childRel, size: stat.size, mtimeMs: stat.mtimeMs, sha256 })
     }
   }
   return out
@@ -175,4 +177,9 @@ export function probeSourceFingerprint(root, entry = 'tools/channel/run-driver.m
     read: (rel) => readFileSync(join(root, rel), 'utf8'),
     exists: (rel) => existsSync(join(root, rel)),
   })
+}
+
+/** probe 身份（BUG-296/297/299）：profile/bootstrap/workspace 必须进缓存键。 */
+export function probeIdentityOf({ profile, bootstrap = false, workspace = '' }) {
+  return [profile ?? '', bootstrap ? '1' : '0', workspace ?? ''].join('|')
 }

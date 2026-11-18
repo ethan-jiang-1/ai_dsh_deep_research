@@ -674,7 +674,7 @@ test('final 覆盖 protocol.output.sections 的映射节；缺节红（BUG-255�
   assert.deepEqual(checkFinalSections(protocol, ''), [], 'final 缺席不在此判（交付门管）')
 })
 
-// 负例留证 2026-11-18：BUG-271 / BUG-272 / BUG-276 / BUG-278——低质证据、过短 final、sha 漂移、waves 超预算各自红。
+// 负例留证 2026-11-18：BUG-271 / BUG-272 / BUG-273 / BUG-276 / BUG-278 / BUG-287 / BUG-289——低质证据、过短 final、sha 漂移、waves 超预算各自红。
 // ── BUG-271 / 272 / 276 / 278：protocol 承诺的下游消费 ────────────────────────
 test('evidence_threshold：evidence quality 低于门槛 → 红（BUG-271）', () => {
   const protocol = baseProtocol({ gates: { ...baseProtocol().gates, evidence_threshold: 'A' } })
@@ -731,4 +731,21 @@ test('gates.claim_verification/critic → claim 裁决是否必需（BUG-273）'
   assert.equal(claimVerificationRequired({ claim_verification: 'off', critic: 'both' }), false)
   assert.equal(claimVerificationRequired({ claim_verification: 'on', critic: 'report' }), false)
   assert.equal(claimVerificationRequired({ claim_verification: 'on', critic: 'none' }), false)
+})
+
+test('gates.critic light/report/none/claim/both → claim 政策（BUG-287）', async () => {
+  const { claimPolicyOf } = await import('../../../checks/lib/gates/protocol-core.mjs')
+  assert.equal(claimPolicyOf({ claim_verification: 'off', critic: 'both' }), 'none')
+  assert.equal(claimPolicyOf({ claim_verification: 'on', critic: 'none' }), 'none')
+  assert.equal(claimPolicyOf({ claim_verification: 'on', critic: 'report' }), 'none')
+  assert.equal(claimPolicyOf({ claim_verification: 'on', critic: 'light' }), 'claims')
+  assert.equal(claimPolicyOf({ claim_verification: 'on', critic: 'claim' }), 'full')
+  assert.equal(claimPolicyOf({ claim_verification: 'on', critic: 'both' }), 'full')
+})
+
+test('BUG-289：方法库缺失（undefined）= N/A；库在但条目缺（null）= 红', async () => {
+  const { checkMethodLibrary } = await import('../../../checks/lib/gates/protocol-audit-core.mjs')
+  const protocol = baseProtocol({ method: { ...baseProtocol().method, kind: 'library', library_name: '格局调研', library_fields_sha256: '0'.repeat(64) } })
+  assert.deepEqual(checkMethodLibrary(protocol, undefined), [])
+  assert.equal(checkMethodLibrary(protocol, null).length, 1)
 })

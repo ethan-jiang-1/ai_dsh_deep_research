@@ -498,3 +498,12 @@ export function claimVerificationRequired(gates) {
   if (gates?.claim_verification === 'off') return false
   return gates?.critic === 'claim' || gates?.critic === 'both'
 }
+
+/** claim 裁决策略（BUG-287）：full = claims+verdict；claims = 只要求 claims 表；none = 不要求。 */
+export function claimPolicyOf(gates) {
+  if (gates?.claim_verification === 'off') return 'none'
+  if (gates?.critic === 'none' || gates?.critic === 'report') return 'none'
+  if (gates?.critic === 'light') return 'claims'
+  if (gates?.critic === 'claim' || gates?.critic === 'both') return 'full'
+  return 'full'
+}

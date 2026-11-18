@@ -160,9 +160,14 @@ if (isMain(import.meta.url)) {
     })
     : []
   const libraryPath = join(bundle, '..', 'method-library.md')
-  let methodLibraryEntry = null
-  if (protocol.method?.library_name !== null && protocol.method?.library_name !== undefined && existsSync(libraryPath)) {
-    const libText = readIf(libraryPath)
+  let methodLibraryEntry
+  const candidates = [libraryPath, join(bundle, '..', '..', 'method-library.md')]
+  if (process.env.DEEP_RESEARCH_WORKSPACE) candidates.push(join(process.env.DEEP_RESEARCH_WORKSPACE, 'method-library.md'))
+  const foundLibrary = protocol.method?.library_name === null || protocol.method?.library_name === undefined
+    ? null
+    : candidates.find((candidate) => existsSync(candidate))
+  if (foundLibrary !== null) {
+    const libText = readIf(foundLibrary)
     const name = String(protocol.method.library_name)
     const lines = libText.split('\n')
     const start = lines.findIndex((line) => line.startsWith('## ' + name))
@@ -180,7 +185,7 @@ if (isMain(import.meta.url)) {
       const m = new RegExp('^-\\s*' + label + '\\s*[:：]\\s*(.+)$', 'm').exec(section)
       if (m) fields[key] = m[1].trim()
     }
-    if (Object.keys(fields).length > 0) methodLibraryEntry = { name, fields }
+    methodLibraryEntry = Object.keys(fields).length > 0 ? { name, fields } : null
   }
   const findings = evaluateBundle({
     protocol,

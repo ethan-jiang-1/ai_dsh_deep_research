@@ -45,7 +45,7 @@
 |---|---|
 | record/record-role-fixture.mjs | 角色组装面 fixture 录制（真模型档一次性；录制品人审入库 + 在场景声明登记 source 身份，此后 keyless 永久回放） |
 | record/record-ci-oracle.mjs | CI 执行面与事件键的外部 oracle 录制（dev-only：真 `yaml@2` + 真 `bash -eo pipefail` + 按目标失败 stub `node`；测试只读 `tests/fixtures/ci-oracle/oracle.json`；`--check` 只比对） |
-| record/record-skill-golden.mjs | skill 正文 sha256 金标准（BUG-258）：`--check` 只比对；`--update`（默认）重录 `tests/fixtures/skill-golden/manifest.json` |
+| record/record-skill-golden.mjs | skill 正文 sha256 金标准（随包 presets + .agents/skills）：`--check` 只比对；`--update`（默认）重录 `tests/fixtures/skill-golden/manifest.json` |
 | record/record-type-closure.mjs | 公开类型面可达闭包记录（BUG-239）：`exports.types` 入口 + 相对 import 目标 → `tests/fixtures/shipped/type-closure.json`；`--check` 只比对；需先 build |
 | record/record-asset-ledger.mjs | 测试资产组合账生成（spec/check 的 lane/class/cost/uniqueClaim/oracleType/sunset；AST 自动推导 oracleType，测试重算对账，漂移 = 红） |
 | record/render-overlay.mjs | 生成器：从 pack 渲染 `tools/record/research.overlay.yml`（改 pack 后必跑，先于 L1） |

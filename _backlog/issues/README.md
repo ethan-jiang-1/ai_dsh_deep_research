@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| [2026-11-18-low-confidence-20-round2](2026-11-18-low-confidence-20-round2.md) | 推敲中 | 低置信区 20 卡（第 7 轮）：plan 门/覆盖金标准/缓存身份；280–299 |
+| （空） | — | 2026-11-18 第 7 轮已结，见 [_archived/settled_issues](../_archived/settled_issues/README.md) |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

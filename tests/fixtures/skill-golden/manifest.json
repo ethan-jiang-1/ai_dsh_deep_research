@@ -2,6 +2,50 @@
   "generatedBy": "tools/record/record-skill-golden.mjs",
   "skills": [
     {
+      "path": ".agents/skills/adding-a-research-role/SKILL.md",
+      "sha256": "6c011e470c527a465008fbcdf2da1eeae8b3e9786adfe31fabac962ff69e42e7"
+    },
+    {
+      "path": ".agents/skills/archiving-a-note/SKILL.md",
+      "sha256": "01886c53d8bd3337db5e7b1236020346e53eeb12e4daa3c6db2b1cadc304f239"
+    },
+    {
+      "path": ".agents/skills/bumping-vendor-pin/SKILL.md",
+      "sha256": "03f28cc39b0f493130d61ef178376ffde718dfe54a135a08b4f6166a7d4bdbbc"
+    },
+    {
+      "path": ".agents/skills/changing-node-topology/SKILL.md",
+      "sha256": "b1b62fc502312c9b3e26bc8aee0a33305caec5769ce60a0ab1ceca724f673e58"
+    },
+    {
+      "path": ".agents/skills/changing-ui-copy/SKILL.md",
+      "sha256": "d7dd19e664af4b09db44c7d3ba0bc854213035b10c6c38f4d9b0fb2cb9189ba7"
+    },
+    {
+      "path": ".agents/skills/exploratory-verification/SKILL.md",
+      "sha256": "79d0f24074daf87dbfd94bf8db1fda045b2f8748e92d4c227fa71ec3b28f9bf1"
+    },
+    {
+      "path": ".agents/skills/reproducing-a-failure/SKILL.md",
+      "sha256": "1515dfc5f9586b2418fc0fe62e5f83ba15dd5b88e264fe134e86f382f673b435"
+    },
+    {
+      "path": ".agents/skills/reviewing-a-delivery/SKILL.md",
+      "sha256": "88ae2a9a3dbb77290f7ed5972cfec3c5ed0e394380cf10ca11d1480690d2b053"
+    },
+    {
+      "path": ".agents/skills/running-a-research-run/SKILL.md",
+      "sha256": "29030a291ccb8ee328df7ec3b8efa39ce5fcef4354850305936cff237496413c"
+    },
+    {
+      "path": ".agents/skills/using-a-probe/SKILL.md",
+      "sha256": "ebb0935fa7262ea8593030edab172ebdc0e63f3bdcf51b29834aaf91d1f27fd1"
+    },
+    {
+      "path": ".agents/skills/writing-a-gate/SKILL.md",
+      "sha256": "fc160f6ccf96704edce9e46d299dc79dac022b9313e84b8e871cbb255d529adc"
+    },
+    {
       "path": "packages/deep-research-pack/presets/analyst/skills/evidence-extraction/SKILL.md",
       "sha256": "83b6a9b86d977ba1a1b6f22e06860e3864312d29d711db62fb292216a5cf098d"
     },

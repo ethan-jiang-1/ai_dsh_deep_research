@@ -6,6 +6,26 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [280](BUG-280-plan-gate-malformed-table-pass.md) | plan 表畸形/缺席时 planGate PASS 0 节点 | （畸形表红） | 2026-11-18 |
+| [281](BUG-281-plan-gate-version-absent.md) | plan 缺图版本时版本链跳过 | （版本必填） | 2026-11-18 |
+| [282](BUG-282-plan-gate-columns-unchecked.md) | plan 列 question/output/acceptance/budget/depth 可空 | （列必填/值域） | 2026-11-18 |
+| [283](BUG-283-plan-gate-wave-task-unchecked.md) | Wave 执行/task_id 无门 | （Wave/task_id 门） | 2026-11-18 |
+| [284](BUG-284-plan-gate-remaining-content-shallow.md) | 剩余工作只查标题 | （剩余工作内容） | 2026-11-18 |
+| [285](BUG-285-plan-gate-snapshot-content-unchecked.md) | 图版本快照只查在场 | （快照内容） | 2026-11-18 |
+| [286](BUG-286-claims-critical-exemption-any-string.md) | critical_exemption 任意字符串 | （exemption 格式） | 2026-11-18 |
+| [287](BUG-287-protocol-critic-light-no-behavior.md) | critic light 与 report 同判 | （claimPolicyOf） | 2026-11-18 |
+| [288](BUG-288-review-coverage-structural-only.md) | review 覆盖表只结构判据 | （卡数对账） | 2026-11-18 |
+| [289](BUG-289-method-library-path-bundle-parent.md) | 方法库只按 bundle 父目录 | （多路径/N/A） | 2026-11-18 |
+| [290](BUG-290-skill-golden-pack-only.md) | skill 金标准只覆盖随包 | （含 .agents 金标准） | 2026-11-18 |
+| [291](BUG-291-snapshot-c-only-lead.md) | snapshot C 只有 lead | （场景级 C 文档） | 2026-11-18 |
+| [292](BUG-292-client-load-role-picker-only.md) | client-load 只验角色选择器 | （role-picker 判据） | 2026-11-18 |
+| [293](BUG-293-agents-skill-golden-missing.md) | .agents/skills 无金标准 | （.agents 入金标准） | 2026-11-18 |
+| [294](BUG-294-snapshot-render-cases-only-lead.md) | renderExpected 只有 lead | （场景级 C 测试） | 2026-11-18 |
+| [295](BUG-295-client-load-method-editor-missing.md) | client-load 不含 method-editor | （method-editor 断言） | 2026-11-18 |
+| [296](BUG-296-probe-cache-profile-omitted.md) | probe 键不含 profile | （profile 入键） | 2026-11-18 |
+| [297](BUG-297-probe-cache-bootstrap-omitted.md) | probe 键不含 bootstrap | （bootstrap 入键） | 2026-11-18 |
+| [298](BUG-298-channel-cache-mtime-size-only.md) | pack 指纹只含 size/mtime | （内容 sha256） | 2026-11-18 |
+| [299](BUG-299-probe-cache-workspace-omitted.md) | probe 键不含 workspace | （workspace 入键） | 2026-11-18 |
 | [260](BUG-260-findings-support-evidence-existence-skips-without-lens.md) | findings 支撑证据存在性被 lens 条件吞掉 | （证据存在性脱离 lens） | 2026-11-18 |
 | [261](BUG-261-findings-lens-gaps-presence-file-global.md) | lens_gaps 存在性用文件级正则，缺行块被掩盖 | （lens_gaps 块级） | 2026-11-18 |
 | [262](BUG-262-findings-lens-gaps-empty-file-global-false-red.md) | lens_gaps [] 文件级误伤其他「无」块 | （[] 块级） | 2026-11-18 |

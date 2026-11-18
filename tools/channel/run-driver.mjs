@@ -35,7 +35,7 @@ import { fileURLToPath } from 'node:url';
 import { isMain } from '../../checks/lib/shared/cli-entry.mjs';
 import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../../checks/lib/channel/run-channel.mjs';
 import { profileGuardDecision } from '../../checks/lib/channel/profile-guard.mjs';
-import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey, probeSourceFingerprint } from '../../checks/lib/channel/channel-cache.mjs';
+import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey, probeIdentityOf, probeSourceFingerprint } from '../../checks/lib/channel/channel-cache.mjs';
 import { authenticate } from '../../checks/lib/shared/web-harness.mjs';
 
 export { guiUrlFromWebLog, runDriverVerdict };
@@ -49,6 +49,7 @@ const WEB_LOG = join(STATE_DIR, 'web.log');
 const BOOT_LOG = join(STATE_DIR, 'run-driver-boot.log');
 const DEFAULT_PORT = process.env.DSH_RUN_PORT || '3083';
 const DEFAULT_PROFILE = process.env.DSH_RUN_PROFILE || 'deep-research';
+const RUN_WORKSPACE = process.env.DSH_RUN_WORKSPACE ?? process.env.DEEP_RESEARCH_WORKSPACE ?? join(ROOT, 'research-workspace');
 const PACK_DIR = join(ROOT, 'packages', 'deep-research-pack');
 // 验证缓存：只存最近一次 GREEN（键 = pack 指纹 + runtime 构建指纹 + 断言参数）；见 checks/lib/channel/channel-cache.mjs。
 const PROBE_CACHE = join(STATE_DIR, 'probe-cache.json');
@@ -361,7 +362,7 @@ if (noProbe) {
 if (!forceProbe && drift?.clean === true) {
   const cached = readProbeCache();
   const packId = packFingerprint(collectPackEntries(PACK_DIR));
-  const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: `${devShellFingerprint()}:${probeSourceFingerprint(ROOT)}` })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
+  const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: `${devShellFingerprint()}:${probeSourceFingerprint(ROOT)}:${probeIdentityOf({ profile: wantProfile, bootstrap: wantBootstrap, workspace: RUN_WORKSPACE })}` })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
   const hit = probeCacheHit({ entry: cached, key, now: Date.now() });
   if (hit.hit) {
     const ready = await httpReady(state.url);
@@ -397,7 +398,7 @@ if (submitted) {
   // 只缓存 GREEN（键 = pack 指纹 + runtime 构建 + 断言参数；冷启动可复用）；红/未跑永不入缓存。
   try {
     const packId = packFingerprint(collectPackEntries(PACK_DIR));
-    const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: `${devShellFingerprint()}:${probeSourceFingerprint(ROOT)}` })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
+    const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: `${devShellFingerprint()}:${probeSourceFingerprint(ROOT)}:${probeIdentityOf({ profile: wantProfile, bootstrap: wantBootstrap, workspace: RUN_WORKSPACE })}` })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
     writeFileSync(PROBE_CACHE, JSON.stringify({ key, at: new Date().toISOString(), level: v.level, payload }, null, 2));
   } catch {}
 }

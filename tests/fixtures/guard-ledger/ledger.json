@@ -1252,6 +1252,166 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "supports T999 → 红"
+    },
+    {
+      "id": "BUG-280",
+      "mechanism": "plan 表畸形/缺席时 planGate PASS 0 节点",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "畸形表 → 红"
+    },
+    {
+      "id": "BUG-281",
+      "mechanism": "plan 缺图版本时版本链跳过",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "删图版本 → 红"
+    },
+    {
+      "id": "BUG-282",
+      "mechanism": "plan question/output/acceptance/budget/depth 可空",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "缺列 → 红"
+    },
+    {
+      "id": "BUG-283",
+      "mechanism": "Wave 执行/task_id/plan-only 无门",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "Wave 层非 plan-only → 红"
+    },
+    {
+      "id": "BUG-284",
+      "mechanism": "剩余工作只查标题",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "空/缺 owner+next → 红"
+    },
+    {
+      "id": "BUG-285",
+      "mechanism": "图版本快照只查在场",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "空快照 → 红"
+    },
+    {
+      "id": "BUG-286",
+      "mechanism": "critical_exemption 任意字符串",
+      "guard": "tests/run/gates/verdict-audit.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "x → claims-invalid 红"
+    },
+    {
+      "id": "BUG-287",
+      "mechanism": "critic light 与 report 同判",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "claimPolicyOf 矩阵红"
+    },
+    {
+      "id": "BUG-288",
+      "mechanism": "review 覆盖表只结构判据",
+      "guard": "tests/run/gates/review-contract.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "声明 2 卡实际 1 卡 → 红"
+    },
+    {
+      "id": "BUG-289",
+      "mechanism": "method library 只按 bundle 父目录",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "undefined 应 N/A、null 红"
+    },
+    {
+      "id": "BUG-290",
+      "mechanism": "skill 金标准只覆盖随包",
+      "guard": "tests/checks/shared/skill-golden.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": ".agents 变更 → 金标准红"
+    },
+    {
+      "id": "BUG-291",
+      "mechanism": "snapshot C 只有 lead（设计：场景级）",
+      "guard": "checks/smoke/snapshot-replay.entry.mjs",
+      "oracleType": "none",
+      "status": "closed",
+      "redRecipe": "文档/场景声明检查"
+    },
+    {
+      "id": "BUG-292",
+      "mechanism": "client-load 只验角色选择器",
+      "guard": "checks/smoke/client-load.entry.mjs",
+      "oracleType": "none",
+      "status": "closed",
+      "redRecipe": "真浏览器断言（nightly）"
+    },
+    {
+      "id": "BUG-293",
+      "mechanism": ".agents/skills 无金标准",
+      "guard": "tests/checks/shared/skill-golden.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": ".agents 技能变更 → 红"
+    },
+    {
+      "id": "BUG-294",
+      "mechanism": "renderExpected 只有 lead（设计：场景级）",
+      "guard": "checks/smoke/snapshot-replay.entry.mjs",
+      "oracleType": "none",
+      "status": "closed",
+      "redRecipe": "场景声明检查"
+    },
+    {
+      "id": "BUG-295",
+      "mechanism": "client-load 不含 method-editor",
+      "guard": "checks/smoke/client-load.entry.mjs",
+      "oracleType": "none",
+      "status": "closed",
+      "redRecipe": "选择器含 Method Editor"
+    },
+    {
+      "id": "BUG-296",
+      "mechanism": "probe 缓存键不含 profile",
+      "guard": "tests/run/channel/channel-cache.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "profile 变 → 身份变"
+    },
+    {
+      "id": "BUG-297",
+      "mechanism": "probe 缓存键不含 bootstrap",
+      "guard": "tests/run/channel/channel-cache.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "bootstrap 变 → 身份变"
+    },
+    {
+      "id": "BUG-298",
+      "mechanism": "pack 指纹只含 size/mtime",
+      "guard": "tests/run/channel/channel-cache.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "同 size/mtime 内容变 → 指纹变"
+    },
+    {
+      "id": "BUG-299",
+      "mechanism": "probe 缓存键不含 workspace",
+      "guard": "tests/run/channel/channel-cache.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "workspace 变 → 身份变"
     }
   ]
 }

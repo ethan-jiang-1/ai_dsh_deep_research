@@ -16,6 +16,7 @@ import {
   probeCacheHit,
   probeCacheKey,
   importClosureHash,
+  probeIdentityOf,
   readShippedCache,
   writeShippedCache,
 } from '../../../checks/lib/channel/channel-cache.mjs'
@@ -130,4 +131,20 @@ test('import 闭包哈希：跟随相对 import/动态 import，内容变则变�
   assert.notEqual(base, hashOf({ ...files, 'tools/channel/a.mjs': files['tools/channel/a.mjs'] + '// x\n' }), '入口依赖变 → 变')
   assert.notEqual(base, hashOf({ ...files, 'tools/channel/run-driver.mjs': files['tools/channel/run-driver.mjs'] + '// probe\n' }), '驱动自身变 → 变')
   assert.equal(hashOf({ 'tools/channel/run-driver.mjs': '// no imports\n' }).length, 16)
+})
+
+// 负例留证 2026-11-18：BUG-296 / BUG-297 / BUG-298 / BUG-299——身份/内容哈希变化必须 miss。
+// ── 缓存身份 ─────────────────────────────────────────────
+test('packFingerprint：内容 sha256 变化即变（同 size/mtime 也不行）（BUG-298）', () => {
+  const a = [{ rel: 'a.md', size: 10, mtimeMs: 1000, sha256: 'a'.repeat(64) }]
+  const b = [{ rel: 'a.md', size: 10, mtimeMs: 1000, sha256: 'b'.repeat(64) }]
+  assert.notEqual(packFingerprint(a), packFingerprint(b))
+})
+
+test('probeIdentityOf：profile/bootstrap/workspace 任一变化都改变身份（BUG-296 / BUG-297 / BUG-299）', () => {
+  const base = probeIdentityOf({ profile: 'deep-research', bootstrap: false, workspace: '/ws' })
+  assert.notEqual(base, probeIdentityOf({ profile: 'research', bootstrap: false, workspace: '/ws' }))
+  assert.notEqual(base, probeIdentityOf({ profile: 'deep-research', bootstrap: true, workspace: '/ws' }))
+  assert.notEqual(base, probeIdentityOf({ profile: 'deep-research', bootstrap: false, workspace: '/other' }))
+  assert.equal(base, probeIdentityOf({ profile: 'deep-research', bootstrap: false, workspace: '/ws' }))
 })

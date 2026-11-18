@@ -1,6 +1,6 @@
 // skill-golden.test.mjs — skill 正文 sha256 金标准（BUG-258）。
 //
-// 负例留证 2026-11-18：BUG-258——改任一 SKILL.md 正文 → 本测试红（快照 B 只比 catalog，抓不到）；
+// 负例留证 2026-11-18：BUG-258 / BUG-290 / BUG-293——改任一 SKILL.md 正文 → 本测试红（快照 B 只比 catalog，抓不到）；
 // 还原 → 绿；金标准为空 → 红（防空语料）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
@@ -11,7 +11,7 @@ import { skillBodyManifest, skillGoldenIssues } from '../../../checks/lib/shared
 const ROOT = join(import.meta.dirname, '..', '..', '..')
 const GOLDEN = JSON.parse(readFileSync(join(ROOT, 'tests', 'fixtures', 'skill-golden', 'manifest.json'), 'utf8')).skills
 
-test('skill 正文 = 金标准哈希；新增/删除/改动都必须显式重录（BUG-258）', () => {
+test('skill 正文 = 金标准哈希；随包 + .agents 新增/删除/改动都必须显式重录（BUG-258 / BUG-290 / BUG-293）', () => {
   const actual = skillBodyManifest(ROOT)
   assert.ok(actual.length >= 10, `防空语料：skill 过少（${actual.length}）`)
   assert.deepEqual(skillGoldenIssues(actual, GOLDEN), [])

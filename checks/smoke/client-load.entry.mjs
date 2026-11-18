@@ -56,6 +56,7 @@ import { cpus, freemem, loadavg } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from '../lib/shared/env.mjs'
+import { rolePickerIssues } from '../lib/harness/role-picker.mjs'
 import { reclaimPort } from '../lib/harness/port-reclaim.mjs'
 import { authenticate, bootWeb, makeRpc } from '../lib/shared/web-harness.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/harness/vendor-artifacts.mjs'
@@ -402,7 +403,8 @@ const saveArtifacts = async (reason, extra = {}) => {
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms))
 
-/** 角色选择器：点开 seat 标签，读全部 preset 名，断言四个研究角色连续相邻（W3-5 退役 e2e-021rc2 的替代断言）。
+/** 角色选择器：点开 seat 标签，读全部 preset 名，断言四个研究角色连续相邻 + Method Editor（D37）在场
+ *  （W3-5 / BUG-292/295；C 渲染面归 snapshot C，不在此逐角色重开）。
  *  只对「首次点开零 preset」重试一次；拿到名字后的数量/连续性断言不重试。 */
 async function assertRolePicker(page) {
   const readNames = async () => {
@@ -420,10 +422,8 @@ async function assertRolePicker(page) {
   if (names === null || names.length === 0) { await wait(3_000); names = await readNames() }
   if (names === null) return { ok: false, detail: '角色 seat 标签缺席（首屏未挂载）' }
   if (names.length === 0) return { ok: false, detail: '角色选择器点开后零 preset（弹层未渲染）' }
-  const research = names.filter((n) => n.startsWith('Deep Research'))
-  const idx = names.map((n, i) => (n.startsWith('Deep Research') ? i : -1)).filter((i) => i >= 0)
-  const contiguous = idx.length === 4 && idx.every((v, k) => k === 0 || v === idx[k - 1] + 1)
-  return { ok: research.length === 4 && contiguous, detail: `四个角色=${String(research.length)} 连续=${String(contiguous)} 序列=[${names.join(' | ')}]` }
+  const issues = rolePickerIssues(names)
+  return { ok: issues.length === 0, detail: `${issues.join('；') || '四角色连续 + Method Editor'}；序列=[${names.join(' | ')}]` }
 }
 // 侧栏会话定位全套（clickRowByText / openSessionById / expandGroup / 候选分组名）=
 // lib/web-ui-nav.mjs **唯一正本**（data-row-key 主锚，2026-10-21 收拢——本件原私有
@@ -624,7 +624,7 @@ async function pass1BoundFacePhase() {
   if (await newSession.isVisible({ timeout: 2_000 }).catch(() => false)) await newSession.click({ timeout: 5_000 }).catch(() => {})
   await wait(1_000)
   const rolePicker = await assertRolePicker(page)
-  step(rolePicker.ok, '角色选择器：四个 Deep Research preset 连续相邻', rolePicker.detail)
+  step(rolePicker.ok, '角色选择器：四个研究 preset 连续相邻 + Method Editor', rolePicker.detail)
   const boundOk = boundSession !== null && expectedFace !== null
   step(boundOk, '磁盘侧找到绑定 run 的带历史会话（渐进面真数据源）', boundOk ? `「${boundSession.title}」→ drt_${boundSession.slug}` : '缺——先跑一场 run（run 通道现用 workspaceId 形态建会话）')
   if (boundOk) {

@@ -322,7 +322,7 @@ test('BUG-159 claims evidence/topics：不存在/绝对路径/不存在 topic �
   assert.ok(codes(absolute).includes('claim-evidence'))
 })
 
-// 负例留证 2026-11-18：BUG-270 / BUG-274 / BUG-275——非 http(s)/重复 URL、冲突裁决、zero-critical 无豁免各自红。
+// 负例留证 2026-11-18：BUG-270 / BUG-274 / BUG-275 / BUG-286——非 http(s)/重复 URL、冲突裁决、zero-critical 无豁免各自红。
 // ── BUG-270 / 274 / 275：URL / 冲突 / zero-critical（2026-11-18）──────────────
 test('URL 字段只认 http(s)、去重（BUG-270）', () => {
   const bad = JSON.parse(claimsTextOf([C1]))
@@ -339,4 +339,12 @@ test('同 claim 不同裁决 → verdict-conflict 红；同值重复只警告（
   const same = auditClaimVerdicts(fixture({ verdicts: [{ ...base, verdict: 'supported' }, { ...base, verdict: 'supported' }] }))
   assert.ok(!codes(same).includes('verdict-conflict'))
   assert.ok(warnCodes(same).includes('verdict-duplicate'))
+})
+
+test('BUG-286：critical_exemption 太短/不提 critical → claims-invalid；合规理由绿', () => {
+  const base = JSON.parse(claimsTextOf([C1]))
+  base.critical_exemption = 'x'
+  assert.ok(codes(auditClaimVerdicts(fixture({ claimsText: JSON.stringify(base) }))).includes('claims-invalid'))
+  base.critical_exemption = '本 run 全部为事实性核对，没有需要 claim 级裁决的关键结论（理由见 review）'
+  assert.ok(!codes(auditClaimVerdicts(fixture({ claimsText: JSON.stringify(base) }))).includes('claims-invalid'))
 })

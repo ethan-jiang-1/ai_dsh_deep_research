@@ -10,6 +10,7 @@ import { join } from 'node:path'
 /** presets/<role>/skills/<n>/SKILL.md 的 sha256 清单（按路径排序）。 */
 export function skillBodyManifest(root, { read = readFileSync } = {}) {
   const presets = join(root, 'packages', 'deep-research-pack', 'presets')
+  const agentsSkills = join(root, '.agents', 'skills')
   const out = []
   for (const role of readdirSync(presets, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name).sort()) {
     const skills = join(presets, role, 'skills')
@@ -22,7 +23,21 @@ export function skillBodyManifest(root, { read = readFileSync } = {}) {
       out.push({ path: rel, sha256: createHash('sha256').update(text).digest('hex') })
     }
   }
-  return out
+  const walkAgents = (dir, rel = '') => {
+    let entries
+    try { entries = readdirSync(dir, { withFileTypes: true }) } catch { return }
+    for (const entry of entries) {
+      const child = join(dir, entry.name)
+      const childRel = rel === '' ? entry.name : rel + '/' + entry.name
+      if (entry.isDirectory()) walkAgents(child, childRel)
+      else if (entry.name === 'SKILL.md') {
+        const path = '.agents/skills/' + childRel
+        try { out.push({ path, sha256: createHash('sha256').update(read(child, 'utf8')).digest('hex') }) } catch { /* 缺席跳过 */ }
+      }
+    }
+  }
+  walkAgents(agentsSkills)
+  return out.sort((a, b) => a.path.localeCompare(b.path))
 }
 
 /** 盘上 manifest vs 金标准：缺文件/多文件/哈希变都点名（空金标准 = 红，防空语料）。 */
