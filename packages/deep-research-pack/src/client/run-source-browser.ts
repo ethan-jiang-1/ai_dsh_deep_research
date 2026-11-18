@@ -2,7 +2,7 @@
  * run-source-browser.ts —— `RunSource` 的浏览器适配器（run-context 的 client 半）。
  *
  * 只做三件事：把 `remote.workspaceFiles` 的 wire 结果翻译成 run-context 的 Entry/Page/version；
- * 位置规则、同名优先级、读策略、翻页全在 `src/lib/run-context.ts`，本件不重复。
+ * 位置规则、同名优先级、读策略、翻页全在 `run-context 折算件`，本件不重复。
  *
  * 失败映射：`workspace-file/not-found` → missing；其它错误（通道、权限、非文本、超限）→ unreadable。
  * 空目录/空文件是 `ok` 的空值——目录缺失与目录为空必须分开，否则 openRun 会把「根还没建」误判成

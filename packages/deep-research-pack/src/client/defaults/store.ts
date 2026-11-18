@@ -5,7 +5,7 @@
  * 写：唯一路径 = `remote.commands.execute('/research-defaults …')`；面板不直写。
  * 「自动」= 文件/字段缺席；本 store 不物化默认值：无文件就是 auto，unset 后回 auto。
  *
- * 纯折算住 `src/lib/research-defaults.ts`（keyless 测）；本文件只做状态机与 remote 接线。
+ * 纯折算住 `research-defaults 折算件`（keyless 测）；本文件只做状态机与 remote 接线。
  */
 import { useEffect, useSyncExternalStore } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'

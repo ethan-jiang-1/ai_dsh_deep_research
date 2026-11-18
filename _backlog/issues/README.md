@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| [2026-11-18-move-residuals](2026-11-18-move-residuals.md) | 推敲中 | 搬家残差 II：tests/checks owner 六分（61 文件）+ 原命名空间残余（发布文本/依赖闭包/干净室/profile 守卫/发布 manifest）；10 张卡 240–249 |
+| （空） | — | 2026-11-18 探索轮已结，见 [_archived/settled_issues](../_archived/settled_issues/README.md) |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

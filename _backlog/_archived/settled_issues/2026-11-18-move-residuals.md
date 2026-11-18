@@ -1,18 +1,18 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-11-18
 ---
 
 # 推敲：搬家残差 II——tests/checks owner 六分 + 原命名空间残余（2026-11-18）
 
-> 立卡：2026-11-18 ｜ 状态：推敲中（两条线第一轮已跑；10 张卡 240–249） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-18 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是｜ 结论：10 卡全部修复归档（240–249）；tests/checks owner 间接规则与发布面残余落地 ｜ 审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 三干净室入口 ｜ 可关闭：是（2026-11-18）
 >
 > **一句话**：先审计最近的 `tests/checks` 按 owner 六分（95b29c68，61 文件），再回到原命名空间搬家面
 > （发布文本/依赖/安装/守卫）继续挖；10 张卡，只报不修。
 >
-> 前序 = [命名空间搬家](../_archived/settled_issues/2026-11-17-exploratory-namespace-move.md) ·
-> [运行时/开发边界](../_archived/settled_issues/2026-11-17-runtime-dev-boundary.md) ·
-> [运行时依赖/安装](../_archived/settled_issues/2026-11-17-runtime-deps-install-boundary.md)
+> 前序 = [命名空间搬家](2026-11-17-exploratory-namespace-move.md) ·
+> [运行时/开发边界](2026-11-17-runtime-dev-boundary.md) ·
+> [运行时依赖/安装](2026-11-17-runtime-deps-install-boundary.md)
 > （219–239 已由 `f3829bea` / `83acbb7c` 修复归档）。
 
 **问题与期望结果：** 最近一次搬家把 `tests/checks` 从平铺拆成六个 owner 目录（`analyze/channel/harness/repo/shared/test-infra`），
@@ -58,16 +58,16 @@ opened: 2026-11-18
 
 | 卡 | 线 | 严重级 | 状态 | 一句话 |
 |---|---|---|---|---|
-| [240](../bugs/BUG-240-clean-room-module-leak-base-home-root.md) | B | P2 | 修复就绪 | clean-room 从 home 根解析，profile 内仓内泄漏看不见 |
-| [241](../bugs/BUG-241-clean-room-leak-names-hardcoded.md) | B | P2 | 修复就绪 | 干净室只探测 3 个包名，新增 peer 不覆盖 |
-| [242](../bugs/BUG-242-run-driver-profile-flag-bypasses-guard.md) | B | P2 | 修复就绪 | run-driver 守卫只看 env/default，不看 `--profile` |
-| [243](../bugs/BUG-243-boot-run-direct-profile-guard-bypass.md) | B | P2 | 修复就绪 | `boot-run.sh` 直起不守卫，`DSH_RUN_PROFILE=research` 绕过 |
-| [244](../bugs/BUG-244-pack-client-bundle-src-path-comments.md) | B | P2 | 修复就绪 | 发布 client bundle 10 条 `src/`/`packages/` 注释 |
-| [245](../bugs/BUG-245-shipped-surface-misses-src-packages-roots.md) | B | P2 | 等人拍板 | `shipped-surface` 词表无 `src/`/`packages/` |
-| [246](../bugs/BUG-246-pack-deps-host-row-prefix-skips-dead-peers.md) | B | P2 | 等人拍板 | `pack-deps` 跳过所有 `dsh-*` host peer，死 peer 不可见 |
-| [247](../bugs/BUG-247-pack-deps-dynamic-import-blind.md) | B | P2 | 修复就绪 | `pack-deps` 只抽 `require`，不抽动态 `import()` |
-| [248](../bugs/BUG-248-test-owner-mirror-helper-indirection.md) | A | P2 | 修复就绪 | owner 规则只看直接 import；helper 可隐藏单 owner 依赖 |
-| [249](../bugs/BUG-249-tarball-dev-scripts-in-published-manifest.md) | B | P2 | 等人拍板 | tarball `package.json` 仍带 `build`/`prepack: pnpm build` |
+| [240](../fixed_bugs/BUG-240-clean-room-module-leak-base-home-root.md) | B | P2 | 修复就绪 | clean-room 从 home 根解析，profile 内仓内泄漏看不见 |
+| [241](../fixed_bugs/BUG-241-clean-room-leak-names-hardcoded.md) | B | P2 | 修复就绪 | 干净室只探测 3 个包名，新增 peer 不覆盖 |
+| [242](../fixed_bugs/BUG-242-run-driver-profile-flag-bypasses-guard.md) | B | P2 | 修复就绪 | run-driver 守卫只看 env/default，不看 `--profile` |
+| [243](../fixed_bugs/BUG-243-boot-run-direct-profile-guard-bypass.md) | B | P2 | 修复就绪 | `boot-run.sh` 直起不守卫，`DSH_RUN_PROFILE=research` 绕过 |
+| [244](../fixed_bugs/BUG-244-pack-client-bundle-src-path-comments.md) | B | P2 | 修复就绪 | 发布 client bundle 10 条 `src/`/`packages/` 注释 |
+| [245](../fixed_bugs/BUG-245-shipped-surface-misses-src-packages-roots.md) | B | P2 | 修复就绪 | `shipped-surface` 词表无 `src/`/`packages/` |
+| [246](../fixed_bugs/BUG-246-pack-deps-host-row-prefix-skips-dead-peers.md) | B | P2 | 修复就绪 | `pack-deps` 跳过所有 `dsh-*` host peer，死 peer 不可见 |
+| [247](../fixed_bugs/BUG-247-pack-deps-dynamic-import-blind.md) | B | P2 | 修复就绪 | `pack-deps` 只抽 `require`，不抽动态 `import()` |
+| [248](../fixed_bugs/BUG-248-test-owner-mirror-helper-indirection.md) | A | P2 | 修复就绪 | owner 规则只看直接 import；helper 可隐藏单 owner 依赖 |
+| [249](../fixed_bugs/BUG-249-tarball-dev-scripts-in-published-manifest.md) | B | P2 | 修复就绪 | tarball `package.json` 仍带 `build`/`prepack: pnpm build` |
 
 **A 线复核（已关闭，不另开卡）**：
 
@@ -98,6 +98,29 @@ opened: 2026-11-18
 | profile 守卫 | 已探（2 卡） | 242 / 243 |
 | pack-deps 闭包 | 已探（2 卡） | 246 / 247 |
 | 发布 manifest scripts | 已探（1 卡） | 249 |
+
+## 批修复（2026-11-18 用户放行 245/246/249；批 Note 待收口）
+
+用户决定：host peer 用显式 allowlist（每条带理由）、发布 manifest 删除 scripts、dev-root 只加
+`src`/`packages` 两个源码根、owner 允许 helper 间接（跨 owner 归 shared）。
+
+| 阶段 | 内容 | 卡 |
+|---|---|---|
+| P1 | 干净室：`moduleLeakOf` 按 `home/profiles/<profile>` 解析；探测集 = 全部 peers；三入口传 profile | 240/241 |
+| P2 | profile 守卫：`run-driver` 判实际 `--profile`；`boot-run.sh` 直起同文案 fail-loud（`DSH_ALLOW_STALE_PROFILE=1` 逃生） | 242/243 |
+| P3 | 发布面：`src`/`packages` 入 dev-root 闭集；24 个源文件/28 处注释改行为描述；重建后 bundle 归零 | 244/245 |
+| P4 | pack-deps：动态 `import()` 进闭包；host peer 前缀豁免改 `HOST_ROW_PEERS` 显式 allowlist（含腐烂检查） | 246/247 |
+| P5 | owner：owner = 直接 import ∪ 经本地 helper 递归；跨 owner 仍归 shared | 248 |
+| P6 | 发布 manifest：剥离 `scripts`（build/prepack 不随包）；tarball 断言 | 249 |
+
+## 收口（2026-11-18）
+
+10 张卡全部 `已修` 并归档到 [fixed 池](../fixed_bugs/README.md)；批 Note =
+[2026-11-18-move-residuals-ii](../../../notes/implemented/2026-11-18-move-residuals-ii.md)。
+干净室按 profile 解析 + peer 全量探测；run-driver/boot-run 守卫覆盖直起入口；发布面 dev-root 补
+`src`/`packages` 并清掉 24 个源文件注释；pack-deps 抽动态 import + host allowlist；owner 规则走
+helper 间接闭包；发布 manifest 删除 scripts。`pnpm verify` / `pnpm test` / `pack.e2e` /
+三干净室入口全绿；红证回放见各卡 `fix-evidence`。
 
 ## 验收标准
 

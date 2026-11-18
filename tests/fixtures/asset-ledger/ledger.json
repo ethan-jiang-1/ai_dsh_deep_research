@@ -19,7 +19,7 @@
       "class": "check-gate",
       "cost": "fast-inproc",
       "uniqueClaim": "profile-guard.test.mjs — 非默认 profile 守卫的纯判据（BUG-237）。",
-      "oracleType": "self-referential",
+      "oracleType": "canonical",
       "sunset": "随门禁/台账合同退役"
     },
     {
@@ -29,7 +29,7 @@
       "class": "check-gate",
       "cost": "fast-inproc",
       "uniqueClaim": "clean-room-policy.test.mjs — 干净室三判据的纯函数矩阵（BUG-233 / 234 / 235）。",
-      "oracleType": "self-referential",
+      "oracleType": "structured",
       "sunset": "随门禁/台账合同退役"
     },
     {
@@ -218,7 +218,7 @@
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "pack-deps.test.mjs — 发布物依赖闭包判据的纯函数矩阵（BUG-229 / 232 / 238）。",
+      "uniqueClaim": "pack-deps.test.mjs — 发布物依赖闭包判据的纯函数矩阵（BUG-229 / 232 / 238 / 246 / 247）。",
       "oracleType": "canonical",
       "sunset": "随门禁/台账合同退役"
     },

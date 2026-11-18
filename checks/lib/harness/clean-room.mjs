@@ -16,13 +16,12 @@
 
 import { spawn, spawnSync } from 'node:child_process'
 import { chmodSync, existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { scrubbedEnv } from '../shared/env.mjs'
-import { dshVersionOfOutput, engineVersionIssues, isOutsideRepo, repoLeaksOf } from './clean-room-policy.mjs'
+import { dshVersionOfOutput, engineVersionIssues, isOutsideRepo } from './clean-room-policy.mjs'
 
-export { isOutsideRepo }
+export { isOutsideRepo, moduleLeakOf } from './clean-room-policy.mjs'
 
 /** 仓外 mkdtemp home（不在仓库祖先链上）。 */
 export function cleanHome(root, prefix) {
@@ -57,19 +56,6 @@ export function engineIssues(root, bin, pkg, { cwd } = {}) {
   const { status, output } = versionOf(bin, { cwd })
   if (status !== 0) return [`dsh --version 不可用（exit ${String(status)}）：${output}`]
   return engineVersionIssues(dshVersionOfOutput(output), pkg?.engines?.dsh)
-}
-
-/**
- * 模块解析祖先检查：从 home 解析 names；若命中 ROOT 内的路径 = 仓内依赖泄漏（假绿）。
- * 解析不到 = 干净室（缺失 peer 应在这里暴露，而不是被仓根 node_modules 补齐）。
- */
-export function moduleLeakOf({ home, root, names }) {
-  const requireFromHome = createRequire(join(home, 'clean-room-probe.cjs'))
-  const resolvedPaths = []
-  for (const name of names) {
-    try { resolvedPaths.push(requireFromHome.resolve(name)) } catch { /* 解析不到 = 干净室 */ }
-  }
-  return repoLeaksOf(root, resolvedPaths)
 }
 
 /** 建 web 模板 profile（自定义 profile 名默认只有 base，起不了 web——先补 web-app）。 */

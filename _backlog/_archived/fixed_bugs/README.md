@@ -6,6 +6,16 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [240](BUG-240-clean-room-module-leak-base-home-root.md) | clean-room 的 moduleLeakOf 从 home 根解析，profile 内仓内泄漏看不见 | （按 profile 解析 + 全 peer 探测） | 2026-11-18 |
+| [241](BUG-241-clean-room-leak-names-hardcoded.md) | 干净室只探测 3 个包名，新增 peer 不覆盖 | （peer 全量派生 + 三入口共用） | 2026-11-18 |
+| [242](BUG-242-run-driver-profile-flag-bypasses-guard.md) | run-driver 守卫只看 env/default，不看 --profile | （判实际 --profile） | 2026-11-18 |
+| [243](BUG-243-boot-run-direct-profile-guard-bypass.md) | boot-run.sh 直起不守卫，非默认 profile 跳过漂移检测 | （boot-run fail-loud + 逃生口） | 2026-11-18 |
+| [244](BUG-244-pack-client-bundle-src-path-comments.md) | 发布 client bundle 10 条 src/packages 源注释 | （源注释改行为描述 + 重建归零） | 2026-11-18 |
+| [245](BUG-245-shipped-surface-misses-src-packages-roots.md) | shipped-surface 词表漏 src/packages 源码根 | （src/packages 入词表） | 2026-11-18 |
+| [246](BUG-246-pack-deps-host-row-prefix-skips-dead-peers.md) | pack-deps 前缀豁免让死 host peer 不可见 | （HOST_ROW_PEERS 显式 allowlist） | 2026-11-18 |
+| [247](BUG-247-pack-deps-dynamic-import-blind.md) | pack-deps 不抽动态 import() | （动态 import() 进闭包） | 2026-11-18 |
+| [248](BUG-248-test-owner-mirror-helper-indirection.md) | owner 规则只看直接 import，helper 可隐藏单 owner 依赖 | （helper 间接闭包） | 2026-11-18 |
+| [249](BUG-249-tarball-dev-scripts-in-published-manifest.md) | tarball manifest 仍带 build/prepack 开发 scripts | （发布 manifest 删 scripts） | 2026-11-18 |
 | [BUG-229](BUG-229-client-bundle-react-peer-missing.md) | client bundle require react/react-dom，peerDependencies 没有 React | （undefined） | 2026-11-17 |
 | [BUG-230](BUG-230-shipped-surface-devref-lookbehind-bypass.md) | shipped-surface 的 devRefsOf 漏 ./ ../ 裸根 反斜杠——一个前缀绕过守卫 | （undefined） | 2026-11-17 |
 | [BUG-231](BUG-231-shipped-surface-source-scan-gaps.md) | 源侧扫描漏 content/**/*.js 与 locale*——push 绿、nightly 红 | （undefined） | 2026-11-17 |

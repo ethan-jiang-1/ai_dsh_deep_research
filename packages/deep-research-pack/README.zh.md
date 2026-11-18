@@ -207,7 +207,7 @@ client 行。团队可视化行（`ui-agent-team`）归团队机制层，不在�
 | `workers/*.patch.yml` | 两条非角色 worker profile 行（`research-worker` / `research-wave`） |
 | `presets/*/skills/` | 按角色硬隔离的方法论 skill |
 | `content/manual.md`, `content/templates/run/` | 注入的手册与 run 模板 |
-| `src/content/`, `src/startup/`, `src/client/`, `src/fetch-fallback/` | 注入内容、启动行、驾驶舱与抓取 provider 的源码 |
+| 源码半（构建为 `lib/`） | 注入内容、启动行、驾驶舱与抓取 provider |
 | `scripts/doctor.mjs` | 只读 `dsh-deep-research-doctor` |
 
 </details>

@@ -4,7 +4,7 @@
 // 本文件扫**随包源码文本**（由 files 允许集派生 + src 注释）+ manifest 不动量 + 类型闭包夹具。
 //
 // 负例留证 2026-11-17：BUG-219 / BUG-220 / BUG-221 / BUG-222 / BUG-223 / BUG-224 / BUG-225 / BUG-226 /
-// BUG-227 / BUG-228 / BUG-229 / BUG-230 / BUG-231 / BUG-232 / BUG-236 / BUG-238 / BUG-239
+// BUG-227 / BUG-228 / BUG-229 / BUG-230 / BUG-231 / BUG-232 / BUG-236 / BUG-238 / BUG-239 / BUG-244 / BUG-245
 // ——本文件的判据都在当前树先红后绿：把 `./checks/…` / `checks/` 写回随包文本、把 `files` 改回 `lib/**`、
 // 删一个闭包类型文件、或把 `content/waves/lens-fanout.js` 写进 dev 引用，各见红；还原 → 绿。
 import { test } from 'node:test'
@@ -107,13 +107,15 @@ test('发布清单 / 顶层集合 / 匹配器的纯函数矩阵', () => {
   assert.equal(matchesFilesPattern('lib/deep/x.js', 'lib/*.js'), false)
 })
 
-test('dev 引用判据的边界：前缀归一、裸根、反斜杠、开发实例名、运行期词与 URL（BUG-230）', () => {
+test('dev 引用判据的边界：前缀归一、裸根、反斜杠、开发实例名、源码根、运行期词与 URL（BUG-230 / BUG-244 / BUG-245）', () => {
   const refs = (text) => devRefsOf(text).map((entry) => entry.ref)
   for (const text of ['see ./checks/x.mjs', 'see ../tests/y.spec.mjs', 'see checks/', 'see /checks/x',
-    'see checks\\x', 'see ./research-workspace/x', '工作区 = research-workspace/']) {
+    'see checks\\x', 'see ./research-workspace/x', '工作区 = research-workspace/', 'see src/lib/foo.ts',
+    'see packages/foo/bar.ts', 'see src/']) {
     assert.ok(refs(text).length > 0, `${JSON.stringify(text)} 应判为 dev 引用（前缀不能绕过）`)
   }
   assert.deepEqual(refs('运行期：content/manual.md、presets/lead.patch.yml、lib/index.js、scripts/doctor.mjs、drt_<slug>/'), [])
+  assert.deepEqual(refs('包内相对 import 形态：./chunk.js 与 ../shared/x.ts 不是开发根'), [])
   assert.deepEqual(refs('release notes/registry 与 changelog 不是路径'), [])
   assert.deepEqual(refs('见 https://example.com/docs/design/50.md 与 https://github.com/x/y/blob/master/_dist/manual.md'), [],
     '绝对 URL 是外部导航，不按包内路径判')

@@ -1,17 +1,17 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-242：run-driver 的非默认 profile 守卫只看 env/default，不看 `--profile` 参数——直起旧 profile 仍可绕过
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：修复就绪（自授权 P2：入口守卫）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）— 结论：run-driver 守卫判本次实际 profile（DEFAULT_PROFILE ∪ --profile）；共享 decision + keyless；去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-move-residuals-ii.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 三干净室入口
 >
-> 位置：[tools/channel/run-driver.mjs](../../tools/channel/run-driver.mjs) 第 211 行（`staleProfileMessage(DEFAULT_PROFILE)`）
+> 位置：[tools/channel/run-driver.mjs](../../../tools/channel/run-driver.mjs) 第 211 行（`staleProfileMessage(DEFAULT_PROFILE)`）
 > 与第 270 行（`wantProfile = arg('--profile', DEFAULT_PROFILE)`）；判据 =
-> [checks/lib/channel/profile-guard.mjs](../../checks/lib/channel/profile-guard.mjs)。
-> 探索轮 = [搬家残差 II](../issues/2026-11-18-move-residuals.md) B。
+> [checks/lib/channel/profile-guard.mjs](../../../checks/lib/channel/profile-guard.mjs)。
+> 探索轮 = [搬家残差 II](../settled_issues/2026-11-18-move-residuals.md) B。
 
 ## 症状
 
@@ -80,3 +80,27 @@ console.log('research:', staleProfileMessage('research'));
 - `DSH_RUN_PROFILE` 未设 + `up --profile research` → exit 2（或显式 `--allow-stale-profile` 放行）；
 - 默认 `deep-research` 不受影响；`probe --profile` 同；
 - `pnpm test` / run-driver 契约测试绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "tools/channel/run-driver.mjs",
+    "checks/lib/channel/profile-guard.mjs",
+    "tests/checks/channel/profile-guard.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/channel/profile-guard.test.mjs",
+    "exit": 1,
+    "output": "not ok 2 - 守卫决策看实际 profile…（把决策改回只看 DEFAULT_PROFILE 后，--profile research 用例红）"
+  },
+  "green": {
+    "command": "node --test tests/checks/channel/profile-guard.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/channel/profile-guard.test.mjs"
+  }
+}
+```

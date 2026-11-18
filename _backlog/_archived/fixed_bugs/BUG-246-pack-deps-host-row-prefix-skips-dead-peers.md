@@ -1,17 +1,17 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-246：`pack-deps` 反向检查跳过所有 `@deepseek-ai/dsh-*`——死 host peer 无法被发现
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（pack 公共行为/门禁触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）— 结论：去掉 @deepseek-ai/dsh-* 前缀豁免；HOST_ROW_PEERS 逐条理由 allowlist + 腐烂检查；去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-move-residuals-ii.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 三干净室入口
 >
-> 位置：[checks/lib/repo/pack-deps.mjs](../../checks/lib/repo/pack-deps.mjs) 的 `unusedPeerIssues`（第 75–83 行，
+> 位置：[checks/lib/repo/pack-deps.mjs](../../../checks/lib/repo/pack-deps.mjs) 的 `unusedPeerIssues`（第 75–83 行，
 > `hostRowPrefix = '@deepseek-ai/dsh-'` 过滤）；实例 = `peerDependencies` 里的
 > `@deepseek-ai/dsh-experimental-client-ui-agent-team`（仅 README 提到，pack 的 src/presets/workers/cordis 无引用）。
-> 探索轮 = [搬家残差 II](../issues/2026-11-18-move-residuals.md) A/B。
+> 探索轮 = [搬家残差 II](../settled_issues/2026-11-18-move-residuals.md) A/B。
 
 ## 症状
 
@@ -32,7 +32,7 @@ pack 的实现/YAML 均无引用——它要么是给团队层预留的 host pee
 - 表面 / 边界：发布 peer 闭包 / ② 静态（结构）
 - DSH 不变量：fail-loud；peer 集 = 真实消费 ∪ 显式 host-row 理由，不允许“前缀豁免”
 - 触及面：pack 公共行为 + 门禁与验收合同
-- 授权：等人拍板（pack/门禁触面）
+- 授权：用户 2026-11-18 放行（pack 公共行为 + 门禁触面 → 修复就绪 = P2 修复授权）
 - 批：搬家残差 II（A/B）
 
 ## 复现
@@ -53,7 +53,7 @@ host-row peer（`@deepseek-ai/dsh-*`）是 preset 依赖的 base 行包，行以
 
 ## 牵出的失败类
 
-- 发布面 C2（peer 双份事实）/ C7（前缀豁免）；与 [BUG-232](../_archived/fixed_bugs/BUG-232-row-deps-scope-no-lib-types.md)
+- 发布面 C2（peer 双份事实）/ C7（前缀豁免）；与 [BUG-232](BUG-232-row-deps-scope-no-lib-types.md)
   同一模块的“反向”半边。
 - 类级方向 = host-row 的合法集来自 `presets/workers/cordis` 的行（或显式 allowlist），不是前缀。
 
@@ -70,3 +70,27 @@ host-row peer（`@deepseek-ai/dsh-*`）是 preset 依赖的 base 行包，行以
 - 所有 peers 要么被用/点名，要么在显式 allowlist（带理由）；
 - 当前树死 host peer 被点名或删除；`pack-deps.test` / `pack.e2e` 绿；
 - 前缀豁免不再作为判据。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/repo/pack-deps.mjs",
+    "checks/smoke/pack.e2e.mjs",
+    "tests/checks/repo/pack-deps.test.mjs"
+  ],
+  "red": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 1,
+    "output": "FAIL  发布物依赖闭包 = peers… peerDependency「@deepseek-ai/dsh-experimental-client-ui-agent-team」…且不在 host-row allowlist——死 peer"
+  },
+  "green": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/repo/pack-deps.test.mjs"
+  }
+}
+```

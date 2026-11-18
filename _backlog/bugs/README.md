@@ -13,18 +13,14 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-240](BUG-240-clean-room-module-leak-base-home-root.md) | 修复就绪 | P2 | clean-room 从 home 根解析，profile 内仓内泄漏看不见 |
-| [BUG-241](BUG-241-clean-room-leak-names-hardcoded.md) | 修复就绪 | P2 | 干净室只探测 3 个包名，新增 peer 不覆盖 |
-| [BUG-242](BUG-242-run-driver-profile-flag-bypasses-guard.md) | 修复就绪 | P2 | run-driver 守卫只看 env/default，不看 `--profile` |
-| [BUG-243](BUG-243-boot-run-direct-profile-guard-bypass.md) | 修复就绪 | P2 | `boot-run.sh` 直起不守卫，`DSH_RUN_PROFILE=research` 绕过 |
-| [BUG-244](BUG-244-pack-client-bundle-src-path-comments.md) | 修复就绪 | P2 | 发布 client bundle 10 条 `src/`/`packages/` 注释 |
-| [BUG-245](BUG-245-shipped-surface-misses-src-packages-roots.md) | 等人拍板 | P2 | `shipped-surface` 词表无 `src/`/`packages/` |
-| [BUG-246](BUG-246-pack-deps-host-row-prefix-skips-dead-peers.md) | 等人拍板 | P2 | `pack-deps` 跳过所有 `dsh-*` host peer，死 peer 不可见 |
-| [BUG-247](BUG-247-pack-deps-dynamic-import-blind.md) | 修复就绪 | P2 | `pack-deps` 只抽 `require`，不抽动态 `import()` |
-| [BUG-248](BUG-248-test-owner-mirror-helper-indirection.md) | 修复就绪 | P2 | owner 规则只看直接 import；helper 可隐藏单 owner 依赖 |
-| [BUG-249](BUG-249-tarball-dev-scripts-in-published-manifest.md) | 等人拍板 | P2 | tarball `package.json` 仍带 `build`/`prepack: pnpm build` |
+| （空） | — | — | 批 G/H/I/J（209–239）全部归档，见下 |
 
 ## 最近归档
+
+（2026-11-18 批 J 搬家残差 II 闭环（10 张，240–249），批 Note =
+[2026-11-18-move-residuals-ii](../../notes/implemented/2026-11-18-move-residuals-ii.md)：
+[240](../_archived/fixed_bugs/BUG-240-clean-room-module-leak-base-home-root.md) [241](../_archived/fixed_bugs/BUG-241-clean-room-leak-names-hardcoded.md) [242](../_archived/fixed_bugs/BUG-242-run-driver-profile-flag-bypasses-guard.md) [243](../_archived/fixed_bugs/BUG-243-boot-run-direct-profile-guard-bypass.md) [244](../_archived/fixed_bugs/BUG-244-pack-client-bundle-src-path-comments.md) [245](../_archived/fixed_bugs/BUG-245-shipped-surface-misses-src-packages-roots.md) [246](../_archived/fixed_bugs/BUG-246-pack-deps-host-row-prefix-skips-dead-peers.md) [247](../_archived/fixed_bugs/BUG-247-pack-deps-dynamic-import-blind.md) [248](../_archived/fixed_bugs/BUG-248-test-owner-mirror-helper-indirection.md) [249](../_archived/fixed_bugs/BUG-249-tarball-dev-scripts-in-published-manifest.md)。
+）
 
 （2026-11-17 批 I 运行时依赖/安装边界闭环（11 张，229–239），批 Note =
 [2026-11-17-runtime-deps-install-boundary](../../notes/implemented/2026-11-17-runtime-deps-install-boundary.md)：

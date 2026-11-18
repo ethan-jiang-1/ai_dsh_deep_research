@@ -10,3 +10,18 @@ export function staleProfileMessage(profile) {
   if (profile === DEFAULT_PROFILE) return null
   return `run-driver: profile「${profile}」不是默认 ${DEFAULT_PROFILE}——直起非默认 profile 会跳过镜像漂移检测（静默用旧插件）；显式 --allow-stale-profile 才继续`
 }
+
+/** 纯决策：非默认 profile 且未显式放行 → 拒绝文案；否则 null（run-driver 与测试共用）。 */
+export function profileGuardDecision({ profile, allowStale = false }) {
+  if (allowStale) return null
+  return staleProfileMessage(profile)
+}
+
+/** boot-run.sh 的直起守卫契约：必须同时含非默认 profile 判据与显式逃生口（BUG-243）。 */
+export function bootRunGuardProblems(text) {
+  const problems = []
+  if (!/DSH_ALLOW_STALE_PROFILE/.test(text)) problems.push('boot-run.sh 缺 DSH_ALLOW_STALE_PROFILE 逃生口')
+  if (!/!= *"deep-research"/.test(text)) problems.push('boot-run.sh 缺非默认 profile 判据（!= deep-research）')
+  if (!/exit 2/.test(text)) problems.push('boot-run.sh 守卫未 fail-loud（缺 exit 2）')
+  return problems
+}

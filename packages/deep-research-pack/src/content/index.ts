@@ -43,7 +43,7 @@ interface SystemPromptLike {
  * 注册 `research_pack_root` 变量与研究手册 runtime context。
  *
  * `input` 是测试注入位（packRoot / manual 文本）——模块加载不读盘，apply 才读；
- * 直跑源码时 packRoot 是 `src/`，`manualPathOf` 会回退到上一级。
+ * 直跑源码时 packRoot 是 `源码半`，`manualPathOf` 会回退到上一级。
  * @param ctx - Host context。
  * @param input - 可选的根与手册文本（缺省读包内 `content/manual.md`）。
  */

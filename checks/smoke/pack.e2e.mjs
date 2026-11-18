@@ -22,7 +22,7 @@ import {
   typeClosureOf, typeSetIssues,
 } from '../lib/repo/shipped-surface.mjs'
 import { packDepsIssues } from '../lib/repo/pack-deps.mjs'
-import { workspaceProtocolIssues } from '../lib/repo/publish-manifest.mjs'
+import { scriptIssues, workspaceProtocolIssues } from '../lib/repo/publish-manifest.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
@@ -73,7 +73,7 @@ const surfaceProblems = [
 ]
 check(surfaceProblems.length === 0, '发布集合 = 允许集 / exports.types 可达闭包', surfaceProblems.slice(0, 6).join('；'))
 const TEXT = /\.(?:md|js|mjs|cjs|ts|tsx|yml|yaml|json)$/
-const shippedTexts = listed.filter((rel) => TEXT.test(rel)).map((rel) => ({ path: rel, text: readFileSync(join(PACK, rel), 'utf8') }))
+const shippedTexts = listed.filter((rel) => rel !== 'package.json' && TEXT.test(rel)).map((rel) => ({ path: rel, text: readFileSync(join(PACK, rel), 'utf8') }))
 check(shippedTexts.length >= 20, '防空语料：随包文本文件下限', `只读到 ${shippedTexts.length} 份——扫描面被收窄`)
 const textProblems = shippedTextIssues(shippedTexts)
 for (const name of ['README.md', 'README.zh.md']) {
@@ -130,6 +130,8 @@ if (existsSync(tgz)) {
     packedManifest === undefined ? '' : JSON.stringify(Object.keys(packedManifest.devDependencies ?? {})))
   const protocol = packedManifest === undefined ? [] : workspaceProtocolIssues(packedManifest)
   check(protocol.length === 0, 'tarball manifest 无 workspace 协议', protocol.slice(0, 4).join('；'))
+  const scriptProblems = packedManifest === undefined ? [] : scriptIssues(packedManifest)
+  check(scriptProblems.length === 0, 'tarball manifest 无 scripts（发布面剥离，BUG-249）', scriptProblems.join('；'))
 }
 if (existsSync(manual) && existsSync(tgz)) {
   const declared = /sha256\s*\|\s*`([0-9a-f]{64})`/.exec(readFileSync(manual, 'utf8'))?.[1] ?? null

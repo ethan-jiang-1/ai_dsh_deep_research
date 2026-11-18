@@ -5,7 +5,7 @@
  * `final/readable.md` / `final/readable-vN.md`）：交付卡片、结句内联引用、Files 树点到
  * 同一份文件，落的都是这一个页签——同地址幂等，不会出现"文件名预览"与"终稿"两个同名视图。
  *
- * 读面是一张定表（折算 = `src/lib/final-target.ts` 的 `finalReadPlan`）：
+ * 读面是一张定表（折算 = `final-target 折算件` 的 `finalReadPlan`）：
  *   `final.md`（工作稿）· `final/readable.md`（读者版工作件）· `final/vN.md` + `final/readable-vN.md`
  *   （交付副本与读者版交付件）· `review.md`（审查判定，静音条用）· `final/` 目录（版本账）。
  * 别的任何路径都不读——"中间过程不泄漏"在结构上成立，不是口头承诺。
@@ -285,7 +285,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
           </div>
         )}
         {failure !== null && <div style={{ marginTop: 12, fontSize: 11.5, color: '#b00' }}>{props.t(failure)}</div>}
-        {/* 交付后只读出口（同状态页 ⑤，共用 src/lib 文案；D18 只读） */}
+        {/* 交付后只读出口（同状态页 ⑤，共用 纯函数层 文案；D18 只读） */}
         <details style={{ marginTop: 18, fontSize: 12, opacity: 0.9 }}>
           <summary style={{ cursor: 'pointer' }}>{props.t('triageTitle')}</summary>
           <div style={{ marginTop: 6, lineHeight: 1.6 }}>

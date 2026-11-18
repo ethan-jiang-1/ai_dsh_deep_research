@@ -1,6 +1,7 @@
 # 运行时依赖与安装边界（批 I：BUG-229…239）
 
 > 状态：implemented
+> 历史注记：安装边界；干净室解析基/pack-deps 反向与动态面/manifest scripts 由 [move-residuals-ii](2026-11-18-move-residuals-ii.md) 增补，其余决定仍现行。
 
 ## 决定
 

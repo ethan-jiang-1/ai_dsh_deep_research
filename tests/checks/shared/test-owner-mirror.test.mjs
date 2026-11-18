@@ -5,6 +5,8 @@
 //  ③ checks/lib 根不得平铺模块；两车道的 owner 目录都非空（防空语料）。
 // 反证：把 spec 移回 tests/run 根 → ①红；把 gates spec 放进 ops → ③红；清空一个 owner 目录 → ⑤红；
 // 单 owner spec 藏进 shared → ③红（BUG-205）。
+// 负例留证 2026-11-18：BUG-248——在 tests/checks/repo 放 helper 引 channel lib 的 test →
+// owner 规则报「住 repo/，但只依赖 channel」；去掉间接追溯则绿（红证回放后删除探针）。
 // 负例留证 2026-11-16：BUG-205——在 tests/run/shared 放一个只依赖 checks/lib/gates 的 spec →
 // ③ 报「住 shared/，但依赖 gates」；单 owner spec 归位后绿。
 import { test } from 'node:test'
@@ -29,6 +31,28 @@ function walk(dir, filter, out = []) {
     else if (filter(ent.name)) out.push(p)
   }
   return out
+}
+
+/**
+ * owner 集 = 直接 lib import ∪ **经本地 helper 递归**得到的 lib import（BUG-248）。
+ * helper 指 tests/ 下非测试模块（非 *.spec/*.test）；递归带环防护。只看直接 import 会让
+ * 「test → helper → 另一个 owner 的 lib」绕过 owner 规则。
+ */
+function ownersOf(file, seen = new Set()) {
+  if (seen.has(file)) return new Set()
+  seen.add(file)
+  const owners = new Set()
+  const testsRoot = join(ROOT, 'tests')
+  for (const { specifier } of parseKeylessImports(readFileSync(file, 'utf8'), file).imports) {
+    const target = localImportPath(file, specifier)
+    if (target === undefined) continue
+    const lr = relative(LIB, target).split('\\').join('/')
+    if (!lr.startsWith('..') && /\.(mjs|cjs)$/.test(lr)) { owners.add(lr.split('/')[0]); continue }
+    if (target.startsWith(`${testsRoot}/`) && !/\.(spec|test)\.mjs$/.test(target)) {
+      for (const owner of ownersOf(target, seen)) owners.add(owner)
+    }
+  }
+  return owners
 }
 
 const specs = walk(RUN, (n) => n.endsWith('.spec.mjs'))
@@ -59,15 +83,7 @@ test('spec 的 lib 依赖 owner ∈ {spec 目录, shared}；shared 只收跨切�
   for (const p of specs) {
     const rel = relative(RUN, p).split('\\').join('/')
     const dir = rel.split('/')[0]
-    const { imports } = parseKeylessImports(readFileSync(p, 'utf8'), p)
-    const owners = new Set()
-    for (const { specifier } of imports) {
-      const target = localImportPath(p, specifier)
-      if (target === undefined) continue
-      const lr = relative(LIB, target).split('\\').join('/')
-      if (lr.startsWith('..') || !/\.(mjs|cjs)$/.test(lr)) continue
-      owners.add(lr.split('/')[0])
-    }
+    const owners = ownersOf(p)
     // 跨切 spec：无 lib 依赖、或只依赖 shared——允许住任一 owner（索引记录实际依赖面）。
     if (owners.size === 0 || (owners.size === 1 && owners.has('shared'))) continue
     if (dir === 'shared') {
@@ -85,7 +101,7 @@ test('六个 run owner 目录都非空（防空语料）', () => {
   }
 })
 
-test('tests/checks 根零平铺，按 checks/lib owner 镜像（2026-11-18）', () => {
+test('tests/checks 根零平铺，按 checks/lib owner 镜像（BUG-248，2026-11-18）', () => {
   assert.ok(checkTests.length >= 40, `防空语料：checks test 过少（${checkTests.length}）`)
   const flat = readdirSync(CHECKS).filter((n) => n.endsWith('.test.mjs'))
   assert.deepEqual(flat, [], `tests/checks 根仍平铺 test：${flat.join(', ')}——按 owner 归位（${CHECK_OWNERS.join('/')}）`)
@@ -94,15 +110,7 @@ test('tests/checks 根零平铺，按 checks/lib owner 镜像（2026-11-18）', 
   for (const p of checkTests) {
     const rel = relative(CHECKS, p).split('\\').join('/')
     const dir = rel.split('/')[0]
-    const { imports } = parseKeylessImports(readFileSync(p, 'utf8'), p)
-    const owners = new Set()
-    for (const { specifier } of imports) {
-      const target = localImportPath(p, specifier)
-      if (target === undefined) continue
-      const lr = relative(LIB, target).split('\\').join('/')
-      if (lr.startsWith('..') || !/\.(mjs|cjs)$/.test(lr)) continue
-      owners.add(lr.split('/')[0])
-    }
+    const owners = ownersOf(p)
     if (owners.size === 0) {
       assert.equal(dir, 'repo', `${relative(ROOT, p)} 无 checks/lib 依赖——仓库级合同归 repo/`)
       continue

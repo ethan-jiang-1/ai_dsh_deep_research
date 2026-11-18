@@ -1,16 +1,16 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-245：`shipped-surface` 的 dev-root 词表漏 `src/` 与 `packages/`——发布物引用开发源码仍绿
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（门禁与验收合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）— 结论：src/packages 入 dev-root 闭集；package.json 排除（repository.directory 是 npm 元数据）；README 源码表改写；去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-move-residuals-ii.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 三干净室入口
 >
-> 位置：[checks/lib/repo/shipped-surface.mjs](../../checks/lib/repo/shipped-surface.mjs) 的
+> 位置：[checks/lib/repo/shipped-surface.mjs](../../../checks/lib/repo/shipped-surface.mjs) 的
 > `FREE_DEV_ROOTS` / `AMBIGUOUS_DEV_ROOTS`；实例 = [BUG-244](BUG-244-pack-client-bundle-src-path-comments.md)
-> （`lib/client.js` 10 条 `src/`/`packages/` 引用）。探索轮 = [搬家残差 II](../issues/2026-11-18-move-residuals.md) B。
+> （`lib/client.js` 10 条 `src/`/`packages/` 引用）。探索轮 = [搬家残差 II](../settled_issues/2026-11-18-move-residuals.md) B。
 
 ## 症状
 
@@ -32,7 +32,7 @@ devRefsOf('see AGENTS.md')             → []（无斜杠，非路径）
 - 表面 / 边界：发布面门禁 / ② 行为（纯函数）
 - DSH 不变量：fail-loud；发布物不得引用未发布源码
 - 触及面：门禁与验收合同（`shipped-surface` 词表）
-- 授权：等人拍板（门禁触面）
+- 授权：用户 2026-11-18 放行（门禁与验收合同触面 → 修复就绪 = P2 修复授权）
 - 批：搬家残差 II（B）
 
 ## 复现
@@ -71,3 +71,30 @@ dev-root 闭集是手工枚举：`checks/tests/tools/probes/_backlog/_dist/.agen
 
 - `src/`/`packages/` 引用在随包文本中必红；当前树 244 的 10 条先红；
 - 运行期词不误伤；`shipped-surface.test` / `pack.e2e` / `pnpm verify` 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/repo/shipped-surface.mjs",
+    "tests/checks/repo/shipped-surface.test.mjs",
+    "checks/smoke/pack.e2e.mjs",
+    "packages/deep-research-pack/README.md",
+    "packages/deep-research-pack/README.zh.md",
+    "packages/deep-research-pack/cordis.patch.yml"
+  ],
+  "red": {
+    "command": "node --test tests/checks/repo/shipped-surface.test.mjs",
+    "exit": 1,
+    "output": "not ok 1 - 随包文本零开发面引用… src/client/… src/lib… packages/…（词表加根后的真红）"
+  },
+  "green": {
+    "command": "node --test tests/checks/repo/shipped-surface.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/repo/shipped-surface.test.mjs"
+  }
+}
+```

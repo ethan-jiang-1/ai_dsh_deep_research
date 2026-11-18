@@ -1,18 +1,18 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-241：clean-room 的泄漏检查只硬编码 3 个包名——新增 peer 不会进入干净室判据
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：修复就绪（自授权 P2：测试基础设施）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）— 结论：探测集从 peerDependencies 全量派生（peerNamesOf）；三入口共用，新增 peer 自动覆盖；去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-move-residuals-ii.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 三干净室入口
 >
-> 位置：[checks/smoke/cold-start.entry.mjs](../../checks/smoke/cold-start.entry.mjs) 第 51 行 ·
-> [checks/smoke/release.entry.mjs](../../checks/smoke/release.entry.mjs) 第 243 行 ·
-> [checks/smoke/lifecycle.entry.mjs](../../checks/smoke/lifecycle.entry.mjs) 第 203 行；
+> 位置：[checks/smoke/cold-start.entry.mjs](../../../checks/smoke/cold-start.entry.mjs) 第 51 行 ·
+> [checks/smoke/release.entry.mjs](../../../checks/smoke/release.entry.mjs) 第 243 行 ·
+> [checks/smoke/lifecycle.entry.mjs](../../../checks/smoke/lifecycle.entry.mjs) 第 203 行；
 > 三处 `names: ['react', 'react-dom', '@deepseek-ai/dsh-client-ui-primitives']`。
-> 探索轮 = [搬家残差 II](../issues/2026-11-18-move-residuals.md) A/B。
+> 探索轮 = [搬家残差 II](../settled_issues/2026-11-18-move-residuals.md) A/B。
 
 ## 症状
 
@@ -65,3 +65,30 @@ node -e "const p=require('./packages/deep-research-pack/package.json'); console.
 - 三个入口的 `names` 与 peer 集合（或显式分组）一致；
 - 新增 peer 时干净室自动探测（测试注入验证）；
 - `pnpm test` / `pnpm test:entry` 相关件绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/harness/clean-room-policy.mjs",
+    "checks/lib/harness/clean-room.mjs",
+    "checks/smoke/cold-start.entry.mjs",
+    "checks/smoke/release.entry.mjs",
+    "checks/smoke/lifecycle.entry.mjs",
+    "tests/checks/harness/clean-room-policy.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/harness/clean-room-policy.test.mjs",
+    "exit": 1,
+    "output": "not ok 6 - 探测集从 peerDependencies 全量派生… 全量 peer 名单必须命中 profile 里的仓内 symlink"
+  },
+  "green": {
+    "command": "node --test tests/checks/harness/clean-room-policy.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/harness/clean-room-policy.test.mjs"
+  }
+}
+```

@@ -1,5 +1,5 @@
 // research-graph/types.ts — 「研究图谱」client 半的注入面类型（槽标准 props 在入口处合成）。
-// 被谁消费：src/client/ResearchGraphTab.tsx 与 src/client/index.ts（注册处按本类型接线）。
+// 被谁消费：ResearchGraphTab 件 与 index 件（注册处按本类型接线）。
 // 注入两条闭包（数据面全部复用既有 remote，无新 RPC；**只读观察，不发指令**）：
 //   · readFile  = remote.workspaceFiles.read 的会话级闭包（只读 `plan.md` / `plan/vN.md`，缺文件合法）；
 //   · listDir   = remote.workspaceFiles.list 的会话级闭包（列 `plan/` 快照；不可达 → null）；

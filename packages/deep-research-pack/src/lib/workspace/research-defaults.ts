@@ -7,7 +7,7 @@
  *
  * 边界：方法默认不在这里（住 `method-library.md` 的〔默认偏好〕；`findDefaultMethod` 只读）；
  * gates/lens/referenceRoot/language 不是本文件的轴。磁盘格式 = `research-defaults.json`，
- * 写入只经 host command（`src/defaults/`）。
+ * 写入只经 host command（`defaults 半`）。
  */
 import { foldLibrary } from '../method-library/library-fold.ts'
 

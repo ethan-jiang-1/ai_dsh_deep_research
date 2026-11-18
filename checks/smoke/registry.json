@@ -208,7 +208,7 @@
     "tier": "nightly",
     "job": "deploy",
     "cost": "medium",
-    "uniqueClaim": "tarball 条目/模块表/sha/无 symlink/无安装脚本 + 发布集合（顶层 / 类型 = exports.types 可达闭包）+ 随包文本零 dev 引用 + manifest 零 devDeps/workspace + 依赖闭包 = peers",
+    "uniqueClaim": "tarball 条目/模块表/sha/无 symlink/无安装脚本 + 发布集合（顶层 / 类型 = exports.types 可达闭包）+ 随包文本零 dev 引用（含 src/packages）+ manifest 零 devDeps/workspace/scripts + 依赖闭包 = peers（require ∪ import() ∪ d.ts；host allowlist）",
     "oracle": [
       "tests/pack/contract/package-contract.spec.mjs"
     ],

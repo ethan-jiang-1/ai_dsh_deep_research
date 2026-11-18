@@ -12,8 +12,8 @@
  * v4 及之前的纯尾窗谓词（"末位回合事件恰为未答 ask"）在 timed 超时后会漏报可答挂起，
  * 被 v5 取代（行为对 legacy 形态完全兼容：在飞 = 其后无事件）。
  *
- * 数据/展示分层纪律（RFC observability-gui）：折算住 src/lib 纯函数 + keyless 单测；
- * 组件薄渲染。client bundle 经 tsdown 打包此文件（tsc client 面含 src/lib）。
+ * 数据/展示分层纪律（RFC observability-gui）：折算住 纯函数层 纯函数 + keyless 单测；
+ * 组件薄渲染。client bundle 经 tsdown 打包此文件（tsc client 面含 纯函数层）。
  */
 
 import { argsObjectOf } from './journal-wire.ts'

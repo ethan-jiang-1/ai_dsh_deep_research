@@ -166,10 +166,10 @@
 | lib/repo/doc-surface.mjs | a-docs、f-repo、doc-prose-paths、doc-surface-shapes.test | live 文档可读面的唯一枚举器：形态台账（SHAPES / COMMAND_FORMS）↔ 订单案例对账、命令归一（env 前缀 / `./` / 包装器 / `&&` / heredoc / 缩进 / YAML 折叠块）、退役根判据 |
 | lib/repo/doc-counts.mjs | a-docs、doc-counts.test | 资产计数名词闭集（count-free 判据面正本）+ 硬计数 token 抽取 |
 | lib/channel/profile-guard.mjs | run-driver、profile-guard.test | run-driver 的非默认 profile 守卫：默认 profile 放行，其余 fail-loud（显式 `--allow-stale-profile` 才继续） |
-| lib/repo/pack-deps.mjs | pack.e2e、pack-deps.test | 发布物依赖闭包 = peers：require/.d.ts import 正向、死 peer 反向、DSH-tag peer 范围 = engines.dsh |
-| lib/repo/publish-manifest.mjs | export-dist、pack.e2e、publish-manifest.test | 发布 manifest 收口：剥离 devDependencies + workspace 协议检查 |
+| lib/repo/pack-deps.mjs | pack.e2e、pack-deps.test | 发布物依赖闭包 = peers：require/动态 import()/.d.ts import 正向、死 peer 反向（host-row 显式 allowlist）、DSH-tag peer 范围 = engines.dsh |
+| lib/repo/publish-manifest.mjs | export-dist、pack.e2e、publish-manifest.test | 发布 manifest 收口：剥离 devDependencies/scripts + workspace 协议检查 |
 | lib/harness/clean-room.mjs | cold-start.entry、release.entry、lifecycle.entry | 干净室安装矩阵：仓外 home / 钉版 dsh / tarball 安装 / 解析祖先 / 版本合同 / 起 web |
-| lib/harness/clean-room-policy.mjs | clean-room、clean-room-policy.test | 干净室纯判据：仓外 home、版本 ∈ engines、解析不落仓根 |
+| lib/harness/clean-room-policy.mjs | clean-room、clean-room-policy.test、cold-start.entry、lifecycle.entry、release.entry | 干净室纯判据：仓外 home、版本 ∈ engines、profile 解析不落仓根、peer 全集派生 |
 | lib/repo/shipped-surface.mjs | b-pack、package-contract.spec、pack.e2e、record-type-closure、shipped-surface.test | 发布面自足判据正本：随包文本零 dev 引用（歧义根只认真实子目录）、README 用户段零开发命令、`files` = `exports.types` 反投影、tarball 顶层/类型集合对账 |
 | lib/repo/redirect-ledger.mjs | a-docs、redirect-ledger.test | 搬家账本链式解析：append-only 后旧条目的 `to` 可再次成为 `from`，解析走到最终落点；环/过深/重复 from fail-loud |
 | lib/probes/direct-authorization-boundary.mjs | entry-chain-probe、entry-chain-probe.spec | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |

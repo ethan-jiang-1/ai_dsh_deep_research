@@ -1,7 +1,7 @@
 /**
  * Host 半：方法库写库工具（D25 2026-10-28 扩展）。只给方法编辑 preset 用：
  * `method_library_upsert` 把一条完整库条目写进当前会话 cwd 的 `method-library.md`（同名覆盖）。
- * 面板仍永不直写；这是业务写入的唯一路径。纯折算住 `src/lib/method-library-write.ts`（keyless 测）。
+ * 面板仍永不直写；这是业务写入的唯一路径。纯折算住 `method-library-write 折算件`（keyless 测）。
  */
 import type { Context } from '@deepseek-ai/cordis'
 import { createHash } from 'node:crypto'

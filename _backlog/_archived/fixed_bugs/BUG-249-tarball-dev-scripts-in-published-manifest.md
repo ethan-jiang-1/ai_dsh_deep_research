@@ -1,16 +1,16 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-249：发布 tarball 的 `package.json` 仍带开发 `scripts`（`build` / `prepack: pnpm build`）——manifest 只剥了 devDependencies
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：等人拍板（pack 公共行为/发布元数据）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）— 结论：发布 manifest 删除 scripts（build/prepack 不随包）；tarball 断言；去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-move-residuals-ii.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 三干净室入口
 >
 > 位置：`_dist/dsh-deep-research-pack-0.3.6.tgz` 内 `package/package.json` 的 `scripts`；
-> 收口实现 = [checks/lib/repo/publish-manifest.mjs](../../checks/lib/repo/publish-manifest.mjs)（只 `stripDevDependencies`）。
-> 探索轮 = [搬家残差 II](../issues/2026-11-18-move-residuals.md) B。
+> 收口实现 = [checks/lib/repo/publish-manifest.mjs](../../../checks/lib/repo/publish-manifest.mjs)（只 `stripDevDependencies`）。
+> 探索轮 = [搬家残差 II](../settled_issues/2026-11-18-move-residuals.md) B。
 
 ## 症状
 
@@ -34,7 +34,7 @@ devDependencies」，但没有说/处理 `scripts`；`pack.e2e` 只验 `workspac
 - 表面 / 边界：发布 manifest / ② 静态（tarball package.json）
 - DSH 不变量：可发布性；发布 manifest 的 scripts 不应引用开发工具链
 - 触及面：pack 公共行为（发布元数据）
-- 授权：等人拍板（pack 触面）
+- 授权：用户 2026-11-18 放行（pack 公共行为/发布元数据触面 → 修复就绪 = P2 修复授权）
 - 批：搬家残差 II（B）
 
 ## 复现
@@ -71,3 +71,28 @@ grep -n 'stripDevDependencies\|scripts' checks/lib/repo/publish-manifest.mjs
 - tarball `scripts` 为空（或显式白名单），不含 `pnpm`/`tsc`/`tsdown`；
 - 新断言在注入 `prepack` 时红；`lifecycle`/`release` 安装绿；
 - `pnpm test` / `pack.e2e` 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/repo/publish-manifest.mjs",
+    "tools/release/export-dist.mjs",
+    "checks/smoke/pack.e2e.mjs",
+    "tests/checks/repo/publish-manifest.test.mjs"
+  ],
+  "red": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 1,
+    "output": "FAIL  tarball manifest 无 scripts（发布面剥离，BUG-249） — 发布 manifest 带 scripts：build, prepack"
+  },
+  "green": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/repo/publish-manifest.test.mjs"
+  }
+}
+```

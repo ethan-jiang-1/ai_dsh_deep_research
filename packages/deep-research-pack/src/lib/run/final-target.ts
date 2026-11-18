@@ -12,7 +12,7 @@
  *     拿它点灯就是把未审草案当终稿；
  *   - 交付的机械判据是 `present`（node-gate 门②），它成功时追加 durable 事件
  *     `deliverables/presented{turn, callId, files[]}`——本文件把它折成"时刻"。
- * 地址语法正本 = vendor `packages/util/workspace-path/src/file-address.ts`
+ * 地址语法正本 = vendor `vendor 的 workspace-path 地址语法`
  * （逐段 component-encode，`:` 留字面给盘符）；本文件只做最小解析，不引 Node 侧依赖
  * （client 半会被内联进浏览器 bundle）。
  */

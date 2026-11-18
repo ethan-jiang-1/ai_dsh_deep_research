@@ -23,6 +23,7 @@ import { parseMarketIndex } from '@deepseek-ai/dsh-plugin-market-index'
 import { scrubbedEnv } from '../lib/shared/env.mjs'
 import { artifactFreshness, packInputRoots, packagedInputEntries } from '../lib/shared/artifact-freshness.mjs'
 import { engineIssues, moduleLeakOf, pinnedDshBin } from '../lib/harness/clean-room.mjs'
+import { peerNamesOf } from '../lib/harness/clean-room-policy.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
@@ -200,7 +201,7 @@ try {
   writeProbe()
   const addPack = run(['plugin', '--profile', PROFILE, 'add', `file:${tarball}`])
   // 干净室：模块解析不得从 home 走到仓根 node_modules（那会把缺失 peer 补齐 = 假绿）。
-  const leaks = moduleLeakOf({ home, root: ROOT, names: ['react', 'react-dom', '@deepseek-ai/dsh-client-ui-primitives'] })
+  const leaks = moduleLeakOf({ home, profile: PROFILE, root: ROOT, names: peerNamesOf(pkg) })
   check('②b 模块解析不经过仓根 node_modules', leaks.length === 0, leaks.join('；'))
   check('③ 装 tarball', addPack.status === 0, tail(addPack))
   const addProbe = run(['plugin', '--profile', PROFILE, 'add', probeDir])

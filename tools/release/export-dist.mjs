@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url'
 import { localDateStr } from '../../checks/lib/shared/local-date.mjs'
 import { packInputRoots, writeBuildManifest } from '../../checks/lib/shared/artifact-freshness.mjs'
 import { writeMarketIndex } from './market.mjs'
-import { stripDevDependencies } from '../../checks/lib/repo/publish-manifest.mjs'
+import { stripDevDependencies, stripScripts } from '../../checks/lib/repo/publish-manifest.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
@@ -63,7 +63,7 @@ try {
     recursive: true,
     filter: (src) => !src.includes('/node_modules') && !src.includes('/.git'),
   })
-  writeFileSync(join(stage, 'package.json'), `${JSON.stringify(stripDevDependencies(JSON.parse(readFileSync(join(stage, 'package.json'), 'utf8'))), null, 2)}\n`)
+  writeFileSync(join(stage, 'package.json'), `${JSON.stringify(stripScripts(stripDevDependencies(JSON.parse(readFileSync(join(stage, 'package.json'), 'utf8')))), null, 2)}\n`)
   const packed = spawnSync('npm', ['pack', '--ignore-scripts', '--pack-destination', DIST, '--cache', join(scratch, 'npm-cache')], {
     cwd: stage, encoding: 'utf8',
   })

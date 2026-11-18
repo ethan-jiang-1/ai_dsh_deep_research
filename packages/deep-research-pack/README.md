@@ -223,7 +223,7 @@ non-role worker row; `presets/<role>/skills/` holds the role's methodology skill
 | `presets/*.patch.yml` · `workers/*.patch.yml` | Five role preset rows + two non-role worker profile rows (`research-worker`, `research-wave`) |
 | `presets/*/skills/` | Role-scoped methodology skills |
 | `content/manual.md`, `content/templates/run/`（含 `protocol.json` 写者契约）, `content/lenses/` | Injected manual, run templates, and on-demand lens entries |
-| `src/content/`, `src/startup/`, `src/client/`, `src/fetch-fallback/` | Source for the injected content, startup row, cockpit, and fetch provider |
+| Source halves (built into `lib/`) | Injected content, startup row, cockpit, and fetch provider |
 | `scripts/doctor.mjs` | Read-only `dsh-deep-research-doctor` |
 
 </details>

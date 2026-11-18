@@ -25,7 +25,7 @@
 import { posix } from 'node:path'
 
 /** 无自然语言歧义的开发根：出现 `<root>/`（含裸根）即 dev 引用。 */
-export const FREE_DEV_ROOTS = Object.freeze(['checks', 'tests', 'tools', 'probes', '_backlog', '_dist', '.agents'])
+export const FREE_DEV_ROOTS = Object.freeze(['checks', 'tests', 'tools', 'probes', '_backlog', '_dist', '.agents', 'src', 'packages'])
 
 /** 有自然语言歧义的开发根：只认本仓真实子目录（`release notes/` 不是路径）。 */
 export const AMBIGUOUS_DEV_ROOTS = Object.freeze({
@@ -137,6 +137,9 @@ export function isShippedFile(rel, pkg) {
  */
 export function shippedSourceFilesOf(pkg, allFiles) {
   return allFiles
+    // package.json 的 repository.directory 是 npm 元数据契约（指向本包在仓库中的位置），
+    // 不是 agent 可读的路径指令；机器清单由 files/exports 判据负责，不做散文扫描。
+    .filter((rel) => rel !== 'package.json')
     .filter((rel) => !rel.startsWith('lib/') && SHIPPED_TEXT_EXT.test(rel) && isShippedFile(rel, pkg))
     .sort()
 }

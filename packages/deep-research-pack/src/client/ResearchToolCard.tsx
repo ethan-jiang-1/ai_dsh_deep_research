@@ -1,7 +1,7 @@
 /**
  * 研究语义工具卡（S2）：把 `spawn_teammate`（组队动作）与 `web_search`（检索动作）在对话流里
  * 渲染成研究语义的卡——"不讲解也能看懂"最便宜的一招（company TeamToolCard 同款教义）。
- * 纯函数展示模型住 `src/lib/tool-card.ts`；组件薄渲染。
+ * 纯函数展示模型住 `tool-card 折算件`；组件薄渲染。
  *
  * ⚠ keyed 槽 key 域开放（拼错不报错、永不渲染）：key 必须与 wire 工具名逐字一致；
  * priority -1 压过 vendor 的通用明细行（rc.2 同键同优先级会 throw——company UX 实验实证）。

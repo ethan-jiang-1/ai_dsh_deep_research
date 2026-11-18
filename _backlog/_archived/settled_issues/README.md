@@ -5,6 +5,7 @@
 | [2026-11-13-workflow-substance-gates](2026-11-13-workflow-substance-gates.md) | 加工环路的实体检查：判据形状字段 + Note 同节 + 两道收口门（Note 早写、暂存区配对）+ 复发必答 + 判据测试负例 + 金标准理由；D52；1400 测试 / gates-smoke 108 全绿；[Note](../../../notes/implemented/2026-11-13-workflow-substance-gates.md) | 2026-11-13 |
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-18-move-residuals](2026-11-18-move-residuals.md) | 搬家残差 II：240–249 全部修复归档；干净室 profile 解析、守卫覆盖直起、发布面词表、pack-deps 动态/host allowlist、owner 间接、manifest scripts；[批 Note](../../../notes/implemented/2026-11-18-move-residuals-ii.md) | 2026-11-18 |
 | [2026-11-17-runtime-deps-install-boundary](2026-11-17-runtime-deps-install-boundary.md) | 运行时依赖/安装边界：10 卡 + 回归 239 全部修复归档；依赖闭包 = peers、干净室矩阵、manifest 剥离、类型可达闭包 11；[批 Note](../../../notes/implemented/2026-11-17-runtime-deps-install-boundary.md) | 2026-11-17 |
 | [2026-11-17-runtime-dev-boundary](2026-11-17-runtime-dev-boundary.md) | 运行时/发布物 vs 开发面 R1–R4：10 张卡 219–228 全部修复归档；发布面自足 = 文本零 dev 引用 + 集合 = 公开合同反投影；tarball 186→82、类型 111→7；[批 Note](../../../notes/implemented/2026-11-17-shipped-boundary-self-contained.md) | 2026-11-17 |
 | [2026-11-17-exploratory-namespace-move](2026-11-17-exploratory-namespace-move.md) | 命名空间搬家后的残差探索 N1–N9：10 张卡 209–218 全部修复归档；形态/命令归一器 + 退出码契约 + tier 频率拆分 + 活指令面入扫描；[批 Note](../../../notes/implemented/2026-11-17-namespace-move-residual-fixes.md) | 2026-11-17 |

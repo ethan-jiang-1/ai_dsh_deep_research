@@ -8,7 +8,7 @@
  * 写操作交给独立 Method Editor Session 的 Host tools，Client 只读 workspace 文件并核对整库结果；
  * 本页签不直写文件、不新增写权限。所有动作显式（保存/设默认/删除二次确认）。
  *
- * 纯折算与写前/写后核对预算住 `src/lib/`；本组件负责读取、会话生命周期与布局。
+ * 纯折算与写前/写后核对预算住 `纯函数层`；本组件负责读取、会话生命周期与布局。
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'

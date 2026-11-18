@@ -1,16 +1,16 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-240：clean-room 的 moduleLeakOf 从 `home` 根解析——profile 里的仓内依赖泄漏永远看不见
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：修复就绪（自授权 P2：测试基础设施）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）— 结论：moduleLeakOf 解析基改 home/profiles/<profile>；profile 缺席红；home 根泄漏仍可达（向上解析）；去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-move-residuals-ii.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 三干净室入口
 >
-> 位置：[checks/lib/harness/clean-room.mjs](../../checks/lib/harness/clean-room.mjs) 的 `moduleLeakOf`（第 66–73 行）；
+> 位置：[checks/lib/harness/clean-room.mjs](../../../checks/lib/harness/clean-room.mjs) 的 `moduleLeakOf`（第 66–73 行）；
 > 消费方 = `checks/smoke/{cold-start,release,lifecycle}.entry.mjs`。
-> 探索轮 = [搬家残差 II](../issues/2026-11-18-move-residuals.md) A/B。
+> 探索轮 = [搬家残差 II](../settled_issues/2026-11-18-move-residuals.md) A/B。
 
 ## 症状
 
@@ -84,3 +84,30 @@ for(const [k,p] of [['home',home],['profile',prof]]){try{console.log(k,createReq
 - 临时 home 的 profile 内 symlink 会被 `moduleLeakOf` 报出；干净安装的空 profile 为空；
 - cold-start/release/lifecycle 的 `leaks` 判据在注入仓内 symlink 时红；
 - `pnpm test` / `pnpm test:entry` 相关件绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/harness/clean-room-policy.mjs",
+    "checks/lib/harness/clean-room.mjs",
+    "checks/smoke/cold-start.entry.mjs",
+    "checks/smoke/release.entry.mjs",
+    "checks/smoke/lifecycle.entry.mjs",
+    "tests/checks/harness/clean-room-policy.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/harness/clean-room-policy.test.mjs",
+    "exit": 1,
+    "output": "not ok 5 - 解析基 = profile/installed… profile 内的仓内 symlink 必须被报出（解析基 = home/profiles/<profile>）"
+  },
+  "green": {
+    "command": "node --test tests/checks/harness/clean-room-policy.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/harness/clean-room-policy.test.mjs"
+  }
+}
+```

@@ -28,6 +28,16 @@ export function requiresOf(text) {
   return out
 }
 
+/** JS 里的动态 `import('…')`（打包器可能保留；只抽 require 会漏，BUG-247）。 */
+export function dynamicImportsOf(text) {
+  const out = []
+  for (const m of String(text ?? '').matchAll(/\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+    const name = packageNameOf(m[1])
+    if (name !== null) out.push({ spec: m[1], name })
+  }
+  return out
+}
+
 /** `.d.ts` 里的 external import（`from '…'`；相对路径与 node: 过滤）。 */
 export function externalImportsOf(text) {
   const out = []
@@ -68,17 +78,41 @@ export function forwardDepIssues({ peers, requires = [], imports = [] }) {
 }
 
 /**
- * 反向：非 host-row peer 必须被发布物用到或在随包 YAML 行里点名。
- * 边界：`@deepseek-ai/dsh-*` 是**宿主行契约**（preset 依赖的 base 行包；行以 id 引用、不以包名出现），
- * 反向"死 peer"对它们不可判——它们由 peerRangeIssues 的「= engines」正面约束；本判据只查其余 peer。
+ * 显式 host-row allowlist（BUG-246）：preset 行以 id 引用 base 行，包名不出现在 YAML 里，
+ * 反向"死 peer"对它们不可判——但**不允许前缀豁免**：每个未消费的 host peer 必须在此逐条登记理由。
+ * 键 = peer 名；值 = 为什么它是合法的宿主行契约（空理由 = 红）。
  */
-export function unusedPeerIssues({ peers, requires = [], imports = [], declaredYaml = new Set(), hostRowPrefix = '@deepseek-ai/dsh-' }) {
+export const HOST_ROW_PEERS = Object.freeze({
+  '@deepseek-ai/dsh-agent': 'preset 行依赖的 agent 主行（base 提供，本包按 id replace/config）',
+  '@deepseek-ai/dsh-api-session-controller': '驾驶舱数据通道依赖的 session controller 行（base web 组合）',
+  '@deepseek-ai/dsh-experimental-client-ui-agent-team': '团队层 Web 可视面由团队 profile 提供（D18 有界例外）',
+  '@deepseek-ai/dsh-workspace': 'workspace 服务行（startup 半登记工作区所依赖的 base 行）',
+  '@deepseek-ai/dsh-session': 'session 服务行（preset 行按 id 依赖的 base 行）',
+  '@deepseek-ai/dsh-session-projection': '会话投影服务行（驾驶舱数据面按 id 依赖的 base 行）',
+  '@deepseek-ai/dsh-tools': '工具注册表行（角色工具面按 id 依赖的 base 行）',
+  '@deepseek-ai/dsh-web': 'web 行（cordis.patch.yml 按 id 重述 search/fetch provider）',
+  '@deepseek-ai/dsh-web-deepseek-api': '搜索 provider 行（web 行 searchProvider 按 id 指向它）',
+  '@deepseek-ai/dsh-web-fetch-http': '本地抓取 provider 行（fetch 回退链第一腿，按 id 组合）',
+})
+
+/** allowlist 自身的守卫：键必须仍是 peer，理由非空（防止 allowlist 腐烂成第二份死名单）。 */
+export function hostRowIssues(pkg, hostRowPeers = HOST_ROW_PEERS) {
+  const peers = new Set(Object.keys(pkg?.peerDependencies ?? {}))
+  const issues = []
+  for (const [name, reason] of Object.entries(hostRowPeers)) {
+    if (!peers.has(name)) issues.push(`host-row allowlist 条目「${name}」已不是 peerDependency——删条目或补 peer`)
+    if (typeof reason !== 'string' || reason.trim() === '') issues.push(`host-row allowlist 条目「${name}」缺理由`)
+  }
+  return issues
+}
+
+/** 反向：每个 peer 必须被发布物用到、在随包 YAML 行里点名，或在显式 host-row allowlist 里（BUG-246）。 */
+export function unusedPeerIssues({ peers, requires = [], imports = [], declaredYaml = new Set(), hostRowPeers = HOST_ROW_PEERS }) {
   const used = new Set([...requires, ...imports].map(({ spec }) => packageNameOf(spec)).filter(Boolean))
   return Object.keys(peers ?? {})
-    .filter((name) => !name.startsWith(hostRowPrefix))
-    .filter((name) => !used.has(name) && !declaredYaml.has(name))
+    .filter((name) => !used.has(name) && !declaredYaml.has(name) && !Object.hasOwn(hostRowPeers, name))
     .sort()
-    .map((name) => `peerDependency「${name}」既没被发布物 require/import，也没在随包 YAML 行里点名——死 peer（删掉或补消费方）`)
+    .map((name) => `peerDependency「${name}」既没被发布物 require/import，也没在随包 YAML 行里点名，且不在 host-row allowlist——死 peer（删掉或补消费方/登记理由）`)
 }
 
 /** 版本：跟随 DSH tag 的 peer 必须与 engines.dsh 同一范围字符串。 */
@@ -96,12 +130,13 @@ export function peerRangeIssues(pkg, { tagPrefix = '@deepseek-ai/dsh-' } = {}) {
 /** 汇总：消费方传发布物文本与已解析 YAML 声明名。 */
 export function packDepsIssues({ pkg, jsTexts = [], dtsTexts = [], yamlTexts = [] }) {
   const peers = pkg?.peerDependencies ?? {}
-  const requires = jsTexts.flatMap((text) => requiresOf(text))
+  const requires = jsTexts.flatMap((text) => [...requiresOf(text), ...dynamicImportsOf(text)])
   const imports = dtsTexts.flatMap((text) => externalImportsOf(text))
   const declaredYaml = new Set(yamlTexts.flatMap((text) => [...declaredNamesOf(text)]))
   return [
     ...forwardDepIssues({ peers, requires, imports }),
     ...unusedPeerIssues({ peers, requires, imports, declaredYaml }),
+    ...hostRowIssues(pkg),
     ...peerRangeIssues(pkg),
   ]
 }

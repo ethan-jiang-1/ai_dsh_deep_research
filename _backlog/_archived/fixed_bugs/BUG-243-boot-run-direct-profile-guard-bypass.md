@@ -1,16 +1,16 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-243：`boot-run.sh` 直起不做非默认 profile 守卫——`DSH_RUN_PROFILE=research` 绕过漂移门
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：修复就绪（自授权 P2：入口守卫）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）— 结论：boot-run 直起非默认 profile fail-loud（DSH_ALLOW_STALE_PROFILE=1 逃生）；静态契约 + 真入口红证；去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-move-residuals-ii.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 三干净室入口
 >
-> 位置：[tools/channel/boot-run.sh](../../tools/channel/boot-run.sh) 第 21 行（`PROFILE="${DSH_RUN_PROFILE:-deep-research}"`）；
-> 守卫只存在于 [tools/channel/run-driver.mjs](../../tools/channel/run-driver.mjs)（见 [BUG-242](BUG-242-run-driver-profile-flag-bypasses-guard.md)）。
-> 探索轮 = [搬家残差 II](../issues/2026-11-18-move-residuals.md) B。
+> 位置：[tools/channel/boot-run.sh](../../../tools/channel/boot-run.sh) 第 21 行（`PROFILE="${DSH_RUN_PROFILE:-deep-research}"`）；
+> 守卫只存在于 [tools/channel/run-driver.mjs](../../../tools/channel/run-driver.mjs)（见 [BUG-242](BUG-242-run-driver-profile-flag-bypasses-guard.md)）。
+> 探索轮 = [搬家残差 II](../settled_issues/2026-11-18-move-residuals.md) B。
 
 ## 症状
 
@@ -67,3 +67,27 @@ profile 选择。
 
 - 直起非默认 profile → exit 2；显式 `--allow-stale-profile`/env 放行；
 - 默认 `deep-research` 行为不变；`pnpm test` / 入口契约绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "tools/channel/boot-run.sh",
+    "checks/lib/channel/profile-guard.mjs",
+    "tests/checks/channel/profile-guard.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/channel/profile-guard.test.mjs",
+    "exit": 1,
+    "output": "not ok 3 - boot-run 直起守卫契约在场…（删掉守卫后契约用例红）"
+  },
+  "green": {
+    "command": "node --test tests/checks/channel/profile-guard.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/channel/profile-guard.test.mjs"
+  }
+}
+```

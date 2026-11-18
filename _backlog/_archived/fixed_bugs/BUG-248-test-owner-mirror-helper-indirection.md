@@ -1,17 +1,17 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-248：`test-owner-mirror` 只认 test 的直接 import——经 `-helpers` 间接依赖 owner 的 test 可藏在 shared
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：修复就绪（自授权 P2：测试规则）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）— 结论：owner = 直接 import ∪ 经本地 helper 递归；跨 owner 归 shared；探针红证；去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-move-residuals-ii.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 三干净室入口
 >
-> 位置：[tests/checks/shared/test-owner-mirror.test.mjs](../../tests/checks/shared/test-owner-mirror.test.mjs) 的
+> 位置：[tests/checks/shared/test-owner-mirror.test.mjs](../../../tests/checks/shared/test-owner-mirror.test.mjs) 的
 > checks 车道循环（第 94–110 行：只 `parseKeylessImports` test 文件的直接 import）；
-> 对照 = [checks/lib/repo/test-placement.mjs](../../checks/lib/repo/test-placement.mjs) 允许 `tests/<domain>/…-helpers.<ext>`。
-> 探索轮 = [搬家残差 II](../issues/2026-11-18-move-residuals.md) A（tests/checks 搬家）。
+> 对照 = [checks/lib/repo/test-placement.mjs](../../../checks/lib/repo/test-placement.mjs) 允许 `tests/<domain>/…-helpers.<ext>`。
+> 探索轮 = [搬家残差 II](../settled_issues/2026-11-18-move-residuals.md) A（tests/checks 搬家）。
 
 ## 症状
 
@@ -77,3 +77,25 @@ owner 抽取只遍历 `parseKeylessImports(test)` 的直接 specifier；`localIm
 
 - 注入 shared test + repo helper → owner 规则红；直接/间接两种形态都覆盖；
 - 现有 61 个 tests/checks 文件不误伤；`pnpm test` 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "tests/checks/shared/test-owner-mirror.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/shared/test-owner-mirror.test.mjs",
+    "exit": 1,
+    "output": "not ok 4 - tests/checks 根零平铺… tests/checks/repo/__probe.test.mjs 住 repo/，但只依赖 channel——归位到 channel/ 或改登记"
+  },
+  "green": {
+    "command": "node --test tests/checks/shared/test-owner-mirror.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/shared/test-owner-mirror.test.mjs"
+  }
+}
+```

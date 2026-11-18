@@ -1,16 +1,16 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-247：`pack-deps` 只看 JS 的 `require` 与 `.d.ts` 的 import——`lib/*.js` 的动态 `import()` 不在依赖闭包
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：修复就绪（自授权 P2：守卫补全）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）— 结论：pack-deps 抽动态 import() 进闭包；端到端用例覆盖；去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-move-residuals-ii.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 三干净室入口
 >
-> 位置：[checks/lib/repo/pack-deps.mjs](../../checks/lib/repo/pack-deps.mjs) 的 `requiresOf`（`require(` 正则）与
+> 位置：[checks/lib/repo/pack-deps.mjs](../../../checks/lib/repo/pack-deps.mjs) 的 `requiresOf`（`require(` 正则）与
 > `externalImportsOf`（只喂 `.d.ts`）；消费 = `pack.e2e` 的 `jsTexts` / `dtsTexts`。
-> 探索轮 = [搬家残差 II](../issues/2026-11-18-move-residuals.md) A/B。
+> 探索轮 = [搬家残差 II](../settled_issues/2026-11-18-move-residuals.md) A/B。
 
 ## 症状
 
@@ -57,7 +57,7 @@ console.log(externalImportsOf(\"const m = await import('@deepseek-ai/foo/bar')\"
 
 ## 牵出的失败类
 
-- 发布面 C2/C4（加载形态边界）；与 [BUG-232](../_archived/fixed_bugs/BUG-232-row-deps-scope-no-lib-types.md) 同模块。
+- 发布面 C2/C4（加载形态边界）；与 [BUG-232](BUG-232-row-deps-scope-no-lib-types.md) 同模块。
 - 类级方向 = 一个 JS 模块级提取器（require/import/import()）供正反向共用。
 
 ## 修法
@@ -71,3 +71,27 @@ console.log(externalImportsOf(\"const m = await import('@deepseek-ai/foo/bar')\"
 
 - 动态 import 的包名进入前向/反向闭包；注入未声明包红；
 - 现有 `pack-deps.test` / `pack.e2e` 绿；`pnpm test` 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/repo/pack-deps.mjs",
+    "checks/smoke/pack.e2e.mjs",
+    "tests/checks/repo/pack-deps.test.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/checks/repo/pack-deps.test.mjs",
+    "exit": 1,
+    "output": "not ok 5 - 汇总闭包：动态 import() 进入 packDepsIssues… 动态 import() 未声明 peer 必须被汇总判出"
+  },
+  "green": {
+    "command": "node --test tests/checks/repo/pack-deps.test.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/repo/pack-deps.test.mjs"
+  }
+}
+```

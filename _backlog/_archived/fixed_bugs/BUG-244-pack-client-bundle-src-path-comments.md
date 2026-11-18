@@ -1,15 +1,15 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-18
 ---
 
 # BUG-244：发布 `lib/client.js` 仍带 10 条 `src/` / `packages/` 开发源路径注释——上一轮的 dev 引用清单漏了源码根
 
-> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：修复就绪（自授权 P2：源注释/构建清理）
+> 严重级别：P2 ｜ 发现：2026-11-18 ｜ 状态：已修（2026-11-18）— 结论：24 个源文件/28 处 src·packages 注释改行为描述；重建后 lib/client.js 归零；去向：implemented — [批 Note](../../../notes/implemented/2026-11-18-move-residuals-ii.md)；审查：agent — 红证回放 + 全量 verify/test/pack.e2e + 三干净室入口
 >
 > 位置：`packages/deep-research-pack/lib/client.js`（构建产物，随 tarball 发布；源 = `src/client/**`）。
-> 探索轮 = [搬家残差 II](../issues/2026-11-18-move-residuals.md) B。
+> 探索轮 = [搬家残差 II](../settled_issues/2026-11-18-move-residuals.md) B。
 
 ## 症状
 
@@ -70,3 +70,31 @@ grep -cE '(^|[^A-Za-z0-9_.-])(src|packages)/' packages/deep-research-pack/lib/cl
 - `lib/client.js` 零 `src/`/`packages/` 引用；其余 `lib/*.js` 同；
 - 构建/客户端测试绿；发布物扫描在注入 `src/__gone__.ts` 时红；
 - `pnpm test` / `pack.e2e` 绿。
+
+## 修复落地（2026-11-18）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/client/ResearchGraphTab.tsx",
+    "packages/deep-research-pack/src/client/ResearchFinalTab.tsx",
+    "packages/deep-research-pack/src/lib/events/hitl-fold.ts",
+    "packages/deep-research-pack/src/lib/run/final-target.ts",
+    "packages/deep-research-pack/src/lib/workspace/research-defaults.ts",
+    "packages/deep-research-pack/src/index.ts",
+    "checks/smoke/pack.e2e.mjs"
+  ],
+  "red": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 1,
+    "output": "FAIL  随包文本零 dev 引用 — lib/client.js:1530 随包文本引用开发面 packages/util/workspace-path/src/file-address.ts；… src/lib；… src/defaults/…"
+  },
+  "green": {
+    "command": "node checks/smoke/pack.e2e.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/checks/repo/shipped-surface.test.mjs"
+  }
+}
+```

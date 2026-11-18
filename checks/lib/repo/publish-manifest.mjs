@@ -11,6 +11,20 @@ export function stripDevDependencies(manifest) {
   return rest
 }
 
+/** 删除发布 manifest 的 scripts（BUG-249）：build/prepack 是开发命令，安装/发布不需要。 */
+export function stripScripts(manifest) {
+  const { scripts, ...rest } = manifest
+  return rest
+}
+
+/** 发布 manifest 的 scripts 判据：必须缺席或为空（任何键 = 开发命令随包，红）。 */
+export function scriptIssues(manifest) {
+  const scripts = manifest?.scripts
+  if (scripts === undefined) return []
+  if (scripts === null || typeof scripts !== 'object' || Object.keys(scripts).length === 0) return []
+  return [`发布 manifest 带 scripts：${Object.keys(scripts).join(', ')}——构建/发布命令是开发动作，发布包不需要`]
+}
+
 /** 发布 manifest 的协议检查：不得出现 workspace 协议（dependencies/peer/dev 任一字段）。 */
 export function workspaceProtocolIssues(manifest) {
   const issues = []

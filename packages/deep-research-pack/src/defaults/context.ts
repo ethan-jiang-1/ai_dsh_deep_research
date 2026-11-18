@@ -1,9 +1,9 @@
 /**
  * defaults/context — 项目研究默认的模型面文本（host-only；client 不 import 本文件）。
  *
- * 为什么不在共享 `src/lib/research-defaults.ts` 里写这段中文：共享件同时进 client bundle，
+ * 为什么不在共享 `research-defaults 折算件` 里写这段中文：共享件同时进 client bundle，
  * UI 面不得有中文硬编码（cjk-source 门禁）；这段文本只服务 `systemPrompt.context`（模型面），
- * 住 host 侧。`src/lib` 只留 schema/纯折算/ASCII 命令码。
+ * 住 host 侧。`纯函数层` 只留 schema/纯折算/ASCII 命令码。
  *
  * 语义（issue 核心）：只列**已设置**字段；未列出的维度 = 自动 = Lead 自主判断，不是系统默认。
  */

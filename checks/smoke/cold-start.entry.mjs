@@ -20,6 +20,7 @@ import { reclaimPort } from '../lib/harness/port-reclaim.mjs'
 import {
   cleanHome, engineIssues, initWebProfile, installTarball, moduleLeakOf, pinnedDshBin, startWeb, stopWeb,
 } from '../lib/harness/clean-room.mjs'
+import { peerNamesOf } from '../lib/harness/clean-room-policy.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
@@ -48,7 +49,7 @@ try {
   if (install.status !== 0) fail(`plugin add 失败：\n${install.output.split('\n').slice(-12).join('\n')}`)
   const installed = join(home, 'profiles', PROFILE, 'node_modules', 'dsh-deep-research-pack')
   if (!existsSync(join(installed, 'presets', 'lead.patch.yml'))) fail(`安装副本缺 presets（${installed}）`)
-  const leaks = moduleLeakOf({ home, root: ROOT, names: ['react', 'react-dom', '@deepseek-ai/dsh-client-ui-primitives'] })
+  const leaks = moduleLeakOf({ home, profile: PROFILE, root: ROOT, names: peerNamesOf(pkg) })
   if (leaks.length > 0) fail(`依赖解析落到仓根 node_modules（不是干净室）：${leaks.join('；')}`)
 
   // 先收割端口，避免上一轮残留把「起不来」误判成「装坏了」。

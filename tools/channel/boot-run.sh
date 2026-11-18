@@ -19,6 +19,12 @@ set -euo pipefail
 node "$ROOT/checks/lib/harness/vendor-artifacts.mjs"
 
 PROFILE="${DSH_RUN_PROFILE:-deep-research}"
+# Non-default profile starts skip the mirror drift check (stale plugin would silently load, BUG-243):
+# fail loud unless the caller explicitly opts in (same meaning as run-driver --allow-stale-profile).
+if [ "$PROFILE" != "deep-research" ] && [ "${DSH_ALLOW_STALE_PROFILE:-0}" != "1" ]; then
+  echo "boot-run: profile [$PROFILE] is not the default deep-research -- starting a non-default profile skips the mirror drift check (stale plugin); set DSH_ALLOW_STALE_PROFILE=1 to proceed" >&2
+  exit 2
+fi
 # 端口：缺省 3083（2026-09-28 用户指令——3081 让给别的项目；3080 = 本仓开发 GUI）；覆写：
 #   DSH_RUN_PORT=<空闲端口> bash tools/channel/boot-run.sh
 PORT="${DSH_RUN_PORT:-3083}"

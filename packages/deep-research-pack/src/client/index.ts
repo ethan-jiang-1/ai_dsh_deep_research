@@ -9,7 +9,7 @@
  *   - 研究语义工具卡（对话流：组队 / 检索）；
  *   - 挂起显性化（pending 迁移 → revealStatusTab → openTab 右栏同步骤展开）。
  * 数据通道 = `remote.session.follow`（WebSocket 流，snapshot 给历史、event 给实时）+
- * `remote.workspaceFiles`（会话工作区 → bundle 文件）。折算谓词住 `src/lib/`（keyless 单测，
+ * `remote.workspaceFiles`（会话工作区 → bundle 文件）。折算谓词住 `纯函数层`（keyless 单测，
  * 与 run-dashboard 投影共用）；数据/展示分层纪律：折算进 lib，组件薄渲染——本文件只做
  * 登记与装配。
  */

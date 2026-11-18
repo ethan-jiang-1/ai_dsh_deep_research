@@ -34,7 +34,7 @@ import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isMain } from '../../checks/lib/shared/cli-entry.mjs';
 import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../../checks/lib/channel/run-channel.mjs';
-import { staleProfileMessage } from '../../checks/lib/channel/profile-guard.mjs';
+import { profileGuardDecision } from '../../checks/lib/channel/profile-guard.mjs';
 import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey } from '../../checks/lib/channel/channel-cache.mjs';
 import { authenticate } from '../../checks/lib/shared/web-harness.mjs';
 
@@ -207,8 +207,10 @@ const wantBootstrap = isCli && process.argv.includes('--bootstrap');
 // 非默认 profile 的漂移检测会被跳过（BUG-237）：boot-run 的指纹门只覆盖当前 profile，而
 // dev home 里曾留下停在不同版本的旧 profile 镜像。直起 up/probe 时 fail-loud，除非显式放行。
 const allowStaleProfile = isCli && (process.argv.includes('--allow-stale-profile') || process.env.DSH_ALLOW_STALE_PROFILE === '1');
+// 判据对象 = 本次实际会用的 profile：env/default（DEFAULT_PROFILE）∪ 显式 --profile（BUG-242）。
+const requestedProfile = isCli ? arg('--profile', DEFAULT_PROFILE) : DEFAULT_PROFILE;
 if (isCli && (sub === 'up' || sub === 'probe') && !allowStaleProfile) {
-  const message = staleProfileMessage(DEFAULT_PROFILE);
+  const message = profileGuardDecision({ profile: requestedProfile });
   if (message !== null) { console.error(message); process.exit(2); }
 }
 

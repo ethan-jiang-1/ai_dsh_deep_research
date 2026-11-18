@@ -34,6 +34,7 @@ import { presetRoles } from '../lib/shared/roles.mjs';
 import { reclaimPort } from '../lib/harness/port-reclaim.mjs';
 import { satisfiesVersion } from '../../packages/deep-research-pack/scripts/lib/version-range.mjs';
 import { cleanHome, engineIssues, isOutsideRepo, moduleLeakOf, pinnedDshBin } from '../lib/harness/clean-room.mjs';
+import { peerNamesOf } from '../lib/harness/clean-room-policy.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
@@ -240,7 +241,7 @@ try {
     { cwd: dshSrc, env: scrubbedEnv({ DSH_HOME: home }), timeoutMs: T_INSTALL });
   step(add.status === 0, 'dsh plugin add 安装', tail(add));
   // 干净室：模块解析不得从 home 走到仓根 node_modules（否则缺失 peer 被补齐 = 假绿）。
-  const leaks = moduleLeakOf({ home, root: ROOT, names: ['react', 'react-dom', '@deepseek-ai/dsh-client-ui-primitives'] });
+  const leaks = moduleLeakOf({ home, profile: PROFILE, root: ROOT, names: peerNamesOf(packPkg) });
   if (devHome) console.log('note  dev-home 模式：模块解析允许经仓根 node_modules（预期；干净室判据只对默认模式生效）');
   else step(leaks.length === 0, '模块解析不经过仓根 node_modules（干净室）', leaks.join('；'));
 

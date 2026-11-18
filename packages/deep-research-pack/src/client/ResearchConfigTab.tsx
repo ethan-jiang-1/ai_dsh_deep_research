@@ -4,7 +4,7 @@
  * 当前只渲染：① 本次研究（本次采用 ＋ 来源 ＋ 换一条——读 question.md 研究方法节，五态如实）
  * 与「方法库（本工作区）→ 顶部 tab」入口；库列表/内置卡/领域示范/术语/管理回执移到主界面
  * `conversation.view` 的「方法库」tab。旧管理块保留在 COMPACT=false 分支（回滚/对照），默认不渲染。
- * 指令仍经 `session/prompt` 交 Lead（面板不直写文件）；折算住 `src/lib/`（纯函数，keyless 单测）。
+ * 指令仍经 `session/prompt` 交 Lead（面板不直写文件）；折算住 `纯函数层`（纯函数，keyless 单测）。
  */
 import type { ReactNode } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
@@ -124,7 +124,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
     </div>
   )
 
-  /** 旧格式正文逐行剥前缀：口径 = src/lib/library-fold 的 legacyLinesOf（读态单块与编辑态预填共用）。 */
+  /** 旧格式正文逐行剥前缀：口径 = library-fold 折算件 的 legacyLinesOf（读态单块与编辑态预填共用）。 */
 
   /** 旧格式正文呈现块：纯旧格式条目 = 单块「自定义要求」（无 4×未设置噪音）；混居条目 = 四分区之外追加「自定义要求（旧）」，内容零丢失。 */
   const legacyBlock = (label: string, lines: readonly string[]) => (

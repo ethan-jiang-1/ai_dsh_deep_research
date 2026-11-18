@@ -26,7 +26,7 @@
  * 数据面：journal 事件 = remote.session.follow；bundle = remote.workspaceFiles
  * （list 本会话绑定的 bundle → 文件在场性/read question.md 首行）——company
  * cultivation 页签同款闭包模式（失败降级 null，面板如实显示）。
- * 分层纪律：折算全住 src/lib 纯函数（keyless 单测）；组件薄渲染。
+ * 分层纪律：折算全住 纯函数层 纯函数（keyless 单测）；组件薄渲染。
  */
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
