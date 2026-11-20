@@ -84,6 +84,6 @@ opened: 2026-11-19
 ## 未证边界与收尾
 
 - runner 原样复制当轮生产入口/owner/body，只替换外部 vendor CLI、dashboard、lsof/npm/git 等适配面；未跑真实 DSH、GUI、模型或任意平台矩阵。
-- 最新正控 `runtime/smoke-workspace/channel-start-e2e-h6jRC5/result.json` 原始 exit 0、12 项，新增覆盖后台 shutdown diagnostic、caller-relative home/workspace、handoff ACK 暂缓交付时 driver TERM（exit 143）的完整收束。最终版两项入口反控在默认沙箱下 exit 2（未跑），待权限切换后重跑；旧反控只作当轮证据。
+- 最新正控 `runtime/smoke-workspace/channel-start-e2e-h6jRC5/result.json` 原始 exit 0、12 项，新增覆盖后台 shutdown diagnostic、caller-relative home/workspace、handoff ACK 暂缓交付时 driver TERM（exit 143）的完整收束。最终版本两项入口反控在默认权限下 exit 2（未跑），保留当轮旧红；本次不扩大权限或重复升权，不称最终版本反控已跑。
 - 无完整公开入口 stale/外部替换锁后的旧 shell trap 事故实演；活动目录外部删除/替换不在新协议保证内。
 - 收尾：父级最终 `pnpm verify` exit 0（`final-verify.out`），`pnpm test` exit 0（`final-test.out`，1423 + 265 项，零 skip）。生产增量 review 原三项 blocker 已修，无剩余 blocker，源码 SHA 与 h6jRC5 正控匹配；最终版反控仍未跑，保持修复就绪、不归档。

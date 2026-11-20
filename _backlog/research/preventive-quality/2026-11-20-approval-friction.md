@@ -68,10 +68,9 @@ intent: 区分项目实施授权、产品阶段判断与原生工具许可，核
 ## 五、可执行的减摩擦方案
 
 1. **立即修执行行为**：相同授权范围的读码、设计、测试、自审直接完成；不再问“现在开始吗”“要不要继续”。只有缺少必要的人类判断时问具体未决项；独立已授权工作照常继续。依据为开发环、研发宪章及现成入口链探针。
-2. **真实需要升权时只保留原生许可**：有实际拒绝证据后，按原工具合同对原调用一次使用最窄更宽模式及 justification，不先额外发 `ask_user_question`。获批后直接执行该具体调用，不再确认相同动作。批准被拒或不可用时停止依赖步骤并报告限制。
+2. **权限受限不阻断其余工作**：本次用户明确只授权改本 repo，不接受通过 Full access 扩大权限。受限检查记为 NOT-RUN，保留原因并继续独立工作；不反复发起同类升权，不削弱 oracle，不换通道绕过限制。若某项交付性质确实缺证，明确保留该缺口。
 3. **减少不必要的重复调用**：复用仍有效的进程身份、检查结果与证据；在执行前把同一诊断问题所必需且范围明确的检查组织成一次可审查调用。不能借批处理混入未授权动作，也不能把已被拒的命令改写后走替代通道。
-4. **若用户确实希望减少原生弹窗，由用户选择原生当前会话权限**：先由用户在 composer 的 Permissions 控件或 `/permission` 查看可选项。当前会话选择 Full access 会取消工作区 confinement；它不是永久允许某条 `ps` 的窄白名单。保持 General 的未来会话默认不动，不改 profile、全局安装或本仓 vendor。
-5. **Auto review 仅作为已有原生可选项说明**：安装目录里有该包，尚不能据此断言 profile 已启用。只有当前 picker 出现 Auto 时用户才能直接选择；没有则另按明确插件安装授权处理。不要为减少弹窗自动安装/启用它。
+4. **保留 repo 边界**：不改会话权限、General 默认、profile、全局安装或本仓 vendor；不安装改变批准行为的插件。Full access 和 Auto 均扩大实际执行权限，不符合本次用户限制，不作为减摩擦方案。
 
 Auto 的实际边界来自 `INST/dsh-permission-presets/lib/index.js:54–60`（Full access + ask），以及 `INST/dsh-experimental-auto-review/lib/index.js:21,33–39`：普通项目工作低风险允许；不可逆删除、生产操作、外部写入与权限安全变更需要明确动作/目标/范围；敏感外传硬拒。其 `README.md:38,48,60` 说明它是当前 session 的实验模式、每次工具调用仍经模型审查、拒绝才转原生人工许可。它可能减少人工卡片，但会使用 Full access，并增加逐调用模型审查，不能描述成“保持 workspace-write 且自动批准”。
 
@@ -95,6 +94,6 @@ Auto 的实际边界来自 `INST/dsh-permission-presets/lib/index.js:54–60`（
 
 ## 用户追加的根治要求与当前处置
 
-用户随后明确要求消除无人值守时逐次授权卡住的问题，指出仅消歧项目说明不能解决它。主会话据此选择原生 Full access 作为不再逐次询问的处置路径：当前会话命令 `/permission danger-full-access`（或 Permissions 选择 Full access）将两项机制一起切到 `danger-full-access + never`；General 的默认 Permissions 另控制未来新会话。不要只把 approval 改成 `never` 而仍留 workspace-write，那只会把升权变成自动拒绝。
+用户要求消除无人值守时逐次授权卡住的问题，并进一步明确：只能改这个 repo，不许改其他地方；`/permission danger-full-access` 的建议不可接受。主会话先前把“少弹窗”解释为 Full access 是错误的范围判断，现已撤回。保持 `workspace-write + ask`，不修改权限实现、宿主、全局设置或 profile。
 
-主会话已通过 Host Inspect 读取 `permissionPresets.set(session, name)` 的精确合同与当前工具目录。Inspect 只有只读查询；已提供工具没有会话权限切换操作，因此未调用该 Service、未安装绕过它的插件，也未修改会话日志模拟切换。已向用户提供一次原生切换入口；目前最新 runtime snapshot 仍为 `workspace-write + ask`，尚未观察切换生效，不宣称已根治。生效后应以新 snapshot 和不带 `sandbox_permissions` 的进程 runner 执行结果验证，并在本节更新事实。
+主会话曾通过 Host Inspect 只读查询权限 Service 与工具目录，没有调用权限 setter、安装插件或改写会话日志。仓内已有授权的实施、验证、自审继续直接执行；明确受限项只记未跑，不再为同类 `ps` 取证逐次打断用户。本 repo 能修正调用与执行策略，不能据此声称宿主执行限制已被删除或根治。

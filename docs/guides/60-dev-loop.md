@@ -26,7 +26,7 @@
 - **验收门（TDD 式，[D23](../decisions.md#d23)）**：对已授权工作，在实施前把可判定的验收判据绑定检查方式；可机械者先立红，人工判据明确记录走查证据。验收尚不明确时，澄清是当前任务需要，不会自动阻断已授权且可独立推进的工作；证据设计复用本仓现有 owner，不另造队列。四条硬边界：①**改断言迁就实现不是修法**——断言只在行为/合同真实变化时同 diff 改（[tests/AGENTS](../../tests/AGENTS.md)）；②**未验项不得写 implemented**，被阻断检查如实注明；③**复发升格**——implemented 缺真实验证证据复发时，才考虑升为机械门禁并配负例；④证据和结论不得超出检查实际证明的范围（依据见 [external-materials.md](../external-materials.md) 与 [item-lifecycle-tdd Note](../../notes/archived/2026-10-05-item-lifecycle-tdd.md)）。
 - **修复卡证据（红→绿）**：bug 翻 `修复落地/已修` 必须写 `## 修复落地` 的 `json fix-evidence` 块（changes/red/green/guard；exit 是 oracle；红证可重放或 changes 含测试/门禁资产），且归档与代码/测试同暂存集；只翻状态/移卡 = 假修（规则 = [_backlog/bugs/README.md](../../_backlog/bugs/README.md)；方法 = [_backlog/methods/bug-to-fix.md](../../_backlog/methods/bug-to-fix.md)）。
 - 同一授权范围内直接实施、验证、自审和修复，不重复询问是否开始或继续；只有缺少必要的人类判断或范围变化时才澄清。阶段验收中的产品取舍归用户，技术证据与自主审查归 agent（[研发宪章](../../CONTRIBUTING.md#development-charter)）。
-- 工具执行许可由当前运行时的 sandbox/approval policy 单独强制，与实施授权、Plan Mode 和业务验收分开；遇到实际拒绝时按工具支持的最窄权限请求，不另发问卡重复确认，也不从仓库内任务推导对其他路径或任意操作的许可。原生机制见 `vendor/dsh/packages/interaction/user-approval/README.md`；项目指南不改变运行时策略。
+- 工具执行许可由当前运行时的 sandbox/approval policy 单独强制，与实施授权、Plan Mode 和业务验收分开；遇到实际拒绝时按工具支持的最窄权限请求，不另发问卡重复确认，也不从仓库内任务推导对其他路径或任意操作的许可。原生机制见 `vendor/dsh/packages/interaction/user-approval/README.md`；项目指南不改变运行时策略。用户限定只改 repo 时，不以 Full access 或全局配置消除弹窗；受限检查记未跑，继续独立工作，不为同类操作反复申请升权。
 - 多步实施按可独立验收结果拆解；小问题不强行拆成子任务。一次需要多个相互独立的人类判断时，分别记录问题与依赖，不把它们伪装成执行步骤。
 - steer（用户插话）开启新 turn = 清单重排的信号，看得见反馈被吸收。
 
