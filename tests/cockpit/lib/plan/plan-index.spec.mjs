@@ -255,15 +255,24 @@ test('表事实：空表/错列/重复语义列/多表/转义管道 → invalid 
   const duplicate = planIndex('| id | id | budget | task_id |\n|---|---|---|---|\n| W1.1 | W1.2 | — | — |\n')
   assert.equal(duplicate.table.status, 'invalid')
   assert.ok(duplicate.table.diagnostics.some((item) => item.code === 'duplicate-column'))
+  assert.deepEqual(duplicate.nodes, [])
 
   const twoTables = planIndex('| id | budget | task_id |\n|---|---|---|\n| W1.1 | — | — |\n\n| id | budget | task_id |\n|---|---|---|\n| W2.1 | — | — |\n')
   assert.equal(twoTables.table.status, 'invalid')
   assert.ok(twoTables.table.diagnostics.some((item) => item.code === 'ambiguous-table'))
+  assert.deepEqual(twoTables.nodes, [])
 
   const escaped = planIndex('| id | budget | task_id |\n|---|---|---|\n| W1.1 | — | task\\|x |\n')
   assert.equal(escaped.table.status, 'invalid')
   assert.ok(escaped.table.diagnostics.some((item) => item.code === 'unsupported-escaped-pipe'))
   assert.deepEqual(escaped.nodes, [])
+})
+
+test('表事实：数据行丢失行首管道 → row-arity，不静默截断', () => {
+  const index = planIndex('| id | budget | task_id |\n|---|---|---|\n| W1.1 | — | — |\nW2.1 | — | — |\n')
+  assert.equal(index.table.status, 'invalid')
+  assert.ok(index.table.diagnostics.some((item) => item.code === 'row-arity' && item.line === 4))
+  assert.deepEqual(index.nodes, [])
 })
 
 test('表事实：无空行紧邻的第二张表不被当成数据行', () => {

@@ -170,6 +170,11 @@ function tableOf(text: string | null | undefined): PlanTable {
   if (start === -1) return { source: 'present', status: 'invalid', rows, diagnostics: [{ code: 'table-missing', line: 1 }] }
   let end = start + 1
   for (; end < lines.length; end += 1) if (splitRow(lines[end]!).length === 0) break
+  // 数据行丢了行首 `|` 时表格会被提前截断；诊断而不是静默丢掉后续节点。
+  const stray = (lines[end] ?? '').trim()
+  if (stray !== '' && stray.includes('|') && !stray.startsWith('|')) {
+    diagnostics.push({ code: 'row-arity', line: end + 1 })
+  }
   for (let at = end + 1; at < lines.length; at += 1) {
     if (splitRow(lines[at]!).map(normalizeHeader).includes('id')) {
       return { source: 'present', status: 'invalid', rows, diagnostics: [{ code: 'ambiguous-table', line: start + 1 }, { code: 'ambiguous-table', line: at + 1 }] }

@@ -143,7 +143,7 @@ Lead 的“读 plan → 调 Team 工具”由 [planning skill](../../packages/de
 
 | 编号 / 类 | 输入与正常/反面结果 | 信号、owner 与命令 | 人工判断 / 证明边界 |
 |---|---|---|---|
-| D1 字段解释（确定性） | 支持域逐族给 raw/presence/value/diagnostic 独立 expected；active 预算和任务缺/空/—、墓碑互补，合法样例不误红 | [plan-index](../../tests/cockpit/lib/plan/plan-index.spec.mjs) + [plan-gate](../../tests/run/gates/plan-gate.spec.mjs)；`node --import tsx/esm --test tests/cockpit/lib/plan/plan-index.spec.mjs tests/run/gates/plan-gate.spec.mjs`。补 budget 缺列/空值真实断言。恢复第二读、丢占位区别及漏校验各自见红 | 新增支持/拒绝的公共行为由用户；既有性质正确性由独立合同判断 |
+| D1 字段解释（确定性） | 支持域逐族给 raw/presence/value/diagnostic 独立 expected；active 预算和任务缺/空/—、墓碑互补，合法样例不误红 | [plan-index](../../tests/cockpit/lib/plan/plan-index.spec.mjs) + [plan-gate](../../tests/run/gates/plan-gate.spec.mjs)；`node --import tsx/esm --test tests/cockpit/lib/plan/plan-index.spec.mjs tests/run/gates/plan-gate.spec.mjs`。已补 budget/task_id 缺列与空值断言（gate spec）。恢复第二读、丢占位区别及漏校验各自见红 | 新增支持/拒绝的公共行为由用户；既有性质正确性由独立合同判断 |
 | D2 消费策略与旧性质（确定性） | 当前/快照、旧图、映射/墓碑、差异、版本/投入、strategy；相同表字段同源，各 reader 结果符合自己的合同 | D1 与 [graph-model](../../tests/cockpit/lib/plan/graph-model.spec.mjs)、[plan-diff](../../tests/cockpit/lib/plan/plan-diff.spec.mjs)、[plan-graph](../../tests/cockpit/lib/plan/plan-graph.spec.mjs)、[protocol-core](../../tests/run/gates/protocol-core.spec.mjs)、[strategy-core](../../tests/run/gates/strategy-core.spec.mjs)、[run-version](../../tests/cockpit/lib/run/run-version.spec.mjs)。复用这些 owner 的定向 `node --import tsx/esm --test <files>`；每条受影响旧性质对应反例 | 无新业务判断；纯件只证调用逻辑，不证 hook 轮询、浏览器或调度 |
 | D3 真实使用（装配，按实际 diff） | 所有改动 reader 实际调用共用解释；真实门对坏 bundle RED、合法/缺席各按合同；不能只测 helper | [node-gate](../../checks/run-gates/node-gate.mjs) 入口对隔离 bundle 运行，用 `node --import tsx/esm checks/run-gates/node-gate.mjs <隔离 bundle 绝对路径> --sessions <空会话目录绝对路径> --no-write --no-review`，读取 stdout 的门 P 状态/诊断；当前 CLI 没有 `--json`。逐门断言 P，其他子门可能因不完整 bundle 为 RED/UNATTESTED，不以整体 exit 冒充 P 结果。若显示/locale/客户端装配有变化，按 [开发环](../../docs/guides/60-dev-loop.md)走 [client-load](../../checks/smoke/client-load.entry.mjs)真显示档；包结构改动再走 [release.entry](../../checks/smoke/release.entry.mjs) | 无新业务判断；入口只证所走面，不证装态生产强制。环境阻断写 NOT-RUN，不换 helper 冒充 |
 | D4 义务减法与回归（确定性 + 业务判断） | gate 第二节点表读实际删除；重复纯件断言收敛但旧性质保留；合法矩阵无误红；无新 public publish/配置/第二存储 | diff、定向命令耗时、`pnpm verify` + `pnpm test`；修改代码必须类型检查。新 UI 诊断中英同步；不改模型工具/skill，模型证据 N/A，若实际扩面先重审 | 用户判断收益与维护成本；不拿测试数/BUG 数代替业务收益，不外推长期缺陷率 |
@@ -154,10 +154,10 @@ Lead 的“读 plan → 调 Team 工具”由 [planning skill](../../packages/de
 
 | 证据 | 层 / 覆盖的失败类 | 负控（见过红） | 结果 / 边界 |
 |---|---|---|---|
-| [plan-index 表事实与观察诊断](../../tests/cockpit/lib/plan/plan-index.spec.mjs) + [plan-gate 字段/装饰/占位](../../tests/run/gates/plan-gate.spec.mjs) | 确定性：缺席 vs 空白、占位 vs 缺失、短行、重复语义列、多表、伪表、转义管道、装饰、BOM/CRLF | 改前装饰用例实际 RED；五次源码变异各 1 红后还原 | 34/34、38/38 定向通过；`pnpm typecheck` exit 0。纯件不证浏览器/hook |
-| [node-gate 真入口](../../checks/run-gates/node-gate.mjs) 隔离 bundle | 装配：实际 run 门读取同一解码事实 | 无独立变异；坏/缺席/合法三态对照 | 合法 P=PASS exit0；空白 P=RED exit1；缺席 P=N/A exit0。聚合退出不冒充 P |
+| [plan-index 表事实与观察诊断](../../tests/cockpit/lib/plan/plan-index.spec.mjs) + [plan-gate 字段/装饰/占位](../../tests/run/gates/plan-gate.spec.mjs) | 确定性：缺席 vs 空白、占位 vs 缺失、短行、重复语义列、多表、伪表、转义管道、装饰、BOM/CRLF | 改前装饰用例实际 RED；六次源码变异各 1 红后还原 | 35/35、39/39 定向通过；`pnpm typecheck` exit 0。纯件不证浏览器/hook |
+| [node-gate 真入口](../../checks/run-gates/node-gate.mjs) 隔离 bundle | 装配：实际 run 门读取同一解码事实 | 无独立变异；坏/缺席/合法三态对照 | 合法与装饰表 P=PASS exit0；空白与多表 P=RED exit1；缺席 P=N/A exit0。聚合退出不冒充 P |
 | [GraphNotices 静态渲染](../../tests/cockpit/client/research-tabs.spec.mjs) | 显示：中英诊断文案与英文零 CJK | 文案删改即红 | 3/3 pass；不证浏览器加载 |
-| `pnpm verify` + `pnpm test` + `pnpm build` | L0：引用/形状、现有回归、构建 | 无新增门禁变异 | verify exit0；1434 spec + 265 checks，0 fail/skip；build exit0 |
+| `pnpm verify` + `pnpm test` + `pnpm build` | L0：引用/形状、现有回归、构建 | 无新增门禁变异 | verify exit0；1435 spec + 265 checks，0 fail/skip；build exit0 |
 | `client-load.entry --seed` | 真浏览器装配回归 | 无坏表种子，不能证明新诊断显示 | **NOT-RUN**：主机 load 3.62 > 1.5，exit 2；未跑 ≠ 通过 |
 | 生产写入/派工拒绝、并发恢复、安装形态、模型 | P / 其余层 | — | 未运行；D 不声称这些 |
 
