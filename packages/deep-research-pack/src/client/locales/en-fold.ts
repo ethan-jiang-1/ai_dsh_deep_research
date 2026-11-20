@@ -109,6 +109,7 @@ export const enFold = {
   diffDepsChanged: '{count} dependency changes',
   diffEmpty: 'Neither side has nodes',
 
+  planIssueTableInvalid: 'Node table cannot be decoded: {detail} — fix the header/column count or keep exactly one node table',
   planIssueDuplicateId: '{id} appears multiple times — an id may be assigned only once',
   planIssueMixedFamily: 'This plan mixes W/N families — new plans use W; legacy N is read-only',
   planIssueCycle: 'Dependency cycle: {cycle} — not executable; use versioned nodes (repair-rN / review-rN) for review back-edges; renumbering cannot break a cycle',

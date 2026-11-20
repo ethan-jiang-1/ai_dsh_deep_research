@@ -7,17 +7,49 @@
  *
  * - `planIndex` / `planNodeOf`：节点查询面（id / parent / kind / depth / acceptance / task_id）；
  *   `topLevel` 只含 parent 缺省的 active 节点（复合子节点 W3.1… 默认不进图；墓碑不进图）。
+ *   解析事实（`table`：源码缺席 / 在场坏表 / decoded，字段存在性、显式占位与位置诊断）与
+ *   查询面同源；缺文件 = absent，在场坏表 = invalid + diagnostics，不再静默退化成“合法空图”。
  * - `planIssuesOf`：重号 / 悬空 parent / 悬空 dep / 自依赖 / 环 / wave 前缀 → 只读稳定性提示
  *   （不是 node-gate）。
  */
 import { translateZh, type PackTranslate } from '../shared/i18n.ts'
+import { maskMarkdownLines } from '../shared/markdown-mask.ts'
 
 /** 研究流程 stage（由根 W 的 kind 派生；不是独立列）。 */
 type PlanStage = 'scan' | 'dive' | 'check' | 'synthesis' | 'review' | 'gate' | 'unknown'
 
+const PLAN_COLUMNS = ['id', 'parent', 'lifecycle', 'kind', 'question', 'ownerrole', 'deps', 'output', 'acceptance', 'budget', 'depth', 'taskid'] as const
+type PlanColumn = typeof PLAN_COLUMNS[number]
+
+/** 单元格的存在性与显式无值不折叠；位置为源行号 + 表内列序号（从 1 开始）。 */
+export interface PlanCell {
+  readonly state: 'missing-column' | 'missing-cell' | 'empty' | 'explicit-placeholder' | 'value'
+  readonly raw?: string
+  readonly value?: string
+  readonly line: number
+  readonly column?: number
+}
+
+type PlanTableProblem = 'empty-source' | 'table-missing' | 'empty-table' | 'duplicate-column' | 'ambiguous-table' | 'row-arity' | 'unsupported-escaped-pipe' | 'missing-id'
+export interface PlanTableDiagnostic {
+  readonly code: PlanTableProblem
+  readonly line: number
+  readonly column?: number
+}
+
+/** 解析事实不是 gate verdict；invalid 保留行事实供诊断，但不投影权威节点。 */
+export interface PlanTable {
+  readonly source: 'absent' | 'present'
+  readonly status: 'absent' | 'invalid' | 'decoded'
+  readonly rows: readonly Readonly<Record<PlanColumn, PlanCell>>[]
+  readonly diagnostics: readonly PlanTableDiagnostic[]
+}
+
 /** `plan.md` 节点表的一行：W<wave>.<index> 节点（W2 是 Wave 2，W2.1 是其节点）。 */
 export interface PlanNode {
   readonly id: string
+  /** 与 table.rows 同源的字段事实；硬门不再重新扫描文本。 */
+  readonly cells: Readonly<Record<PlanColumn, PlanCell>>
   /** 内部拆解父节点 id；Wave 内的顶层节点 parent 缺省。`W2.1.1` 的 parent = `W2.1`。 */
   readonly parent?: string
   /** 生命周期：active（默认）/ retired / merged_into:… / superseded_by:…；墓碑留在表里供 byId。 */
@@ -57,6 +89,7 @@ export function isActivePlanNode(node: PlanNode): boolean {
 
 /** `plan.md` 的查询面（节点表缺席时为空索引，不是错误）。 */
 export interface PlanIndex {
+  readonly table: PlanTable
   readonly nodes: readonly PlanNode[]
   readonly byId: ReadonlyMap<string, PlanNode>
   readonly byTaskId: ReadonlyMap<string, PlanNode>
@@ -83,6 +116,7 @@ type PlanIssueKind =
   | 'tombstone-without-successor'
   | 'wave-prefix'
   | 'legacy-flat-w'
+  | 'table-invalid'
 
 export interface PlanIssue {
   readonly kind: PlanIssueKind
@@ -91,8 +125,9 @@ export interface PlanIssue {
 }
 
 /** 空 plan 索引（节点表缺席的合法形态）。 */
-function emptyPlanIndex(version?: string): PlanIndex {
+function emptyPlanIndex(table: PlanTable, version?: string): PlanIndex {
   return {
+    table,
     nodes: [],
     byId: new Map(),
     byTaskId: new Map(),
@@ -115,29 +150,75 @@ function normalizeHeader(cell: string): string {
   return cell.replace(/`/g, '').replace(/\*\*/g, '').trim().toLowerCase().replace(/[\s_-]+/g, '')
 }
 
-/** 单元格值归一：剥 markdown 标记；空/占位符 → undefined。 */
-function cellValue(raw: string | undefined): string | undefined {
-  if (raw === undefined) return undefined
-  const value = raw.replace(/`/g, '').replace(/\*\*/g, '').trim()
-  if (value === '' || value === '-' || value === '—' || value === '–') return undefined
-  return value
-}
-
 /** 分隔行（`|---|---|` / `:---:`）。 */
 function isSeparator(cells: readonly string[]): boolean {
   return cells.length > 0 && cells.every((cell) => /^:?-{3,}:?$/.test(cell.trim()))
 }
 
+/** 节点表只认正文；语义列重复、多表和错位不选择一个“最可能”的读法。 */
+function tableOf(text: string | null | undefined): PlanTable {
+  if (text === null || text === undefined) return { source: 'absent', status: 'absent', rows: [], diagnostics: [] }
+  const diagnostics: PlanTableDiagnostic[] = []
+  const rows: Readonly<Record<PlanColumn, PlanCell>>[] = []
+  if (text.trim() === '') return { source: 'present', status: 'invalid', rows, diagnostics: [{ code: 'empty-source', line: 1 }] }
+  const lines = maskMarkdownLines(text.replace(/^\uFEFF/, ''))
+  // 表从第一个含 id 列的行开始，到第一个非表格行为止；之后若再出现含 id 列的候选表 → 多表。
+  let start = -1
+  for (let at = 0; at < lines.length; at += 1) {
+    if (splitRow(lines[at]!).map(normalizeHeader).includes('id')) { start = at; break }
+  }
+  if (start === -1) return { source: 'present', status: 'invalid', rows, diagnostics: [{ code: 'table-missing', line: 1 }] }
+  let end = start + 1
+  for (; end < lines.length; end += 1) if (splitRow(lines[end]!).length === 0) break
+  for (let at = end + 1; at < lines.length; at += 1) {
+    if (splitRow(lines[at]!).map(normalizeHeader).includes('id')) {
+      return { source: 'present', status: 'invalid', rows, diagnostics: [{ code: 'ambiguous-table', line: start + 1 }, { code: 'ambiguous-table', line: at + 1 }] }
+    }
+  }
+  const header = { at: start, cells: splitRow(lines[start]!) }
+  const columns = new Map<string, number>()
+  header.cells.forEach((cell, at) => {
+    const name = normalizeHeader(cell)
+    if (!(PLAN_COLUMNS as readonly string[]).includes(name)) return
+    if (columns.has(name)) diagnostics.push({ code: 'duplicate-column', line: header.at + 1, column: at + 1 })
+    else columns.set(name, at)
+  })
+  if (lines[header.at]?.includes('\\|')) diagnostics.push({ code: 'unsupported-escaped-pipe', line: header.at + 1 })
+  for (let at = header.at + 1; at < end; at += 1) {
+    const line = lines[at]!
+    const cells = splitRow(line)
+    if (isSeparator(cells)) continue
+    if (line.includes('\\|')) diagnostics.push({ code: 'unsupported-escaped-pipe', line: at + 1 })
+    if (cells.length !== header.cells.length) diagnostics.push({ code: 'row-arity', line: at + 1 })
+    const facts = Object.fromEntries(PLAN_COLUMNS.map((name) => {
+      const column = columns.get(name)
+      const raw = column === undefined ? undefined : cells[column]
+      const normalized = raw?.replace(/`/g, '').replace(/\*\*/g, '').trim()
+      const state: PlanCell['state'] = column === undefined ? 'missing-column'
+        : raw === undefined ? 'missing-cell'
+          : normalized === '' ? 'empty'
+            : normalized === '-' || normalized === '—' || normalized === '–' ? 'explicit-placeholder' : 'value'
+      return [name, { state, ...(raw !== undefined ? { raw } : {}), ...(normalized !== undefined ? { value: normalized } : {}), line: at + 1, ...(column !== undefined ? { column: column + 1 } : {}) }]
+    })) as unknown as Readonly<Record<PlanColumn, PlanCell>>
+    rows.push(facts)
+    if (facts.id.state !== 'value') diagnostics.push({ code: 'missing-id', line: at + 1, column: (columns.get('id') ?? 0) + 1 })
+  }
+  if (rows.length === 0) diagnostics.push({ code: 'empty-table', line: header.at + 1 })
+  return { source: 'present', status: diagnostics.length === 0 ? 'decoded' : 'invalid', rows, diagnostics }
+}
+
 /**
  * 解析 `plan.md` 的节点表（id / parent / kind / question / owner_role / deps / output /
- * acceptance / depth / task_id）。表头缺失、表格畸形、文本缺席 → 空索引（合法退化，不是错误）。
+ * acceptance / depth / task_id）。文本缺席 → absent；在场无表/空表/畸形 → invalid 并给出
+ * 行定位诊断，节点查询面为空；只有 decodable 的唯一节点表才投影节点。
  * `task_id` 列是 Team 任务 ↔ W/N 节点的唯一权威映射（F8）；不按数字后缀猜映射。
  * `parent` 是复合节点的层级；顶层图只取 parent 缺省的节点。
  * @param text - `plan.md` 文本（可为 null/undefined）。
  * @returns 节点查询面。
  */
 export function planIndex(text: string | null | undefined): PlanIndex {
-  if (typeof text !== 'string' || text.trim() === '') return emptyPlanIndex()
+  const table = tableOf(text)
+  if (typeof text !== 'string' || text.trim() === '') return emptyPlanIndex(table)
   // 取**最后**一条版本声明，并且先剥掉 HTML 注释（模板里的示例行也写 `图版本：vN`）。
   // 不剥注释/取第一条会把重写后的 plan 读成样板值（受控 E2E 实测：v2 被读成 v1 或 vN）。
   const withoutComments = text.replace(/<!--[\s\S]*?-->/g, '')
@@ -151,31 +232,12 @@ export function planIndex(text: string | null | undefined): PlanIndex {
   const version = headerMatches.length === 0
     ? undefined
     : (hasHeading ? headerMatches.at(-1)?.[1] : headerMatches[0]?.[1])
-  const lines = text.split(/\r?\n/)
+  if (table.status !== 'decoded') return emptyPlanIndex(table, version)
   const nodes: PlanNode[] = []
-  let columns: Map<string, number> | undefined
-  let started = false
+  for (const cells of table.rows) {
+    const read = (name: PlanColumn): string | undefined => cells[name].state === 'value' ? cells[name].value : undefined
+    const id = read('id')!
 
-  for (const line of lines) {
-    const cells = splitRow(line)
-    if (!started) {
-      if (cells.length < 2) continue
-      const normalized = cells.map(normalizeHeader)
-      if (!normalized.includes('id')) continue
-      const map = new Map<string, number>()
-      normalized.forEach((cell, index) => { if (!map.has(cell)) map.set(cell, index) })
-      columns = map
-      started = true
-      continue
-    }
-    if (cells.length === 0) break
-    if (isSeparator(cells)) continue
-    const read = (name: string): string | undefined => {
-      const index = columns?.get(name)
-      return index === undefined ? undefined : cellValue(cells[index])
-    }
-    const id = read('id')
-    if (id === undefined) continue
     const deps = (read('deps') ?? '').split(/[,，;；]/).map((dep) => dep.trim()).filter((dep) => dep !== '')
     const parent = read('parent')
     const lifecycle = read('lifecycle')
@@ -188,6 +250,7 @@ export function planIndex(text: string | null | undefined): PlanIndex {
     const depth = read('depth')
     const node: PlanNode = {
       id,
+      cells,
       deps,
       ...(parent !== undefined ? { parent } : {}),
       ...(lifecycle !== undefined ? { lifecycle } : {}),
@@ -202,7 +265,7 @@ export function planIndex(text: string | null | undefined): PlanIndex {
     nodes.push(node)
   }
 
-  if (nodes.length === 0) return emptyPlanIndex(version)
+  if (nodes.length === 0) return emptyPlanIndex(table, version)
   const rawById = new Map<string, PlanNode>()
   for (const node of nodes) if (!rawById.has(node.id)) rawById.set(node.id, node)
   const rootOf = (node: PlanNode): PlanNode => {
@@ -233,6 +296,7 @@ export function planIndex(text: string | null | undefined): PlanIndex {
     else bucket.push(node)
   }
   return {
+    table,
     nodes: staged,
     byId,
     byTaskId,
@@ -255,6 +319,10 @@ export function planIndex(text: string | null | undefined): PlanIndex {
 export function planIssuesOf(index: PlanIndex | null | undefined, t: PackTranslate = translateZh): readonly PlanIssue[] {
   if (index === null || index === undefined) return []
   const issues: PlanIssue[] = []
+  if (index.table.status === 'invalid') {
+    const detail = index.table.diagnostics.map((item) => `${item.code}@${item.line}`).join(', ')
+    issues.push({ kind: 'table-invalid', nodeId: '*', message: t('planIssueTableInvalid', { detail }) })
+  }
   const seen = new Set<string>()
   const duplicated = new Set<string>()
   for (const node of index.nodes) {

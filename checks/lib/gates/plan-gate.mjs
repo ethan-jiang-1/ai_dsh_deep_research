@@ -53,32 +53,19 @@ export function planGate(bundleDir) {
     if (node.ownerRole !== undefined && !roles.has(node.ownerRole)) issues.push(`${node.id} 的 owner_role「${node.ownerRole}」不在角色集（${[...roles].join('/')}）`)
     if (node.lifecycle !== undefined && !LIFECYCLE.test(node.lifecycle.trim())) issues.push(`${node.id} 的 lifecycle「${node.lifecycle}」非法`)
   }
-  // plan-index 不解析 budget/task_id；从原始表按表头取（单列判据，不复制整张表）。
-  const tableLines = text.split('\n').filter((line) => /^\s*\|/.test(line))
-  const headerLine = tableLines.find((line) => /\|\s*id\s*\|/i.test(line)) ?? ''
-  const headerCells = headerLine.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((cell) => cell.trim().toLowerCase())
-  const cellOf = (column, id) => {
-    const at = headerCells.indexOf(column)
-    if (at === -1) return undefined
-    const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const line = tableLines.find((row) => new RegExp('^\\s*\\|\\s*' + escaped + '\\s*\\|').test(row))
-    if (line === undefined) return undefined
-    return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|')[at]?.trim()
-  }
-  const budgetOf = (id) => cellOf('budget', id)
-  const taskOf = (id) => cellOf('task_id', id)
+  // 同一节点表解码事实保留显式占位，硬门只拥有判定策略，不再次解释 Markdown。
   // 列必填/值域（BUG-282 / 300–302）：只对 active 节点要求，墓碑可省。
   for (const node of index.nodes.filter(isActivePlanNode)) {
     for (const [field, value] of [['question', node.question], ['output', node.output], ['acceptance', node.acceptance]]) {
       if (value === undefined || String(value).trim() === '' || /^<.*>$/.test(String(value).trim())) issues.push(`${node.id} 缺 ${field}（active 节点必填）`)
     }
-    const budget = budgetOf(node.id)
+    const budget = node.cells.budget.value
     if (budget === undefined || budget === '') issues.push(`${node.id} 缺 budget（无预算写 —）`)
     const depth = String(node.depth ?? '').trim().toUpperCase()
     if (!DEPTHS.includes(depth)) issues.push(`${node.id} 的 depth「${node.depth ?? ''}」非法（L0–L3）`)
     if (node.ownerRole === undefined) issues.push(`${node.id} 缺 owner_role（active 节点必填，BUG-300）`)
     if (node.kind === undefined) issues.push(`${node.id} 缺 kind（active 节点必填，BUG-301）`)
-    const task = taskOf(node.id)
+    const task = node.cells.taskid.value
     if (task === undefined || task === '') issues.push(`${node.id} 缺 task_id（无映射写 —；BUG-302）`)
   }
   // 图版本（BUG-281）+ 快照内容（BUG-285 / 305）

@@ -111,6 +111,7 @@ export const zhFold = {
   diffDepsChanged: '{count} 依赖变化',
   diffEmpty: '两侧都没有节点',
 
+  planIssueTableInvalid: '节点表无法解析：{detail}——修表头/列数，或只保留一张节点表',
   planIssueDuplicateId: '{id} 出现了多次——编号只能分配一次',
   planIssueMixedFamily: '同一 plan 混用 W/N 家族——新 plan 用 W，旧 N 只读兼容',
   planIssueCycle: '依赖图有环：{cycle}——不可执行；审查回边用版本化节点（repair-rN / review-rN），重编号不能解环',

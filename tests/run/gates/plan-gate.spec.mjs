@@ -19,6 +19,31 @@ test('合法 plan：图无环/字段闭集/剩余工作在场 → PASS', () => {
   try { assert.equal(planGate(d).status, 'PASS') } finally { rmSync(d, { recursive: true, force: true }) }
 })
 
+// 负例留证 2026-11-20：统一节点表解释前，装饰 ID/表头被 raw 第二读误判缺 budget/task_id；本用例实红。
+test('节点表的装饰等价形式不改变 active 字段裁决', () => {
+  for (const decorate of [(value) => `**${value}**`, (value) => `\`${value}\``]) {
+    const text = plan([row('W1.1', '—')])
+      .replace('| id |', `| ${decorate('id')} |`)
+      .replace('| task_id |', `| ${decorate('TASK-ID')} |`)
+      .replace('| budget |', `| ${decorate('BUDGET')} |`)
+      .replace('| W1.1 |', `| ${decorate('W1.1')} |`)
+    const d = dirOf(text)
+    try { assert.equal(planGate(d).status, 'PASS', text) } finally { rmSync(d, { recursive: true, force: true }) }
+  }
+})
+
+test('active budget/task_id：空白红，显式占位合法（task_id 占位为既有缺口，不新增收紧）', () => {
+  const budgetEmpty = dirOf(plan([row('W1.1', '—')]).replace('| out | ok | 1 | L1 |', '| out | ok |  | L1 |'))
+  try { assert.match(planGate(budgetEmpty).detail, /缺 budget/) } finally { rmSync(budgetEmpty, { recursive: true, force: true }) }
+  const budgetNone = dirOf(plan([row('W1.1', '—')]).replace('| out | ok | 1 | L1 |', '| out | ok | — | L1 |'))
+  try { assert.equal(planGate(budgetNone).status, 'PASS') } finally { rmSync(budgetNone, { recursive: true, force: true }) }
+  const taskEmpty = dirOf(plan([row('W1.1', '—')]).replace('| L1 | — |', '| L1 |  |'))
+  try { assert.match(planGate(taskEmpty).detail, /缺 task_id/) } finally { rmSync(taskEmpty, { recursive: true, force: true }) }
+  // planning §4 要求回填后 task-N / plan-only；gate 当前接受 —。本片只保真占位、记录缺口，不暗改派工门。
+  const taskNone = dirOf(plan([row('W1.1', '—')]))
+  try { assert.equal(planGate(taskNone).status, 'PASS') } finally { rmSync(taskNone, { recursive: true, force: true }) }
+})
+
 test('环/悬空/重号/自依赖 → RED（BUG-267）', () => {
   for (const text of [
     plan([row('W1.1', 'W2.1'), row('W2.1', 'W1.1')]),

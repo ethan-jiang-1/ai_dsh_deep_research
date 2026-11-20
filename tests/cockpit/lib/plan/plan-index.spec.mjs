@@ -216,3 +216,97 @@ test('BUG-125 无 ## 的 plan 取首个声明（跳过模板 blockquote）', () 
   const text = ['# Plan', '', '图版本：v2', '', '旧版图版本：v1 已废弃', ''].join('\n')
   assert.equal(planIndex(text).version, 'v2')
 })
+
+// 独立 expected 2026-11-20（未参与实现的审阅者按 issue 候选合同冻结，不由本实现生成）：
+// 节点表解码事实与 gate verdict 分开；这些用例钉住缺席/坏表/占位/歧义/编码。
+test('表事实：缺席与在场空白分开，占位符不折叠成缺失', () => {
+  const absent = planIndex(null)
+  assert.equal(absent.table.source, 'absent')
+  assert.equal(absent.table.status, 'absent')
+  assert.deepEqual(absent.nodes, [])
+
+  const blank = planIndex('   \n')
+  assert.equal(blank.table.source, 'present')
+  assert.equal(blank.table.status, 'invalid')
+  assert.deepEqual(blank.table.diagnostics.map((item) => item.code), ['empty-source'])
+
+  const plan = planIndex('| id | budget | task_id |\n|---|---|---|\n| W1.1 | — | — |\n')
+  assert.equal(plan.table.status, 'decoded')
+  assert.deepEqual(plan.table.diagnostics, [])
+  assert.equal(plan.nodes.length, 1)
+  assert.equal(plan.nodes[0].cells.budget.state, 'explicit-placeholder')
+  assert.equal(plan.nodes[0].cells.taskid.state, 'explicit-placeholder')
+  assert.equal(plan.nodes[0].taskId, undefined, '占位符不是会话映射')
+  assert.equal(planNodeOf(plan, 'task-1'), undefined)
+})
+
+test('表事实：空表/错列/重复语义列/多表/转义管道 → invalid 且不投影节点', () => {
+  const empty = planIndex('| id | budget | task_id |\n|---|---|---|\n')
+  assert.equal(empty.table.status, 'invalid')
+  assert.ok(empty.table.diagnostics.some((item) => item.code === 'empty-table'))
+  assert.deepEqual(empty.nodes, [])
+
+  const short = planIndex('| id | budget | task_id |\n|---|---|---|\n| W1.1 | — |\n')
+  assert.equal(short.table.status, 'invalid')
+  assert.ok(short.table.diagnostics.some((item) => item.code === 'row-arity'))
+  assert.equal(short.table.rows[0].taskid.state, 'missing-cell', '审计事实保留')
+  assert.deepEqual(short.nodes, [])
+
+  const duplicate = planIndex('| id | id | budget | task_id |\n|---|---|---|---|\n| W1.1 | W1.2 | — | — |\n')
+  assert.equal(duplicate.table.status, 'invalid')
+  assert.ok(duplicate.table.diagnostics.some((item) => item.code === 'duplicate-column'))
+
+  const twoTables = planIndex('| id | budget | task_id |\n|---|---|---|\n| W1.1 | — | — |\n\n| id | budget | task_id |\n|---|---|---|\n| W2.1 | — | — |\n')
+  assert.equal(twoTables.table.status, 'invalid')
+  assert.ok(twoTables.table.diagnostics.some((item) => item.code === 'ambiguous-table'))
+
+  const escaped = planIndex('| id | budget | task_id |\n|---|---|---|\n| W1.1 | — | task\\|x |\n')
+  assert.equal(escaped.table.status, 'invalid')
+  assert.ok(escaped.table.diagnostics.some((item) => item.code === 'unsupported-escaped-pipe'))
+  assert.deepEqual(escaped.nodes, [])
+})
+
+test('表事实：未知扩展列忽略；装饰与 BOM/CRLF 得到同一 id', () => {
+  const unknown = planIndex('| id | note | note | budget | task_id |\n|---|---|---|---|---|\n| W1.1 | a | b | — | — |\n')
+  assert.equal(unknown.table.status, 'decoded')
+  assert.equal(unknown.nodes[0].id, 'W1.1')
+
+  const decorated = planIndex('| **id** | `budget` | TASK-ID |\n|---|---|---|\n| **W1.1** | — | — |\n')
+  assert.equal(decorated.table.status, 'decoded')
+  assert.equal(decorated.nodes[0].id, 'W1.1')
+
+  const crlf = planIndex('\uFEFF# Plan\r\n\r\n| id | budget | task_id |\r\n|---|---|---|\r\n| W1.1 | — | — |\r\n')
+  assert.equal(crlf.table.status, 'decoded')
+  assert.equal(crlf.nodes[0].id, 'W1.1')
+})
+
+test('观察提示：坏表给出可定位诊断，缺席不误报', () => {
+  const bad = planIndex('| id | budget | task_id |\n|---|---|---|\n| W1.1 | — |\n')
+  const issues = planIssuesOf(bad)
+  assert.equal(issues.length, 1)
+  assert.equal(issues[0].kind, 'table-invalid')
+  assert.match(issues[0].message, /row-arity@3/)
+  assert.deepEqual(planIssuesOf(planIndex(null)), [], '缺席是合法路径，不产生坏表提示')
+})
+
+test('表事实：注释/围栏内的伪表不夺权，真表仍 decoded', () => {
+  const text = [
+    '<!-- | id | budget | task_id |',
+    '|---|---|---|',
+    '| W9.9 | 1 | task-9 |',
+    '-->',
+    '',
+    '| id | budget | task_id |',
+    '|---|---|---|',
+    '| W1.1 | — | — |',
+    '',
+    '```md',
+    '| id | budget | task_id |',
+    '|---|---|---|',
+    '| W8.8 | 1 | task-8 |',
+    '```',
+  ].join('\n')
+  const index = planIndex(text)
+  assert.equal(index.table.status, 'decoded')
+  assert.deepEqual(index.nodes.map((node) => node.id), ['W1.1'])
+})
