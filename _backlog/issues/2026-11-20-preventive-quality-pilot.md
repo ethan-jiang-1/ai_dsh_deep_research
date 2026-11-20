@@ -7,13 +7,17 @@ opened: 2026-11-20
 
 > 立卡：2026-11-20 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做（首批同时落开发环与工程实证） ｜ 可关闭：否
 
-> 去向：implemented — 计划在交付时写入 `notes/implemented/2026-11-20-preventive-quality-pilot.md`；实际日期随交付核定。业务验收 owner = 用户，技术证据 owner = 实施 agent。本轮未创建该 Note。
+> 去向：implemented — 分批交付（B 技术决定已有 Note；A4 与首批整体验收仍待定）。业务验收 owner = 用户，技术证据 owner = 实施 agent。此行不表示卡片可关闭；当前 B Note 见上文链接。
 
 **问题与期望结果：** 已有 D54/D55、类级守卫和多轮修复，新启动锁仍重犯活 owner 被时间接管、旧 release 删除新锁、两个入口各自锁定等已知问题。要把保障前移到新行为引入阶段，让公共操作与可执行性质减少重复缺陷和调用义务；探索用于预算内发现新假设，同一已声明性质不再每轮靠探索首检。
 
-**当前情况：** 2026-11-20 研究结论与证据已评审，转为本卡的实施范围和验收设计。本卡是后续落地的统一入口；[研究题](../research/preventive-quality/README.md)保存依据，[综合](../research/preventive-quality/2026-11-20-prevention-synthesis.md)解释取舍，[详细落地方案](../research/preventive-quality/2026-11-20-repo-landing-plan.md)展开文件映射。状态表示方案具备进入实施设计的条件；本轮完成研究和同步，尚未改产品、门禁或开发纪律。
+**当前情况：** 2026-11-20 研究结论与证据已评审，实施记录见本卡下方及[首批 Note](../../notes/implemented/2026-11-20-preventive-quality-pilot.md)；[研究题](../research/preventive-quality/README.md)保存依据，[综合](../research/preventive-quality/2026-11-20-prevention-synthesis.md)解释取舍，[详细落地方案](../research/preventive-quality/2026-11-20-repo-landing-plan.md)展开文件映射。本批技术改动已进入工作树，12 项真进程正向回归 exit 0，`pnpm test` 为 spec 1423 / checks 265、零失败零 skip，`pnpm verify` 全绿 exit 0；A4 未通过，最终版负控复跑因沙箱限制未跑。本卡继续保持 `待落地`、`可关闭：否`。首批 A+B 不称整体完成，也未取得用户业务验收。
 
-**实施前需核定：** 启动事务与服务存活的生命周期、资源身份、检查/准备/启动的锁边界、安全委托与退出；磁盘原语能否满足接管/释放原子性。它们是首步设计任务，未预选 TTL、依赖或通用锁库。
+**实施合同：** 基线 `48d57835`。2026-11-20 用户授权按本卡自主落地；测试接缝为公共 acquire/release Interface、两个公开 CLI 的真进程与隔离外部适配器，以及预封存非锁准入案例。启动操作保护 canonical state 与实际 dev home，固定顺序取得，持到服务组静默；同 home 的不同 profile/state 不并行，独立 home/state 可并行，端口最终由 OS bind 裁决。准备模式同样持锁；`--drift-only` 不持服务锁，仅读取镜像与原子发布可丢弃缓存。
+
+**恢复与取消：** 不做自动 stale 接管：超龄、死 pid、owner 缺/坏均拒绝。正常释放仅 unlink 本次唯一 owner 文件后非递归 rmdir，重复 release 无效。INT/TERM、交接前断线和失败须停止 owned process group、等待退出/组静默后释放；无法证明静默保留锁。SIGKILL/掉电可能遗留子孙与锁，只能停相关启动者/服务、核实离线后归档残留再恢复，不承诺自动重启或主动 setsid 子孙清理。后台通过本次 generation 的私有 IPC READY/交接，旧日志不建立成功；无 skip-lock 开关。旧锁残留拒绝自动迁移。
+
+**冻结预算：** 首批仅 A1–A6；设计与原型一个工作日内，实现/复核先以两个工作日为限，进入具体实施前估计并记录；达到预算只结束本轮并报告未证，不改验收或自动扩面。低层用例为活 owner 超龄、旧 release、未知残留、owner 写入故障、正常释放；真进程 runner 固定为 `node checks/smoke/channel-start.e2e.mjs`，覆盖双入口竞争、共享资源/独立资源、检查/复用、失败取消及旁路负控。
 
 **下一步：** 从下表第 1 步固定语义与反例，再完成开发环和公共操作；用非锁案例验证有限准入可迁移。后续范围、判据、进度、实际证据与去向继续更新本卡，研究材料不代替实施记录。
 
@@ -62,12 +66,12 @@ opened: 2026-11-20
 
 | 步骤 | 要完成的结果 | 当前状态 |
 |---|---|---|
-| 1. 冻结语义与旧基线 | 写清资源键、生命周期、正常/拒绝/恢复结果；确定有限反例与退出预算 | 待实施；已有源码证据与两个 helper 复现 |
-| 2. 首批开发环改动 | 按上述 A 修改现有 owner，封存非锁样本及免触发样本的预期 | 待实施 |
-| 3. 公共操作与低层性质 | 同一资产在旧实现红、实现后绿，覆盖失败/取消；集中所有权并删重复协议 | 待实施 |
-| 4. 真实入口及旁路负控 | 两入口竞争与检查/复用正例；恢复旧独立锁或绕委托应失败；落定 runner 和频率 | 待实施 |
-| 5. 准入迁移及成本复核 | 未参与调优的上下文冷读非锁 diff 与免触发 diff，记录提前发现/漏识别；核对净义务与成本 | 待实施 |
-| 6. 交付与阶段退出 | 更新本卡、实际缺陷证据与 Note；执行适用检查；满足关闭条件后归档 | 待实施 |
+| 1. 冻结语义与旧基线 | 写清资源键、生命周期、正常/拒绝/恢复结果；确定有限反例与退出预算 | 已实施；资源/owner、取消与离线恢复边界见上方实施合同和 Note；旧低层两个性质有红证 |
+| 2. 首批开发环改动 | 按上述 A 修改现有 owner，封存非锁样本及免触发样本的预期 | 已实施；更新现有 guide、review/exploration skill 与证据说明；A4 样本与 expected 已封存 |
+| 3. 公共操作与低层性质 | 同一资产在旧实现红、实现后绿，覆盖失败/取消；集中所有权并删重复协议 | 已实施；旧实现活 owner / 旧 release 世界状态见红，默认低层 5 项绿；共享 supervisor 并删除重复协议 |
+| 4. 真实入口及旁路负控 | 两入口竞争与检查/复用正例；恢复旧独立锁或绕委托应失败；落定 runner 和频率 | 正向 12-case runner exit 0；早期 bypass-wrapper 负控按预期 exit 1，见红；最终版本复跑因 ps EPERM 为 exit 2 / NOT-RUN。runner 已登记为影响触发 dev-only |
+| 5. 准入迁移及成本复核 | 未参与调优的上下文冷读非锁 diff 与免触发 diff，记录提前发现/漏识别；核对净义务与成本 | 已执行 A4；A 未满足封存判据、B 符合静态对照但标签泄露，规则效力未证。义务减法已记录，业务成本待用户验收 |
+| 6. 交付与阶段退出 | 更新本卡、实际缺陷证据与 Note；执行适用检查；满足关闭条件后归档 | 进行中；Note 与记录已建立，`pnpm test` 通过（1423 spec + 265 checks，零 fail/skip），9 项 dev-parity 注入 exit 0，增量 review 无剩余 blocker；`pnpm verify` 全绿 exit 0；最终版负控因沙箱 exit 2 未跑。source-only 非发布件，L2 未跑。A4 未通过且无用户业务验收，保持待落地、不可关闭 |
 
 ## 验收标准
 
@@ -99,9 +103,33 @@ opened: 2026-11-20
 
 ## 研究验证、实施验证与关闭条件
 
-研究阶段重跑现有 keyless 回归：spec 1423、checks 261，0 fail/skip；两个 helper 行为已在临时目录复现。先前全量 verify 仅因已有 `dist-tarball` / `dist-freshness` 制品漂移退出 1。质量复核收尾时，将失配的忽略制品及 manifest 保存在运行区，未改 tracked 手册、pack 或重导出；源码形态全量 verify 随后 exit 0，制品两项明确 note 缺席，未验证发布件。详见[综合稿验证节](../research/preventive-quality/2026-11-20-prevention-synthesis.md#九本轮验证与显式未覆盖)。候选新性质、变异、跨入口竞争、准入盲评和收益复核均未实施，研究验证不算本卡实施验收。
+研究阶段实际运行结果与限制见[研究 README 本轮证据](../research/preventive-quality/README.md#本轮进度与实施证据)及[综合稿验证节](../research/preventive-quality/2026-11-20-prevention-synthesis.md#九本轮验证与显式未覆盖)。研究验证不替代本卡实施验收。
 
-2026-11-20 状态记录：研究定性后，方案/判据/验收/去向齐备，`推敲中 → 待落地`；可关闭仍为否。语义审查已将真实入口、非锁迁移、多实现漏执行和义务减法纳入验收；技术方案生效与收益成立仍待实施。
+### 本批实施记录（2026-11-20）
+
+**进度：** 方案所涉实现、指南、契约与登记已进入当前工作树；这不是首批 A+B 验收完成。该记录不改变 issue 的 `待落地` 状态，`可关闭：否`。A4 判据未满足，用户业务价值/成本验收未发生。
+
+**已取得的专项证据：**
+
+| 证据 | 层 | 覆盖性质 | 负控/结果 | 执行状态 |
+|---|---|---|---|---|
+| `start-lock.baseline.test.mjs` + `live-owner.red.out` | 低层；旧实现 | 活 owner 超龄不失权 | 旧实现复现接管，exit 1 | 红已记录 |
+| `release-world.baseline.test.mjs` + `release-world.red.out` | 低层；旧实现实际文件系统 | 旧 release 不删除后来 owner；oracle 为目录/内容状态，不是 release 返回值 | 旧实现删除后来锁目录，exit 1 | 红已记录 |
+| `tests/checks/channel/start-lock.test.mjs` + `start-lock.green.out` | 低层契约 | 互斥、正常 release、活 owner 超龄、重复 release、未知/损坏残留与写入失败 | 新性质 5 项 pass，fail 0 | 绿已记录 |
+| `focused-integration.out` | 旧集成静态契约对照 | profile guard / run-driver wrapper 的源码形状 | 3 项旧静态断言失配；其余 13 项通过 | 静态形状不匹配，不是产品行为红证，也非新实现结果 |
+| `bypass-wrapper.out`（同类记录 `CNezLA`、`DJhmFY`） | 隔离真进程变异负控 | 故意绕 wrapper 后错误拒绝码应被 ownership 断言捕获 | exit 1（实际 1、预期 busy=2） | 预期负控红，断言抓到变异 |
+| `bypass-wrapper.final.out` | 隔离真进程负控复跑 | 最终版本负控 | `ps` 被沙箱 EPERM 阻断，0 checks、exit 2 | NOT-RUN；保留旧版有效红证，不冒称最终复跑通过 |
+| `runtime/smoke-workspace/channel-start-e2e-h6jRC5/result.json` | 隔离真进程正控 | direct↔driver、drift/reuse、共享/独立资源、TERM/取消/失败静默、handoff、相对路径、后台诊断 | 12 项通过，exit 0；fixture adapter，不是 DSH/GUI/model 证明 | 已实跑 |
+| `checks/smoke/registry.json` | 执行车道登记 | runner 的触发与频率 | `dev-only`，启动 owner/锁变化时触发；不进默认/nightly | 已登记 |
+| A4 封存材料与两份输出 | 模型/准入观察 | Case A/B 对照判读 | A 按原封存 expected 失败；B 静态等价符合对照，但标签泄露 | 未通过；guide/skill 未提供，规则效力未证。不刷样本、不改 expected |
+
+**范围与成本口径：** 启动锁默认回归用例由 1→5；旧启动协议两套收敛为一个 supervisor；真进程 runner 一个、12 cases、dev-only。删除 driver 与 shell 重复锁、pgrep/旧日志轮询。新增代码净行较大，不称净 LOC 减少；收益只记义务减少与 owner 集中，不以 BUG 数代替业务收益。一次性工时来自本 session 多轮实施和错误诊断，无法精确计量，不编造时数。
+
+**正向真进程结果：** 最终 review 补查 handoff cancel、relative paths、background diagnostic 后，`runtime/smoke-workspace/channel-start-e2e-h6jRC5/result.json` 记录 12 项通过、exit 0，包含 handoff ACK 后 TERM 取消并以 driver exit 143 收束。runner 使用隔离 fixture adapter，不证明 DSH/GUI/model 行为。
+
+**负控结果：** 早期 `bypass-wrapper.out`（同类 `CNezLA`、`DJhmFY`）在变异下 exit 1，实际拒绝码 1 与预期 busy=2 不同，属于预期负控红，证明断言抓住变异。最终版 `bypass-wrapper.final.out` 因 `ps` 被沙箱 EPERM 阻断，0 checks、exit 2（NOT-RUN）；旧红证不抹除，但不宣称最终版负控已复跑。
+
+**最终检查与审查：** `runtime/smoke-workspace/preventive-quality/final-test.out` 记录 `pnpm test:spec && pnpm test:checks` exit 0：1423 spec + 265 checks，0 fail、0 skip；`final-verify.out` 记录 `pnpm verify` 全绿 exit 0。父级记录 dev-parity 9 项注入 exit 0；增量 review `547fac7b` 修复原 3 个 blocker 后无剩余 blocker。source-only 工作树不含发布件，L2 未跑。七问边界：会红 ✅（旧 TTL/release-world 反例和两项 bypass-wrapper mutation）；真入口 ✅（两个真实 public CLI）；验世界 ✅（文件系统与进程组）；模型可见钉住 ❌（本轮未改 pack 模型面，A4 实际流程也未暴露规则）；最低层 ✅（unit/entry 分层）；skip 可见 ✅（最终 mutation exit 2 单列 NOT-RUN）；可重复 ✅（runner 前置 `ps`/`lsof`/平台条件可见）。这些逐项判定不等于整体验收通过。最终版 bypass-wrapper 负控因沙箱 EPERM 未运行，旧版有效红证仍保留。A4 未满足且用户业务验收未发生，故关闭条件不成立。
 
 ## 关闭条件
 

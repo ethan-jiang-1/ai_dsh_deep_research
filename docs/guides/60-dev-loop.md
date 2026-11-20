@@ -25,6 +25,8 @@
   文件："a plan directory creates a second durable home"——会话日志即计划与清单的持久真相）。
 - **验收门（TDD 式，[D23](../decisions.md#d23)）**：对已授权工作，在实施前把可判定的验收判据绑定检查方式；可机械者先立红，人工判据明确记录走查证据。验收尚不明确时，澄清是当前任务需要，不会自动阻断已授权且可独立推进的工作；证据设计复用本仓现有 owner，不另造队列。四条硬边界：①**改断言迁就实现不是修法**——断言只在行为/合同真实变化时同 diff 改（[tests/AGENTS](../../tests/AGENTS.md)）；②**未验项不得写 implemented**，被阻断检查如实注明；③**复发升格**——implemented 缺真实验证证据复发时，才考虑升为机械门禁并配负例；④证据和结论不得超出检查实际证明的范围（依据见 [external-materials.md](../external-materials.md) 与 [item-lifecycle-tdd Note](../../notes/archived/2026-10-05-item-lifecycle-tdd.md)）。
 - **修复卡证据（红→绿）**：bug 翻 `修复落地/已修` 必须写 `## 修复落地` 的 `json fix-evidence` 块（changes/red/green/guard；exit 是 oracle；红证可重放或 changes 含测试/门禁资产），且归档与代码/测试同暂存集；只翻状态/移卡 = 假修（规则 = [_backlog/bugs/README.md](../../_backlog/bugs/README.md)；方法 = [_backlog/methods/bug-to-fix.md](../../_backlog/methods/bug-to-fix.md)）。
+- 同一授权范围内直接实施、验证、自审和修复，不重复询问是否开始或继续；只有缺少必要的人类判断或范围变化时才澄清。阶段验收中的产品取舍归用户，技术证据与自主审查归 agent（[研发宪章](../../CONTRIBUTING.md#development-charter)）。
+- 工具执行许可由当前运行时的 sandbox/approval policy 单独强制，与实施授权、Plan Mode 和业务验收分开；遇到实际拒绝时按工具支持的最窄权限请求，不另发问卡重复确认，也不从仓库内任务推导对其他路径或任意操作的许可。原生机制见 `vendor/dsh/packages/interaction/user-approval/README.md`；项目指南不改变运行时策略。
 - 多步实施按可独立验收结果拆解；小问题不强行拆成子任务。一次需要多个相互独立的人类判断时，分别记录问题与依赖，不把它们伪装成执行步骤。
 - steer（用户插话）开启新 turn = 清单重排的信号，看得见反馈被吸收。
 
@@ -59,12 +61,20 @@
 
 ### 1.2 六步闭环
 
-1. 读取本轮授权与对应 owner；存在 backlog 问题时读卡片及其直接证据；存在 RFC 时按其范围执行；
+1. 读取本轮授权与对应 owner；存在 backlog 问题时读卡片及其直接证据；存在 RFC 时按其范围执行；语义变更先按 §1.3 准备验收；
 2. 复杂的多步实施列 todo（一 concrete step 一条，完成即更新）；
 3. 改动（源码/文档/配置同 diff 维护"现在为真"）；
 4. 按改动面选跑验证（§2 面选择表 + 任务型路由表）；
 5. 修复 → 复跑，只报告**实际跑过的检查**；
 6. 收尾（§4）。
+
+### 1.3 语义变更的验收准备
+
+新增或替换 parser、机器判据、资源 ownership/lifecycle 操作，或改变这些合同、共享事实写方、生产者/消费者集合、模型能力与可见行为时，先查相关 owner、已有 Module/Interface、旧性质及其测试，再进入改动。
+
+在本次既有验收记录中说明：哪些旧性质继续成立、全部受影响的真实入口/消费者、复用公共操作或另建实现的理由，以及正常与失败/取消后的外部结果；将这些结果绑定最低可见层的正反证据。没有同类旧性质时说明查过的范围与新增承诺，继承方法见[类级守卫](../../_backlog/methods/class-level-guards.md#01-旧性质随变更继承)。
+
+普通改名、唯一写方的闭集常量投影或保持上述语义不变的整理，沿原任务型验证即可；更名若改变解析、发现或消费者可达性，仍按语义变更处理。记录沿用当前 issue/验收说明/交付报告，不新增必填字段或独立总账；交付核对由[语义自审](../../.agents/skills/reviewing-a-delivery/SKILL.md#从什么开始)承担。
 
 ## 2. 面选择、任务型路由与全档命令（运行时入口）
 
@@ -99,7 +109,7 @@
 | 改 `src/lib/` 纯函数 / 类型面（pack 两半的编译面） | 对应 `src/lib` / `src/client` 类型位 | `pnpm typecheck` → `pnpm test`（typecheck 前置 = vendor 构建产物在场） | L0 + typecheck | 同上 | typecheck + 对应测试绿 |
 | **新增/修改机器判据**（门禁/审计/交付决定从散文里判值） | 设计卡 `## 判据形状` + 判据测试（不变量+矩阵） | 先写变异矩阵（红）→ 实现 → L0 | L0 + 判据测试 | 判据形状 + 反证 | 歧义会红 + 矩阵绿 |
 | 加 / 改机械门禁 | `context.mjs` gates 数组 + 该域 `verify/gates/<域>.mjs` + `evaluation.md` §L0 台账（案例表有增删再动 `gates.e2e.mjs`） | **注入回归红 → 还原 → 绿** → `gates.e2e --gate=<改的门禁>` | L0 + `gates.e2e --gate=<改的门禁>`（日常只跑该门禁的案例；全量 = 发布档，见下） | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + `--gate` 绿 |
-| 改 run 通道工具 / 审计门（run-driver / boot-run / watch-run / hitl-answer / run-dashboard / evidence-audit / node-gate / schema-scan / snapshot-replay） | 对应 `checks/` / `tools/` / `probes/` 脚本 | — | L0 + 对应 `tests/<domain>/*.spec.mjs` 契约测试必跑（用例即其反证记录） | 判据变更才写 Note | 对应契约测试绿 |
+| 改 run 通道工具 / 审计门（run-driver / boot-run / watch-run / hitl-answer / run-dashboard / evidence-audit / node-gate / schema-scan / snapshot-replay） | 对应 `checks/` / `tools/` / `probes/` 脚本 | 启动 owner、公开入口或锁变更另跑 `node checks/smoke/channel-start.e2e.mjs`（dev-only 真进程；影响触发，不进默认回归或 nightly） | L0 + 对应 `tests/<domain>/*.spec.mjs` 契约测试必跑（用例即其反证记录） | 判据变更才写 Note | 对应契约测试及适用进程 smoke 绿 |
 | 改 checks/lib 支撑模块 / dev 基建本体（`lib/*.mjs`、env.sh、render-overlay） | 支撑模块 + 其**全部消费方**（消费面 grep：roles.mjs 的角色枚举消费方、render-overlay → `overlay-fresh`、run-state → watch-run/hitl-answer/run-dashboard） | 消费方门禁在同 diff 复跑 | L0 + lib 对应契约测试 | 判据变更才写 Note | 消费方门禁与契约测试绿 |
 | 查/加探针（真实边界单点证据） | `probes/` 头注 + `probes/INDEX.generated.md` | `node probes/_index.mjs --write` → 跑探针本体 | L0 + 目标探针（真模型档需凭据） | 头注/索引变更才写 | 索引门绿 + 探针红→绿 |
 | 改研究工作区手册 / 模板（结构性调整：模板增删 / 路径与格式修正；**手册正文文本 = 模型可见，走上行〔改 persona / skill / 手册文本〕**） | `packages/deep-research-pack/content/` | 无生成器 | L0 + `content-shape` | — | `content-shape` 绿 |

@@ -166,7 +166,7 @@
 | lib/repo/doc-surface.mjs | a-docs、f-repo、doc-prose-paths、doc-surface-shapes.test | live 文档可读面的唯一枚举器：形态台账（SHAPES / COMMAND_FORMS）↔ 订单案例对账、命令归一（env 前缀 / `./` / 包装器 / `&&` / heredoc / 缩进 / YAML 折叠块）、退役根判据 |
 | lib/repo/doc-counts.mjs | a-docs、doc-counts.test | 资产计数名词闭集（count-free 判据面正本）+ 硬计数 token 抽取 |
 | lib/shared/skill-golden.mjs | record-skill-golden、skill-golden.test | skill 正文 sha256 清单与漂移判据（快照 B 只比 catalog） |
-| lib/channel/start-lock.mjs | run-driver、start-lock.test | 启动互斥：原子 mkdir + owner.json + stale 回收（run-driver up / boot-run.sh 共用文案） |
+| lib/channel/start-lock.mjs | start-channel、start-lock.test | 启动互斥：原子 mkdir + 每次取得的独有 owner 文件；release 仅删除本代文件并 rmdir，无在线 stale 接管；两个入口由 start-channel 统一持有 |
 | lib/channel/profile-guard.mjs | run-driver、profile-guard.test | run-driver 的非默认 profile 守卫：默认 profile 放行，其余 fail-loud（显式 `--allow-stale-profile` 才继续） |
 | lib/gates/findings-core.mjs | evidence-audit-core、node-gate-run-gates、review-contract、findings-contract.spec、template-contract.spec、topics-contract.spec | findings gap 四态 / lenses / lens_gaps 差集 / scope_role 闭集 |
 | lib/gates/review-contract.mjs | node-gate-delivery-gate、review-contract.spec | review 覆盖表（topic × lens）+ CRITICAL 与 readiness 交叉 |

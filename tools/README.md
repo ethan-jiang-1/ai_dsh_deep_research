@@ -3,7 +3,7 @@
 > 维护面：**operate**（run = 起/复用进程；act = 持久改动，失败可能半途、需 converge/repair）。
 > 装：`channel/` run 通道与驱动、`build/` 环境冷启动与 vendor 构建、`record/` 录制与生成器、
 > `release/` 分发与移交、`clean/` 运行区清理。不装：裁决（→ `checks/`）、只读投影（→ `probes/`）。
-> 例外：`hooks/pre-commit` 是 judge；`env.sh`、预载驱动、vendor 构建配置、手册源是非面。
+> 例外：`hooks/pre-commit` 是 judge；`env.sh`、私有 body 库、预载驱动、vendor 构建配置、手册源是非面。
 > 规则 = [surface-contract](../docs/guides/68-surface-contract.md)。
 >
 > 命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)（含 `source tools/env.sh` 前置说明）；run 通道用法 = [Run 指南](../docs/guides/61-run-playbook.md)。本页 = tools/ 每个盘上入口的职责与状态（逐件一行，子组/件 全路径点名）。
@@ -24,8 +24,10 @@
 
 | 件 | 职责 |
 |---|---|
-| channel/run-driver.mjs | **驱动入口（启动/验证/呈交一条命令）**：`up` 起通道（经 boot-run，不绕漂移门）或复用已在飞的（复用先跑 `boot-run --drift-only` 验镜像；漂移/未取证 = NOT-RUN）→ 用 cdp-probe 验浏览器面 + 截图 → 打印呈交块；**验证缓存**：同一 pack 源 + 同一 runtime 构建 + 30 分钟内的 GREEN 直接复用（冷启动也命中，命中前做 HTTP 就绪检查；`--force-probe` 强制重验；缓存只存 GREEN）；`--bootstrap` 先跑冷启动前置，`--profile`/`DSH_RUN_STATE_DIR` 支持多实例；`probe` 只验面（同样先验镜像、永远真验）、`url` 打印 URL。verdict = exit 0 可呈交 / 1 红 / 2 未跑。通道事实唯一来源 = 本次 state 的 `web.log` 最后一条横幅 |
-| channel/boot-run.sh | run 通道正式启动面：自检 → 组合检查/补装 → 漂移门 → boot web（默认 3083；runtime 默认 vendor 构建产物 `lib/bin.js`，`DSH_RUN_RUNTIME=source` 退回 tsx 源码）→ 后台仪表盘；`DSH_RUN_PROFILE`/`DSH_RUN_PORT`/`DSH_RUN_STATE_DIR`/`DSH_RUN_WORKSPACE` 支持多实例（自 source env.sh） |
+| channel/run-driver.mjs | **驱动入口（启动/验证/呈交一条命令）**：`up` 冷启动 fork 同一个 start-channel supervisor，经本代 READY/交接确认后服务独立存活；复用先跑 `boot-run --drift-only` 验镜像（漂移/未取证 = NOT-RUN）→ cdp-probe 验浏览器面 + 截图 → 呈交；GREEN 验证缓存 30 分钟（身份含 pack/runtime/驱动与实例配置，冷启动可命中，先验 HTTP；`--force-probe` 强制重验）；`probe` 永远真验，`url` 从本次 state 的 `web.log` 最后一条横幅取 URL；exit 0 可呈交 / 1 红 / 2 未跑。`--bootstrap` 先准备环境；多实例边界 = [guides/65 §7](../docs/guides/65-run-forms.md#7-独立环境与多实例) |
+| channel/boot-run.sh | 公开前台 wrapper：自 source env.sh 后 `exec node start-channel.mjs`，由 supervisor 统一持锁、准备与服务回收 |
+| channel/start-channel.mjs | 两个公开启动入口共用的 supervisor：canonical home/state 双锁覆盖准备与完整服务生命；持锁后运行 body，自检 → 组合检查/补装 → 漂移门 → web + 仪表盘；停止时确认整个子进程组静默后才释放锁。无 stale/PID/TTL 自动接管，异常残留按 [Run 指南](../docs/guides/61-run-playbook.md#01-特殊形态与排障按需读首跑不需要) 离线恢复；`--drift-only` 免启动锁、可并发，但会写原子发布清单缓存 |
+| channel/boot-run-body.sh | 私有实现库（非独立执行入口，直接执行 exit 2）；由 supervisor source 后调用；runtime 默认 vendor 构建产物 `lib/bin.js`，`DSH_RUN_RUNTIME=source` 退回 tsx 源码 |
 | channel/run-kickoff.mjs | run 会话驱动：建 lead 会话 + 发 kickoff（GUI 的 RPC 替代入口） |
 | channel/hitl-answer.mjs | HITL 代答（代理模拟；answerer 在浏览器客户端，先盘侧谓词自拒） |
 | channel/llm-socket-isolation.cjs | api.deepseek.com socket 隔离预载（NODE_OPTIONS，非面驱动）：LLM 流与 web_search 两类请求均每请求一次性连接、永不复用；上游边缘对长命复用连接有相位性故障（[postmortem](../notes/archived/2026-10-13-llm-stream-malformed-storm.md)），移除 = 摘 boot-run 一行 |
@@ -86,7 +88,7 @@
 
 | 机制点 | 用户安装路径 | dev 通道 | 判定 |
 |---|---|---|---|
-| profile 名 | `deep-research` | `deep-research`（`DSH_RUN_PROFILE` 可覆写；多实例靠 `DSH_RUN_STATE_DIR`，不改名） | 同形 |
+| profile 名 | `deep-research` | `deep-research`（`DSH_RUN_PROFILE` 可覆写；并发实例须独立 home/state，见 [guides/65 §7](../docs/guides/65-run-forms.md#7-独立环境与多实例)） | 同形 |
 | profile 初始化 | `--from-default-profile web` | 同一条命令 | 同形 |
 | 安装源 | registry / tarball | `npm pack` 出的 tarball（`dsh plugin --profile <p> add file:`） | 同形 |
 | roster 写入者 | `dsh plugin --profile <p> add/remove` | 同一个命令（脚本不手写 `dsh.profile.bundles`） | 同形 |
@@ -96,7 +98,7 @@
 | runtime | npm 全局 `dsh` | vendor **构建产物** `lib/bin.js`（同 pin 源码编译，≈3s；`DSH_RUN_RUNTIME=source` 退回 tsx 源码 ≈13s；`tools/env.sh` 拦截裸 dsh） | 允许差异（调试必需；同一 `--profile` 启动面） |
 | 工作区 | 用户自选目录 | `research-workspace/`（`DSH_RUN_WORKSPACE` 可覆写） | 允许差异（调试必需） |
 | 凭据 | 用户 home | `runtime/harness-home/.credentials.yaml` | 允许差异（隔离） |
-| 重建 | `plugin add/remove` 增量 + 重启 | 缺件时 `rm -rf` 重建（幂等加速） | 允许差异（可重复） |
+| 重建 | `plugin add/remove` 增量 + 重启 | supervisor 持锁后对缺件组合重建；已加载的 profile 须先停服务，人工恢复先核实目标与进程 | 允许差异（可重复） |
 | 观测 | 无 | probe / 仪表盘 / 日志 / LLM socket 隔离预载 | 允许差异（调试必需） |
 | dev-only 工具行 | 无 | MCP Playwright（`--patch` 覆盖层，`MCP_PLAYWRIGHT=0` 可拆） | 允许差异（dev 工具） |
 

@@ -118,12 +118,22 @@ node tools/channel/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览�
 | 变量 | 默认 | 作用 |
 |---|---|---|
 | `DSH_DEV_HOME` | `runtime/harness-home` | 隔离 DSH home（可指仓外） |
-| `DSH_RUN_PROFILE` | `deep-research` | profile 名（与用户主路径同名；多实例用 `DSH_RUN_STATE_DIR` 隔离） |
+| `DSH_RUN_PROFILE` | `deep-research` | profile 名（与用户主路径同名；同 home 的不同 profile 仍共享 home 锁） |
 | `DSH_RUN_PORT` | `3083` | web 端口 |
 | `DSH_RUN_STATE_DIR` | `runtime/smoke-workspace` | web.log/仪表盘/run-pack/npm-cache 的实例状态根 |
-| `DSH_RUN_WORKSPACE` | `research-workspace` | 研究会话 cwd（角色手册从这里注入；多实例请各自指定） |
+| `DSH_RUN_WORKSPACE` | `research-workspace` | 研究会话 cwd（角色手册由包内 content 行注入；多实例请各自指定） |
 
-不同 `DSH_RUN_STATE_DIR` 的实例允许并行；同一 workspace 不支持两个实例共用（无跨进程锁）。
+开发启动的共同 owner = [start-channel supervisor](../../tools/channel/start-channel.mjs)：[boot-run.sh](../../tools/channel/boot-run.sh)
+自 source env.sh 后 `exec` 它，run-driver 冷启动 fork 它。supervisor 在准备前将 home/state 归一到 canonical 路径并分别持有
+`channel-start.lock`，锁覆盖完整服务生命；只有确认整个子进程组静默后才释放。仅改变 state/profile/端口不会隔离 home 写入，
+同 home 不同 state/profile 保守串行；同 state 不同 home 也串行。**并发实例须使用独立 canonical home 与 state**，并各用空闲端口；
+同一 workspace 不支持两个实例共用（无跨进程锁）。
+
+锁没有 stale/PID/TTL 自动接管；缺失或损坏的 owner 元数据也视为占用。crash 残留、旧启动锁或无法确认进程组静默时，
+先确认相关进程全部停止，再核对路径与内容后离线恢复。操作步骤归 [Run 指南 §0.1](61-run-playbook.md#01-特殊形态与排障按需读首跑不需要)。
+
+`--drift-only` 不取启动锁，可并发检查镜像，不修改活 profile；它仍会确保目录并写 npm cache / 原子发布清单缓存，
+因此不能当成无写入操作。`--prepare-profile` / `--drift-check` 会持锁到本次准备或检查结束；模式细节见同节。
 
 ## 8. 移交
 

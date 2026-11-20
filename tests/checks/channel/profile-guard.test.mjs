@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
-  bootRunGuardProblems, DEFAULT_PROFILE, profileGuardDecision, staleProfileMessage,
+  DEFAULT_PROFILE, profileGuardDecision, staleProfileMessage,
 } from '../../../checks/lib/channel/profile-guard.mjs'
 
 test('非默认 profile fail-loud，默认 profile 放行（BUG-237）', () => {
@@ -29,9 +29,10 @@ test('守卫决策看实际 profile：--profile/非默认都拒，显式放行�
   assert.equal(profileGuardDecision({ profile: 'research', allowStale: true }), null, '显式 --allow-stale-profile 放行')
 })
 
-test('boot-run 直起守卫契约在场（BUG-243 静态面；真红证 = DSH_RUN_PROFILE=research 直起 exit 2）', () => {
+test('公开启动 body 对非默认 profile fail-loud，并支持显式放行（BUG-243）', () => {
   const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
-  const text = readFileSync(join(root, 'tools', 'channel', 'boot-run.sh'), 'utf8')
-  assert.deepEqual(bootRunGuardProblems(text), [])
-  assert.ok(bootRunGuardProblems('PROFILE=x').length >= 2, '缺守卫的脚本必须被判红')
+  const text = readFileSync(join(root, 'tools', 'channel', 'boot-run-body.sh'), 'utf8')
+  assert.match(text, /PROFILE.*deep-research/)
+  assert.match(text, /DSH_ALLOW_STALE_PROFILE/)
+  assert.match(text, /exit 2/)
 })

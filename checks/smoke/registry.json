@@ -11,6 +11,18 @@
     "sunset": "当 client-hitl 的 HITL 代答覆盖发送/排队两路径时退役",
     "lane": "entry"
   },
+  "channel-start.e2e.mjs": {
+    "tier": "dev-only",
+    "reason": "启动 owner/入口/锁变更时必须本地实跑；nightly 已达硬上限，不扩默认频率，交付证据另记正控及两项变异",
+    "cost": "medium",
+    "uniqueClaim": "两个公开run启动入口共享唯一所有者；竞争、失败与取消完成后外部子进程静默且锁状态正确",
+    "oracle": [
+      "tests/checks/channel/start-lock.test.mjs",
+      "tests/run/channel/run-driver-contract.spec.mjs"
+    ],
+    "sunset": "移除run-driver或direct boot公开启动入口后与剩余入口契约合并",
+    "lane": "e2e"
+  },
   "cli-exit.e2e.mjs": {
     "tier": "nightly",
     "cost": "fast",

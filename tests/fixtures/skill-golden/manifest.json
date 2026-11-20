@@ -23,7 +23,7 @@
     },
     {
       "path": ".agents/skills/exploratory-verification/SKILL.md",
-      "sha256": "79d0f24074daf87dbfd94bf8db1fda045b2f8748e92d4c227fa71ec3b28f9bf1"
+      "sha256": "022278d210c9ed34b3a92263b053cf5528acf5477b125823ce67f84095dacda2"
     },
     {
       "path": ".agents/skills/reproducing-a-failure/SKILL.md",
@@ -31,7 +31,7 @@
     },
     {
       "path": ".agents/skills/reviewing-a-delivery/SKILL.md",
-      "sha256": "88ae2a9a3dbb77290f7ed5972cfec3c5ed0e394380cf10ca11d1480690d2b053"
+      "sha256": "818764df2e7c585705906a28d8a0e4a00d7a7be3653a21d29b378dab1f65c7e9"
     },
     {
       "path": ".agents/skills/running-a-research-run/SKILL.md",

@@ -133,22 +133,27 @@ test('verdict 契约：exit 0=全绿 / 1=断言红 / 2=未跑；消息面出现�
   assert.equal(unproven.exit, 2, '没取证镜像就不许给绿');
 });
 
-test('复用通道也过镜像门：run-driver 调 boot-run --drift-only，未取证不许绿', () => {
+test('复用通道仍执行漂移门；drift-only 通过统一 wrapper 交给 owner', () => {
   const src = read('tools/channel/run-driver.mjs');
-  assert.ok(src.includes("'--drift-only'"), 'run-driver 复用通道时未调 boot-run --drift-only——旧页面会被判成当前绿');
+  assert.ok(src.includes("'--drift-only'"), 'run-driver 复用通道时未调 drift-only——旧页面会被判成当前绿');
   assert.ok(src.includes('mirrorDrift()'), 'run-driver 缺镜像取证函数');
   const boot = read('tools/channel/boot-run.sh');
-  assert.ok(boot.includes('--drift-only'), 'boot-run 缺只读镜像检查模式（--drift-only）');
-  // 旧实现的两个空转点：composing 永远是 false；复用分支没有任何新鲜度取证
+  const owner = read('tools/channel/start-channel.mjs');
+  assert.ok(owner.includes("'--drift-only'"), '统一 owner 缺 drift-only 模式');
+  assert.ok(boot.includes('start-channel.mjs'), '公开 wrapper 未委托统一 owner');
   assert.ok(!src.includes('composing'), 'verdict 仍有无人计算的 composing 参数（幻影检查）');
 });
 
-test('驱动入口不绕过漂移门：boot 必须经 tools/channel/boot-run.sh，禁止直起 dsh --profile research', () => {
+test('冷启动由统一 supervisor 委托，不绕过 ownership 或镜像漂移门', () => {
   const src = read('tools/channel/run-driver.mjs');
-  assert.ok(src.includes('boot-run.sh'), 'run-driver 未走 boot-run（绕过漂移检测、静默用旧镜像）');
-  // 裸起 profile 只在 boot-run 内部合法；驱动入口自己的代码里不许出现
-  assert.ok(!/--profile\s+['"]?research/.test(src.replace(/^.*boot-run\.sh.*$/gm, '')),
-    'run-driver 直起 research profile——绕过漂移门（guides/61 §0.1）');
+  const owner = read('tools/channel/start-channel.mjs');
+  const body = read('tools/channel/boot-run-body.sh');
+  const boot = read('tools/channel/boot-run.sh');
+  assert.ok(src.includes('start-channel.mjs'), 'run-driver 未经统一 supervisor 启动');
+  assert.ok(owner.includes('boot-run-body.sh'), 'supervisor 未运行原启动 body');
+  assert.ok(boot.includes('start-channel.mjs'), 'direct wrapper 未经统一 supervisor 启动');
+  assert.match(body, /runBootBody\(\)/, '启动 body 不再是可复用函数库');
+  assert.ok(!/boot-run-body\.sh.*runBootBody/.test(src), 'run-driver 直接调用内部 body 绕过 supervisor');
 });
 
 // 2026-10-20 审计 P0-1：README / 00-index / project-map / guides/61 各写第一条启动动作，

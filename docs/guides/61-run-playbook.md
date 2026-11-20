@@ -12,8 +12,8 @@
   `DEEPSEEK_API_KEY`（见 [AGENTS.md §密钥](../../AGENTS.md)；boot 本身 keyless）。
   启动横幅出来后自查一步：`grep -q DEEPSEEK runtime/harness-home/.credentials.yaml`——
   boot 不查凭据，缺了要到 lead 首次调模型才炸（启动成功 ≠ 能跑研究）；
-- 启动：`node tools/channel/run-driver.mjs up`（起/复用通道 → 验浏览器面 → 打印呈交块；内部调
-  `bash tools/channel/boot-run.sh` 做自检/组合/漂移门）→ 用浏览器打开呈交块里的
+- 启动：`node tools/channel/run-driver.mjs up`（起/复用通道 → 验浏览器面 → 打印呈交块；冷启动 fork
+  [start-channel supervisor](../../tools/channel/start-channel.mjs) 做自检/组合/漂移门）→ 用浏览器打开呈交块里的
   `http://127.0.0.1:<port>/?token=…`。**端口 = `DSH_RUN_PORT`，缺省 3083**
   （3080 = 本仓开发 GUI、3081 = 已让渡外部项目，均勿占；换端口：
   `DSH_RUN_PORT=<空闲端口> node tools/channel/run-driver.mjs up`）。端口已被占时 boot-run 会 fail-loud 并给
@@ -29,22 +29,23 @@
 - **启动次序（DSH 原生顺序，dev 通道不得重排）**：① 建 profile（CLI，仅首次；已有 profile **不要**
   重复 `--from-default-profile`，那是破坏性替换）→ ② `dsh plugin --profile deep-research add …` 写
   roster（bundle membership 变更**必须重启**才生效）→ ③ `dsh --profile deep-research` 起 web
-  （Host 读 roster → web app → 本包 client 插件）→ ④ 首屏选工作区 → 建会话。boot-run 只在 ② 与 ③
-  之间加自检/漂移门/MCP overlay；验证缓存与探针只跳过"重复验证"，**不跳过任何一步**（冷启动走全序）。
+  （Host 读 roster → web app → 本包 client 插件）→ ④ 首屏选工作区 → 建会话。supervisor 先取锁并自检，
+  再准备组合，在 ② 与 ③ 之间加漂移门/MCP overlay；验证缓存与探针只跳过"重复验证"，**不跳过任何一步**（冷启动走全序）。
   **不得自创**：不手起 `dsh --profile deep-research`（dev 绕漂移门）、不对已有 profile 重复
   `--from-default-profile`、不手写/改 `dsh.profile.bundles`（roster 只经 `dsh plugin add/remove`）、
   roster 变更后不跳过重启；
 - **已有通道时**：取当前 URL = `node tools/channel/run-driver.mjs url`；只验浏览器面（不启动、不换 token）=
-  `node tools/channel/run-driver.mjs probe`。probe/up 复用通道时先跑只读镜像门（`boot-run --drift-only`）：
+  `node tools/channel/run-driver.mjs probe`。probe/up 复用通道时先跑镜像门（`boot-run --drift-only`，可并发，
+  不修改活 profile，但会写原子发布清单缓存，详见 §0.1）：
   通道镜像 ≠ 当前 pack 源 → **exit 2 未跑**（不是绿）——旧页面验不出当前代码，先重建/重启再验。
   URL/token 的唯一来源仍是最后一条启动横幅；旧横幅 = 旧 token；
 - **启动三分支（先判"通道活没活 + 镜像一不一致"，再动手）**（实测 2026-11-05：缓存热复用 ≈0.5s，
   冷启动缓存命中 ≈10s，缓存过期后真验 ≈20–25s，冷重建 ≈2–3 min）：
-  - 通道活 + 镜像一致 → `up` 复用并跑全量探针；只要当前 URL = `node tools/channel/run-driver.mjs url`（≈0.2s）；
-  - 通道活 + 镜像漂移 → `up` 判 exit 2；确认没有在飞 run 要保活后，一条命令重建：
-    `kill $(lsof -t -iTCP:3083 -sTCP:LISTEN) ; rm -rf runtime/harness-home/profiles/deep-research ; node tools/channel/run-driver.mjs up`
-    ——≈2–3 min 是 npm pack + 两次 plugin add + boot + 探针的必要开销，不是卡死（端口按当次横幅换）；
-  - 通道死 → 直接 `up`（它自己起 boot-run）；**别手起 `dsh --profile deep-research`**，那会绕漂移门；
+  - 通道活 + 镜像一致 → `up` 复用，按缓存条件复用 GREEN 或跑探针；只要当前 URL = `node tools/channel/run-driver.mjs url`（≈0.2s）；
+  - 通道活 + 镜像漂移 → `up` 判 exit 2；确认在飞 run 的处置后停止所属 supervisor，核实相关进程全部停止，
+    再离线核对实际 home/profile 路径并重建镜像，随后重跑 `up`；停止与异常残留的边界见 §0.1；
+  - 通道死 → 无锁残留时直接 `up`（它 fork 同一个 supervisor）；锁残留须先按 §0.1 离线恢复。
+    **别手起 `dsh --profile deep-research`**，那会绕漂移门与 ownership；
 - **运行时与验证缓存（加速的事实边界）**：boot-run 默认用 **vendor 构建产物** `lib/bin.js` 启动
   （同一 pin 源码编译，≈3s；`DSH_RUN_RUNTIME=source` 退回 tsx 源码 ≈13s）——仍是同一条
   `dsh --profile deep-research` 启动面与同一 roster。
@@ -59,8 +60,8 @@
 - **启动请求的呈交纪律（2026-09-30 用户定调）**：用户让"启动/起 web" = 代理**先自己跑通再交 URL**——
   run-driver 就是这条纪律的可复跑入口（exit 0 = 可呈交 / 1 = 红不得呈交 / 2 = 未跑）。三步序如下，
   红了按序修后重跑同一条：
-  ① boot-run 全序（自检 → 组合检查/必要补装 → 漂移检测）红了当场修——漂移 = 按脚本处方重建
-  profile；vendor 产物缺失 = `bash tools/build/vendor-build.sh`；
+  ① supervisor 执行 boot 全序（自检 → 组合检查/必要补装 → 漂移检测）红了当场修——漂移 = 按 §0.1
+  先停服务、核实后离线重建 profile；vendor 产物缺失 = `bash tools/build/vendor-build.sh`；
   ② boot 出横幅后验浏览器面：探针断言宿主就位 / **首屏无遮挡**（DSH 版本升级后的 Preview Notice
   全屏遮罩必须关掉——探针的 JS 派发绕过可点性检查，不关则绿的是 DOM、不是人看得见的页面）/
   零 console 错误（boot 横幅只证宿主侧，观察面可能坏着——0.2.0 轮教训）；
@@ -90,23 +91,23 @@
   先查代理路径，不要先怀疑上游）。零干预的理由与拆掉的方案 =
   [网络零干预 Note](../../notes/rejected/2026-10-13-network-vanilla-restore.md)；
   - **出问题第一步 = 诊断**：先把「哪场 run」变成「哪个会话」——`node probes/analyze/bundle-sessions.mjs <bundle|slug>`（bundle 不记会话 id，这是唯一反查入口；判据 = 写过 `drt_<slug>/` 的 lead 会话，并直接打印下一步命令）；再 `node probes/analyze/stream-diagnostics.mjs --session <标题|id>`（或 `--recent N`）——输出模型尝试时间线、失败密度、provider/重试策略实名、该会话的工具调用与检索查询。判定行直接给"链路/上游态 vs 间歇性"。
-- **web 进程生命周期（实测约束）**：`boot-run.sh` 把 web 跑在**前台**并用 trap 管子进程——
-  **脚本退出即 web 停**（这是特性：不留孤儿）。因此：
-
-  - 交互式使用 = 让 `boot-run.sh` 待在终端里（Ctrl-C 才停）；
-  - 需要它在你离开后继续服务（agent 驱动 / 无人值守）= 无人值守形态两条路按场景选：
-    - **托管后台 job 直接跑 `bash tools/channel/boot-run.sh`（首选）**——自检/补装/漂移门全走，
-      实测一场 run 全程存活（2026-10-11：web 未因 stdin 退出）；
-    - **裸命令 + 睡眠管道（备用）**：宿主会关后台 job 的 stdin 时用（症状 = web 自行退出）：
-      `sleep <秒> | node --import tsx/esm vendor/dsh/apps/cli/src/bin.ts --profile deep-research
-      -- --port <端口，缺省 3083> --no-open`。**这条绕过 boot-run 的漂移门**（
-      [00-index §先分流](../00-index.md) 首行"别直接 `dsh --profile deep-research`"正为此——
-      同理：绕过漂移检测、静默用旧镜像）：先 `bash tools/channel/boot-run.sh --drift-check` 过门再用它；
-  `--drift-check` 模式会检查端口且可初始化环境/补装 profile/写 MCP patch，不是只读探针。要只读地
-  回答"当前安装镜像是否等于 pack 源"（不碰活通道）= `bash tools/channel/boot-run.sh --drift-only`——run-driver
-  复用通道时用的就是它。判红只看**运行时文件**（`lib/`/presets/content/locale/cordis.patch.yml 等）；
-  README/LICENSE 漂移只提示、不拦绿（页面行为不变）。报漂移就按
-      [guides/62 §改动影响面](./62-plugin-authoring.md) 重建镜像；
+- **启动 owner 与服务生命周期**：前台入口 [boot-run.sh](../../tools/channel/boot-run.sh) 自 source env.sh 后
+  `exec` 同一个 [start-channel supervisor](../../tools/channel/start-channel.mjs)；run-driver 冷启动 fork 它，
+  以本代 READY/交接确认启动成功。交接前 driver 取消或断连会收束启动，交接后服务独立于 driver 存活。
+  [boot-run-body.sh](../../tools/channel/boot-run-body.sh) 是私有实现库，由 supervisor source 后调用；直接执行 exit 2。
+- **前台与停止**：交互式运行 `bash tools/channel/boot-run.sh`，Ctrl-C 请求 supervisor 停止；也可用托管后台 job
+  运行同一入口。run-driver 后台启动时，本次 state 的 `run-driver.pid` 记录 supervisor PID，须核实进程身份后
+  向该 supervisor 请求停止。supervisor 回收整个子进程组，确认 body、web、仪表盘等相关进程静默后才释放锁。
+- **锁与离线恢复**：supervisor 在准备前对 canonical home/state 各取 `channel-start.lock`，完整服务生命期持续持有；
+  同 home 不同 state/profile 也保守串行，独立 home/state 才可并发（实例变量见 [guides/65 §7](65-run-forms.md#7-独立环境与多实例)）。
+  锁在场即拒绝进入；没有 stale/PID/TTL 自动接管，owner 元数据缺失或损坏同样阻断。crash 或无法证明子进程组静默时
+  保留锁；旧 `boot-run.lock` / `run-driver-up.lock` 也要求离线恢复。先确认该 home/state 的所有相关进程全部停止，
+  再核对 canonical 路径与残留内容后人工恢复；不要在线删锁，也不要把 PID 消失或经过一段时间当成可接管证明。
+- **单跑模式**：`--prepare-profile` 只准备/校验，`--drift-check` 检查端口且可补装 profile/生成 dev overlay，
+  两者都由 supervisor 持锁执行到退出。`bash tools/channel/boot-run.sh --drift-only` 不取启动锁，可与活通道并发，
+  不检查端口、不安装、不改活 profile、不起 web；它会确保 home/state 目录，miss 时写 npm cache 并以临时文件 + rename
+  原子发布 `pack-shipped.json`，因此并非无写入。判红只看运行时文件（`lib/`/presets/content/locale/cordis.patch.yml 等）；
+  README/LICENSE 漂移只提示。报漂移后的镜像重建先遵守上面的停止与离线核实步骤，影响面见 [guides/62](62-plugin-authoring.md)。
 - **刷新白屏的判别序**：① `lsof -nP -iTCP:<端口> -sTCP:LISTEN` 有没有监听 → 无 = 进程已停
   （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，
   用当次横幅里的 URL；旧 URL 作废）；③ 有监听且 token 新但页面空 = 前端壳产物陈旧

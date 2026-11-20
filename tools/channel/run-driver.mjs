@@ -27,9 +27,9 @@
 // 不绕漂移门（guides/61 §0.1）：起通道一律经 `bash tools/channel/boot-run.sh`，从不直起 `dsh --profile
 // research`——那会跳过 pack 漂移检测、静默用旧镜像。boot 是前台进程（脚本退出即 web 停），
 // 故 `up` 以**托管后台 job** 形态起 boot-run，本驱动的 probe 阶段独立取证。
-import { spawn, spawnSync } from 'node:child_process';
+import { fork, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { copyFileSync, existsSync, mkdirSync, openSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isMain } from '../../checks/lib/shared/cli-entry.mjs';
@@ -37,7 +37,7 @@ import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../../c
 import { profileGuardDecision } from '../../checks/lib/channel/profile-guard.mjs';
 import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey, probeIdentityOf, probeSourceFingerprint, writeJsonAtomic } from '../../checks/lib/channel/channel-cache.mjs';
 import { authenticate } from '../../checks/lib/shared/web-harness.mjs';
-import { acquireStartLock } from '../../checks/lib/channel/start-lock.mjs';
+
 
 export { guiUrlFromWebLog, runDriverVerdict };
 
@@ -50,7 +50,10 @@ const WEB_LOG = join(STATE_DIR, 'web.log');
 const BOOT_LOG = join(STATE_DIR, 'run-driver-boot.log');
 const DEFAULT_PORT = process.env.DSH_RUN_PORT || '3083';
 const DEFAULT_PROFILE = process.env.DSH_RUN_PROFILE || 'deep-research';
-const RUN_WORKSPACE = process.env.DSH_RUN_WORKSPACE ?? process.env.DEEP_RESEARCH_WORKSPACE ?? join(ROOT, 'research-workspace');
+// Freeze caller-relative paths before the supervisor forks with cwd ROOT.
+const CALLER_CWD = process.cwd();
+const DEV_HOME = resolvePath(CALLER_CWD, process.env.DSH_DEV_HOME || join(ROOT, 'runtime/harness-home'));
+const RUN_WORKSPACE = resolvePath(CALLER_CWD, process.env.DSH_RUN_WORKSPACE || process.env.DEEP_RESEARCH_WORKSPACE || join(ROOT, 'research-workspace'));
 const PACK_DIR = join(ROOT, 'packages', 'deep-research-pack');
 // 验证缓存：只存最近一次 GREEN（键 = pack 指纹 + runtime 构建指纹 + 断言参数）；见 checks/lib/channel/channel-cache.mjs。
 const PROBE_CACHE = join(STATE_DIR, 'probe-cache.json');
@@ -70,7 +73,7 @@ const runtimeFingerprint = () => {
 };
 // dev 外壳指纹：决定被探测页面内容的 overlay / boot 序列 / 渲染器。pack 没动但外壳变了也必须
 // miss（BUG-065：旧键只有 pack+runtime，会拿 30 分钟前的 GREEN 冒充当前页面）。
-const DEV_SHELL_FILES = ['tools/record/research.overlay.yml', 'tools/channel/boot-run.sh', 'tools/record/render-overlay.mjs'];
+const DEV_SHELL_FILES = ['tools/record/research.overlay.yml', 'tools/channel/boot-run.sh', 'tools/channel/boot-run-body.sh', 'tools/channel/start-channel.mjs', 'tools/record/render-overlay.mjs'];
 const devShellFingerprint = () => {
   const hash = createHash('sha256');
   for (const rel of DEV_SHELL_FILES) {
@@ -105,11 +108,6 @@ const listenPids = (port) => {
   return (r.stdout ?? '').trim().split('\n').filter(Boolean);
 };
 
-const isBootDriving = () => {
-  const r = spawnSync('pgrep', ['-f', 'tools/channel/boot-run.sh'], { encoding: 'utf8' });
-  return (r.stdout ?? '').trim() !== '';
-};
-
 const currentUrl = () => {
   if (!existsSync(WEB_LOG)) return null;
   return guiUrlFromWebLog(readFileSync(WEB_LOG, 'utf8'));
@@ -122,6 +120,66 @@ function channelState() {
   const port = portOf(url);
   const pids = listenPids(port);
   return { url, port, pids, listening: pids.length > 0, alive: pids.length > 0 };
+}
+
+// The supervisor owns locks, log creation and its complete child lifetime. A lost
+// parent before handoff cancels startup; after handoff the service is independent.
+async function startOwnedChannel({ port, profile }) {
+  const child = fork(join(ROOT, 'tools/channel/start-channel.mjs'), ['--background'], {
+    cwd: ROOT, detached: true, stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
+    env: { ...process.env, DSH_DEV_HOME: DEV_HOME, DSH_RUN_WORKSPACE: RUN_WORKSPACE,
+      DEEP_RESEARCH_WORKSPACE: RUN_WORKSPACE, DSH_RUN_PORT: port, DSH_RUN_PROFILE: profile, DSH_RUN_STATE_DIR: STATE_DIR },
+  });
+  return new Promise((resolve) => {
+    let generation;
+    let readyUrl;
+    let failure;
+    let finished = false;
+    let escalation;
+    const finish = (result) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(deadline);
+      clearTimeout(escalation);
+      process.off('SIGINT', interrupt);
+      process.off('SIGTERM', terminate);
+      resolve(result);
+    };
+    const cancel = (reason, exit = 1) => {
+      if (failure !== undefined) return;
+      failure = { ok: false, reason, exit };
+      // SIGTERM also stops the owned group after handoff, before its ACK reaches us.
+      // The supervisor installs this handler before acquiring ownership; IPC can disconnect.
+      child.kill('SIGTERM');
+      // An unresponsive supervisor keeps its crash lock; never release on its behalf.
+      escalation = setTimeout(() => child.kill('SIGKILL'), 15_000);
+    };
+    const interrupt = () => cancel('启动在交接前被取消', 130);
+    const terminate = () => cancel('启动在交接前被终止', 143);
+    const deadline = setTimeout(() => cancel('启动超时；已请求收束，详情见启动日志'), 120_000);
+    process.once('SIGINT', interrupt);
+    process.once('SIGTERM', terminate);
+    child.on('message', (message) => {
+      if (message?.type === 'acquired') generation = message.generation;
+      if (message?.type === 'failed' && failure === undefined) {
+        failure = { ok: false, reason: message.reason ?? '启动失败', exit: message.exit ?? 1 };
+      }
+      if (message?.type === 'ready' && message.generation === generation && failure === undefined) {
+        readyUrl = guiUrlFromWebLog(`dsh web: ${message.url}`);
+        if (readyUrl === null || String(portOf(readyUrl)) !== String(port)) {
+          cancel('本次启动 READY 的 URL/端口不匹配');
+        } else child.send({ type: 'handoff', generation });
+      }
+      if (message?.type === 'handed-off' && message.generation === generation && readyUrl !== undefined && failure === undefined) {
+        child.unref();
+        finish({ ok: true, url: readyUrl });
+      }
+    });
+    child.once('error', (error) => finish({ ok: false, reason: error.message, exit: 1 }));
+    child.once('exit', (code, signal) => finish(failure ?? {
+      ok: false, reason: `启动未交接即退出（${code ?? signal}）；日志 ${BOOT_LOG}`, exit: 1,
+    }));
+  });
 }
 
 // ── 浏览器面验证（子进程 = probes/browser/cdp-probe.mjs，真值的唯一实现）──────────
@@ -276,9 +334,6 @@ const noProbe = has('--no-probe');
 const forceProbe = has('--force-probe');
 const expectFace = arg('--expect-face', undefined);
 const requireData = has('--require-data');
-const startLock = acquireStartLock(join(STATE_DIR, 'run-driver-up.lock'));
-if (!startLock.ok) { console.error(`run-driver: ${startLock.reason}`); process.exit(2); }
-process.on('exit', () => startLock.release());
 
 let state = channelState();
 let drift = null;
@@ -304,11 +359,6 @@ if (state.alive) {
       process.exit(1);
     }
   }
-  // 并发检查只守默认 state：不同 state dir 的实例允许并行（多实例）；同端口仍由下方端口检查拦。
-  if (STATE_DIR === DEFAULT_STATE_DIR && isBootDriving()) {
-    console.error('run-driver: 默认 state 下已有一个 boot-run.sh 在起通道（勿并发另起）——等它出横幅后跑 `node tools/channel/run-driver.mjs probe`');
-    process.exit(2);
-  }
   const port = wantPort;
   const busy = listenPids(port);
   if (busy.length > 0) {
@@ -318,37 +368,13 @@ if (state.alive) {
     process.exit(1);
   }
   console.log(`run-driver: 起通道（bash tools/channel/boot-run.sh，端口 ${port}；日志 ${BOOT_LOG}）…`);
-  const out = openSync(BOOT_LOG, 'w');
-  const child = spawn('bash', [join(ROOT, 'tools/channel/boot-run.sh')], {
-    cwd: ROOT,
-    detached: true,
-    stdio: ['ignore', out, out],
-    env: { ...process.env, DSH_RUN_PORT: port, DSH_RUN_PROFILE: wantProfile, DSH_RUN_STATE_DIR: STATE_DIR },
-  });
-  child.unref();
-  writeFileSync(join(STATE_DIR, 'run-driver.pid'), String(child.pid));
-
-  // 等横幅（boot-run 的自检/漂移门在前，正常 5–30s；红了就 fail-loud 回显尾部）
-  let waited = 0;
-  let tail = '';
-  while (waited < 120_000) {
-    // 250ms 轮询（2026-11-05 加速）：横幅出现即返回，避免 1s 粒度的平均 0.5s 等待。
-    await new Promise((r) => setTimeout(r, 250));
-    waited += 250;
-    tail = existsSync(BOOT_LOG) ? readFileSync(BOOT_LOG, 'utf8') : '';
-    if (guiUrlFromWebLog(tail) !== null) break;
-    if (/boot-run: .*(?:fail-loud|已退出|失败)|pack 漂移检测红|漂移——/.test(tail) && waited > 5000) break;
+  const started = await startOwnedChannel({ port, profile: wantProfile });
+  if (!started.ok) {
+    console.error(`run-driver: ${started.reason}`);
+    process.exit(started.exit);
   }
-  state = channelState();
-  if (!state.alive) {
-    // 起不来就**回收自己 spawn 的子进程**（2026-10-19 实测：detached 子进程活过失败分支会变成
-    // 孤儿 boot-run——本驱动生的必须自己收，否则占着 boot 锁让下一次 up 误报"已有 boot 在起"）。
-    try { process.kill(-child.pid, 'SIGTERM') } catch {}
-    try { child.kill('SIGTERM') } catch {}
-    console.error('run-driver: boot 未出可用横幅——boot-run 日志尾部：');
-    console.error(tail.slice(-2000) || '（空）');
-    process.exit(1);
-  }
+  // Only the current supervisor's private READY+handoff can establish this generation.
+  state = { url: started.url, port: portOf(started.url), alive: true };
   console.log(`run-driver: 横幅已出（端口 ${state.port}）`);
   // 刚起的通道已经过 boot-run 的漂移门（红则起不来）——此处只记录取证结果。
   drift = { clean: true, detail: 'boot-run 漂移门绿（起通道时已验）' };

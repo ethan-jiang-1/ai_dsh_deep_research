@@ -974,6 +974,58 @@ export const CASES = [
     if (!text.includes("|| 'deep-research'")) throw new Error('夹具 run-driver 默认 profile 不是 deep-research——案例失效');
     writeFileSync(p, text.replace("|| 'deep-research'", "|| 'research'"));
   } },
+  // dev-parity 的安装/profile/覆盖层判据归 body；向 wrapper 注入同名字串会打错对象。
+  { id: 'dev-parity-body-profile', gate: 'dev-parity', mutate: (dir) => {
+    const p = join(dir, 'tools', 'channel', 'boot-run-body.sh');
+    const text = readFileSync(p, 'utf8');
+    const before = 'PROFILE="${DSH_RUN_PROFILE:-deep-research}"';
+    if (!text.includes(before)) throw new Error('夹具 body 缺默认 profile——案例失效');
+    writeFileSync(p, text.replace(before, 'PROFILE="${DSH_RUN_PROFILE:-research}"'));
+  } },
+  { id: 'dev-parity-body-runtime-version', gate: 'dev-parity', mutate: (dir) => {
+    const p = join(dir, 'tools', 'channel', 'boot-run-body.sh');
+    const text = readFileSync(p, 'utf8');
+    const before = /^LAYER_VER=.*$/m;
+    if (!before.test(text)) throw new Error('夹具 body 缺团队层版本派生——案例失效');
+    writeFileSync(p, text.replace(before, 'LAYER_VER="0.0.0"'));
+  } },
+  { id: 'dev-parity-body-deleted-version-field', gate: 'dev-parity', mutate: (dir) => {
+    appendFileSync(join(dir, 'tools', 'channel', 'boot-run-body.sh'),
+      '\nLAYER_VER="$(node -p \'require(process.env.PACKDIR + "/package.json").dsh.compatibility.dshReleases[0]\')"\n');
+  } },
+  { id: 'dev-parity-body-overlay-path', gate: 'dev-parity', mutate: (dir) => {
+    const p = join(dir, 'tools', 'channel', 'boot-run-body.sh');
+    const text = readFileSync(p, 'utf8');
+    const before = 'DEV_OVERLAY="$STATE_DIR/dev-overlay.yml"';
+    if (!text.includes(before)) throw new Error('夹具 body 缺 dev overlay 路径——案例失效');
+    writeFileSync(p, text.replace(before, 'DEV_OVERLAY="$PROFDIR/cordis.patch.yml"'));
+  } },
+  { id: 'dev-parity-body-patch-args', gate: 'dev-parity', mutate: (dir) => {
+    const p = join(dir, 'tools', 'channel', 'boot-run-body.sh');
+    const text = readFileSync(p, 'utf8');
+    const before = 'PATCH_ARGS=(--patch "$DEV_OVERLAY")';
+    if (!text.includes(before)) throw new Error('夹具 body 缺 --patch 委托——案例失效');
+    writeFileSync(p, text.replace(before, 'PATCH_ARGS=()'));
+  } },
+  { id: 'dev-parity-body-profile-write', gate: 'dev-parity', mutate: (dir) => {
+    appendFileSync(join(dir, 'tools', 'channel', 'boot-run-body.sh'),
+      '\ncat >> "$PROFDIR/cordis.patch.yml" <<\'YAML\'\n- id: dev-only\nYAML\n');
+  } },
+  // 名字留在注释，真实入口绕过 owner：includes(owner) 不能替代 exec 委托断言。
+  { id: 'dev-parity-wrapper-bypass-owner', gate: 'dev-parity', mutate: (dir) => {
+    const p = join(dir, 'tools', 'channel', 'boot-run.sh');
+    const text = readFileSync(p, 'utf8');
+    const before = 'exec node "$SCRIPT_DIR/start-channel.mjs" "$@"';
+    if (!text.includes(before)) throw new Error('夹具 wrapper 缺 exec owner——案例失效');
+    writeFileSync(p, text.replace(before,
+      '# start-channel.mjs bypassed\nsource "$SCRIPT_DIR/boot-run-body.sh"\nrunBootBody "$@"'));
+  } },
+  { id: 'dev-parity-owner-body-missing', gate: 'dev-parity', mutate: (dir) => {
+    const p = join(dir, 'tools', 'channel', 'start-channel.mjs');
+    const text = readFileSync(p, 'utf8');
+    if (!text.includes('boot-run-body.sh')) throw new Error('夹具 owner 缺 body 委托——案例失效');
+    writeFileSync(p, text.replaceAll('boot-run-body.sh', 'boot-run-missing.sh'));
+  } },
   // readme-shape：删掉 README 前置字段——文档生成器不再把包认成 bundle。
   { id: 'readme-shape-no-frontmatter', gate: 'readme-shape', mutate: (dir) => {
     const p = join(dir, 'packages', 'deep-research-pack', 'README.md');

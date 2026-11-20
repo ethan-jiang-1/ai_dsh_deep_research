@@ -1,41 +1,45 @@
-// start-lock.mjs — 启动互斥（BUG-309 / 310；keyless 纯 fs）。
-//
-// `run-driver up` / `boot-run.sh` 都是“先判空闲、再启动”；两个进程可同时看到空闲并竞争同一
-// 端口/状态根。本模块提供原子 mkdir 锁 + pid/时间戳 + stale 回收；CLI 用同一文案 fail-loud。
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+// Startup ownership: atomic mkdir, no age-based or check-then-delete takeover.
+// Missing/malformed owner metadata is busy too. Crash remnants require offline recovery.
+import { mkdirSync, rmdirSync, unlinkSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-
-/** 锁目录的默认 stale 上限（10 分钟；启动失败/进程被杀留下时由下一位回收）。 */
-export const START_LOCK_STALE_MS = 10 * 60 * 1000
+import { randomUUID } from 'node:crypto'
 
 /**
- * 获取启动锁。
- * @returns {{ ok: boolean, reason?: string, release: () => void }}
+ * Acquire one resource until release. All participants must use this protocol;
+ * externally deleting/replacing an active lock directory is unsupported.
+ * A release consumes its unique identity once and never recursively deletes.
  */
-export function acquireStartLock(lockDir, { now = Date.now(), staleMs = START_LOCK_STALE_MS, pid = process.pid } = {}) {
-  const ownerPath = join(lockDir, 'owner.json')
-  const tryCreate = () => {
+export function acquireStartLock(lockDir, { now = Date.now(), pid = process.pid } = {}) {
+  const identity = `owner-${randomUUID()}.json`
+  const ownerPath = join(lockDir, identity)
+  try {
+    mkdirSync(lockDir)
+  } catch (error) {
+    return { ok: false, reason: error?.code === 'EEXIST'
+      ? `另一实例持锁或异常残留（${lockDir}）；禁止在线删除，先停相关进程并核实后离线恢复`
+      : `锁创建失败（${lockDir}）：${error.message}`, release: () => false }
+  }
+  let consumed = false
+  const release = () => {
+    if (consumed) return false
+    consumed = true
     try {
-      mkdirSync(lockDir)
-      writeFileSync(ownerPath, JSON.stringify({ pid, at: new Date(now).toISOString() }))
-      return { ok: true, release: () => rmSync(lockDir, { recursive: true, force: true }) }
-    } catch (error) {
-      if (error?.code !== 'EEXIST') return { ok: false, reason: `锁创建失败：${String(error?.message ?? error)}`, release: () => {} }
-      return null
+      unlinkSync(ownerPath)
+      rmdirSync(lockDir)
+      return true
+    } catch {
+      // Never remove a directory after failing to remove our own identity.
+      return false
     }
   }
-  let created = tryCreate()
-  if (created !== null) return created
-  let stale = false
   try {
-    const owner = JSON.parse(readFileSync(ownerPath, 'utf8'))
-    const at = Date.parse(owner.at)
-    stale = !Number.isFinite(at) || now - at > staleMs
-  } catch { stale = true }
-  if (stale) {
-    rmSync(lockDir, { recursive: true, force: true })
-    created = tryCreate()
-    if (created !== null) return created
+    writeFileSync(ownerPath, JSON.stringify({ pid, at: new Date(now).toISOString() }), { flag: 'wx' })
+    return { ok: true, release }
+  } catch (error) {
+    // mkdir succeeded, and no conforming contender can enter this directory.
+    try { unlinkSync(ownerPath) } catch {}
+    try { rmdirSync(lockDir) } catch {}
+    consumed = true
+    return { ok: false, reason: `锁 owner 写入失败（${lockDir}）：${error.message}`, release: () => false }
   }
-  return { ok: false, reason: `另一实例持锁（${lockDir}）；确认无实例后可删除该目录重试`, release: () => {} }
 }

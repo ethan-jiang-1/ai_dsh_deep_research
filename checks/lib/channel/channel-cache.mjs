@@ -84,7 +84,7 @@ export function readShippedCache(path, key) {
  */
 export function writeShippedCache(path, key, files) {
   mkdirSync(dirname(path), { recursive: true })
-  writeFileSync(path, JSON.stringify({ key, files }, null, 2))
+  writeJsonAtomic(path, { key, files })
 }
 
 /**

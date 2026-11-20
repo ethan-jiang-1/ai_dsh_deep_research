@@ -1491,7 +1491,7 @@
       "guard": "tests/checks/channel/start-lock.test.mjs",
       "oracleType": "structured",
       "status": "closed",
-      "redRecipe": "第二次 acquire → 失败"
+      "redRecipe": "原语第二次 acquire 拒绝；超龄活 owner 与旧 release 对旧实现判红；入口参与另由 channel-start.e2e.mjs 双向竞争与 bypass-wrapper 负控实跑证明"
     },
     {
       "id": "BUG-310",
@@ -1499,7 +1499,7 @@
       "guard": "tests/checks/channel/start-lock.test.mjs",
       "oracleType": "structured",
       "status": "closed",
-      "redRecipe": "同 309（共享锁）"
+      "redRecipe": "仅原语性质由本测试执行；direct wrapper 参与、服务生命持锁与取消收束另由 channel-start.e2e.mjs 和 bypass-wrapper 断言红证明，不能以共享 helper 单测替代"
     },
     {
       "id": "BUG-311",

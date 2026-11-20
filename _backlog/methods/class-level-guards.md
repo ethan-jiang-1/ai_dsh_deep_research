@@ -35,6 +35,14 @@ regression fails it… prove it: introduce the regression, watch red, revert」�
 fails through the real runner **for each changed acceptance rule**」）。注意后者是
 **per-rule** 而不是 per-test——一条验收规则一个负控，这就是类级的粒度。
 
+### 0.1 旧性质随变更继承
+
+[开发环语义准入](../../docs/guides/60-dev-loop.md#13-语义变更的验收准备)触发后，从当前 owner 与已有测试追溯适用性质，而非从新文件名或 import 猜同类。优先由公共 Module 拥有操作，让调用者和测试经过同一 Interface；复用失败时说明语义差异。
+
+用独立的行为承诺定义 expected，再让原有反例与正常对照在新实现运行；失败/取消同时断言外部状态。共享算法的两个结果相等只能证明一致，不能单独证明正确。
+
+若确需保留不同实现，在该家族 suite 显式列出批准实现并逐个执行适用性质，对账实际执行集合；漏执行一个实现及各实现注入旧错误都应被发现。真实入口参与的核对归[交付自审](../../.agents/skills/reviewing-a-delivery/SKILL.md#从什么开始)，证明边界归[五关](../../docs/guides/67-test-strategy.md#3-五关)。
+
 ---
 
 ## A. DSH 一手源里的类级做法

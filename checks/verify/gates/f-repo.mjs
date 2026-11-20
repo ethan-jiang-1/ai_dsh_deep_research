@@ -360,17 +360,24 @@ export function runF() {
 // profile patch（cat >> … cordis.patch.yml）→ 红；把团队层版本改回读包清单 → 红。
 {
   const gate = 'dev-parity';
-  const bootPath = join(ROOT, 'tools', 'channel', 'boot-run.sh');
+  const bootPath = join(ROOT, 'tools', 'channel', 'boot-run-body.sh');
+  const wrapperPath = join(ROOT, 'tools', 'channel', 'boot-run.sh');
+  const ownerPath = join(ROOT, 'tools', 'channel', 'start-channel.mjs');
   const driverPath = join(ROOT, 'tools', 'channel', 'run-driver.mjs');
   const readmePath = join(ROOT, 'tools', 'README.md');
-  for (const [file, path] of [['tools/channel/boot-run.sh', bootPath], ['tools/channel/run-driver.mjs', driverPath], ['tools/README.md', readmePath]]) {
+  for (const [file, path] of [['tools/channel/boot-run.sh', wrapperPath], ['tools/channel/boot-run-body.sh', bootPath], ['tools/channel/start-channel.mjs', ownerPath], ['tools/channel/run-driver.mjs', driverPath], ['tools/README.md', readmePath]]) {
     if (!existsSync(path)) fail(gate, `${file} 缺席——dev 通道的 parity 判据失去对象`);
   }
-  if (existsSync(bootPath) && existsSync(driverPath)) {
+  if (existsSync(bootPath) && existsSync(driverPath) && existsSync(wrapperPath) && existsSync(ownerPath)) {
     const boot = readFileSync(bootPath, 'utf8');
+    const wrapper = readFileSync(wrapperPath, 'utf8');
+    const owner = readFileSync(ownerPath, 'utf8');
     const driver = readFileSync(driverPath, 'utf8');
     if (!/PROFILE="\$\{DSH_RUN_PROFILE:-deep-research\}"/.test(boot))
-      fail(gate, 'boot-run 默认 profile 不是用户安装 profile 名 deep-research——dev 与用户路径身份不一致（改 PROFILE 默认值）');
+      fail(gate, 'boot-run body 默认 profile 不是用户安装 profile 名 deep-research——dev 与用户路径身份不一致（改 PROFILE 默认值）');
+    // wrapper 必须真 exec owner；仅在注释里提到 owner、实际直跑 body 也要红。
+    if (!/^\s*exec\s+node\s+"\$SCRIPT_DIR\/start-channel\.mjs"\s+"\$@"\s*$/m.test(wrapper) || !owner.includes('boot-run-body.sh'))
+      fail(gate, 'tools/channel/boot-run.sh → start-channel.mjs → boot-run-body.sh 委托链断开——wrapper 须 exec 启动 owner，由 owner 调用 body');
     if (!/DSH_RUN_PROFILE \|\| 'deep-research'/.test(driver))
       fail(gate, "run-driver 默认 profile 不是 'deep-research'——驱动与安装面身份不一致");
     // 版本必须从**实际启动的 runtime**（构建产物 DSH_BOOT 或 tsx 源码 dsh）的 --version 派生，

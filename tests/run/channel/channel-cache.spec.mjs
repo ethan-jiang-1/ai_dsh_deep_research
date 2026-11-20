@@ -51,6 +51,7 @@ test('发布清单缓存：roundtrip / 键不符 miss / 损坏 miss', () => {
   const path = join(dir, 'pack-shipped.json')
   writeShippedCache(path, 'k1', ['a.js', 'b.md'])
   assert.deepEqual(readShippedCache(path, 'k1'), ['a.js', 'b.md'])
+  assert.deepEqual(readdirSync(dir), ['pack-shipped.json'], 'atomic publication leaves no partial temp artifact')
   assert.equal(readShippedCache(path, 'k2'), null)
   writeFileSync(path, '{not json')
   assert.equal(readShippedCache(path, 'k1'), null)

@@ -7,9 +7,9 @@ opened: 2026-11-20
 
 > 状态：已定性
 > 问题：为什么已有测试策略、类级守卫和探索毕业纪律，仍持续依赖探索找 bug 再补？哪些机制应在设计与变更时预埋，怎样用有限资产和可证伪的退出条件减少同类复发？
-> 消费者：[预防性质量落地卡](../../issues/2026-11-20-preventive-quality-pilot.md)（研究已定性，卡片消费依据并承接首批实施）
-> 产出的卡：[预防性质量落地](../../issues/2026-11-20-preventive-quality-pilot.md)（待落地；首批范围、验收与后续触发均已同步，本轮未实施）
-> 结论：旧类保障未随新 Module 和真实入口继承是已证缺口。首批将既有开发环的有限准入与启动互斥实证配套，以公共操作和执行性质减少重复义务；依据见[综合](2026-11-20-prevention-synthesis.md)，具体实施范围见[落地方案](2026-11-20-repo-landing-plan.md)。
+> 消费者：[预防性质量落地卡](../../issues/2026-11-20-preventive-quality-pilot.md)（研究已定性；卡片承接首批实施记录与未决验收）
+> 产出的卡：[预防性质量落地](../../issues/2026-11-20-preventive-quality-pilot.md)（待落地、可关闭否；12 项真进程正向回归 exit 0，A4 未通过，最终门禁/负控待回填，未作用户业务验收）
+> 结论：旧类保障未随新 Module 和真实入口继承是已证缺口。首批将既有开发环的有限准入与启动互斥实证配套，以公共操作和执行性质减少重复义务；实际技术决定见[首批 Note](../../../notes/implemented/2026-11-20-preventive-quality-pilot.md)，研究依据见[综合](2026-11-20-prevention-synthesis.md)，范围见[落地方案](2026-11-20-repo-landing-plan.md)。
 
 ## 研究委托
 
@@ -33,9 +33,20 @@ opened: 2026-11-20
 | [复发链审计](2026-11-20-recurrence-audit.md) | 多轮历史、当前保障、最新锁反例与证据限制 | 2026-11-20 |
 | [开发准入审计](2026-11-20-change-admission-audit.md) | 五关在真实 hook、验证与新增 Module 中的执行范围和缺口 | 2026-11-20 |
 | [本仓落地方案](2026-11-20-repo-landing-plan.md) | 既有 owner 的具体修改、有限准入、首批实证与后续触发条件 | 2026-11-20 |
+| [准入封存案例](2026-11-20-admission-cases.md) | 首批 A4 的虚拟变更输入、独立 expected 与取样边界 | 2026-11-20 |
+| [准入评测结果](2026-11-20-admission-results.md) | 两份实际输入、逐项判读、标签泄露与规则未受测的证据边界 | 2026-11-20 |
+| [重复确认与工具许可](2026-11-20-approval-friction.md) | 直接授权、阶段判断与当前安装原生许可的分界及减摩擦方案 | 2026-11-20 |
 
-## 本轮证据与后续
+## 本轮进度与实施证据
 
-先读综合稿和本仓落地方案，再按需查三篇证据。首轮研究不改变 D54/D55、现行验收合同或产品行为；[落地卡](../../issues/2026-11-20-preventive-quality-pilot.md)承接工作流准入与启动实证，具体生命周期与存储原语仍待实施设计核定。
+先读综合稿和本仓落地方案，再按需查证据材料。研究定性不替代实施验收；逐项执行记录与关闭边界以[承接卡](../../issues/2026-11-20-preventive-quality-pilot.md)为准。
 
-2026-11-20 结论与证据已评审，实施范围和正反验收已同步承接卡，研究题转为已定性。实际机械验证与显式未覆盖见综合稿末节；后续工作通过承接卡推进，不把研究定性视为方案已实施。
+首批技术改动已进入工作树，决定理由与实际已取得证据见[implemented Note](../../../notes/implemented/2026-11-20-preventive-quality-pilot.md)。当前状态仍是部分验收：低层 5 项启动锁性质通过；旧实现的活 owner 超龄接管与旧 release 删除后来锁目录均有 exit 1 反证，后者按实际文件系统状态判定而非返回值。`pnpm test`（1423 spec + 265 checks，零 fail/skip）与 `pnpm verify` 均 exit 0。
+
+真实入口方面，早期 `bypass-wrapper.out`（同类记录 `CNezLA`、`DJhmFY`）在 `--mutate=bypass-wrapper` 下 exit 1；变异后实际拒绝码 1、期望 busy=2，属于预期负控红，断言抓住了错误拒绝。最终版 `bypass-wrapper.final.out` 因 `ps` 进程组观察被沙箱 EPERM 阻断，0 checks、exit 2（NOT-RUN）；保留旧版有效红证，不称最终版负控已复跑。正向结果：`runtime/smoke-workspace/channel-start-e2e-h6jRC5/result.json` exit 0，12 项通过，覆盖双向委托/handoff、drift/reuse、共享与独立资源、启动失败、TERM/交接取消、子进程静默、相对路径和后台诊断；使用隔离 fixture adapter，不证明 DSH/GUI/model 行为。runner 登记为一个 12-case、影响触发的 dev-only 检查，不进默认回归或 nightly。
+
+A4 原样材料与判读见[准入评测结果](2026-11-20-admission-results.md)：Case A 按封存 expected 失败；Case B 静态等价判断符合对照，但标题标签泄露。受测上下文未获准读取准入 guide/skill，故规则效力未证；不扩样、不改 expected。A4 未通过，不能称首批 A+B 整体完成，也未发生用户业务验收；issue 保持待落地且不可关闭。
+
+规模与收益只按本轮可核事实表达：启动锁默认回归用例由 1→5，旧协议两套收敛为一个 supervisor；删除 driver 与 shell 的重复锁、pgrep 和旧 log polling。新增代码净行较大，不称净 LOC 减少；收益是减少重复调用/释放义务，不以 BUG 数量替代业务价值。一次性工时来自本 session 多轮实施与错误诊断，无法精确计量，不编造时数。
+
+本轮研究阶段原有 verify/test 与未覆盖情况见[综合稿验证节](2026-11-20-prevention-synthesis.md#九本轮验证与显式未覆盖)；那组研究期计数不冒充本批最终验证。本批 `pnpm test:spec && pnpm test:checks` exit 0（1423 spec + 265 checks，0 fail/skip），`pnpm verify` 全绿 exit 0；9 项 dev-parity 注入 exit 0，增量 review `547fac7b` 修复原 3 个 blocker 后无剩余 blocker。source-only 非发布件形态，L2 未跑。最终版 bypass-wrapper 负控因沙箱 EPERM exit 2/0 checks（NOT-RUN），保留早期有效 exit 1 负控红。A4 未通过，issue 仍为待落地、可关闭否；首批 A+B 不称整体完成，也未作用户业务验收。
