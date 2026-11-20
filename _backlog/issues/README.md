@@ -8,6 +8,7 @@
 |---|---|---|
 | [2026-11-19-low-confidence-40](2026-11-19-low-confidence-40.md) | 推敲中 | 低置信区 20 卡（第 9 轮）：锁/端口/缓存读写并发残差；320–339 |
 | [预防性质量落地](2026-11-20-preventive-quality-pilot.md) | 待落地 | 有限准入 + 启动互斥实证；已补可复核验收、模型盲评与首批关闭边界 |
+| [Pack 生产源头预防](2026-11-20-pack-production-prevention.md) | 推敲中 | 先收敛 plan 的严格解释/发布边界；已列质量合同，写入口、兼容与失败模型未定 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

@@ -94,7 +94,7 @@ opened: 2026-11-20
 
 | 候选 | 推进条件与范围 |
 |---|---|
-| plan 严格 decoder/写入所有权 | 下一次改变 [plan-gate](../../checks/lib/gates/plan-gate.mjs) 或 [plan-index](../../packages/deep-research-pack/src/lib/plan/plan-index.ts)裁决语义，或重现读取漂移；先比共用严格解码与更换正本，历史真实性另定来源，不预建第二份 JSON 权威 |
+| plan 严格 decoder/写入所有权 | 消费者对照已出现读法差异；查证、候选支持域与发布边界转由[生产源头预防卡](2026-11-20-pack-production-prevention.md)承接。该卡仍推敲中，不计本卡首批验收，也未授权产品改造；历史真实性另定来源，不预建第二份 JSON 权威 |
 | 一个研究交付终态场景 | 下一次要承诺研究流程的文件结果正确；复用 pinned workspace oracle，独立编写正常/缺证据预期，record/refresh 不覆盖 expected；当前 A/B 继续只承诺其已证范围 |
 | 独立角色工具集合 | 下一次角色工具职责变化或装配缺口；真 Loader 有效能力对独立职责期望精确比较，和 B 请求漂移证据分工 |
 | 其他状态/解析家族 | 第一批已提前拦错且减少义务，再一次推广一个家族；替换旧证明，记录相同尺度成本，不展开整仓迁移 |
