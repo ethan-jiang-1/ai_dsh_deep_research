@@ -154,10 +154,10 @@ Lead 的“读 plan → 调 Team 工具”由 [planning skill](../../packages/de
 
 | 证据 | 层 / 覆盖的失败类 | 负控（见过红） | 结果 / 边界 |
 |---|---|---|---|
-| [plan-index 表事实与观察诊断](../../tests/cockpit/lib/plan/plan-index.spec.mjs) + [plan-gate 字段/装饰/占位](../../tests/run/gates/plan-gate.spec.mjs) | 确定性：缺席 vs 空白、占位 vs 缺失、短行、重复语义列、多表、伪表、转义管道、装饰、BOM/CRLF | 改前装饰用例实际 RED；四次源码变异各 1 红后还原 | 30/30、35/35 定向通过；`pnpm typecheck` exit 0。纯件不证浏览器/hook |
+| [plan-index 表事实与观察诊断](../../tests/cockpit/lib/plan/plan-index.spec.mjs) + [plan-gate 字段/装饰/占位](../../tests/run/gates/plan-gate.spec.mjs) | 确定性：缺席 vs 空白、占位 vs 缺失、短行、重复语义列、多表、伪表、转义管道、装饰、BOM/CRLF | 改前装饰用例实际 RED；五次源码变异各 1 红后还原 | 34/34、38/38 定向通过；`pnpm typecheck` exit 0。纯件不证浏览器/hook |
 | [node-gate 真入口](../../checks/run-gates/node-gate.mjs) 隔离 bundle | 装配：实际 run 门读取同一解码事实 | 无独立变异；坏/缺席/合法三态对照 | 合法 P=PASS exit0；空白 P=RED exit1；缺席 P=N/A exit0。聚合退出不冒充 P |
 | [GraphNotices 静态渲染](../../tests/cockpit/client/research-tabs.spec.mjs) | 显示：中英诊断文案与英文零 CJK | 文案删改即红 | 3/3 pass；不证浏览器加载 |
-| `pnpm verify` + `pnpm test` + `pnpm build` | L0：引用/形状、现有回归、构建 | 无新增门禁变异 | verify exit0；1430 spec + 265 checks，0 fail/skip；build exit0 |
+| `pnpm verify` + `pnpm test` + `pnpm build` | L0：引用/形状、现有回归、构建 | 无新增门禁变异 | verify exit0；1434 spec + 265 checks，0 fail/skip；build exit0 |
 | `client-load.entry --seed` | 真浏览器装配回归 | 无坏表种子，不能证明新诊断显示 | **NOT-RUN**：主机 load 3.62 > 1.5，exit 2；未跑 ≠ 通过 |
 | 生产写入/派工拒绝、并发恢复、安装形态、模型 | P / 其余层 | — | 未运行；D 不声称这些 |
 

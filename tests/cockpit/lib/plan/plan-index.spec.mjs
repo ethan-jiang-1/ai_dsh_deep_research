@@ -266,6 +266,20 @@ test('表事实：空表/错列/重复语义列/多表/转义管道 → invalid 
   assert.deepEqual(escaped.nodes, [])
 })
 
+test('表事实：无空行紧邻的第二张表不被当成数据行', () => {
+  const index = planIndex('| id | budget | task_id |\n|---|---|---|\n| W1.1 | — | — |\n| id | budget | task_id |\n|---|---|---|\n| W2.1 | — | — |\n')
+  assert.equal(index.table.status, 'invalid')
+  assert.ok(index.table.diagnostics.some((item) => item.code === 'ambiguous-table'))
+  assert.deepEqual(index.nodes, [])
+})
+
+test('表事实：数据行缺 id → invalid，不静默跳过', () => {
+  const index = planIndex('| id | budget | task_id |\n|---|---|---|\n|  | — | — |\n')
+  assert.equal(index.table.status, 'invalid')
+  assert.ok(index.table.diagnostics.some((item) => item.code === 'missing-id'))
+  assert.deepEqual(index.nodes, [])
+})
+
 test('表事实：未知扩展列忽略；装饰与 BOM/CRLF 得到同一 id', () => {
   const unknown = planIndex('| id | note | note | budget | task_id |\n|---|---|---|---|---|\n| W1.1 | a | b | — | — |\n')
   assert.equal(unknown.table.status, 'decoded')

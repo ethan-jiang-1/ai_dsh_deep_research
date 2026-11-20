@@ -202,6 +202,9 @@ function tableOf(text: string | null | undefined): PlanTable {
     })) as unknown as Readonly<Record<PlanColumn, PlanCell>>
     rows.push(facts)
     if (facts.id.state !== 'value') diagnostics.push({ code: 'missing-id', line: at + 1, column: (columns.get('id') ?? 0) + 1 })
+    // 两张表之间没有空行时，第二张表的表头会被当成数据行；识别“id 值就是 id + 多个语义列名”。
+    const recognized = cells.map(normalizeHeader).filter((name) => (PLAN_COLUMNS as readonly string[]).includes(name))
+    if (facts.id.value === 'id' && recognized.length >= 2) diagnostics.push({ code: 'ambiguous-table', line: at + 1 })
   }
   if (rows.length === 0) diagnostics.push({ code: 'empty-table', line: header.at + 1 })
   return { source: 'present', status: diagnostics.length === 0 ? 'decoded' : 'invalid', rows, diagnostics }

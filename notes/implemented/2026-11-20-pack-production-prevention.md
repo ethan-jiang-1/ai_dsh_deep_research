@@ -24,13 +24,13 @@
 
 ## 实际跑过的验证
 
-- **红→绿（装饰等价缺口）**：改前 `node --import tsx/esm --test tests/run/gates/plan-gate.spec.mjs` exit 1，新增“装饰表头/ID 不改变 active 字段裁决”用例如期 RED（actual RED vs expected PASS；记录 `runtime/smoke-workspace/preventive-quality/plan-gate-decorated.red.out`）。共用解码后同文件 30/30 通过。
+- **红→绿（装饰等价缺口）**：改前 `node --import tsx/esm --test tests/run/gates/plan-gate.spec.mjs` exit 1，新增“装饰表头/ID 不改变 active 字段裁决”用例如期 RED（actual RED vs expected PASS；记录 `runtime/smoke-workspace/preventive-quality/plan-gate-decorated.red.out`）。共用解码后同文件 34/34 通过（含缺列、缺 id 与紧邻多表控制）。
 - **独立期望**：未参与实现的审阅者按卡上候选合同冻结 literal 输入/预期（缺席 vs 空白、占位、短行、重复语义列、多表、伪表、转义管道、装饰、BOM/CRLF），未由实现生成；用例落在 `tests/cockpit/lib/plan/plan-index.spec.mjs` 的“表事实”块与 `plan-gate.spec.mjs` 的 budget/task 用例。
 - **定向**：`node --import tsx/esm --test tests/cockpit/lib/plan/plan-index.spec.mjs tests/run/gates/plan-gate.spec.mjs tests/cockpit/shared/i18n.spec.mjs` → 35 tests / 35 pass / 0 fail（`plan-decoder-obs.green.out`）；`pnpm typecheck` exit 0。
-- **负控（逐规则，先改源码后还原）**：把 `—` 折成空值、放开转义管道、取消 Markdown 遮罩、重复语义列静默取首列——四次变异各 exit 1 且恰有 1 个用例红，源码还原后与备份逐字节相同（`negctl/*.out`）。
+- **负控（逐规则，先改源码后还原）**：把 `—` 折成空值、放开转义管道、取消 Markdown 遮罩、重复语义列静默取首列、紧邻第二张表静默当数据——五次变异各 exit 1 且恰有 1 个用例红，源码还原后与备份逐字节相同（`negctl/*.out`）。
 - **真实入口**：`node --import tsx/esm checks/run-gates/node-gate.mjs <bundle> --sessions <empty> --no-write --no-review`。合法 bundle 门 P = PASS（exit 0）；在场空白 plan 门 P = RED（exit 1，聚合退出，逐门读 stdout）；缺席 bundle 门 P = N/A（exit 0）。
 - **显示**：`react-dom/server` 静态渲染 `GraphNotices`，验证中英诊断文案（`row-arity@3`）且英文零 CJK，3/3 pass（`TSX_TSCONFIG_PATH=packages/deep-research-pack/tsconfig.client.json`）。
-- **全量**：`pnpm verify` exit 0；`pnpm test` exit 0（1430 spec + 265 checks，0 fail / 0 skip）。`pnpm build` exit 0。
+- **全量**：`pnpm verify` exit 0；`pnpm test` exit 0（1434 spec + 265 checks，0 fail / 0 skip）。`pnpm build` exit 0。
 - **未跑 / NOT-RUN**：真浏览器坏表诊断显示（`client-load.entry --seed` 因主机 load 3.62 > 1.5 自判 NOT-RUN，exit 2；种子 run 也没有坏表）；安装形态、模型、真实派工拒绝、并发/恢复未运行。SSR 只证组件渲染，不证 hook 文件轮询或浏览器装配。
 
 ## 残余风险

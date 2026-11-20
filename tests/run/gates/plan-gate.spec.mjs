@@ -44,6 +44,20 @@ test('active budget/task_id：空白红，显式占位合法（task_id 占位为
   try { assert.equal(planGate(taskNone).status, 'PASS') } finally { rmSync(taskNone, { recursive: true, force: true }) }
 })
 
+test('缺 budget/task_id 列 → RED（缺列与空值分开）', () => {
+  const build = (header, rowLine) => `# Plan\n\n> 图版本：v1\n\n## 节点表\n\n${header}\n|---\n${rowLine}\n\n## 剩余工作\n\n- W1.1 owner: scout next: 继续\n`
+  const noBudget = dirOf(build(
+    '| id | parent | lifecycle | kind | question | owner_role | deps | output | acceptance | depth | task_id |',
+    '| W1.1 | — | active | broad-scan | q | scout | — | out | ok | L1 | — |',
+  ))
+  try { assert.match(planGate(noBudget).detail, /缺 budget/) } finally { rmSync(noBudget, { recursive: true, force: true }) }
+  const noTask = dirOf(build(
+    '| id | parent | lifecycle | kind | question | owner_role | deps | output | acceptance | budget | depth |',
+    '| W1.1 | — | active | broad-scan | q | scout | — | out | ok | 1 | L1 |',
+  ))
+  try { assert.match(planGate(noTask).detail, /缺 task_id/) } finally { rmSync(noTask, { recursive: true, force: true }) }
+})
+
 test('环/悬空/重号/自依赖 → RED（BUG-267）', () => {
   for (const text of [
     plan([row('W1.1', 'W2.1'), row('W2.1', 'W1.1')]),
