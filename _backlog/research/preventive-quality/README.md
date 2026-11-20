@@ -7,8 +7,8 @@ opened: 2026-11-20
 
 > 状态：已定性
 > 问题：为什么已有测试策略、类级守卫和探索毕业纪律，仍持续依赖探索找 bug 再补？哪些机制应在设计与变更时预埋，怎样用有限资产和可证伪的退出条件减少同类复发？
-> 消费者：[预防性质量落地卡](../../issues/2026-11-20-preventive-quality-pilot.md)（首批实施记录与未决验收）；[Pack 生产源头预防](../../issues/2026-11-20-pack-production-prevention.md)（节点表解释首片与生产强制分开推敲，首片不声称阻止坏计划派工）
-> 产出的卡：[预防性质量落地](../../issues/2026-11-20-preventive-quality-pilot.md)（待落地、可关闭否；12 项真进程正向回归及 verify/test exit 0，A4 未通过、最终版负控未跑，未作用户业务验收）；[Pack 生产源头预防](../../issues/2026-11-20-pack-production-prevention.md)（推敲中、可关闭否；候选质量合同已写，未授权产品实施）
+> 消费者：[预防性质量落地卡](../../issues/2026-11-20-preventive-quality-pilot.md)（首批实施记录与未决验收）；[Pack 生产源头预防](../../issues/2026-11-20-pack-production-prevention.md)（D 节点表解释已落地；P 生产强制仍未展开，不声称阻止坏计划派工）
+> 产出的卡：[预防性质量落地](../../issues/2026-11-20-preventive-quality-pilot.md)（待落地、可关闭否；12 项真进程正向回归及 verify/test exit 0，A4 未通过、最终版负控未跑，未作用户业务验收）；[Pack 生产源头预防](../../issues/2026-11-20-pack-production-prevention.md)（等人拍板、可关闭否；D 节点表解释已落地，待用户业务验收，P 生产强制未定）
 > 结论：旧类保障未随新 Module 和真实入口继承是已证缺口。首批将既有开发环的有限准入与启动互斥实证配套，以公共操作和执行性质减少重复义务；实际技术决定见[首批 Note](../../../notes/implemented/2026-11-20-preventive-quality-pilot.md)，研究依据见[综合](2026-11-20-prevention-synthesis.md)，范围见[落地方案](2026-11-20-repo-landing-plan.md)。
 
 ## 研究委托

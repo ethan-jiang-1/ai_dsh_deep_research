@@ -174,7 +174,7 @@
 | (root) | `index` | — |
 | (root) | `keys` | `tests/cockpit/client/final-tab-patterns.spec.mjs` |
 | (root) | `lead-prompt` | `tests/cockpit/shared/client-pure-logic.spec.mjs` |
-| (root) | `locales` | `tests/cockpit/client/builtin-display.spec.mjs`<br>`tests/cockpit/client/coach-sessions.spec.mjs`<br>`tests/cockpit/client/locales/client-locale.spec.mjs`<br>`tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/client/research-config-source.spec.mjs`<br>`tests/cockpit/client/research-tabs.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
+| (root) | `locales` | `tests/cockpit/client/builtin-display.spec.mjs`<br>`tests/cockpit/client/coach-sessions.spec.mjs`<br>`tests/cockpit/client/locales/client-locale.spec.mjs`<br>`tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/client/research-config-source.spec.mjs`<br>`tests/cockpit/client/research-graph/graph-notices.spec.mjs`<br>`tests/cockpit/client/research-tabs.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | locales | `locales/en` | — |
 | locales | `locales/en-fold` | — |
 | locales | `locales/zh` | `tests/cockpit/shared/defaults-ui.spec.mjs` |
@@ -198,7 +198,7 @@
 | research-config | `research-config/useConfigFeed` | `tests/cockpit/client/research-config/config-feed-session.spec.mjs` |
 | research-graph | `research-graph/DagMap` | — |
 | research-graph | `research-graph/format` | `tests/cockpit/shared/client-pure-logic.spec.mjs` |
-| research-graph | `research-graph/GraphNotices` | — |
+| research-graph | `research-graph/GraphNotices` | `tests/cockpit/client/research-graph/graph-notices.spec.mjs` |
 | research-graph | `research-graph/GraphVersionRail` | — |
 | research-graph | `research-graph/NodeCard` | — |
 | research-graph | `research-graph/state-note` | `tests/cockpit/client/research-graph/state-note.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |

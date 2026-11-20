@@ -8,7 +8,7 @@
 |---|---|---|
 | [2026-11-19-low-confidence-40](2026-11-19-low-confidence-40.md) | 推敲中 | 低置信区 20 卡（第 9 轮）：锁/端口/缓存读写并发残差；320–339 |
 | [预防性质量落地](2026-11-20-preventive-quality-pilot.md) | 待落地 | 有限准入 + 启动互斥实证；已补可复核验收、模型盲评与首批关闭边界 |
-| [Pack 生产源头预防](2026-11-20-pack-production-prevention.md) | 推敲中 | 思想审查后分开节点表解释与生产强制；首片已补 reader/候选支持域/验收，兼容与独立期望待冻结 |
+| [Pack 生产源头预防](2026-11-20-pack-production-prevention.md) | 等人拍板 | D 节点表解释已落地（`e646efbc`）；待用户业务验收与兼容取舍，P 生产强制另裁 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

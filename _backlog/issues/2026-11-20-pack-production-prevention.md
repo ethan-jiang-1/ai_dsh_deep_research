@@ -1,21 +1,22 @@
 ---
-status: 推敲中
+status: 等人拍板
 opened: 2026-11-20
 ---
 
-# 推敲：Pack 生产源头预防——先统一 plan 节点表解释，再判断生产强制接缝
+# 推敲：Pack 生产源头预防——D 节点表解释已落地，P 生产强制仍待裁决
 
-> 立卡：2026-11-20 ｜ 状态：推敲中 ｜ 类型：Feature ｜ 结论倾向：未定 — 技术建议先做节点表解释切片；支持域与实施范围尚未确认 ｜ 可关闭：否
+> 立卡：2026-11-20 ｜ 状态：等人拍板 ｜ 类型：Feature ｜ 结论倾向：现在做 — D 节点表解释切片已交付；P 生产强制未定 ｜ 可关闭：否
+> 去向：implemented — [实现说明](../../notes/implemented/2026-11-20-pack-production-prevention.md)；业务验收：用户（待）
 
-**问题与期望结果：** 研究角色直接生产文件，部分确定性错误到包外审计或后续探索才被发现。希望把这类错误的解释与诊断集中，减少反复修同类输入的义务。完整方向是尽早发现坏产物；首个建议切片只承诺 plan 节点表单次解释及既有消费者的正确使用，不声称已经阻止坏 plan 写入或派工，也不以 schema 合法代替研究质量。
+**问题与期望结果：** 研究角色直接生产文件，部分确定性错误到包外审计或后续探索才被发现。希望把这类错误的解释与诊断集中，减少反复修同类输入的义务。完整方向是尽早发现坏产物；D 切片只完成 plan 节点表单次解释及既有消费者的正确使用，不声称已经阻止坏 plan 写入或派工，也不以 schema 合法代替研究质量。
 
-**当前情况：** [生产源头研究](../research/preventive-quality/2026-11-20-pack-production-prevention.md)已提交于 `6d6fd17f`，源码采样点 `71010fef`。普通/加粗 ID 的消费者对照证明读法不同，未证明哪种装饰是公共支持格式。2026-11-20 对 `0d67a076` 的实质审查认为方向成立，但原卡将统一解析与发布/快照/Team 事务捆绑过早；本版将二者的承诺和验收分开。无候选产品实现。
+**当前情况：** [生产源头研究](../research/preventive-quality/2026-11-20-pack-production-prevention.md)已提交于 `6d6fd17f`，源码采样点 `71010fef`。D 切片的兼容/结果合同已冻结并由独立审阅者写独立期望，实现提交于 `e646efbc`；观察与硬门共用解码事实、各自裁决，gate 的 raw 第二读已删除。业务验收与 P 的取舍未完成。
 
-**本轮授权：** review 思路、按 [methods](../methods/README.md)补事实并修订卡片，未授权产品实施。只改本 repo，不改权限、全局配置、宿主或 vendor。[首批 A+B 卡](2026-11-20-preventive-quality-pilot.md)的失败评测、未决验收保持独立。
+**本轮授权：** 用户 2026-11-20 授权按已审查范围自主实施并验证 D，要求实际证据与质量；P 仍未授权。只改本 repo，不改权限、全局配置、宿主或 vendor。[首批 A+B 卡](2026-11-20-preventive-quality-pilot.md)的失败评测、未决验收保持独立。
 
-**未决问题：** 第一切片的支持域还需冻结；对已有宽松观察兼容能否保留、歧义输入如何明示而不阻 UI，需给具体结果。生产强制的真实保护点尚未证明；不能靠新增 publish 工具推定全部入口被保护。
+**未决问题：** 用户是否接受 D 的兼容变化（装饰表头/ID 进入 gate 支持域；多表、重复语义列、错列、转义管道成为明确拒绝）与其有限收益。P 的真实保护点仍未证明，是否以后做/不做未裁决。
 
-**下一步：** agent 先完成下文“落地前准备表”的 D 切片技术缺口，提交可审的兼容/输出合同与独立 expected；用户只判断是否采用该有限收益和公共行为取舍。P 发布问题不成为 D 的虚假前置，也不因 D 通过而被接受。当前保留推敲态。
+**下一步：** 用户确认 D 的业务结果与兼容取舍；P 单独裁决，未裁决前本卡活跃、不可关闭。agent 不再改产品，除非用户明确扩大授权。
 
 ## 核心思想审查
 
@@ -138,7 +139,7 @@ Lead 的“读 plan → 调 Team 工具”由 [planning skill](../../packages/de
 
 ## 验收标准
 
-以下是 D 候选实施的要求，尚未通过；support/diagnostic exact 结果冻结后才可 ready。P 不在本表，也不能因本表全绿被称完成。
+下表仍是 D 的合格合同。D1–D4 已按该合同实施并有实际证据（见“本轮实施记录”），但**业务验收归用户、尚未完成**；P 不在本表，也不能因本表全绿被称完成。
 
 | 编号 / 类 | 输入与正常/反面结果 | 信号、owner 与命令 | 人工判断 / 证明边界 |
 |---|---|---|---|
@@ -146,6 +147,19 @@ Lead 的“读 plan → 调 Team 工具”由 [planning skill](../../packages/de
 | D2 消费策略与旧性质（确定性） | 当前/快照、旧图、映射/墓碑、差异、版本/投入、strategy；相同表字段同源，各 reader 结果符合自己的合同 | D1 与 [graph-model](../../tests/cockpit/lib/plan/graph-model.spec.mjs)、[plan-diff](../../tests/cockpit/lib/plan/plan-diff.spec.mjs)、[plan-graph](../../tests/cockpit/lib/plan/plan-graph.spec.mjs)、[protocol-core](../../tests/run/gates/protocol-core.spec.mjs)、[strategy-core](../../tests/run/gates/strategy-core.spec.mjs)、[run-version](../../tests/cockpit/lib/run/run-version.spec.mjs)。复用这些 owner 的定向 `node --import tsx/esm --test <files>`；每条受影响旧性质对应反例 | 无新业务判断；纯件只证调用逻辑，不证 hook 轮询、浏览器或调度 |
 | D3 真实使用（装配，按实际 diff） | 所有改动 reader 实际调用共用解释；真实门对坏 bundle RED、合法/缺席各按合同；不能只测 helper | [node-gate](../../checks/run-gates/node-gate.mjs) 入口对隔离 bundle 运行，用 `node --import tsx/esm checks/run-gates/node-gate.mjs <隔离 bundle 绝对路径> --sessions <空会话目录绝对路径> --no-write --no-review`，读取 stdout 的门 P 状态/诊断；当前 CLI 没有 `--json`。逐门断言 P，其他子门可能因不完整 bundle 为 RED/UNATTESTED，不以整体 exit 冒充 P 结果。若显示/locale/客户端装配有变化，按 [开发环](../../docs/guides/60-dev-loop.md)走 [client-load](../../checks/smoke/client-load.entry.mjs)真显示档；包结构改动再走 [release.entry](../../checks/smoke/release.entry.mjs) | 无新业务判断；入口只证所走面，不证装态生产强制。环境阻断写 NOT-RUN，不换 helper 冒充 |
 | D4 义务减法与回归（确定性 + 业务判断） | gate 第二节点表读实际删除；重复纯件断言收敛但旧性质保留；合法矩阵无误红；无新 public publish/配置/第二存储 | diff、定向命令耗时、`pnpm verify` + `pnpm test`；修改代码必须类型检查。新 UI 诊断中英同步；不改模型工具/skill，模型证据 N/A，若实际扩面先重审 | 用户判断收益与维护成本；不拿测试数/BUG 数代替业务收益，不外推长期缺陷率 |
+
+## 本轮实施记录（D 切片，`e646efbc`）
+
+实现说明与残余风险 = [implemented Note](../../notes/implemented/2026-11-20-pack-production-prevention.md)。机器证据在 `runtime/smoke-workspace/preventive-quality/`（运行区，不入库）。
+
+| 证据 | 层 / 覆盖的失败类 | 负控（见过红） | 结果 / 边界 |
+|---|---|---|---|
+| [plan-index 表事实与观察诊断](../../tests/cockpit/lib/plan/plan-index.spec.mjs) + [plan-gate 字段/装饰/占位](../../tests/run/gates/plan-gate.spec.mjs) | 确定性：缺席 vs 空白、占位 vs 缺失、短行、重复语义列、多表、伪表、转义管道、装饰、BOM/CRLF | 改前装饰用例实际 RED；四次源码变异各 1 红后还原 | 30/30、35/35 定向通过；`pnpm typecheck` exit 0。纯件不证浏览器/hook |
+| [node-gate 真入口](../../checks/run-gates/node-gate.mjs) 隔离 bundle | 装配：实际 run 门读取同一解码事实 | 无独立变异；坏/缺席/合法三态对照 | 合法 P=PASS exit0；空白 P=RED exit1；缺席 P=N/A exit0。聚合退出不冒充 P |
+| [GraphNotices 静态渲染](../../tests/cockpit/client/research-tabs.spec.mjs) | 显示：中英诊断文案与英文零 CJK | 文案删改即红 | 3/3 pass；不证浏览器加载 |
+| `pnpm verify` + `pnpm test` + `pnpm build` | L0：引用/形状、现有回归、构建 | 无新增门禁变异 | verify exit0；1430 spec + 265 checks，0 fail/skip；build exit0 |
+| `client-load.entry --seed` | 真浏览器装配回归 | 无坏表种子，不能证明新诊断显示 | **NOT-RUN**：主机 load 3.62 > 1.5，exit 2；未跑 ≠ 通过 |
+| 生产写入/派工拒绝、并发恢复、安装形态、模型 | P / 其余层 | — | 未运行；D 不声称这些 |
 
 ## P 仍未展开的生产强制问题
 
@@ -157,11 +171,11 @@ P 先回答“在哪里真正阻止使用非法 plan”，再设计工具，不�
 
 **成本建议：** D 先冻结支持域与独立期望，再估实现成本；不以未经测量的 ≤1 秒或 4 小时当收益依据。记录定向 suite 的输入、命令、机器与实际耗时。D 应减少调用者重复解释；若需新增复杂 Markdown 引擎、public 发布系统或持久正本才能做成，回到方案比较。P 单独预算，不扩进 D。
 
-**ready 条件：** D 的独立结果被确认，支持域/状态/diagnostic/各 reader 策略已冻结、独立 expected 和证据路由就位，明确现在做及去向后才按状态机翻 `待落地`。测试需有可运行设计，实施后的新绿/负控不要求事先存在。当前技术准备尚未齐，也没有用户产品实施授权。
+**ready/落地状态：** D 的支持域、结果合同、独立 expected、证据路由与实现均已落地（`e646efbc`），技术负控与真实入口见上表。用户业务验收尚未完成，因此卡片停在 `等人拍板`，不归档。P 没有可运行保护点，仍未展开；它不因 D 通过而自动成立。
 
-**去向候选：** 若 D 获准且不需另行 RFC，交付时由 implemented Note 承载“同源节点表事实、观察/硬门分策略”的持久理由，计划路径 `notes/implemented/2026-11-20-pack-production-prevention.md`，业务验收用户、技术证据 agent。此为尚未选定的路径，不创建 implemented Note。P 的后续选择留本卡依赖分支，不因 D ready 自动进入执行。
+**去向：** D 的持久理由已由 implemented Note 承载；业务验收归用户。P 的后续选择留本卡依赖分支，以后做/不做需用户明确裁决并记录重议 owner。
 
-**关闭条件：** 按最终选定范围及 [结论去向](../methods/issue-to-note.md)收尾；若将卡限定为 D，必须明确 P 的去向/重议 owner，不能静默丢弃生产源头目标。若继续承载 D+P，D 完成不关闭整卡。明确不做/以后做/并入的裁决另按状态机记录。机械绿、文档齐全或第一切片绿均不等于整 Feature 完成。
+**关闭条件：** 用户对 D 的业务结果与兼容取舍给出明确答复，且 P 的重议去向被记录后，按 [结论去向](../methods/issue-to-note.md)与归档规则关闭。机械绿、文档齐全或第一切片绿均不等于整 Feature 完成。
 
 ## 审查与实际证据
 
@@ -175,4 +189,4 @@ P 先回答“在哪里真正阻止使用非法 plan”，再设计工具，不�
 | 六 owner 定向现有测试（审阅者执行） | keyless：plan-index/gate、protocol-core、graph-model/diff、strategy-core 现有性质 | 未改代码、未做新变异；不证 D 已实现 | 103 pass、0 fail/skip；当前机器约 549ms |
 | 本轮文档 verify/test | L0：引用/形状与现有回归 | 不新增机器判据，不注入产品变异；不证候选成立 | exit 0；1423 + 265，0 fail/skip；提交仍走正常钩子 |
 
-够了判据仅对 review/修卡：会红＝本轮发现方案范围与证据不匹配，非产品 prove-red；真入口＝文档 verify/test exit 0（不是候选生产入口证据）；验世界＝读实际 reader/现有测试，未改文件状态机；模型可见钉住＝N/A；最低层＝静态语义 + L0；skip 可见＝未来 D/P 未跑与已有绿分列；可重复＝仓内路径/命令、基线与独立期望冻结要求。生产写入、派工拒绝、并发恢复、模型、安装形态均未运行。
+够了判据（D 交付 + 本卡收尾）：会红＝装饰缺口改前实红、四次变异各自见红；真入口＝node-gate 隔离 bundle 三态实跑（浏览器显示 NOT-RUN）；验世界＝磁盘 bundle 的 P 状态与退出码、负控后源码逐字节还原；模型可见钉住＝N/A（未改模型面）；最低层＝纯件 + 真实 run 门 + SSR；skip 可见＝浏览器/安装/模型/P 未跑与已跑分列，0 skip 不包含它们；可重复＝仓内命令、输入与输出路径在运行区。生产写入、派工拒绝、并发恢复、安装形态与模型仍未运行；D 只证明节点表解释与现有消费面，不证明整 Feature。

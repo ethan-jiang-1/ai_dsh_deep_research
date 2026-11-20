@@ -773,6 +773,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/research-graph/graph-notices.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "graph-notices.spec.mjs — 研究图谱坏表提示的 keyless 静态渲染（react-dom/server）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/research-graph/state-note.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
