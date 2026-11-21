@@ -13,11 +13,12 @@
 //
 // 用法：node checks/run-gates/protocol-audit.mjs <run-bundle-dir> [--write|--no-write] [--require]
 // 退出码：0 = 绿（含 legacy-not-applicable）；1 = 红；2 = 用法/前置（bundle 不在场）。
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 import { epochDateOf, runType } from '../lib/gates/schema-scan-core.mjs'
 import { PROTOCOL_CONTRACT_DATE, designSha256, preContractByDelivery } from '../lib/gates/protocol-core.mjs'
 import { evaluateBundle, requiredByProtocolContract } from '../lib/gates/protocol-audit-core.mjs'
+import { splitFrontmatter } from '../lib/shared/frontmatter.mjs'
 import { isMain } from '../lib/shared/cli-entry.mjs'
 
 const readIf = (path) => (existsSync(path) ? readFileSync(path, 'utf8') : '')
@@ -171,7 +172,7 @@ if (isMain(import.meta.url)) {
   let methodLibraryEntry
   const candidates = [libraryPath, join(bundle, '..', '..', 'method-library.md')]
   if (process.env.DEEP_RESEARCH_WORKSPACE) candidates.push(join(process.env.DEEP_RESEARCH_WORKSPACE, 'method-library.md'))
-  const foundLibrary = protocol.method?.library_name === null || protocol.method?.library_name === undefined
+  const foundLibrary = protocol === null || protocol.method?.library_name === null || protocol.method?.library_name === undefined
     ? null
     : candidates.find((candidate) => existsSync(candidate))
   if (foundLibrary !== null) {

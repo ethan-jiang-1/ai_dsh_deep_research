@@ -22,7 +22,6 @@
 | [BUG-335](BUG-335-snapshot-port-nan.md) | 修复就绪 | P2 | snapshot --port NaN |
 | [BUG-336](BUG-336-client-load-port-nan.md) | 修复就绪 | P2 | client-load --port NaN |
 | [BUG-338](BUG-338-pick-free-port-toctou.md) | 修复就绪 | P2 | pickFreePort TOCTOU |
-| [BUG-340](BUG-340-protocol-audit-cli-missing-readdir-import.md) | 修复就绪 | P1 | protocol-audit 壳缺 readdir import |
 | [BUG-341](BUG-341-findings-one-line-vs-f-block.md) | 等人拍板 | P1 | findings 一行 vs F# 块 |
 | [BUG-342](BUG-342-plan-remaining-work-owner-next-literal.md) | 等人拍板 | P1 | 剩余工作 owner/next 字面判据 |
 | [BUG-343](BUG-343-readiness-json-extra-count-keys.md) | 等人拍板 | P2 | readiness 附加计数键 |

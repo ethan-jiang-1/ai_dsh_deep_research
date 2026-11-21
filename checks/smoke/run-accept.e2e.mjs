@@ -199,9 +199,10 @@ try {
     check(JSON.parse(readFileSync(join(bundle, 'manifest.json'), 'utf8')).schema === 2, '⑥ repair 不动 manifest 的 schema 快照')
 
     // schema-scan CLI 的绿面：在验收后补齐"完整 run"必备件（验收前的证据会触发 evidence-audit 对账，
-    // 与本断言无关），再让真 CLI 判一次新契约。
+    // 与本断言无关），再让真 CLI 判一次新契约。验收后交付段必须有回执指针（D28）。
     writeFileSync(join(bundle, 'topics.md'), '# Topics\n')
     writeFileSync(join(bundle, 'findings.md'), '# Findings\n')
+    writeFileSync(join(bundle, 'run.md'), `${readFileSync(join(bundle, 'run.md'), 'utf8').trimEnd()}\n- delivered: v1\n`)
     mkdirSync(join(bundle, 'evidence'), { recursive: true })
     writeFileSync(join(bundle, 'evidence', 'e1.md'), '---\nsource_url: https://example.com\nretrieved_at: 2026-10-24\nquality: A\nfound_by: scout\nsupports: F1\nsource_tier: primary\npublisher: example.com\n---\n\n> quote\n\n解读\n')
     const scan = runNode(SCHEMA_SCAN, [bundle], env())
@@ -267,7 +268,7 @@ try {
       gates: { hitl1: 'none', hitl2: 'review', evidence_threshold: 'B', critic: 'report', claim_verification: 'on' }, deviations: [],
     }
     const T1 = Date.parse('2026-11-13T09:00:00+08:00')
-    const { bundle, sessions } = writeBundle('proto', '', '# v1\n\nclean\n', '- schema: 2\n- created: 2026-11-13', 'quick_factual')
+    const { bundle, sessions } = writeBundle('proto', '', '# v1\n\n## answer\n\nok\n\n## basis\n\nb1\n\n## limits\n\nl1\n', '- schema: 2\n- created: 2026-11-13', 'quick_factual')
     writeSession(join(sessions, 'sess', 'session.v4.jsonl'), 'proto', WS, join(bundle, 'final', 'v1.md'), T1)
     writeFileSync(join(bundle, 'protocol.json'), `${JSON.stringify(quickProtocol, null, 2)}\n`)
     writeFileSync(join(bundle, 'question.md'), `${readFileSync(join(bundle, 'question.md'), 'utf8')}\n## 研究方法（本次实际采用）\n\n- 采用: 事实核查（自动采用）\n\n${projectionOf(quickProtocol)}\n`)
@@ -275,6 +276,14 @@ try {
     check(ok.status === 0, '⑩ 契约日后有效 protocol：run-accept 绿', ok.stdout.slice(-500))
     check(existsSync(join(bundle, 'protocol-audit.md')), '⑩ protocol-audit.md 落盘')
     check(/^v1 design_sha256=[0-9a-f]{64}$/m.test(readFileSync(join(bundle, 'protocol-audit.md'), 'utf8')), '⑩ 报告含 v1 版本指纹行')
+
+    // 带 evidence 的 bundle：CLI 壳必须能走完证据扫描（BUG-340：壳缺 readdirSync/splitFrontmatter 时
+    // 只在有 evidence 的真实 bundle 上崩，无证据夹具全绿——这正是它逃过本件旧夹具的原因）。
+    mkdirSync(join(bundle, 'evidence'), { recursive: true })
+    writeFileSync(join(bundle, 'evidence', 'e1.md'), '---\nsource_url: https://example.com\nretrieved_at: 2026-11-13\nquality: A\nfound_by: scout\nsupports: T1\nlens: official\n---\n\n> quote\n')
+    const withEvidence = runNode(join(ROOT, 'checks', 'run-gates', 'protocol-audit.mjs'), [bundle, '--no-write'], env())
+    check(!/ReferenceError/.test(withEvidence.stdout + withEvidence.stderr), '⑩ 带 evidence：CLI 不用未定义符号', withEvidence.stdout.slice(-300))
+    check(withEvidence.status === 0 || withEvidence.status === 1, '⑩ 带 evidence：CLI 返回判定而非崩溃', withEvidence.stdout.slice(-300))
 
     // 改一个字节 → protocol-changed 红（版本指纹不是装饰；CLI 级反证）。
     const mutated = JSON.parse(readFileSync(join(bundle, 'protocol.json'), 'utf8'))

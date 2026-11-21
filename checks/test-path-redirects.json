@@ -2789,6 +2789,7 @@
     {"from": "_backlog/bugs/BUG-332-start-lock-no-pid-liveness.md", "to": "_backlog/_archived/suspended_bugs/BUG-332-start-lock-no-pid-liveness.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
     {"from": "_backlog/bugs/BUG-337-boot-run-port-invalid.md", "to": "_backlog/_archived/suspended_bugs/BUG-337-boot-run-port-invalid.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
     {"from": "_backlog/bugs/BUG-339-boot-run-trap-removes-new-lock.md", "to": "_backlog/_archived/suspended_bugs/BUG-339-boot-run-trap-removes-new-lock.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
-    {"from": "_backlog/bugs/BUG-330-output-length-heuristic-still.md", "to": "_backlog/_archived/suspended_bugs/BUG-330-output-length-heuristic-still.md", "reason": "2026-11-21 已由 BUG-313 修复；迁暂停池（用户直派）"}
+    {"from": "_backlog/bugs/BUG-330-output-length-heuristic-still.md", "to": "_backlog/_archived/suspended_bugs/BUG-330-output-length-heuristic-still.md", "reason": "2026-11-21 已由 BUG-313 修复；迁暂停池（用户直派）"},
+    {"from": "_backlog/bugs/BUG-340-protocol-audit-cli-missing-readdir-import.md", "to": "_backlog/_archived/fixed_bugs/BUG-340-protocol-audit-cli-missing-readdir-import.md", "reason": "2026-11-21 BUG-340 已修归档"}
   ]
 }
