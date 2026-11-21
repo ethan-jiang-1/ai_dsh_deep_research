@@ -171,8 +171,9 @@ A 的 readiness 多 4 个计数键；B 的 claims 是 rich ledger。**过去六�
 
 **P4 进度（2026-11-21）**
 
-- 已修归档：**347**（无 review 面 = absent，pass=null）、**344**（runSettled 追加无在飞子代理；watch-run 读子会话）。
-- 待做：**345**（交付见证：durable present ∨ 工具回执、窗口无关）、**348**（run health derive-only + 横幅）。
+- 已修归档：**347**（无 review 面 = absent，pass=null）、**344**（runSettled 追加无在飞子代理；watch-run 读子会话）、**345**（回执只认工具形状；install-only 手写不冒充；窗口外无回执 = 未见证，不伪造）。
+- **348 修复落地**：health fold + 状态页横幅（zh/en）+ watch-run STALLED 行；真日志 02:35–08:47 重放 stalled=true/372min；浏览器复验 `client-load.entry --seed` 因主机 load 15–20 NOT-RUN，负载下降后复跑再归档。
+- 残差（记入批 Note）：vendor follow 快照窗口不改；present-only 且窗口外且无工具回执 = 未见证（生产侧正路 = ops run-accept 写回执）。
 
 ### P5 沙箱、残余红分诊与收尾（1 会话）
 
