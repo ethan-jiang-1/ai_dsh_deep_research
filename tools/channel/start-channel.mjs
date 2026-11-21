@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // One owner for both public launch paths. A crash retains its locks for offline recovery.
-import { spawn, spawnSync } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { closeSync, existsSync, mkdirSync, openSync, realpathSync, writeFileSync, writeSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -58,16 +58,19 @@ function canonicalDirectory(path) {
   return realpathSync(path)
 }
 
-// ps observes the entire group, including descendants that outlive the body shell.
-// Zombies cannot execute or retain resources; an unreadable group is unknown, never quiet.
+// Group silence: probe existence with kill(-pgid, 0), not `ps`. Under a sandbox `ps` cannot
+// read agent children (EPERM), which used to turn a proven-quiet group into "unknown" and retain
+// ownership forever (BUG-346). ESRCH = the whole group is gone; EPERM or success = still alive.
 function groupQuiet(pid) {
-  const result = spawnSync('ps', ['-axo', 'pid=,pgid=,stat='], { encoding: 'utf8', timeout: 1000 })
-  if (result.status !== 0 || result.error) return null
-  for (const line of result.stdout.split('\n')) {
-    const match = /^\s*(\d+)\s+(\d+)\s+(\S+)/.exec(line)
-    if (match && Number(match[2]) === pid && !match[3].startsWith('Z')) return false
+  if (!Number.isInteger(pid) || pid <= 0) return true
+  try {
+    process.kill(-pid, 0)
+    return false
+  } catch (error) {
+    if (error.code === 'ESRCH') return true
+    if (error.code === 'EPERM') return false
+    return null
   }
-  return true
 }
 
 function signalGroup(signal) {
@@ -115,7 +118,8 @@ async function stop(exit, reason) {
         }
       }
     } else {
-      safeDiagnostic('start-channel: process group is not proven quiet; ownership retained, recover offline')
+      const held = locks.map(lock => lock.path).join(', ')
+      safeDiagnostic(`start-channel: process group is not proven quiet; ownership retained (${held}); stop related processes, verify none remain, then remove the lock directories and recover offline`)
       exit = 1
     }
     if (logFd !== null) { closeSync(logFd); logFd = null }

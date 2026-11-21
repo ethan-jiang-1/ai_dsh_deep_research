@@ -27,7 +27,6 @@
 | [BUG-343](BUG-343-readiness-json-extra-count-keys.md) | 等人拍板 | P2 | readiness 附加计数键 |
 | [BUG-344](BUG-344-watch-run-settled-while-subagent-live.md) | 修复就绪 | P2 | watch-run 误报 settled |
 | [BUG-345](BUG-345-delivery-witness-window-and-receipt-shape.md) | 等人拍板 | P2 | present 后仍「交付未见证」 |
-| [BUG-346](BUG-346-start-channel-ps-unreadable-retains-lock.md) | 等人拍板 | P2 | ps 不可读保留启动锁 |
 | [BUG-347](BUG-347-review-absent-shown-as-fail.md) | 修复就绪 | P1 | 无 review 时显示「审查未过」 |
 | [BUG-348](BUG-348-long-run-silent-stall-no-alert.md) | 等人拍板 | P2 | 长 run 停摆无告警 |
 | [BUG-349](BUG-349-workflow-sandbox-nested-eph.md) | 等人拍板 | P2 | workflow 嵌套沙箱必失败 |

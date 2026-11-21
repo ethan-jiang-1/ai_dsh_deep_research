@@ -41,11 +41,14 @@ const put = (path, content, executable = false) => {
 }
 function live(pid) {
   if (!Number.isInteger(pid) || pid < 1) return false
-  const result = spawnSync('ps', ['-p', String(pid), '-o', 'stat='], { encoding: 'utf8', timeout: 1000 })
-  if (result.error) throw result.error
-  if (result.status === 1 && result.stdout.trim() === '' && result.stderr.trim() === '') return false
-  if (result.status !== 0 || result.stdout.trim() === '') throw new Error(`ps could not determine PID ${pid}: exit ${result.status} ${result.stderr}`)
-  return !result.stdout.trim().startsWith('Z')
+  // Existence via kill, not ps: under the agent sandbox ps cannot read child processes (EPERM),
+  // which used to make the whole runner NOT-RUN (BUG-346). A zombie still answers kill; every
+  // entry we own is awaited to `close`, so reap latency is bounded here.
+  try { process.kill(pid, 0); return true } catch (error) {
+    if (error.code === 'ESRCH') return false
+    if (error.code === 'EPERM') return true
+    throw error
+  }
 }
 async function until(label, predicate, timeoutMs = 12_000) {
   const deadline = performance.now() + timeoutMs
@@ -317,6 +320,19 @@ async function scenarios() {
   await release(first, ownerPid, owner)
   report('foreground TERM', 'both locks remain until vendor child close; supervisor and dashboard exit')
 
+  // ps unreadable: the group-silence probe must not depend on ps (BUG-346). A failing ps on PATH
+  // used to turn a proven-quiet group into "unknown" and retain both locks after a normal TERM.
+  const noPs = await instance('ps-unreadable')
+  const fakeBin = join(noPs.area, 'fakebin')
+  mkdirSync(fakeBin, { recursive: true })
+  put(join(fakeBin, 'ps'), '#!/usr/bin/env bash\necho "ps: Operation not permitted" >&2\nexit 1\n', true)
+  noPs.env.PATH = `${fakeBin}:${noPs.env.PATH}`
+  const noPsHandle = direct(noPs)
+  await ready(noPs)
+  const noPsPid = assertOwned(noPs)
+  await release(noPs, noPsPid, noPsHandle)
+  report('ps unreadable', 'normal TERM proves quiet via kill(-pgid,0); both locks released without ps')
+
   const second = await instance('driver-first')
   const driverOwner = driver(second)
   assert.equal(await exited(driverOwner, 'driver handoff'), 2, driverOwner.output)
@@ -401,9 +417,12 @@ async function scenarios() {
   const bodyPid = Number(text(join(early.fixture, 'body-pid')))
   const holderPid = Number(text(join(early.fixture, 'descendant-pid')))
   assert(live(bodyPid) && live(holderPid), 'body and inherited-pipe descendant are live before failure')
-  const group = spawnSync('ps', ['-p', String(holderPid), '-o', 'pgid='], { encoding: 'utf8', timeout: 1000 })
-  assert.equal(group.status, 0, group.error?.message ?? group.stderr)
-  assert.equal(Number(group.stdout.trim()), bodyPid, 'holder belongs to the real detached body process group')
+  // Group membership is proven by behavior below (holder survives body exit, ignores TERM, then
+  // dies on the group KILL). pgid equality cannot be read under a ps-less sandbox; the group
+  // existence probe is enough here.
+  let groupAlive = true
+  try { process.kill(-bodyPid, 0) } catch { groupAlive = false }
+  assert(groupAlive, 'detached body process group exists (pgid = body pid)')
   put(join(early.fixture, 'allow-body-exit'), '')
   await until('body exit is observed while descendant retains pipe', () => !live(bodyPid) && existsSync(join(early.fixture, 'descendant-term')))
   assert(live(holderPid), 'descendant ignores TERM and still holds inherited stdout/stderr after body exit')
@@ -526,14 +545,10 @@ let exit = 0
 try {
   if (unknown.length || (mutation !== null && !allowed.has(mutation))) throw new Error('usage: channel-start.e2e.mjs [--mutate=drop-home-lock|bypass-wrapper]')
   if (process.platform === 'win32') { const error = new Error('requires POSIX bash/process groups/ps'); error.prerequisite = true; throw error }
-  const preflight = spawnSync('bash', ['-c', 'for name in ps tee diff sed grep head tr cat dirname; do command -v "$name" >/dev/null || exit 2; done'], { encoding: 'utf8', timeout: 3000 })
+  const preflight = spawnSync('bash', ['-c', 'for name in tee diff sed grep head tr cat dirname; do command -v "$name" >/dev/null || exit 2; done'], { encoding: 'utf8', timeout: 3000 })
   if (preflight.error || preflight.status !== 0) { const error = new Error(`unavailable shell prerequisite: ${preflight.error?.message ?? preflight.stderr ?? `exit ${preflight.status}`}`); error.prerequisite = true; throw error }
-  const observation = spawnSync('ps', ['-axo', 'pid=,pgid=,stat='], { encoding: 'utf8', timeout: 1000 })
-  if (observation.error || observation.status !== 0 || !observation.stdout.split('\n').some(line => Number(line.trim().split(/\s+/)[0]) === process.pid)) {
-    const error = new Error(`unavailable process-group observation: ${observation.error?.message ?? observation.stderr ?? `exit ${observation.status}`}`)
-    error.prerequisite = true
-    throw error
-  }
+  // No process-group observation prerequisite: existence is probed with kill (BUG-346), so a
+  // sandbox that denies ps must not turn this runner into NOT-RUN.
   for (const rel of required) if (!existsSync(join(ROOT, rel))) { const error = new Error(`missing prerequisite ${rel}`); error.prerequisite = true; throw error }
   fixtureRoot()
   console.log(`channel-start fixture: ${archive}${mutation ? ` (mutation=${mutation})` : ''}`)

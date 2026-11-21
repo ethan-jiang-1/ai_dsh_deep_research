@@ -6,6 +6,7 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [346](BUG-346-start-channel-ps-unreadable-retains-lock.md) | ps 不可读保留启动锁 | （kill(-pgid,0) 判静默） | 2026-11-21 |
 | [340](BUG-340-protocol-audit-cli-missing-readdir-import.md) | protocol-audit 壳缺 import/null 守卫 | （壳 import + null 守卫） | 2026-11-21 |
 | [300](BUG-300-plan-owner-role-missing.md) | plan active 缺 owner_role | （owner 必填） | 2026-11-19 |
 | [301](BUG-301-plan-kind-missing.md) | plan active 缺 kind | （kind 必填） | 2026-11-19 |
