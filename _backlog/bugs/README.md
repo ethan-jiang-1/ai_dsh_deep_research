@@ -14,11 +14,6 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-327](BUG-327-probe-cache-mcp-read-write-key-mismatch.md) | 修复就绪 | P2 | probe 读写键 MCP 不一致 |
-| [BUG-333](BUG-333-run-driver-port-nan.md) | 修复就绪 | P2 | --port NaN/0 未校验 |
-| [BUG-334](BUG-334-cold-start-port-env-nan.md) | 修复就绪 | P2 | COLD_START_PORT NaN |
-| [BUG-335](BUG-335-snapshot-port-nan.md) | 修复就绪 | P2 | snapshot --port NaN |
-| [BUG-336](BUG-336-client-load-port-nan.md) | 修复就绪 | P2 | client-load --port NaN |
 
 ## 最近归档
 
