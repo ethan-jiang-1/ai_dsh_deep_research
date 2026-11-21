@@ -20,19 +20,18 @@ env 端口没有正整数校验。
 
 ## 复现
 
-复现状态：稳定（读码/临时脚本/局部命令）。
+复现状态：稳定 — 真入口：
 
 ```sh
-# 证据见症状与当前源码；临时验证只读，不改仓库
+COLD_START_PORT=abc node checks/smoke/cold-start.entry.mjs
+# 观察：Number('abc') = NaN，后续 startWeb/端口检查才失败
 ```
 
 ## 修法
 
-1. 为锁/端口/缓存/plan 字段补 owner token、校验或范围；
-2. 加正反控与旧场/迁移豁免；
-3. 两套入口共用同一实现。
+`COLD_START_PORT` 走同一 `parsePort`：非法 → exit 2；未设置 → 仍 `pickFreePort()`；不再把 NaN 传下去。
 
 ## 修复判据
 
-- 该缺口有正反控；旧场/合法路径不误伤；
+- `abc/0/-1/65536` 各一例 exit 2；未设置时仍自动选空闲端口；
 - `pnpm verify` / `pnpm test` 绿。

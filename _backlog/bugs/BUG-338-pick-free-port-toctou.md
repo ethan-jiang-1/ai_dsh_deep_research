@@ -20,19 +20,17 @@ pickFreePort 取空闲端口后 close，后续 startWeb 再 bind；并发进程�
 
 ## 复现
 
-复现状态：稳定（读码/临时脚本/局部命令）。
+复现状态：未复现 — 抢占是时序窗口，稳定复现需并发进程；读法协议 = 在 `pickFreePort()` 返回后、`startWeb` bind 前由第二个进程占同一端口，观察失败是否被归成「端口不可用」并给出可行动诊断。
 
 ```sh
-# 证据见症状与当前源码；临时验证只读，不改仓库
+node --input-type=module -e "import { pickFreePort } from './checks/lib/harness/port-reclaim.mjs'; const p = await pickFreePort(); console.log('picked', p); const { createServer } = await import('node:net'); await new Promise((r) => { const s = createServer().listen(p, '127.0.0.1', () => { console.log('stolen', p); s.close(r) }) })"
 ```
 
 ## 修法
 
-1. 为锁/端口/缓存/plan 字段补 owner token、校验或范围；
-2. 加正反控与旧场/迁移豁免；
-3. 两套入口共用同一实现。
+不做「预留」假承诺：bind 冲突 → 换端口有界重试（2–3 次），仍失败 exit 1 并打印实际端口与占用者；卡上写明「TOCTOU 未被消除，只被兜住」。
 
 ## 修复判据
 
-- 该缺口有正反控；旧场/合法路径不误伤；
-- `pnpm verify` / `pnpm test` 绿。
+- 抢占后下一次尝试换端口成功；重试耗尽 exit 1 且诊断含端口；
+- 不无限重试；`pnpm verify` / `pnpm test` 绿。

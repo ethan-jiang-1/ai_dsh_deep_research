@@ -26,9 +26,10 @@ const FIX_EVIDENCE = '\n## 修复落地\n\n```json fix-evidence\n' + JSON.string
   green: { command: 'node --test tests/checks/fix.test.mjs', exit: 0 },
   guard: { path: 'tests/checks/fix.test.mjs' },
 }, null, 2) + '\n```\n';
+const REPRO = '\n## 复现\n复现状态：稳定 — 局部测试。\n\n```sh\nnode --test tests/checks/fix.test.mjs\n```\n';
 const READY_BUG_TEXT = '---\nstatus: 修复就绪\nseverity: P1\nopened: 2026-10-08\n---\n\n# BUG-019\n'
   + '> 严重级别：P1（重要）｜发现：2026-10-08｜状态：修复就绪\n\n'
-  + '## 修复判据\n1. 回归测试通过。\n';
+  + '## 修复判据\n1. 回归测试通过。\n' + REPRO;
 const RESEARCH_BANNER = '---\nstatus: 调研中\nopened: 2026-10-08\n---\n\n# Example\n> 状态：调研中\n'
   + '> 问题：Why?\n> 消费者：none\n> 产出的卡：—\n> 结论：—\n\n## 材料\n'
   + '| [2026-10-08-evidence.md](2026-10-08-evidence.md) | evidence |\n';
@@ -154,7 +155,7 @@ test('bug lifecycle enums and status-line mirror are enforced on active cards', 
   const f = fixture(t);
   for (const phase of ['排查中', '修复就绪', '修复落地', '等人拍板']) {
     const text = BUG_TEXT.replace('status: 排查中', `status: ${phase}`).replace('状态：排查中', `状态：${phase}`);
-    const criteria = ['修复就绪', '修复落地'].includes(phase) ? '\n## 修复判据\n1. Probe.\n' : '';
+    const criteria = ['修复就绪', '修复落地'].includes(phase) ? `\n## 修复判据\n1. Probe.\n${REPRO}` : '';
     bug(f, `${text}${criteria}${phase === '修复落地' ? FIX_EVIDENCE : ''}`);
     assert.deepEqual(f.check(), [], phase);
   }
@@ -180,6 +181,20 @@ test('修复就绪/修复落地 need a non-empty 修复判据', (t) => {
     bug(f, (phase === '修复落地' ? `${text}${FIX_EVIDENCE}` : text).replace('## 修复判据\n1. 回归测试通过。\n', ''), READY_BUG);
     assert.ok(f.check().some((p) => p.includes('修复判据')), phase);
   }
+});
+
+test('修复就绪 needs a replayable command in ## 复现 or an explicit 未复现 protocol', (t) => {
+  const f = fixture(t);
+  // 缺整节 = 红；围栏里只有注释 = 红（「读码可证」不是可重放证据）。
+  bug(f, READY_BUG_TEXT.replace(REPRO, ''), READY_BUG);
+  assert.ok(f.check().some((p) => p.includes('## 复现')), 'missing section');
+  bug(f, READY_BUG_TEXT.replace('node --test tests/checks/fix.test.mjs', '# 读码结论：见源码分支'), READY_BUG);
+  assert.ok(f.check().some((p) => p.includes('replayable command')), 'comment-only fence');
+  // 未复现必须带读法/协议行；带了就合法。
+  bug(f, READY_BUG_TEXT.replace('复现状态：稳定 — 局部测试。', '复现状态：未复现 — 读码定位。'), READY_BUG);
+  assert.ok(f.check().some((p) => p.includes('读法/协议')), '未复现 without protocol');
+  bug(f, READY_BUG_TEXT.replace('复现状态：稳定 — 局部测试。', '复现状态：未复现 — 读码定位；读法协议 = 对照源码分支与真实入口。'), READY_BUG);
+  assert.deepEqual(f.check(), []);
 });
 
 test('research lives in a thread with a banner; topic/intent stay one-line and status-free', (t) => {

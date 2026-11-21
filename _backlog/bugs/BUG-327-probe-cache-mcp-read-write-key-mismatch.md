@@ -20,19 +20,18 @@ read key 用 `probeIdentityOf({..., mcp: process.env.MCP_PLAYWRIGHT ?? ""})`；w
 
 ## 复现
 
-复现状态：稳定（读码/临时脚本/局部命令）。
+复现状态：未复现 — 读写键在 `tools/channel/run-driver.mjs` 两处内联构造，动态复现需要一次真实 probe 写读；读法协议 = 对照 `:395`（带 `mcp`）与 `:431`（不带）的 `probeIdentityOf` 实参，并用下面的命令证明两个身份的键不同：
 
 ```sh
-# 证据见症状与当前源码；临时验证只读，不改仓库
+node --input-type=module -e "import { probeIdentityOf } from './checks/lib/channel/channel-cache.mjs'; console.log(probeIdentityOf({ profile: 'p', workspace: 'w', mcp: 'on' }) !== probeIdentityOf({ profile: 'p', workspace: 'w' }))"
 ```
 
 ## 修法
 
-1. 为锁/端口/缓存/plan 字段补 owner token、校验或范围；
-2. 加正反控与旧场/迁移豁免；
-3. 两套入口共用同一实现。
+一个身份函数、读写共用：把两处内联 key 收进 `channel-cache.mjs` 的 `probeCacheKeyOf(...)`（含 `mcp`），run-driver 读写都调它；不做旧缓存迁移（miss 可接受）。
 
 ## 修复判据
 
-- 该缺口有正反控；旧场/合法路径不误伤；
+- MCP=on 与 MCP=off 的 key 不同；同一配置下 key(read) === key(write)；
+- `tests/run/channel/channel-cache.spec.mjs` 有正反控（对称 + 不串命中）；
 - `pnpm verify` / `pnpm test` 绿。

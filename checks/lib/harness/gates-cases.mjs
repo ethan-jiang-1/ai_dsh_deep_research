@@ -174,7 +174,8 @@ const READY_ISSUE_TEXT = '---\nstatus: 待落地\nopened: 2099-01-01\n---\n\n# R
   + '## 验收标准\n1. Probe.\n';
 const READY_BUG_TEXT = '---\nstatus: 修复就绪\nseverity: P1\nopened: 2099-01-01\n---\n\n# Probe\n'
   + '> 严重级别：P1｜发现：2099-01-01｜状态：修复就绪\n\n'
-  + '## 修复判据\n1. Probe.\n';
+  + '## 修复判据\n1. Probe.\n\n'
+  + '## 复现\n复现状态：稳定。\n\n```sh\nnode --test tests/probe.test.mjs\n```\n';
 const FIXED_BUG_NO_EVIDENCE = '---\nstatus: 修复落地\nseverity: P2\nopened: 2099-01-01\n---\n\n# Probe\n'
   + '> 严重级别：P2｜发现：2099-01-01｜状态：修复落地\n\n'
   + '## 修复判据\n1. Probe.\n';
@@ -715,6 +716,8 @@ export const CASES = [
   { id: 'backlog-research-thread-unindexed', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT, { index: '' }) },
   { id: 'backlog-issue-ready-no-acceptance', gate: 'backlog-liveness', mutate: backlogReadyIssue((text) => text.replace('## 验收标准\n1. Probe.\n', '')) },
   { id: 'backlog-bug-ready-no-criteria', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-996-ready.md', READY_BUG_TEXT.replace('## 修复判据\n1. Probe.\n', '')) },
+  // 修复就绪 = 修复授权；复现围栏里只有注释 = 没有可重放证据（2026-11-21 G2）。
+  { id: 'backlog-bug-ready-no-repro', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-994-ready.md', READY_BUG_TEXT.replace('node --test tests/probe.test.mjs', '# 读码结论：见源码分支')) },
   { id: 'backlog-bug-fix-no-evidence', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-995-fix.md', FIXED_BUG_NO_EVIDENCE) },
   { id: 'backlog-research-material-unindexed', gate: 'backlog-liveness', mutate: researchThread(RESEARCH_TEXT,
     { banner: RESEARCH_BANNER.replace('| [2099-01-01-evidence.md](2099-01-01-evidence.md) | probe |\n', '| [other.md](other.md) |\n') }) },

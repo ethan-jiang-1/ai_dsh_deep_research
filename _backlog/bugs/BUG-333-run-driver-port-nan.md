@@ -20,19 +20,18 @@ run-driver `wantPort = String(arg("--port", DEFAULT_PORT))`；没有正整数/�
 
 ## 复现
 
-复现状态：稳定（读码/临时脚本/局部命令）。
+复现状态：稳定 — 真入口复现（先停当前通道，避免 `up` 复用）：
 
 ```sh
-# 证据见症状与当前源码；临时验证只读，不改仓库
+node tools/channel/run-driver.mjs up --port=abc
+# 观察：入口不拒绝，abc 原样进入 boot-run；失败信息远离入口
 ```
 
 ## 修法
 
-1. 为锁/端口/缓存/plan 字段补 owner token、校验或范围；
-2. 加正反控与旧场/迁移豁免；
-3. 两套入口共用同一实现。
+入口 fail-loud：新增 `parsePort`（1–65535 整数），`--port=abc|0|-1|1.5|65536` → exit 2 并报参数名，合法值原样传递；与 cold-start/snapshot/client-load 共用同一实现。
 
 ## 修复判据
 
-- 该缺口有正反控；旧场/合法路径不误伤；
+- 5 个畸形值各一例 exit 2，错误信息含 `--port`；合法端口行为不变；
 - `pnpm verify` / `pnpm test` 绿。

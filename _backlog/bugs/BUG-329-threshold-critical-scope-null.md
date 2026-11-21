@@ -1,12 +1,12 @@
 ---
-status: 等人拍板
+status: 修复就绪
 severity: P2
 opened: 2026-11-19
 ---
 
 # BUG-329：claims 不可读/无 claims 时 criticalEvidence=null，threshold 退回全部 evidence
 
-> 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：等人拍板（门禁/合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：修复就绪（2026-11-21 用户授权按计划修；门禁/合同触面）
 >
 > 探索轮 = [低置信区 20 卡（第 9 轮）](../issues/2026-11-19-low-confidence-40.md)。
 
@@ -20,19 +20,18 @@ protocol-audit 只在 claims 解析成功时提供 criticalEvidence；解析失�
 
 ## 复现
 
-复现状态：稳定（读码/临时脚本/局部命令）。
+复现状态：稳定 — 直接调判据函数，`criticalEvidence=null` 时背景卡被当作关键范围：
 
 ```sh
-# 证据见症状与当前源码；临时验证只读，不改仓库
+node --input-type=module -e "import { checkEvidenceThreshold } from './checks/lib/gates/protocol-audit-core.mjs'; console.log(checkEvidenceThreshold({ gates: { evidence_threshold: 'A' } }, [{ file: 'background.md', quality: 'C' }], 'deep', null))"
+# 当前输出 red：background.md 被逐卡比；critical 范围未知时应为「无法确定」而非「低质关键证据」
 ```
 
 ## 修法
 
-1. 为锁/端口/缓存/plan 字段补 owner token、校验或范围；
-2. 加正反控与旧场/迁移豁免；
-3. 两套入口共用同一实现。
+`criticalEvidence=null` 不再退全部：阈值判据给出显式 `unverifiable`（notice，不冒充通过也不假装红）；claims 不可读的失败由 claims 判据承担，避免同一个原因报两次。
 
 ## 修复判据
 
-- 该缺口有正反控；旧场/合法路径不误伤；
-- `pnpm verify` / `pnpm test` 绿。
+- null + 背景低质卡 → 无 `evidence-threshold` 红；有 critical 集时仍按集判且低质关键卡红；
+- claims 不可读时只有 claims 判据红；`pnpm verify` / `pnpm test` 绿。

@@ -55,6 +55,43 @@ const hasFilledSection = (text, heading) => {
   const body = sectionText(text, heading);
   return body !== null && body !== '';
 };
+// 复现合同（2026-11-21 G2）：修复就绪 = 修复授权。没有可重放的命令或显式未复现协议时，授权没有
+// 证据基础——18 张同模板薄卡曾以「稳定（读码）」+ 空围栏自授权，其中一半在代码变更后已不成立。
+// 规则 = 围栏内的同边界命令，或 `复现状态：未复现` + 读法/协议行（方法 §3 的两种合法形态）。
+const REPRO_COMMAND_HEAD = /^\s*(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*(?:node|pnpm|npx|bash|sh|git|timeout)\b/;
+function fencedBlocksOf(text) {
+  const blocks = [];
+  let fence = null;
+  let current = [];
+  for (const line of text.split('\n')) {
+    if (fence !== null) {
+      if (new RegExp(`^ {0,3}${fence.ch}{${fence.len},}[ \\t]*$`).test(line)) {
+        blocks.push(current.join('\n'));
+        fence = null;
+        current = [];
+      } else {
+        current.push(line);
+      }
+      continue;
+    }
+    const open = /^ {0,3}(`{3,}|~{3,})([^\n]*)$/.exec(line);
+    if (open !== null && !(open[1][0] === '`' && open[2].includes('`'))) {
+      fence = { ch: open[1][0], len: open[1].length };
+      current = [];
+    }
+  }
+  return blocks;
+}
+function reproProblems(text) {
+  const body = sectionText(text, '复现');
+  if (body === null) return ['修复就绪 requires a ## 复现 section (command or 未复现 protocol)'];
+  if (/复现状态[：:]\s*未复现/.test(body)) {
+    return /(读法|协议|判读)/.test(body) ? [] : ['复现状态：未复现 requires a 读法/协议 line'];
+  }
+  // 命令必须真在围栏里：散文里的命令不是可重放证据（与 fix-evidence 的围栏口径一致）。
+  const hasCommand = fencedBlocksOf(body).some((block) => block.split('\n').some((line) => REPRO_COMMAND_HEAD.test(line)));
+  return hasCommand ? [] : ['修复就绪 requires a replayable command inside a fenced block in ## 复现 (or 复现状态：未复现 + 读法协议)'];
+}
 const dispositionOf = (text) => /^>\s*去向[：:]\s*(none|rejected|proposed|implemented|deferred)\b/m
   .exec(headOf(text))?.[1];
 /** 去向行的目标（inline code 或相对链接）；用于「Note 是否早写」。 */
@@ -180,6 +217,9 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
         if (shelf.endsWith('bugs') && !['P0', 'P1', 'P2'].includes(fields.get('severity'))) problems.push(`${loc} needs severity: P0/P1/P2`);
         if (shelf.endsWith('bugs') && ['修复就绪', '修复落地'].includes(fields.get('status')) && !hasFilledSection(text, '修复判据'))
           problems.push(`${loc} ${fields.get('status')} requires a non-empty ## 修复判据`);
+        if (shelf === 'bugs' && fields.get('status') === '修复就绪') {
+          for (const problem of reproProblems(text)) problems.push(`${loc} ${problem}`);
+        }
         if (shelf === 'bugs' && fields.get('status') === '修复落地') {
           for (const problem of fixEvidenceProblems(text)) problems.push(`${loc} ${problem}`);
           const guard = fixGuardOf(text);

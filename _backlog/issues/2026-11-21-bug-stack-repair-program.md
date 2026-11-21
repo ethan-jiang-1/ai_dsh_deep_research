@@ -1,23 +1,24 @@
 ---
-status: 等人拍板
+status: 待落地
 opened: 2026-11-21
 ---
 
 # 缺陷积压修复程序：BUG-320…350 的账实对齐、合同收紧与流程保障（v2）
 
-> 立卡：2026-11-21 ｜ 状态：等人拍板 ｜ 类型：Task ｜ 结论倾向：现在做（技术决定已自定，等开修授权） ｜ 可关闭：否
+> 立卡：2026-11-21 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做（P0 已完，进入 P1） ｜ 可关闭：否
+> 去向：implemented — `notes/implemented/2026-11-21-bug-stack-repair.md`（批 Note，交付时写）
 > 对象：`_backlog/bugs/` 的积压缺陷。执行载体 = 后续 goal 按 §5 阶段推进；本卡是批索引 + 决定账 + 卡→用例映射。
 > **v2（2026-11-21）**：用户裁定——技术合同与排版由 agent 自定，不把 schema 选择推给用户；**不做旧产物兼容，
 > 长期正确优先**。v2 因此把 v1 的「双轨/兼容」改为「生产者收紧 + 一份正本三处投影」，取消「两场旧 bundle
-> 全绿」这个验收目标，并把 11 张已不是缺陷的卡迁出活跃区（§3）。
+> 全绿」这个验收目标，并把 12 张已不是缺陷的卡迁出活跃区（§3）。
 > 方法正本 = [bug-to-fix §2 批模式](../methods/bug-to-fix.md)；状态机 = [bugs/README](README.md)；证据主人 = [guides/60](../../docs/guides/60-dev-loop.md)。
 
 ## 0. 结论
 
-1. **31 张 → 11 张迁暂停池 → 20 张 live。** 迁出的 11 张不是「修好了」，是「不再是缺陷」：8 张被
+1. **31 张 → 12 张迁暂停池 → 19 张 live。** 迁出的 12 张不是「修好了」，是「不再是缺陷」：8 张被
    `71010fef` 的新启动所有权取代、2 张实现已入树而最终反控未跑、1 张是获批合同取向。迁移 = 用户直派
    （2026-11-21）；**不制造修复证据，也不为它们补「已修」计数**。
-2. 20 张按机制分 **5 簇**；顺序 = 再就绪与流程门 → oracle/通道 → 端口与缓存 → 合同收紧 → 驾驶舱 → 沙箱与收尾。
+2. 19 张按机制分 **5 簇**；顺序 = 再就绪与流程门 → oracle/通道 → 端口与缓存 → 合同收紧 → 驾驶舱 → 沙箱与收尾。
    不按 BUG 号逐张修。
 3. **不做兼容。** 判据只认 canonical 形状；旧产物红了是预期，不为它放宽门、不加 shim、不手改 bundle。
    两场旧 run 降级为**修复前诊断夹具**：研究结果仍然可用，但它们不是本程序的验收目标。
@@ -37,16 +38,16 @@ opened: 2026-11-21
 
 | 项 | 事实 |
 |---|---|
-| 活跃卡 | **20 张**（327/328/329/330/333/334/335/336/338/340/341/342/343/344/345/346/347/348/349/350） |
-| 暂停池 | 11 张（320/321/322/323/324/325/326/331/332/337/339），索引与原因见 [暂停池 README](../_archived/suspended_bugs/README.md) |
+| 活跃卡 | **19 张**（327/328/329/333/334/335/336/338/340/341/342/343/344/345/346/347/348/349/350） |
+| 暂停池 | 12 张（320/321/322/323/324/325/326/330/331/332/337/339），索引与原因见 [暂停池 README](../_archived/suspended_bugs/README.md) |
 | 卡的来源 | 340–350 = 2026-11-20 端到端回归；327–339 = 11-19 第 9 轮低置信探索 |
-| 薄卡 | 327–330、333–336、338 共 9 张仍是 38 行模板卡：`修法` 是模板句、`复现` 代码块为空；P0 必须逐张写实或降级 |
+| 薄卡 | 327–329、333–336、338 共 8 张仍是 38 行模板卡：`修法` 是模板句、`复现` 代码块为空；P0 必须逐张写实或降级 |
 | vendor pin | 自 2026-11-05 未变（`dsh-v0.2.1-rc.5` @ `b830ec950f`）；「base 变了」= 本仓代码基线 `71010fef` |
 | 机械面 | `pnpm verify` exit 0、`pnpm test` exit 0（本会话实测，checks 265 全过零 skip） |
 | 本机夹具 | `runtime/e2e-2026-11-20/`、`research-workspace/drt_pg-latest-stable/`、`drt_sodium-ion-bess/`（gitignored） |
 | 环境坑 | **run-gates 必须先 `source tools/env.sh`**：不 source 时 `DSH_HOME` 缺失，evidence-audit 假红（实测 `0/46 → 43/46`、CRITICAL `46 → 0`） |
 
-## 3. 活跃 20 张的存在性判定与簇归属
+## 3. 活跃 19 张的存在性判定与簇归属
 
 判据 = 当前源码是否仍能产生卡里写的症状（行号见 v1 审计，未变；327–338 均仍存在）。
 
@@ -54,7 +55,7 @@ opened: 2026-11-21
 |---|---|---|---|
 | C0 oracle/通道 | 340、346 | `checks/run-gates/protocol-audit.mjs`、`tools/channel/start-channel.mjs` | 真跑 CLI；真进程 + PATH 假 `ps` |
 | C2 端口/缓存身份 | 327、333、334、335、336、338 | 新增 `parsePort` + `channel-cache` 身份函数 + `port-reclaim` | 入口负控 5 例；key 对称性；真抢占 |
-| C3 判据↔生产者 | 328、329、330、341、342、343、350 | parser/schema 模块 + 模板/skill + `contract-fixture` | 真实 bundle 现场 + canonical 夹具 + 负控 |
+| C3 判据↔生产者 | 328、329、341、342、343、350 | parser/schema 模块 + 模板/skill + `contract-fixture` | 真实 bundle 现场 + canonical 夹具 + 负控 |
 | C4 驾驶舱/见证 | 344、345、347、348 | `run-state`、`review-readiness`、`final-target`、新 run-health fold | spec + client-load + 录得事件重放 |
 | C5 沙箱 | 349 | 启动探测 + workflow 降级记账 | 嵌套/非嵌套对照 |
 
@@ -62,7 +63,7 @@ opened: 2026-11-21
 
 ### 4.1 判据↔生产者断裂（C3，7 张）
 
-`341/342/343/350/328/329/330`：判据按「想象的写法」解析，模板/技能没承诺，模型写了合法但不同的形态。
+`341/342/343/350/328/329`：判据按「想象的写法」解析，模板/技能没承诺，模型写了合法但不同的形态。
 真实证据：A 的 findings 是 `- F1｜…` 一行式、B 是 `## F1 ` 无冒号；B 的 plan 用 `scout —— 待派发`；
 A 的 readiness 多 4 个计数键；B 的 claims 是 rich ledger。**过去六批（260→350）反复放宽判据没有收敛**，
 因为放宽只是把「另一种写法」追认为合法，下一轮换个写法又红。
@@ -95,10 +96,18 @@ A 的 readiness 多 4 个计数键；B 的 claims 是 rich ledger。**过去六�
 
 ### P0 再就绪与流程门（0.5 会话，不写生产代码）
 
-- 9 张薄卡（327–330、333–336、338）逐张写实：具体修法 + 同边界红命令 + 判据；写不出 → 降 `排查中`。
-- 落 G2 机械门：先在这 9 张卡上看到红（空复现块），再改绿；同时把规则写进 `backlog-liveness` 注释。
+- 8 张薄卡（327–329、333–336、338）逐张写实：具体修法 + 同边界红命令 + 判据；写不出 → 降 `排查中`。
+- 落 G2 机械门：先在这些卡上看到红（空复现块），再改绿；同时把规则写进 `backlog-liveness` 注释。
 - 建 §8 批表（填不满的行不开工）；复跑 `pnpm verify` / `pnpm test` 记账。
 - 退出：每张 live 卡有可执行方案；门禁在旧形态上红、在新形态上绿。
+
+**P0 结果（2026-11-21）**
+
+- **动态复核推翻一条静态判定**：BUG-330 的症状已由 BUG-313 修复——`countLength` 剔除围栏/inline code/URL/表格；实测 `checkOutputLength` 对代码+URL+表格文本返回 `[]`。已迁暂停池（12 张），活跃 19。
+- **G2 红证**：规则落入 `checks/lib/repo/backlog-liveness.mjs` 后，真仓 `pnpm verify` 在 6 张 `修复就绪` 薄卡上红（327/333/334/335/336/338），错误逐卡点名「requires a replayable command」。
+- **绿证**：6 张卡写入同边界命令或 `未复现` + 读法协议；328/329 补可复现命令并从 `等人拍板` 翻 `修复就绪`（用户 2026-11-21 授权按计划修）；`pnpm verify` 全绿。
+- **门禁自测**：`node checks/smoke/gates.e2e.mjs --gate=backlog-liveness` → 25 注入案例 + 5 对照全绿；新增注入案例 `backlog-bug-ready-no-repro`；单测 24/24。
+- 批表已填（§8）；每张 live 卡有可执行方案。
 
 ### P1 打通 oracle 与通道（2 张，0.5–1 会话）
 
@@ -130,7 +139,6 @@ A 的 readiness 多 4 个计数键；B 的 claims 是 rich ledger。**过去六�
 | 341 | findings 块：`## F<n>：`（冒号必需）+ `- 支撑证据：`/`- lenses：`/`- lens_gaps：`/`- gap：`（`- 备注：` 可选），一行一字段 | findings 模板已是该形态；lead skill 给同块样例 | 模板块 → parser 绿；一行式、无冒号标题、重复 F#、幽灵 lens 红 |
 | 328 | 快照 vN-1 必须与当前图在节点/验收/预算上**有差异**，不只比文本 | plan 模板的重写纪律补一句 | 构造「内容改过但文本不同」的旧图 → 红；空快照/版本错仍红 |
 | 329 | `criticalEvidence=null` 不再退全部：阈值判据给出显式 `unverifiable`（不冒充通过，也不假装红）；claims 已红时由 claims 承担失败 | 无需改（判据侧） | null 场景 → 不出现「关键阈值」假红；有 critical 集时仍按集判 |
-| 330 | 计长前剔除围栏、URL、表格；「什么算正文长度」写进手册 | `content/manual.md` 与 skill 的 output 段同步 | 正文超限仍红；只有代码/URL/表格时不误判 |
 
 - 共享交付：`contract-fixture` 守卫 + 每个产物的 canonical 样例（模板文件或 skill fenced 块）。
 - 旧 bundle 的 `readiness.json`/`claims.json`/findings/plan 一律不迁移、不手改；它们在新判据下红是预期。
@@ -155,7 +163,7 @@ A 的 readiness 多 4 个计数键；B 的 claims 是 rich ledger。**过去六�
   保留。若需要 DSH 侧选项，另立 upstream issue，不改 vendor。
 - **残余红分诊**：两场旧 bundle 的卡外红逐条判「生产者错 / 判据错 / 交付确实不合格」：B 的
   `owner_role` 含 `executor=`、`W2.2 task_id` 非 plan-only、review 覆盖表缺 T1/T2/T3、未解释 CRITICAL C7/C1。
-  这些不是本批的 20 张；各建新卡或记 `none — 门禁判定正确`。**不为它们放宽门。**
+  这些不是本批的 19 张；各建新卡或记 `none — 门禁判定正确`。**不为它们放宽门。**
 - **收尾**：批 Note（共享根因簇）+ 每卡 `fix-evidence` + 归档 + `bugs/README` + `triggers.md` 的下一次
   natural run 触发条件 + 本卡 `git mv` 到 `_archived/settled_issues/`。
 - **合规未证边界**（必须写进批 Note）：模型是否照新 canonical 写，只有下一次自然 run 能证明；
@@ -197,7 +205,7 @@ A 的 readiness 多 4 个计数键；B 的 claims 是 rich ledger。**过去六�
 | C2 | 327 | `run-driver.mjs` + `channel-cache.mjs` | key 对称性单测 + 真 probe 缓存 | 修 |
 | C2 | 333–336 | `parsePort`（新支撑件） | 入口畸形 `--port`/env 负控 | 修 |
 | C2 | 338 | `port-reclaim.mjs` | 抢占重试 + 明示失败 | 修（取舍上卡） |
-| C3 | 343/350/342/341/328/329/330 | parser/schema + 模板/skill + `contract-fixture` | 模板样例 → 门禁绿；旧形态红 | 修 |
+| C3 | 343/350/342/341/328/329 | parser/schema + 模板/skill + `contract-fixture` | 模板样例 → 门禁绿；旧形态红 | 修 |
 | C4 | 347/344/345/348 | `review-readiness`/`run-state`/`final-target`/`run-health` | spec + client-load + 事件重放 | 修 |
 | C5 | 349 | 启动探测 + workflow 降级 | 嵌套/非嵌套对照 | 修 |
 
@@ -222,7 +230,7 @@ A 的 readiness 多 4 个计数键；B 的 claims 是 rich ledger。**过去六�
   `去向：implemented — 批 Note`。
 - 触发条件：`triggers.md` 记「下一次自然 P5 run 必须在新合同下绿；否则引用旧卡新建卡」。
 - 显式不做：不改 `vendor/dsh/`；不手改两场 bundle 的 findings/plan/claims/readiness/receipt；不为旧产物
-  放宽负控或删断言；不复活暂停池的 11 张来凑「已修」数。
+  放宽负控或删断言；不复活暂停池的 12 张来凑「已修」数。
 
 ## 11. 风险清单
 
@@ -232,4 +240,12 @@ A 的 readiness 多 4 个计数键；B 的 claims 是 rich ledger。**过去六�
 | 旧 bundle 的红被误当成本批未完成 | 有人拿 `run-accept` 红项问进度 | 本卡 §0.3 明示它们是诊断夹具；批 Note 再写一次 |
 | 门禁误伤合法写法 | 真实 run 出现 canonical 未覆盖的合法形态 | 先改 canonical 正本与样例，再改 parser；不放宽到「任意形态」 |
 | 沙箱 EPERM 使真进程证据不可得 | `channel-start.e2e` NOT-RUN | P1 先修 346；仍不可得则记 `notMechanizable` + trigger |
-| 范围回涨 | 新红项不在 §8 表 | 新建卡，不入本批；本批只收这 20 张 |
+| 范围回涨 | 新红项不在 §8 表 | 新建卡，不入本批；本批只收这 19 张 |
+
+## 验收标准
+
+1. 19 张 live 卡全部有终局处置（`已修` 归档，或明确新建卡/驳回），每卡 `json fix-evidence` 的 `changes` 与代码/测试同暂存集，`guard` 在同边界存活。
+2. `pnpm verify` 与 `pnpm test` 全绿；改动面定向门禁（protocol/verdict/plan/findings/readiness/client-load）绿；真进程/浏览器档该跑的都跑了，未跑项记增 `NOT-RUN` 与理由。
+3. 不做旧产物兼容：树内没有为旧 `claims.json`/`readiness.json`/一行式 findings/手写回执新增的宽松分支或迁移脚本；两场旧 bundle 的红不当作未完成。
+4. G2 门禁在「空复现块」形态上红、在「命令/未复现协议」形态上绿，注入案例与单测同 diff。
+5. 批 Note、`bugs/README`、暂停池索引与 `triggers.md` 的「下一次 P5 run」触发条件在同一收尾变更里。

@@ -17,7 +17,6 @@
 | [BUG-327](BUG-327-probe-cache-mcp-read-write-key-mismatch.md) | 修复就绪 | P2 | probe 读写键 MCP 不一致 |
 | [BUG-328](BUG-328-plan-snapshot-same-text-only.md) | 等人拍板 | P2 | plan 快照只拒同文本 |
 | [BUG-329](BUG-329-threshold-critical-scope-null.md) | 等人拍板 | P2 | claims 缺时 threshold 退全部 |
-| [BUG-330](BUG-330-output-length-heuristic-still.md) | 等人拍板 | P2 | 长度仍启发式 |
 | [BUG-333](BUG-333-run-driver-port-nan.md) | 修复就绪 | P2 | --port NaN/0 未校验 |
 | [BUG-334](BUG-334-cold-start-port-env-nan.md) | 修复就绪 | P2 | COLD_START_PORT NaN |
 | [BUG-335](BUG-335-snapshot-port-nan.md) | 修复就绪 | P2 | snapshot --port NaN |
@@ -37,7 +36,7 @@
 
 ## 最近归档
 
-（2026-11-21 不再修的 11 张迁入[暂停池](../_archived/suspended_bugs/README.md)：320/321/322/323/324/325/326/331/332/337/339——8 张被 `71010fef` 的新启动所有权取代、2 张实现已入树而最终反控未跑、1 张为获批合同取向；用户直派，不按缺陷修，也不为它们制造修复证据。）
+（2026-11-21 不再修的 12 张迁入[暂停池](../_archived/suspended_bugs/README.md)：320/321/322/323/324/325/326/330/331/332/337/339——8 张被 `71010fef` 的新启动所有权取代、2 张实现已入树而最终反控未跑、1 张为获批合同取向、1 张（330）已由 BUG-313 修复；用户直派，不按缺陷修，也不为它们制造修复证据。）
 
 （2026-11-19 批 N 第 8 轮（300–319），批 Note =
 [2026-11-18-low-confidence-30](../../notes/implemented/2026-11-18-low-confidence-30.md)：

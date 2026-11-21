@@ -24,6 +24,7 @@
 | [BUG-332](BUG-332-start-lock-no-pid-liveness.md) | 获批合同：不按 TTL/PID/坏 owner 在线接管 |
 | [BUG-337](BUG-337-boot-run-port-invalid.md) | 公开入口经 `start-channel` 校验 `DSH_RUN_PORT` 1–65535 |
 | [BUG-339](BUG-339-boot-run-trap-removes-new-lock.md) | 入口仅 exec supervisor；body 无锁、无锁相关 trap；最终反控未跑，修复未确认 |
+| [BUG-330](BUG-330-output-length-heuristic-still.md) | 已由 BUG-313 修复：`countLength` 剔除围栏、inline code、URL、表格（11-21 复核） |
 
 重启条件：后续变更重新引入同类机制时，由用户决定是否复活（`git mv` 回活跃区并按新证据重判）；不要为了「已修」计数复活它们。
 
