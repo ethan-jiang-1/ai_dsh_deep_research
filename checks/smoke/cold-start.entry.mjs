@@ -22,13 +22,15 @@ import {
 } from '../lib/harness/clean-room.mjs'
 import { peerNamesOf } from '../lib/harness/clean-room-policy.mjs'
 import { parsePort } from '../lib/shared/port.mjs'
+import { bootOnFreePort } from '../lib/shared/boot-port.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
 const ENV_PORT = process.env.COLD_START_PORT
 const parsedPort = ENV_PORT === undefined ? null : parsePort(ENV_PORT)
 if (parsedPort !== null && !parsedPort.ok) { console.error(`cold-start.entry: COLD_START_PORT ${parsedPort.error}`); process.exit(2) }
-const PORT = parsedPort === null ? await pickFreePort() : parsedPort.port
+const EXPLICIT_PORT = parsedPort === null ? null : parsedPort.port
+let PORT = EXPLICIT_PORT === null ? await pickFreePort() : EXPLICIT_PORT
 if (PORT === null) { console.error('cold-start.entry: 找不到空闲端口'); process.exit(2) }
 const PROFILE = 'cold-start'
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
@@ -60,7 +62,14 @@ try {
   // 先收割端口，避免上一轮残留把「起不来」误判成「装坏了」。
   const leftover = await reclaimPort(PORT)
   if (leftover !== null) fail(`端口 ${PORT} 上有残留监听（${leftover}）——先收干净再跑`)
-  web = await startWeb({ bin: dsh, home, profile: PROFILE, port: PORT, cwd: ROOT, timeoutMs: 180_000 })
+  const boot = await bootOnFreePort({
+    explicitPort: EXPLICIT_PORT,
+    pick: pickFreePort,
+    boot: (port) => startWeb({ bin: dsh, home, profile: PROFILE, port, cwd: ROOT, timeoutMs: 180_000 }),
+    onRetry: ({ port, attempt, attempts }) => console.error(`cold-start.entry: 端口 ${port} 被抢占，重选（${attempt}/${attempts}）`),
+  })
+  PORT = boot.port
+  web = boot.value
   const url = new URL(web.url)
   const token = url.searchParams.get('token')
   const cookie = await authenticate(url.origin, token)

@@ -6,6 +6,7 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [338](BUG-338-pick-free-port-toctou.md) | pickFreePort TOCTOU | （bootOnFreePort 有界重选） | 2026-11-21 |
 | [345](BUG-345-delivery-witness-window-and-receipt-shape.md) | present 后仍「交付未见证」 | （只认工具回执） | 2026-11-21 |
 | [347](BUG-347-review-absent-shown-as-fail.md) | 无 review 显示「审查未过」 | （absent 三态） | 2026-11-21 |
 | [344](BUG-344-watch-run-settled-while-subagent-live.md) | watch-run 误报 settled | （无在飞子代理） | 2026-11-21 |

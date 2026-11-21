@@ -15,6 +15,7 @@ const EXCEPTIONS = {
   'checks/smoke/client-load.entry.mjs': 'phase-oriented browser E2E（phase map 在文件头；拆分另立轮，triggers 有重议条件）',
   'checks/lib/harness/gates-cases.mjs': '门禁注入案例表（数据表，不是控制流）',
   'checks/smoke/channel-start.e2e.mjs': '真进程启动 owner runner：fixture adapters 与 13 场景同文件；2026-11-21 BUG-346 加 ps-unreadable 后 565 行，拆分另立轮（triggers 有重议条件）',
+  'checks/smoke/snapshot-replay.entry.mjs': '场景回放入口：场景发现/渲染断言/网络离线 preload 同文件；2026-11-21 BUG-338 端口重选后 559 行，拆分另立轮（triggers 有重议条件）',
 }
 
 const walk = (dir) => readdirSync(dir).flatMap((name) => {

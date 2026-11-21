@@ -65,6 +65,7 @@ export const prepareProbePort = (preferredPort, label = 'probe') => resolveProbe
 /** 行为探针统一 finally 收割入口（整组 SIGKILL + 按端口回收孙进程，BUG-136）。 */
 export const cleanupBootedProbe = (booted, port) => reapBootedWeb(booted, port, { reclaim: reclaimPort });
 
+
 /** 取一个空闲端口（bind 0 后关闭；失败 null）。并行入口各自持有，避免固定端口互撞（BUG-315–317）。 */
 export async function pickFreePort() {
   const { createServer } = await import('node:net')

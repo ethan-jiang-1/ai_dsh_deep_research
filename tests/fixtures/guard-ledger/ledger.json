@@ -1628,6 +1628,14 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删掉 absent 分支 → 无 review 面折成 prose/FAIL（1 例红）"
+    },
+    {
+      "id": "BUG-338",
+      "mechanism": "自动端口有界重选（bootOnFreePort）；显式端口不重选",
+      "guard": "tests/run/harness/port-reclaim.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "去掉 EADDRINUSE 重选（任何错误直接抛）→ 抢占重选例红"
     }
   ]
 }

@@ -34,3 +34,41 @@ test('入口端口缺省 = pickFreePort，不再有 3129/3103/3109 固定缺省�
     assert.doesNotMatch(text, /'31(?:29|03|09)'/, `${rel} 不得再有固定端口缺省`)
   }
 })
+
+// 负例留证 2026-11-21：BUG-338——自动端口被抢占后必须有界重选；显式端口只试一次。
+test('BUG-338：bootOnFreePort 有界重选；显式端口不重试；非占用错误立即抛', async () => {
+  const { bootOnFreePort } = await import('../../../checks/lib/shared/boot-port.mjs')
+  const ports = [4101, 4102, 4103]
+  const pick = async () => ports.shift() ?? null
+  const retries = []
+  const result = await bootOnFreePort({
+    pick,
+    attempts: 3,
+    boot: async (port) => { if (port === 4101) throw new Error('listen EADDRINUSE: address already in use'); return `ok:${port}` },
+    onRetry: (info) => retries.push(info),
+  })
+  assert.deepEqual(result, { port: 4102, value: 'ok:4102' })
+  assert.equal(retries.length, 1)
+  // 显式端口：不调用 pick，也不重试
+  let picks = 0
+  const explicit = await bootOnFreePort({ explicitPort: 4200, pick: async () => { picks += 1; return 1 }, boot: async (port) => `ok:${port}` })
+  assert.deepEqual(explicit, { port: 4200, value: 'ok:4200' })
+  assert.equal(picks, 0)
+  // 非占用错误立即抛
+  await assert.rejects(bootOnFreePort({ explicitPort: null, pick: async () => 4300, boot: async () => { throw new Error('boom') } }), /boom/)
+  // 耗尽：抛最后一次
+  await assert.rejects(bootOnFreePort({
+    pick: (() => { const p = [4400, 4401]; return async () => p.shift() ?? null })(),
+    attempts: 2,
+    boot: async () => { throw new Error('listen EADDRINUSE') },
+  }), /EADDRINUSE/)
+})
+
+// 静态契约：三个自动端口入口都必须经 bootOnFreePort（显式端口传 EXPLICIT_PORT，不重选）。
+test('BUG-338：自动端口入口接线（client-load / snapshot-replay / cold-start）', () => {
+  for (const rel of ['checks/smoke/client-load.entry.mjs', 'checks/smoke/snapshot-replay.entry.mjs', 'checks/smoke/cold-start.entry.mjs']) {
+    const source = readFileSync(join(ROOT, rel), 'utf8')
+    assert.match(source, /bootOnFreePort\(/, `${rel} 未接 bootOnFreePort`)
+    assert.match(source, /explicitPort:\s*EXPLICIT_PORT/, `${rel} 未区分显式端口`)
+  }
+})

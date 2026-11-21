@@ -58,6 +58,7 @@ import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from '../lib/shared/env.mjs'
 import { rolePickerIssues } from '../lib/harness/role-picker.mjs'
 import { pickFreePort } from '../lib/harness/port-reclaim.mjs'
+import { bootOnFreePort } from '../lib/shared/boot-port.mjs'
 import { reclaimPort } from '../lib/harness/port-reclaim.mjs'
 import { parsePort } from '../lib/shared/port.mjs'
 import { authenticate, bootWeb, makeRpc } from '../lib/shared/web-harness.mjs'
@@ -87,7 +88,8 @@ const arg = (name, fallback) => {
 const PORT_ARG = arg('port', null)
 const parsedPort = PORT_ARG === null ? null : parsePort(PORT_ARG)
 if (parsedPort !== null && !parsedPort.ok) { console.error(`client-load.entry: --port ${parsedPort.error}`); process.exit(2) }
-const PORT = parsedPort === null ? await pickFreePort() : parsedPort.port
+const EXPLICIT_PORT = parsedPort === null ? null : parsedPort.port
+let PORT = EXPLICIT_PORT === null ? await pickFreePort() : EXPLICIT_PORT
 if (PORT === null) { console.error('client-load.entry: 找不到空闲端口'); process.exit(2) }
 // 既有会话默认 = 盘侧最新绑定会话（惰性解析——由下方参考模块选择；硬编码标题会
 // 随会话积累腐烂，BUG-002 清扫轮实测假红）。--session 仍可显式指定。
@@ -222,22 +224,22 @@ writeFileSync(teamPatchPath, readFileSync(join(ROOT, 'tools', 'record', 'researc
  *  被上一次异常退出的监听者占住，下一次直接 EADDRINUSE（现场 = 01:49 的 `readdirSync is not
  *  defined` 异常跑完后端口仍监听）。本站点因此显式消费 port-reclaim：boot 前清陈旧监听
  *  （本脚本独占该端口，port-exclusive 门禁把守）、boot 失败兜底、收尾验证到静默。 */
-async function boot() {
-  const stale = await reclaimPort(PORT)
+async function boot(port) {
+  const stale = await reclaimPort(port)
   if (stale !== null) {
     releaseRunLock(LOCK_DIR)
-    console.error(`client-load.entry: 端口 ${PORT} 预收割失败：${stale}`)
+    console.error(`client-load.entry: 端口 ${port} 预收割失败：${stale}`)
     process.exit(2)
   }
   try {
     const booted = await bootWeb({
-      bin, cwd: ROOT, profile: 'web', patchPath: teamPatchPath, port: PORT,
+      bin, cwd: ROOT, profile: 'web', patchPath: teamPatchPath, port,
       env: scrubbedEnv({ DSH_HOME: home }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 800,
       detached: false, // 原值：本站点非组长（不整组收割；收尾用 child.kill + reclaimPort）
     })
     return { child: booted.child, token: booted.token }
   } catch (error) {
-    const leak = await reclaimPort(PORT)
+    const leak = await reclaimPort(port)
     if (leak !== null) console.error(`client-load.entry: ${leak}`)
     throw error
   }
@@ -332,7 +334,12 @@ process.on('exit', () => releaseRunLock(LOCK_DIR))
 let child
 let token
 try {
-  ({ child, token } = await boot())
+  const booted = await bootOnFreePort({
+    explicitPort: EXPLICIT_PORT, pick: pickFreePort, boot,
+    onRetry: ({ port, attempt, attempts }) => console.error(`client-load.entry: 端口 ${port} 被抢占，重选（${attempt}/${attempts}）`),
+  })
+  PORT = booted.port
+  ;({ child, token } = booted.value)
 } catch (error) {
   releaseRunLock(LOCK_DIR)
   throw error

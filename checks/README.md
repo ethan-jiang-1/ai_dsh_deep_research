@@ -116,6 +116,7 @@
 |---|---|---|
 | lib/repo/content-budget.mjs | e-workspace、content-disclosure.spec | 常驻面预算唯一正本：T0 两级（下放 10,000 / 硬顶 12,288）+ lead persona/合计的 char/byte/token |
 | lib/shared/roles.mjs | discipline-probe、doctor.e2e、fetch-fallback-orchestration.spec、l4-lite.e2e、preset.e2e、presets.spec、release.entry、replay-fixtures.spec、replay-scene.spec、role-consumer-matrix.spec、snapshot-replay.entry、strategy-core.spec、team-preflight.e2e、plan-gate | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
+| lib/shared/boot-port.mjs | client-load.entry、cold-start.entry、port-reclaim.spec、snapshot-replay.entry | 自动端口的有界重选（BUG-338）：纯逻辑，pick/boot 注入；显式端口不重选 |
 | lib/shared/cli-entry.mjs | export-handoff、gates.e2e、market、run-dashboard、protocol-audit、schema-scan、verdict-audit、node-gate、evidence-audit、channel-cache、run-driver、vendor-artifacts、release-check、cli-entry.test | symlink-safe CLI 入口判定（realpath 归一；macOS `/tmp` → `/private/tmp` 下不静默） |
 | lib/shared/cli-exit.mjs | run-dashboard、run-kickoff、run-lane、cli-exit-contract.test | 退出码契约唯一出口：`EXIT` 0/1/2 + `usageError`（usage/前置 = 2）+ `verdictOf`（全 SKIP = 2；有 FAIL = 1；有 PASS 的混合 = 0） |
 | lib/repo/release-anchor.mjs | release-check、release-anchor.test | 发布/移交锚纯判据：版本/tag 类型/commit、工作树、manual sha、build-manifest sha、artifact freshness；配套 `release-check --handoff` |

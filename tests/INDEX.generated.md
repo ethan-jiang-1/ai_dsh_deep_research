@@ -79,6 +79,7 @@
 | repo | `checks/lib/repo/staged-change-pairing` | `tests/checks/repo/staged-change-pairing.test.mjs` |
 | repo | `checks/lib/repo/test-placement` | `tests/checks/repo/test-placement.test.mjs`<br>`tests/checks/shared/pack-mirror.test.mjs`<br>`tests/checks/shared/test-lanes.test.mjs`<br>`tests/checks/shared/test-owner-mirror.test.mjs` |
 | shared | `checks/lib/shared/artifact-freshness` | `tests/checks/shared/artifact-freshness.test.mjs` |
+| shared | `checks/lib/shared/boot-port` | `tests/run/harness/port-reclaim.spec.mjs` |
 | shared | `checks/lib/shared/cdp-driver` | — |
 | shared | `checks/lib/shared/cli-entry` | `tests/checks/shared/cli-entry.test.mjs` |
 | shared | `checks/lib/shared/cli-exit` | `tests/checks/shared/cli-exit-contract.test.mjs` |

@@ -48,7 +48,8 @@ import { dismissPreviewNotice, openSessionById } from '../lib/shared/web-ui-nav.
 import { profileLayerIssues, runtimeVersionOf } from '../lib/shared/profile-health.mjs';
 import { acquireRunLock, releaseRunLock } from '../lib/harness/run-lock.mjs';
 import { resolveSnapshotMode } from '../lib/harness/snapshot-mode.mjs';
-import { pickFreePort } from '../lib/harness/port-reclaim.mjs';
+import { pickFreePort } from '../lib/harness/port-reclaim.mjs'
+import { bootOnFreePort } from '../lib/shared/boot-port.mjs';
 import { parsePort } from '../lib/shared/port.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -60,7 +61,8 @@ const argvOf = (i) => process.argv[i + 1];
 const PORT_ARG = arg('port', null);
 const parsedPort = PORT_ARG === null ? null : parsePort(PORT_ARG);
 if (parsedPort !== null && !parsedPort.ok) { console.error(`snapshot-replay.entry: --port ${parsedPort.error}`); process.exit(2); }
-const PORT = parsedPort === null ? await pickFreePort() : parsedPort.port;
+const EXPLICIT_PORT = parsedPort === null ? null : parsedPort.port;
+let PORT = EXPLICIT_PORT === null ? await pickFreePort() : EXPLICIT_PORT;
 if (PORT === null) { console.error('snapshot-replay.entry: 找不到空闲端口'); process.exit(2); }
 const ONLY = arg('scenario'); // --scenario <id> 单场景跑（红证定向/迭代用；缺省全场景）
 const FACE_ONLY = arg('face'); // --face <name> 定向单场景集（全名）；缺省 = 发现全部场景集逐场景跑
@@ -225,15 +227,22 @@ for (const { face, scene } of SCENES) {
   // 超时 BOOT_TIMEOUT_MS、尾部 600 字符）；**内层 rpc 刻意不收敛**——它是闭包形态
   // （`rpc(endpoint, args)` 捕获 base/cookie），与 makeRpc 的 `(base, cookie, endpoint, args)`
   // 不同形，硬收敛即行为改写（round3 卡「输掉的方案」）。
-  const booted = await bootWeb({
-    bin, cwd: dshSrc, profile: PROFILE, patchPath, port: PORT,
-    env: scrubbedEnv({
-      DSH_HOME,
-      PATH: process.env.PATH,
-      REPLAY_NETWORK_OFFLINE: '1',
-      NODE_OPTIONS: [process.env.NODE_OPTIONS, `--require ${OFFLINE_PRELOAD}`].filter(Boolean).join(' '),
-    }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 600,
+  const boot = await bootOnFreePort({
+    explicitPort: EXPLICIT_PORT,
+    pick: pickFreePort,
+    boot: (port) => bootWeb({
+      bin, cwd: dshSrc, profile: PROFILE, patchPath, port,
+      env: scrubbedEnv({
+        DSH_HOME,
+        PATH: process.env.PATH,
+        REPLAY_NETWORK_OFFLINE: '1',
+        NODE_OPTIONS: [process.env.NODE_OPTIONS, `--require ${OFFLINE_PRELOAD}`].filter(Boolean).join(' '),
+      }), timeoutMs: BOOT_TIMEOUT_MS, tailChars: 600,
+    }),
+    onRetry: ({ port, attempt, attempts }) => console.error(`snapshot-replay.entry: 端口 ${port} 被抢占，重选（${attempt}/${attempts}）`),
   });
+  PORT = boot.port;
+  const booted = boot.value;
   const child = booted.child;
   let childGone = false;
   child.on('exit', () => { childGone = true; });
