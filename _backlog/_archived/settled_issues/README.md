@@ -5,6 +5,8 @@
 | [2026-11-13-workflow-substance-gates](2026-11-13-workflow-substance-gates.md) | 加工环路的实体检查：判据形状字段 + Note 同节 + 两道收口门（Note 早写、暂存区配对）+ 复发必答 + 判据测试负例 + 金标准理由；D52；1400 测试 / gates-smoke 108 全绿；[Note](../../../notes/implemented/2026-11-13-workflow-substance-gates.md) | 2026-11-13 |
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-20-pack-production-prevention](2026-11-20-pack-production-prevention.md) | Pack 生产源头预防：D 节点表解释已交付并接受（装饰进支持域、多表/转义管道明确拒绝）；P 生产强制转「以后做」入 [triggers](../../triggers.md)；[Note](../../../notes/implemented/2026-11-20-pack-production-prevention.md) | 2026-11-22 |
+| [2026-11-20-preventive-quality-pilot](2026-11-20-preventive-quality-pilot.md) | 预防性质量首批 A+B：启动所有权 + 有限准入交付接受；A4 盲评失败如实留档（规则效力未证）；后续候选 1 项并 P、3 项 none；[Note](../../../notes/implemented/2026-11-20-preventive-quality-pilot.md) | 2026-11-22 |
 | [2026-11-19-low-confidence-40](2026-11-19-low-confidence-40.md) | 第 9 轮低置信区 320–339：20 卡全部有去向（8 已修 / 12 迁暂停池，330 由 313 修复）；锁/端口/缓存/plan 判据落定；[批 Note](../../../notes/implemented/2026-11-21-bug-stack-repair.md) | 2026-11-21 |
 | [2026-11-21-bug-stack-repair-program](2026-11-21-bug-stack-repair-program.md) | 缺陷积压修复程序：20 张活跃卡 → 19 已修 / 1 判非缺陷（330）；不做旧产物兼容；[批 Note](../../../notes/implemented/2026-11-21-bug-stack-repair.md) | 2026-11-21 |
 | [2026-11-18-low-confidence-30](2026-11-18-low-confidence-30.md) | 低置信区第 8 轮：300–319 全部修复归档；plan 门/缓存身份/并发端口/cold-start nightly；[批 Note](../../../notes/implemented/2026-11-18-low-confidence-30.md) | 2026-11-19 |

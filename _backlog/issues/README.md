@@ -6,8 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| [预防性质量落地](2026-11-20-preventive-quality-pilot.md) | 待落地 | 有限准入 + 启动互斥实证；已补可复核验收、模型盲评与首批关闭边界 |
-| [Pack 生产源头预防](2026-11-20-pack-production-prevention.md) | 等人拍板 | D 节点表解释已落地（`e646efbc`）；待用户业务验收与兼容取舍，P 生产强制另裁 |
+| — | — | 当前无活跃卡（2026-11-22：最后两卡结案归档） |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

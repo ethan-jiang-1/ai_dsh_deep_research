@@ -14,6 +14,7 @@
 
 | 名头 | 材料 | 历史消费者 | 产出的卡 | 归档 |
 |---|---|---|---|---|
+| [preventive-quality/](preventive-quality/README.md) · 预防性质量：探索补洞 → 设计约束与测试资产 | 10 份 | [预防性质量落地](../settled_issues/2026-11-20-preventive-quality-pilot.md)、[Pack 生产源头预防](../settled_issues/2026-11-20-pack-production-prevention.md) | [首批卡](../settled_issues/2026-11-20-preventive-quality-pilot.md)（已结，A4 失败留档）、[D 卡](../settled_issues/2026-11-20-pack-production-prevention.md)（已结，P 转 triggers）、[Note](../../../notes/implemented/2026-11-20-preventive-quality-pilot.md) | 2026-11-22 |
 | [pack-src-test-mirror/](pack-src-test-mirror/README.md) · pack src ↔ 测试：按 domain 同名 | 1 份 | [issue](../settled_issues/2026-11-15-pack-src-test-mirror.md) | [卡](../settled_issues/2026-11-15-pack-src-test-mirror.md)、[Note](../../../notes/implemented/2026-11-15-pack-src-test-mirror.md) | 2026-11-15 |
 | [test-source-mirror/](test-source-mirror/README.md) · 测试子目录 ↔ 源码位置：按消费者接口分层 | 1 份 | [issue](../settled_issues/2026-11-15-test-source-mirror.md) | [卡](../settled_issues/2026-11-15-test-source-mirror.md)、[Note](../../../notes/implemented/2026-11-15-test-source-mirror.md) | 2026-11-15 |
 | [test-asset-fence/](test-asset-fence/README.md) · 测试资产围栏：把证据重心压到秒级单元/集成层 | 1 份 | [测试资产围栏卡](../settled_issues/2026-11-13-test-asset-fence.md)、[oracle 补强卡](../settled_issues/2026-11-14-verification-oracle-hardening.md) | [卡](../settled_issues/2026-11-13-test-asset-fence.md)、[Note](../../../notes/implemented/2026-11-13-test-asset-fence.md) | 2026-11-15 |

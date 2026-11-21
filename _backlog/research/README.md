@@ -184,7 +184,7 @@ status——材料的状态就是题的状态。
 
 | 名头 | 问题 | 消费者 | 材料 |
 |---|---|---|---|
-| [预防性质量](preventive-quality/README.md) | 如何把反复探索补洞转成设计约束、测试资产与有界发现 | 用户 2026-11-20 授权研究 | [题名与材料](preventive-quality/README.md#材料) |
+| — | — | — | 当前无活跃研究题（2026-11-22：preventive-quality 随两卡结案归档） |
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单，也不抄状态（状态正本 = 题名页）。
 

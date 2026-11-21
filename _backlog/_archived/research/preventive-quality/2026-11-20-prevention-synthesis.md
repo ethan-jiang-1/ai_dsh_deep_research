@@ -9,7 +9,7 @@ intent: 对照一手实现与复发链，提出减少缺陷生成机会的设计
 
 **应把正确性前移到新行为的设计与写入操作，并让已有失败类的不变量约束后来的同类实现。** 探索保留为有预算的发现手段；其价值应逐渐转为发现新问题，而非重复支付旧类缺陷的成本。本轮没有证据支持「消灭探索」或「门禁能保证任意研究任务正确」。
 
-本仓已经有 D54 的类级守卫、变更类证据与退役纪律，以及 D55 的独立 oracle、标准解析与账本。再写一套相似原则不足以解决问题。首轮抽查显示，仍值得优先处理的是：旧不变量没有约束同类新 Module、多个入口没有共享状态所有权、宽松观察解析被用于硬裁决，以及资产分类不足以充当语义保障。依据分别见[现行测试制度](../../../docs/guides/67-test-strategy.md)、[当前启动锁](../../../checks/lib/channel/start-lock.mjs)、[plan 门](../../../checks/lib/gates/plan-gate.mjs)与[资产分类器](../../../checks/lib/test-infra/asset-ledger.mjs)。
+本仓已经有 D54 的类级守卫、变更类证据与退役纪律，以及 D55 的独立 oracle、标准解析与账本。再写一套相似原则不足以解决问题。首轮抽查显示，仍值得优先处理的是：旧不变量没有约束同类新 Module、多个入口没有共享状态所有权、宽松观察解析被用于硬裁决，以及资产分类不足以充当语义保障。依据分别见[现行测试制度](../../../../docs/guides/67-test-strategy.md)、[当前启动锁](../../../../checks/lib/channel/start-lock.mjs)、[plan 门](../../../../checks/lib/gates/plan-gate.mjs)与[资产分类器](../../../../checks/lib/test-infra/asset-ledger.mjs)。
 
 建议首批一起完成「既有开发环的有限准入」和「启动互斥的工程实证」：前者在同类新实现出现时追查旧不变量与全部入口，后者用公共操作、独立性质和真入口反证替代分散义务。仅修锁不能防下一份新锁，只有清单又会重复形式闭环。具体修改文件、验证入口、反证与减法见[本仓落地方案](2026-11-20-repo-landing-plan.md)。后续才按真实变更触发 plan 严格模型或交付终态场景；本轮未实施。
 
@@ -17,14 +17,14 @@ intent: 对照一手实现与复发链，提出减少缺陷生成机会的设计
 
 - 调查入口是用户指定的 Schemastery basics 与 preset quality 两组 FAQ；逐项一手查证见[原生证据](2026-11-20-native-quality-evidence.md)，历史与当前实现的对照见[复发审计](2026-11-20-recurrence-audit.md)。FAQ 是二手整理，不能把它描述的所有机制算成本仓已有保障。
 - 本仓 HEAD 为 `43f89a0b0135`，vendor pin 为 `b830ec950faba0a46dda564be3e2d854afed94f1`，采样日期为 2026-11-20。当前判断来自该工作树的源码与测试，不以全局安装版本替代 pinned 源码。
-- 历史复盘记录过 79 张探索缺陷和 17 条复发链；它们说明过去发生过什么，不能直接证明当下尚有同样漏洞。当前仍适用的机制必须回查拥有实现。参见[历史复盘](../../../notes/archived/2026-11-13-exploratory-bug-wave-postmortem.md)与[制度交付记录](../../../notes/implemented/2026-11-13-test-strategy-operating-model.md)。
+- 历史复盘记录过 79 张探索缺陷和 17 条复发链；它们说明过去发生过什么，不能直接证明当下尚有同样漏洞。当前仍适用的机制必须回查拥有实现。参见[历史复盘](../../../../notes/archived/2026-11-13-exploratory-bug-wave-postmortem.md)与[制度交付记录](../../../../notes/implemented/2026-11-13-test-strategy-operating-model.md)。
 - 本轮读源、检查账本、运行仓库 keyless 验证；没有启动服务、进行真实模型评估或执行本文提出的试点。正文中的候选不变量需要在试点中红绿验证。
 
 ## 二、为什么「一直探索、一直补」不收敛
 
 ### 1. 防线会修旧模块，却不一定约束新实现
 
-[start-lock 的测试](../../../tests/checks/channel/start-lock.test.mjs)只有一个顺序场景，覆盖获取、二次获取、释放与按时长回收；其中甚至把当前进程仍存活时跨过 11 分钟被回收当作正确期望。[当前实现](../../../checks/lib/channel/start-lock.mjs)的释放无属主 token，回收只看时间，创建是 mkdir 后再写 owner。已有其他锁的历史防线不能自动保护这份新实现。
+[start-lock 的测试](../../../../tests/checks/channel/start-lock.test.mjs)只有一个顺序场景，覆盖获取、二次获取、释放与按时长回收；其中甚至把当前进程仍存活时跨过 11 分钟被回收当作正确期望。[当前实现](../../../../checks/lib/channel/start-lock.mjs)的释放无属主 token，回收只看时间，创建是 mkdir 后再写 owner。已有其他锁的历史防线不能自动保护这份新实现。
 
 [开发准入审计](2026-11-20-change-admission-audit.md)进一步追到实际入口：`test-surface` 验直接 import，`guard-red-record` 验标题旁红配方注释，守卫账对账路径与分类；它们不执行红配方，也不证明新 Module 继承旧类性质。`pre-commit` 运行 verify + test，未消费变更类语义与交付证据表。旧制度的原则存在，但这个连接仍需落实。
 
@@ -32,31 +32,31 @@ intent: 对照一手实现与复发链，提出减少缺陷生成机会的设计
 
 ### 2. 规则放在外围，会产生「每个入口都要记得」的义务
 
-[最新探索记录](../../issues/2026-11-19-low-confidence-40.md)指出启动入口分别持有不同锁，漂移只读检查又受到启动锁影响。验证 helper 里的互斥不能证明 shell 入口参与了同一互斥域。原生配置演变给出的更深做法，是把解析、比较和提交放回各调用者必经的拥有位置，而非增加外围通知；其一手出处见[原生证据](2026-11-20-native-quality-evidence.md)。
+[最新探索记录](../../../issues/2026-11-19-low-confidence-40.md)指出启动入口分别持有不同锁，漂移只读检查又受到启动锁影响。验证 helper 里的互斥不能证明 shell 入口参与了同一互斥域。原生配置演变给出的更深做法，是把解析、比较和提交放回各调用者必经的拥有位置，而非增加外围通知；其一手出处见[原生证据](2026-11-20-native-quality-evidence.md)。
 
 候选设计应明确：哪个操作拥有某个资源的一次状态改变，哪些入口只是调用者。测试要跨与调用者相同的 Interface；辅助函数全绿仍不足以证明跨入口的一致性。
 
 ### 3. 开放语法与弱表示持续制造邻接变体
 
-Markdown、YAML、shell 是成熟且复杂的语言。过去靠缩进、关键词、有限词表猜语义，矩阵维度仍由实现者决定，容易在下一轮出现新变体。D55 补强已经采用标准 YAML AST、CommonMark 对照和受控 shell 写法，不能把这些历史缺陷重报为当前漏洞。参见[D55 现行决定](../../../notes/implemented/2026-11-14-verification-oracle-hardening.md)。
+Markdown、YAML、shell 是成熟且复杂的语言。过去靠缩进、关键词、有限词表猜语义，矩阵维度仍由实现者决定，容易在下一轮出现新变体。D55 补强已经采用标准 YAML AST、CommonMark 对照和受控 shell 写法，不能把这些历史缺陷重报为当前漏洞。参见[D55 现行决定](../../../../notes/implemented/2026-11-14-verification-oracle-hardening.md)。
 
-当前 [plan-index](../../../packages/deep-research-pack/src/lib/plan/plan-index.ts)的 Interface 明确面向观察、允许缺省；[plan-gate](../../../checks/lib/gates/plan-gate.mjs)又从原文补读部分列和章节以承担硬裁决。这里值得研究严格输入模型，而不是默认每新增一项合同就再加一段扫描器。支持任意人写 Markdown 与支持一种规范表格是两种不同承诺，必须先选定。
+当前 [plan-index](../../../../packages/deep-research-pack/src/lib/plan/plan-index.ts)的 Interface 明确面向观察、允许缺省；[plan-gate](../../../../checks/lib/gates/plan-gate.mjs)又从原文补读部分列和章节以承担硬裁决。这里值得研究严格输入模型，而不是默认每新增一项合同就再加一段扫描器。支持任意人写 Markdown 与支持一种规范表格是两种不同承诺，必须先选定。
 
 ### 4. 资产登记与形式证据容易被误读成充分证明
 
-本轮直接汇总现有账本：234 项测试资产中 canonical 122、structured 48、external 27、self-referential 37；196 项守卫记录中 closed 193、provisional 3。输入分别为[资产账](../../../tests/fixtures/asset-ledger/ledger.json)和[守卫账](../../../tests/fixtures/guard-ledger/ledger.json)，这些是本轮观测值，不是长期合同。
+本轮直接汇总现有账本：234 项测试资产中 canonical 122、structured 48、external 27、self-referential 37；196 项守卫记录中 closed 193、provisional 3。输入分别为[资产账](../../../../tests/fixtures/asset-ledger/ledger.json)和[守卫账](../../../../tests/fixtures/guard-ledger/ledger.json)，这些是本轮观测值，不是长期合同。
 
-[oracleTypeOf](../../../checks/lib/test-infra/asset-ledger.mjs)按 import、AST 节点、文件读取和临时目录等源码形状推导分类。例如引入外部解析器即可归 external，使用临时目录可归 structured。这有助于发现资产和防漂移，**不证明外部结果真的参与了断言，也不证明期望来自正确需求**。启动锁测试归 structured，仍可以认可错误的生命期策略。
+[oracleTypeOf](../../../../checks/lib/test-infra/asset-ledger.mjs)按 import、AST 节点、文件读取和临时目录等源码形状推导分类。例如引入外部解析器即可归 external，使用临时目录可归 structured。这有助于发现资产和防漂移，**不证明外部结果真的参与了断言，也不证明期望来自正确需求**。启动锁测试归 structured，仍可以认可错误的生命期策略。
 
-更直接的证据是[守卫账](../../../tests/fixtures/guard-ledger/ledger.json)把 BUG-310 记为 closed，红配方写「同 309（共享锁）」；[复发审计](2026-11-20-recurrence-audit.md)核对出 shell 入口实际使用另一把锁，并在 33 项现有抽样测试通过后，用临时目录复现了活 pid 被回收、旧 release 删除新 owner 锁。形式闭环没有覆盖其声称的入口和生命期。
+更直接的证据是[守卫账](../../../../tests/fixtures/guard-ledger/ledger.json)把 BUG-310 记为 closed，红配方写「同 309（共享锁）」；[复发审计](2026-11-20-recurrence-audit.md)核对出 shell 入口实际使用另一把锁，并在 33 项现有抽样测试通过后，用临时目录复现了活 pid 被回收、旧 release 删除新 owner 锁。形式闭环没有覆盖其声称的入口和生命期。
 
 因此不建议把所有 self-referential 清零当作目标。纯算术或封闭枚举用显式例子可能已经足够；高价值的工作是抽查高风险承诺的实际 assertion，以及在具体回归被注入时是否会拒绝。
 
 ### 5. 某些命题缺独立事实，继续补检查也无法证明
 
-[BUG-328](../../bugs/BUG-328-plan-snapshot-same-text-only.md)要求旧图真实，但当前文件互不相同只能证明字节差异；若没有独立保存的历史或拥有写入的操作，事后扫描无法证明历史真实性。同处可变目录、可以一起重写的 hash 也不能成为独立历史锚。
+[BUG-328](../../../bugs/BUG-328-plan-snapshot-same-text-only.md)要求旧图真实，但当前文件互不相同只能证明字节差异；若没有独立保存的历史或拥有写入的操作，事后扫描无法证明历史真实性。同处可变目录、可以一起重写的 hash 也不能成为独立历史锚。
 
-[BUG-330](../../bugs/BUG-330-output-length-heuristic-still.md)称未排除代码、URL、表格，但[当前 countLength](../../../checks/lib/gates/protocol-audit-core.mjs)已经剔除若干这些形式。它仍是有限 Markdown 处理与页数估算；是否要求更多形式，要回到产品承诺判断，不能凭卡的标题判定当前缺陷成立。
+[BUG-330](../../../bugs/BUG-330-output-length-heuristic-still.md)称未排除代码、URL、表格，但[当前 countLength](../../../../checks/lib/gates/protocol-audit-core.mjs)已经剔除若干这些形式。它仍是有限 Markdown 处理与页数估算；是否要求更多形式，要回到产品承诺判断，不能凭卡的标题判定当前缺陷成立。
 
 这说明研究还有一个必要出口：先纠正证据和质量声明，或明确不承诺某项语义。并非每条观察都应转成新门禁。
 
@@ -79,7 +79,7 @@ Schema 适合在配置或工具 JSON 等输入处拒绝无效值、补确定的�
 
 ## 四、测试资产从「实例」升级为「可复用的生成规则」
 
-本仓已有[六种类级形态](../../methods/class-level-guards.md)。建议下一步先选一个行为族，把资产写成以下三层，复用现有 Node 测试，不建立新测试框架。
+本仓已有[六种类级形态](../../../methods/class-level-guards.md)。建议下一步先选一个行为族，把资产写成以下三层，复用现有 Node 测试，不建立新测试框架。
 
 1. **规范样本和独立不变量。** 对锁先写「两个竞争者不能同时持有」「旧持有者不能删新锁」「存活的长启动不会仅因经过某个时长被偷锁」。对 codec 写语义 round-trip；对阈值范围写「加入不相关背景证据不改变关键证据结论」。其中最后一项只有在关键范围已定义时才成立。
 2. **由操作或语法产生变体。** 对锁组合 acquire、owner 写入失败、竞争接管、旧 release、时钟变化；对表示组合缺失、合法值、非法值、重复字段和不同受支持编码。期望由独立模型或不变量计算，不能再抄一份实现分支。
@@ -104,7 +104,7 @@ Schema 适合在配置或工具 JSON 等输入处拒绝无效值、补确定的�
 
 ### 第一试点：启动互斥的行为所有权
 
-消费者为[最新低置信区问题](../../issues/2026-11-19-low-confidence-40.md)，重点核对 BUG-309/310 引入路径及其 320–326、331/332、339 邻接问题，完整证据见[复发审计](2026-11-20-recurrence-audit.md)。其中 339 的早退 trap 后续被 cleanup trap 覆盖，不能按卡文直接断言完整启动退出会删新锁；释放路径需分别核实。试点准备与后续去向由[预防性质量试点卡](../../issues/2026-11-20-preventive-quality-pilot.md)承接。
+消费者为[最新低置信区问题](../../../issues/2026-11-19-low-confidence-40.md)，重点核对 BUG-309/310 引入路径及其 320–326、331/332、339 邻接问题，完整证据见[复发审计](2026-11-20-recurrence-audit.md)。其中 339 的早退 trap 后续被 cleanup trap 覆盖，不能按卡文直接断言完整启动退出会删新锁；释放路径需分别核实。试点准备与后续去向由[预防性质量试点卡](../../settled_issues/2026-11-20-preventive-quality-pilot.md)承接。
 
 - **先定性质。** 启动互斥与 Web 服务存活锁是否不同；只读漂移检查是否需要锁；长启动、死 owner、owner 信息未完成时的接管语义是什么。不要先选十分钟 TTL 再把测试写成认可该常量。
 - **再定拥有操作。** 两个入口共用相同资源身份与取得/释放操作，或明确一个入口委托另一个入口并携带交接凭证。不能在父调用子时重复抢同一把非重入锁；也不能给所有人一个可伪造的「跳过锁」选项。
@@ -116,13 +116,13 @@ Schema 适合在配置或工具 JSON 等输入处拒绝无效值、补确定的�
 
 ### 后续候选：严格计划模型与一个交付场景
 
-[plan 门](../../../checks/lib/gates/plan-gate.mjs)与[观察解析器](../../../packages/deep-research-pack/src/lib/plan/plan-index.ts)可比较两条路线：在现有 Markdown 正本上使用共享严格 decoder，或由结构化正本生成 Markdown。前者迁移较小；后者可减少解析自由度，但改变编辑体验和公共内容合同。不要无证据新增第二份正本；先用同一组合法/非法 plan 比较差异和维护成本。
+[plan 门](../../../../checks/lib/gates/plan-gate.mjs)与[观察解析器](../../../../packages/deep-research-pack/src/lib/plan/plan-index.ts)可比较两条路线：在现有 Markdown 正本上使用共享严格 decoder，或由结构化正本生成 Markdown。前者迁移较小；后者可减少解析自由度，但改变编辑体验和公共内容合同。不要无证据新增第二份正本；先用同一组合法/非法 plan 比较差异和维护成本。
 
 历史快照真实性单独处理：先确定拥有保存动作的操作与可接受历史来源，再谈摘要、不可覆盖存储或回执。不能把「快照与当前不同」悄悄提升为完整版本链证明。
 
-本仓[场景说明](../../../snapshots/README.md)明确工作区世界树尚未实施，A/B/C 不证明最终 bundle。若下一次改动要声称某个研究交付流程完成，可选一个离线合成研究，配正常和缺关键证据两种任务，并独立编写期望文件集合、受保护原件和字段关系。原生完整工作区 oracle 已存在；优先复用其能力并评估本仓适配成本，不为本轮研究预先复制全套基础设施。
+本仓[场景说明](../../../../snapshots/README.md)明确工作区世界树尚未实施，A/B/C 不证明最终 bundle。若下一次改动要声称某个研究交付流程完成，可选一个离线合成研究，配正常和缺关键证据两种任务，并独立编写期望文件集合、受保护原件和字段关系。原生完整工作区 oracle 已存在；优先复用其能力并评估本仓适配成本，不为本轮研究预先复制全套基础设施。
 
-角色的精确能力集也是候选：[preset.e2e](../../../checks/smoke/preset.e2e.mjs)已有精确 skills 验证，[请求面快照](../../../snapshots/README.md)已有完整工具 schema 比对；还需判断是否值得在真挂载时按角色职责增加精确工具集，以区分「两边一致」和「组合符合独立能力承诺」。不应从当前有效配置自动生成全部期望再宣称角色正确。
+角色的精确能力集也是候选：[preset.e2e](../../../../checks/smoke/preset.e2e.mjs)已有精确 skills 验证，[请求面快照](../../../../snapshots/README.md)已有完整工具 schema 比对；还需判断是否值得在真挂载时按角色职责增加精确工具集，以区分「两边一致」和「组合符合独立能力承诺」。不应从当前有效配置自动生成全部期望再宣称角色正确。
 
 ## 七、怎样知道它正在收敛，以及何时停止
 
@@ -137,7 +137,7 @@ Schema 适合在配置或工具 JSON 等输入处拒绝无效值、补确定的�
 | 维护成本 | 本次新增/删除资产、常驻命令耗时、误报、重录次数 | 不自动增加 required slow 预算 |
 | 模型与领域质量 | 固定关键任务的逐例结果、严重错误、首次失败、成本与返工 | 样本小就报告小样本，不外推任意研究任务 |
 
-先冻结承诺、输入域、入口和分类规则，复核结果区分旧类迁移遗漏、新类和明确域外，不能靠改类名或持续扩域扭曲退出判断。首批交付与关闭以[承接卡](../../issues/2026-11-20-preventive-quality-pilot.md#关闭条件)为准：正反性质、真实回归变异、入口验收、义务减法和准入盲评分别给证据，未覆盖语义/平台/成本写清。两个事先固定范围与预算的独立窗口是交付后观察建议；采用时写入实际 owning Note/trigger，不是本卡的隐含关闭门，也不是零缺陷证明或已执行结果。
+先冻结承诺、输入域、入口和分类规则，复核结果区分旧类迁移遗漏、新类和明确域外，不能靠改类名或持续扩域扭曲退出判断。首批交付与关闭以[承接卡](../../settled_issues/2026-11-20-preventive-quality-pilot.md#关闭条件)为准：正反性质、真实回归变异、入口验收、义务减法和准入盲评分别给证据，未覆盖语义/平台/成本写清。两个事先固定范围与预算的独立窗口是交付后观察建议；采用时写入实际 owning Note/trigger，不是本卡的隐含关闭门，也不是零缺陷证明或已执行结果。
 
 达到退出条件后结束该专项探索，把资产放回日常/按影响/夜间车道。仅在新语义、新入口、依赖改变、真实事故或同类逃逸发生时重开对应命题；不因「还可能有 bug」自动续轮。
 

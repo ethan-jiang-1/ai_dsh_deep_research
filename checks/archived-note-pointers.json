@@ -992,12 +992,12 @@
       "reason": "2026-11-14 D55 缺口取证材料：审计对象即为首轮 2026-11-14-verification-oracle 交付件，移入冻结层后保留为历史取证指针"
     },
     {
-      "source": "_backlog/research/preventive-quality/2026-11-20-prevention-synthesis.md",
+      "source": "_backlog/_archived/research/preventive-quality/2026-11-20-prevention-synthesis.md",
       "target": "notes/archived/2026-11-13-exploratory-bug-wave-postmortem.md",
       "reason": "2026-11-20 预防性质量研究引用历史复盘作为多轮探索与复发的证据；不作现行实现或制度权威"
     },
     {
-      "source": "_backlog/research/preventive-quality/2026-11-20-recurrence-audit.md",
+      "source": "_backlog/_archived/research/preventive-quality/2026-11-20-recurrence-audit.md",
       "target": "notes/archived/2026-11-14-verification-oracle.md",
       "reason": "2026-11-20 复发链研究对照 D55 初版的历史证明面与后续补强；当前权威仍为 implemented 中的 hardening Note"
     }

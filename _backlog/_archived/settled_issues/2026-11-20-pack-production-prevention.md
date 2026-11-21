@@ -1,12 +1,12 @@
 ---
-status: 等人拍板
+status: 已结
 opened: 2026-11-20
 ---
 
 # 推敲：Pack 生产源头预防——D 节点表解释已落地，P 生产强制仍待裁决
 
-> 立卡：2026-11-20 ｜ 状态：等人拍板 ｜ 类型：Feature ｜ 结论倾向：现在做 — D 节点表解释切片已交付；P 生产强制未定 ｜ 可关闭：否
-> 去向：implemented — [实现说明](../../notes/implemented/2026-11-20-pack-production-prevention.md)；业务验收：用户（待）
+> 立卡：2026-11-20 ｜ 状态：已结（2026-11-22）— 结论：用户接受 D 的兼容取舍；P 生产强制记为「以后做」并登记 triggers；审查：agent — 对照实施记录 + 定向复跑；可关闭：是 ｜ 类型：Feature ｜ 结论倾向：现在做
+> 归档：2026-11-22 ｜ 去向：implemented — [实现说明](../../../notes/implemented/2026-11-20-pack-production-prevention.md)；P → [triggers](../../triggers.md)
 
 **问题与期望结果：** 研究角色直接生产文件，部分确定性错误到包外审计或后续探索才被发现。希望把这类错误的解释与诊断集中，减少反复修同类输入的义务。完整方向是尽早发现坏产物；D 切片只完成 plan 节点表单次解释及既有消费者的正确使用，不声称已经阻止坏 plan 写入或派工，也不以 schema 合法代替研究质量。
 
@@ -23,7 +23,7 @@ opened: 2026-11-20
 | 判断 | 理由与对方案的约束 |
 |---|---|
 | **方向对：把确定性解释及其错误归到一个 Module** | 观察层与 gate 对同一表做两次解释，是已证局部成因；把列定位、原始值/规范值与诊断集中可删除调用者的重复知识。首片 Interface 应是纯输入→解析结果，不混入文件写入、Team 调用、UI 策略；测试和消费者经过该 Interface |
-| **一致不等于正确** | 两个消费者用同一错误 decoder 也会一致。必须按独立合同冻结 expected，分别证明字段解释与各消费者策略；见 [类级守卫 §旧性质](../methods/class-level-guards.md#01-旧性质随变更继承) |
+| **一致不等于正确** | 两个消费者用同一错误 decoder 也会一致。必须按独立合同冻结 expected，分别证明字段解释与各消费者策略；见 [类级守卫 §旧性质](../../methods/class-level-guards.md#01-旧性质随变更继承) |
 | **目前不支持把事务发布列为最低试点** | 现有证据支持解释收口，尚未证明需要自建发布操作及其接缝。任务创建、回填、快照、当前文件是不同副作用；不能用统一 decoder 证明它们可原子化 |
 | **首片的收益有限且要明说** | D 能减少解释漂移和后验门误判，不改变通用写入/派工链；距离“在生产源头强制预防”还有 P 的机制证据。若用户只接受生产强制收益，D 单独通过不满足该目标 |
 
@@ -31,14 +31,14 @@ opened: 2026-11-20
 
 | 已证事实 | owner / 证据 | 解释边界 |
 |---|---|---|
-| 节点表 canonical，Team task 是镜像；重写前保存旧版 | [plan 模板](../../packages/deep-research-pack/content/templates/run/plan.md)、[planning skill](../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md) §1/4/6 | 文本义务不是事务实现；task_id 是先建 task 后回填的会话映射 |
-| 观察层规范化表头和单元格，丢掉 budget 及空/显式占位符区别；gate 又按 raw table 查 budget/task_id | [plan-index](../../packages/deep-research-pack/src/lib/plan/plan-index.ts) `normalizeHeader/cellValue/planIndex`；[plan-gate](../../checks/lib/gates/plan-gate.mjs) 56–82 行 | gate 已有 active 字段门；显式 `—` 合法，不能为同源化丢掉该性质 |
+| 节点表 canonical，Team task 是镜像；重写前保存旧版 | [plan 模板](../../../packages/deep-research-pack/content/templates/run/plan.md)、[planning skill](../../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md) §1/4/6 | 文本义务不是事务实现；task_id 是先建 task 后回填的会话映射 |
+| 观察层规范化表头和单元格，丢掉 budget 及空/显式占位符区别；gate 又按 raw table 查 budget/task_id | [plan-index](../../../packages/deep-research-pack/src/lib/plan/plan-index.ts) `normalizeHeader/cellValue/planIndex`；[plan-gate](../../../checks/lib/gates/plan-gate.mjs) 56–82 行 | gate 已有 active 字段门；显式 `—` 合法，不能为同源化丢掉该性质 |
 | 普通 ID 和 `**ID**` 的观察节点相同，gate 分别 PASS / RED 缺 budget/task_id | [研究 §样本 1](../research/preventive-quality/2026-11-20-pack-production-prevention.md#样本-1plan-只读提示字段门补齐以及-active-budget-的旧性质)保存条件与完整结果；本机对照脚本当轮 exit 0 | 只证消费者差异；未证加粗 ID 必须合法，更未证生产坏计划已被派工 |
-| 缺 plan 与坏 plan 在观察层都可得到空索引；UI 可回退显示 Team tasks，硬门对在场空表 RED | [plan-index 测试](../../tests/cockpit/lib/plan/plan-index.spec.mjs)；[ResearchGraphTab](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx)；[plan-gate](../../checks/lib/gates/plan-gate.mjs) | 保留观察的可用性，不能把解析诊断变成 UI/整个 run 新硬阻断；门 P 缺席 N/A 不代替 schema-scan 在场级判断 |
-| 角色仍有通用 write/edit；包发布不包含整个 checks | [lead preset](../../packages/deep-research-pack/presets/lead.patch.yml)、[NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)、[manifest](../../packages/deep-research-pack/package.json) | 包内存在 parser 不等于装态存在硬门；推荐 publish 路径不等于强制唯一写方 |
-| 集中写操作已有实例，但不能直接借用其锁证明 CAS | [method-library-tool](../../packages/deep-research-pack/src/method-library-tool.ts)、[method-library-io](../../packages/deep-research-pack/src/method-library-io.ts)；[研究 §三](../research/preventive-quality/2026-11-20-pack-production-prevention.md#三现有源头能力到底证到哪里) | 是可行形态参考，不是 plan 操作合同或原子并发证明 |
+| 缺 plan 与坏 plan 在观察层都可得到空索引；UI 可回退显示 Team tasks，硬门对在场空表 RED | [plan-index 测试](../../../tests/cockpit/lib/plan/plan-index.spec.mjs)；[ResearchGraphTab](../../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx)；[plan-gate](../../../checks/lib/gates/plan-gate.mjs) | 保留观察的可用性，不能把解析诊断变成 UI/整个 run 新硬阻断；门 P 缺席 N/A 不代替 schema-scan 在场级判断 |
+| 角色仍有通用 write/edit；包发布不包含整个 checks | [lead preset](../../../packages/deep-research-pack/presets/lead.patch.yml)、[NODES](../../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)、[manifest](../../../packages/deep-research-pack/package.json) | 包内存在 parser 不等于装态存在硬门；推荐 publish 路径不等于强制唯一写方 |
+| 集中写操作已有实例，但不能直接借用其锁证明 CAS | [method-library-tool](../../../packages/deep-research-pack/src/method-library-tool.ts)、[method-library-io](../../../packages/deep-research-pack/src/method-library-io.ts)；[研究 §三](../research/preventive-quality/2026-11-20-pack-production-prevention.md#三现有源头能力到底证到哪里) | 是可行形态参考，不是 plan 操作合同或原子并发证明 |
 
-历史 267/282、260、312、150、097/114 的因果与当前修复核对见[研究 §二](../research/preventive-quality/2026-11-20-pack-production-prevention.md#二历史因果样本与当前代码核对)，不是新漏洞清单。快照历史来源真实性另属 [BUG-328](../bugs/BUG-328-plan-snapshot-same-text-only.md)，D 不宣称解决。
+历史 267/282、260、312、150、097/114 的因果与当前修复核对见[研究 §二](../research/preventive-quality/2026-11-20-pack-production-prevention.md#二历史因果样本与当前代码核对)，不是新漏洞清单。快照历史来源真实性另属 [BUG-328](../../bugs/BUG-328-plan-snapshot-same-text-only.md)，D 不宣称解决。
 
 ## 范围与方案取舍
 
@@ -60,14 +60,14 @@ evidence/findings、review/reader 等候选继续在[研究候选表](../researc
 
 | 真实 reader / owner | 当前决定与必须继承的性质 | 定向证据 owner |
 |---|---|---|
-| [useGraphFeed](../../packages/deep-research-pack/src/client/research-graph/useGraphFeed.ts) 当前/快照文本 → planIndex；[ResearchGraphTab](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) → planIssuesOf | 只读、不 throw；坏 plan 仍可观察任务及提示；无映射是未知，不冒充未执行/完成；快照不参与派工 | [plan-index](../../tests/cockpit/lib/plan/plan-index.spec.mjs)、[graph-model](../../tests/cockpit/lib/plan/graph-model.spec.mjs)、[plan-diff](../../tests/cockpit/lib/plan/plan-diff.spec.mjs)。hook 轮询/浏览器不是这些纯件测试所证 |
-| [graph-model](../../packages/deep-research-pack/src/lib/plan/graph-model.ts)、[plan-diff](../../packages/deep-research-pack/src/lib/plan/plan-diff.ts) | 精确 task_id/id 映射、不按后缀猜；active/墓碑、父子、差异及重编号语义继承 | 同名两份测试；图算法归 [plan-graph](../../tests/cockpit/lib/plan/plan-graph.spec.mjs) |
-| [plan-gate](../../checks/lib/gates/plan-gate.mjs) 当前/前版快照 → [node-gate-core](../../checks/lib/gates/node-gate-core.mjs) | 缺文件 N/A，在场空/畸形 RED；active 必填/墓碑豁免、hard/soft、版本/快照、剩余工作与 Wave/task 原性质保留；仅删除重复节点表解释 | [plan-gate](../../tests/run/gates/plan-gate.spec.mjs)；不得以标题声称已测全部 budget 状态 |
-| [protocol-audit-core](../../checks/lib/gates/protocol-audit-core.mjs)、[strategy-core](../../checks/lib/gates/strategy-core.mjs) → planIndex | Protocol 顶层节点/深度/Wave 上限；strategy 为派生观察，不判断领域策略好坏。**D 候选保持当前策略**：坏表仍可能投影为 nodes=0；这不是有效零投入的证据，必须同时看门 P/解析诊断，不把 strategy/protocol 单项绿作为表合法证明。把零值改 unknown 或新增 protocol 阻断不在首片，需另审输出兼容 | [protocol-core](../../tests/run/gates/protocol-core.spec.mjs)、[strategy-core](../../tests/run/gates/strategy-core.spec.mjs)；非法输入如何传播须在冻结合同中明确，不借此更改整个 protocol policy |
-| [client-load](../../checks/smoke/client-load.entry.mjs) 读取 planIndex 的 active 节点数 | 是消费面与必要时的真显示证据，不是派工保护点 | 原有 browser 入口；D 若不改显示/装配，不以额外浏览器演示代替纯件证据 |
-| [run-version](../../packages/deep-research-pack/src/lib/run/run-version.ts) 另读头部/重写记录版本 | **相关但本轮排除版本 codec 改造**；它不仅读节点表，头部与记录冲突要分别展示。不能声称“全部 plan 解释已统一” | [run-version 测试](../../tests/cockpit/lib/run/run-version.spec.mjs)保回归；如 D 必须改变版本读法则扩大范围前重审 |
+| [useGraphFeed](../../../packages/deep-research-pack/src/client/research-graph/useGraphFeed.ts) 当前/快照文本 → planIndex；[ResearchGraphTab](../../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) → planIssuesOf | 只读、不 throw；坏 plan 仍可观察任务及提示；无映射是未知，不冒充未执行/完成；快照不参与派工 | [plan-index](../../../tests/cockpit/lib/plan/plan-index.spec.mjs)、[graph-model](../../../tests/cockpit/lib/plan/graph-model.spec.mjs)、[plan-diff](../../../tests/cockpit/lib/plan/plan-diff.spec.mjs)。hook 轮询/浏览器不是这些纯件测试所证 |
+| [graph-model](../../../packages/deep-research-pack/src/lib/plan/graph-model.ts)、[plan-diff](../../../packages/deep-research-pack/src/lib/plan/plan-diff.ts) | 精确 task_id/id 映射、不按后缀猜；active/墓碑、父子、差异及重编号语义继承 | 同名两份测试；图算法归 [plan-graph](../../../tests/cockpit/lib/plan/plan-graph.spec.mjs) |
+| [plan-gate](../../../checks/lib/gates/plan-gate.mjs) 当前/前版快照 → [node-gate-core](../../../checks/lib/gates/node-gate-core.mjs) | 缺文件 N/A，在场空/畸形 RED；active 必填/墓碑豁免、hard/soft、版本/快照、剩余工作与 Wave/task 原性质保留；仅删除重复节点表解释 | [plan-gate](../../../tests/run/gates/plan-gate.spec.mjs)；不得以标题声称已测全部 budget 状态 |
+| [protocol-audit-core](../../../checks/lib/gates/protocol-audit-core.mjs)、[strategy-core](../../../checks/lib/gates/strategy-core.mjs) → planIndex | Protocol 顶层节点/深度/Wave 上限；strategy 为派生观察，不判断领域策略好坏。**D 候选保持当前策略**：坏表仍可能投影为 nodes=0；这不是有效零投入的证据，必须同时看门 P/解析诊断，不把 strategy/protocol 单项绿作为表合法证明。把零值改 unknown 或新增 protocol 阻断不在首片，需另审输出兼容 | [protocol-core](../../../tests/run/gates/protocol-core.spec.mjs)、[strategy-core](../../../tests/run/gates/strategy-core.spec.mjs)；非法输入如何传播须在冻结合同中明确，不借此更改整个 protocol policy |
+| [client-load](../../../checks/smoke/client-load.entry.mjs) 读取 planIndex 的 active 节点数 | 是消费面与必要时的真显示证据，不是派工保护点 | 原有 browser 入口；D 若不改显示/装配，不以额外浏览器演示代替纯件证据 |
+| [run-version](../../../packages/deep-research-pack/src/lib/run/run-version.ts) 另读头部/重写记录版本 | **相关但本轮排除版本 codec 改造**；它不仅读节点表，头部与记录冲突要分别展示。不能声称“全部 plan 解释已统一” | [run-version 测试](../../../tests/cockpit/lib/run/run-version.spec.mjs)保回归；如 D 必须改变版本读法则扩大范围前重审 |
 
-Lead 的“读 plan → 调 Team 工具”由 [planning skill](../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md)规定，不是上述观察 reader 的机器守卫。D 不改变这条调度链。
+Lead 的“读 plan → 调 Team 工具”由 [planning skill](../../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md)规定，不是上述观察 reader 的机器守卫。D 不改变这条调度链。
 
 ### D 支持域：先核合同，后冻结期望
 
@@ -143,20 +143,20 @@ Lead 的“读 plan → 调 Team 工具”由 [planning skill](../../packages/de
 
 | 编号 / 类 | 输入与正常/反面结果 | 信号、owner 与命令 | 人工判断 / 证明边界 |
 |---|---|---|---|
-| D1 字段解释（确定性） | 支持域逐族给 raw/presence/value/diagnostic 独立 expected；active 预算和任务缺/空/—、墓碑互补，合法样例不误红 | [plan-index](../../tests/cockpit/lib/plan/plan-index.spec.mjs) + [plan-gate](../../tests/run/gates/plan-gate.spec.mjs)；`node --import tsx/esm --test tests/cockpit/lib/plan/plan-index.spec.mjs tests/run/gates/plan-gate.spec.mjs`。已补 budget/task_id 缺列与空值断言（gate spec）。恢复第二读、丢占位区别及漏校验各自见红 | 新增支持/拒绝的公共行为由用户；既有性质正确性由独立合同判断 |
-| D2 消费策略与旧性质（确定性） | 当前/快照、旧图、映射/墓碑、差异、版本/投入、strategy；相同表字段同源，各 reader 结果符合自己的合同 | D1 与 [graph-model](../../tests/cockpit/lib/plan/graph-model.spec.mjs)、[plan-diff](../../tests/cockpit/lib/plan/plan-diff.spec.mjs)、[plan-graph](../../tests/cockpit/lib/plan/plan-graph.spec.mjs)、[protocol-core](../../tests/run/gates/protocol-core.spec.mjs)、[strategy-core](../../tests/run/gates/strategy-core.spec.mjs)、[run-version](../../tests/cockpit/lib/run/run-version.spec.mjs)。复用这些 owner 的定向 `node --import tsx/esm --test <files>`；每条受影响旧性质对应反例 | 无新业务判断；纯件只证调用逻辑，不证 hook 轮询、浏览器或调度 |
-| D3 真实使用（装配，按实际 diff） | 所有改动 reader 实际调用共用解释；真实门对坏 bundle RED、合法/缺席各按合同；不能只测 helper | [node-gate](../../checks/run-gates/node-gate.mjs) 入口对隔离 bundle 运行，用 `node --import tsx/esm checks/run-gates/node-gate.mjs <隔离 bundle 绝对路径> --sessions <空会话目录绝对路径> --no-write --no-review`，读取 stdout 的门 P 状态/诊断；当前 CLI 没有 `--json`。逐门断言 P，其他子门可能因不完整 bundle 为 RED/UNATTESTED，不以整体 exit 冒充 P 结果。若显示/locale/客户端装配有变化，按 [开发环](../../docs/guides/60-dev-loop.md)走 [client-load](../../checks/smoke/client-load.entry.mjs)真显示档；包结构改动再走 [release.entry](../../checks/smoke/release.entry.mjs) | 无新业务判断；入口只证所走面，不证装态生产强制。环境阻断写 NOT-RUN，不换 helper 冒充 |
+| D1 字段解释（确定性） | 支持域逐族给 raw/presence/value/diagnostic 独立 expected；active 预算和任务缺/空/—、墓碑互补，合法样例不误红 | [plan-index](../../../tests/cockpit/lib/plan/plan-index.spec.mjs) + [plan-gate](../../../tests/run/gates/plan-gate.spec.mjs)；`node --import tsx/esm --test tests/cockpit/lib/plan/plan-index.spec.mjs tests/run/gates/plan-gate.spec.mjs`。已补 budget/task_id 缺列与空值断言（gate spec）。恢复第二读、丢占位区别及漏校验各自见红 | 新增支持/拒绝的公共行为由用户；既有性质正确性由独立合同判断 |
+| D2 消费策略与旧性质（确定性） | 当前/快照、旧图、映射/墓碑、差异、版本/投入、strategy；相同表字段同源，各 reader 结果符合自己的合同 | D1 与 [graph-model](../../../tests/cockpit/lib/plan/graph-model.spec.mjs)、[plan-diff](../../../tests/cockpit/lib/plan/plan-diff.spec.mjs)、[plan-graph](../../../tests/cockpit/lib/plan/plan-graph.spec.mjs)、[protocol-core](../../../tests/run/gates/protocol-core.spec.mjs)、[strategy-core](../../../tests/run/gates/strategy-core.spec.mjs)、[run-version](../../../tests/cockpit/lib/run/run-version.spec.mjs)。复用这些 owner 的定向 `node --import tsx/esm --test <files>`；每条受影响旧性质对应反例 | 无新业务判断；纯件只证调用逻辑，不证 hook 轮询、浏览器或调度 |
+| D3 真实使用（装配，按实际 diff） | 所有改动 reader 实际调用共用解释；真实门对坏 bundle RED、合法/缺席各按合同；不能只测 helper | [node-gate](../../../checks/run-gates/node-gate.mjs) 入口对隔离 bundle 运行，用 `node --import tsx/esm checks/run-gates/node-gate.mjs <隔离 bundle 绝对路径> --sessions <空会话目录绝对路径> --no-write --no-review`，读取 stdout 的门 P 状态/诊断；当前 CLI 没有 `--json`。逐门断言 P，其他子门可能因不完整 bundle 为 RED/UNATTESTED，不以整体 exit 冒充 P 结果。若显示/locale/客户端装配有变化，按 [开发环](../../../docs/guides/60-dev-loop.md)走 [client-load](../../../checks/smoke/client-load.entry.mjs)真显示档；包结构改动再走 [release.entry](../../../checks/smoke/release.entry.mjs) | 无新业务判断；入口只证所走面，不证装态生产强制。环境阻断写 NOT-RUN，不换 helper 冒充 |
 | D4 义务减法与回归（确定性 + 业务判断） | gate 第二节点表读实际删除；重复纯件断言收敛但旧性质保留；合法矩阵无误红；无新 public publish/配置/第二存储 | diff、定向命令耗时、`pnpm verify` + `pnpm test`；修改代码必须类型检查。新 UI 诊断中英同步；不改模型工具/skill，模型证据 N/A，若实际扩面先重审 | 用户判断收益与维护成本；不拿测试数/BUG 数代替业务收益，不外推长期缺陷率 |
 
 ## 本轮实施记录（D 切片，`e646efbc`）
 
-实现说明与残余风险 = [implemented Note](../../notes/implemented/2026-11-20-pack-production-prevention.md)。机器证据在 `runtime/smoke-workspace/preventive-quality/`（运行区，不入库）。
+实现说明与残余风险 = [implemented Note](../../../notes/implemented/2026-11-20-pack-production-prevention.md)。机器证据在 `runtime/smoke-workspace/preventive-quality/`（运行区，不入库）。
 
 | 证据 | 层 / 覆盖的失败类 | 负控（见过红） | 结果 / 边界 |
 |---|---|---|---|
-| [plan-index 表事实与观察诊断](../../tests/cockpit/lib/plan/plan-index.spec.mjs) + [plan-gate 字段/装饰/占位](../../tests/run/gates/plan-gate.spec.mjs) | 确定性：缺席 vs 空白、占位 vs 缺失、短行、重复语义列、多表、伪表、转义管道、装饰、BOM/CRLF | 改前装饰用例实际 RED；六次源码变异各 1 红后还原 | 35/35、39/39 定向通过；`pnpm typecheck` exit 0。纯件不证浏览器/hook |
-| [node-gate 真入口](../../checks/run-gates/node-gate.mjs) 隔离 bundle | 装配：实际 run 门读取同一解码事实 | 无独立变异；坏/缺席/合法三态对照 | 合法与装饰表 P=PASS exit0；空白与多表 P=RED exit1；缺席 P=N/A exit0。聚合退出不冒充 P |
-| [GraphNotices 静态渲染](../../tests/cockpit/client/research-tabs.spec.mjs) | 显示：中英诊断文案与英文零 CJK | 文案删改即红 | 3/3 pass；不证浏览器加载 |
+| [plan-index 表事实与观察诊断](../../../tests/cockpit/lib/plan/plan-index.spec.mjs) + [plan-gate 字段/装饰/占位](../../../tests/run/gates/plan-gate.spec.mjs) | 确定性：缺席 vs 空白、占位 vs 缺失、短行、重复语义列、多表、伪表、转义管道、装饰、BOM/CRLF | 改前装饰用例实际 RED；六次源码变异各 1 红后还原 | 35/35、39/39 定向通过；`pnpm typecheck` exit 0。纯件不证浏览器/hook |
+| [node-gate 真入口](../../../checks/run-gates/node-gate.mjs) 隔离 bundle | 装配：实际 run 门读取同一解码事实 | 无独立变异；坏/缺席/合法三态对照 | 合法与装饰表 P=PASS exit0；空白与多表 P=RED exit1；缺席 P=N/A exit0。聚合退出不冒充 P |
+| [GraphNotices 静态渲染](../../../tests/cockpit/client/research-tabs.spec.mjs) | 显示：中英诊断文案与英文零 CJK | 文案删改即红 | 3/3 pass；不证浏览器加载 |
 | `pnpm verify` + `pnpm test` + `pnpm build` | L0：引用/形状、现有回归、构建 | 无新增门禁变异 | verify exit0；1435 spec + 265 checks，0 fail/skip；build exit0 |
 | `client-load.entry --seed` | 真浏览器装配回归 | 无坏表种子，不能证明新诊断显示 | **NOT-RUN**：主机 load 3.62 > 1.5，exit 2；未跑 ≠ 通过 |
 | 生产写入/派工拒绝、并发恢复、安装形态、模型 | P / 其余层 | — | 未运行；D 不声称这些 |
@@ -175,13 +175,13 @@ P 先回答“在哪里真正阻止使用非法 plan”，再设计工具，不�
 
 **去向：** D 的持久理由已由 implemented Note 承载；业务验收归用户。P 的后续选择留本卡依赖分支，以后做/不做需用户明确裁决并记录重议 owner。
 
-**关闭条件：** 用户对 D 的业务结果与兼容取舍给出明确答复，且 P 的重议去向被记录后，按 [结论去向](../methods/issue-to-note.md)与归档规则关闭。机械绿、文档齐全或第一切片绿均不等于整 Feature 完成。
+**关闭条件：** 用户对 D 的业务结果与兼容取舍给出明确答复，且 P 的重议去向被记录后，按 [结论去向](../../methods/issue-to-note.md)与归档规则关闭。机械绿、文档齐全或第一切片绿均不等于整 Feature 完成。
 
 ## 审查与实际证据
 
 建卡提交 `0d67a076`：独立审查 `03a87bb3` 修正真实测试路径后无文档交付 blocker；`pnpm verify` exit 0，`pnpm test` exit 0（1423 spec + 265 checks，0 fail/skip）。这些是文档及现有回归证据，不是 D/P 实现结果。
 
-本轮思想审查以 `0d67a076` 为基线，调用 [reviewing-a-delivery](../../.agents/skills/reviewing-a-delivery/SKILL.md) 并读完整 codebase-design/DEEPENING。按 [整理方案](../methods/requirements-synthesis.md)只读完整本地 to-spec 作来源适配，未注册调用、不执行其远端发布/自动 ready 默认。两名独立审阅者 `ce1ebf9b` / `535a040b` 均认为方向成立但首片过宽；本版分开 D/P，补状态/支持域/reader 和独立 oracle。修订后定向复核确认 D/P 拆分成立；提出的 task_id 占位/终态差异、strategy 零值投影限制与 node-gate CLI 参数均已核源码并修订。两项仍阻 ready 的准备是兼容取舍确认与独立 expected 最终冻结，不阻本轮 review/卡片提交。`pnpm verify` exit 0；`pnpm test` exit 0（1423 spec + 265 checks，0 fail/skip），本机输出 `runtime/smoke-workspace/preventive-quality/issue-review-test.out`。
+本轮思想审查以 `0d67a076` 为基线，调用 [reviewing-a-delivery](../../../.agents/skills/reviewing-a-delivery/SKILL.md) 并读完整 codebase-design/DEEPENING。按 [整理方案](../../methods/requirements-synthesis.md)只读完整本地 to-spec 作来源适配，未注册调用、不执行其远端发布/自动 ready 默认。两名独立审阅者 `ce1ebf9b` / `535a040b` 均认为方向成立但首片过宽；本版分开 D/P，补状态/支持域/reader 和独立 oracle。修订后定向复核确认 D/P 拆分成立；提出的 task_id 占位/终态差异、strategy 零值投影限制与 node-gate CLI 参数均已核源码并修订。两项仍阻 ready 的准备是兼容取舍确认与独立 expected 最终冻结，不阻本轮 review/卡片提交。`pnpm verify` exit 0；`pnpm test` exit 0（1423 spec + 265 checks，0 fail/skip），本机输出 `runtime/smoke-workspace/preventive-quality/issue-review-test.out`。
 
 | 证据 | 层 / 失败类 | 负控与证明边界 | 结果 |
 |---|---|---|---|
@@ -190,3 +190,14 @@ P 先回答“在哪里真正阻止使用非法 plan”，再设计工具，不�
 | 本轮文档 verify/test | L0：引用/形状与现有回归 | 不新增机器判据，不注入产品变异；不证候选成立 | exit 0；1423 + 265，0 fail/skip；提交仍走正常钩子 |
 
 够了判据（D 交付 + 本卡收尾）：会红＝装饰缺口改前实红、四次变异各自见红；真入口＝node-gate 隔离 bundle 三态实跑（浏览器显示 NOT-RUN）；验世界＝磁盘 bundle 的 P 状态与退出码、负控后源码逐字节还原；模型可见钉住＝N/A（未改模型面）；最低层＝纯件 + 真实 run 门 + SSR；skip 可见＝浏览器/安装/模型/P 未跑与已跑分列，0 skip 不包含它们；可重复＝仓内命令、输入与输出路径在运行区。生产写入、派工拒绝、并发恢复、安装形态与模型仍未运行；D 只证明节点表解释与现有消费面，不证明整 Feature。
+
+## 结案记录（2026-11-22）
+
+用户 2026-11-22 对 D 与 P 分别拍板：
+
+- **D 接受。** 用户接受 D 的有限收益与其兼容取舍：装饰表头/ID 进入 gate 支持域；多表、重复语义列、错列、转义管道成为明确拒绝。这不改变 D 不声称阻止坏 plan 写入或派工的范围边界。
+- **P 记为「以后做」。** D 只统一节点表解释，通用 write/edit、Task 创建/回填与派工链仍未受保护；重议条件（真实 run 出现坏 plan 被派工，或消费方因此误判）登记于 [triggers](../../triggers.md)。
+
+归档复核（本次只做定向复跑，不重跑浏览器/安装/模型档）：`node --import tsx/esm --test tests/cockpit/lib/plan/plan-index.spec.mjs tests/run/gates/plan-gate.spec.mjs` → 36/36 pass（2026-11-22）。实施证据仍以 `e646efbc` 与本卡「本轮实施记录」为准。
+
+去向载体成立：implemented Note 已在；P 的可观察重议条件在 triggers。研究材料随卡迁至 [_archived/research/preventive-quality/](../research/preventive-quality/README.md)。

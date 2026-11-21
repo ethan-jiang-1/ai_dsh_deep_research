@@ -1,17 +1,17 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-20
 ---
 
 # 预防性质量落地：有限准入与启动互斥实证
 
-> 立卡：2026-11-20 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做（首批同时落开发环与工程实证） ｜ 可关闭：否
+> 立卡：2026-11-20 ｜ 状态：已结（2026-11-22）— 结论：用户接受首批 A+B 交付；A4 盲评失败如实留档（规则效力未证）；审查：agent — 对照实施记录 + 定向复跑；可关闭：是 ｜ 类型：Task ｜ 结论倾向：现在做
 
-> 去向：implemented — 分批交付（B 技术决定已有 Note；A4 与首批整体验收仍待定）。业务验收 owner = 用户，技术证据 owner = 实施 agent。此行不表示卡片可关闭；当前 B Note 见上文链接。
+> 归档：2026-11-22 ｜ 去向：implemented — [首批 Note](../../../notes/implemented/2026-11-20-preventive-quality-pilot.md)；业务验收：用户（2026-11-22 接受首批，A4 失败留档）
 
 **问题与期望结果：** 已有 D54/D55、类级守卫和多轮修复，新启动锁仍重犯活 owner 被时间接管、旧 release 删除新锁、两个入口各自锁定等已知问题。要把保障前移到新行为引入阶段，让公共操作与可执行性质减少重复缺陷和调用义务；探索用于预算内发现新假设，同一已声明性质不再每轮靠探索首检。
 
-**当前情况：** 2026-11-20 研究结论与证据已评审，实施记录见本卡下方及[首批 Note](../../notes/implemented/2026-11-20-preventive-quality-pilot.md)；[研究题](../research/preventive-quality/README.md)保存依据，[综合](../research/preventive-quality/2026-11-20-prevention-synthesis.md)解释取舍，[详细落地方案](../research/preventive-quality/2026-11-20-repo-landing-plan.md)展开文件映射。本批技术改动已进入工作树，12 项真进程正向回归 exit 0，`pnpm test` 为 spec 1423 / checks 265、零失败零 skip，`pnpm verify` 全绿 exit 0；A4 未通过，最终版负控复跑因沙箱限制未跑。本卡继续保持 `待落地`、`可关闭：否`。首批 A+B 不称整体完成，也未取得用户业务验收。
+**当前情况：** 2026-11-20 研究结论与证据已评审，实施记录见本卡下方及[首批 Note](../../../notes/implemented/2026-11-20-preventive-quality-pilot.md)；[研究题](../research/preventive-quality/README.md)保存依据，[综合](../research/preventive-quality/2026-11-20-prevention-synthesis.md)解释取舍，[详细落地方案](../research/preventive-quality/2026-11-20-repo-landing-plan.md)展开文件映射。本批技术改动已进入工作树，12 项真进程正向回归 exit 0，`pnpm test` 为 spec 1423 / checks 265、零失败零 skip，`pnpm verify` 全绿 exit 0；A4 未通过，最终版负控复跑因沙箱限制未跑。本卡当时保持 `待落地` 与不可关闭状态。首批 A+B 不称整体完成，也未取得用户业务验收。
 
 **实施合同：** 基线 `48d57835`。2026-11-20 用户授权按本卡自主落地；测试接缝为公共 acquire/release Interface、两个公开 CLI 的真进程与隔离外部适配器，以及预封存非锁准入案例。启动操作保护 canonical state 与实际 dev home，固定顺序取得，持到服务组静默；同 home 的不同 profile/state 不并行，独立 home/state 可并行，端口最终由 OS bind 裁决。准备模式同样持锁；`--drift-only` 不持服务锁，仅读取镜像与原子发布可丢弃缓存。
 
@@ -34,16 +34,16 @@ opened: 2026-11-20
 
 | 部分 | 现有 owner 与预期改动 | 执行结果 |
 |---|---|---|
-| A：实施前识别 | [guides/60](../../docs/guides/60-dev-loop.md)任务型路由/验收门：对新增或改变 parser、机器判据、资源所有权/生命周期、共享事实写方、生产者/消费者集合、角色能力与模型可见行为，查已有 Module/Interface、旧性质和全部受影响入口 | 在既有验收记录说明复用或新建理由、正常与失败后的外部结果；普通改名、闭集常量投影、无新语义整理有免触发对照 |
-| A：交付核对 | [guides/67](../../docs/guides/67-test-strategy.md)明确五关证明边界；[reviewing-a-delivery](../../.agents/skills/reviewing-a-delivery/SKILL.md)据真实 diff 核验继承与参与；[类级方法](../methods/class-level-guards.md)吸收本仓实证 | 不以表/标题/分类当充分证据；技能修改按 `writing-for-agents` 检查触发、可发现性与上下文成本 |
-| A：探索退出 | [exploratory-verification](../../.agents/skills/exploratory-verification/SKILL.md)沿既有流程固定范围、版本、预算及重议条件 | 区分新类、旧类迁移遗漏、明确域外与误报；不因还可能有 bug 自动续轮 |
-| B：唯一拥有操作 | [start-lock](../../checks/lib/channel/start-lock.mjs)、[run-driver](../../tools/channel/run-driver.mjs)、[boot-run](../../tools/channel/boot-run.sh)，必要时同 owner 提取支撑件 | 两公开入口委托同一启动操作，集中取得/接管/释放；删除被替代的 shell 协议；保持正常启动、复用与检查 |
-| B：可执行性质 | [start-lock 测试](../../tests/checks/channel/start-lock.test.mjs)、[现有入口契约](../../tests/run/channel/run-driver-contract.spec.mjs)与合适的真进程车道 | 低层性质进 `pnpm test`；跨入口/退出用隔离真进程，静态 includes 不替代执行；按[smoke registry](../../checks/smoke/registry.json)落定影响触发与频率 |
-| B：交付减法 | [guard-ledger](../../tests/fixtures/guard-ledger/ledger.json)、[asset-ledger](../../tests/fixtures/asset-ledger/ledger.json)、相关缺陷卡及交付 Note | 记录实际证明范围，退役重复实现/义务/无独立价值的测试；不以 ledger 更新替代行为证据 |
+| A：实施前识别 | [guides/60](../../../docs/guides/60-dev-loop.md)任务型路由/验收门：对新增或改变 parser、机器判据、资源所有权/生命周期、共享事实写方、生产者/消费者集合、角色能力与模型可见行为，查已有 Module/Interface、旧性质和全部受影响入口 | 在既有验收记录说明复用或新建理由、正常与失败后的外部结果；普通改名、闭集常量投影、无新语义整理有免触发对照 |
+| A：交付核对 | [guides/67](../../../docs/guides/67-test-strategy.md)明确五关证明边界；[reviewing-a-delivery](../../../.agents/skills/reviewing-a-delivery/SKILL.md)据真实 diff 核验继承与参与；[类级方法](../../methods/class-level-guards.md)吸收本仓实证 | 不以表/标题/分类当充分证据；技能修改按 `writing-for-agents` 检查触发、可发现性与上下文成本 |
+| A：探索退出 | [exploratory-verification](../../../.agents/skills/exploratory-verification/SKILL.md)沿既有流程固定范围、版本、预算及重议条件 | 区分新类、旧类迁移遗漏、明确域外与误报；不因还可能有 bug 自动续轮 |
+| B：唯一拥有操作 | [start-lock](../../../checks/lib/channel/start-lock.mjs)、[run-driver](../../../tools/channel/run-driver.mjs)、[boot-run](../../../tools/channel/boot-run.sh)，必要时同 owner 提取支撑件 | 两公开入口委托同一启动操作，集中取得/接管/释放；删除被替代的 shell 协议；保持正常启动、复用与检查 |
+| B：可执行性质 | [start-lock 测试](../../../tests/checks/channel/start-lock.test.mjs)、[现有入口契约](../../../tests/run/channel/run-driver-contract.spec.mjs)与合适的真进程车道 | 低层性质进 `pnpm test`；跨入口/退出用隔离真进程，静态 includes 不替代执行；按[smoke registry](../../../checks/smoke/registry.json)落定影响触发与频率 |
+| B：交付减法 | [guard-ledger](../../../tests/fixtures/guard-ledger/ledger.json)、[asset-ledger](../../../tests/fixtures/asset-ledger/ledger.json)、相关缺陷卡及交付 Note | 记录实际证明范围，退役重复实现/义务/无独立价值的测试；不以 ledger 更新替代行为证据 |
 
 复用现有开发环和证据表；不新增全仓同类分类器、强制质量字段、常驻总账、测试 DSL 或第六关。不提高日常全量慢检查频率。首批不改研究内容合同、不启动当前 GUI；自动回归不引入真模型依赖，A4 另行记录实施上下文的模型行为观察，也不顺手处理 BUG-328/329/330 的其他合同选择。
 
-本卡引用[低置信区第 9 轮](2026-11-19-low-confidence-40.md)的缺陷事实；相关缺陷的状态和修复证据仍归各卡，不因本卡转 ready 而宣布修复。实施若吸收这些卡，须按已有 fix-evidence 与同变更规则逐项核对真实证明面。
+本卡引用[低置信区第 9 轮](../../issues/2026-11-19-low-confidence-40.md)的缺陷事实；相关缺陷的状态和修复证据仍归各卡，不因本卡转 ready 而宣布修复。实施若吸收这些卡，须按已有 fix-evidence 与同变更规则逐项核对真实证明面。
 
 ## 方案与取舍
 
@@ -75,15 +75,15 @@ opened: 2026-11-20
 
 ## 验收标准
 
-以下是首批质量合同，按[验收设计](../methods/validation-design.md)区分确定性逻辑、编排与模型行为。技术证据由 agent 记录，用户判断只承担业务价值、成本与结果接受，不让机械通过代替它。
+以下是首批质量合同，按[验收设计](../../methods/validation-design.md)区分确定性逻辑、编排与模型行为。技术证据由 agent 记录，用户判断只承担业务价值、成本与结果接受，不让机械通过代替它。
 
 | 编号 / 行为 | 类别与输入/状态 | 通过、失败与独立期望 | 负控 / 恢复 | 证据 owner 与执行方式 | 人工判断 |
 |---|---|---|---|---|---|
-| A1 既有性质约束新操作 | 确定性；临时状态根，活 owner 超龄、旧 release、创建失败、正常 acquire/release | 依本卡不变量：活 owner 不因年龄失权；旧 release 不删新 owner；失败不报取得成功、不改他人状态；正常取得和释放通过。任一违反即失败 | 用旧实现复现前两项；创建失败用故障注入；以假时钟/屏障控制交错，不用长 sleep 或确定性 retry | [start-lock 测试](../../tests/checks/channel/start-lock.test.mjs)，`pnpm test`；沿公共 Interface 读实际文件系统，不抄算法作为 expected | 无；原语、目录格式与内部接缝由 agent 设计 |
-| A2 真入口参与且生命周期完整 | 编排；隔离 state root 的直起/代理启动竞争，正常启动、检查/复用、失败/取消 | 两公开入口在同资源上至多一个启动权；合法检查/复用成功；失败/取消后资源和子进程已收束。helper 绿或源码 includes 不计此行通过 | 恢复独立 shell 锁或绕委托，同一 runner 必须红；保留合法启动与清理对照 | 真进程车道，候选路径 `checks/smoke/channel-start.e2e.mjs`；若复用现有资产，在第 1 步将实际命令及路径回填本卡；按[registry](../../checks/smoke/registry.json)登记，交付前必须实跑 | 无；不启动当前 GUI、不调用研究模型 |
+| A1 既有性质约束新操作 | 确定性；临时状态根，活 owner 超龄、旧 release、创建失败、正常 acquire/release | 依本卡不变量：活 owner 不因年龄失权；旧 release 不删新 owner；失败不报取得成功、不改他人状态；正常取得和释放通过。任一违反即失败 | 用旧实现复现前两项；创建失败用故障注入；以假时钟/屏障控制交错，不用长 sleep 或确定性 retry | [start-lock 测试](../../../tests/checks/channel/start-lock.test.mjs)，`pnpm test`；沿公共 Interface 读实际文件系统，不抄算法作为 expected | 无；原语、目录格式与内部接缝由 agent 设计 |
+| A2 真入口参与且生命周期完整 | 编排；隔离 state root 的直起/代理启动竞争，正常启动、检查/复用、失败/取消 | 两公开入口在同资源上至多一个启动权；合法检查/复用成功；失败/取消后资源和子进程已收束。helper 绿或源码 includes 不计此行通过 | 恢复独立 shell 锁或绕委托，同一 runner 必须红；保留合法启动与清理对照 | 真进程车道，候选路径 `checks/smoke/channel-start.e2e.mjs`；若复用现有资产，在第 1 步将实际命令及路径回填本卡；按[registry](../../../checks/smoke/registry.json)登记，交付前必须实跑 | 无；不启动当前 GUI、不调用研究模型 |
 | A3 保留多实现时不漏执行 | 确定性 + 编排；仅当设计确认必须保留不同实现 | 该家族实际执行身份集合精确等于批准集合，且逐个满足适用性质；缺一个或未执行性质即失败 | 漏适配一个批准实现应被发现；逐个注入旧错误均判红。若只保留一个实现，记录批准集合与此项不适用理由 | 同 A1/A2 的实际 suite；不新增全仓实现注册账 | 无；不能为统一而牺牲已确认语义 |
 | A4 有限准入提前识别遗漏且不过度触发 | 模型行为 + 开发环编排；预先封存一个非锁 parser/新消费者 diff，以及一个无新语义的改名/闭集常量 diff | 盲评输出须指出预设的旧性质、遗漏入口及所需证据，并豁免对照；漏任一预设项或强制对照扩流程即失败。expected 由案例作者在运行前封存，不能看输出再改答案 | 正例故意仅带 happy-path 测试/漏消费者；对照保持语义不变。失败如实记录，不增加样本刷通过 | 案例、expected、完整输出与逐项判读存入本研究题的新材料，并登记题名页；未参与起草/调优的上下文只读修订开发环与案例。记录模型/版本/输入/次数；这是实际模型观察，不把 keyless 当替代 | 独立评审者判断输出是否命中封存项；用户判断这项成本与收益是否可接受。单对样本仅证明该对，不外推长期收益 |
-| A5 保障进入对应执行车道 | 编排；A1–A4 的资产及触发说明 | A1 由 `pnpm test` 执行；A2/A3 真进程命令、按影响触发与 CI 频率准确登记；A4 是本次明确模型观察。manual/nightly 不写为默认 required | 真入口负控见 A2；改门禁才跑对应 `gates.e2e --gate`；未跑/skip 单列 | [guides/60](../../docs/guides/60-dev-loop.md)与实际 registry/CI；收尾 `pnpm verify`、`pnpm test`，按影响实跑 A2 | 无；不新增日常全量慢检查 |
+| A5 保障进入对应执行车道 | 编排；A1–A4 的资产及触发说明 | A1 由 `pnpm test` 执行；A2/A3 真进程命令、按影响触发与 CI 频率准确登记；A4 是本次明确模型观察。manual/nightly 不写为默认 required | 真入口负控见 A2；改门禁才跑对应 `gates.e2e --gate`；未跑/skip 单列 | [guides/60](../../../docs/guides/60-dev-loop.md)与实际 registry/CI；收尾 `pnpm verify`、`pnpm test`，按影响实跑 A2 | 无；不新增日常全量慢检查 |
 | A6 交付减少义务且成本有依据 | 确定性证据 + 人工价值判断；同范围实施前后 diff、命令耗时及误报记录 | 删除被替代的 shell 协议、逐入口释放义务及无独立证明面的重复例；保留必要证明。只有新增规则/注释/账目，或目标回归仍靠探索首检，判未兑现 | 核对 A1/A2 红绿及删除清单；若无净义务减法或成本不可接受，停止扩面并记录原因 | 本卡执行记录、实际 diff、交付理由载体；一次性工时与常驻耗时分开记录，不用 BUG/closed 数作收益 | 用户接受首批价值与成本；agent 不自验业务收益 |
 
 第 1 步先固定资源身份、生命周期及恢复策略，再绑定有限性质与 A2 实际 runner；具体存储原语/Interface 是技术设计待办。若事实迫使改变本卡承诺或验收，先回卡修订并重新判定 ready，不在实现后调整期望迁就代码。A4 消费实施 agent 的实际上下文，不额外启动研究 run 或默认付费 API 车道。
@@ -99,7 +99,7 @@ opened: 2026-11-20
 | 独立角色工具集合 | 下一次角色工具职责变化或装配缺口；真 Loader 有效能力对独立职责期望精确比较，和 B 请求漂移证据分工 |
 | 其他状态/解析家族 | 第一批已提前拦错且减少义务，再一次推广一个家族；替换旧证明，记录相同尺度成本，不展开整仓迁移 |
 
-这些是研究建议，未启动，也未作为已批准延后事项。它们不计本卡首批关闭验收；本卡活跃时，相关事实与决定继续同步。首批交付时，仅将仍有价值且已确认的观察条件移交实际 owning Note 或 [triggers](../triggers.md)并记去向；未采用项明确记 none。已结后出现新触发，建引用本卡的新卡，不重开或继续扩写已结卡。
+这些是研究建议，未启动，也未作为已批准延后事项。它们不计本卡首批关闭验收；本卡活跃时，相关事实与决定继续同步。首批交付时，仅将仍有价值且已确认的观察条件移交实际 owning Note 或 [triggers](../../triggers.md)并记去向；未采用项明确记 none。已结后出现新触发，建引用本卡的新卡，不重开或继续扩写已结卡。
 
 ## 研究验证、实施验证与关闭条件
 
@@ -141,4 +141,14 @@ opened: 2026-11-20
 
 ## 本卡质量复核
 
-2026-11-20 按[问题加工](../README.md#入口两张票)、[验收设计](../methods/validation-design.md)与[去向规则](../methods/issue-to-note.md)复核：原卡载体和 ready 结构成立，但模型准入行为缺独立期望/输出/裁决，首批关闭与后续观察边界混杂。已补 A1–A6 行为与证据分工、A4 盲评记录、首批关闭及已结后新卡规则；保留 `待落地` / `可关闭：否`。这次复核修正文档质量，不代表任何实施判据已通过。
+2026-11-20 按[问题加工](../../README.md#入口两张票)、[验收设计](../../methods/validation-design.md)与[去向规则](../../methods/issue-to-note.md)复核：原卡载体和 ready 结构成立，但模型准入行为缺独立期望/输出/裁决，首批关闭与后续观察边界混杂。已补 A1–A6 行为与证据分工、A4 盲评记录、首批关闭及已结后新卡规则；保留 `待落地` / `可关闭：否`。这次复核修正文档质量，不代表任何实施判据已通过。
+
+## 结案记录（2026-11-22）
+
+用户 2026-11-22 接受首批 A+B 交付：低层 5 项启动锁性质、12 项真进程正向回归与当轮 `pnpm verify`/`pnpm test` 记录按原样成立。A4 盲评失败（Case B 标题标签泄露、受测者未获准入 guide/skill，规则效力未证）如实留档，不刷样本、不改 expected；A4 不构成本批交付缺陷，但也不证明有限准入规则有效。
+
+后续候选去向（按卡上「后续阶段按什么触发」）：plan 严格 decoder/写入所有权 → 并入[生产源头预防卡的 P 分支](2026-11-20-pack-production-prevention.md)与其 triggers 行；一个研究交付终态场景、独立角色工具集合、其他状态解析家族 → **none**（未采用，也未作为已批准延后事项）。
+
+归档复核（本次只做定向复跑，不重跑真进程 runner/浏览器/模型档）：`node --import tsx/esm --test tests/checks/channel/start-lock.test.mjs` → 5/5 pass（2026-11-22）。实施证据仍以 `71010fef`、本卡「本批实施记录（2026-11-20）」与[首批 Note](../../../notes/implemented/2026-11-20-preventive-quality-pilot.md)为准。
+
+去向载体成立：implemented Note 已在；两个有界复核窗口按卡上原判定不阻止关闭，未安排、不预称。研究材料随卡迁至 [_archived/research/preventive-quality/](../research/preventive-quality/README.md)。

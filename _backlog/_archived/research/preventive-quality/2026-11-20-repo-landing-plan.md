@@ -9,11 +9,11 @@ intent: 把预防性质量研究收敛为本仓既有开发环、状态操作与
 
 一次新功能或机制提交前，能够回答：它改变什么承诺、是否重建了已有机制、旧不变量是否仍成立、哪些真实入口参与，以及证据明确不证明什么。日常执行的保障来自公共操作与测试，设计选择由有范围的语义审查承担。探索只用于未枚举的输入和新假设，不再为同一已声明性质承担每轮首检。
 
-这是一份研究阶段的待实施方案。后续范围、顺序、验收与进度以[承接卡](../../issues/2026-11-20-preventive-quality-pilot.md)为统一入口；本材料保留细节与理由，实施时同卡核对。本轮只改研究、承接卡与引用登记，不修改以下现行 owner。研究由[综合稿](2026-11-20-prevention-synthesis.md)、[复发链](2026-11-20-recurrence-audit.md)、[原生证据](2026-11-20-native-quality-evidence.md)与[准入审计](2026-11-20-change-admission-audit.md)支撑；实施消费者为[承接卡](../../issues/2026-11-20-preventive-quality-pilot.md)。
+这是一份研究阶段的待实施方案。后续范围、顺序、验收与进度以[承接卡](../../settled_issues/2026-11-20-preventive-quality-pilot.md)为统一入口；本材料保留细节与理由，实施时同卡核对。本轮只改研究、承接卡与引用登记，不修改以下现行 owner。研究由[综合稿](2026-11-20-prevention-synthesis.md)、[复发链](2026-11-20-recurrence-audit.md)、[原生证据](2026-11-20-native-quality-evidence.md)与[准入审计](2026-11-20-change-admission-audit.md)支撑；实施消费者为[承接卡](../../settled_issues/2026-11-20-preventive-quality-pilot.md)。
 
 ## 1. 缺的不是原则，而是两种连接
 
-[guides/67](../../../docs/guides/67-test-strategy.md)已有「变更类」「消费者」「状态交错」「先红后绿」。[bug-to-fix](../../methods/bug-to-fix.md)要求同机制第二次作类修；但它的输入是已有 bug 卡。[guides/60](../../../docs/guides/60-dev-loop.md)新纯件路径主要要求直测；[test-surface](../../../tests/checks/test-infra/test-surface.test.mjs)也明确只证 AST 直接 import、不证质量。[pre-commit](../../../tools/hooks/pre-commit)不消费语义自审的证据账本。
+[guides/67](../../../../docs/guides/67-test-strategy.md)已有「变更类」「消费者」「状态交错」「先红后绿」。[bug-to-fix](../../../methods/bug-to-fix.md)要求同机制第二次作类修；但它的输入是已有 bug 卡。[guides/60](../../../../docs/guides/60-dev-loop.md)新纯件路径主要要求直测；[test-surface](../../../../tests/checks/test-infra/test-surface.test.mjs)也明确只证 AST 直接 import、不证质量。[pre-commit](../../../../tools/hooks/pre-commit)不消费语义自审的证据账本。
 
 需要连接的是：**把已有失败类与新行为相连，把声称覆盖的性质与真正执行的调用路径相连。** 只添加一个 `failureClass` 字段、把测试名改成 conformance、增加一份批准清单，都无法自动完成这两种连接。
 
@@ -29,28 +29,28 @@ intent: 把预防性质量研究收敛为本仓既有开发环、状态操作与
 
 | 现有拥有文件 | 候选具体改动 | 不能只做什么 |
 |---|---|---|
-| [guides/60 任务型路由](../../../docs/guides/60-dev-loop.md) | 在实施前识别上述触发，定位已有 Module/Interface；列本次受影响调用者、复用/新建的理由，以及正常/失败后的外部结果；证据进入已有验收记录 | 不只加「必须更认真测试」一行；不要求所有编辑立卡 |
-| [guides/67 五关](../../../docs/guides/67-test-strategy.md) | 把准入对象从「测试资产值得存在吗」补到「新机制如何继承旧类保障」；明确直测/分类/closed 的证明范围，链接实际行为证据 | 不造第六关、第五账或新增质量 D 号作为主成果 |
-| [reviewing-a-delivery](../../../.agents/skills/reviewing-a-delivery/SKILL.md) | 对触发面核对真实 diff：新实现是否绕开旧 owner，入口是否参与，目标反例是否由实际命令拒绝；不能回答时降低结论并记录原因 | 不把「有表」「有标题」「类型为 external」判为已证 |
-| [class-level-guards](../../methods/class-level-guards.md) | 增加一个本仓实际交付的「新 Module 继承旧不变量」实例，链接公共操作、运行测试与入口反证 | 不复制综合稿或全套矩阵；方法只留可复用判断 |
-| [exploratory-verification](../../../.agents/skills/exploratory-verification/SKILL.md) | 固定承诺面、版本和预算；先判新类/旧类迁移遗漏/域外/误报；预算与质量验收分开结束 | 不把「再找一批」当默认续轮，也不声称没找到等于无 bug |
+| [guides/60 任务型路由](../../../../docs/guides/60-dev-loop.md) | 在实施前识别上述触发，定位已有 Module/Interface；列本次受影响调用者、复用/新建的理由，以及正常/失败后的外部结果；证据进入已有验收记录 | 不只加「必须更认真测试」一行；不要求所有编辑立卡 |
+| [guides/67 五关](../../../../docs/guides/67-test-strategy.md) | 把准入对象从「测试资产值得存在吗」补到「新机制如何继承旧类保障」；明确直测/分类/closed 的证明范围，链接实际行为证据 | 不造第六关、第五账或新增质量 D 号作为主成果 |
+| [reviewing-a-delivery](../../../../.agents/skills/reviewing-a-delivery/SKILL.md) | 对触发面核对真实 diff：新实现是否绕开旧 owner，入口是否参与，目标反例是否由实际命令拒绝；不能回答时降低结论并记录原因 | 不把「有表」「有标题」「类型为 external」判为已证 |
+| [class-level-guards](../../../methods/class-level-guards.md) | 增加一个本仓实际交付的「新 Module 继承旧不变量」实例，链接公共操作、运行测试与入口反证 | 不复制综合稿或全套矩阵；方法只留可复用判断 |
+| [exploratory-verification](../../../../.agents/skills/exploratory-verification/SKILL.md) | 固定承诺面、版本和预算；先判新类/旧类迁移遗漏/域外/误报；预算与质量验收分开结束 | 不把「再找一批」当默认续轮，也不声称没找到等于无 bug |
 
 运行载体仍是现有实施记录与交付证据表，不新增强制 YAML 声明、全仓自动分类器或每次 commit 运行的全量变异系统。技能修改需同批按 `writing-for-agents` 设计其触发、信息发现和上下文成本；本轮未改技能。
 
 ### B. 用启动互斥证明准入会改变结果
 
-实际调用链是 [run-driver up](../../../tools/channel/run-driver.mjs)取得自己的锁后启动 [boot-run](../../../tools/channel/boot-run.sh)，后者还有自己的 shell 锁。直接把两个锁路径改成一样会令父子相互阻塞。只读 `--drift-only` 目前经过 shell 建锁，而后面的 cleanup 又覆盖早期释放 trap；因此必须先区分检查、准备、启动与持续运行的生命周期。
+实际调用链是 [run-driver up](../../../../tools/channel/run-driver.mjs)取得自己的锁后启动 [boot-run](../../../../tools/channel/boot-run.sh)，后者还有自己的 shell 锁。直接把两个锁路径改成一样会令父子相互阻塞。只读 `--drift-only` 目前经过 shell 建锁，而后面的 cleanup 又覆盖早期释放 trap；因此必须先区分检查、准备、启动与持续运行的生命周期。
 
 建议最小设计方向：启动相关的可变状态由一个操作拥有；直接 boot 与 run-driver 的启动请求进入这个操作，shell 保留外层参数转交与环境装配。检查镜像可以先从启动事务中分离；如果它会写缓存，需明确缓存写入的并发语义，不能简单称整个模式无写入。持锁的拥有者要跨越必要的检查和提交，释放由其生命周期负责，不能在 spawn 后过早交权。
 
 | 改动面 | 预计现有文件 | 需要实际验证 |
 |---|---|---|
-| 共享启动操作与资源身份 | [start-lock](../../../checks/lib/channel/start-lock.mjs)、[run-driver](../../../tools/channel/run-driver.mjs)、[boot-run](../../../tools/channel/boot-run.sh)；必要时在同 owner 下提取支撑件 | 两个公开入口进入同一操作；委托不能靠任意调用者可伪造的 skip-lock 开关；不再保留第二份 shell 回收算法 |
-| 独立性质与有限操作序列 | [start-lock 测试](../../../tests/checks/channel/start-lock.test.mjs) | 活持有者不因经过固定时长被接管；旧 release 不删新 owner；创建失败不留下假成功；竞争取得至多一个成功；失败不改他人状态 |
-| 真实进程入口与分工 | [run-driver 行为测试](../../../tests/run/channel/run-driver-contract.spec.mjs)、[smoke registry](../../../checks/smoke/registry.json) | 先确定现有资产能否承接；真进程不塞入默认 keyless；有门槛的隔离入口测试不必启动真实模型/浏览器 |
-| 记录与减法 | [guard-ledger](../../../tests/fixtures/guard-ledger/ledger.json)、[asset-ledger](../../../tests/fixtures/asset-ledger/ledger.json)及相关缺陷卡/Note | 更新声明与实际证明面；退役重复协议/无独立价值的测试；账本不再替代行为执行 |
+| 共享启动操作与资源身份 | [start-lock](../../../../checks/lib/channel/start-lock.mjs)、[run-driver](../../../../tools/channel/run-driver.mjs)、[boot-run](../../../../tools/channel/boot-run.sh)；必要时在同 owner 下提取支撑件 | 两个公开入口进入同一操作；委托不能靠任意调用者可伪造的 skip-lock 开关；不再保留第二份 shell 回收算法 |
+| 独立性质与有限操作序列 | [start-lock 测试](../../../../tests/checks/channel/start-lock.test.mjs) | 活持有者不因经过固定时长被接管；旧 release 不删新 owner；创建失败不留下假成功；竞争取得至多一个成功；失败不改他人状态 |
+| 真实进程入口与分工 | [run-driver 行为测试](../../../../tests/run/channel/run-driver-contract.spec.mjs)、[smoke registry](../../../../checks/smoke/registry.json) | 先确定现有资产能否承接；真进程不塞入默认 keyless；有门槛的隔离入口测试不必启动真实模型/浏览器 |
+| 记录与减法 | [guard-ledger](../../../../tests/fixtures/guard-ledger/ledger.json)、[asset-ledger](../../../../tests/fixtures/asset-ledger/ledger.json)及相关缺陷卡/Note | 更新声明与实际证明面；退役重复协议/无独立价值的测试；账本不再替代行为执行 |
 
-旧 [run-lock](../../../checks/lib/harness/run-lock.mjs)已有更完整的创建与活 pid 保护；这给出了应继承的性质，但不等于它满足启动锁全部需求。方法库锁也是参照，不将不同生命期与回收策略合并成万能锁。底层存储原语的接管、检查与删除能否满足原子性，需要设计和反证；token、pid、rename 各自不能单独完成整体证明。
+旧 [run-lock](../../../../checks/lib/harness/run-lock.mjs)已有更完整的创建与活 pid 保护；这给出了应继承的性质，但不等于它满足启动锁全部需求。方法库锁也是参照，不将不同生命期与回收策略合并成万能锁。底层存储原语的接管、检查与删除能否满足原子性，需要设计和反证；token、pid、rename 各自不能单独完成整体证明。
 
 ## 3. 怎样让保障在以后继续执行
 
@@ -73,13 +73,13 @@ intent: 把预防性质量研究收敛为本仓既有开发环、状态操作与
 5. 另用一个本次未调优的非锁变更情形（parser 或新消费者），检查开发环能否在探索之前识别旧性质与完整入口义务；另有普通重命名/闭集常量的免触发对照。先封存案例期望，再由未参与方案起草的上下文按修订开发环执行；不声称两个样本证明普遍有效。测试故障可以自动执行，义务识别作为语义审查证据如实记录。
 6. 执行所涉现有车道，报告新增/删除资产、重复实现与调用义务的净变化；不提高日常全量检查预算。只有结果有益，才推广到下一个家族。
 
-首批交付边界以[承接卡验收与关闭条件](../../issues/2026-11-20-preventive-quality-pilot.md#关闭条件)为准：性质与正常控制、目标变异、真实入口、义务减法、准入盲评和业务接受分别有证据。预算到即结束实验并报告未证，不以预算耗尽判质量通过。两个有固定范围/预算的窗口仅是交付后观察建议；采用时由实际 owning Note/trigger 承接，不让未安排的长期观察阻止首批关闭，也不默认续轮。
+首批交付边界以[承接卡验收与关闭条件](../../settled_issues/2026-11-20-preventive-quality-pilot.md#关闭条件)为准：性质与正常控制、目标变异、真实入口、义务减法、准入盲评和业务接受分别有证据。预算到即结束实验并报告未证，不以预算耗尽判质量通过。两个有固定范围/预算的窗口仅是交付后观察建议；采用时由实际 owning Note/trigger 承接，不让未安排的长期观察阻止首批关闭，也不默认续轮。
 
 ## 5. 后续推进采用触发条件
 
 | 候选 | 推进条件 | 实施边界 | 不推进时 |
 |---|---|---|---|
-| plan 严格 decoder 与写入所有权 | 下一次变更 [plan-gate](../../../checks/lib/gates/plan-gate.mjs) 或 [plan-index](../../../packages/deep-research-pack/src/lib/plan/plan-index.ts)的裁决语义，或再现重复读取漂移 | 对比保留 Markdown + 共用严格解码，与更换正本；先处理支持范围，历史真实性另定独立来源 | 保留研究，不预建第二份 JSON 正本 |
+| plan 严格 decoder 与写入所有权 | 下一次变更 [plan-gate](../../../../checks/lib/gates/plan-gate.mjs) 或 [plan-index](../../../../packages/deep-research-pack/src/lib/plan/plan-index.ts)的裁决语义，或再现重复读取漂移 | 对比保留 Markdown + 共用严格解码，与更换正本；先处理支持范围，历史真实性另定独立来源 | 保留研究，不预建第二份 JSON 正本 |
 | 一个带工作区终态的研究场景 | 下一次要声明真实研究交付流程的文件结果正确 | 利用 pinned 原生终态机制，手写正常/缺关键证据的配对期望，record/refresh 不覆盖 oracle | 当前 A/B 的请求漂移承诺继续按其范围解释 |
 | 独立角色工具集合 | 下一次角色工具职责改变或已有集成发现装配缺口 | 在真 Loader 挂载时比对独立角色能力承诺；B 快照继续验请求漂移 | 不为每个角色立即复制新场景 |
 | 其他状态/解析家族 | 第一批已减少重复义务且有提前拦截证据 | 一次推广一个家族，替换旧证明，维护相同尺度的成本记录 | 不展开全仓迁移或覆盖率冲刺 |

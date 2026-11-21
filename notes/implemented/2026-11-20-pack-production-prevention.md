@@ -2,7 +2,7 @@
 
 > 状态：implemented
 
-问题卡 = [Pack 生产源头预防](../../_backlog/issues/2026-11-20-pack-production-prevention.md)（D 切片；P 生产强制仍未定）。本 Note 只记已交付的 D 决定与证据。
+问题卡 = [Pack 生产源头预防](../../_backlog/_archived/settled_issues/2026-11-20-pack-production-prevention.md)（D 切片；P 生产强制转「以后做」）。本 Note 只记已交付的 D 决定与证据。
 
 ## 决定
 
