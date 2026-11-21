@@ -259,7 +259,14 @@ export function finalVersionOfPath(path: string | null | undefined): number | nu
 
 export function deliveryFromReceipt(receipt: unknown, slug?: string): FinalDelivery | null {
   if (typeof receipt !== 'object' || receipt === null) return null
-  const record = receipt as { present?: unknown; final?: unknown }
+  const record = receipt as { version?: unknown; slug?: unknown; acceptedAt?: unknown; gate?: unknown; present?: unknown; final?: unknown }
+  // BUG-345：只认工具写的回执（run-accept 的 buildDelivered：version 1 + slug + acceptedAt + gate.PASS）。
+  // 手写的 install-only 形状（final_copy/presented）或缺 gate 的仿制品不是回执——不做旧形兼容。
+  if (record.version !== 1 || typeof record.slug !== 'string' || record.slug === '') return null
+  if (typeof record.acceptedAt !== 'string' || record.acceptedAt.trim() === '') return null
+  if (slug !== undefined && record.slug !== slug) return null
+  const gate = typeof record.gate === 'object' && record.gate !== null ? record.gate as { status?: unknown } : null
+  if (gate?.status !== 'PASS') return null
   const present = typeof record.present === 'object' && record.present !== null
     ? record.present as { path?: unknown; callId?: unknown; version?: unknown }
     : null

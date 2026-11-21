@@ -1,12 +1,12 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-20
 ---
 
 # BUG-345：present 已发生，驾驶舱仍报「交付未见证」且终稿页签不出现
 
-> 严重级别：P2 ｜ 发现：2026-11-20 ｜ 状态：等人拍板（回执形态与观察窗口如何收口，是合同取舍）
+> 严重级别：P2 ｜ 发现：2026-11-20 ｜ 状态：已修（2026-11-21）— 结论：回执只认工具形状（version 1 + slug + acceptedAt + gate.PASS），手写 install-only 不冒充；窗口外无回执 = 未见证，不伪造；审查：agent — 注入红回归；去向：none — 合同收紧
 >
 > 现场 = `runtime/e2e-2026-11-20/run-a-delivered.png`；run = `research-workspace/drt_pg-latest-stable/`。
 
@@ -90,4 +90,33 @@ console.log('cwd=workspace →', latestFinalDelivery(ev, '/Users/bowhead/ai_dsh_
 - 未 present 的 bundle 不显示终稿/已交付（负例），未绑定会话零泄漏（既有断言不回退）。
 - `client-load.entry --seed` 与 dev-home 两手都绿。
 
-可关闭：否
+
+## 修复落地（2026-11-21）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/run/final-target.ts",
+    "tests/run/gates/final-target.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/final-target.spec.mjs",
+    "exit": 1,
+    "output": "回退宽松回执解析：install-only 手写形状与缺 gate/缺 acceptedAt 的仿制品被当成交付（1 例红）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/final-target.spec.mjs",
+    "exit": 0,
+    "output": "21 tests 全过：canonical 回执 → 交付；install-only / 缺 gate / slug 不符 → null"
+  },
+  "guard": {
+    "path": "tests/run/gates/final-target.spec.mjs"
+  }
+}
+```
+
+判据修订（用户 2026-11-21 裁定不做旧产物兼容）：
+- 只认工具回执（`run-accept` 写的 `version:1 + slug + acceptedAt + gate.PASS`）。本卡现场那份 lead 手写的 install-only 形状**不算回执**，保持未见证——不为它加兼容分支。
+- 观察窗口外且无工具回执 = **未见证**（不伪造已交付）；生产侧正路 = 交付时跑 ops `run-accept`，由工具写回执。窗口本身由 vendor follow 快照策略决定，本仓不改 vendor；这条残差记入批 Note 的未证边界。
+
+可关闭：是

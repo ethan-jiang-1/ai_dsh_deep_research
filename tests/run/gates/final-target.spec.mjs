@@ -202,15 +202,18 @@ test('BUG-129 finalPathOfWithin：绝对路径必须落在 cwd 内，跨 workspa
 
 // 负例留证 2026-11-13：D51——会话窗口不含旧 present 时，交付态从窗口读成「未交付」；
 // 持久回执 delivered.json 是同一事实。红配方：删掉 deliveryFromReceipt 的兜底接线（只留 present 事件）。
-test('deliveryFromReceipt：回执 → 交付见证（窗口外 present 的持久兜底）', () => {
-  const receipt = { present: { path: 'drt_x/final/v2.md', callId: 'p1', version: 2 }, final: { version: 2 } }
-  assert.deepEqual(deliveryFromReceipt(receipt), { path: 'drt_x/final/v2.md', turn: 0, callId: 'p1' })
+test('deliveryFromReceipt：只认工具回执（version/slug/acceptedAt/gate.PASS），手写形状不冒充', () => {
+  const canonical = (over = {}) => ({ version: 1, slug: 'x', acceptedAt: '2026-11-21T00:00:00Z', gate: { status: 'PASS', exit: 0 }, present: { path: 'drt_x/final/v2.md', callId: 'p1', version: 2 }, final: { version: 2 }, ...over })
+  assert.deepEqual(deliveryFromReceipt(canonical()), { path: 'drt_x/final/v2.md', turn: 0, callId: 'p1' })
   // 缺 present.path 时用 slug + final.version 合成
-  assert.equal(deliveryFromReceipt({ final: { version: 3 } }, 'x')?.path, 'drt_x/final/v3.md')
-  // 畸形/空回执不冒充
+  assert.equal(deliveryFromReceipt(canonical({ present: null, final: { version: 3 } }), 'x')?.path, 'drt_x/final/v3.md')
+  // BUG-345 现场（lead 手写的 install-only 形态）：不是回执。
+  assert.equal(deliveryFromReceipt({ schema: 1, run: 'drt_x', delivered_at: '2026-11-20T22:05:00+08:00', final_copy: 'final/v1.md', presented: ['drt_x/final/v1.md'] }), null)
+  // 仿制品：缺 gate / 缺 acceptedAt / slug 不符 → 不冒充。
+  assert.equal(deliveryFromReceipt(canonical({ gate: undefined })), null)
+  assert.equal(deliveryFromReceipt(canonical({ acceptedAt: '' })), null)
+  assert.equal(deliveryFromReceipt(canonical(), 'other'), null)
   assert.equal(deliveryFromReceipt(null), null)
-  assert.equal(deliveryFromReceipt({}), null)
-  assert.equal(deliveryFromReceipt({ present: { path: '  ' } }), null)
 })
 
 test('finalVersionOfPath：版本族路径才取版本', () => {
