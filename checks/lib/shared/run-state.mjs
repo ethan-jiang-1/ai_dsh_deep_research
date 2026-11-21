@@ -18,6 +18,7 @@ import { existsSync, lstatSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { foldHitlPending } from '../../../packages/deep-research-pack/src/lib/events/hitl-fold.ts'
 import { sessionBindingOf } from '../../../packages/deep-research-pack/src/lib/run/bundle-bind.ts'
+import { runHealthOf } from '../../../packages/deep-research-pack/src/lib/run/health.ts'
 import { bundleCandidates } from '../../../packages/deep-research-pack/src/lib/run/run-context.ts'
 import { readSessionEvents } from './session-log.mjs'
 
@@ -145,6 +146,7 @@ export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false, no
   const turnOpen = readable ? turnOpenOf(events) : null
   const pending = readable ? hitlPendingOf(events) : null
   const liveSubagents = readable ? liveSubagentsOf(events, readChildEvents) : []
+  const health = readable ? runHealthOf(events, { now }) : null
   // HITL 已等待时长（G-24）：ask 事件自带 time；pending=true 且时间可读才给数，否则 null（不猜）。
   const lastAsk = readable
     ? [...events].reverse().find((j) => j?.type === 'tool/call' && j?.data?.name === 'ask_user_question')
@@ -184,6 +186,7 @@ export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false, no
     askIndefinite: readable ? askIndefiniteOf(events) : null,
     presentCalls: readable ? toolCallCount(events, 'present') : null,
     liveSubagents,
+    health,
     turnOpen,
     ...bundle,
     activeBundle,

@@ -301,6 +301,7 @@ const zhBase = {
   provenancePrefix: '来源：{provenance}',
   rowMenuAria: '{name} 的操作',
   streamFailureBanner: '⚠️ 上游模型流连续异常，刚才那回合没跑成——研究档案都在。等一两分钟，在对话里发「继续」即可接着跑。',
+  runStalledBanner: '⚠️ 运行停摆：最后活动 {minutes} 分钟前，最后回合错误「{error}」——先看通道与上游；恢复按 guides/61 §5（run-kickoff --session）。',
   configHeader: '研究偏好',
   configThisRun: '本次研究',
   configThisRunAdopted: '本次研究：{name}',

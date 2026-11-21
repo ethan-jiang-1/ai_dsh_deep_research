@@ -16,6 +16,7 @@ import { bindingTrust, type BindingTrust } from '../../lib/run/binding-trust.ts'
 import { openRun } from '../../lib/run/run-context.ts'
 import { streamFailureOf } from '../../lib/events/stream-failure.ts'
 import { deliveryFromReceipt, finalVersionOfPath, latestFinalDelivery, latestPresentedFinalVersion } from '../../lib/run/final-target.ts'
+import { runHealthOf } from '../../lib/run/health.ts'
 import { runVersionFaceOf, type RunVersionFace } from '../../lib/run/run-version.ts'
 import { readinessOfSources } from '../../lib/review/review-readiness.ts'
 import type { TeamProjection } from '@deepseek-ai/dsh-experimental-agent-team/client'
@@ -49,6 +50,7 @@ export interface StatusFeed {
   readonly delivery: ReturnType<typeof latestFinalDelivery>
   readonly streamFailure: ReturnType<typeof streamFailureOf>
   readonly anchors: ReturnType<typeof deriveAnchors>
+  readonly health: ReturnType<typeof runHealthOf> | null
   readonly versionFace: RunVersionFace | null
 }
 
@@ -270,6 +272,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
 
   // 流畸形死亡（BUG-023 修复①）：journal 尾窗折算，与 HITL 挂起互斥显示（挂起时主横幅让位）。
   const streamFailure = useMemo(() => streamFailureOf(journalEvents), [journalEvents])
+  // 停摆判据（BUG-348）：派生自事件流，不写文件；与 watch-run 同一 fold。
+  const health = useMemo(() => (journalEvents.length === 0 ? null : runHealthOf(journalEvents, { now: Date.now() })), [journalEvents])
   const anchors = useMemo(
     () => deriveAnchors(journalEvents, face !== null ? { question: face.hasQuestion, delivered: delivery !== null } : undefined, props.t),
     [journalEvents, face, props.t],
@@ -296,6 +300,6 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
 
   return {
     rows, hitl, journalEvents, face, unbound, trust, journalSeen, kickoffHold, error,
-    memberSummaries, team, members, delivery, streamFailure, anchors, versionFace,
+    memberSummaries, team, members, delivery, streamFailure, anchors, health, versionFace,
   }
 }

@@ -18,6 +18,7 @@
     "config-tables.ts",
     "final-target.ts",
     "graph-model.ts",
+    "health.ts",
     "hitl-fold.ts",
     "i18n.ts",
     "journal-wire.ts",

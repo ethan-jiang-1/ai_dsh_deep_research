@@ -1,0 +1,48 @@
+// health.spec.mjs — run 停摆派生判据（BUG-348）：静默 + 最后回合错误才告警。
+// 反证：把 stalled 改成只看 quietMs → 「长回合无错误」例红；只看 lastTurnError → 「错误后仍有活动」例红。
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { runHealthOf, DEFAULT_STALL_MS } from '../../../../packages/deep-research-pack/src/lib/run/health.ts'
+
+const T = 1_800_000_000_000
+const event = (type, time, data = {}) => ({ type, time, data })
+
+test('无事件：不告警，未知保持 null', () => {
+  const health = runHealthOf([], { now: T })
+  assert.equal(health.lastActivityAt, null)
+  assert.equal(health.quietMs, null)
+  assert.equal(health.lastTurnError, null)
+  assert.equal(health.stalled, false)
+})
+
+test('静默超阈值 + 最后回合错误 → stalled', () => {
+  const events = [event('turn/start', T - DEFAULT_STALL_MS - 60_000), event('llm/retry', T - DEFAULT_STALL_MS - 30_000, { failure: { message: 'DeepSeek Messages stream idle timeout', code: 'TIMEOUT' } })]
+  const health = runHealthOf(events, { now: T })
+  assert.equal(health.lastTurnError, 'DeepSeek Messages stream idle timeout')
+  assert.equal(health.quietMs, DEFAULT_STALL_MS + 30_000)
+  assert.equal(health.stalled, true)
+})
+
+test('静默超阈值但没有错误 → 不告警（正常长回合）', () => {
+  const health = runHealthOf([event('turn/start', T - DEFAULT_STALL_MS - 60_000)], { now: T })
+  assert.equal(health.stalled, false)
+})
+
+test('错误之后又有活动 → 不告警（已恢复）', () => {
+  const events = [event('llm/retry', T - DEFAULT_STALL_MS - 60_000, { failure: { message: 'TRANSPORT' } }), event('assistant/message', T - 1000)]
+  const health = runHealthOf(events, { now: T })
+  assert.equal(health.lastTurnError, 'TRANSPORT')
+  assert.equal(health.stalled, false)
+})
+
+test('上一回合的错误不翻旧账：新回合开始后清空', () => {
+  const events = [event('llm/retry', T - DEFAULT_STALL_MS - 60_000, { failure: { message: 'OLD' } }), event('turn/start', T - DEFAULT_STALL_MS - 30_000)]
+  const health = runHealthOf(events, { now: T })
+  assert.equal(health.lastTurnError, null)
+  assert.equal(health.stalled, false)
+})
+
+test('错误在阈值内 → 不告警', () => {
+  const health = runHealthOf([event('llm/retry', T - 60_000, { failure: { message: 'TIMEOUT' } })], { now: T })
+  assert.equal(health.stalled, false)
+})

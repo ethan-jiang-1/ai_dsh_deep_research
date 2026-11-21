@@ -71,6 +71,7 @@ let prevEvents = null
 while (Date.now() < deadline) {
   await new Promise((r) => setTimeout(r, INTERVAL_S * 1000))
   const s = runStateOf({ logPath, wsRoot, readChildEvents })
+  if (s.health?.stalled) console.log(`watch-run: STALLED——最后活动 ${Math.round((s.health.quietMs ?? 0) / 60000)} 分钟前；最后回合错误：${s.health.lastTurnError}`)
   // 日志回退检测（BUG-007 自救面）：同会话事件数变小 = 日志丢尾，此后一切盘侧谓词
   // （hitlPending/runSettled）都建立在残缺地基上——fail-loud 退出，不带着假象盯场。
   if (eventsRegressed(prevEvents, s.readable ? s.events : null)) {

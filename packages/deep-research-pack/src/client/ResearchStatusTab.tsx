@@ -52,7 +52,7 @@ export type { FollowTarget, JournalFrame, ResearchStatusTabInjected, ResearchSta
 export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const {
     rows, hitl, face, unbound, trust, kickoffHold, error,
-    memberSummaries, members, delivery, streamFailure, anchors, versionFace,
+    memberSummaries, members, delivery, streamFailure, anchors, health, versionFace,
   } = useStatusFeed(props)
 
   // 流程轨道件（锚点入轨，RFC cockpit-flow-face）：锚点段从 journal+文件折算（挂起期也在场），
@@ -103,6 +103,12 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       {streamFailure.dead && !hitl.pending && (
         <div style={{ fontWeight: 600, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#ef444418', border: '1px solid #ef444440' }}>
           {props.t('streamFailureBanner')}
+        </div>
+      )}
+      {/* 停摆横幅（BUG-348）：静默 ≥30min 且最后回合有错误——与 watch-run 同一派生；不写 run.md。 */}
+      {health?.stalled === true && !hitl.pending && (
+        <div style={{ fontWeight: 600, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#ef444418', border: '1px solid #ef444440' }}>
+          {props.t('runStalledBanner', { minutes: String(Math.round((health.quietMs ?? 0) / 60000)), error: health.lastTurnError ?? '' })}
         </div>
       )}
       {/* ⓪ 业务摘要层（issue 2026-10-11-executive-research-ux-delivery）：五问业务语言——

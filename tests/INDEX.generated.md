@@ -147,6 +147,7 @@
 | run | `run/brief-fold` | `tests/cockpit/lib/run/brief-fold.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | run | `run/bundle-bind` | `tests/run/gates/bundle-bind.spec.mjs` |
 | run | `run/final-target` | `tests/contracts/present-version-conformance.spec.mjs`<br>`tests/run/gates/final-target.spec.mjs` |
+| run | `run/health` | `tests/cockpit/lib/run/health.spec.mjs` |
 | run | `run/receipt-fold` | `tests/cockpit/lib/run/receipt-fold.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | run | `run/rerun-triage` | `tests/cockpit/lib/run/rerun-triage.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/rerun-triage-contract.spec.mjs` |
 | run | `run/run-context` | `tests/cockpit/client/run-source-browser.spec.mjs`<br>`tests/run/gates/run-context-node.spec.mjs`<br>`tests/run/gates/run-context.spec.mjs` |

@@ -1,12 +1,12 @@
 ---
-status: 等人拍板
+status: 修复落地
 severity: P2
 opened: 2026-11-21
 ---
 
 # BUG-348：长 run 遇上游流错误后静默停摆数小时，观察面无告警、恢复只能靠人回来
 
-> 严重级别：P2 ｜ 发现：2026-11-21 ｜ 状态：等人拍板（告警面/重试归属与 DSH 重试策略相关）
+> 严重级别：P2 ｜ 发现：2026-11-21 ｜ 状态：修复落地（2026-11-21）— 判据/证据已记；浏览器复验 NOT-RUN（主机 load 15–20），待复跑（告警面/重试归属与 DSH 重试策略相关）
 >
 > 现场 = `runtime/e2e-2026-11-20/`；run = `research-workspace/drt_sodium-ion-bess/`；
 > 会话 = `session-168734ce-...`。
@@ -48,5 +48,39 @@ node --import tsx/esm probes/analyze/session-events.mjs session-168734ce-cf68-44
 - 用本卡会话日志重放：02:35–08:47 窗口在状态页显示停摆告警与恢复指引（不冒充"研究失败"）。
 - 正常长回合（worker 在飞、无错误）不误报（负控）。
 - 人工唤醒后告警消失。
+
+
+## 修复落地（2026-11-21）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/run/health.ts",
+    "packages/deep-research-pack/src/client/research-status/useStatusFeed.ts",
+    "packages/deep-research-pack/src/client/ResearchStatusTab.tsx",
+    "packages/deep-research-pack/src/client/locales/zh.ts",
+    "packages/deep-research-pack/src/client/locales/en.ts",
+    "packages/deep-research-pack/src/lib/faces.json",
+    "checks/lib/shared/run-state.mjs",
+    "probes/analyze/watch-run.mjs",
+    "tests/cockpit/lib/run/health.spec.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm --test tests/cockpit/lib/run/health.spec.mjs",
+    "exit": 1,
+    "output": "注入回归：stalled 只看 quietMs（去掉 lastTurnError 条件）→ 「静默但无错误」例红"
+  },
+  "green": {
+    "command": "node --import tsx/esm --test tests/cockpit/lib/run/health.spec.mjs",
+    "exit": 0,
+    "output": "6 tests 全过；真日志重放 1795199750749→1795222075086 窗口：stalled=true / quiet=372min / error=DeepSeek Messages transport failed"
+  },
+  "guard": {
+    "path": "tests/cockpit/lib/run/health.spec.mjs"
+  }
+}
+```
+
+未跑项：`client-load.entry --seed` 因主机 load 15–20 判 NOT-RUN（exit 2）——横幅的浏览器渲染未复验；主机负载下降后同命令复跑，绿后再归档。
 
 可关闭：否

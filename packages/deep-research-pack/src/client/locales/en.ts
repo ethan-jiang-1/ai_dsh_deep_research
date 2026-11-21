@@ -302,6 +302,7 @@ const enBase = {
   provenancePrefix: 'Source: {provenance}',
   rowMenuAria: 'Actions for {name}',
   streamFailureBanner: '⚠️ The upstream model stream kept failing and the last turn did not complete — all research artifacts are safe. Wait a minute or two, then send “continue” in the conversation to resume.',
+  runStalledBanner: '⚠️ Run stalled: last activity {minutes} min ago; last turn error “{error}”. Check the channel and upstream first; recover per guides/61 §5 (run-kickoff --session).',
   configHeader: 'Research preferences',
   configThisRun: 'This research',
   configThisRunAdopted: 'This research: {name}',
