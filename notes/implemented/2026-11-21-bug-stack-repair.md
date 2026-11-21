@@ -43,7 +43,7 @@
 
 ## 实际跑过的验证
 
-- 批次收口：`pnpm verify` 全绿；`pnpm test` **1456 spec + 266 checks 全绿（零 skip）**；`pnpm typecheck` 与 `pnpm build` 全绿。
+- 批次收口：`pnpm verify` 全绿；`pnpm test` **1457 spec + 266 checks 全绿（零 skip）**；`pnpm typecheck` 与 `pnpm build` 全绿。
 - 真进程：`node checks/smoke/channel-start.e2e.mjs` **13 项全绿**（含 `ps unreadable` 与继承管道保锁负控）；
   `node checks/smoke/run-accept.e2e.mjs` 全绿（含协议夹具带 evidence 的壳级用例）。
 - 模型可见面：readiness/claims/plan/findings 的 skill/manual/模板变更后，5 个角色 fixture **全部重录**
@@ -83,12 +83,13 @@
 | 347 | 无 review 面 = absent（pass=null） | `tests/run/gates/readiness-declaration.spec.mjs` |
 | 349 | 嵌套沙箱探测 + 运行时声明 | `tests/pack/content/content-effect.spec.mjs` |
 | 350 | claims v2（critical 必填、禁 verdict 字段） | `tests/run/gates/verdict-audit.spec.mjs` |
-| 348（修复落地） | run 健康 fold + 横幅 + watch-run | `tests/cockpit/lib/run/health.spec.mjs` |
+| 348 | run 健康 fold + 横幅文案 fold + watch-run | `tests/cockpit/lib/run/health.spec.mjs` |
 
 ## 残余与未证边界
 
-- **348 的浏览器渲染未复验**：`client-load.entry --seed` 因主机 load 14–20 判 NOT-RUN（exit 2）；
-  横幅的浏览器面待负载下降后同命令复跑，绿后再归档（卡保持 `修复落地`）。
+- **348 的横幅专用浏览器断言未单独复验**：`client-load.entry --seed` 于负载下降后复跑——研究状态页
+  全部断言 PASS，仅「终稿端到端」1 例 SKIP（seed 无窗口内交付目标，与本卡无关）。横幅文案已从 JSX
+  抽成 `stalledBannerLine` fold，由 health.spec 覆盖（stalled/非 stalled/参数）。
 - **旧 shape 兼容**：两场旧 run 在新判据下保持红（预期）；它们的 `readiness/claims/findings/plan` 不迁移。
 - **345 窗口残差**：vendor follow 快照窗口不改；present-only 且窗口外且无工具回执 = 未见证（不伪造）。
   生产侧正路 = 交付时跑 ops `run-accept` 写回执。

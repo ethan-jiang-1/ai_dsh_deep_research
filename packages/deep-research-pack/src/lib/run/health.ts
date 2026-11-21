@@ -52,3 +52,12 @@ export function runHealthOf(events: readonly unknown[], { now = Date.now(), stal
     stalled: quietMs !== null && quietMs >= stallMs && lastTurnError !== null,
   }
 }
+
+/** 停摆横幅文案（BUG-348）：返回 null = 不显示；文案键与参数由调用方注入的 t 解析。 */
+export function stalledBannerLine(health: RunHealth | null | undefined, t: (key: 'runStalledBanner', params?: Record<string, string>) => string): string | null {
+  if (health?.stalled !== true) return null
+  return t('runStalledBanner', {
+    minutes: String(Math.round((health.quietMs ?? 0) / 60000)),
+    error: health.lastTurnError ?? '',
+  })
+}

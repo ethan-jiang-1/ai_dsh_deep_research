@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-21
 ---
 
 # BUG-348：长 run 遇上游流错误后静默停摆数小时，观察面无告警、恢复只能靠人回来
 
-> 严重级别：P2 ｜ 发现：2026-11-21 ｜ 状态：修复落地（2026-11-21）— 判据/证据已记；浏览器复验 NOT-RUN（主机 load 15–20），待复跑（告警面/重试归属与 DSH 重试策略相关）
+> 严重级别：P2 ｜ 发现：2026-11-21 ｜ 状态：已修（2026-11-21）— 结论：停摆 = 静默 ≥30min 且最后一回合有错误；fold + 横幅文案 + watch-run 共用同一判据，不写 run.md；审查：agent — 注入红回归 + 真日志重放 + client-load 挂载绿；去向：none — 观察面派生
 >
 > 现场 = `runtime/e2e-2026-11-20/`；run = `research-workspace/drt_sodium-ion-bess/`；
 > 会话 = `session-168734ce-...`。
@@ -81,6 +81,6 @@ node --import tsx/esm probes/analyze/session-events.mjs session-168734ce-cf68-44
 }
 ```
 
-未跑项：`client-load.entry --seed` 因主机 load 15–20 判 NOT-RUN（exit 2）——横幅的浏览器渲染未复验；主机负载下降后同命令复跑，绿后再归档。
+收尾证据：`client-load.entry --seed tests/fixtures/client-load-home --port 3109` 于负载下降后复跑——研究状态页全部断言 PASS，仅「终稿端到端」1 例 SKIP（seed 无窗口内交付目标，与本卡无关）；横幅文案已从 JSX 抽成 `stalledBannerLine` fold（health.spec 7 例覆盖 stalled/非 stalled/参数）。
 
-可关闭：否
+可关闭：是

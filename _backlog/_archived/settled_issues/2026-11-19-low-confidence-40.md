@@ -1,11 +1,12 @@
 ---
-status: 推敲中
+status: 已结
 opened: 2026-11-19
 ---
 
 # 推敲：低置信区 20 卡（第 9 轮）——锁/端口/缓存读写的并发残差
 
-> 立卡：2026-11-19 ｜ 状态：推敲中（20 张卡 320–339） ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-19 ｜ 状态：已结（2026-11-21）— 结论：20 张卡全部有去向（327/328/329/333/334/335/336/338 已修归档；320–326/330/331/332/337/339 迁暂停池，其中 330 已由 313 修复）；锁/端口/缓存/plan 判据落定；审查：agent — 逐卡红绿 + 批 Note；可关闭：是 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 去向：implemented — [批 Note](../../../notes/implemented/2026-11-21-bug-stack-repair.md)
 >
 > **一句话**：上一轮加了动态端口与启动锁；这一轮专挖**锁/端口/缓存读写的并发残差**，以及 plan 快照、
 > threshold 范围、长度计数三个语义浅检。20 张卡，只报不修。
@@ -35,26 +36,26 @@ opened: 2026-11-19
 
 | 卡 | 组 | 严重级 | 状态 | 一句话 |
 |---|---|---|---|---|
-| [BUG-320](../bugs/BUG-320-boot-run-drift-only-lock-regression.md) | 运行态/缓存 | P2 | 修复就绪 | drift-only 在活通道持锁时必失败 |
-| [BUG-321](../bugs/BUG-321-boot-run-stale-lock-no-recovery.md) | 运行态/缓存 | P2 | 修复就绪 | boot-run 锁无 stale 回收 |
-| [BUG-322](../bugs/BUG-322-start-lock-stale-reclaim-race.md) | 运行态/缓存 | P2 | 修复就绪 | stale 回收竞态可双拿锁 |
-| [BUG-323](../bugs/BUG-323-start-lock-future-timestamp-blocks.md) | 运行态/缓存 | P2 | 修复就绪 | 未来时间锁永不过期 |
-| [BUG-324](../bugs/BUG-324-start-lock-10min-steals-long-boot.md) | 运行态/缓存 | P2 | 修复就绪 | 10min stale 抢长启动 |
-| [BUG-325](../bugs/BUG-325-start-lock-release-removes-new-owner.md) | 运行态/缓存 | P2 | 修复就绪 | 旧持有者 release 删新锁 |
-| [BUG-326](../bugs/BUG-326-run-driver-boot-run-two-locks.md) | 运行态/缓存 | P2 | 修复就绪 | run-driver/boot-run 两把锁 |
-| [BUG-327](../bugs/BUG-327-probe-cache-mcp-read-write-key-mismatch.md) | 运行态/缓存 | P2 | 修复就绪 | probe 读写键 MCP 不一致 |
-| [BUG-328](../bugs/BUG-328-plan-snapshot-same-text-only.md) | plan/语义 | P2 | 等人拍板 | plan 快照只拒同文本 |
-| [BUG-329](../bugs/BUG-329-threshold-critical-scope-null.md) | plan/语义 | P2 | 等人拍板 | claims 缺时 threshold 退全部 |
-| [BUG-330](../bugs/BUG-330-output-length-heuristic-still.md) | plan/语义 | P2 | 等人拍板 | 长度仍启发式 |
-| [BUG-331](../bugs/BUG-331-start-lock-owner-write-failure-leaks.md) | 运行态/缓存 | P2 | 修复就绪 | owner 写失败留锁 |
-| [BUG-332](../bugs/BUG-332-start-lock-no-pid-liveness.md) | 运行态/缓存 | P2 | 修复就绪 | 只按时间不按 pid |
-| [BUG-333](../bugs/BUG-333-run-driver-port-nan.md) | 运行态/缓存 | P2 | 修复就绪 | --port NaN/0 未校验 |
-| [BUG-334](../bugs/BUG-334-cold-start-port-env-nan.md) | 运行态/缓存 | P2 | 修复就绪 | COLD_START_PORT NaN |
-| [BUG-335](../bugs/BUG-335-snapshot-port-nan.md) | 运行态/缓存 | P2 | 修复就绪 | snapshot --port NaN |
-| [BUG-336](../bugs/BUG-336-client-load-port-nan.md) | 运行态/缓存 | P2 | 修复就绪 | client-load --port NaN |
-| [BUG-337](../bugs/BUG-337-boot-run-port-invalid.md) | 运行态/缓存 | P2 | 修复就绪 | DSH_RUN_PORT 未校验 |
-| [BUG-338](../bugs/BUG-338-pick-free-port-toctou.md) | 运行态/缓存 | P2 | 修复就绪 | pickFreePort TOCTOU |
-| [BUG-339](../bugs/BUG-339-boot-run-trap-removes-new-lock.md) | 运行态/缓存 | P2 | 修复就绪 | trap 删新锁 |
+| [BUG-320](../../bugs/BUG-320-boot-run-drift-only-lock-regression.md) | 运行态/缓存 | P2 | 修复就绪 | drift-only 在活通道持锁时必失败 |
+| [BUG-321](../../bugs/BUG-321-boot-run-stale-lock-no-recovery.md) | 运行态/缓存 | P2 | 修复就绪 | boot-run 锁无 stale 回收 |
+| [BUG-322](../../bugs/BUG-322-start-lock-stale-reclaim-race.md) | 运行态/缓存 | P2 | 修复就绪 | stale 回收竞态可双拿锁 |
+| [BUG-323](../../bugs/BUG-323-start-lock-future-timestamp-blocks.md) | 运行态/缓存 | P2 | 修复就绪 | 未来时间锁永不过期 |
+| [BUG-324](../../bugs/BUG-324-start-lock-10min-steals-long-boot.md) | 运行态/缓存 | P2 | 修复就绪 | 10min stale 抢长启动 |
+| [BUG-325](../../bugs/BUG-325-start-lock-release-removes-new-owner.md) | 运行态/缓存 | P2 | 修复就绪 | 旧持有者 release 删新锁 |
+| [BUG-326](../../bugs/BUG-326-run-driver-boot-run-two-locks.md) | 运行态/缓存 | P2 | 修复就绪 | run-driver/boot-run 两把锁 |
+| [BUG-327](../../bugs/BUG-327-probe-cache-mcp-read-write-key-mismatch.md) | 运行态/缓存 | P2 | 修复就绪 | probe 读写键 MCP 不一致 |
+| [BUG-328](../../bugs/BUG-328-plan-snapshot-same-text-only.md) | plan/语义 | P2 | 等人拍板 | plan 快照只拒同文本 |
+| [BUG-329](../../bugs/BUG-329-threshold-critical-scope-null.md) | plan/语义 | P2 | 等人拍板 | claims 缺时 threshold 退全部 |
+| [BUG-330](../../bugs/BUG-330-output-length-heuristic-still.md) | plan/语义 | P2 | 等人拍板 | 长度仍启发式 |
+| [BUG-331](../../bugs/BUG-331-start-lock-owner-write-failure-leaks.md) | 运行态/缓存 | P2 | 修复就绪 | owner 写失败留锁 |
+| [BUG-332](../../bugs/BUG-332-start-lock-no-pid-liveness.md) | 运行态/缓存 | P2 | 修复就绪 | 只按时间不按 pid |
+| [BUG-333](../../bugs/BUG-333-run-driver-port-nan.md) | 运行态/缓存 | P2 | 修复就绪 | --port NaN/0 未校验 |
+| [BUG-334](../../bugs/BUG-334-cold-start-port-env-nan.md) | 运行态/缓存 | P2 | 修复就绪 | COLD_START_PORT NaN |
+| [BUG-335](../../bugs/BUG-335-snapshot-port-nan.md) | 运行态/缓存 | P2 | 修复就绪 | snapshot --port NaN |
+| [BUG-336](../../bugs/BUG-336-client-load-port-nan.md) | 运行态/缓存 | P2 | 修复就绪 | client-load --port NaN |
+| [BUG-337](../../bugs/BUG-337-boot-run-port-invalid.md) | 运行态/缓存 | P2 | 修复就绪 | DSH_RUN_PORT 未校验 |
+| [BUG-338](../../bugs/BUG-338-pick-free-port-toctou.md) | 运行态/缓存 | P2 | 修复就绪 | pickFreePort TOCTOU |
+| [BUG-339](../../bugs/BUG-339-boot-run-trap-removes-new-lock.md) | 运行态/缓存 | P2 | 修复就绪 | trap 删新锁 |
 
 ## 基线与负对照
 

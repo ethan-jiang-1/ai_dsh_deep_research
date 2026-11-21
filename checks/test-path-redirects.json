@@ -2808,6 +2808,8 @@
     {"from": "_backlog/bugs/BUG-345-delivery-witness-window-and-receipt-shape.md", "to": "_backlog/_archived/fixed_bugs/BUG-345-delivery-witness-window-and-receipt-shape.md", "reason": "2026-11-21 已修归档"},
     {"from": "_backlog/bugs/BUG-338-pick-free-port-toctou.md", "to": "_backlog/_archived/fixed_bugs/BUG-338-pick-free-port-toctou.md", "reason": "2026-11-21 已修归档"},
     {"from": "_backlog/bugs/BUG-349-workflow-sandbox-nested-eph.md", "to": "_backlog/_archived/fixed_bugs/BUG-349-workflow-sandbox-nested-eph.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/issues/2026-11-21-bug-stack-repair-program.md", "to": "_backlog/_archived/settled_issues/2026-11-21-bug-stack-repair-program.md", "reason": "2026-11-21 批程序收口归档"}
+    {"from": "_backlog/issues/2026-11-21-bug-stack-repair-program.md", "to": "_backlog/_archived/settled_issues/2026-11-21-bug-stack-repair-program.md", "reason": "2026-11-21 批程序收口归档"},
+    {"from": "_backlog/bugs/BUG-348-long-run-silent-stall-no-alert.md", "to": "_backlog/_archived/fixed_bugs/BUG-348-long-run-silent-stall-no-alert.md", "reason": "2026-11-21 已修归档"},
+    {"from": "_backlog/issues/2026-11-19-low-confidence-40.md", "to": "_backlog/_archived/settled_issues/2026-11-19-low-confidence-40.md", "reason": "2026-11-21 第 9 轮探索收口"}
   ]
 }

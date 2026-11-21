@@ -1636,6 +1636,15 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "去掉 EADDRINUSE 重选（任何错误直接抛）→ 抢占重选例红"
+    },
+    {
+      "id": "BUG-348",
+      "mechanism": "run 健康 derive-only（静默 + 最后一回合错误）+ 横幅文案 fold",
+      "guard": "tests/cockpit/lib/run/health.spec.mjs",
+      "oracleType": "self-referential",
+      "status": "provisional",
+      "redRecipe": "stalled 只看 quietMs → 「静默但无错误」例红；删横幅接线 → stalledBannerLine 例红",
+      "trigger": "下一次自然 run 出现停摆告警误报/漏报，或 30min 阈值需要调整时重估"
     }
   ]
 }

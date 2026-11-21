@@ -6,6 +6,7 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [348](BUG-348-long-run-silent-stall-no-alert.md) | 长 run 停摆无告警 | （health fold + 横幅） | 2026-11-21 |
 | [349](BUG-349-workflow-sandbox-nested-eph.md) | workflow 嵌套沙箱必失败 | （探测 + 运行时声明） | 2026-11-21 |
 | [338](BUG-338-pick-free-port-toctou.md) | pickFreePort TOCTOU | （bootOnFreePort 有界重选） | 2026-11-21 |
 | [345](BUG-345-delivery-witness-window-and-receipt-shape.md) | present 后仍「交付未见证」 | （只认工具回执） | 2026-11-21 |

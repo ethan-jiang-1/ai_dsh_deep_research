@@ -5,7 +5,7 @@ opened: 2026-11-21
 
 # 缺陷积压修复程序：BUG-320…350 的账实对齐、合同收紧与流程保障（v2）
 
-> 立卡：2026-11-21 ｜ 状态：已结（2026-11-21）— 结论：20 张活跃卡中 18 张已修归档、1 张修复落地待浏览器复验（348）、1 张判为已由 313 修复迁暂停池（330）；批 Note = 2026-11-21-bug-stack-repair；可关闭：是
+> 立卡：2026-11-21 ｜ 状态：已结（2026-11-21）— 结论：20 张活跃卡中 19 张已修归档、1 张判为已由 313 修复迁暂停池（330）；批 Note = 2026-11-21-bug-stack-repair；可关闭：是
 > 去向：implemented — [批 Note](../../../notes/implemented/2026-11-21-bug-stack-repair.md)
 > 对象：`_backlog/bugs/` 的积压缺陷。执行载体 = 后续 goal 按 §5 阶段推进；本卡是批索引 + 决定账 + 卡→用例映射。
 > **v2（2026-11-21）**：用户裁定——技术合同与排版由 agent 自定，不把 schema 选择推给用户；**不做旧产物兼容，
@@ -172,7 +172,7 @@ A 的 readiness 多 4 个计数键；B 的 claims 是 rich ledger。**过去六�
 **P4 进度（2026-11-21）**
 
 - 已修归档：**347**（无 review 面 = absent，pass=null）、**344**（runSettled 追加无在飞子代理；watch-run 读子会话）、**345**（回执只认工具形状；install-only 手写不冒充；窗口外无回执 = 未见证，不伪造）。
-- **348 修复落地**：health fold + 状态页横幅（zh/en）+ watch-run STALLED 行；真日志 02:35–08:47 重放 stalled=true/372min；浏览器复验 `client-load.entry --seed` 因主机 load 15–20 NOT-RUN，负载下降后复跑再归档。
+- **348 已修归档**：health fold + 状态页横幅（zh/en）+ 文案 fold + watch-run STALLED 行；真日志 02:35–08:47 重放 stalled=true/372min；`client-load.entry --seed` 研究状态页全绿（终稿 e2e 1 SKIP，seed 无窗口内交付目标）。
 - 残差（记入批 Note）：vendor follow 快照窗口不改；present-only 且窗口外且无工具回执 = 未见证（生产侧正路 = ops run-accept 写回执）。
 
 ### P5 沙箱、残余红分诊与收尾（1 会话）

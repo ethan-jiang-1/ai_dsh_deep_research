@@ -19,7 +19,6 @@
 | [BUG-334](BUG-334-cold-start-port-env-nan.md) | 修复就绪 | P2 | COLD_START_PORT NaN |
 | [BUG-335](BUG-335-snapshot-port-nan.md) | 修复就绪 | P2 | snapshot --port NaN |
 | [BUG-336](BUG-336-client-load-port-nan.md) | 修复就绪 | P2 | client-load --port NaN |
-| [BUG-348](BUG-348-long-run-silent-stall-no-alert.md) | 等人拍板 | P2 | 长 run 停摆无告警 |
 
 ## 最近归档
 

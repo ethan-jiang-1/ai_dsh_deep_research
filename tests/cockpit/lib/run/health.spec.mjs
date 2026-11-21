@@ -1,8 +1,10 @@
 // health.spec.mjs — run 停摆派生判据（BUG-348）：静默 + 最后回合错误才告警。
+// 负例留证 2026-11-21：BUG-348——stalled 只看 quietMs（去掉最后一回合错误）→ 「静默但无错误」例红；
+// 删掉 capabilityNote 式的横幅接线 → stalledBannerLine 例红。还原 → 绿。
 // 反证：把 stalled 改成只看 quietMs → 「长回合无错误」例红；只看 lastTurnError → 「错误后仍有活动」例红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { runHealthOf, DEFAULT_STALL_MS } from '../../../../packages/deep-research-pack/src/lib/run/health.ts'
+import { runHealthOf, stalledBannerLine, DEFAULT_STALL_MS } from '../../../../packages/deep-research-pack/src/lib/run/health.ts'
 
 const T = 1_800_000_000_000
 const event = (type, time, data = {}) => ({ type, time, data })
@@ -45,4 +47,11 @@ test('上一回合的错误不翻旧账：新回合开始后清空', () => {
 test('错误在阈值内 → 不告警', () => {
   const health = runHealthOf([event('llm/retry', T - 60_000, { failure: { message: 'TIMEOUT' } })], { now: T })
   assert.equal(health.stalled, false)
+})
+
+test('BUG-348：停摆横幅文案只在 stalled 时给出，参数含分钟与最后错误', () => {
+  const t = (key, params = {}) => `${key}:${params.minutes ?? ''}:${params.error ?? ''}`
+  assert.equal(stalledBannerLine({ stalled: false, quietMs: 0, lastTurnError: null, lastActivityAt: null }, t), null)
+  assert.equal(stalledBannerLine(null, t), null)
+  assert.equal(stalledBannerLine({ stalled: true, quietMs: 3_600_000, lastTurnError: 'TIMEOUT', lastActivityAt: null }, t), 'runStalledBanner:60:TIMEOUT')
 })
