@@ -1,22 +1,22 @@
 ---
-status: 修复就绪
+status: 待修
 severity: P2
 opened: 2026-11-19
 ---
 
-# BUG-325：锁被 stale 回收后，原持有者的 release 会删掉新持有者的锁
+# BUG-324：启动锁 10 分钟 stale——长安装/首启超过 10 分钟会被第二个实例抢锁
 
 > 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：修复就绪（运行态/测试）
 >
-> 探索轮 = [低置信区 20 卡（第 9 轮）](../issues/2026-11-19-low-confidence-40.md)。
+> 探索轮 = [低置信区 20 卡（第 9 轮）](../../issues/2026-11-19-low-confidence-40.md)。
 
 ## 症状
 
-release 闭包无条件 `rmSync(lockDir, recursive)`；A 的锁被 B stale 回收后，A 退出时 release 把 B 的新锁删掉。
+`START_LOCK_STALE_MS = 10min`；cold-start 安装/首启可能超过 10 分钟（网络慢/构建），第二实例可回收并并发启动。
 
 ## 根因（已证）
 
-release 没有 owner token 校验。
+stale 上限与最长启动时间没有关系。
 
 ## 复现
 

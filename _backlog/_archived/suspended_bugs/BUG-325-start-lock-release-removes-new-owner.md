@@ -1,22 +1,22 @@
 ---
-status: 修复就绪
+status: 待修
 severity: P2
 opened: 2026-11-19
 ---
 
-# BUG-326：run-driver up 与 boot-run 直起是两把独立锁——直起可在 up 判空后插队
+# BUG-325：锁被 stale 回收后，原持有者的 release 会删掉新持有者的锁
 
 > 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：修复就绪（运行态/测试）
 >
-> 探索轮 = [低置信区 20 卡（第 9 轮）](../issues/2026-11-19-low-confidence-40.md)。
+> 探索轮 = [低置信区 20 卡（第 9 轮）](../../issues/2026-11-19-low-confidence-40.md)。
 
 ## 症状
 
-run-driver 持 `run-driver-up.lock`，boot-run 持 `boot-run.lock`；直接 boot-run 不检查 run-driver 锁，可在我 up 判空后先启动。
+release 闭包无条件 `rmSync(lockDir, recursive)`；A 的锁被 B stale 回收后，A 退出时 release 把 B 的新锁删掉。
 
 ## 根因（已证）
 
-启动互斥没有跨入口共享同一把锁/同一 compare-and-set。
+release 没有 owner token 校验。
 
 ## 复现
 

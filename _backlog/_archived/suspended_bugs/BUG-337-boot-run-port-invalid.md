@@ -1,22 +1,22 @@
 ---
-status: 修复就绪
+status: 待修
 severity: P2
 opened: 2026-11-19
 ---
 
-# BUG-324：启动锁 10 分钟 stale——长安装/首启超过 10 分钟会被第二个实例抢锁
+# BUG-337：boot-run `DSH_RUN_PORT=abc` 不做校验，直接用于 lsof/dsh
 
 > 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：修复就绪（运行态/测试）
 >
-> 探索轮 = [低置信区 20 卡（第 9 轮）](../issues/2026-11-19-low-confidence-40.md)。
+> 探索轮 = [低置信区 20 卡（第 9 轮）](../../issues/2026-11-19-low-confidence-40.md)。
 
 ## 症状
 
-`START_LOCK_STALE_MS = 10min`；cold-start 安装/首启可能超过 10 分钟（网络慢/构建），第二实例可回收并并发启动。
+boot-run `PORT="${DSH_RUN_PORT:-3083}"`；没有数字/范围校验，`abc` 使 lsof/端口检查失真，dsh 才报错。
 
 ## 根因（已证）
 
-stale 上限与最长启动时间没有关系。
+shell 入口没有端口校验。
 
 ## 复现
 

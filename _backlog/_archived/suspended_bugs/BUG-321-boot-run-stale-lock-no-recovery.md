@@ -1,5 +1,5 @@
 ---
-status: 修复就绪
+status: 待修
 severity: P2
 opened: 2026-11-19
 ---
@@ -8,31 +8,31 @@ opened: 2026-11-19
 
 > 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：修复就绪（2026-11-20：实现与局部证据已入工作树，父级最终 checks 待跑；不归档）
 >
-> 探索轮 = [低置信区 20 卡（第 9 轮）](../issues/2026-11-19-low-confidence-40.md)。
+> 探索轮 = [低置信区 20 卡（第 9 轮）](../../issues/2026-11-19-low-confidence-40.md)。
 
 ## 症状与历史校正
 
-旧 [boot-run](../../tools/channel/boot-run.sh) 使用 `$STATE_DIR/boot-run.lock` 的裸 `mkdir`，没有 owner 记录；SIGKILL 不执行 trap。源码还存在另一条残留路径：前段注册的 `rmdir` trap 在服务段被 `trap cleanup EXIT INT TERM` 覆盖，所以不能把残留只归因于崩溃。
+旧 [boot-run](../../../tools/channel/boot-run.sh) 使用 `$STATE_DIR/boot-run.lock` 的裸 `mkdir`，没有 owner 记录；SIGKILL 不执行 trap。源码还存在另一条残留路径：前段注册的 `rmdir` trap 在服务段被 `trap cleanup EXIT INT TERM` 覆盖，所以不能把残留只归因于崩溃。
 
 原卡把“必须自动 stale 接管”当作修复方向，现撤回。2026-11-20 用户批准的合同是：**不按 TTL、PID 存活或 owner 缺失/损坏自动接管；崩溃残留先停相关进程，核实 home/state 锁及其进程组后离线处理。** 不自动接管属于获批处理取向，不作为未修漏洞；也不通过放宽旧断言宣称已修。
 
 ## 分诊与授权
 
 - 表面：开发 run 通道；最低边界分为文件系统 ownership 性质与公开入口真实进程生命周期。
-- 同机制类修：与 [BUG-339](BUG-339-boot-run-trap-removes-new-lock.md) 共用启动 owner；历史入口缺口见 [BUG-309](../_archived/fixed_bugs/BUG-309-run-driver-no-up-lock.md)、[BUG-310](../_archived/fixed_bugs/BUG-310-boot-run-no-start-lock.md)。仅记录本卡，不代表本批其他卡完成。
+- 同机制类修：与 [BUG-339](../../bugs/BUG-339-boot-run-trap-removes-new-lock.md) 共用启动 owner；历史入口缺口见 [BUG-309](../fixed_bugs/BUG-309-run-driver-no-up-lock.md)、[BUG-310](../fixed_bugs/BUG-310-boot-run-no-start-lock.md)。仅记录本卡，不代表本批其他卡完成。
 - 授权：用户直派更新本卡并批准上述无在线接管合同；状态暂保持修复就绪，可关闭：否。
 
 ## 根因（已证）
 
-旧 bash 锁与 [start-lock](../../checks/lib/channel/start-lock.mjs) 是两套协议；后者旧实现按十分钟 TTL 或坏 owner 删除重建锁，前者缺 owner 且 trap 被覆盖。单纯给 bash 增加时间回收会继承旧低层实现的活 owner 被夺权问题。
+旧 bash 锁与 [start-lock](../../../checks/lib/channel/start-lock.mjs) 是两套协议；后者旧实现按十分钟 TTL 或坏 owner 删除重建锁，前者缺 owner 且 trap 被覆盖。单纯给 bash 增加时间回收会继承旧低层实现的活 owner 被夺权问题。
 
 旧实现快照及性质反证保留在运行区：`runtime/smoke-workspace/preventive-quality/start-lock.baseline.mjs`、`runtime/smoke-workspace/preventive-quality/live-owner.red.out`、`runtime/smoke-workspace/preventive-quality/lock-properties.red.out`。前者红因是活 owner 超龄后第二次 acquire 返回 true；性质组第三项是空 owner 残留被自动接管。两者均指向 online takeover，不证明完整 boot-run 的 SIGKILL 恢复行为。
 
 ## 修法
 
-[boot-run](../../tools/channel/boot-run.sh) exec 到 [start-channel](../../tools/channel/start-channel.mjs)；[run-driver](../../tools/channel/run-driver.mjs) 也将启动交给该 supervisor。它规范化 home/state 路径并按固定顺序获取两个 `channel-start.lock`，在 prepare/服务生命周期内持有；独立 home/state 可并行，同 home 换 state 仍拒绝。旧 `boot-run.lock` / `run-driver-up.lock` 残留阻止启动并要求离线核实。
+[boot-run](../../../tools/channel/boot-run.sh) exec 到 [start-channel](../../../tools/channel/start-channel.mjs)；[run-driver](../../../tools/channel/run-driver.mjs) 也将启动交给该 supervisor。它规范化 home/state 路径并按固定顺序获取两个 `channel-start.lock`，在 prepare/服务生命周期内持有；独立 home/state 可并行，同 home 换 state 仍拒绝。旧 `boot-run.lock` / `run-driver-up.lock` 残留阻止启动并要求离线核实。
 
-[start-lock](../../checks/lib/channel/start-lock.mjs) 每代写唯一 owner 文件，记录 pid/时间但不据此夺权；owner 写失败回滚自己的空目录，release 只消费自己的身份一次，禁止递归清理。supervisor 在子进程 close 且整个进程组已证静默后释放；未证静默则保锁并报离线恢复。`--drift-only` 不获取服务锁，持锁通道仍可接受漂移检查。
+[start-lock](../../../checks/lib/channel/start-lock.mjs) 每代写唯一 owner 文件，记录 pid/时间但不据此夺权；owner 写失败回滚自己的空目录，release 只消费自己的身份一次，禁止递归清理。supervisor 在子进程 close 且整个进程组已证静默后释放；未证静默则保锁并报离线恢复。`--drift-only` 不获取服务锁，持锁通道仍可接受漂移检查。
 
 ## 修复判据
 

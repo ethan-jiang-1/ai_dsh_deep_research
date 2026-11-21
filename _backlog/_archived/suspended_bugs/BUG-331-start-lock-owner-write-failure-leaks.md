@@ -1,22 +1,22 @@
 ---
-status: 修复就绪
+status: 待修
 severity: P2
 opened: 2026-11-19
 ---
 
-# BUG-323：owner.at 在未来（时钟回拨/伪造）时 `now - at` 为负，锁永不过期
+# BUG-331：mkdir 成功但 owner.json 写失败时返回失败却留下锁目录
 
 > 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：修复就绪（运行态/测试）
 >
-> 探索轮 = [低置信区 20 卡（第 9 轮）](../issues/2026-11-19-low-confidence-40.md)。
+> 探索轮 = [低置信区 20 卡（第 9 轮）](../../issues/2026-11-19-low-confidence-40.md)。
 
 ## 症状
 
-stale 判据是 `now - at > staleMs`；owner.at 在未来时永远 false，锁一直阻塞，直到人工删。
+tryCreate 先 mkdir 再 writeFileSync；写入异常（磁盘满/权限）走 `error.code !== EEXIST` 返回 `{ok:false}`，但锁目录已创建，且没有 owner，后续 stale 依赖 catch 删除。
 
 ## 根因（已证）
 
-时钟回拨/跨机时间没有下界处理。
+创建不是原子的“目录+owner”两步。
 
 ## 复现
 

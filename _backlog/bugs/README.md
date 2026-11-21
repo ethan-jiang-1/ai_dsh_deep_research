@@ -8,32 +8,21 @@
 > （fixed + suspended）的已分配最大号 + 1（按盘上两区实算，不登记实值——登记 = 第二份手抄件必腐）。
 > 规矩手册 = [`../README.md`](../README.md)；本区子树指令 = [`../AGENTS.md`](../AGENTS.md)；
 > 方法 = [`../methods/bug-to-fix.md`](../methods/bug-to-fix.md)——先判表面/边界，再按状态翻转收证据（DSH 插件 = 多边界组合，低边界绿不算修好）。
-> 2026-11-21 起的 31 张积压卡修复程序（账实对齐 / 次序 / 流程保障）= [修复计划](../issues/2026-11-21-bug-stack-repair-program.md)。
+> 2026-11-21 起的缺陷积压修复程序（20 张活跃分 5 簇，另有 11 张迁暂停池；不做旧产物兼容）= [修复计划](../issues/2026-11-21-bug-stack-repair-program.md)。
 
 ## 活跃列表
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-320](BUG-320-boot-run-drift-only-lock-regression.md) | 修复就绪 | P2 | drift-only 在活通道持锁时必失败 |
-| [BUG-321](BUG-321-boot-run-stale-lock-no-recovery.md) | 修复就绪 | P2 | boot-run 锁无 stale 回收 |
-| [BUG-322](BUG-322-start-lock-stale-reclaim-race.md) | 修复就绪 | P2 | stale 回收竞态可双拿锁 |
-| [BUG-323](BUG-323-start-lock-future-timestamp-blocks.md) | 修复就绪 | P2 | 未来时间锁永不过期 |
-| [BUG-324](BUG-324-start-lock-10min-steals-long-boot.md) | 修复就绪 | P2 | 10min stale 抢长启动 |
-| [BUG-325](BUG-325-start-lock-release-removes-new-owner.md) | 修复就绪 | P2 | 旧持有者 release 删新锁 |
-| [BUG-326](BUG-326-run-driver-boot-run-two-locks.md) | 修复就绪 | P2 | run-driver/boot-run 两把锁 |
 | [BUG-327](BUG-327-probe-cache-mcp-read-write-key-mismatch.md) | 修复就绪 | P2 | probe 读写键 MCP 不一致 |
 | [BUG-328](BUG-328-plan-snapshot-same-text-only.md) | 等人拍板 | P2 | plan 快照只拒同文本 |
 | [BUG-329](BUG-329-threshold-critical-scope-null.md) | 等人拍板 | P2 | claims 缺时 threshold 退全部 |
 | [BUG-330](BUG-330-output-length-heuristic-still.md) | 等人拍板 | P2 | 长度仍启发式 |
-| [BUG-331](BUG-331-start-lock-owner-write-failure-leaks.md) | 修复就绪 | P2 | owner 写失败留锁 |
-| [BUG-332](BUG-332-start-lock-no-pid-liveness.md) | 修复就绪 | P2 | 只按时间不按 pid |
 | [BUG-333](BUG-333-run-driver-port-nan.md) | 修复就绪 | P2 | --port NaN/0 未校验 |
 | [BUG-334](BUG-334-cold-start-port-env-nan.md) | 修复就绪 | P2 | COLD_START_PORT NaN |
 | [BUG-335](BUG-335-snapshot-port-nan.md) | 修复就绪 | P2 | snapshot --port NaN |
 | [BUG-336](BUG-336-client-load-port-nan.md) | 修复就绪 | P2 | client-load --port NaN |
-| [BUG-337](BUG-337-boot-run-port-invalid.md) | 修复就绪 | P2 | DSH_RUN_PORT 未校验 |
 | [BUG-338](BUG-338-pick-free-port-toctou.md) | 修复就绪 | P2 | pickFreePort TOCTOU |
-| [BUG-339](BUG-339-boot-run-trap-removes-new-lock.md) | 修复就绪 | P2 | trap 删新锁 |
 | [BUG-340](BUG-340-protocol-audit-cli-missing-readdir-import.md) | 修复就绪 | P1 | protocol-audit 壳缺 readdir import |
 | [BUG-341](BUG-341-findings-one-line-vs-f-block.md) | 等人拍板 | P1 | findings 一行 vs F# 块 |
 | [BUG-342](BUG-342-plan-remaining-work-owner-next-literal.md) | 等人拍板 | P1 | 剩余工作 owner/next 字面判据 |
@@ -47,6 +36,8 @@
 | [BUG-350](BUG-350-claims-json-schema-mismatch.md) | 等人拍板 | P1 | claims.json 形状不符 schema |
 
 ## 最近归档
+
+（2026-11-21 不再修的 11 张迁入[暂停池](../_archived/suspended_bugs/README.md)：320/321/322/323/324/325/326/331/332/337/339——8 张被 `71010fef` 的新启动所有权取代、2 张实现已入树而最终反控未跑、1 张为获批合同取向；用户直派，不按缺陷修，也不为它们制造修复证据。）
 
 （2026-11-19 批 N 第 8 轮（300–319），批 Note =
 [2026-11-18-low-confidence-30](../../notes/implemented/2026-11-18-low-confidence-30.md)：

@@ -1,22 +1,22 @@
 ---
-status: 修复就绪
+status: 待修
 severity: P2
 opened: 2026-11-19
 ---
 
-# BUG-331：mkdir 成功但 owner.json 写失败时返回失败却留下锁目录
+# BUG-326：run-driver up 与 boot-run 直起是两把独立锁——直起可在 up 判空后插队
 
 > 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：修复就绪（运行态/测试）
 >
-> 探索轮 = [低置信区 20 卡（第 9 轮）](../issues/2026-11-19-low-confidence-40.md)。
+> 探索轮 = [低置信区 20 卡（第 9 轮）](../../issues/2026-11-19-low-confidence-40.md)。
 
 ## 症状
 
-tryCreate 先 mkdir 再 writeFileSync；写入异常（磁盘满/权限）走 `error.code !== EEXIST` 返回 `{ok:false}`，但锁目录已创建，且没有 owner，后续 stale 依赖 catch 删除。
+run-driver 持 `run-driver-up.lock`，boot-run 持 `boot-run.lock`；直接 boot-run 不检查 run-driver 锁，可在我 up 判空后先启动。
 
 ## 根因（已证）
 
-创建不是原子的“目录+owner”两步。
+启动互斥没有跨入口共享同一把锁/同一 compare-and-set。
 
 ## 复现
 

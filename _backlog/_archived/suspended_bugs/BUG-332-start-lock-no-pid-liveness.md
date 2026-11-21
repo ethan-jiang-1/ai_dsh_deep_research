@@ -1,22 +1,22 @@
 ---
-status: 修复就绪
+status: 待修
 severity: P2
 opened: 2026-11-19
 ---
 
-# BUG-337：boot-run `DSH_RUN_PORT=abc` 不做校验，直接用于 lsof/dsh
+# BUG-332：start-lock 只看时间，不看 pid 是否存活——崩溃后 10 分钟内无法启动
 
 > 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：修复就绪（运行态/测试）
 >
-> 探索轮 = [低置信区 20 卡（第 9 轮）](../issues/2026-11-19-low-confidence-40.md)。
+> 探索轮 = [低置信区 20 卡（第 9 轮）](../../issues/2026-11-19-low-confidence-40.md)。
 
 ## 症状
 
-boot-run `PORT="${DSH_RUN_PORT:-3083}"`；没有数字/范围校验，`abc` 使 lsof/端口检查失真，dsh 才报错。
+owner.json 有 pid，但 stale 只比较 at；进程崩溃 <10min 时锁仍被视为有效，第二个实例只能等或手删。
 
 ## 根因（已证）
 
-shell 入口没有端口校验。
+失败恢复只靠时间，不靠进程事实。
 
 ## 复现
 

@@ -1,22 +1,22 @@
 ---
-status: 修复就绪
+status: 待修
 severity: P2
 opened: 2026-11-19
 ---
 
-# BUG-332：start-lock 只看时间，不看 pid 是否存活——崩溃后 10 分钟内无法启动
+# BUG-320：`boot-run --drift-only` 先抢 boot 锁——活通道持锁时漂移检查永远失败
 
 > 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：修复就绪（运行态/测试）
 >
-> 探索轮 = [低置信区 20 卡（第 9 轮）](../issues/2026-11-19-low-confidence-40.md)。
+> 探索轮 = [低置信区 20 卡（第 9 轮）](../../issues/2026-11-19-low-confidence-40.md)。
 
 ## 症状
 
-owner.json 有 pid，但 stale 只比较 at；进程崩溃 <10min 时锁仍被视为有效，第二个实例只能等或手删。
+boot-run 在 `--drift-only` 分支之前就 `mkdir $BOOT_LOCK`；boot 进程在 web 存活期间一直持锁。`run-driver up` 复用活通道时调 `boot-run --drift-only`，必然 EEXIST → 漂移检查失败。
 
 ## 根因（已证）
 
-失败恢复只靠时间，不靠进程事实。
+锁的范围盖住了只读模式，启动锁与漂移检查互斥。
 
 ## 复现
 

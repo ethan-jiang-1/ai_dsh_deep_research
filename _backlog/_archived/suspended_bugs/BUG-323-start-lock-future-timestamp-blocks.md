@@ -1,22 +1,22 @@
 ---
-status: 修复就绪
+status: 待修
 severity: P2
 opened: 2026-11-19
 ---
 
-# BUG-320：`boot-run --drift-only` 先抢 boot 锁——活通道持锁时漂移检查永远失败
+# BUG-323：owner.at 在未来（时钟回拨/伪造）时 `now - at` 为负，锁永不过期
 
 > 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：修复就绪（运行态/测试）
 >
-> 探索轮 = [低置信区 20 卡（第 9 轮）](../issues/2026-11-19-low-confidence-40.md)。
+> 探索轮 = [低置信区 20 卡（第 9 轮）](../../issues/2026-11-19-low-confidence-40.md)。
 
 ## 症状
 
-boot-run 在 `--drift-only` 分支之前就 `mkdir $BOOT_LOCK`；boot 进程在 web 存活期间一直持锁。`run-driver up` 复用活通道时调 `boot-run --drift-only`，必然 EEXIST → 漂移检查失败。
+stale 判据是 `now - at > staleMs`；owner.at 在未来时永远 false，锁一直阻塞，直到人工删。
 
 ## 根因（已证）
 
-锁的范围盖住了只读模式，启动锁与漂移检查互斥。
+时钟回拨/跨机时间没有下界处理。
 
 ## 复现
 

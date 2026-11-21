@@ -1,5 +1,5 @@
 ---
-status: 修复就绪
+status: 待修
 severity: P2
 opened: 2026-11-19
 ---
@@ -8,20 +8,20 @@ opened: 2026-11-19
 
 > 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：修复就绪（2026-11-20：实现与局部证据已入工作树，父级最终 checks 待跑；不归档）
 >
-> 探索轮 = [低置信区 20 卡（第 9 轮）](../issues/2026-11-19-low-confidence-40.md)。
+> 探索轮 = [低置信区 20 卡（第 9 轮）](../../issues/2026-11-19-low-confidence-40.md)。
 
 ## 症状与历史校正
 
-原卡声称“boot-run stale 接管后旧实例完整 body 的 EXIT trap 会删新锁”，范围过大，现缩限：旧 [boot-run](../../tools/channel/boot-run.sh) 在取得裸 `boot-run.lock` 后注册 `trap 'rmdir "$BOOT_LOCK" …' EXIT INT TERM`，但进入仪表盘/服务段后以 `trap cleanup EXIT INT TERM` 覆盖它。后者只杀子进程，不删启动锁；不能沿用原卡对完整 body 生命周期的误删结论。
+原卡声称“boot-run stale 接管后旧实例完整 body 的 EXIT trap 会删新锁”，范围过大，现缩限：旧 [boot-run](../../../tools/channel/boot-run.sh) 在取得裸 `boot-run.lock` 后注册 `trap 'rmdir "$BOOT_LOCK" …' EXIT INT TERM`，但进入仪表盘/服务段后以 `trap cleanup EXIT INT TERM` 覆盖它。后者只杀子进程，不删启动锁；不能沿用原卡对完整 body 生命周期的误删结论。
 
 在前一个 trap 仍有效的准备阶段，如果外部删除/替换锁目录，旧实例的 `rmdir` 没有代际校验，可能删掉后来创建的空目录。旧 bash 入口本身没有自动 stale 回收；此条件不能写成已证正常 stale 接管路径。对有文件的目录，`rmdir` 会失败，也不能夸成递归误删。
 
-另一个已证的同类缺口在旧 [start-lock](../../checks/lib/channel/start-lock.mjs)：release 对路径无条件 recursive rm。第一代正常 release、第二代 acquire 后，再次执行第一代 release，会删除第二代的目录及 owner 文件。该低层行为有独立磁盘反证，不等于完整 shell trap 事故已复现。
+另一个已证的同类缺口在旧 [start-lock](../../../checks/lib/channel/start-lock.mjs)：release 对路径无条件 recursive rm。第一代正常 release、第二代 acquire 后，再次执行第一代 release，会删除第二代的目录及 owner 文件。该低层行为有独立磁盘反证，不等于完整 shell trap 事故已复现。
 
 ## 分诊与授权
 
 - 表面：run 通道 ownership 与清理生命周期；最低证据边界 = 文件系统代际释放 + 公开入口进程组收束。
-- 类修关联：[BUG-321](BUG-321-boot-run-stale-lock-no-recovery.md)；历史入口缺口见 [BUG-309](../_archived/fixed_bugs/BUG-309-run-driver-no-up-lock.md)、[BUG-310](../_archived/fixed_bugs/BUG-310-boot-run-no-start-lock.md)。不据此宣称其他活跃卡完成。
+- 类修关联：[BUG-321](../../bugs/BUG-321-boot-run-stale-lock-no-recovery.md)；历史入口缺口见 [BUG-309](../fixed_bugs/BUG-309-run-driver-no-up-lock.md)、[BUG-310](../fixed_bugs/BUG-310-boot-run-no-start-lock.md)。不据此宣称其他活跃卡完成。
 - 授权：用户直派更新、按源码收窄历史事实；状态暂保持修复就绪，可关闭：否。
 
 ## 根因与复现（已证范围）
@@ -32,9 +32,9 @@ opened: 2026-11-19
 
 ## 修法
 
-公开 [boot-run](../../tools/channel/boot-run.sh) 与 [run-driver](../../tools/channel/run-driver.mjs) 统一交给 [start-channel](../../tools/channel/start-channel.mjs) 持有 home/state 两个锁；[body](../../tools/channel/boot-run-body.sh) 仅负责启动实现与 dashboard cleanup，不再拥有旧 `BOOT_LOCK` trap。
+公开 [boot-run](../../../tools/channel/boot-run.sh) 与 [run-driver](../../../tools/channel/run-driver.mjs) 统一交给 [start-channel](../../../tools/channel/start-channel.mjs) 持有 home/state 两个锁；[body](../../../tools/channel/boot-run-body.sh) 仅负责启动实现与 dashboard cleanup，不再拥有旧 `BOOT_LOCK` trap。
 
-[start-lock](../../checks/lib/channel/start-lock.mjs) 每代创建唯一 owner 文件；release 消费一次，只 unlink 自己的文件，再 rmdir 空目录，不 recursive rm，不在 unlink 身份失败后继续删目录。supervisor 等待子进程 close 并确认整个进程组静默后才 release，无法确认则保锁诊断。正常服务交接后仍由 supervisor 持锁。
+[start-lock](../../../checks/lib/channel/start-lock.mjs) 每代创建唯一 owner 文件；release 消费一次，只 unlink 自己的文件，再 rmdir 空目录，不 recursive rm，不在 unlink 身份失败后继续删目录。supervisor 等待子进程 close 并确认整个进程组静默后才 release，无法确认则保锁诊断。正常服务交接后仍由 supervisor 持锁。
 
 获批协议不按 TTL/PID/坏 owner 在线接管；在线外部删除或替换活动锁目录不受支持。崩溃残留需要停相关进程并核实后离线处理，不能把 token/唯一文件名夸成对任意恶意目录替换都成立的原子比较删除。
 

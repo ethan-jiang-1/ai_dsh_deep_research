@@ -2777,6 +2777,17 @@
     {"from": "tests/checks/test-surface.test.mjs", "to": "tests/checks/test-infra/test-surface.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
     {"from": "tests/checks/verify-gates.test.mjs", "to": "tests/checks/harness/verify-gates.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
     {"from": "tests/checks/web-ui-nav-bilingual.test.mjs", "to": "tests/checks/shared/web-ui-nav-bilingual.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/workspace-parsers.test.mjs", "to": "tests/checks/test-infra/workspace-parsers.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"}
+    {"from": "tests/checks/workspace-parsers.test.mjs", "to": "tests/checks/test-infra/workspace-parsers.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
+    {"from": "_backlog/bugs/BUG-320-boot-run-drift-only-lock-regression.md", "to": "_backlog/_archived/suspended_bugs/BUG-320-boot-run-drift-only-lock-regression.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
+    {"from": "_backlog/bugs/BUG-321-boot-run-stale-lock-no-recovery.md", "to": "_backlog/_archived/suspended_bugs/BUG-321-boot-run-stale-lock-no-recovery.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
+    {"from": "_backlog/bugs/BUG-322-start-lock-stale-reclaim-race.md", "to": "_backlog/_archived/suspended_bugs/BUG-322-start-lock-stale-reclaim-race.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
+    {"from": "_backlog/bugs/BUG-323-start-lock-future-timestamp-blocks.md", "to": "_backlog/_archived/suspended_bugs/BUG-323-start-lock-future-timestamp-blocks.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
+    {"from": "_backlog/bugs/BUG-324-start-lock-10min-steals-long-boot.md", "to": "_backlog/_archived/suspended_bugs/BUG-324-start-lock-10min-steals-long-boot.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
+    {"from": "_backlog/bugs/BUG-325-start-lock-release-removes-new-owner.md", "to": "_backlog/_archived/suspended_bugs/BUG-325-start-lock-release-removes-new-owner.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
+    {"from": "_backlog/bugs/BUG-326-run-driver-boot-run-two-locks.md", "to": "_backlog/_archived/suspended_bugs/BUG-326-run-driver-boot-run-two-locks.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
+    {"from": "_backlog/bugs/BUG-331-start-lock-owner-write-failure-leaks.md", "to": "_backlog/_archived/suspended_bugs/BUG-331-start-lock-owner-write-failure-leaks.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
+    {"from": "_backlog/bugs/BUG-332-start-lock-no-pid-liveness.md", "to": "_backlog/_archived/suspended_bugs/BUG-332-start-lock-no-pid-liveness.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
+    {"from": "_backlog/bugs/BUG-337-boot-run-port-invalid.md", "to": "_backlog/_archived/suspended_bugs/BUG-337-boot-run-port-invalid.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
+    {"from": "_backlog/bugs/BUG-339-boot-run-trap-removes-new-lock.md", "to": "_backlog/_archived/suspended_bugs/BUG-339-boot-run-trap-removes-new-lock.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"}
   ]
 }
