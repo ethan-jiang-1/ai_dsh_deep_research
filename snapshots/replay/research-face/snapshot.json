@@ -6,9 +6,8 @@
   "sessionFormat": 4,
   "mcp": false,
   "lastRewrite": {
-    "why": "none",
-    "at": "2026-11-17T00:00:00Z",
-    "note": "header-only path fix after root unification (checks/smoke); rendered body unchanged, not a re-record"
+    "why": "_backlog/issues/2026-11-21-bug-stack-repair-program.md",
+    "at": "2026-11-21T13:52:31.214Z"
   },
   "roleFace": [
     "lead",

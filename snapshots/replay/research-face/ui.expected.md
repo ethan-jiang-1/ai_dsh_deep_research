@@ -7,9 +7,9 @@
 
 ## 对话流 · 研究语义卡（web_search 卡标题，状态符不钉）
 
-检索：DSH harness · DeepSeek Harness · DSH agent harness GitHub
+检索：DSH harness · DeepSeek Harness DSH · DSH deep research harne
 
 ## 研究状态页签 · 人性化活动行（icon + 文本）
 
-🔍 检索：DSH harness · DeepSeek Harness · DSH age
-💬 探针完成：执行了 3 条 query（DSH harness、DeepSeek Harness、DS
+🔍 检索：DSH harness · DeepSeek Harness DSH · DSH
+💬 探针完成，搜了 3 个 query（「DSH harness」/「DeepSeek Harness
