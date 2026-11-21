@@ -8,6 +8,7 @@
 > （fixed + suspended）的已分配最大号 + 1（按盘上两区实算，不登记实值——登记 = 第二份手抄件必腐）。
 > 规矩手册 = [`../README.md`](../README.md)；本区子树指令 = [`../AGENTS.md`](../AGENTS.md)；
 > 方法 = [`../methods/bug-to-fix.md`](../methods/bug-to-fix.md)——先判表面/边界，再按状态翻转收证据（DSH 插件 = 多边界组合，低边界绿不算修好）。
+> 2026-11-21 起的 31 张积压卡修复程序（账实对齐 / 次序 / 流程保障）= [修复计划](../issues/2026-11-21-bug-stack-repair-program.md)。
 
 ## 活跃列表
 
