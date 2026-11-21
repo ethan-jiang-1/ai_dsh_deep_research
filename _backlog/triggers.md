@@ -6,6 +6,7 @@
 
 | 对象 | 当前决定 | 具体观察（出现位置） | owner |
 |---|---|---|---|
+| 351 的浏览器横幅/tick | fold + 真 follow 快照重放已证（`stalled=true`）；`client-load --seed` 因主机 load 20.6 NOT-RUN | 下一次 client-load/dev-home 运行：打开合成停摆会话应显示横幅，停留 2min 应在 ≤60s 内跨阈值；误报/漏报则建卡 | [BUG-351](_archived/fixed_bugs/BUG-351-stalled-banner-reset-by-open-events.md) |
 | 新 canonical 合同的模型遵守 | 模板/契约夹具已落（readiness v2 / claims v2 / findings 块 / 剩余工作表）；旧 bundle 不作验收；模型是否照写未证 | 下一次自然 P5 run：run-accept 在新合同下红 → 引用本批卡新建卡；连续两场绿 → 移除本行 | [批 Note](../notes/implemented/2026-11-21-bug-stack-repair.md) |
 | 旧 run B 的卡外红 | 判定为生产者错误/真实交付缺陷，未建卡（`owner_role` 复合值、覆盖表缺行、未解释 CRITICAL） | 下一次 P5 run 再现其中任一 → 建卡；`owner_role` 的 `executor` 落点是已知 schema 缺口 | [批 Note](../notes/implemented/2026-11-21-bug-stack-repair.md) |
 | snapshot-replay.entry 拆分 | 暂不拆：场景发现/渲染断言/网络离线 preload 同文件；2026-11-21 BUG-338 端口重选后 559 行，`script-file-size` 登记债务 | 单次 diff 触及 ≥3 场景 / 文件 >600 行 / offline preload 出现第二消费方时，按「场景组」拆 | [BUG-338](_archived/fixed_bugs/BUG-338-pick-free-port-toctou.md) |

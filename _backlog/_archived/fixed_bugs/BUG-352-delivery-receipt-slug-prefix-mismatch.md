@@ -1,12 +1,12 @@
 ---
-status: 排查中
+status: 已修
 severity: P2
 opened: 2026-11-21
 ---
 
 # BUG-352：工具回执的 slug 带 `drt_`、驾驶舱用裸 slug 比对——`run-accept` 回执永远不被接受
 
-> 严重级别：P2 ｜ 发现：2026-11-21 ｜ 状态：排查中 — 边界已用真实回执复现；按用户指令只报不修。
+> 严重级别：P2 ｜ 发现：2026-11-21 ｜ 状态：已修（2026-11-22）— 结论：回执身份 = bundle 目录名（`drt_<slug>`），消费侧在唯一函数里归一；驾驶舱裸 slug 可认工具回执；审查：agent — 注入红回归 + 真实回执边界；去向：none — 机械修复
 > 现场 = `research-workspace/drt_api-context-caching-ds-openai/delivered.json` +
 > 其见证会话 `session-cf03a459-...`。
 
@@ -107,3 +107,31 @@ null
 本卡证据是纯函数 + 真实回执边界，不依赖浏览器；没有合成「窗口外 present」的会话，
 因为现有唯一带工具回执的见证会话 `session-cf03a459-...` 的 present 仍在窗口内，
 会掩盖回执兜底。浏览器红证可在补窗口外夹具后升级；本卡不把「未跑浏览器」写成已验证。
+
+## 修复落地（2026-11-22）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/run/final-target.ts",
+    "tests/run/gates/final-target.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/final-target.spec.mjs",
+    "exit": 1,
+    "output": "回退严格相等（record.slug !== slug）→ 真实形状 drt_x + 裸 x 的用例红（1 fail）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/final-target.spec.mjs",
+    "exit": 0,
+    "output": "21 tests 全过；真实回执边界：bound slug=api-context-caching-ds-openai → delivery path=drt_.../final/v1.md（裸/带前缀两种入参同判）"
+  },
+  "guard": {
+    "path": "tests/run/gates/final-target.spec.mjs"
+  }
+}
+```
+
+边界：回执 `present.path` 仍保留 `drt_` 前缀；只归一用于身份比较的 `slug` 两侧。旧 install-only 回执仍拒收（345 裁定不变）。
+
+可关闭：是

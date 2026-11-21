@@ -3,6 +3,11 @@
 // 删掉 capabilityNote 式的横幅接线 → stalledBannerLine 例红。还原 → 绿。
 // 反证：把 stalled 改成只看 quietMs → 「长回合无错误」例红；只看 lastTurnError → 「错误后仍有活动」例红。
 import { test } from 'node:test'
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..')
 import assert from 'node:assert/strict'
 import { runHealthOf, stalledBannerLine, DEFAULT_STALL_MS } from '../../../../packages/deep-research-pack/src/lib/run/health.ts'
 
@@ -54,4 +59,32 @@ test('BUG-348：停摆横幅文案只在 stalled 时给出，参数含分钟与�
   assert.equal(stalledBannerLine({ stalled: false, quietMs: 0, lastTurnError: null, lastActivityAt: null }, t), null)
   assert.equal(stalledBannerLine(null, t), null)
   assert.equal(stalledBannerLine({ stalled: true, quietMs: 3_600_000, lastTurnError: 'TIMEOUT', lastActivityAt: null }, t), 'runStalledBanner:60:TIMEOUT')
+})
+
+// 负例留证 2026-11-22：BUG-351——打开会话注入的生命周期事件（时间戳=打开时刻）不算活动；
+// 否则 durable log 与 follow 快照对同一会话给出不同 stalled。反证：把活动谓词改回「任意事件」→ 本例红。
+test('BUG-351：生命周期事件不推进最后活动时间（两个输入集同判）', () => {
+  const durable = [
+    event('turn/end', T - DEFAULT_STALL_MS - 60_000),
+    event('llm/retry', T - DEFAULT_STALL_MS - 30_000, { failure: { message: 'TRANSPORT' } }),
+  ]
+  const snapshot = [
+    ...durable,
+    event('session/end-seed', T - 60_000),
+    event('permission/preset', T - 60_000),
+    event('sandbox/mode', T - 60_000),
+    event('approval/policy', T - 60_000),
+  ]
+  const fromLog = runHealthOf(durable, { now: T })
+  const fromSnapshot = runHealthOf(snapshot, { now: T })
+  assert.equal(fromLog.stalled, true)
+  assert.equal(fromSnapshot.stalled, true, '打开会话注入的事件不得把静默窗口清零')
+  assert.equal(fromSnapshot.quietMs, fromLog.quietMs)
+})
+
+test('BUG-351：时间推进面在位（hook 以 tick 驱动 now，不冻结在 memo）', () => {
+  const source = readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/research-status/useStatusFeed.ts'), 'utf8')
+  assert.match(source, /setInterval\(\(\) => setNowTick\(Date\.now\(\)\)/, '缺 30s tick')
+  assert.match(source, /runHealthOf\(journalEvents, \{ now: nowTick \}\)/, 'health 仍用一次性 now')
+  assert.match(source, /\[journalEvents, nowTick\]/, 'health memo 未依赖 tick')
 })

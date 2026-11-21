@@ -64,6 +64,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   const [journalSeen, setJournalSeen] = useState(false)
   // 交付回执兜底（D51）：会话窗口可能不含旧的 present 事件；回执是持久事实。
   const [receiptDelivery, setReceiptDelivery] = useState<ReturnType<typeof deliveryFromReceipt> | null>(null)
+  // 时间推进面（BUG-351）：静默阈值必须能在观察期间跨过，不能把 now 冻在 memo 里。
+  const [nowTick, setNowTick] = useState(() => Date.now())
   const [kickoffHold, setKickoffHold] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const trustRef = useRef<BindingTrust>({ kind: 'unbound' })
@@ -273,7 +275,11 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   // 流畸形死亡（BUG-023 修复①）：journal 尾窗折算，与 HITL 挂起互斥显示（挂起时主横幅让位）。
   const streamFailure = useMemo(() => streamFailureOf(journalEvents), [journalEvents])
   // 停摆判据（BUG-348）：派生自事件流，不写文件；与 watch-run 同一 fold。
-  const health = useMemo(() => (journalEvents.length === 0 ? null : runHealthOf(journalEvents, { now: Date.now() })), [journalEvents])
+  useEffect(() => {
+    const timer = setInterval(() => setNowTick(Date.now()), 30_000)
+    return () => clearInterval(timer)
+  }, [])
+  const health = useMemo(() => (journalEvents.length === 0 ? null : runHealthOf(journalEvents, { now: nowTick })), [journalEvents, nowTick])
   const anchors = useMemo(
     () => deriveAnchors(journalEvents, face !== null ? { question: face.hasQuestion, delivered: delivery !== null } : undefined, props.t),
     [journalEvents, face, props.t],

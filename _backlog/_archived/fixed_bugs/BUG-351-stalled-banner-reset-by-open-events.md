@@ -1,12 +1,12 @@
 ---
-status: 排查中
+status: 已修
 severity: P2
 opened: 2026-11-21
 ---
 
 # BUG-351：停摆横幅被「打开会话」注入的生命周期事件清零——watch-run 判停摆，驾驶舱不显示
 
-> 严重级别：P2 ｜ 发现：2026-11-21 ｜ 状态：排查中 — 根因与红证已定位；按用户指令只报不修。
+> 严重级别：P2 ｜ 发现：2026-11-21 ｜ 状态：已修（2026-11-22）— 结论：活动谓词收窄（生命周期事件不算活动）+ 客户端 30s tick；真快照重放与 durable log 同判 stalled；审查：agent — 注入红回归 + 真实快照重放；去向：none — 观察面判据修复
 > 现场 = `runtime/e2e/`；合成会话 = `session-293ce364-d1e7-4a80-a2de-12fefc86495c`
 > （dev home `research-workspace` 组，runtime 已 gitignore）。
 
@@ -111,3 +111,32 @@ const health = useMemo(
 - 红证：把 `runHealthOf` 的活动谓词改回「任意事件」或将 `now` 固定为常量，上述两条
   各红一次；还原后绿。guard 落点建议 = `tests/cockpit/lib/run/health.spec.mjs`（fold）
   + 浏览器层用例（本卡证据链可升格为 `client-load` 相位或新 entry 用例）。
+
+## 修复落地（2026-11-22）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/run/health.ts",
+    "packages/deep-research-pack/src/client/research-status/useStatusFeed.ts",
+    "tests/cockpit/lib/run/health.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/cockpit/lib/run/health.spec.mjs",
+    "exit": 1,
+    "output": "回退活动谓词为「任意事件」→ 生命周期事件清零静默窗口，两个输入集同判例红（1 fail）"
+  },
+  "green": {
+    "command": "node --test tests/cockpit/lib/run/health.spec.mjs",
+    "exit": 0,
+    "output": "9 tests 全过；真实 follow 快照（11 事件，含 session/end-seed 等 4 条生命周期）重放：quiet=157min / stalled=true / error=E2E injected transport failure"
+  },
+  "guard": {
+    "path": "tests/cockpit/lib/run/health.spec.mjs"
+  }
+}
+```
+
+未跑项：浏览器「打开即显示横幅 / 停留 2min 跨阈值」未复验——`client-load.entry --seed` 因主机 load 20.6 判 NOT-RUN（exit 2）。fold 与真实快照重放已证；tick 由源码守卫（setInterval + memo 依赖）钉住；下一次 client-load/dev-home 运行触发复验。
+
+可关闭：是

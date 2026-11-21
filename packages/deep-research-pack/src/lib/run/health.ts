@@ -33,12 +33,31 @@ const failureOf = (event: unknown): string | null => {
   return null
 }
 
+/**
+ * 活动谓词（BUG-351）：只有 agent 回合工作事件推进「最后活动时间」。
+ * 打开历史会话时服务端会向 follow 快照注入 `session/end-seed`、`permission/preset`、`sandbox/mode`、
+ * `approval/policy`（时间戳 = 打开时刻），它们不进 durable log，也不能把静默窗口清零。
+ */
+const ACTIVITY_TYPES = new Set([
+  'turn/start', 'turn/end', 'step/start', 'step/end',
+  'llm/retry', 'llm/retry-started',
+  'tool/call', 'tool/result',
+  'assistant/message', 'assistant/attempt', 'user/message',
+  'agent/inbox/spliced', 'team/task',
+  'subagent/catalog', 'subagent/start', 'subagent/end',
+  'deliverables/presented',
+])
+const isAgentActivity = (event: unknown): boolean => {
+  const type = (event as { type?: unknown } | null)?.type
+  return typeof type === 'string' && ACTIVITY_TYPES.has(type)
+}
+
 export function runHealthOf(events: readonly unknown[], { now = Date.now(), stallMs = DEFAULT_STALL_MS } = {}): RunHealth {
   let lastActivityAt: number | null = null
   let lastTurnError: string | null = null
   for (const event of events) {
     const time = timeOf(event)
-    if (time !== null && (lastActivityAt === null || time > lastActivityAt)) lastActivityAt = time
+    if (time !== null && isAgentActivity(event) && (lastActivityAt === null || time > lastActivityAt)) lastActivityAt = time
     // 只认**最后一回合**的错误：新回合开始即清空（旧回合的 retry 不应在之后的静默里翻旧账）。
     if ((event as { type?: unknown } | null)?.type === 'turn/start') lastTurnError = null
     const failure = failureOf(event)

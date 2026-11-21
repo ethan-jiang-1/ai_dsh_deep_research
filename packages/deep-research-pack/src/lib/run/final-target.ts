@@ -257,14 +257,23 @@ export function finalVersionOfPath(path: string | null | undefined): number | nu
   return match === null ? null : Number(match[1])
 }
 
+/** 回执身份 = bundle 目录名（`drt_<slug>`）；驾驶舱传裸 slug。比较前只在一处剥前缀（BUG-352）。 */
+const bareBundleSlugOf = (value: unknown): string | null => {
+  if (typeof value !== 'string') return null
+  const bare = value.trim().replace(/^drt_/, '')
+  return bare === '' ? null : bare
+}
+
 export function deliveryFromReceipt(receipt: unknown, slug?: string): FinalDelivery | null {
   if (typeof receipt !== 'object' || receipt === null) return null
   const record = receipt as { version?: unknown; slug?: unknown; acceptedAt?: unknown; gate?: unknown; present?: unknown; final?: unknown }
   // BUG-345：只认工具写的回执（run-accept 的 buildDelivered：version 1 + slug + acceptedAt + gate.PASS）。
   // 手写的 install-only 形状（final_copy/presented）或缺 gate 的仿制品不是回执——不做旧形兼容。
   if (record.version !== 1 || typeof record.slug !== 'string' || record.slug === '') return null
+  const receiptSlug = bareBundleSlugOf(record.slug)
+  if (receiptSlug === null) return null
   if (typeof record.acceptedAt !== 'string' || record.acceptedAt.trim() === '') return null
-  if (slug !== undefined && record.slug !== slug) return null
+  if (slug !== undefined && bareBundleSlugOf(slug) !== receiptSlug) return null
   const gate = typeof record.gate === 'object' && record.gate !== null ? record.gate as { status?: unknown } : null
   if (gate?.status !== 'PASS') return null
   const present = typeof record.present === 'object' && record.present !== null
@@ -275,7 +284,7 @@ export function deliveryFromReceipt(receipt: unknown, slug?: string): FinalDeliv
     : null
   const version = typeof present?.version === 'number' ? present.version : (typeof final?.version === 'number' ? final.version : null)
   const declared = typeof present?.path === 'string' && present.path.trim() !== '' ? present.path : null
-  const path = declared ?? (version !== null && slug !== undefined ? `drt_${slug}/final/v${version}.md` : null)
+  const path = declared ?? (version !== null ? `drt_${receiptSlug}/final/v${version}.md` : null)
   if (path === null) return null
   return { path, turn: 0, callId: typeof present?.callId === 'string' ? present.callId : '' }
 }

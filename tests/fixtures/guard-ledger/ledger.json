@@ -1641,10 +1641,17 @@
       "id": "BUG-348",
       "mechanism": "run 健康 derive-only（静默 + 最后一回合错误）+ 横幅文案 fold",
       "guard": "tests/cockpit/lib/run/health.spec.mjs",
-      "oracleType": "self-referential",
-      "status": "provisional",
-      "redRecipe": "stalled 只看 quietMs → 「静默但无错误」例红；删横幅接线 → stalledBannerLine 例红",
-      "trigger": "下一次自然 run 出现停摆告警误报/漏报，或 30min 阈值需要调整时重估"
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "stalled 只看 quietMs → 「静默但无错误」例红；删横幅接线 → stalledBannerLine 例红"
+    },
+    {
+      "id": "BUG-351",
+      "mechanism": "活动谓词收窄（生命周期事件不算活动）+ 客户端 tick 推进 now",
+      "guard": "tests/cockpit/lib/run/health.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "回退活动谓词为「任意事件」→ 生命周期清零静默例红；删 tick → 源码守卫红"
     }
   ]
 }

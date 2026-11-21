@@ -87,12 +87,12 @@
 
 ## 残余与未证边界
 
-- **348 的横幅专用浏览器断言未单独复验**：`client-load.entry --seed` 于负载下降后复跑——研究状态页
-  全部断言 PASS，仅「终稿端到端」1 例 SKIP（seed 无窗口内交付目标，与本卡无关）。横幅文案已从 JSX
-  抽成 `stalledBannerLine` fold，由 health.spec 覆盖（stalled/非 stalled/参数）。
+- **348 的横幅在打开会话时不可达**：follow 快照注入的生命周期事件会把静默窗口清零（351）。
+  已修：活动谓词收窄 + 客户端 tick；真快照重放与 durable log 同判。研究状态页挂载仍以
+  `client-load.entry --seed` 的既有绿为准（终稿端到端 1 例 SKIP）。
 - **旧 shape 兼容**：两场旧 run 在新判据下保持红（预期）；它们的 `readiness/claims/findings/plan` 不迁移。
 - **345 窗口残差**：vendor follow 快照窗口不改；present-only 且窗口外且无工具回执 = 未见证（不伪造）。
-  生产侧正路 = 交付时跑 ops `run-accept` 写回执。
+  生产侧正路 = 交付时跑 ops `run-accept` 写回执；工具回执的消费路径已由 352 修复。
 - **新 canonical 的模型遵守**：模板/fixture 已就位，但模型是否照写只有下一次自然 P5 run 能证明；
   `run-accept` 会在那次红。触发条件已登记 `_backlog/triggers.md`。
 - **旧 run B 的卡外红**（未建卡，门禁判定正确）：`W2.1 owner_role` 含 `executor=`（plan schema 无 executor
@@ -100,3 +100,20 @@
   C7/C1 而 readiness=PASS。它们是生产者错误/真实交付缺陷，不为它们放宽门；下一次自然 run 若复发再建卡。
 - **349**：探测只影响模型可见提示；workflow 的真实失败仍由 `waves/W2.json` 如实记录；未跑真模型 run。
 - 未跑：完整 L4 run、L2 安装档（本批未改安装形态）、跨平台矩阵。
+
+## 后续修正（2026-11-22，BUG-351/352）
+
+上一批的 345/348 在真实路径上各有一个可达性缺口，已由两张回归卡修复：
+
+- **352（回执身份）**：回执的 `slug` 是 bundle 目录名（`drt_<slug>`），驾驶舱传裸 slug；严格相等让
+  345 的「回执兜底」成为死代码。修法 = 在 `deliveryFromReceipt` 一处归一，`present.path` 的 `drt_`
+  前缀不动；fixture 改用真实 `run-accept` 形状（`drt_x` + 裸 `x`）。
+- **351（停摆可达性）**：`runHealthOf` 对任何带时间的事件更新活动时间，而打开历史会话时 follow 快照
+  注入 `session/end-seed` 等生命周期事件（时间戳 = 打开时刻）。修法 = 活动谓词收窄为 agent 回合工作
+  事件；`useStatusFeed` 加 30s tick，`now` 不再冻在 `useMemo`。真 follow 快照（11 事件，含 4 条
+  生命周期）重放 → `stalled=true`，与 durable log 同判。
+- **类级修正（G9–G11）**：① 守卫夹具必须来自真实生产者产物，并写明调用方真实参数形状（352）；
+  ② 两个 oracle 判同一事实时要有同输入集对账（351 的 durable vs snapshot）；③ 时间谓词必须有推进面
+  与可执行的源码/假时钟守卫（351 的 tick）。
+- **未证边界**：351 的浏览器「打开即显示横幅 / 停留跨阈值」未复验——`client-load.entry --seed` 因主机
+  load 20.6 判 NOT-RUN；下一次 client-load/dev-home 运行触发复验（triggers 已登记）。

@@ -6,6 +6,8 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [351](BUG-351-stalled-banner-reset-by-open-events.md) | 打开会话清零停摆窗口 | （活动谓词 + tick） | 2026-11-22 |
+| [352](BUG-352-delivery-receipt-slug-prefix-mismatch.md) | 回执 slug 前缀不匹配 | （身份归一） | 2026-11-22 |
 | [348](BUG-348-long-run-silent-stall-no-alert.md) | 长 run 停摆无告警 | （health fold + 横幅） | 2026-11-21 |
 | [349](BUG-349-workflow-sandbox-nested-eph.md) | workflow 嵌套沙箱必失败 | （探测 + 运行时声明） | 2026-11-21 |
 | [338](BUG-338-pick-free-port-toctou.md) | pickFreePort TOCTOU | （bootOnFreePort 有界重选） | 2026-11-21 |

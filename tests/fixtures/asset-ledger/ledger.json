@@ -1019,7 +1019,7 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "health.spec.mjs — run 停摆派生判据（BUG-348）：静默 + 最后回合错误才告警。",
-      "oracleType": "self-referential",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {
