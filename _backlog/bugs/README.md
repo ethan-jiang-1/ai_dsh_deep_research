@@ -20,7 +20,6 @@
 | [BUG-335](BUG-335-snapshot-port-nan.md) | 修复就绪 | P2 | snapshot --port NaN |
 | [BUG-336](BUG-336-client-load-port-nan.md) | 修复就绪 | P2 | client-load --port NaN |
 | [BUG-348](BUG-348-long-run-silent-stall-no-alert.md) | 等人拍板 | P2 | 长 run 停摆无告警 |
-| [BUG-349](BUG-349-workflow-sandbox-nested-eph.md) | 等人拍板 | P2 | workflow 嵌套沙箱必失败 |
 
 ## 最近归档
 

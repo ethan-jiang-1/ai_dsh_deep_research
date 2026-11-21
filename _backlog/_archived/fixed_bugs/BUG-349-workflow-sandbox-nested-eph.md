@@ -1,12 +1,12 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-21
 ---
 
 # BUG-349：run 通道从代理沙箱启动时，workflow 的 W2 脚本扇出必失败（sandbox-exec EPERM）
 
-> 严重级别：P2 ｜ 发现：2026-11-21 ｜ 状态：等人拍板（嵌套沙箱属环境/机制归属，需定处置）
+> 严重级别：P2 ｜ 发现：2026-11-21 ｜ 状态：已修（2026-11-21）— 结论：启动探测嵌套沙箱，运行时上下文显式声明脚本层不可用；不改 vendor、不假装已执行；审查：agent — 注入红回归 + 真环境探测；去向：none — 环境处置
 >
 > 现场 = `research-workspace/drt_sodium-ion-bess/waves/W2.json`；run 通道 = 3083。
 
@@ -52,3 +52,34 @@ run 通道由 DSH 代理在**已被沙箱化的进程**里启动（seatbelt）�
 - `waves/W2.json` 的 `agents_started` 与实际子会话数一致。
 
 可关闭：否
+
+## 修复落地（2026-11-21）
+
+```json fix-evidence
+{
+  "changes": [
+    "tools/channel/start-channel.mjs",
+    "checks/lib/shared/sandbox-capability.mjs",
+    "packages/deep-research-pack/src/content/index.ts",
+    "tests/run/shared/sandbox-capability.spec.mjs",
+    "tests/pack/content/content-effect.spec.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm --test tests/pack/content/content-effect.spec.mjs",
+    "exit": 1,
+    "output": "注入回归：删掉 capabilityNote 的 env 判断 → 嵌套环境 runtime context 不出现「脚本层沙箱不可用」（1 例红）"
+  },
+  "green": {
+    "command": "node --import tsx/esm --test tests/pack/content/content-effect.spec.mjs",
+    "exit": 0,
+    "output": "2 例全过（非嵌套无提示 / 嵌套有提示）；本环境实测 /usr/bin/sandbox-exec 探测 status=71「Operation not permitted」→ env=1"
+  },
+  "guard": {
+    "path": "tests/pack/content/content-effect.spec.mjs"
+  }
+}
+```
+
+边界：探测只决定模型可见提示；workflow 的 `sandbox-unavailable` 仍由 waves 如实记录（不改 vendor、不伪造脚本层执行）。非嵌套环境 env 不置位，注入文本与重录快照完全一致。
+
+可关闭：是

@@ -100,6 +100,7 @@
 | shared | `checks/lib/shared/roles` | `tests/pack/contract/role-consumer-matrix.spec.mjs`<br>`tests/pack/fetch-fallback/fetch-fallback-orchestration.spec.mjs`<br>`tests/pack/scripts/presets.spec.mjs`<br>`tests/run/gates/strategy-core.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/harness/replay-scene.spec.mjs` |
 | shared | `checks/lib/shared/run-receipt` | `tests/contracts/run-bundle-charter.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs` |
 | shared | `checks/lib/shared/run-state` | `tests/run/shared/run-state.spec.mjs` |
+| shared | `checks/lib/shared/sandbox-capability` | `tests/run/shared/sandbox-capability.spec.mjs` |
 | shared | `checks/lib/shared/secret-scan` | `tests/run/shared/secret-scan.spec.mjs` |
 | shared | `checks/lib/shared/session-log` | `tests/run/gates/verdict-audit-fixture.spec.mjs`<br>`tests/run/shared/run-state.spec.mjs`<br>`tests/run/shared/session-log.spec.mjs` |
 | shared | `checks/lib/shared/skill-golden` | `tests/checks/shared/skill-golden.test.mjs` |

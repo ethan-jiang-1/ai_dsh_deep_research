@@ -2293,6 +2293,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/run/shared/sandbox-capability.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "sandbox-capability.spec.mjs — 嵌套沙箱判据（BUG-349）。反证：把 status!==0 判成 true →",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/run/shared/secret-scan.spec.mjs",
       "domain": "run",
       "lane": "spec",

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // One owner for both public launch paths. A crash retains its locks for offline recovery.
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { closeSync, existsSync, mkdirSync, openSync, realpathSync, writeFileSync, writeSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -8,10 +8,20 @@ import { fileURLToPath } from 'node:url'
 import { setTimeout as delay } from 'node:timers/promises'
 import { performance } from 'node:perf_hooks'
 import { acquireStartLock } from '../../checks/lib/channel/start-lock.mjs'
+import { sandboxAvailability } from '../../checks/lib/shared/sandbox-capability.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const generation = randomUUID()
 const env = { ...process.env }
+const SANDBOX_AVAILABLE = probeSandbox()
+if (SANDBOX_AVAILABLE === false) env.DSH_SANDBOX_UNAVAILABLE = '1'
+// 嵌套沙箱探测（BUG-349）：跑在已沙箱化的进程里时，workflow 的 sandbox-exec 二次 apply 会 EPERM。
+// 探测结果只进 env/诊断：内容注入据此告诉模型不要承诺脚本层扇出（不改 vendor、不假装已执行）。
+function probeSandbox() {
+  if (process.platform !== 'darwin') return null
+  const result = spawnSync('/usr/bin/sandbox-exec', ['-p', '(version 1)', '/usr/bin/true'], { encoding: 'utf8', timeout: 1000 })
+  return sandboxAvailability({ platform: process.platform, status: result.status, errorCode: result.error?.code })
+}
 const argv = process.argv.slice(2)
 const background = argv.includes('--background')
 const args = argv.filter(arg => arg !== '--background')
@@ -201,6 +211,7 @@ async function main() {
     for (const name of ['boot-run.lock', 'run-driver-up.lock']) {
       if (existsSync(join(state, name))) throw fail(`legacy ownership exists (${join(state, name)}); stop related processes and recover offline`, 2)
     }
+    if (SANDBOX_AVAILABLE === false) safeDiagnostic('start-channel: nested sandbox detected (sandbox-exec EPERM); script-layer fan-out will be declared unavailable')
     // Home-level writes occur during preparation; keeping this lock for the service
     // also prohibits rebuilding a loaded profile. Independent homes can run in parallel.
     const paths = [...new Set([join(home, 'channel-start.lock'), join(state, 'channel-start.lock')])].sort()

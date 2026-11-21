@@ -38,3 +38,29 @@ test('content.apply：variable/context 注册经 ctx.effect 挂载，返回 disp
   assert.ok(calls.includes('dispose:research:manual'), 'context disposer 未接通');
   assert.ok(calls.includes('dispose:variable:research_pack_root'), 'variable disposer 未接通——HMR 重名注册会抛');
 });
+
+// 负例留证 2026-11-21：BUG-349——嵌套沙箱时 runtime context 必须明确写「脚本层不可用」；
+// 非嵌套保持原文（不误伤正常环境）。反证：删掉 capabilityNote 接线 → 本例如期红。
+test('嵌套沙箱：runtime context 追加脚本层不可用提示', () => {
+  const contextTexts = []
+  const ctx = {
+    effect(fn) { return fn() },
+    logger: { warn() {}, info() {} },
+    systemPrompt: {
+      variable() { return () => {} },
+      context(input) { contextTexts.push(input.text); return () => {} },
+    },
+  }
+  const previous = process.env.DSH_SANDBOX_UNAVAILABLE
+  try {
+    delete process.env.DSH_SANDBOX_UNAVAILABLE
+    apply(ctx, { packRoot: '/fixture/pack', manual: '# Manual\n' })
+    assert.equal(contextTexts[0].includes('脚本层沙箱不可用'), false, '非嵌套环境不得出现降级提示')
+    process.env.DSH_SANDBOX_UNAVAILABLE = '1'
+    apply(ctx, { packRoot: '/fixture/pack', manual: '# Manual\n' })
+    assert.equal(contextTexts[1].includes('脚本层沙箱不可用'), true, '嵌套环境必须显式提示')
+  } finally {
+    if (previous === undefined) delete process.env.DSH_SANDBOX_UNAVAILABLE
+    else process.env.DSH_SANDBOX_UNAVAILABLE = previous
+  }
+})

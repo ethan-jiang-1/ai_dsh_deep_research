@@ -39,6 +39,12 @@ interface SystemPromptLike {
   }): (() => void) | undefined
 }
 
+/** 嵌套沙箱的运行时提示（BUG-349）：脚本层不可用时明确告诉模型不要承诺 workflow 扇出。 */
+function capabilityNote(): string {
+  if (process.env.DSH_SANDBOX_UNAVAILABLE !== '1') return ''
+  return '\n\n## 运行环境能力\n\n- 脚本层沙箱不可用（嵌套沙箱）：不要声明或承诺 workflow 的脚本层扇出；改走对话层 subagent，并在 plan/waves 显式记 `sandbox-unavailable`。\n'
+}
+
 /**
  * 注册 `research_pack_root` 变量与研究手册 runtime context。
  *
@@ -49,7 +55,7 @@ interface SystemPromptLike {
  */
 export function apply(ctx: Context, input: { packRoot?: string; manual?: string } = {}): void {
   const packRoot = input.packRoot ?? PACK_ROOT
-  const manual = input.manual ?? readFileSync(manualPathOf(packRoot), 'utf8')
+  const manual = (input.manual ?? readFileSync(manualPathOf(packRoot), 'utf8')) + capabilityNote()
   const systemPrompt = (ctx as unknown as { systemPrompt?: SystemPromptLike }).systemPrompt
   if (systemPrompt === undefined) {
     ctx.logger.warn('deep-research: systemPrompt 不在组合中；跳过研究手册注入')
