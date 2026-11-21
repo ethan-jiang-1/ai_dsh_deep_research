@@ -14,6 +14,8 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
+| [BUG-351](BUG-351-stalled-banner-reset-by-open-events.md) | 排查中 | P2 | 打开会话注入的生命周期事件清零静默窗口——watch-run 判停摆、驾驶舱不显示 |
+| [BUG-352](BUG-352-delivery-receipt-slug-prefix-mismatch.md) | 排查中 | P2 | 工具回执 slug 带 `drt_`、驾驶舱用裸 slug 比对——`run-accept` 回执永远不被接受 |
 
 ## 最近归档
 
