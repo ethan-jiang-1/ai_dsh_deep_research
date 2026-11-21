@@ -2802,6 +2802,8 @@
     {"from": "_backlog/bugs/BUG-342-plan-remaining-work-owner-next-literal.md", "to": "_backlog/_archived/fixed_bugs/BUG-342-plan-remaining-work-owner-next-literal.md", "reason": "2026-11-21 已修归档"},
     {"from": "_backlog/bugs/BUG-341-findings-one-line-vs-f-block.md", "to": "_backlog/_archived/fixed_bugs/BUG-341-findings-one-line-vs-f-block.md", "reason": "2026-11-21 已修归档"},
     {"from": "_backlog/bugs/BUG-328-plan-snapshot-same-text-only.md", "to": "_backlog/_archived/fixed_bugs/BUG-328-plan-snapshot-same-text-only.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-329-threshold-critical-scope-null.md", "to": "_backlog/_archived/fixed_bugs/BUG-329-threshold-critical-scope-null.md", "reason": "2026-11-21 已修归档"}
+    {"from": "_backlog/bugs/BUG-329-threshold-critical-scope-null.md", "to": "_backlog/_archived/fixed_bugs/BUG-329-threshold-critical-scope-null.md", "reason": "2026-11-21 已修归档"},
+    {"from": "_backlog/bugs/BUG-347-review-absent-shown-as-fail.md", "to": "_backlog/_archived/fixed_bugs/BUG-347-review-absent-shown-as-fail.md", "reason": "2026-11-21 已修归档"},
+    {"from": "_backlog/bugs/BUG-344-watch-run-settled-while-subagent-live.md", "to": "_backlog/_archived/fixed_bugs/BUG-344-watch-run-settled-while-subagent-live.md", "reason": "2026-11-21 已修归档"}
   ]
 }

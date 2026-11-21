@@ -149,3 +149,14 @@ test('D51 负例：声明重复键 → fail-closed（不取末值）', () => {
   assert.equal(parsed.ok, false)
   assert.match(parsed.detail, /重复键/)
 })
+
+// 负例留证 2026-11-21：BUG-347——无 review 面（无目录、无 review.md）时 readinessOfSources 曾折成
+// prose/FAIL，驾驶舱因此对活跃 run 显示「审查未过」；absent 必须是 pass=null。
+test('BUG-347：无 review 面 = absent（pass=null）；review.md 无终局行仍 FAIL', () => {
+  const absent = readinessOfSources({ reviewText: null, declarationText: null, hasReviewDir: false })
+  assert.equal(absent.pass, null)
+  assert.equal(absent.source, 'absent')
+  const broken = readinessOfSources({ reviewText: '# Review\n\n没有判定\n', declarationText: null, hasReviewDir: false })
+  assert.equal(broken.pass, false)
+  assert.equal(broken.source, 'prose')
+})

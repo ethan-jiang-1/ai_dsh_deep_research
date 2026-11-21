@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P1
 opened: 2026-11-20
 ---
 
 # BUG-347：review.md 尚未产生时，研究状态页把它显示成「审查未过 / 对抗审查发现问题」
 
-> 严重级别：P1 ｜ 发现：2026-11-20 ｜ 状态：修复就绪（观测折算缺陷，修法明确）
+> 严重级别：P1 ｜ 发现：2026-11-20 ｜ 状态：已修（2026-11-21）— 结论：无 review 面 = absent（pass=null），不再折成 FAIL；review.md 无终局行仍 FAIL；审查：agent — 注入红回归；去向：none — 机械修复
 >
 > 现场 = `runtime/e2e-2026-11-20/run-b-status-w2.png`；run = `research-workspace/drt_sodium-ion-bess/`
 > （当时只有 question/topics/plan/leads，无 review.md）。
@@ -69,4 +69,30 @@ console.log(readinessOfSources({ reviewText: null, declarationText: null, hasRev
 - 有 review.md 但无终局判定：不冒充 PASS（维持 FAIL/未知，按既有判据）。
 - `pnpm test` 的 review-readiness / brief-fold 矩阵同步更新并通过。
 
-可关闭：否
+
+## 修复落地（2026-11-21）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/review/review-readiness.ts",
+    "packages/deep-research-pack/src/client/research-status/useStatusFeed.ts",
+    "tests/run/gates/readiness-declaration.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/readiness-declaration.spec.mjs",
+    "exit": 1,
+    "output": "注入回归：删掉 absent 分支 → 无 review 面折成 prose/FAIL（1 例红）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/readiness-declaration.spec.mjs",
+    "exit": 0,
+    "output": "12 tests 全过：absent pass=null、review.md 无终局行 FAIL、声明三态不回退"
+  },
+  "guard": {
+    "path": "tests/run/gates/readiness-declaration.spec.mjs"
+  }
+}
+```
+
+可关闭：是

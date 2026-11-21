@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-20
 ---
 
 # BUG-344：watch-run 在子代理仍在飞时误报 RUN-SETTLED
 
-> 严重级别：P2 ｜ 发现：2026-11-20 ｜ 状态：修复就绪（判据缺陷，修法明确）
+> 严重级别：P2 ｜ 发现：2026-11-20 ｜ 状态：已修（2026-11-21）— 结论：runSettled 追加「无在飞子代理」；子会话日志不可读 = 未知不落定；watch-run 读子会话；审查：agent — 注入红回归；去向：none — 机械修复
 >
 > 现场 = `runtime/e2e-2026-11-20/`；run = `research-workspace/drt_pg-latest-stable/`。
 
@@ -51,4 +51,30 @@ node --import tsx/esm probes/analyze/watch-run.mjs session-93752db0-e400-4ec3-bf
 - 真场重放：本卡 run 的 21:59 时刻不再判 settled；22:10 交付后判 settled。
 - `pnpm test` 的 run-state 矩阵通过；`probes/analyze/watch-run.mjs` 行为同步。
 
-可关闭：否
+
+## 修复落地（2026-11-21）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/shared/run-state.mjs",
+    "probes/analyze/watch-run.mjs",
+    "tests/run/shared/run-state.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/shared/run-state.spec.mjs",
+    "exit": 1,
+    "output": "注入回归：删掉 liveSubagents 条件 → 父回合结束+final 在场即报 settled（1 例红）"
+  },
+  "green": {
+    "command": "node --test tests/run/shared/run-state.spec.mjs",
+    "exit": 0,
+    "output": "28 tests 全过：catalog 在飞 false、子回合未终 false、子会话终局才 true"
+  },
+  "guard": {
+    "path": "tests/run/shared/run-state.spec.mjs"
+  }
+}
+```
+
+可关闭：是

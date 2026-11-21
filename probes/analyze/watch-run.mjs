@@ -19,7 +19,8 @@ import { existsSync, readdirSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { runStateOf, eventsRegressed, leadHitlCandidate } from '../../checks/lib/shared/run-state.mjs'
-import { findGroup, researchWorkspaceGroup, resolveSessionLog } from '../../checks/lib/shared/session-log.mjs'
+import { findGroup, findSessionDir, researchWorkspaceGroup, resolveSessionLog } from '../../checks/lib/shared/session-log.mjs'
+import { readSessionEvents } from '../../checks/lib/shared/run-state.mjs'
 import { workspaceRoot } from '../../checks/lib/shared/workspace-root.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -54,13 +55,22 @@ if (logPath === null) {
   process.exit(2)
 }
 const wsRoot = WORKSPACE.root
+// 子代理活动只住子会话日志（父日志仅有 subagent/catalog）；读不到 = 未知，不判 settled。
+const readChildEvents = (childId) => {
+  const dir = findSessionDir(sessionsRoot, childId)
+  if (dir === null) return null
+  const childLog = resolveSessionLog(dir)
+  if (childLog === null) return null
+  const { readable, events } = readSessionEvents(childLog)
+  return readable ? events : null
+}
 
 const deadline = Date.now() + TIMEOUT_MIN * 60 * 1000
 let last = ''
 let prevEvents = null
 while (Date.now() < deadline) {
   await new Promise((r) => setTimeout(r, INTERVAL_S * 1000))
-  const s = runStateOf({ logPath, wsRoot })
+  const s = runStateOf({ logPath, wsRoot, readChildEvents })
   // 日志回退检测（BUG-007 自救面）：同会话事件数变小 = 日志丢尾，此后一切盘侧谓词
   // （hitlPending/runSettled）都建立在残缺地基上——fail-loud 退出，不带着假象盯场。
   if (eventsRegressed(prevEvents, s.readable ? s.events : null)) {

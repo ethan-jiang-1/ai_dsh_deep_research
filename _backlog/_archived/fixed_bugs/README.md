@@ -6,6 +6,8 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [347](BUG-347-review-absent-shown-as-fail.md) | 无 review 显示「审查未过」 | （absent 三态） | 2026-11-21 |
+| [344](BUG-344-watch-run-settled-while-subagent-live.md) | watch-run 误报 settled | （无在飞子代理） | 2026-11-21 |
 | [350](BUG-350-claims-json-schema-mismatch.md) | claims 形状不符 schema | （claims v2） | 2026-11-21 |
 | [342](BUG-342-plan-remaining-work-owner-next-literal.md) | 剩余工作 owner/next 字面 | （task_id|state 表） | 2026-11-21 |
 | [341](BUG-341-findings-one-line-vs-f-block.md) | findings 一行 vs 块 | （块格式 + 报错点名） | 2026-11-21 |

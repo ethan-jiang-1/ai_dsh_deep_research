@@ -1620,6 +1620,14 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删掉 liveSubagents 条件 → 父回合结束+final 在场即报 settled（1 例红）"
+    },
+    {
+      "id": "BUG-347",
+      "mechanism": "无 review 面 = absent（pass=null）；review.md 无终局行仍 FAIL",
+      "guard": "tests/run/gates/readiness-declaration.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 absent 分支 → 无 review 面折成 prose/FAIL（1 例红）"
     }
   ]
 }
