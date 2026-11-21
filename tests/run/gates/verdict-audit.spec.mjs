@@ -34,7 +34,7 @@ const ITEM = { claim_id: 'C1', verdict: 'supported', quote: '0.28 美元', reaso
 
 const rawOf = (items) => JSON.stringify(items)
 const withBatch = (item, batch = 0) => ({ ...item, batch })
-const claimsTextOf = (claims = [C1, C2], finalRef = 1) => JSON.stringify({ version: 1, finalRef, claims })
+const claimsTextOf = (claims = [C1, C2], finalRef = 1) => JSON.stringify({ version: 2, finalRef, claims })
 const verdictsTextOf = ({ round = 1, raw = rawOf([ITEM]), verdicts = [withBatch(ITEM)], session = 's1', preset = 'critic', depth = 1 } = {}) => JSON.stringify({
   version: 1,
   round,
@@ -272,10 +272,17 @@ test('final 不可读 → final-missing 警告，不做原文核对', () => {
 })
 
 test('claims 形状错误：未知字段 / 重复 id / 非对象顶层 → claims-invalid', () => {
-  assert.ok(parseClaims(JSON.stringify({ version: 1, finalRef: 1, claims: [{ ...C1, extra: 1 }] })).problems.some((p) => p.code === 'claims-invalid'))
+  assert.ok(parseClaims(JSON.stringify({ version: 2, finalRef: 1, claims: [{ ...C1, extra: 1 }] })).problems.some((p) => p.code === 'claims-invalid'))
   assert.ok(parseClaims(claimsTextOf([C1, { ...C2, id: 'C1' }])).problems.some((p) => p.code === 'claims-invalid'))
   assert.ok(parseClaims('[]').problems.some((p) => p.code === 'claims-invalid'))
   assert.ok(parseClaims('{').problems.some((p) => p.code === 'claims-invalid'))
+  // BUG-350 的现场形态：rich ledger 字段必须红（裁决只住 verdicts-rN.json）。
+  assert.ok(parseClaims(claimsTextOf([{ ...C1, must_answer: 'RQ1' }])).problems.some((p) => p.code === 'claims-invalid'))
+  assert.ok(parseClaims(claimsTextOf([{ ...C1, verdict: 'supported' }])).problems.some((p) => p.code === 'claims-invalid'))
+  assert.ok(parseClaims(claimsTextOf([{ ...C1, verdict_file: 'review/verdicts-r1.json' }])).problems.some((p) => p.code === 'claims-invalid'))
+  // critical 必填；v1 不兼容。
+  assert.ok(parseClaims(claimsTextOf([{ id: 'C9', text: CLAIM_TEXT }])).problems.some((p) => p.code === 'claims-invalid'))
+  assert.ok(parseClaims(JSON.stringify({ version: 1, finalRef: 1, claims: [C1] })).problems.some((p) => p.code === 'claims-invalid'))
 })
 
 test('verdicts 形状错误：未知字段 / 空 batches / raw 非字符串 → verdicts-invalid', () => {

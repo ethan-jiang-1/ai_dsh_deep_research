@@ -2797,6 +2797,11 @@
     {"from": "_backlog/bugs/BUG-334-cold-start-port-env-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-334-cold-start-port-env-nan.md", "reason": "2026-11-21 已修归档"},
     {"from": "_backlog/bugs/BUG-335-snapshot-port-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-335-snapshot-port-nan.md", "reason": "2026-11-21 已修归档"},
     {"from": "_backlog/bugs/BUG-336-client-load-port-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-336-client-load-port-nan.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-343-readiness-json-extra-count-keys.md", "to": "_backlog/_archived/fixed_bugs/BUG-343-readiness-json-extra-count-keys.md", "reason": "2026-11-21 BUG-343 已修归档"}
+    {"from": "_backlog/bugs/BUG-343-readiness-json-extra-count-keys.md", "to": "_backlog/_archived/fixed_bugs/BUG-343-readiness-json-extra-count-keys.md", "reason": "2026-11-21 BUG-343 已修归档"},
+    {"from": "_backlog/bugs/BUG-350-claims-json-schema-mismatch.md", "to": "_backlog/_archived/fixed_bugs/BUG-350-claims-json-schema-mismatch.md", "reason": "2026-11-21 已修归档"},
+    {"from": "_backlog/bugs/BUG-342-plan-remaining-work-owner-next-literal.md", "to": "_backlog/_archived/fixed_bugs/BUG-342-plan-remaining-work-owner-next-literal.md", "reason": "2026-11-21 已修归档"},
+    {"from": "_backlog/bugs/BUG-341-findings-one-line-vs-f-block.md", "to": "_backlog/_archived/fixed_bugs/BUG-341-findings-one-line-vs-f-block.md", "reason": "2026-11-21 已修归档"},
+    {"from": "_backlog/bugs/BUG-328-plan-snapshot-same-text-only.md", "to": "_backlog/_archived/fixed_bugs/BUG-328-plan-snapshot-same-text-only.md", "reason": "2026-11-21 已修归档"},
+    {"from": "_backlog/bugs/BUG-329-threshold-critical-scope-null.md", "to": "_backlog/_archived/fixed_bugs/BUG-329-threshold-critical-scope-null.md", "reason": "2026-11-21 已修归档"}
   ]
 }

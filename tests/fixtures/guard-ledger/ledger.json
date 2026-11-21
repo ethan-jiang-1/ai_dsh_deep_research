@@ -1580,6 +1580,46 @@
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "共享构造器丢掉 mcp → 「MCP on/off 不得同键」例红；还原 → 绿"
+    },
+    {
+      "id": "BUG-342",
+      "mechanism": "plan 剩余工作 = 两列表格 task_id|state；owner/next 从图派生",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "回退到旧 owner/next 字面判据 → 表格形态被拒、未知 task_id/非法 state 不被识别（6 例红）"
+    },
+    {
+      "id": "BUG-328",
+      "mechanism": "plan 快照除同文本外比解码事实（节点/验收/预算）",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "回退旧同文本检查 → 同事实异措辞快照被 PASS"
+    },
+    {
+      "id": "BUG-329",
+      "mechanism": "critical 范围未知不再退全部 evidence（unscoped warning）",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "回退旧 threshold → null 时背景低质卡被逐卡比（2 例红）"
+    },
+    {
+      "id": "BUG-341",
+      "mechanism": "findings 只认 `## F<n>：` 块；一行式/无冒号标题报错点名形态",
+      "guard": "tests/run/gates/findings-contract.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "回退旧解析器 → 一行式/无冒号只报「无 F# 块」（1 例红）"
+    },
+    {
+      "id": "BUG-344",
+      "mechanism": "runSettled 追加「无在飞子代理」；子会话日志不可读 = 未知不落定",
+      "guard": "tests/run/shared/run-state.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 liveSubagents 条件 → 父回合结束+final 在场即报 settled（1 例红）"
     }
   ]
 }

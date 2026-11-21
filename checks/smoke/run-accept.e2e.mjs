@@ -97,7 +97,7 @@ function writeClaimFixtures(bundle, sessions, { verdict = 'supported' } = {}) {
   mkdirSync(join(bundle, 'review'), { recursive: true })
   writeFileSync(join(bundle, 'review', 'readiness.json'), reviewFixture.declarationText)
   writeFileSync(join(bundle, 'review', 'claims.json'), `${JSON.stringify({
-    version: 1,
+    version: 2,
     finalRef: 1,
     claims: [{ id: 'C1', text: claimText, critical: true, urls: ['https://a.example/x'] }],
   }, null, 2)}\n`)

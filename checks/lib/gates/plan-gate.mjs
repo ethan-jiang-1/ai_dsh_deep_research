@@ -3,7 +3,7 @@
 // `planIssuesOf` 原本只是驾驶舱的“稳定性提示”；本模块把它接到 run 门：
 //   硬结构（环/悬空 dep/悬空 parent/重复 id/自依赖/混合族）→ RED；
 //   字段（owner_role/kind/task_id 必填、question/output/acceptance/budget/depth、
-//   `## 剩余工作` 内容、图版本与 plan/vN 快照内容、Wave 执行/task_id）→ RED；
+//   `## 剩余工作`（两列表格 task_id|state）、图版本与 plan/vN 快照内容、Wave 执行/task_id）→ RED；
 //   wave-prefix/legacy 类迁移提示保留为 detail 注记。
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -84,22 +84,42 @@ export function planGate(bundleDir) {
         if (snap === null || snap.nodes.length === 0) issues.push(`plan/v${n - 1}.md 快照为空/无节点表（BUG-285）`)
         if (snap?.version !== undefined && snap.version !== `v${n - 1}`) issues.push(`plan/v${n - 1}.md 快照图版本为 ${snap.version}，与链不符`)
         if (snapText === text) issues.push(`plan/v${n - 1}.md 与当前 plan.md 完全相同——快照必须是旧版（BUG-305）`)
+        // BUG-328：不同文本但解码事实相同 = 快照不是旧图。事实 = 节点 id/验收/预算/lifecycle/kind。
+        else if (snap !== null) {
+          const factsOf = (index) => JSON.stringify(index.nodes
+            .map((node) => [node.id, node.acceptance ?? '', node.budget ?? '', node.lifecycle ?? 'active', node.kind ?? ''])
+            .sort((a, b) => String(a[0]).localeCompare(String(b[0]))))
+          if (factsOf(snap) === factsOf(index)) issues.push(`plan/v${n - 1}.md 与当前图的节点/验收/预算无差异——快照必须是旧图（BUG-328）`)
+        }
       }
     }
   }
   const waveText = sectionOf(text, 'Wave 执行')
   const waves = waveText === null ? [] : [...waveText.matchAll(/^-\s*W(\d+)\s*[:：]/gm)].map((m) => m[1])
-  // 剩余工作内容（BUG-284 / 303）
+  // 剩余工作（BUG-342）：两列表格 task_id | state；owner/next 由节点表与 deps 派生，不再手写。
   const remaining = sectionOf(text, '剩余工作')
   if (remaining === null) issues.push('plan.md 缺「## 剩余工作」节（nodes-contract 要求在場必有）')
   else {
-    const bullets = remaining.split('\n').map((line) => line.trim()).filter((line) => /^-\s+/.test(line))
-    if (bullets.length === 0) issues.push('「## 剩余工作」为空——全部完成写 `- 无`')
-    else if (bullets.some((line) => /^-\s*无\s*$/.test(line))) {
-      if (index.nodes.some(isActivePlanNode)) issues.push('「## 剩余工作」写 `- 无` 但图里仍有 active 节点（BUG-303）')
+    const lines = remaining.split('\n').map((line) => line.trim()).filter((line) => line !== '')
+    const cellsOf = (line) => line.replace(/^\||\|$/g, '').split('|').map((cell) => cell.trim())
+    const headerLine = lines.find((line) => /^\|/.test(line)) ?? ''
+    const headerCells = headerLine === '' ? [] : cellsOf(headerLine).map((cell) => cell.toLowerCase())
+    if (headerCells.length !== 2 || headerCells[0] !== 'task_id' || headerCells[1] !== 'state') {
+      issues.push('「## 剩余工作」必须是两列表格：| task_id | state |（owner/next 从节点表/deps 派生，不再手写）')
     } else {
-      for (const line of bullets) {
-        if (!/(owner|负责人)/i.test(line) || !/(next|下一步)/i.test(line)) issues.push(`剩余工作条目缺 owner/next：${line.slice(0, 60)}`)
+      const rows = lines.slice(lines.indexOf(headerLine) + 1)
+        .filter((line) => /^\|/.test(line))
+        .map(cellsOf)
+        .filter((cells) => cells.length >= 2 && !cells.every((cell) => /^:?-{3,}:?$/.test(cell)))
+      if (rows.length === 0 && index.nodes.some(isActivePlanNode)) issues.push('「## 剩余工作」表为空但图里仍有 active 节点（BUG-303）')
+      for (const [taskId, state] of rows) {
+        if (taskId === '—' || taskId === '-') {
+          if (state !== '完成') issues.push(`「## 剩余工作」的空表行必须是 | — | 完成 |（实际 ${state}）`)
+          else if (index.nodes.some(isActivePlanNode)) issues.push('「## 剩余工作」写 | — | 完成 | 但图里仍有 active 节点（BUG-303）')
+          continue
+        }
+        if (!index.nodes.some((node) => node.id === taskId)) issues.push(`「## 剩余工作」条目 ${taskId} 不在节点表`)
+        if (!['待派发', '进行中', '完成', '阻塞'].includes(state)) issues.push(`「## 剩余工作」${taskId} 的 state「${state}」非法（待派发/进行中/完成/阻塞）`)
       }
     }
   }

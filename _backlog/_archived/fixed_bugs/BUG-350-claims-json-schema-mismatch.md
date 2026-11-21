@@ -1,12 +1,12 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P1
 opened: 2026-11-21
 ---
 
 # BUG-350：P5 run 的 claims.json 形态与 verdict-audit schema 不符，验收预检 49 项红
 
-> 严重级别：P1 ｜ 发现：2026-11-21 ｜ 状态：等人拍板（裁决表形态与「rich claims」取舍属合同决定）
+> 严重级别：P1 ｜ 发现：2026-11-21 ｜ 状态：已修（2026-11-21）— 结论：claims v2 = 模板形状（version 2 + critical 必填）；rich ledger/must_answer/verdict 一律红，裁决只住 verdicts-rN.json；审查：agent — 注入红回归；去向：none — 合同收紧
 >
 > 现场 = `research-workspace/drt_sodium-ion-bess/review/claims.json`；run =
 > `drt_sodium-ion-bess`（P5 多维对比，claim_verification=on）。
@@ -54,4 +54,34 @@ node checks/run-gates/run-accept.mjs research-workspace/drt_sodium-ion-bess --no
 - version 非 1、finalRef 缺失、claim 缺 text/critical 仍红（负控保留）；
 - `pnpm test` 的 verdict-audit 矩阵同步更新并通过。
 
-可关闭：否
+
+## 修复落地（2026-11-21）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/verdict-audit-core.mjs",
+    "packages/deep-research-pack/content/templates/run/claims.json",
+    "packages/deep-research-pack/content/manual.md",
+    "packages/deep-research-pack/content/generic/state-and-recovery.md",
+    "tests/run/gates/verdict-audit.spec.mjs",
+    "tests/fixtures/verdict-audit/pilot-a/bundle/review/claims.json",
+    "checks/smoke/run-accept.e2e.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/verdict-audit.spec.mjs",
+    "exit": 1,
+    "output": "回退到旧 v1 解析：31 例红——模板 v2 被拒、rich ledger 字段未被判红"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/verdict-audit.spec.mjs",
+    "exit": 0,
+    "output": "37 tests 全过：模板 v2 可直接 parseClaims；must_answer/verdict/verdict_file/缺 critical/v1 均红"
+  },
+  "guard": {
+    "path": "tests/run/gates/verdict-audit.spec.mjs"
+  }
+}
+```
+
+可关闭：是

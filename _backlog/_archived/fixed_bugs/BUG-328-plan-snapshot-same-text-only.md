@@ -1,14 +1,14 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-19
 ---
 
 # BUG-328：plan/vN-1 只拒绝“与当前文本完全相同”，不校验旧图内容/重写记录
 
-> 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：修复就绪（2026-11-21 用户授权按计划修；门禁/合同触面）
+> 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：已修（2026-11-21）— 结论：快照除同文本外再比解码事实（节点/验收/预算）；同事实异措辞红；审查：agent — 注入红回归；去向：none — 合同收紧
 >
-> 探索轮 = [低置信区 20 卡（第 9 轮）](../issues/2026-11-19-low-confidence-40.md)。
+> 探索轮 = [低置信区 20 卡（第 9 轮）](../../issues/2026-11-19-low-confidence-40.md)。
 
 ## 症状
 
@@ -48,3 +48,29 @@ console.log(planGate(d));
 
 - 同事实异措辞 → 红；真正更早的图（节点/验收/预算有差异）→ 绿；
 - 空快照 / 版本号不符仍红；`pnpm verify` / `pnpm test` 绿。
+
+## 修复落地（2026-11-21）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/plan-gate.mjs",
+    "tests/run/gates/plan-gate.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/plan-gate.spec.mjs",
+    "exit": 1,
+    "output": "回退旧快照检查：6 例红——同事实异措辞快照被 PASS"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/plan-gate.spec.mjs",
+    "exit": 0,
+    "output": "15 tests 全过：同事实异措辞红，事实有差异绿"
+  },
+  "guard": {
+    "path": "tests/run/gates/plan-gate.spec.mjs"
+  }
+}
+```
+
+可关闭：是

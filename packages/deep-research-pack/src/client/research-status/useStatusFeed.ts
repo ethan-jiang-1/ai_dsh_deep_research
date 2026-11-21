@@ -220,7 +220,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         if (stopped) return
         const declarationText = declRead !== null && declRead.ok && !declRead.value.truncated ? declRead.value.text : null
         const reading = readinessOfSources({ reviewText, declarationText, hasReviewDir: names.has('review') })
-        const readiness = reading.source === 'declaration' || reading.source === 'prose'
+        const readiness = (reading.source === 'declaration' || reading.source === 'prose') && typeof reading.pass === 'boolean'
           ? (reading.pass ? 'PASS' : 'FAIL')
           : null
         const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null

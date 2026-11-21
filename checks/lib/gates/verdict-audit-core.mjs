@@ -59,7 +59,7 @@ const parseJson = (text, code) => {
 
 /**
  * 解析并校验 claim 表。
- * @param text `review/claims.json` 全文。@returns {{value:{finalRef:number,claims:object[]}|null, problems:Array<{code,detail}>}}
+ * @param text `review/claims.json`（v2）全文。@returns {{value:{finalRef:number,claims:object[]}|null, problems:Array<{code,detail}>}}
  */
 export function parseClaims(text) {
   const { value, problems } = parseJson(text, 'claims-invalid')
@@ -68,7 +68,7 @@ export function parseClaims(text) {
   for (const key of Object.keys(value)) {
     if (!['version', 'finalRef', 'claims', 'critical_exemption'].includes(key)) problems.push({ code: 'claims-invalid', detail: `未知字段 ${key}（形状 = version/finalRef/claims[/critical_exemption]）` })
   }
-  if (value.version !== 1) problems.push({ code: 'claims-invalid', detail: `version 必须是 1（实际 ${JSON.stringify(value.version)}）` })
+  if (value.version !== 2) problems.push({ code: 'claims-invalid', detail: `version 必须是 2（实际 ${JSON.stringify(value.version)}）` })
   if (!Number.isSafeInteger(value.finalRef) || value.finalRef < 1) problems.push({ code: 'claims-invalid', detail: 'finalRef 必须是 final/v<N> 的正整数 N' })
   if (value.critical_exemption !== undefined && value.critical_exemption !== null) {
     const reason = typeof value.critical_exemption === 'string' ? value.critical_exemption.trim() : ''
@@ -90,7 +90,7 @@ export function parseClaims(text) {
     else if (ids.has(raw.id)) problems.push({ code: 'claims-invalid', detail: `${where}.id 重复：${raw.id}` })
     else ids.add(raw.id)
     if (!nonEmptyString(raw.text)) problems.push({ code: 'claims-invalid', detail: `${where}.text 必须是非空字符串` })
-    if (raw.critical !== undefined && typeof raw.critical !== 'boolean') problems.push({ code: 'claims-invalid', detail: `${where}.critical 必须是布尔` })
+    if (typeof raw.critical !== 'boolean') problems.push({ code: 'claims-invalid', detail: `${where}.critical 必填布尔（是否 must-answer 句）` })
     for (const key of ['topics', 'evidence', 'urls']) {
       if (raw[key] !== undefined && !isStringArray(raw[key])) problems.push({ code: 'claims-invalid', detail: `${where}.${key} 必须是字符串数组` })
     }

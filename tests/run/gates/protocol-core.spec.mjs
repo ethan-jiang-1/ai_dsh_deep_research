@@ -22,7 +22,7 @@ import {
   preContractByDelivery,
   validateProtocol,
 } from '../../../checks/lib/gates/protocol-core.mjs'
-import { cardTextOf, evaluateBundle, projectionOf, requiredByProtocolContract } from '../../../checks/lib/gates/protocol-audit-core.mjs'
+import { cardTextOf, checkEvidenceThreshold, evaluateBundle, projectionOf, requiredByProtocolContract } from '../../../checks/lib/gates/protocol-audit-core.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const TEMPLATE = join(ROOT, 'packages', 'deep-research-pack', 'content', 'templates', 'run', 'protocol.json')
@@ -681,12 +681,12 @@ test('evidence_threshold：evidence quality 低于门槛 → 红（BUG-271）', 
   const protocol = baseProtocol({ gates: { ...baseProtocol().gates, evidence_threshold: 'A' } })
   const findings = evaluateBundle({
     protocol, questionText: questionOf(protocol), planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false,
-    evidences: [{ file: 'evidence/e.md', quality: 'C' }],
+    evidences: [{ file: 'evidence/e.md', quality: 'C' }], criticalEvidence: ['evidence/e.md'],
   })
   assert.ok(has(findings, 'evidence-threshold'))
   const ok = evaluateBundle({
     protocol, questionText: questionOf(protocol), planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false,
-    evidences: [{ file: 'evidence/e.md', quality: 'A' }],
+    evidences: [{ file: 'evidence/e.md', quality: 'A' }], criticalEvidence: ['evidence/e.md'],
   })
   assert.ok(!has(ok, 'evidence-threshold'))
 })
@@ -759,7 +759,8 @@ test('BUG-312：threshold 只查 critical claims 的证据；非关键低质不�
   const scoped = evaluateBundle({ protocol, questionText: questionOf(protocol), planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false, evidences, criticalEvidence: ['evidence/critical.md'] })
   assert.equal(scoped.filter((f) => f.code === 'evidence-threshold').length, 1)
   const all = evaluateBundle({ protocol, questionText: questionOf(protocol), planText: planOf(6), topicsText: topicsOf(6), auditText: '', hasSnapshot: false, evidences, criticalEvidence: null })
-  assert.equal(all.filter((f) => f.code === 'evidence-threshold').length, 2)
+  assert.equal(all.filter((f) => f.code === 'evidence-threshold').length, 0, '未知 critical 范围不得逐卡比')
+  assert.equal(all.filter((f) => f.code === 'evidence-threshold-unscoped').length, 1)
 })
 
 test('BUG-313：长度只计散文，代码/URL/表格不计', async () => {
@@ -767,4 +768,18 @@ test('BUG-313：长度只计散文，代码/URL/表格不计', async () => {
   const prose = '这是 一段 中文 散文'
   const noisy = prose + '\n\n\`\`\`\nconst x = 1\n\`\`\`\n\nhttps://example.com/very/long/path\n\n| a | b |\n|---|---|\n| 1 | 2 |\n'
   assert.equal(countLength(prose, 'words'), countLength(noisy, 'words'))
+})
+
+
+// 负例留证 2026-11-21：BUG-329——critical 范围未知（claims 不可读/缺席）时不得把全部 evidence 当关键证据逐卡比。
+test('BUG-329：critical 范围未知 → 只给 notice，不逐卡比 quality', () => {
+  const protocol = { gates: { evidence_threshold: 'A' } }
+  const unknown = checkEvidenceThreshold(protocol, [{ file: 'background.md', quality: 'C' }], 'deep', null)
+  assert.equal(unknown.length, 1)
+  assert.equal(unknown[0].code, 'evidence-threshold-unscoped')
+  assert.equal(unknown[0].level, 'warning')
+  const scoped = checkEvidenceThreshold(protocol, [{ file: 'background.md', quality: 'C' }, { file: 'crit.md', quality: 'C' }], 'deep', ['crit.md'])
+  assert.equal(scoped.length, 1)
+  assert.match(scoped[0].message, /crit\.md/)
+  assert.deepEqual(checkEvidenceThreshold(protocol, [{ file: 'background.md', quality: 'C' }], 'deep', []), [])
 })

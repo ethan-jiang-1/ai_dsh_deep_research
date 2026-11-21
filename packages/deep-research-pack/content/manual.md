@@ -33,7 +33,7 @@ drt_<slug>/            一次调研 = 一个 run bundle（drt = Deep Research To
   findings.md          发现账本：结论 + 支撑 + gap 状态（owner: lead）
   review.md            对抗核查报告（owner: critic）：当前终局块（文件头声明最新在上；
                        `readiness: PASS|FAIL` + CRITICAL/MAJOR 清单；历史轮不夺权）
-  review/claims.json   claim 表（lead）：text 必须是 final 原句；critical 标 must-answer 句
+  review/claims.json   claim 表（lead，v2）：final 原句；critical 必填；裁决住 verdicts-rN.json
   review/verdicts-r<N>.json
                        裁决原文 + 批次（lead 写；child 只回文本；形状见同名模板）
   drafts/              过程稿（owner: 各角色，按需）

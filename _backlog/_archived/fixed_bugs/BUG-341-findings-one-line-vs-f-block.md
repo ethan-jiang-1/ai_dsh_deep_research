@@ -1,12 +1,12 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P1
 opened: 2026-11-20
 ---
 
 # BUG-341：findings 的模型可见指令是「一行一条」，门 F 只认 `## F#` 块——正常 run 必红
 
-> 严重级别：P1 ｜ 发现：2026-11-20 ｜ 状态：等人拍板（改解析器还是改技能/模板，是合同取舍）
+> 严重级别：P1 ｜ 发现：2026-11-20 ｜ 状态：已修（2026-11-21）— 结论：findings 只认 `## F<n>：` 块；synthesis skill 的一行式指令改成块样例；报错点名一行式/缺冒号；审查：agent — 注入红回归；去向：none — 合同收紧
 >
 > 现场 = `runtime/e2e-2026-11-20/`（gitignored）；run = `research-workspace/drt_pg-latest-stable/`。
 
@@ -62,4 +62,30 @@ node checks/run-gates/node-gate.mjs research-workspace/drt_sodium-ion-bess
 - 另一条错误形态（缺 gap、空 lens_gaps）仍点名红。
 - `pnpm test` 的 findings-contract 矩阵同步更新并通过。
 
-可关闭：否
+
+## 修复落地（2026-11-21）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/findings-core.mjs",
+    "packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md",
+    "tests/run/gates/findings-contract.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 1,
+    "output": "回退旧解析器：1 例红——一行式/无冒号标题只报「无 F# 块」，不点名修正形态"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/findings-contract.spec.mjs",
+    "exit": 0,
+    "output": "8 tests 全过：一行式与无冒号标题各自点名正确形态"
+  },
+  "guard": {
+    "path": "tests/run/gates/findings-contract.spec.mjs"
+  }
+}
+```
+
+可关闭：是

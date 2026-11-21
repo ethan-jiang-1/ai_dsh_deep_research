@@ -45,6 +45,24 @@ export function turnOpenOf(events) {
 }
 
 /**
+ * 在飞子代理（BUG-344）：`subagent/catalog` 声明了 childId；childId 的会话日志可读时按 turnOpen 判，
+ * 读不到 = 未知（保守视为在飞）。没有 catalog = 无子代理。
+ * @param events 父会话事件。@param readChildEvents (childId) => events[]|null；null = 无读取能力。
+ */
+export function liveSubagentsOf(events, readChildEvents = null) {
+  const children = events
+    .filter((event) => event?.type === 'subagent/catalog' && typeof event?.data?.childId === 'string')
+    .map((event) => ({ id: event.data.childId, label: typeof event.data.label === 'string' ? event.data.label : '' }))
+  if (children.length === 0) return []
+  if (typeof readChildEvents !== 'function') return children
+  return children.filter((child) => {
+    const childEvents = readChildEvents(child.id)
+    if (childEvents === null || childEvents === undefined) return true
+    return turnOpenOf(childEvents)
+  })
+}
+
+/**
  * 同会话事件数回退检测（BUG-007 自救面：通道死亡丢日志尾部后，hitl-fold 等盘侧谓词
  * 会把 settled run 折叠成"挂起未答"假态——日志单调是所有盘侧判据的地基，回退即损坏）。
  * @param prevCount 上一轮读到的事件数（null = 无前值）。@param curCount 本轮事件数
@@ -121,11 +139,12 @@ function isRegularFile(path) {
  * @param params.wsRoot 研究工作区根。
  * @param params.includeSessionIdentity 仅需按 UI 会话身份选路时设 true；默认日志快照不暴露标题与 id。
  */
-export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false, now = Date.now() }) {
+export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false, now = Date.now(), readChildEvents = null }) {
   const { readable, events } = readSessionEvents(logPath)
   const bundle = bundleStateOf(wsRoot)
   const turnOpen = readable ? turnOpenOf(events) : null
   const pending = readable ? hitlPendingOf(events) : null
+  const liveSubagents = readable ? liveSubagentsOf(events, readChildEvents) : []
   // HITL 已等待时长（G-24）：ask 事件自带 time；pending=true 且时间可读才给数，否则 null（不猜）。
   const lastAsk = readable
     ? [...events].reverse().find((j) => j?.type === 'tool/call' && j?.data?.name === 'ask_user_question')
@@ -164,6 +183,7 @@ export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false, no
     askCalls: readable ? toolCallCount(events, 'ask_user_question') : null,
     askIndefinite: readable ? askIndefiniteOf(events) : null,
     presentCalls: readable ? toolCallCount(events, 'present') : null,
+    liveSubagents,
     turnOpen,
     ...bundle,
     activeBundle,
@@ -172,7 +192,8 @@ export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false, no
     finalWritten,
     // runSettled = 回合已终 + **本会话绑定 bundle** 的 final 在场。无绑定 → false（未知不是落定）；
     // present 缺席不阻塞 settled（由 presentCalls 暴露偏差）。
-    runSettled: readable === true && turnOpen === false && finalWritten === true,
+    // BUG-344：在飞子代理存在时不得报 settled（父回合结束但子代理仍在工作）。
+    runSettled: readable === true && turnOpen === false && finalWritten === true && liveSubagents.length === 0,
   }
 }
 

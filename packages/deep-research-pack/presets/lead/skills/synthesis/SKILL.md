@@ -9,7 +9,7 @@ description: 综合写作（wave2 语义）方法论：纯综合先行、finding
 
 ## 流程
 
-1. **纯综合（禁止新搜索）**：通读本 run bundle（drt_<slug>/）的 evidence/ 全部文件与 topics.md，写 findings.md——每个 finding 一行：结论 + 支撑证据文件 + `lenses`（哪些面支撑）+ `lens_gaps`（哪些面没覆盖）+ gap 状态（`supported` / `needs_search` / `contradicted`）。
+1. **纯综合（禁止新搜索）**：通读本 run bundle（drt_<slug>/）的 evidence/ 全部文件与 topics.md，写 findings.md——每个 finding 一个块：`## F<n>：<结论一句话>`（标题必须带冒号），块内每行一个字段：`- 支撑证据：evidence/<file>.md`、`- lenses：<哪些面支撑>`、`- lens_gaps：<哪些面没覆盖>`、`- gap：supported|needs_search|contradicted|insufficient`。一行式 `- F1｜…` 不是合法形态。
 2. **gap 定向补搜**：只对 `needs_search` 的 finding 派一次定向任务（给 analyst 或 subagent，说清找什么、什么算找到）。补完更新 findings.md，**只补一轮**——补了还缺就把该 finding 标 `insufficient` 并在报告里如实呈现。**未取得 ≠ 没有**：拿不到的项，报告里只能落「未取得/无法判定」（写明试过的渠道），**禁止转写成「没有/不提供」**——取证可达性不对称是常态（cn-dr-products 实证：洋厂商一手定价页全域 403，"查不到"进无法判定类），查不到 ≠ 官方没有。
 3. **写 run 根 final.md 当前版**（交付时忠实复制为 final/vN 副本，present 指它）：**决策摘要首屏先行**——六段：
    答案/建议及适用条件（成立条件、口径、有效期；证据不足以支撑建议时如实写

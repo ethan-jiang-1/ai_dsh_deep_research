@@ -262,9 +262,9 @@ export function parseReadinessDeclaration(text: string): { readonly ok: true; re
 
 /** 终局 readiness 的判据来源（声明件优先；散文只做副本；无 review/ 的旧场回退散文）。 */
 export interface ReadinessReading {
-  readonly pass: boolean
+  readonly pass: boolean | null
   readonly conditional: boolean
-  readonly source: 'declaration' | 'prose' | 'missing' | 'invalid' | 'mismatch' | 'ambiguous'
+  readonly source: 'declaration' | 'prose' | 'missing' | 'invalid' | 'mismatch' | 'ambiguous' | 'absent'
   readonly detail?: string
 }
 
@@ -289,7 +289,14 @@ export function readinessOfSources(input: {
   const terminal = analysis.value === null ? null : { value: analysis.value, line: analysis.line ?? '' }
   const proseValue = analysis.value
   if (typeof input.declarationText !== 'string') {
-    if (!input.hasReviewDir) return { pass: terminal?.value === 'PASS', conditional: terminal !== null && /附条件|条件\s*[=＝：:]/.test(terminal.line), source: 'prose' }
+    if (!input.hasReviewDir) {
+      // BUG-347：没有 review/ 目录、也没有 review.md 文本 = 没审过（absent）；pass=null 不得折成 FAIL。
+      // review.md 存在但没有终局判定行 = 审查未给结论，仍是 FAIL（pass=false）。
+      if (terminal === null && (input.reviewText == null || input.reviewText.trim() === '')) {
+        return { pass: null, conditional: false, source: 'absent', detail: '无 review 面（未审查）——不是审查未过' }
+      }
+      return { pass: terminal?.value === 'PASS', conditional: terminal !== null && /附条件|条件\s*[=＝：:]/.test(terminal.line), source: 'prose' }
+    }
     return {
       pass: false,
       conditional: false,

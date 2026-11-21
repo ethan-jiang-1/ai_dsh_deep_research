@@ -138,7 +138,15 @@ export function findingsContractIssues(bundleDir) {
   const allLenses = new Set([...topics.values()].flatMap((t) => t.lenses))
   const issues = []
   const blocks = parseFindingsOf(text)
-  if (blocks.length === 0) issues.push('findings.md 无 F# 块——防空语料（不得静默 0 条）')
+  if (blocks.length === 0) {
+    if (/^##\s*F\d+\b/m.test(text) && !/^##\s*F\d+\s*[:：]/m.test(text)) {
+      issues.push('findings.md 的 F# 标题缺冒号——用 `## F1：结论`（模板形态；无冒号的标题不构成块）')
+    } else if (/^-\s*F\d+\s*[｜|]/m.test(text)) {
+      issues.push('findings.md 用了一行式 F#——每个 finding 必须是一个 `## F1：结论` 块，字段逐行')
+    } else {
+      issues.push('findings.md 无 F# 块——防空语料（不得静默 0 条）')
+    }
+  }
   const seen = new Map()
   for (const block of blocks) seen.set(block.id, (seen.get(block.id) ?? 0) + 1)
   for (const [id, count] of seen) if (count > 1) issues.push(`findings.md 重复 F#：${id} × ${count}（引用歧义）`)

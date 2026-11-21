@@ -401,3 +401,28 @@ test('runStateOf：D28 绑定 bundle 在 _abandoned/ 时 final 仍可判、bundl
     assert.equal(s.runSettled, true);
   } finally { rmSync(tmp, { recursive: true, force: true }) }
 });
+
+// 负例留证 2026-11-21：BUG-344——父回合已终 + final 在场，但 subagent/catalog 的子会话仍在跑：
+// 旧 runSettled 只看 turnOpen/finalWritten，会误报落定。
+test('BUG-344：在飞子代理 → runSettled=false；子会话终局才 settled', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'run-state-subagent-'));
+  try {
+    mkdirSync(join(tmp, 'drt_x'));
+    writeFileSync(join(tmp, 'drt_x', 'final.md'), '# 交付');
+    const log = join(tmp, 's.jsonl');
+    writeFileSync(log, [
+      { type: 'session', id: 's', agentPreset: 'lead' },
+      { type: 'tool/call', data: { name: 'write', arguments: JSON.stringify({ path: 'drt_x/question.md' }) } },
+      { type: 'subagent/catalog', data: { version: 0, childId: 'child-1', label: 'scout' } },
+      { type: 'turn/start' },
+      { type: 'turn/end' },
+    ].map((e) => JSON.stringify(e)).join('\n') + '\n');
+    const unknown = runStateOf({ logPath: log, wsRoot: tmp });
+    assert.equal(unknown.liveSubagents.length, 1);
+    assert.equal(unknown.runSettled, false, '读不到子日志 = 未知，不落定');
+    const running = runStateOf({ logPath: log, wsRoot: tmp, readChildEvents: (id) => (id === 'child-1' ? [{ type: 'turn/start' }] : null) });
+    assert.equal(running.runSettled, false, '子会话回合未终 → 不落定');
+    const done = runStateOf({ logPath: log, wsRoot: tmp, readChildEvents: () => [{ type: 'turn/start' }, { type: 'turn/end' }] });
+    assert.equal(done.runSettled, true, '子会话终局后才落定');
+  } finally { rmSync(tmp, { recursive: true, force: true }) }
+});

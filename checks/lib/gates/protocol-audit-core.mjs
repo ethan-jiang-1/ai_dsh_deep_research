@@ -423,7 +423,10 @@ export function checkEvidenceThreshold(protocol, evidences, runKind = '', critic
   const rank = { A: 4, B: 3, C: 2, D: 1 }
   if (!(threshold in rank)) return []
   const out = []
-  const scoped = criticalEvidence === null ? evidences : evidences.filter((ev) => criticalEvidence.includes(ev.file))
+  // BUG-329：claims 不可读/缺席时 critical 范围未知——不得静默退化成「全部证据逐卡比」。
+  // 该失败由 claims 判据承担；这里只给可行动的 notice，不冒充通过也不假装红。
+  if (criticalEvidence === null) return [warn('evidence-threshold-unscoped', 'critical 范围未知（claims 不可读或未提供）——未按关键证据逐卡比 quality；失败由 claims 判据承担')]
+  const scoped = evidences.filter((ev) => criticalEvidence.includes(ev.file))
   for (const ev of scoped) {
     const q = String(ev.quality ?? '').trim()
     if (!(q in rank)) continue

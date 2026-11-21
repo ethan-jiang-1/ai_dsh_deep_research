@@ -6,6 +6,11 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [350](BUG-350-claims-json-schema-mismatch.md) | claims 形状不符 schema | （claims v2） | 2026-11-21 |
+| [342](BUG-342-plan-remaining-work-owner-next-literal.md) | 剩余工作 owner/next 字面 | （task_id|state 表） | 2026-11-21 |
+| [341](BUG-341-findings-one-line-vs-f-block.md) | findings 一行 vs 块 | （块格式 + 报错点名） | 2026-11-21 |
+| [328](BUG-328-plan-snapshot-same-text-only.md) | plan 快照只拒同文本 | （快照事实比对） | 2026-11-21 |
+| [329](BUG-329-threshold-critical-scope-null.md) | threshold 退全部 evidence | （unscoped warning） | 2026-11-21 |
 | [343](BUG-343-readiness-json-extra-count-keys.md) | readiness 附加计数键 | （v2 counts） | 2026-11-21 |
 | [327](BUG-327-probe-cache-mcp-read-write-key-mismatch.md) | probe 键缺 MCP | （唯一构造器） | 2026-11-21 |
 | [333](BUG-333-run-driver-port-nan.md) | run-driver --port NaN | （parsePort） | 2026-11-21 |

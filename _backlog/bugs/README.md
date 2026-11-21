@@ -15,21 +15,16 @@
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
 | [BUG-327](BUG-327-probe-cache-mcp-read-write-key-mismatch.md) | 修复就绪 | P2 | probe 读写键 MCP 不一致 |
-| [BUG-328](BUG-328-plan-snapshot-same-text-only.md) | 等人拍板 | P2 | plan 快照只拒同文本 |
-| [BUG-329](BUG-329-threshold-critical-scope-null.md) | 等人拍板 | P2 | claims 缺时 threshold 退全部 |
 | [BUG-333](BUG-333-run-driver-port-nan.md) | 修复就绪 | P2 | --port NaN/0 未校验 |
 | [BUG-334](BUG-334-cold-start-port-env-nan.md) | 修复就绪 | P2 | COLD_START_PORT NaN |
 | [BUG-335](BUG-335-snapshot-port-nan.md) | 修复就绪 | P2 | snapshot --port NaN |
 | [BUG-336](BUG-336-client-load-port-nan.md) | 修复就绪 | P2 | client-load --port NaN |
 | [BUG-338](BUG-338-pick-free-port-toctou.md) | 修复就绪 | P2 | pickFreePort TOCTOU |
-| [BUG-341](BUG-341-findings-one-line-vs-f-block.md) | 等人拍板 | P1 | findings 一行 vs F# 块 |
-| [BUG-342](BUG-342-plan-remaining-work-owner-next-literal.md) | 等人拍板 | P1 | 剩余工作 owner/next 字面判据 |
 | [BUG-344](BUG-344-watch-run-settled-while-subagent-live.md) | 修复就绪 | P2 | watch-run 误报 settled |
 | [BUG-345](BUG-345-delivery-witness-window-and-receipt-shape.md) | 等人拍板 | P2 | present 后仍「交付未见证」 |
 | [BUG-347](BUG-347-review-absent-shown-as-fail.md) | 修复就绪 | P1 | 无 review 时显示「审查未过」 |
 | [BUG-348](BUG-348-long-run-silent-stall-no-alert.md) | 等人拍板 | P2 | 长 run 停摆无告警 |
 | [BUG-349](BUG-349-workflow-sandbox-nested-eph.md) | 等人拍板 | P2 | workflow 嵌套沙箱必失败 |
-| [BUG-350](BUG-350-claims-json-schema-mismatch.md) | 等人拍板 | P1 | claims.json 形状不符 schema |
 
 ## 最近归档
 

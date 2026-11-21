@@ -24,6 +24,7 @@
 
 **终局块**：`review.md` 只认当前终局块（文件头声明方向；当前实现最新在上）；`readiness: PASS|FAIL` 是判据，末尾/历史轮的 PASS 不算。
 
+**claim 表**：`review/claims.json` v2，形状 = `content/templates/run/claims.json`；`critical` 必填，禁 `verdict`/`must_answer` 字段——裁决只住 `review/verdicts-rN.json`，同一事实不写两份。
 **终局声明**：critic 同轮写 `review/readiness.json`（`version:2` + `readiness` + 可选 `conditional`/`round`/`at` + 必填 `counts` 五项）；门禁以声明为准，review.md 的判定行只做副本——不一致/缺席/非法 = 红。历史轮/附录不夺权；lead 升级须引 critic 授权并落新的终局块。无 `run.md` 的旧场不出结构化证据，门禁记 UNATTESTED（不是通过）。
 
 **旧 run 推导表**（无 `run.md`；不补）：

@@ -10,7 +10,12 @@ import { join } from 'node:path'
 import { planGate } from '../../../checks/lib/gates/plan-gate.mjs'
 
 const HEAD = '| id | parent | lifecycle | kind | question | owner_role | deps | output | acceptance | budget | depth | task_id |\n|---|---|---|---|---|---|---|---|---|---|---|---|\n'
-const plan = (rows, extra = '') => `# Plan\n\n> 图版本：v1\n\n## 节点表\n\n${HEAD}${rows.join('\n')}\n\n## 剩余工作\n\n- W1.1 owner: scout next: 继续\n${extra}`
+const remainingOf = (rows) => {
+  const id = rows.length > 0 ? (rows[0].split('|')[1] ?? '').trim() : '—'
+  const state = id === '' || id === '—' ? '完成' : '待派发'
+  return `## 剩余工作\n\n| task_id | state |\n|---|---|\n| ${id || '—'} | ${state} |\n`
+}
+const plan = (rows, extra = '') => `# Plan\n\n> 图版本：v1\n\n## 节点表\n\n${HEAD}${rows.join('\n')}\n\n${remainingOf(rows)}${extra}`
 const row = (id, deps, { owner = 'scout', kind = 'broad-scan', lifecycle = 'active' } = {}) => `| ${id} | — | ${lifecycle} | ${kind} | q | ${owner} | ${deps} | out | ok | 1 | L1 | — |`
 function dirOf(text) { const d = mkdtempSync(join(tmpdir(), 'plan-gate-')); writeFileSync(join(d, 'plan.md'), text); return d }
 
@@ -45,7 +50,7 @@ test('active budget/task_id：空白红，显式占位合法（task_id 占位为
 })
 
 test('缺 budget/task_id 列 → RED（缺列与空值分开）', () => {
-  const build = (header, rowLine) => `# Plan\n\n> 图版本：v1\n\n## 节点表\n\n${header}\n|---\n${rowLine}\n\n## 剩余工作\n\n- W1.1 owner: scout next: 继续\n`
+  const build = (header, rowLine) => `# Plan\n\n> 图版本：v1\n\n## 节点表\n\n${header}\n|---\n${rowLine}\n\n## 剩余工作\n\n| task_id | state |\n|---|---|\n| W1.1 | 待派发 |\n`
   const noBudget = dirOf(build(
     '| id | parent | lifecycle | kind | question | owner_role | deps | output | acceptance | depth | task_id |',
     '| W1.1 | — | active | broad-scan | q | scout | — | out | ok | L1 | — |',
@@ -75,7 +80,7 @@ test('owner/kind/lifecycle 非法、缺剩余工作、图版本缺快照 → RED
     [plan([row('W1.1', '—', { owner: 'ghost' })]), 'owner_role'],
     [plan([row('W1.1', '—', { kind: 'whatever' })]), 'kind'],
     [plan([row('W1.1', '—', { lifecycle: 'dead' })]), 'lifecycle'],
-    [plan([row('W1.1', '—')]).replace('## 剩余工作\n\n- W1.1 owner: scout next: 继续\n', ''), '剩余工作'],
+    [plan([row('W1.1', '—')]).replace(/## 剩余工作[\s\S]*$/, ''), '剩余工作'],
     [plan([row('W1.1', '—')]).replace('图版本：v1', '图版本：v2'), 'plan/v1.md'],
   ]) {
     const d = dirOf(text)
@@ -119,13 +124,18 @@ test('BUG-283：Wave 执行层节点 task_id 必须 plan-only；engine/channel �
   try { assert.match(planGate(d).detail, /task_id 不是 plan-only/) } finally { rmSync(d, { recursive: true, force: true }) }
 })
 
-test('BUG-284：剩余工作空/条目缺 owner+next → RED；- 无 合法', () => {
-  const d = dirOf(plan([row('W1.1', '—')]).replace('## 剩余工作\n\n- W1.1 owner: scout next: 继续\n', '## 剩余工作\n\n- W2.1 还没做\n'))
-  try { assert.match(planGate(d).detail, /剩余工作条目缺 owner\/next/) } finally { rmSync(d, { recursive: true, force: true }) }
+test('BUG-342（取代 BUG-284 的 owner/next 判据）：剩余工作必须是两列表格；未知 task_id / 非法 state / 散文 → RED', () => {
+  const base = plan([row('W1.1', '—')])
+  const d = dirOf(base.replace(/## 剩余工作[\s\S]*$/, '## 剩余工作\n\n- W2.1 还没做\n'))
+  try { assert.match(planGate(d).detail, /两列表格/) } finally { rmSync(d, { recursive: true, force: true }) }
+  const d2 = dirOf(base.replace('| W1.1 | 待派发 |', '| W9.9 | 待派发 |'))
+  try { assert.match(planGate(d2).detail, /不在节点表/) } finally { rmSync(d2, { recursive: true, force: true }) }
+  const d3 = dirOf(base.replace('| W1.1 | 待派发 |', '| W1.1 | 快了 |'))
+  try { assert.match(planGate(d3).detail, /state/) } finally { rmSync(d3, { recursive: true, force: true }) }
 })
 
-test('BUG-303：剩余工作 - 无 与 active 节点共存 → RED', () => {
-  const d = dirOf(plan([row('W1.1', '—')]).replace('## 剩余工作\n\n- W1.1 owner: scout next: 继续\n', '## 剩余工作\n\n- 无\n'))
+test('BUG-303：剩余工作 | — | 完成 | 与 active 节点共存 → RED', () => {
+  const d = dirOf(plan([row('W1.1', '—')]).replace(/## 剩余工作[\s\S]*$/, '## 剩余工作\n\n| task_id | state |\n|---|---|\n| — | 完成 |\n'))
   try { assert.match(planGate(d).detail, /仍有 active 节点/) } finally { rmSync(d, { recursive: true, force: true }) }
 })
 
@@ -164,4 +174,22 @@ test('BUG-305：快照与当前 plan.md 完全相同 → RED', () => {
     writeFileSync(join(d, 'plan', 'v1.md'), plan([row('W1.1', '—')]).replace('图版本：v1', '图版本：v2'))
     assert.match(planGate(d).detail, /完全相同/)
   } finally { rmSync(d, { recursive: true, force: true }) }
+})
+
+
+// 负例留证 2026-11-21：BUG-342 / BUG-328——快照文本不同但解码事实相同（节点/验收/预算）→ 快照不是旧图。
+test('BUG-328：同事实异措辞快照 → RED；事实有差异 → PASS', () => {
+  const current = plan([row('W1.1', '—')]).replace('图版本：v1', '图版本：v2')
+  const sameFacts = current.replace('# Plan', '# Plan（旧版措辞不同）').replace('> 图版本：v2', '> 图版本：v1')
+  const older = sameFacts.replace('| out | ok |', '| out | 旧验收 |')
+  for (const [snapshot, needle] of [[sameFacts, /无差异/], [older, null]]) {
+    const d = dirOf(current)
+    try {
+      mkdirSync(join(d, 'plan'), { recursive: true })
+      writeFileSync(join(d, 'plan', 'v1.md'), snapshot)
+      const r = planGate(d)
+      if (needle === null) assert.equal(r.status, 'PASS', r.detail)
+      else assert.match(r.detail, needle)
+    } finally { rmSync(d, { recursive: true, force: true }) }
+  }
 })

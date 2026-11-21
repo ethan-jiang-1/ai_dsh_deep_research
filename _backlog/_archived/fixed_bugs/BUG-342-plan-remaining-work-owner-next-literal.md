@@ -1,12 +1,12 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P1
 opened: 2026-11-20
 ---
 
 # BUG-342：门 P 的「剩余工作」要求字面 owner/next 关键词——所有真实 plan 都被判红
 
-> 严重级别：P1 ｜ 发现：2026-11-20 ｜ 状态：等人拍板（判据形态按关键词还是按语义/机器格式，是合同取舍）
+> 严重级别：P1 ｜ 发现：2026-11-20 ｜ 状态：已修（2026-11-21）— 结论：剩余工作改两列表格 task_id|state（owner/next 从节点表/deps 派生），散文 bullet 不再合法；审查：agent — 注入红回归；去向：none — 合同收紧
 >
 > 现场 = `runtime/e2e-2026-11-20/`；新 run = `research-workspace/drt_sodium-ion-bess/`。
 
@@ -69,4 +69,30 @@ node checks/run-gates/node-gate.mjs research-workspace/drt_sodium-ion-bess
 - 既有三份 plan 重跑结果符合新口径；旧场 epoch 豁免如适用须显式。
 - `pnpm test` 的 plan-gate 矩阵同步更新并通过。
 
-可关闭：否
+
+## 修复落地（2026-11-21）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/gates/plan-gate.mjs",
+    "packages/deep-research-pack/content/templates/run/plan.md",
+    "tests/run/gates/plan-gate.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/plan-gate.spec.mjs",
+    "exit": 1,
+    "output": "回退到旧 owner/next 字面判据：6 例红——表格形态被拒，未知 task_id/非法 state 不被识别"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/plan-gate.spec.mjs",
+    "exit": 0,
+    "output": "15 tests 全过：表格合法、散文红、未知 task_id/非法 state 红"
+  },
+  "guard": {
+    "path": "tests/run/gates/plan-gate.spec.mjs"
+  }
+}
+```
+
+可关闭：是

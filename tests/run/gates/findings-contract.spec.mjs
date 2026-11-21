@@ -132,3 +132,15 @@ test('BUG-263：重复 F# 红（引用主键唯一）', () => {
     assert.ok(findingsContractIssues(dir).some((i) => i.includes('重复 F#')))
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
+
+// 负例留证 2026-11-21：BUG-341——一行式 findings / 无冒号标题必须在报错里点名修正形态，
+// 而不是笼统的「无 F# 块」（现场 = A 的 `- F1｜…` 与 B 的 `## F1 `）。
+test('BUG-341：一行式 F# 与无冒号标题 → 报错点名正确形态', () => {
+  const dir = fixture()
+  try {
+    write(dir, 'findings.md', '# Findings\n\n- F1｜版本号：19。支撑：evidence/ev-a.md。lenses: official｜gap: supported\n')
+    assert.ok(findingsContractIssues(dir).some((i) => i.includes('一行式')))
+    write(dir, 'findings.md', '# Findings\n\n## F1 版本号：19\n\n- 支撑证据: evidence/ev-a.md\n- gap: supported\n')
+    assert.ok(findingsContractIssues(dir).some((i) => i.includes('缺冒号')))
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
