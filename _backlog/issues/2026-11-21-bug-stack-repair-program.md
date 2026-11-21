@@ -149,6 +149,13 @@ A 的 readiness 多 4 个计数键；B 的 claims 是 rich ledger。**过去六�
 - 共享交付：`contract-fixture` 守卫 + 每个产物的 canonical 样例（模板文件或 skill fenced 块）。
 - 旧 bundle 的 `readiness.json`/`claims.json`/findings/plan 一律不迁移、不手改；它们在新判据下红是预期。
 
+**P3 结果（2026-11-21）**
+
+- 已修归档：**343 / 350 / 342 / 341 / 328 / 329**（330 已在 P0 迁暂停池）。canonical：readiness v2（必填 counts）、claims v2（critical 必填、禁 verdict 字段）、plan 剩余工作表（task_id|state）、findings 块（冒号必需 + 报错点名）、plan 快照事实比对、threshold unscoped warning。
+- 契约夹具：critic skill 的 readiness 样例、claims 模板、findings 模板直接进测试（改一侧不同步即红）；synthesis skill 的「每个 finding 一行」改为块样例。
+- 模型可见面变更 → 5 角色 fixture 全部重录 + C 金标准 `--update-expected`；skill-golden/asset-ledger/guard-ledger 同变更。
+- 实测：`pnpm test` 1445 spec + 266 checks 全绿；`pnpm verify` 全绿（含 dist 重建）。
+
 ### P4 驾驶舱与交付见证（4 张，2 会话）
 
 - **347**：`readinessOfSources` 增 `absent`（pass=null）；`useStatusFeed` 只折有判定的结果；
@@ -161,6 +168,11 @@ A 的 readiness 多 4 个计数键；B 的 claims 是 rich ledger。**过去六�
 - **348**：**derive-only** run health（最后活动时间、最后一回合错误、在飞子代理）住 pack lib（`src/lib/run/`），
   客户端横幅与 `probes/analyze/watch-run.mjs` 消费同一 fold；不写 `run.md` 机器事实（避免第二份真相）。
   阈值 30 min 无事件且末回合有错；守卫 = `runb-events-full.jsonl` 02:35–08:47 窗口重放出告警 + 正常长回合不误报。
+
+**P4 进度（2026-11-21）**
+
+- 已修归档：**347**（无 review 面 = absent，pass=null）、**344**（runSettled 追加无在飞子代理；watch-run 读子会话）。
+- 待做：**345**（交付见证：durable present ∨ 工具回执、窗口无关）、**348**（run health derive-only + 横幅）。
 
 ### P5 沙箱、残余红分诊与收尾（1 会话）
 
