@@ -2812,6 +2812,9 @@
     {"from": "_backlog/bugs/BUG-348-long-run-silent-stall-no-alert.md", "to": "_backlog/_archived/fixed_bugs/BUG-348-long-run-silent-stall-no-alert.md", "reason": "2026-11-21 已修归档"},
     {"from": "_backlog/issues/2026-11-19-low-confidence-40.md", "to": "_backlog/_archived/settled_issues/2026-11-19-low-confidence-40.md", "reason": "2026-11-21 第 9 轮探索收口"},
     {"from": "_backlog/bugs/BUG-352-delivery-receipt-slug-prefix-mismatch.md", "to": "_backlog/_archived/fixed_bugs/BUG-352-delivery-receipt-slug-prefix-mismatch.md", "reason": "2026-11-22 已修归档"},
-    {"from": "_backlog/bugs/BUG-351-stalled-banner-reset-by-open-events.md", "to": "_backlog/_archived/fixed_bugs/BUG-351-stalled-banner-reset-by-open-events.md", "reason": "2026-11-22 已修归档"}
+    {"from": "_backlog/bugs/BUG-351-stalled-banner-reset-by-open-events.md", "to": "_backlog/_archived/fixed_bugs/BUG-351-stalled-banner-reset-by-open-events.md", "reason": "2026-11-22 已修归档"},
+    {"from": "_backlog/bugs/BUG-353-stalled-banner-after-delivery.md", "to": "_backlog/_archived/fixed_bugs/BUG-353-stalled-banner-after-delivery.md", "reason": "2026-11-22 已修归档"},
+    {"from": "_backlog/bugs/BUG-354-stalled-banner-unbound-session.md", "to": "_backlog/_archived/fixed_bugs/BUG-354-stalled-banner-unbound-session.md", "reason": "2026-11-22 已修归档"},
+    {"from": "_backlog/bugs/BUG-355-graph-plan-read-failure-as-missing.md", "to": "_backlog/_archived/fixed_bugs/BUG-355-graph-plan-read-failure-as-missing.md", "reason": "2026-11-22 已修归档"}
   ]
 }

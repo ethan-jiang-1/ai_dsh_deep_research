@@ -1,12 +1,12 @@
 ---
-status: 排查中
+status: 已修
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-353：已交付 run 仍显示「运行停摆」横幅——交付与停摆同时成立
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：排查中 — 真浏览器现场已复现；按用户指令只报不修。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：已修（2026-11-22）— 结论：停摆横幅加可行动门：已交付 run 不再给恢复指引（交付徽标/终稿入口照常）；审查：agent — 注入红回归 + 真浏览器复跑；去向：none — 展示层判据修复
 > 现场 = `runtime/e2e/`；seed 夹具 = `runtime/e2e/delivered-stall-e2e.mjs`。
 
 ## 症状
@@ -80,3 +80,30 @@ node --import tsx/esm runtime/e2e/delivered-stall-e2e.mjs
 - 红证：去掉 `delivery !== null` 抑制 → 本夹具再次出现横幅，exit 1；还原后绿。
 - guard 落点建议：`tests/cockpit/lib/run/health.spec.mjs` 之外，加一个状态页/浏览器层
   用例（本 seed 夹具可升格为 `client-load` 相位）。
+
+## 修复落地（2026-11-22）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/run/health.ts",
+    "packages/deep-research-pack/src/client/ResearchStatusTab.tsx",
+    "tests/cockpit/lib/run/health.spec.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm --test tests/cockpit/lib/run/health.spec.mjs",
+    "exit": 1,
+    "output": "注入回归：删掉 delivered !== false 条件 → 已交付行红（1 fail）"
+  },
+  "green": {
+    "command": "node --import tsx/esm --test tests/cockpit/lib/run/health.spec.mjs",
+    "exit": 0,
+    "output": "9 tests 全过（四轴真值表）；真浏览器：delivered=true / stalled=false / 交付徽标与终稿入口在场"
+  },
+  "guard": {
+    "path": "tests/cockpit/lib/run/health.spec.mjs"
+  }
+}
+```
+
+可关闭：是

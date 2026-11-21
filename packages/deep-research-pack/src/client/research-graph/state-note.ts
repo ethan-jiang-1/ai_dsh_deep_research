@@ -7,7 +7,7 @@
 import { translateZh, type PackTranslate } from '../../lib/shared/i18n.ts'
 
 export interface GraphStateNoteInput {
-  readonly planState: 'loading' | 'missing' | 'unbound' | 'ready' | 'truncated'
+  readonly planState: 'loading' | 'missing' | 'unbound' | 'ready' | 'truncated' | 'error'
   readonly boundSlug: string | null
   readonly followError: string | null
   readonly hasPlan: boolean
@@ -38,6 +38,10 @@ export function graphStateNote(input: GraphStateNoteInput, t: PackTranslate = tr
   }
   if (boundSlug === null) {
     return { title: t('graphNoteUnboundTitle'), body: t('graphNoteUnboundBody') }
+  }
+  if (planState === 'error') {
+    // BUG-355：读失败 ≠ 没有 plan.md；独立失败态，给重试入口，不冒充空态。
+    return { title: t('graphNotePlanReadFailedTitle'), body: t('graphNotePlanReadFailedBody') }
   }
   if (hasPlan && !hasTopLevel) {
     return { title: t('graphNoteOnlyChildrenTitle'), body: t('graphNoteOnlyChildrenBody') }

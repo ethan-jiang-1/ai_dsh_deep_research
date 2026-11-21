@@ -1,12 +1,12 @@
 ---
-status: 排查中
+status: 已修
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-354：未绑定会话也显示「运行停摆」横幅——没有 run 却给出恢复指引
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：排查中 — 真浏览器现场已复现；按用户指令只报不修。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：已修（2026-11-22）— 结论：停摆横幅加可行动门：未绑定/立项抑制会话不再给恢复指引，「尚未绑定」如实说明照常；审查：agent — 注入红回归 + 真浏览器复跑；去向：none — 展示层判据修复
 > 现场 = `runtime/e2e/`；seed 夹具 = `runtime/e2e/unbound-stall-e2e.mjs`。
 
 ## 症状
@@ -77,3 +77,30 @@ stalledBannerLine(health, props.t) !== null && !hitl.pending
 - 正常长回合（无错误）→ 不显示（既有负控不回退）。
 - 红证：去掉 `trust.kind === 'bound'` 前置 → 本夹具再次出现横幅，exit 1；还原后绿。
 - guard 落点：浏览器层用例（本 seed 夹具可升格），或状态页纯函数渲染矩阵。
+
+## 修复落地（2026-11-22）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/run/health.ts",
+    "packages/deep-research-pack/src/client/ResearchStatusTab.tsx",
+    "tests/cockpit/lib/run/health.spec.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm --test tests/cockpit/lib/run/health.spec.mjs",
+    "exit": 1,
+    "output": "注入回归：删掉 bound !== true 条件 → 未绑定行红（1 fail）"
+  },
+  "green": {
+    "command": "node --import tsx/esm --test tests/cockpit/lib/run/health.spec.mjs",
+    "exit": 0,
+    "output": "9 tests 全过；真浏览器：face=unbound / stalled=false，未绑定说明在场"
+  },
+  "guard": {
+    "path": "tests/cockpit/lib/run/health.spec.mjs"
+  }
+}
+```
+
+可关闭：是

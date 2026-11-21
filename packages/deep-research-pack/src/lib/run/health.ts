@@ -72,9 +72,21 @@ export function runHealthOf(events: readonly unknown[], { now = Date.now(), stal
   }
 }
 
-/** 停摆横幅文案（BUG-348）：返回 null = 不显示；文案键与参数由调用方注入的 t 解析。 */
-export function stalledBannerLine(health: RunHealth | null | undefined, t: (key: 'runStalledBanner', params?: Record<string, string>) => string): string | null {
+/**
+ * 停摆横幅的可行动门（BUG-348/353/354）：只有**已绑定、未交付、未挂起**的 run 才给恢复指引。
+ * 已交付后再失败的回合（353）与未绑定会话的失败回合（354）都不该让用户去"恢复"一个
+ * 已完成的 run 或不存在的 run；文案键与参数由调用方注入的 t 解析。
+ */
+export interface StalledBannerState {
+  readonly health: RunHealth | null | undefined
+  readonly bound: boolean
+  readonly delivered: boolean
+  readonly hitlPending?: boolean
+}
+export function stalledBannerOf(state: StalledBannerState, t: (key: 'runStalledBanner', params?: Record<string, string>) => string): string | null {
+  const { health, bound, delivered, hitlPending = false } = state
   if (health?.stalled !== true) return null
+  if (bound !== true || delivered !== false || hitlPending) return null
   return t('runStalledBanner', {
     minutes: String(Math.round((health.quietMs ?? 0) / 60000)),
     error: health.lastTurnError ?? '',

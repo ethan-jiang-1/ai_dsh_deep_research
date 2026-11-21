@@ -1652,6 +1652,30 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "回退活动谓词为「任意事件」→ 生命周期清零静默例红；删 tick → 源码守卫红"
+    },
+    {
+      "id": "BUG-353",
+      "mechanism": "停摆横幅的可行动门：已交付 run 不再给恢复指引",
+      "guard": "tests/cockpit/lib/run/health.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 delivered !== false 条件 → 已交付行红"
+    },
+    {
+      "id": "BUG-354",
+      "mechanism": "停摆横幅的可行动门：未绑定会话不给恢复指引",
+      "guard": "tests/cockpit/lib/run/health.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 bound !== true 条件 → 未绑定行红"
+    },
+    {
+      "id": "BUG-355",
+      "mechanism": "plan.md 读失败独立成 error 态，不冒充 missing",
+      "guard": "tests/cockpit/client/research-graph/state-note.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 !read.ok/catch 分支改回 setPlanState('missing') → 状态例外红"
     }
   ]
 }

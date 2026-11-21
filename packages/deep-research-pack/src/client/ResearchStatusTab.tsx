@@ -36,7 +36,7 @@ import { foldHitlPending, type HitlState } from '../lib/events/hitl-fold.ts'
 import { deriveBusinessBrief, type BusinessBrief } from '../lib/run/brief-fold.ts'
 import { rerunTriageRowsOf } from '../lib/run/rerun-triage.ts'
 import { statusFaceMarker } from '../lib/run/binding-trust.ts'
-import { stalledBannerLine } from '../lib/run/health.ts'
+import { stalledBannerOf } from '../lib/run/health.ts'
 import type { ResearchStatusTabProps, ResearchStatusTitleInjected } from './research-status/types.ts'
 import { TrackRail } from './research-status/TrackRail.tsx'
 import { useStatusFeed } from './research-status/useStatusFeed.ts'
@@ -84,6 +84,10 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     }, props.t),
     [unbound, trust, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery, props.t],
   )
+  const stalledBanner = stalledBannerOf(
+    { health, bound: trust.kind === 'bound', delivered: delivery !== null, hitlPending: hitl.pending },
+    props.t,
+  )
   return (
     // 滚动义务在页签体自己（vendor .tabBody = overflow:hidden 的定高 flex 列——BUG 2026-10-12
     // 用户报告：活动流超长即被裁且不可滚）：根容器 flex:1 + minHeight:0 吃满宿主高，
@@ -106,10 +110,10 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           {props.t('streamFailureBanner')}
         </div>
       )}
-      {/* 停摆横幅（BUG-348）：静默 ≥30min 且最后回合有错误——与 watch-run 同一派生；不写 run.md。 */}
-      {stalledBannerLine(health, props.t) !== null && !hitl.pending && (
+      {/* 停摆横幅（BUG-348/353/354）：静默 ≥30min + 最后回合错误，且**已绑定、未交付、未挂起**才给恢复指引。 */}
+      {stalledBanner !== null && (
         <div style={{ fontWeight: 600, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#ef444418', border: '1px solid #ef444440' }}>
-          {stalledBannerLine(health, props.t)}
+          {stalledBanner}
         </div>
       )}
       {/* ⓪ 业务摘要层（issue 2026-10-11-executive-research-ux-delivery）：五问业务语言——

@@ -102,7 +102,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const statuses = props.useSessionStatus((state) => state)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const {
-    boundSlug, plan, planText, planState, planVersion, snapshots, latestSnapshot, graphView, setGraphView,
+    boundSlug, plan, planText, planState, planVersion, snapshots, latestSnapshot, graphView, setGraphView, retry,
     snapshotPlan, snapshotState, showSnapshotPlan, setShowSnapshotPlan, planLoadedAt, followError,
   } = useGraphFeed(props, leadSessionId)
   const [copiedId, setCopiedId] = useState<string | null>(null)
@@ -316,6 +316,9 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         <div style={BANNER_STYLE}>
           <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{stateNote.title}</div>
           <div style={MUTED_STYLE}>{stateNote.body}</div>
+          {planState === 'error' && (
+            <button type="button" onClick={retry} style={{ marginTop: 6, fontSize: 12 }}>{props.t('graphRetryRead')}</button>
+          )}
         </div>
       )}
 

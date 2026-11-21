@@ -6,6 +6,9 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [353](BUG-353-stalled-banner-after-delivery.md) | 已交付 run 仍显示停摆 | （交付前置门） | 2026-11-22 |
+| [354](BUG-354-stalled-banner-unbound-session.md) | 未绑定会话显示停摆 | （绑定前置门） | 2026-11-22 |
+| [355](BUG-355-graph-plan-read-failure-as-missing.md) | 图谱读失败冒充无 plan | （planState error） | 2026-11-22 |
 | [351](BUG-351-stalled-banner-reset-by-open-events.md) | 打开会话清零停摆窗口 | （活动谓词 + tick） | 2026-11-22 |
 | [352](BUG-352-delivery-receipt-slug-prefix-mismatch.md) | 回执 slug 前缀不匹配 | （身份归一） | 2026-11-22 |
 | [348](BUG-348-long-run-silent-stall-no-alert.md) | 长 run 停摆无告警 | （health fold + 横幅） | 2026-11-21 |

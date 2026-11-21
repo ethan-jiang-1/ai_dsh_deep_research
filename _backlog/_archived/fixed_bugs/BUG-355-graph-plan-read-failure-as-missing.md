@@ -1,12 +1,12 @@
 ---
-status: 排查中
+status: 已修
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-355：研究图谱把 plan.md 读取失败降级成「没有 plan.md」——失败态与空态不可分
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：排查中 — 真浏览器现场已复现；按用户指令只报不修。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：已修（2026-11-22）— 结论：plan.md 读失败独立成 error 态：图谱显示「计划读取失败」+ 重试；missing 只留给文件真缺席；审查：agent — 注入红回归 + 真浏览器复跑；去向：none — 展示层判据修复
 > 现场 = `runtime/e2e/`；seed 夹具 = `runtime/e2e/graph-read-error-e2e.mjs`。
 
 ## 症状
@@ -23,7 +23,7 @@ Team 0 任务 · 完成 0
 
 把「读取失败」说成「没有 plan.md（旧 run / 未落盘）」。用户会以为这场 run 从未写过计划，
 可能据此重跑；页面没有失败态、没有重试提示。这与
-[研究驾驶舱设计 §6「失败态与空态必须可分」](../../docs/design/40-research-cockpit.md)
+[研究驾驶舱设计 §6「失败态与空态必须可分」](../../../docs/design/40-research-cockpit.md)
 （2026-10-27 BUG-045 定下的原则：读不到 ≠ 没有；catch 里不许只 `console.error` 后落回空态）
 直接冲突。
 
@@ -100,3 +100,33 @@ if (!read.ok) {
 - 恢复可读后，重试/下一轮扫描自动回到 ready（有界重试，不无限转圈）。
 - 红证：把 `!read.ok` 分支改回 `missing` → 本夹具再次出现空态措辞，exit 1；还原后绿。
 - guard 落点：`useGraphFeed` 的纯函数/状态矩阵（`planState`）或浏览器层用例（本 seed 夹具可升格）。
+
+## 修复落地（2026-11-22）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/client/research-graph/useGraphFeed.ts",
+    "packages/deep-research-pack/src/client/research-graph/state-note.ts",
+    "packages/deep-research-pack/src/client/ResearchGraphTab.tsx",
+    "packages/deep-research-pack/src/client/locales/zh-fold.ts",
+    "packages/deep-research-pack/src/client/locales/en-fold.ts",
+    "tests/cockpit/client/research-graph/state-note.spec.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm --test tests/cockpit/client/research-graph/state-note.spec.mjs",
+    "exit": 1,
+    "output": "注入回归：把 !read.ok/catch 分支改回 setPlanState('missing') → 状态例外红（1 fail）"
+  },
+  "green": {
+    "command": "node --import tsx/esm --test tests/cockpit/client/research-graph/state-note.spec.mjs",
+    "exit": 0,
+    "output": "2 tests 全过；真浏览器：planUnreadable=true / failureState=true / 文案含「计划读取失败…这不是「没有 plan.md」…重试读取」"
+  },
+  "guard": {
+    "path": "tests/cockpit/client/research-graph/state-note.spec.mjs"
+  }
+}
+```
+
+可关闭：是

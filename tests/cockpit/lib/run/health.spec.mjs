@@ -1,4 +1,5 @@
 // health.spec.mjs — run 停摆派生判据（BUG-348）：静默 + 最后回合错误才告警。
+// 负例留证 2026-11-22：BUG-353 / BUG-354——停摆横幅四轴门：已交付/未绑定都应抑制；
 // 负例留证 2026-11-21：BUG-348——stalled 只看 quietMs（去掉最后一回合错误）→ 「静默但无错误」例红；
 // 删掉 capabilityNote 式的横幅接线 → stalledBannerLine 例红。还原 → 绿。
 // 反证：把 stalled 改成只看 quietMs → 「长回合无错误」例红；只看 lastTurnError → 「错误后仍有活动」例红。
@@ -9,7 +10,7 @@ import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..')
 import assert from 'node:assert/strict'
-import { runHealthOf, stalledBannerLine, DEFAULT_STALL_MS } from '../../../../packages/deep-research-pack/src/lib/run/health.ts'
+import { runHealthOf, stalledBannerOf, DEFAULT_STALL_MS } from '../../../../packages/deep-research-pack/src/lib/run/health.ts'
 
 const T = 1_800_000_000_000
 const event = (type, time, data = {}) => ({ type, time, data })
@@ -54,11 +55,18 @@ test('错误在阈值内 → 不告警', () => {
   assert.equal(health.stalled, false)
 })
 
-test('BUG-348：停摆横幅文案只在 stalled 时给出，参数含分钟与最后错误', () => {
+test('BUG-348 / BUG-353 / BUG-354：停摆横幅四轴门（stalled × bound × delivered × hitl）', () => {
   const t = (key, params = {}) => `${key}:${params.minutes ?? ''}:${params.error ?? ''}`
-  assert.equal(stalledBannerLine({ stalled: false, quietMs: 0, lastTurnError: null, lastActivityAt: null }, t), null)
-  assert.equal(stalledBannerLine(null, t), null)
-  assert.equal(stalledBannerLine({ stalled: true, quietMs: 3_600_000, lastTurnError: 'TIMEOUT', lastActivityAt: null }, t), 'runStalledBanner:60:TIMEOUT')
+  const stalled = { stalled: true, quietMs: 3_600_000, lastTurnError: 'TIMEOUT', lastActivityAt: null }
+  assert.equal(stalledBannerOf({ health: stalled, bound: true, delivered: false }, t), 'runStalledBanner:60:TIMEOUT')
+  // 353：已交付 → 不再给「恢复」指引
+  assert.equal(stalledBannerOf({ health: stalled, bound: true, delivered: true }, t), null)
+  // 354：未绑定（或立项抑制）→ 没有 run 可恢复
+  assert.equal(stalledBannerOf({ health: stalled, bound: false, delivered: false }, t), null)
+  // HITL 挂起 / 未停摆 / 无健康输入 → 不显示
+  assert.equal(stalledBannerOf({ health: stalled, bound: true, delivered: false, hitlPending: true }, t), null)
+  assert.equal(stalledBannerOf({ health: { ...stalled, stalled: false }, bound: true, delivered: false }, t), null)
+  assert.equal(stalledBannerOf({ health: null, bound: true, delivered: false }, t), null)
 })
 
 // 负例留证 2026-11-22：BUG-351——打开会话注入的生命周期事件（时间戳=打开时刻）不算活动；

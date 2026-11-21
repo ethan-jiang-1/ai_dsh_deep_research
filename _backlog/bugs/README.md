@@ -14,9 +14,6 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-353](BUG-353-stalled-banner-after-delivery.md) | 排查中 | P2 | 已交付 run 仍显示「运行停摆」——交付与停摆同时成立 |
-| [BUG-354](BUG-354-stalled-banner-unbound-session.md) | 排查中 | P2 | 未绑定会话也显示「运行停摆」——没有 run 却给出恢复指引 |
-| [BUG-355](BUG-355-graph-plan-read-failure-as-missing.md) | 排查中 | P2 | 图谱把 plan.md 读取失败降级成「没有 plan.md」——失败态与空态不可分 |
 
 ## 最近归档
 

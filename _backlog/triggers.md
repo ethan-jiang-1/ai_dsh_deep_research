@@ -6,6 +6,7 @@
 
 | 对象 | 当前决定 | 具体观察（出现位置） | owner |
 |---|---|---|---|
+| 图谱旧图快照读取失败 | plan/vN 快照读取失败仍落 `snapshotState='missing'`，但 UI 文案是 `oldGraphUnread`（读不到）——未发现「说成缺席」的措辞 | 若文案被改成缺席措辞，或快照读取失败需要独立失败态时，建卡 | [批 Note](../notes/implemented/2026-11-21-bug-stack-repair.md) |
 | Pack 生产源头强制（P） | **以后做**：D 已统一 plan 节点表解释（观察/硬门共用解码事实），但通用 write/edit、Task 创建/回填与派工链未受保护；不声称唯一写方 | 真实 run 出现坏 plan（缺/空 budget·task_id、多表、转义管道）被派工，或消费方因此误判 → 引用旧卡新建，不重开已结卡 | [已结卡](_archived/settled_issues/2026-11-20-pack-production-prevention.md) |
 | 351 的浏览器横幅/tick | fold + 真 follow 快照重放已证（`stalled=true`）；`client-load --seed` 因主机 load 20.6 NOT-RUN | 下一次 client-load/dev-home 运行：打开合成停摆会话应显示横幅，停留 2min 应在 ≤60s 内跨阈值；误报/漏报则建卡 | [BUG-351](_archived/fixed_bugs/BUG-351-stalled-banner-reset-by-open-events.md) |
 | 新 canonical 合同的模型遵守 | 模板/契约夹具已落（readiness v2 / claims v2 / findings 块 / 剩余工作表）；旧 bundle 不作验收；模型是否照写未证 | 下一次自然 P5 run：run-accept 在新合同下红 → 引用本批卡新建卡；连续两场绿 → 移除本行 | [批 Note](../notes/implemented/2026-11-21-bug-stack-repair.md) |

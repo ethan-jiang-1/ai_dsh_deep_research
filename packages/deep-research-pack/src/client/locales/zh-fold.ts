@@ -151,6 +151,9 @@ export const zhFold = {
   graphNoteNoDagTitle: '没有可画的 DAG',
   graphNoteNoDagBodyMissingPlan: '此 run 没有 plan.md（旧 run / 未落盘），Team 板也没有 blocked_by。下面是任务快照，不是 DAG；rerun 会按 plan.md 生成执行图。',
   graphNoteNoDagBodyNoNodes: 'plan.md 没有可读节点表，Team 板也没有 blocked_by。下面是任务快照，不是 DAG。',
+  graphNotePlanReadFailedTitle: '计划读取失败',
+  graphNotePlanReadFailedBody: 'plan.md 在场但读不到（权限 / IO / 工作区失败）——这不是「没有 plan.md」。页面每 30s 自动重试，也可点「重试读取」。',
+  graphRetryRead: '重试读取',
 
   executionWhoSource: 'scout（检索器对账、query 三轮）＋ analyst（采信分级）',
   executionWhereSource: '派工五件⑤ 的方法论装载 ＋ leads.md 的「单检索器——待破」行',

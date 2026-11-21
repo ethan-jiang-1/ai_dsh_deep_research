@@ -22,7 +22,8 @@ export interface GraphFeed {
   readonly boundSlug: string | null
   readonly plan: PlanIndex | null
   readonly planText: string | null
-  readonly planState: 'loading' | 'missing' | 'unbound' | 'ready' | 'truncated'
+  readonly planState: 'loading' | 'missing' | 'unbound' | 'ready' | 'truncated' | 'error'
+  readonly retry: () => void
   readonly planVersion: number | null
   readonly snapshots: readonly number[]
   /** `plan/` 里最高快照号（无快照 = null）；旧图轨与按钮文案都用它。 */
@@ -46,7 +47,8 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
   const viewRef = useRef<RunView | null>(null)
   const [plan, setPlan] = useState<PlanIndex | null>(null)
   const [planText, setPlanText] = useState<string | null>(null)
-  const [planState, setPlanState] = useState<'loading' | 'missing' | 'unbound' | 'ready' | 'truncated'>('loading')
+  const [planState, setPlanState] = useState<'loading' | 'missing' | 'unbound' | 'ready' | 'truncated' | 'error'>('loading')
+  const [retryTick, setRetryTick] = useState(0)
   // 版本轨（rerun 版本面）：plan 基址 + `plan/` 快照 + 当前图版本；view 只切只看，不改图。
   const [planVersion, setPlanVersion] = useState<number | null>(null)
   const [snapshots, setSnapshots] = useState<readonly number[]>([])
@@ -125,7 +127,7 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
           viewRef.current = null
           setPlan(null)
           setPlanText(null)
-          setPlanState('missing')
+          setPlanState('error')
           setPlanLoadedAt(null)
           return
         }
@@ -136,7 +138,7 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
           viewRef.current = view
           setPlan(null)
           setPlanText(null)
-          setPlanState('missing')
+          setPlanState('error')
           setPlanLoadedAt(null)
           return
         }
@@ -174,7 +176,7 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
         viewRef.current = null
         setPlan(null)
         setPlanText(null)
-        setPlanState('missing')
+        setPlanState('error')
         setPlanLoadedAt(null)
         console.error('[research-graph] plan.md 读取失败', String(cause))
       }
@@ -182,7 +184,7 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
     void load()
     timer = setInterval(() => { void load() }, PLAN_REFRESH_MS)
     return () => { stopped = true; controller.abort(); if (timer !== undefined) clearInterval(timer) }
-  }, [leadSessionId, boundSlug, props.runSource])
+  }, [leadSessionId, boundSlug, props.runSource, retryTick])
 
   // 旧图快照按需读（没有快照就不读；`plan/vN.md` 不在场就如实 missing）。
   const latestSnapshot = snapshots.length > 0 ? (snapshots[snapshots.length - 1] ?? null) : null
@@ -207,5 +209,6 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
   return {
     boundSlug, plan, planText, planState, planVersion, snapshots, latestSnapshot, graphView, setGraphView,
     snapshotPlan, snapshotState, showSnapshotPlan, setShowSnapshotPlan, planLoadedAt, followError,
+    retry: () => setRetryTick((value) => value + 1),
   }
 }

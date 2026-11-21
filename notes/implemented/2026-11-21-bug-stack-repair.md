@@ -117,3 +117,17 @@
   与可执行的源码/假时钟守卫（351 的 tick）。
 - **未证边界**：351 的浏览器「打开即显示横幅 / 停留跨阈值」未复验——`client-load.entry --seed` 因主机
   load 20.6 判 NOT-RUN；下一次 client-load/dev-home 运行触发复验（triggers 已登记）。
+
+### 2026-11-22 第二批回归（BUG-353/354/355）
+
+- **353/354（停摆横幅的可行动门）**：348/351 只修了「停摆判据」，没修「该不该给行动指令」。
+  收成一个四轴 gate（`stalled × bound × delivered × hitl`）：只有**已绑定、未交付、未挂起**的 run
+  才显示恢复指引。真浏览器复跑：已交付 run → `delivered=true / stalled=false`；未绑定会话 →
+  `unbound=true / stalled=false`，各自的如实说明照常。
+- **355（图谱读失败）**：`planState` 增加 `error`，`!read.ok` 与 catch 不再落 `missing`；
+  图谱显示「计划读取失败 + 重试读取」，`missing` 只留给文件真缺席。真浏览器：
+  `planUnreadable=true / failureState=true`，文案不再出现「没有 plan.md」。
+- **类级修正**：① 可行动横幅必须有权限门 + 四轴真值表（纯函数，JSX 只消费）；②「读失败 ≠ 缺席」
+  要做 reader 扫描。本轮有界扫描：final tab、method-library、run-context 已区分 missing/unreadable；
+  图谱快照轨仍用 `snapshotState='missing'` 但文案是 `oldGraphUnread`，登记 trigger 复核，不建卡。
+- 未证边界：无（三张卡的现场浏览器脚本均复跑绿）。
