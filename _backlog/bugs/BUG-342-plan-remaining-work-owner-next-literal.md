@@ -46,6 +46,17 @@ node checks/run-gates/node-gate.mjs research-workspace/drt_sodium-ion-bess
 # 门 P = RED … 剩余工作条目缺 owner/next（5 条全中）
 ```
 
+## 同族第二现场（跑起来之后）
+
+同一份 plan v2 还踩了另外两条形态判据：
+
+- `W2.1 的 owner_role「analyst（executor=research-wave）」不在角色集`——lead 想把 executor 记在
+  owner_role 里（表里没有 executor 列）；判据只认裸角色名，没有"该写哪"的模型可见说明。
+- `W2.2 在 Wave 执行层但 task_id 不是 plan-only`——Wave 执行层的节点必须写 `plan-only`，
+  但模板只给了"task_id"列名，没给这条取值规则。
+
+三条都是"真实写法的合理近似"被字面判据打红，且没有一条能在 lead 侧自检。
+
 ## 修法（需拍板）
 
 1. 判据放宽：owner 接受盘上角色名（scout/analyst/critic/lead/research-wave），next 接受 `待…`/`→`；

@@ -22,15 +22,18 @@ v1 版本账 · 交付未见证
 且页签栏只有「对话 / 方法库」，**没有「终稿」**。用种子夹具跑 `client-load.entry --seed` 时
 交付门与终稿页签全绿——同一客户端代码在另一种数据下有正确行为。
 
-## 根因（两段）
+## 根因（三段）
 
-1. **观察窗口**：`useStatusFeed` 的 `journalEvents` 来自 follow 的 history 帧（窗口有界）。
-   22:08 的 present 在 22:09 的 goal round（+170 事件）之后落到窗口外；`latestFinalDelivery`
-   因此返回 null，状态页走「版本账在、present 不在窗口」分支。
+1. **浏览器 RunSource 没有 root**：`browserRunSource` 不提供 `RunSource.root`（接口注明"浏览器适配器可缺"），
+   而 `useStatusFeed` 用 `props.runSource(sessionId).root` 当 `cwd` 传给 `latestFinalDelivery`。
+   present 事件里的路径是**绝对路径**；`finalPathOfWithin(absolutePath, undefined)` 返回 null →
+   交付永远"未见证"。
 2. **回执兜底失效**：兜底读 `delivered.json`，`deliveryFromReceipt` 期待
    `{ present: { path }, final: { version } }`；而本 run 的 `delivered.json` 是 lead 自写的
    install-only 形态（`presented: [ … ]` / `final_copy` / `machine_audit`），解析不出交付。
    同一份回执还是**先写后交**：22:05 写入时把 `presented` 记成已交付，present 22:08 才发生。
+3. **观察窗口加重**：`journalEvents` 来自 follow 的 history 帧（窗口有界）。run A 的 present
+   在随后的 goal round（+170 事件）之后可能落出窗口；即使窗口内，也会被 (1) 挡掉。
 
 ## 复现
 
@@ -44,6 +47,35 @@ node probes/browser/cdp-probe.mjs '<gui-url>' --open-session 'PostgreSQL 最新�
 # 3) 种子夹具对照全绿
 node --import tsx/esm checks/smoke/client-load.entry.mjs --seed tests/fixtures/client-load-home --port 3109
 ```
+
+### 形态证明（keyless）
+
+```sh
+node --import tsx/esm -e "
+import { readFileSync } from 'node:fs'
+import { deliveryFromReceipt } from './packages/deep-research-pack/src/lib/run/final-target.ts'
+const lead = JSON.parse(readFileSync('research-workspace/drt_pg-latest-stable/delivered.json', 'utf8'))
+console.log('lead receipt →', deliveryFromReceipt(lead, 'pg-latest-stable'))
+console.log('accept shape →', deliveryFromReceipt({ present: { path: 'drt_pg-latest-stable/final/v1.md', callId: 'x' }, final: { version: 1 } }, 'pg-latest-stable'))
+"
+# lead receipt → null
+# accept shape → { path: 'drt_pg-latest-stable/final/v1.md', turn: 0, callId: 'x' }
+```
+
+```sh
+node --import tsx/esm -e "
+import { readFileSync } from 'node:fs'
+import { latestFinalDelivery } from './packages/deep-research-pack/src/lib/run/final-target.ts'
+const lines = readFileSync('runtime/e2e-2026-11-20/runb-events-full.jsonl', 'utf8').split('\n').filter(Boolean); lines.shift()
+const ev = lines.map(l => JSON.parse(l))
+console.log('cwd=undefined →', latestFinalDelivery(ev, undefined))
+console.log('cwd=workspace →', latestFinalDelivery(ev, '/Users/bowhead/ai_dsh_deep_research/research-workspace'))
+"
+# cwd=undefined → null
+# cwd=workspace → { path: 'drt_sodium-ion-bess/final/readable-v1.md', … }
+```
+
+浏览器适配器不提供 `root`，所以线上永远是第一行；回执兜底又因形态不符 null。两条路同时断。
 
 ## 修法（需拍板）
 

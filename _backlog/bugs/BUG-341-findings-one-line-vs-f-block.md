@@ -39,6 +39,17 @@ node checks/run-gates/node-gate.mjs research-workspace/drt_pg-latest-stable
 # 门 F = RED … 无 F# 块
 ```
 
+## 第二现场（2026-11-21，P5 run）
+
+`research-workspace/drt_sodium-ion-bess/findings.md` 写成了 `## F1 已投运的…`（有块，但**没有冒号**），
+门 F 仍报「无 F# 块」。解析器正则要求 `^##\s*F(\d+)\s*[:：]`；模板恰是 `## F1: …`，而技能正文没有
+强调冒号。操作侧只看到"无 F# 块"，与盘上事实不符，排障成本高。
+
+```sh
+node checks/run-gates/node-gate.mjs research-workspace/drt_sodium-ion-bess
+# 门 F = RED … 无 F# 块（文件里其实有 10 个 ## F 标题）
+```
+
 ## 修法（三选一，需拍板）
 
 1. 解析器同时接受行首 `- F<n>｜…`（按「支撑/lenses/lens_gaps/gap」字段切分）；

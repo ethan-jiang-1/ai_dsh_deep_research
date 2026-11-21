@@ -42,6 +42,8 @@
 | [BUG-346](BUG-346-start-channel-ps-unreadable-retains-lock.md) | 等人拍板 | P2 | ps 不可读保留启动锁 |
 | [BUG-347](BUG-347-review-absent-shown-as-fail.md) | 修复就绪 | P1 | 无 review 时显示「审查未过」 |
 | [BUG-348](BUG-348-long-run-silent-stall-no-alert.md) | 等人拍板 | P2 | 长 run 停摆无告警 |
+| [BUG-349](BUG-349-workflow-sandbox-nested-eph.md) | 等人拍板 | P2 | workflow 嵌套沙箱必失败 |
+| [BUG-350](BUG-350-claims-json-schema-mismatch.md) | 等人拍板 | P1 | claims.json 形状不符 schema |
 
 ## 最近归档
 

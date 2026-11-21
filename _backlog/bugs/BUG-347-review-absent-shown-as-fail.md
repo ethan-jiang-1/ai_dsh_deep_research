@@ -45,6 +45,16 @@ node checks/run-gates/node-gate.mjs research-workspace/drt_sodium-ion-bess   # �
 node probes/browser/cdp-probe.mjs '<gui-url>' --open-session '2026 年钠离子电池储能商业化进展' --open-status
 ```
 
+### 折算证明（keyless）
+
+```sh
+node --import tsx/esm -e "
+import { readinessOfSources } from './packages/deep-research-pack/src/lib/review/review-readiness.ts'
+console.log(readinessOfSources({ reviewText: null, declarationText: null, hasReviewDir: false }))
+"
+# → { pass: false, conditional: false, source: 'prose' }   ← 缺席被折成 FAIL
+```
+
 ## 修法
 
 - `readinessOfSources` 增三态：无 review 面 → `source:'absent'`（pass=null）；有 review.md 但无终局行
