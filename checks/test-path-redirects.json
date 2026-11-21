@@ -2796,6 +2796,7 @@
     {"from": "_backlog/bugs/BUG-333-run-driver-port-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-333-run-driver-port-nan.md", "reason": "2026-11-21 已修归档"},
     {"from": "_backlog/bugs/BUG-334-cold-start-port-env-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-334-cold-start-port-env-nan.md", "reason": "2026-11-21 已修归档"},
     {"from": "_backlog/bugs/BUG-335-snapshot-port-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-335-snapshot-port-nan.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-336-client-load-port-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-336-client-load-port-nan.md", "reason": "2026-11-21 已修归档"}
+    {"from": "_backlog/bugs/BUG-336-client-load-port-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-336-client-load-port-nan.md", "reason": "2026-11-21 已修归档"},
+    {"from": "_backlog/bugs/BUG-343-readiness-json-extra-count-keys.md", "to": "_backlog/_archived/fixed_bugs/BUG-343-readiness-json-extra-count-keys.md", "reason": "2026-11-21 BUG-343 已修归档"}
   ]
 }

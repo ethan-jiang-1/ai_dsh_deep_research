@@ -367,7 +367,7 @@ test('BUG-154 manifest：protocol 角色 + review/waves/protocol 目录带 sha25
     writeFileSync(join(b, 'review', 'claims.json'), '[]\n')
     writeFileSync(join(b, 'review', 'verdicts-r1.json'), '[]\n')
     mkdirSync(join(b, 'waves'), { recursive: true })
-    writeFileSync(join(b, 'review', 'readiness.json'), '{"version":1,"readiness":"PASS"}\n')
+    writeFileSync(join(b, 'review', 'readiness.json'), '{"version":2,"readiness":"PASS","counts":{"critical":0,"major":0,"minor":0,"unverified":0,"rechecked_urls":0}}\n')
     writeFileSync(join(b, 'waves', 'w1.json'), '{}\n')
     mkdirSync(join(b, 'protocol'), { recursive: true })
     writeFileSync(join(b, 'protocol', 'v1.json'), '{}\n')

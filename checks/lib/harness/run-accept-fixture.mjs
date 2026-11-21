@@ -6,7 +6,7 @@
 export function claimReviewFixture() {
   return {
     reviewText: '# Review\n\n## readiness: PASS\n\n当前裁决 = verdicts-r1.json\n',
-    declarationText: `${JSON.stringify({ version: 1, readiness: 'PASS' }, null, 2)}\n`,
+    declarationText: `${JSON.stringify({ version: 2, readiness: 'PASS', counts: { critical: 0, major: 0, minor: 0, unverified: 0, rechecked_urls: 0 } }, null, 2)}\n`,
     hasReviewDir: true,
   };
 }

@@ -6,6 +6,7 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [343](BUG-343-readiness-json-extra-count-keys.md) | readiness 附加计数键 | （v2 counts） | 2026-11-21 |
 | [327](BUG-327-probe-cache-mcp-read-write-key-mismatch.md) | probe 键缺 MCP | （唯一构造器） | 2026-11-21 |
 | [333](BUG-333-run-driver-port-nan.md) | run-driver --port NaN | （parsePort） | 2026-11-21 |
 | [334](BUG-334-cold-start-port-env-nan.md) | COLD_START_PORT NaN | （parsePort） | 2026-11-21 |

@@ -1,12 +1,12 @@
 ---
-status: 等人拍板
+status: 已修
 severity: P2
 opened: 2026-11-20
 ---
 
 # BUG-343：critic 把计数键写进 readiness.json，门② 判红且交付链无自检
 
-> 严重级别：P2 ｜ 发现：2026-11-20 ｜ 状态：等人拍板（严格 schema 与附加字段怎么共存，是合同取舍）
+> 严重级别：P2 ｜ 发现：2026-11-20 ｜ 状态：已修（2026-11-21）— 结论：readiness v2 把计数收进必填 `counts`，skill 样例如 v2，不做旧形兼容；审查：agent — 契约夹具红→绿；去向：none — 合同收紧
 >
 > 现场 = `runtime/e2e-2026-11-20/`；run = `research-workspace/drt_pg-latest-stable/`。
 
@@ -55,4 +55,34 @@ node checks/run-gates/node-gate.mjs research-workspace/drt_pg-latest-stable
 - 坏 JSON / 错版本 / 声明与散文不一致仍红（既有负控不回退）。
 - `pnpm test` 的 review-readiness 矩阵同步更新并通过。
 
-可关闭：否
+可关闭：是
+
+## 修复落地（2026-11-21）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/review/review-readiness.ts",
+    "packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md",
+    "packages/deep-research-pack/content/generic/state-and-recovery.md",
+    "tests/run/gates/readiness-declaration.spec.mjs",
+    "tests/run/gates/run-receipt.spec.mjs",
+    "checks/lib/harness/run-accept-fixture.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/gates/readiness-declaration.spec.mjs",
+    "exit": 1,
+    "output": "parser 升 v2 后 critic skill 样例仍是 v1 → not ok 10 - critic skill 的 readiness 样例可直接解析（样例 = 正本）"
+  },
+  "green": {
+    "command": "node --test tests/run/gates/readiness-declaration.spec.mjs",
+    "exit": 0,
+    "output": "11 tests 全过：v2 counts 合法、缺 counts/未知键/错版本/坏 JSON 红、skill 样例可解析"
+  },
+  "guard": {
+    "path": "tests/run/gates/readiness-declaration.spec.mjs"
+  }
+}
+```
+
+判据修订（用户 2026-11-21 裁定不做旧产物兼容）：本卡现场那份 v1 扁平计数声明在新 schema 下**保持非法**，不作为验收目标；验收 = canonical v2 形状被接受、skill 样例可解析、既有负控不回退。

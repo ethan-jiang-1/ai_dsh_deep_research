@@ -24,7 +24,6 @@
 | [BUG-338](BUG-338-pick-free-port-toctou.md) | 修复就绪 | P2 | pickFreePort TOCTOU |
 | [BUG-341](BUG-341-findings-one-line-vs-f-block.md) | 等人拍板 | P1 | findings 一行 vs F# 块 |
 | [BUG-342](BUG-342-plan-remaining-work-owner-next-literal.md) | 等人拍板 | P1 | 剩余工作 owner/next 字面判据 |
-| [BUG-343](BUG-343-readiness-json-extra-count-keys.md) | 等人拍板 | P2 | readiness 附加计数键 |
 | [BUG-344](BUG-344-watch-run-settled-while-subagent-live.md) | 修复就绪 | P2 | watch-run 误报 settled |
 | [BUG-345](BUG-345-delivery-witness-window-and-receipt-shape.md) | 等人拍板 | P2 | present 后仍「交付未见证」 |
 | [BUG-347](BUG-347-review-absent-shown-as-fail.md) | 修复就绪 | P1 | 无 review 时显示「审查未过」 |

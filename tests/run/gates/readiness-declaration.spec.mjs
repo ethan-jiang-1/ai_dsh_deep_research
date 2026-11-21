@@ -12,6 +12,10 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { readFileSync } from 'node:fs'
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 import { readinessOfBundle } from '../../../checks/lib/shared/node-gate-contracts.mjs'
 import { parseReadinessDeclaration, readinessOfSources } from '../../../packages/deep-research-pack/src/lib/review/review-readiness.ts'
 import { deliveryGate } from '../../../checks/lib/gates/node-gate-delivery-gate.mjs'
@@ -34,7 +38,7 @@ const makeBundle = (reviewText, declaration = undefined) => {
 }
 
 test('声明 PASS + 散文无判定 → PASS（声明是权威，散文缺席不否决）', () => {
-  const { dir, cleanup } = makeBundle('## 审查\n\n（散文没有判定行）\n', { version: 1, readiness: 'PASS' })
+  const { dir, cleanup } = makeBundle('## 审查\n\n（散文没有判定行）\n', { version: 2, readiness: 'PASS', counts: { critical: 0, major: 0, minor: 0, unverified: 0, rechecked_urls: 0 } })
   try {
     const r = readinessOfBundle(dir)
     assert.equal(r.pass, true)
@@ -43,7 +47,7 @@ test('声明 PASS + 散文无判定 → PASS（声明是权威，散文缺席不
 })
 
 test('声明 PASS + 散文 PASS → PASS；conditional 从声明读', () => {
-  const { dir, cleanup } = makeBundle('## readiness（终局）: PASS\n', { version: 1, readiness: 'PASS', conditional: true })
+  const { dir, cleanup } = makeBundle('## readiness（终局）: PASS\n', { version: 2, readiness: 'PASS', conditional: true, counts: { critical: 0, major: 0, minor: 0, unverified: 0, rechecked_urls: 0 } })
   try {
     const r = readinessOfBundle(dir)
     assert.equal(r.pass, true)
@@ -52,7 +56,7 @@ test('声明 PASS + 散文 PASS → PASS；conditional 从声明读', () => {
 })
 
 test('声明 PASS + 散文 FAIL → 不一致，fail-closed', () => {
-  const { dir, cleanup } = makeBundle('## readiness（终局）: FAIL\n', { version: 1, readiness: 'PASS' })
+  const { dir, cleanup } = makeBundle('## readiness（终局）: FAIL\n', { version: 2, readiness: 'PASS', counts: { critical: 0, major: 0, minor: 0, unverified: 0, rechecked_urls: 0 } })
   try {
     const r = readinessOfBundle(dir)
     assert.equal(r.pass, false)
@@ -87,10 +91,10 @@ test('无 review/ 的旧场 → 散文回退（迁移期路径）', () => {
 test('非法声明：坏 JSON / 未知键 / 错版本 / 错值 → fail-closed', () => {
   for (const declaration of [
     '{not json',
-    { version: 1, readiness: 'PASS', extra: 1 },
-    { version: 2, readiness: 'PASS' },
-    { version: 1, readiness: 'pending' },
-    { version: 1, readiness: 'PASS', conditional: 'yes' },
+    { version: 2, readiness: 'PASS', counts: { critical: 0, major: 0, minor: 0, unverified: 0, rechecked_urls: 0 }, extra: 1 },
+    { version: 2, readiness: 'PASS' },  // 缺 counts
+    { version: 2, readiness: 'pending', counts: { critical: 0, major: 0, minor: 0, unverified: 0, rechecked_urls: 0 } },
+    { version: 2, readiness: 'PASS', conditional: 'yes', counts: { critical: 0, major: 0, minor: 0, unverified: 0, rechecked_urls: 0 } },
   ]) {
     const { dir, cleanup } = makeBundle('## readiness（终局）: PASS\n', declaration)
     try {
@@ -102,7 +106,7 @@ test('非法声明：坏 JSON / 未知键 / 错版本 / 错值 → fail-closed',
 })
 
 test('共享判据：驾驶舱与门禁同一函数——声明 PASS + 无散文判定 → PASS', () => {
-  const r = readinessOfSources({ reviewText: '## 审查\n无判定行\n', declarationText: JSON.stringify({ version: 1, readiness: 'PASS', conditional: true }), hasReviewDir: true })
+  const r = readinessOfSources({ reviewText: '## 审查\n无判定行\n', declarationText: JSON.stringify({ version: 2, readiness: 'PASS', conditional: true, counts: { critical: 0, major: 0, minor: 0, unverified: 0, rechecked_urls: 0 } }), hasReviewDir: true })
   assert.equal(r.pass, true)
   assert.equal(r.source, 'declaration')
   assert.equal(r.conditional, true)
@@ -112,7 +116,7 @@ test('门A 集成：散文 PASS + 声明 FAIL 的 bundle 不得判绿（mismatch
   withCompleteBundle((dir) => {
     // fixture-complete 的 review.md 为 PASS；声明写 FAIL → 不一致
     mkdirSync(join(dir, 'review'), { recursive: true })
-    writeFileSync(join(dir, 'review', 'readiness.json'), JSON.stringify({ version: 1, readiness: 'FAIL' }))
+    writeFileSync(join(dir, 'review', 'readiness.json'), JSON.stringify({ version: 2, readiness: 'FAIL', counts: { critical: 0, major: 0, minor: 0, unverified: 0, rechecked_urls: 0 } }))
     const g = deliveryGate(dir, '2026-10-08')
     assert.equal(g.status, 'RED', JSON.stringify(g))
   })
@@ -123,17 +127,25 @@ test('门A 集成：散文 PASS + 声明 FAIL 的 bundle 不得判绿（mismatch
 test('D51 负例：散文互斥 + 声明 PASS → 仍红（互斥不是缺席）', () => {
   const r = readinessOfSources({
     reviewText: 'readiness: PASS；readiness: FAIL',
-    declarationText: JSON.stringify({ version: 1, readiness: 'PASS' }),
+    declarationText: JSON.stringify({ version: 2, readiness: 'PASS', counts: { critical: 0, major: 0, minor: 0, unverified: 0, rechecked_urls: 0 } }),
     hasReviewDir: true,
   })
   assert.equal(r.pass, false)
   assert.equal(r.source, 'ambiguous')
 })
 
+// 契约夹具：critic skill 里的 readiness 样例就是 parser 的测试输入（改一侧不改另一侧 → 红）。
+test('critic skill 的 readiness 样例可直接解析（样例 = 正本）', () => {
+  const skill = readFileSync(join(ROOT, 'packages', 'deep-research-pack', 'presets', 'critic', 'skills', 'adversarial-review', 'SKILL.md'), 'utf8')
+  const block = /```json\n([\s\S]*?)```/.exec(skill)?.[1] ?? ''
+  assert.ok(block.includes('"version": 2'), 'skill 样例未升到 v2')
+  const parsed = parseReadinessDeclaration(block)
+  assert.equal(parsed.ok, true, parsed.ok ? '' : parsed.detail)
+})
 // 负例留证 2026-11-13：JSON.parse 对重复键静默取末值（FAIL→PASS 的假绿）。
 // 红配方：删掉 parseReadinessDeclaration 的重复键检测 → 本例如期 PASS。
 test('D51 负例：声明重复键 → fail-closed（不取末值）', () => {
-  const parsed = parseReadinessDeclaration('{"version":1,"readiness":"FAIL","readiness":"PASS"}')
+  const parsed = parseReadinessDeclaration('{"version":2,"readiness":"FAIL","readiness":"PASS","counts":{"critical":0,"major":0,"minor":0,"unverified":0,"rechecked_urls":0}}')
   assert.equal(parsed.ok, false)
   assert.match(parsed.detail, /重复键/)
 })

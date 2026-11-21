@@ -199,19 +199,31 @@ export function terminalReadiness(reviewText: string | null | undefined): Readin
   return terminalVerdictLine(reviewText)?.value ?? null
 }
 
-/** 结构化声明（`review/readiness.json`）的解析结果。 */
+/** 结构化声明（`review/readiness.json` v2）的解析结果。 */
+export interface ReadinessCounts {
+  readonly critical: number
+  readonly major: number
+  readonly minor: number
+  readonly unverified: number
+  readonly rechecked_urls: number
+}
 export interface ReadinessDeclaration {
   readonly readiness: Readiness
   readonly conditional: boolean
+  readonly counts: ReadinessCounts
 }
 
+const DECLARATION_KEYS = ['version', 'readiness', 'conditional', 'round', 'at', 'counts']
+const COUNT_KEYS = ['critical', 'major', 'minor', 'unverified', 'rechecked_urls']
+
 /**
- * 解析 `review/readiness.json`（D51）：只认已知键，坏 JSON/未知键/错值 = 非法。
+ * 解析 `review/readiness.json`（D51；v2）：只认已知键，坏 JSON/未知键/错值 = 非法。
+ * v2 = 计数收进 `counts`（critic 必须给出四项判定计数 + 重核 URL 数）；不做 v1 兼容。
  * 门禁与驾驶舱共用本函数——同一份声明在两侧必须同判。
  */
 export function parseReadinessDeclaration(text: string): { readonly ok: true; readonly value: ReadinessDeclaration } | { readonly ok: false; readonly detail: string } {
-  // 重复键 = 两种读法（JSON.parse 静默取末值）——flat schema 上按已知键计数，fail-closed。
-  const declaredKeys = [...text.matchAll(/"(version|readiness|conditional|round|at)"\s*:/g)].map((match) => match[1])
+  // 重复键 = 两种读法（JSON.parse 静默取末值）——按已知键计数，fail-closed（含 counts 子键）。
+  const declaredKeys = [...text.matchAll(/"(version|readiness|conditional|round|at|critical|major|minor|unverified|rechecked_urls)"\s*:/g)].map((match) => match[1])
   const duplicate = declaredKeys.find((key, index) => declaredKeys.indexOf(key) !== index)
   if (duplicate !== undefined) return { ok: false, detail: `review/readiness.json 重复键 ${duplicate}（拒绝取末值）` }
   let raw: unknown
@@ -220,14 +232,32 @@ export function parseReadinessDeclaration(text: string): { readonly ok: true; re
   const record = raw as Record<string, unknown>
   const problems: string[] = []
   for (const key of Object.keys(record)) {
-    if (!['version', 'readiness', 'conditional', 'round', 'at'].includes(key)) problems.push(`未知键 ${key}`)
+    if (!DECLARATION_KEYS.includes(key)) problems.push(`未知键 ${key}`)
   }
-  if (record.version !== 1) problems.push('version 必须为 1')
+  if (record.version !== 2) problems.push('version 必须为 2')
   if (record.readiness !== 'PASS' && record.readiness !== 'FAIL') problems.push('readiness 必须为 PASS/FAIL')
   if ('conditional' in record && typeof record.conditional !== 'boolean') problems.push('conditional 必须是布尔')
   if ('round' in record && (!Number.isInteger(record.round) || (record.round as number) < 1)) problems.push('round 必须是 ≥1 的整数')
-  if (problems.length > 0) return { ok: false, detail: `review/readiness.json 不合法：${problems.join('；')}` }
-  return { ok: true, value: { readiness: record.readiness as Readiness, conditional: record.conditional === true } }
+  if ('at' in record && (typeof record.at !== 'string' || record.at.trim() === '')) problems.push('at 必须是非空字符串（写入时刻）')
+  let counts: ReadinessCounts | null = null
+  if (!('counts' in record)) {
+    problems.push('counts 必填（critical/major/minor/unverified/rechecked_urls）')
+  } else if (typeof record.counts !== 'object' || record.counts === null || Array.isArray(record.counts)) {
+    problems.push('counts 必须是对象')
+  } else {
+    const rawCounts = record.counts as Record<string, unknown>
+    for (const key of Object.keys(rawCounts)) if (!COUNT_KEYS.includes(key)) problems.push(`counts 未知键 ${key}`)
+    const normalized: Record<string, number> = {}
+    for (const key of COUNT_KEYS) {
+      if (!(key in rawCounts)) { problems.push(`counts 缺 ${key}`); continue }
+      const value = rawCounts[key]
+      if (!Number.isInteger(value) || (value as number) < 0) { problems.push(`counts.${key} 必须是 ≥0 的整数`); continue }
+      normalized[key] = value as number
+    }
+    if (problems.length === 0) counts = normalized as unknown as ReadinessCounts
+  }
+  if (problems.length > 0 || counts === null) return { ok: false, detail: `review/readiness.json 不合法：${problems.join('；')}` }
+  return { ok: true, value: { readiness: record.readiness as Readiness, conditional: record.conditional === true, counts } }
 }
 
 /** 终局 readiness 的判据来源（声明件优先；散文只做副本；无 review/ 的旧场回退散文）。 */
