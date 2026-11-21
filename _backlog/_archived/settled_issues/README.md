@@ -5,6 +5,7 @@
 | [2026-11-13-workflow-substance-gates](2026-11-13-workflow-substance-gates.md) | 加工环路的实体检查：判据形状字段 + Note 同节 + 两道收口门（Note 早写、暂存区配对）+ 复发必答 + 判据测试负例 + 金标准理由；D52；1400 测试 / gates-smoke 108 全绿；[Note](../../../notes/implemented/2026-11-13-workflow-substance-gates.md) | 2026-11-13 |
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-21-bug-stack-repair-program](2026-11-21-bug-stack-repair-program.md) | 缺陷积压修复程序：20 张活跃卡 → 18 已修 / 1 修复落地（348 浏览器待复验）/ 1 判非缺陷（330）；不做旧产物兼容；[批 Note](../../../notes/implemented/2026-11-21-bug-stack-repair.md) | 2026-11-21 |
 | [2026-11-18-low-confidence-30](2026-11-18-low-confidence-30.md) | 低置信区第 8 轮：300–319 全部修复归档；plan 门/缓存身份/并发端口/cold-start nightly；[批 Note](../../../notes/implemented/2026-11-18-low-confidence-30.md) | 2026-11-19 |
 | [2026-11-18-low-confidence-20-round2](2026-11-18-low-confidence-20-round2.md) | 低置信区第 7 轮：280–299 全部修复归档；plan 门/覆盖金标准/缓存身份；[批 Note](../../../notes/implemented/2026-11-18-low-confidence-20-round2.md) | 2026-11-18 |
 | [2026-11-18-low-confidence-20](2026-11-18-low-confidence-20.md) | 低置信区 20 卡：260–279 全部修复归档；findings 块级、topics 图/数量/lens、plan 独立门、run phase、claims/verdicts URL/冲突、protocol threshold/length/gates/sha/waves；[批 Note](../../../notes/implemented/2026-11-18-low-confidence-20.md) | 2026-11-18 |

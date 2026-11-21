@@ -6,6 +6,8 @@
 
 | 对象 | 当前决定 | 具体观察（出现位置） | owner |
 |---|---|---|---|
+| 新 canonical 合同的模型遵守 | 模板/契约夹具已落（readiness v2 / claims v2 / findings 块 / 剩余工作表）；旧 bundle 不作验收；模型是否照写未证 | 下一次自然 P5 run：run-accept 在新合同下红 → 引用本批卡新建卡；连续两场绿 → 移除本行 | [批 Note](../notes/implemented/2026-11-21-bug-stack-repair.md) |
+| 旧 run B 的卡外红 | 判定为生产者错误/真实交付缺陷，未建卡（`owner_role` 复合值、覆盖表缺行、未解释 CRITICAL） | 下一次 P5 run 再现其中任一 → 建卡；`owner_role` 的 `executor` 落点是已知 schema 缺口 | [批 Note](../notes/implemented/2026-11-21-bug-stack-repair.md) |
 | snapshot-replay.entry 拆分 | 暂不拆：场景发现/渲染断言/网络离线 preload 同文件；2026-11-21 BUG-338 端口重选后 559 行，`script-file-size` 登记债务 | 单次 diff 触及 ≥3 场景 / 文件 >600 行 / offline preload 出现第二消费方时，按「场景组」拆 | [BUG-338](_archived/fixed_bugs/BUG-338-pick-free-port-toctou.md) |
 | channel-start.e2e 拆分 | 暂不拆：fixture adapters 与 13 场景同文件；2026-11-21 BUG-346 加 ps-unreadable 场景后 565 行，`script-file-size` 登记债务 | 单次 diff 触及 ≥3 场景 / 文件 >600 行 / fixture adapter 出现第二消费方（如 run-accept 复用）时，按「场景组」拆 | [BUG-346](_archived/fixed_bugs/BUG-346-start-channel-ps-unreadable-retains-lock.md) |
 | tests 合同桶改名（`tests/pack/contract` ↔ `tests/contracts` 撞词） | 暂不改名：包内 `AGENTS.md`/源码注释引用 test 路径，改名要同步改包内文档 → 已发布 0.3.6 的 tarball sha 会变（同版本不同工件） | 下一次 pack 版本变更（bump/release）时同 diff 改名；或包内文档不再引用 test 路径时 | [2026-11-17 维护层对齐 Note](../notes/implemented/2026-11-17-maintenance-layer-alignment.md) |
