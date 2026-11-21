@@ -40,8 +40,7 @@ CLAUDE.md→AGENTS.md、.claude/skills→.agents/skills    两条 symlink（编�
 子树 AGENTS.md            docs/ · checks/ · notes/ · packages/deep-research-pack/ · tests/ · _backlog 各一份——只放该
                          子树的指令（根只放每轮常驻指令；vendor 树内多份同构，份数以盘上为准）
 README.md                 人类门面（使用者：结果 / 安装 / 第一次研究；开发者一行路由；完整安装合同 = _dist/安装手册.md）
-_backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archived/（另有
-                          _done/ 改名兼容指针，见 _backlog/README 载体导航）；
+_backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archived/；
                           手册 = _backlog/README.md、子树门牌 = _backlog/AGENTS.md（状态机/下一步/守卫）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 按实际构建需求——见 pnpm-workspace.yaml 头注）
 packages/deep-research-pack/   唯一自写包（配置为主 + 启动行/内容注入（D40）+ 研究驾驶舱[Research Cockpit，观察面 client 套件，[D18](docs/decisions.md#d18)，构成正本 = docs/design/40-research-cockpit.md]）：presets/<role>.patch.yml（单行形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/时钟/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、content/（研究手册 + run 模板 + lens 目录；src/content 以 runtime context 注入）、cordis.patch.yml（bundle 行）、scripts/doctor.mjs（只读 doctor）、src/{content,startup}/、src/client/ 与 src/lib/（驾驶舱 client 半与折算纯函数，构建产物 lib/）；交付与部署形态 = guides/62，合同 = 包 README
