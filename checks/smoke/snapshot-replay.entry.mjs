@@ -49,6 +49,7 @@ import { profileLayerIssues, runtimeVersionOf } from '../lib/shared/profile-heal
 import { acquireRunLock, releaseRunLock } from '../lib/harness/run-lock.mjs';
 import { resolveSnapshotMode } from '../lib/harness/snapshot-mode.mjs';
 import { pickFreePort } from '../lib/harness/port-reclaim.mjs';
+import { parsePort } from '../lib/shared/port.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const arg = (name, fallback) => {
@@ -57,7 +58,9 @@ const arg = (name, fallback) => {
 };
 const argvOf = (i) => process.argv[i + 1];
 const PORT_ARG = arg('port', null);
-const PORT = PORT_ARG === null ? await pickFreePort() : Number(PORT_ARG);
+const parsedPort = PORT_ARG === null ? null : parsePort(PORT_ARG);
+if (parsedPort !== null && !parsedPort.ok) { console.error(`snapshot-replay.entry: --port ${parsedPort.error}`); process.exit(2); }
+const PORT = parsedPort === null ? await pickFreePort() : parsedPort.port;
 if (PORT === null) { console.error('snapshot-replay.entry: 找不到空闲端口'); process.exit(2); }
 const ONLY = arg('scenario'); // --scenario <id> 单场景跑（红证定向/迭代用；缺省全场景）
 const FACE_ONLY = arg('face'); // --face <name> 定向单场景集（全名）；缺省 = 发现全部场景集逐场景跑

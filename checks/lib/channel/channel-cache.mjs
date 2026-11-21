@@ -190,6 +190,26 @@ export function probeIdentityOf({ profile, bootstrap = false, workspace = '', mc
   return [profile ?? '', bootstrap ? '1' : '0', workspace ?? '', mcp ?? ''].join('|')
 }
 
+/**
+ * probe 缓存键的唯一构造器（BUG-327）：读与写必须用同一个函数。
+ * 旧实现两处内联，写侧漏了 mcp——MCP=on 写的 GREEN 被 MCP=off 命中。
+ */
+export function probeCacheKeyOf({
+  packFingerprint,
+  runtime,
+  devShell,
+  probeSource,
+  profile,
+  bootstrap = false,
+  workspace = '',
+  mcp = '',
+  expectFace = null,
+  requireData = false,
+}) {
+  const identity = probeIdentityOf({ profile, bootstrap, workspace, mcp })
+  return `${probeCacheKey({ packFingerprint, runtime, extra: `${devShell}:${probeSource}:${identity}` })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`
+}
+
 /** 原子写 JSON（BUG-319）：同目录临时文件 + rename，读方不会看到半文件。 */
 export function writeJsonAtomic(path, value) {
   const tmp = path + '.' + process.pid + '.' + Math.random().toString(36).slice(2) + '.tmp'

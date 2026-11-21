@@ -35,8 +35,9 @@ import { fileURLToPath } from 'node:url';
 import { isMain } from '../../checks/lib/shared/cli-entry.mjs';
 import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../../checks/lib/channel/run-channel.mjs';
 import { profileGuardDecision } from '../../checks/lib/channel/profile-guard.mjs';
-import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKey, probeIdentityOf, probeSourceFingerprint, writeJsonAtomic } from '../../checks/lib/channel/channel-cache.mjs';
+import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKeyOf, probeSourceFingerprint, writeJsonAtomic } from '../../checks/lib/channel/channel-cache.mjs';
 import { authenticate } from '../../checks/lib/shared/web-harness.mjs';
+import { parsePort } from '../../checks/lib/shared/port.mjs';
 
 
 export { guiUrlFromWebLog, runDriverVerdict };
@@ -328,7 +329,10 @@ if (isCli && sub !== 'up') {
 // ── up：起通道（或复用）→ 验浏览器面 → 呈交块 ─────────────────────────────────
 // 被 import（非 CLI）= 纯函数面：到此为止，不跑主流程（顶层 await 下 return 不合法，用 if 包）。
 if (isCli && sub === 'up') {
-const wantPort = String(arg('--port', DEFAULT_PORT));
+const wantPortArg = arg('--port', DEFAULT_PORT);
+const parsedPort = parsePort(wantPortArg);
+if (!parsedPort.ok) { console.error(`run-driver: --port ${parsedPort.error}`); process.exit(2); }
+const wantPort = String(parsedPort.port);
 const wantProfile = arg('--profile', DEFAULT_PROFILE);
 const noProbe = has('--no-probe');
 const forceProbe = has('--force-probe');
@@ -385,14 +389,27 @@ if (noProbe) {
   process.exit(2);
 }
 
+// 读写共用的缓存键（BUG-327）：mcp 等身份只在构造器里出现，两处内联已删除。
+const probeCacheKeyNow = () => probeCacheKeyOf({
+  packFingerprint: packFingerprint(collectPackEntries(PACK_DIR)),
+  runtime: runtimeFingerprint(),
+  devShell: devShellFingerprint(),
+  probeSource: probeSourceFingerprint(ROOT),
+  profile: wantProfile,
+  bootstrap: wantBootstrap,
+  workspace: RUN_WORKSPACE,
+  mcp: process.env.MCP_PLAYWRIGHT ?? '',
+  expectFace,
+  requireData,
+});
+
 // 验证缓存（2026-11-05 加速）：同一 pack 源 + 同一 runtime 构建 + TTL（30 分钟）内的最近 GREEN →
 // 复用结论，省掉 ~13s 浏览器探针；**冷启动同样可命中**（页面内容由 pack+runtime 决定）。
 // 命中前仍要求 boot 出横幅 + 一次 HTTP 就绪检查（服务器在、shell 可服务）；HTTP 不过即转真探针。
 // --force-probe 永久绕过；NOT-RUN/红从不入缓存（未跑 ≠ 通过）。
 if (!forceProbe && drift?.clean === true) {
   const cached = readProbeCache();
-  const packId = packFingerprint(collectPackEntries(PACK_DIR));
-  const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: `${devShellFingerprint()}:${probeSourceFingerprint(ROOT)}:${probeIdentityOf({ profile: wantProfile, bootstrap: wantBootstrap, workspace: RUN_WORKSPACE, mcp: process.env.MCP_PLAYWRIGHT ?? '' })}` })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
+  const key = probeCacheKeyNow();
   const hit = probeCacheHit({ entry: cached, key, now: Date.now() });
   if (hit.hit) {
     const ready = await httpReady(state.url);
@@ -427,8 +444,7 @@ const saved = persistVerdict('up', payload, verdict.screenshot, html);
 if (submitted) {
   // 只缓存 GREEN（键 = pack 指纹 + runtime 构建 + 断言参数；冷启动可复用）；红/未跑永不入缓存。
   try {
-    const packId = packFingerprint(collectPackEntries(PACK_DIR));
-    const key = `${probeCacheKey({ packFingerprint: packId, runtime: runtimeFingerprint(), extra: `${devShellFingerprint()}:${probeSourceFingerprint(ROOT)}:${probeIdentityOf({ profile: wantProfile, bootstrap: wantBootstrap, workspace: RUN_WORKSPACE })}` })}|${expectFace ?? ''}|${requireData ? '1' : '0'}`;
+    const key = probeCacheKeyNow();
     writeJsonAtomic(PROBE_CACHE, { key, at: new Date().toISOString(), level: v.level, payload });
   } catch {}
 }

@@ -2791,6 +2791,11 @@
     {"from": "_backlog/bugs/BUG-339-boot-run-trap-removes-new-lock.md", "to": "_backlog/_archived/suspended_bugs/BUG-339-boot-run-trap-removes-new-lock.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
     {"from": "_backlog/bugs/BUG-330-output-length-heuristic-still.md", "to": "_backlog/_archived/suspended_bugs/BUG-330-output-length-heuristic-still.md", "reason": "2026-11-21 已由 BUG-313 修复；迁暂停池（用户直派）"},
     {"from": "_backlog/bugs/BUG-340-protocol-audit-cli-missing-readdir-import.md", "to": "_backlog/_archived/fixed_bugs/BUG-340-protocol-audit-cli-missing-readdir-import.md", "reason": "2026-11-21 BUG-340 已修归档"},
-    {"from": "_backlog/bugs/BUG-346-start-channel-ps-unreadable-retains-lock.md", "to": "_backlog/_archived/fixed_bugs/BUG-346-start-channel-ps-unreadable-retains-lock.md", "reason": "2026-11-21 BUG-346 已修归档"}
+    {"from": "_backlog/bugs/BUG-346-start-channel-ps-unreadable-retains-lock.md", "to": "_backlog/_archived/fixed_bugs/BUG-346-start-channel-ps-unreadable-retains-lock.md", "reason": "2026-11-21 BUG-346 已修归档"},
+    {"from": "_backlog/bugs/BUG-327-probe-cache-mcp-read-write-key-mismatch.md", "to": "_backlog/_archived/fixed_bugs/BUG-327-probe-cache-mcp-read-write-key-mismatch.md", "reason": "2026-11-21 已修归档"},
+    {"from": "_backlog/bugs/BUG-333-run-driver-port-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-333-run-driver-port-nan.md", "reason": "2026-11-21 已修归档"},
+    {"from": "_backlog/bugs/BUG-334-cold-start-port-env-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-334-cold-start-port-env-nan.md", "reason": "2026-11-21 已修归档"},
+    {"from": "_backlog/bugs/BUG-335-snapshot-port-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-335-snapshot-port-nan.md", "reason": "2026-11-21 已修归档"},
+    {"from": "_backlog/bugs/BUG-336-client-load-port-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-336-client-load-port-nan.md", "reason": "2026-11-21 已修归档"}
   ]
 }

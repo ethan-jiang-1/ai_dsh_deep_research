@@ -59,6 +59,7 @@ import { scrubbedEnv } from '../lib/shared/env.mjs'
 import { rolePickerIssues } from '../lib/harness/role-picker.mjs'
 import { pickFreePort } from '../lib/harness/port-reclaim.mjs'
 import { reclaimPort } from '../lib/harness/port-reclaim.mjs'
+import { parsePort } from '../lib/shared/port.mjs'
 import { authenticate, bootWeb, makeRpc } from '../lib/shared/web-harness.mjs'
 import { assertVendorArtifacts, ARTIFACT_REMEDY } from '../lib/harness/vendor-artifacts.mjs'
 import { SMOKE_LOCALE, launchChromium, loadChromium } from '../lib/harness/playwright.mjs'
@@ -84,7 +85,9 @@ const arg = (name, fallback) => {
   return i === -1 ? fallback : process.argv[i + 1]
 }
 const PORT_ARG = arg('port', null)
-const PORT = PORT_ARG === null ? await pickFreePort() : Number(PORT_ARG)
+const parsedPort = PORT_ARG === null ? null : parsePort(PORT_ARG)
+if (parsedPort !== null && !parsedPort.ok) { console.error(`client-load.entry: --port ${parsedPort.error}`); process.exit(2) }
+const PORT = parsedPort === null ? await pickFreePort() : parsedPort.port
 if (PORT === null) { console.error('client-load.entry: 找不到空闲端口'); process.exit(2) }
 // 既有会话默认 = 盘侧最新绑定会话（惰性解析——由下方参考模块选择；硬编码标题会
 // 随会话积累腐烂，BUG-002 清扫轮实测假红）。--session 仍可显式指定。

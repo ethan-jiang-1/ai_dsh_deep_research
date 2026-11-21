@@ -2243,6 +2243,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/run/shared/port.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "port.spec.mjs — 端口解析正本（BUG-333–336）。反证：把校验换成 Number(raw) →",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/run/shared/run-accept.spec.mjs",
       "domain": "run",
       "lane": "spec",

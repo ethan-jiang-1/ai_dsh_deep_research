@@ -1,14 +1,14 @@
 ---
-status: 修复就绪
+status: 已修
 severity: P2
 opened: 2026-11-19
 ---
 
 # BUG-327：probe 缓存读键含 MCP，写键不含——MCP=on 的 GREEN 会被 MCP=off 命中
 
-> 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：修复就绪（运行态/测试）
+> 严重级别：P2 ｜ 发现：2026-11-19 ｜ 状态：已修（2026-11-21）— 结论：probe 缓存键收敛到唯一构造器，MCP 身份入键；run-driver 不再内联；审查：agent — 注入红回归 + 入口负控；去向：none — 机械修复
 >
-> 探索轮 = [低置信区 20 卡（第 9 轮）](../issues/2026-11-19-low-confidence-40.md)。
+> 探索轮 = [低置信区 20 卡（第 9 轮）](../../issues/2026-11-19-low-confidence-40.md)。
 
 ## 症状
 
@@ -35,3 +35,29 @@ node --input-type=module -e "import { probeIdentityOf } from './checks/lib/chann
 - MCP=on 与 MCP=off 的 key 不同；同一配置下 key(read) === key(write)；
 - `tests/run/channel/channel-cache.spec.mjs` 有正反控（对称 + 不串命中）；
 - `pnpm verify` / `pnpm test` 绿。
+
+## 修复落地（2026-11-21）
+
+```json fix-evidence
+{
+  "changes": [
+    "checks/lib/channel/channel-cache.mjs",
+    "tools/channel/run-driver.mjs",
+    "tests/run/channel/channel-cache.spec.mjs",
+    "tests/run/channel/run-driver-contract.spec.mjs"
+  ],
+  "red": {
+    "command": "node --test tests/run/channel/channel-cache.spec.mjs",
+    "exit": 1,
+    "output": "注入回归：共享构造器丢掉 mcp → 'MCP on/off 不得同键' 失败；旧实现两处内联、写侧漏 mcp"
+  },
+  "green": {
+    "command": "node --test tests/run/channel/channel-cache.spec.mjs tests/run/channel/run-driver-contract.spec.mjs",
+    "exit": 0,
+    "output": "23 tests 全过；含 MCP 入键、断言参数同构造器、run-driver 不再内联 probeIdentityOf"
+  },
+  "guard": {
+    "path": "tests/run/channel/channel-cache.spec.mjs"
+  }
+}
+```

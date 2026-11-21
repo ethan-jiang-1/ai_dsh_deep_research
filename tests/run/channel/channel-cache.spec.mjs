@@ -1,6 +1,7 @@
 // tests/run/channel/channel-cache.spec.mjs — 启动加速缓存的 keyless 契约
 // （checks/lib/channel/channel-cache.mjs；2026-11-05 实测：漂移门 5.1s + 探针 12s 是热启动的主要开销）。
 //
+// 负例留证 2026-11-21：BUG-327——把共享构造器的 mcp 丢掉 → 「MCP on/off 不得同键」红；还原 → 绿。
 // 立的规矩：缓存只省重复计算，不改变判据——键必须含身份（web pid + pack 指纹），
 // 只复用 GREEN，TTL 外/键不符/时间戳坏一律 miss。反证：把 probeCacheHit 的 GREEN 过滤或
 // key 比较删掉 → 本文件红。
@@ -17,6 +18,7 @@ import {
   probeCacheKey,
   importClosureHash,
   probeIdentityOf,
+  probeCacheKeyOf,
   writeJsonAtomic,
   readShippedCache,
   writeShippedCache,
@@ -184,4 +186,16 @@ test('BUG-318：collectPackEntries 收录 symlink 并哈希目标内容', () => 
     assert.equal(link.link, 'target.md')
     assert.match(link.sha256, /^[0-9a-f]{64}$/)
   } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('BUG-327：probe 缓存键读写同一构造器——MCP 身份必须入键，读写不得各写一份', () => {
+  const base = {
+    packFingerprint: 'pack', runtime: 'runtime', devShell: 'dev', probeSource: 'source',
+    profile: 'lead', bootstrap: false, workspace: '/ws', expectFace: null, requireData: false,
+  }
+  assert.equal(probeCacheKeyOf({ ...base, mcp: 'on' }), probeCacheKeyOf({ ...base, mcp: 'on' }), '同配置同键')
+  assert.notEqual(probeCacheKeyOf({ ...base, mcp: 'on' }), probeCacheKeyOf({ ...base, mcp: '' }), 'MCP on/off 不得同键')
+  // 断言参数也在同一个构造器里（旧实现两处内联，任何一处漏字段都会让读写不对称）。
+  assert.notEqual(probeCacheKeyOf({ ...base, expectFace: 'A' }), probeCacheKeyOf({ ...base, expectFace: 'B' }))
+  assert.notEqual(probeCacheKeyOf({ ...base, requireData: true }), probeCacheKeyOf({ ...base, requireData: false }))
 })

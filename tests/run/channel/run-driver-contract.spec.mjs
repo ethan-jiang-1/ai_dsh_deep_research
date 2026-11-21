@@ -7,6 +7,7 @@
 // 该序的可复跑入口；本测试钉住它的**行为形状**（verdict 契约、token 来源、URL 抽取、端口回退），
 // 不重跑真浏览器（那是 entry 自身的活）。
 //
+// 负例留证 2026-11-21：BUG-327——在 run-driver 里内联 probeIdentityOf → 本件「不再内联」红；还原 → 绿。
 // 立红记录：2026-10-19 首跑——run-driver.mjs 与 tools/README 索引行均缺席即红；实现后转绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -187,3 +188,9 @@ test('启动首动作一致：安装行 = 手册（CLI 建 profile + tarball 装
   assert.ok(!/\n- 启动：`bash tools\/channel\/boot-run\.sh`/.test(section),
     'guides/61 §0 仍把 boot-run 写成启动首动作——应先 run-driver，boot-run 只作底层说明');
 });
+
+test('BUG-327：run-driver 只经共享构造器建 probe 键，不再内联身份', () => {
+  const source = read('tools/channel/run-driver.mjs');
+  assert.ok(!source.includes('probeIdentityOf('), 'run-driver 又内联了 probeIdentityOf——读写键可能再次不对称');
+  assert.ok(source.includes('probeCacheKeyOf('), 'run-driver 未使用共享的 probeCacheKeyOf');
+})

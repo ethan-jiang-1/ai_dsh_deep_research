@@ -91,6 +91,7 @@
 | shared | `checks/lib/shared/node-gate-session-gates` | `tests/run/channel/ask-drive.spec.mjs`<br>`tests/run/gates/node-gate-delivery.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs`<br>`tests/run/gates/node-gate-witness.spec.mjs` |
 | shared | `checks/lib/shared/path-hygiene` | `tests/run/gates/path-hygiene.spec.mjs` |
 | shared | `checks/lib/shared/plan-card` | `tests/run/gates/plan-card.spec.mjs` |
+| shared | `checks/lib/shared/port` | `tests/run/shared/port.spec.mjs` |
 | shared | `checks/lib/shared/probe-index` | `tests/checks/shared/smoke-contract.test.mjs`<br>`tests/run/probes/probe-index.spec.mjs` |
 | shared | `checks/lib/shared/probe-status-tab` | `tests/run/probes/probe-status-tab.spec.mjs` |
 | shared | `checks/lib/shared/profile-health` | `tests/run/channel/profile-health.spec.mjs` |

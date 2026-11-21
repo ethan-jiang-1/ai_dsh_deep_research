@@ -6,6 +6,11 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [327](BUG-327-probe-cache-mcp-read-write-key-mismatch.md) | probe 键缺 MCP | （唯一构造器） | 2026-11-21 |
+| [333](BUG-333-run-driver-port-nan.md) | run-driver --port NaN | （parsePort） | 2026-11-21 |
+| [334](BUG-334-cold-start-port-env-nan.md) | COLD_START_PORT NaN | （parsePort） | 2026-11-21 |
+| [335](BUG-335-snapshot-port-nan.md) | snapshot --port NaN | （parsePort） | 2026-11-21 |
+| [336](BUG-336-client-load-port-nan.md) | client-load --port NaN | （parsePort） | 2026-11-21 |
 | [346](BUG-346-start-channel-ps-unreadable-retains-lock.md) | ps 不可读保留启动锁 | （kill(-pgid,0) 判静默） | 2026-11-21 |
 | [340](BUG-340-protocol-audit-cli-missing-readdir-import.md) | protocol-audit 壳缺 import/null 守卫 | （壳 import + null 守卫） | 2026-11-21 |
 | [300](BUG-300-plan-owner-role-missing.md) | plan active 缺 owner_role | （owner 必填） | 2026-11-19 |

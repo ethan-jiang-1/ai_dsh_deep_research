@@ -21,10 +21,14 @@ import {
   cleanHome, engineIssues, initWebProfile, installTarball, moduleLeakOf, pinnedDshBin, startWeb, stopWeb,
 } from '../lib/harness/clean-room.mjs'
 import { peerNamesOf } from '../lib/harness/clean-room-policy.mjs'
+import { parsePort } from '../lib/shared/port.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
-const PORT = process.env.COLD_START_PORT ? Number(process.env.COLD_START_PORT) : await pickFreePort()
+const ENV_PORT = process.env.COLD_START_PORT
+const parsedPort = ENV_PORT === undefined ? null : parsePort(ENV_PORT)
+if (parsedPort !== null && !parsedPort.ok) { console.error(`cold-start.entry: COLD_START_PORT ${parsedPort.error}`); process.exit(2) }
+const PORT = parsedPort === null ? await pickFreePort() : parsedPort.port
 if (PORT === null) { console.error('cold-start.entry: 找不到空闲端口'); process.exit(2) }
 const PROFILE = 'cold-start'
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))

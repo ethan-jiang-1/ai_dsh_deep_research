@@ -127,6 +127,12 @@ A 的 readiness 多 4 个计数键；B 的 claims 是 rich ledger。**过去六�
 - **327**：读写共用 `probeCacheKeyOf(...)`（一个身份函数）；守卫 = `key(read) === key(write)`，且 MCP=on
   写入的 GREEN 不被 MCP=off 命中。
 
+**P2 结果（2026-11-21）**
+
+- 已修归档：**327 / 333 / 334 / 335 / 336**。`parsePort` 成为唯一端口正本（`checks/lib/shared/port.mjs`），四个入口接线；`probeCacheKeyOf` 成为唯一缓存键构造器，run-driver 不再内联。
+- 红证：注入回归（`parsePort → Number(raw)`、构造器丢 `mcp`）下 `port.spec` / `channel-cache.spec` 红；入口负控实测（`--port abc` / `COLD_START_PORT=abc` → exit 2 且报参数名；旧实现分别把 `abc` 传进 supervisor、或撞无关前置）。
+- **338 移到 P5**：有界重试必须改三个入口的端口生命周期（`PORT` 从常量变可重选、retry 的失败形状要按 `bootWeb`/`startWeb` 实测），本阶段不做半成品；卡保持活跃，判据不变。
+
 ### P3 判据↔生产者合同（7 张，2–3 会话）
 
 按「结构化优先、散文次之」排序；全部按 §4.1 的正本 + 夹具落地；**旧 bundle 红了不处理**。
@@ -158,6 +164,7 @@ A 的 readiness 多 4 个计数键；B 的 claims 是 rich ledger。**过去六�
 
 ### P5 沙箱、残余红分诊与收尾（1 会话）
 
+- **338**（自 P2 移入）：`pickFreePort` 抢占窗口的有界重试；先按 `bootWeb`/`startWeb` 的失败形状实测再改三个入口的端口生命周期（单次重选 + 明示失败），不写「预留」假承诺。
 - **349**：启动探测嵌套沙箱（benign `sandbox-exec` 探测）并把能力写进运行态诊断；嵌套时 plan/Wave 不承诺
   脚本层，workflow 的 `sandbox-unavailable` 记为显式 deviation（已在 waves 记，补 plan 侧声明）；非嵌套负控
   保留。若需要 DSH 侧选项，另立 upstream issue，不改 vendor。

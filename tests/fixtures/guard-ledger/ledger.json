@@ -1572,6 +1572,14 @@
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "writeJsonAtomic 无 tmp 残留"
+    },
+    {
+      "id": "BUG-327",
+      "mechanism": "probe 缓存键读写共用唯一构造器（MCP/断言参数入键）",
+      "guard": "tests/run/channel/channel-cache.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "共享构造器丢掉 mcp → 「MCP on/off 不得同键」例红；还原 → 绿"
     }
   ]
 }
