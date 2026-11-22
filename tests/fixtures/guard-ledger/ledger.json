@@ -1716,6 +1716,70 @@
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "把 list !ok 分支改回 0 → S5 夹具再次出现「证据 0 份」+ 全绿、exit 1"
+    },
+    {
+      "id": "BUG-361",
+      "mechanism": "question 读失败独立失败态 + 重试，不折成「尚未定稿」；立项步只认有效正文",
+      "guard": "checks/smoke/cockpit-artifact-truth.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 question 读失败改回 questionText=null + hasFile 判立项 → S6 夹具红"
+    },
+    {
+      "id": "BUG-362",
+      "mechanism": "回执读失败/畸形 ≠ 没有回执；receiptState 五态，只有 ok 出交付",
+      "guard": "checks/smoke/cockpit-artifact-truth.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 receipt ok=false/JSON 坏改回 receiptValue=null → S7 夹具出现「交付未见证」"
+    },
+    {
+      "id": "BUG-363",
+      "mechanism": "readiness 声明缺席/坏 → reviewVerdict unconfirmed；不拿 prose PASS 给 ✓ 审查",
+      "guard": "checks/smoke/cockpit-artifact-truth.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "只认 declaration/prose、missing 折 null → S8/S9 夹具出现 ✓ 审查"
+    },
+    {
+      "id": "BUG-364",
+      "mechanism": "空读者版不显示空白；回退审计版 + 可见提示",
+      "guard": "checks/smoke/cockpit-artifact-truth.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 hasReader 改回 readerText !== null → S10 夹具显示空白读者版"
+    },
+    {
+      "id": "BUG-365",
+      "mechanism": "空终稿正文落空态；有 reader 则 reader + 提示，不渲染空白",
+      "guard": "checks/smoke/cockpit-artifact-truth.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把正文空判定改回 text !== null → S11 夹具显示空白正文"
+    },
+    {
+      "id": "BUG-366",
+      "mechanism": "空 review.md = unconfirmed；步骤只认终局判定，不给 ✓ 审查",
+      "guard": "checks/smoke/cockpit-artifact-truth.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 reviewState==='ok' 改回只看 read 成功 → S12 夹具出现 ✓ 审查"
+    },
+    {
+      "id": "BUG-367",
+      "mechanism": "空 question.md = empty；不显示「尚未定稿」+✓ 立项，立项步只认有效正文",
+      "guard": "checks/smoke/cockpit-artifact-truth.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把空正文当 ok + hasFile 判立项 → S13 夹具出现「尚未定稿」+✓ 立项"
+    },
+    {
+      "id": "BUG-368",
+      "mechanism": "读者版读失败不静默降级；回退审计版 + 失败提示 + 重试",
+      "guard": "checks/smoke/cockpit-artifact-truth.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 reader.ok=false 改回 readerText=null → S14 夹具无提示"
     }
   ]
 }

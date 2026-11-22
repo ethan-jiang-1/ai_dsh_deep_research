@@ -16,6 +16,7 @@
  * （逐段 component-encode，`:` 留字面给盘符）；本文件只做最小解析，不引 Node 侧依赖
  * （client 半会被内联进浏览器 bundle）。
  */
+import type { ArtifactState } from './artifact-read.ts'
 
 /** 交付事件：一条 `present` 声明里指向终稿的那一条。 */
 interface FinalDelivery {
@@ -424,4 +425,71 @@ export function isFinalAddress(address: string): boolean {
 export function finalAddressOf(sessionId: string, path: string): string {
   const normalized = path.replace(/\\/g, '/').replace(/^(?:\.\/)+/, '')
   return `${SESSION_ADDRESS_PREFIX}${encodeSegment(sessionId)}/${normalized.split('/').map(encodeSegment).join('/')}`
+}
+
+/** 终稿视图的提示：互补版本回退（reader↔audit）必须可见（BUG-364/368）。 */
+export type FinalNotice =
+  | 'readerEmpty'
+  | 'readerUnreadable'
+  | 'auditEmpty'
+  | 'auditUnreadable'
+  | 'auditMissing'
+  | null
+
+/** 终稿视图判定：展示哪一版、是否有回退提示、失败时是哪一态。 */
+export interface FinalViewDecision {
+  readonly view: 'reader' | 'audit' | 'empty' | 'unreadable'
+  readonly notice: FinalNotice
+  readonly failure: 'empty' | 'unreadable' | 'missing' | null
+}
+
+/**
+ * 终稿正文/读者版状态 × 请求视图 → 展示决策（BUG-364/365/368）。
+ *
+ * 规则：请求的那一版 ok 就展示它；请求版空/读失败时，若另一版 ok 则回退并给可见提示；
+ * 两版都不可用 → empty/unreadable/missing 失败态；跨版本绝不回退（地址目标已由 finalTargetOf 定）。
+ * 审计版空/坏而读者版 ok 时也提示，不把审计问题藏起来。
+ * @param input - 正文/读者版状态与请求视图（reader/audit）。
+ * @returns 展示决策。
+ */
+export function finalViewOf(input: {
+  readonly body: ArtifactState
+  readonly reader: ArtifactState
+  readonly requested: 'reader' | 'audit'
+}): FinalViewDecision {
+  const bodyOk = input.body === 'ok'
+  const readerOk = input.reader === 'ok'
+  const readerNotice: FinalNotice = input.reader === 'empty'
+    ? 'readerEmpty'
+    : input.reader === 'unreadable' || input.reader === 'invalid' ? 'readerUnreadable' : null
+  const auditNotice: FinalNotice = input.body === 'empty'
+    ? 'auditEmpty'
+    : input.body === 'unreadable' || input.body === 'invalid' ? 'auditUnreadable' : input.body === 'absent' ? 'auditMissing' : null
+  if (input.requested === 'reader') {
+    if (readerOk) {
+      // 读者版可读；审计版空/坏仍提示（不把审计问题藏起来）。
+      return { view: 'reader', notice: bodyOk ? null : auditNotice, failure: null }
+    }
+    if (bodyOk) {
+      return { view: 'audit', notice: readerNotice, failure: null }
+    }
+    const failure = failureOf(input.body)
+    return { view: failure === 'empty' ? 'empty' : 'unreadable', notice: null, failure }
+  }
+  if (bodyOk) {
+    // 审计版可读；请求审计版时读者版的问题不打扰。
+    return { view: 'audit', notice: null, failure: null }
+  }
+  if (readerOk) {
+    return { view: 'reader', notice: auditNotice, failure: null }
+  }
+  const failure = failureOf(input.body)
+  return { view: failure === 'empty' ? 'empty' : 'unreadable', notice: null, failure }
+}
+
+/** 两版都不可用时，按正文状态给最具体的失败态（缺席优先于读失败，空单独成态）。 */
+function failureOf(body: ArtifactState): 'empty' | 'unreadable' | 'missing' {
+  if (body === 'absent') return 'missing'
+  if (body === 'empty') return 'empty'
+  return 'unreadable'
 }

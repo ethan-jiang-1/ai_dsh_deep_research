@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  deliveryFromReceipt, draftInProgress, finalAddressOf, finalPathOf, finalPathOfWithin, finalReadPlan, finalTargetOf, finalVersionOfPath, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
+  deliveryFromReceipt, draftInProgress, finalAddressOf, finalPathOf, finalPathOfWithin, finalReadPlan, finalTargetOf, finalViewOf, finalVersionOfPath, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
   sessionFileOf, shouldOpenFinal,
 } from '../../../packages/deep-research-pack/src/lib/run/final-target.ts';
 
@@ -276,3 +276,38 @@ test('finalVersionOfPath：版本族路径才取版本', () => {
   assert.equal(finalVersionOfPath('drt_x/notes/v9.md'), null)
   assert.equal(finalVersionOfPath(undefined), null)
 })
+
+
+// 负例留证 2026-11-22：BUG-364/365/368——空/读失败读者版静默回退、空正文空白渲染。
+// 红配方：把 finalViewOf 的 reader/body 互补分支删掉（或永远 view=requested）→ 下列矩阵红。
+test('BUG-364/365/368 finalViewOf：互补回退可见 + 双坏失败态', () => {
+  assert.deepEqual(finalViewOf({ body: 'ok', reader: 'empty', requested: 'reader' }), { view: 'audit', notice: 'readerEmpty', failure: null });
+  assert.deepEqual(finalViewOf({ body: 'ok', reader: 'unreadable', requested: 'reader' }), { view: 'audit', notice: 'readerUnreadable', failure: null });
+  assert.deepEqual(finalViewOf({ body: 'ok', reader: 'absent', requested: 'reader' }), { view: 'audit', notice: null, failure: null });
+  assert.deepEqual(finalViewOf({ body: 'empty', reader: 'absent', requested: 'reader' }), { view: 'empty', notice: null, failure: 'empty' });
+  assert.deepEqual(finalViewOf({ body: 'empty', reader: 'ok', requested: 'reader' }), { view: 'reader', notice: 'auditEmpty', failure: null });
+  assert.deepEqual(finalViewOf({ body: 'ok', reader: 'ok', requested: 'audit' }), { view: 'audit', notice: null, failure: null });
+  assert.deepEqual(finalViewOf({ body: 'unreadable', reader: 'ok', requested: 'audit' }), { view: 'reader', notice: 'auditUnreadable', failure: null });
+  assert.deepEqual(finalViewOf({ body: 'absent', reader: 'ok', requested: 'reader' }), { view: 'reader', notice: 'auditMissing', failure: null });
+  assert.deepEqual(finalViewOf({ body: 'empty', reader: 'empty', requested: 'reader' }), { view: 'empty', notice: null, failure: 'empty' });
+  assert.deepEqual(finalViewOf({ body: 'unreadable', reader: 'empty', requested: 'audit' }), { view: 'unreadable', notice: null, failure: 'unreadable' });
+  assert.deepEqual(finalViewOf({ body: 'absent', reader: 'unreadable', requested: 'reader' }), { view: 'unreadable', notice: null, failure: 'missing' });
+});
+
+test('finalViewOf 不变量：view=reader → reader ok；view=audit → body ok；无失败 → 至少一版 ok；提示与视图互补', () => {
+  const states = ['ok', 'absent', 'unreadable', 'empty', 'invalid'];
+  for (const body of states) {
+    for (const reader of states) {
+      for (const requested of ['reader', 'audit']) {
+        const d = finalViewOf({ body, reader, requested });
+        const label = `body=${body} reader=${reader} req=${requested}`;
+        if (d.view === 'reader') assert.equal(reader, 'ok', label);
+        if (d.view === 'audit') assert.equal(body, 'ok', label);
+        if (d.failure === null) assert.ok(body === 'ok' || reader === 'ok', label);
+        if (d.notice === 'readerEmpty' || d.notice === 'readerUnreadable') assert.equal(d.view, 'audit', label);
+        if (d.notice === 'auditEmpty' || d.notice === 'auditUnreadable' || d.notice === 'auditMissing') assert.equal(d.view, 'reader', label);
+        if (d.failure === 'empty') assert.equal(body, 'empty', label);
+      }
+    }
+  }
+});

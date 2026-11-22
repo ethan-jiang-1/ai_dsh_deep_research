@@ -25,8 +25,9 @@ import { MarkdownText } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
-  FINAL_LEDGER_DIR, FINAL_NAME, FINAL_REVIEW_NAME, finalReadPlan, finalTargetOf, sessionFileOf,
+  FINAL_LEDGER_DIR, FINAL_NAME, FINAL_REVIEW_NAME, finalReadPlan, finalTargetOf, finalViewOf, sessionFileOf,
 } from '../lib/run/final-target.ts'
+import { readArtifact, type ArtifactState } from '../lib/run/artifact-read.ts'
 import { openRun, type RunSource } from '../lib/run/run-context.ts'
 import { latestRunVersion } from '../lib/run/run-fold.ts'
 import { terminalReadiness } from '../lib/review/review-readiness.ts'
@@ -102,7 +103,9 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const [readerText, setReaderText] = useState<string | null>(null)
   const [draftText, setDraftText] = useState<string | null>(null)
   // 失败态存字典键（不存译文）：locale 切换后同一失败仍按当前语言渲染。
-  const [failure, setFailure] = useState<'finalUnreadable' | 'finalReadFailed' | null>(null)
+  const [failure, setFailure] = useState<'finalUnreadable' | 'finalReadFailed' | 'finalEmpty' | null>(null)
+  const [bodyState, setBodyState] = useState<ArtifactState>('absent')
+  const [readerState, setReaderState] = useState<ArtifactState>('absent')
   const [loading, setLoading] = useState(true)
   const [versions, setVersions] = useState(0)
   /** 当前展示的版本（地址目标优先）；null = 通用地址/当前工作稿。 */
@@ -113,9 +116,6 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const [pass, setPass] = useState<boolean | null>(null)
   const [stale, setStale] = useState(false)
   const [resolved, setResolved] = useState<string | null>(null)
-  const [truncated, setTruncated] = useState(false)
-  const [readerTruncated, setReaderTruncated] = useState(false)
-  const [draftTruncated, setDraftTruncated] = useState(false)
   const [view, setView] = useState<FinalView>('reader')
   const targetRef = useRef<{ dir: string; name: string } | null>(null)
 
@@ -146,44 +146,37 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       setLoading(false)
       return
     }
-    const [body, draft, review, reader] = await Promise.all([
-      viewIo.read(target.audit, { signal }),
-      viewIo.read(FINAL_NAME, { signal }),
-      viewIo.read(FINAL_REVIEW_NAME, { signal }),
-      target.reader === null ? Promise.resolve(null) : viewIo.read(target.reader, { signal }),
+    const [bodyArt, draftArt, reviewArt, readerArt] = await Promise.all([
+      readArtifact(viewIo, target.audit, { signal }),
+      readArtifact(viewIo, FINAL_NAME, { signal }),
+      readArtifact(viewIo, FINAL_REVIEW_NAME, { signal }),
+      target.reader === null ? Promise.resolve(null) : readArtifact(viewIo, target.reader, { signal }),
     ])
     if (signal.aborted || !aliveRef.current) return
-    // 地址目标优先：正文缺失时只允许「同版本读者版」或「通用地址的工作稿」兜底；
-    // 点名的版本缺失 = 失败态，绝不拿更高版本/别的文件冒充（BUG-356）。
-    const primary = body.ok
-      ? body
-      : reader !== null && reader.ok
-        ? reader
-        : target.fallback && draft.ok
-          ? draft
-          : body
-    if (!primary.ok) {
-      setFailure(primary.reason === 'missing' ? 'finalUnreadable' : 'finalReadFailed')
+    const initial = finalViewOf({ body: bodyArt.state, reader: readerArt?.state ?? 'absent', requested: 'reader' })
+    if (initial.failure !== null) {
+      setFailure(initial.failure === 'empty' ? 'finalEmpty' : initial.failure === 'missing' ? 'finalUnreadable' : 'finalReadFailed')
       setLoading(false)
       return
     }
-    const primaryName = primary.value.path.startsWith(viewIo.dir)
-      ? primary.value.path.slice(viewIo.dir.length)
-      : target.audit
+    const primaryName = bodyArt.state === 'ok'
+      ? target.audit
+      : readerArt?.state === 'ok' && target.reader !== null
+        ? target.reader
+        : target.audit
     targetRef.current = { dir: viewIo.dir, name: primaryName }
-    setResolved(primary.value.path)
-    setText(primary.value.text)
-    setTruncated(primary.value.truncated)
-    setDraftText(draft.ok ? draft.value.text : null)
-    setDraftTruncated(draft.ok ? draft.value.truncated : false)
-    setReaderText(reader !== null && reader.ok ? reader.value.text : null)
-    setReaderTruncated(reader !== null && reader.ok ? reader.value.truncated : false)
+    setBodyState(bodyArt.state)
+    setReaderState(readerArt?.state ?? 'absent')
+    setResolved(`${viewIo.dir}${target.audit}`)
+    setText(bodyArt.state === 'ok' ? bodyArt.text : null)
+    setDraftText(draftArt.state === 'ok' ? draftArt.text : null)
+    setReaderText(readerArt?.state === 'ok' ? readerArt.text : null)
     setReaderName(target.reader)
     setShownVersion(target.version)
     setFallback(target.fallback)
     setVersions(latest)
-    if (primary.value.version !== undefined) versionRef.current = primary.value.version
-    const readiness = review.ok && !review.value.truncated ? terminalReadiness(review.value.text) : null
+    versionRef.current = null
+    const readiness = reviewArt.state === 'ok' && reviewArt.text !== null ? terminalReadiness(reviewArt.text) : null
     setPass(readiness === null ? null : readiness === 'PASS')
     setLoading(false)
     setStale(false)
@@ -199,6 +192,8 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     setReaderName(null)
     setShownVersion(null)
     setFallback(false)
+    setBodyState('absent')
+    setReaderState('absent')
     setStale(false)
     setResolved(null)
     setView('reader')
@@ -241,16 +236,27 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       </div>
     )
   }
-  if (text === null) return <div style={MESSAGE}>{props.t('finalUnread')}</div>
-
-  const hasReader = readerText !== null
-  const showingReader = hasReader && view === 'reader'
-  const showingDraft = !hasReader && fallback && versions >= 1 && view === 'draft'
-  const displayed = showingReader ? readerText : showingDraft ? (draftText ?? text) : text
-  const displayedTruncated = showingReader ? readerTruncated : showingDraft ? (draftText === null ? truncated : draftTruncated) : truncated
+  const requested = view === 'draft' ? 'audit' : view
+  const decision = finalViewOf({ body: bodyState, reader: readerState, requested })
+  const hasReader = readerState === 'ok' && readerText !== null
+  const hasAudit = bodyState === 'ok' && text !== null
+  const showingDraft = view === 'draft' && draftText !== null
+  const showingReader = !showingDraft && decision.view === 'reader' && hasReader
+  const displayed = showingDraft ? draftText : showingReader ? readerText : text
+  if (displayed === null) return <div style={MESSAGE}>{props.t('finalUnread')}</div>
+  const displayedTruncated = false
   const displayedPath = showingReader && readerName !== null
     ? readerName
     : showingDraft ? FINAL_NAME : resolved ?? plan.final
+  const noticeKey = decision.notice === 'readerEmpty'
+    ? 'finalReaderEmptyFallback'
+    : decision.notice === 'readerUnreadable'
+      ? 'finalReaderReadFailedFallback'
+      : decision.notice === 'auditEmpty'
+        ? 'finalBodyEmptyFallback'
+        : decision.notice === 'auditUnreadable'
+          ? 'finalBodyReadFailedFallback'
+          : decision.notice === 'auditMissing' ? 'finalBodyMissingFallback' : null
   const state = pass === false
     ? props.t('reviewFailed')
     : showingReader
@@ -261,11 +267,11 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const stateStyle = pass === false
     ? { color: '#b45309', fontWeight: 600 }
     : undefined
-  const toggleLabel = hasReader
+  const toggleLabel = hasReader && hasAudit
     ? view === 'reader'
       ? props.t('auditToggleLabel', { version: shownVersion !== null ? props.t('versionV', { version: String(shownVersion) }) : '' })
       : props.t('viewReader')
-    : fallback && versions >= 1
+    : !hasReader && fallback && versions >= 1 && draftText !== null
       ? view === 'draft' ? props.t('viewVersion', { version: String(shownVersion ?? versions) }) : props.t('viewCurrentDraft')
       : null
   // 滚动义务在页签体自己：vendor 的 `.tabBody` 是定高 flex 列且 `overflow: hidden`，
@@ -280,6 +286,12 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
           <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal) }}>{props.t('finalReload')}</button>
         </div>
       )}
+      {noticeKey !== null && (
+        <div style={{ ...BAR, margin: '8px 12px 0', flexShrink: 0 }}>
+          <span style={{ flex: 1 }}>{props.t(noticeKey)}</span>
+          <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal) }}>{props.t('retry')}</button>
+        </div>
+      )}
       <div style={{ ...STRIP, padding: '3px 12px 7px', flexShrink: 0 }} title={displayedPath}>
         <span style={stateStyle}>{state}</span>
         <span style={{ flex: 1 }} />
@@ -287,11 +299,11 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
           <button
             type="button"
             style={LINK_BUTTON}
-            title={hasReader
+            title={hasReader && hasAudit
               ? (view === 'reader' ? props.t('auditCanonicalNote') : props.t('readerNote'))
               : props.t('ledgerNote')}
             onClick={() => {
-              setView(hasReader
+              setView(hasReader && hasAudit
                 ? (view === 'reader' ? 'audit' : 'reader')
                 : (view === 'draft' ? 'audit' : 'draft'))
             }}

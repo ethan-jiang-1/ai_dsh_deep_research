@@ -689,7 +689,7 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "final-tab-patterns.spec.mjs — 「终稿」页签认领 glob 的形态合同（2026-11-03 实红回归）。",
-      "oracleType": "self-referential",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {

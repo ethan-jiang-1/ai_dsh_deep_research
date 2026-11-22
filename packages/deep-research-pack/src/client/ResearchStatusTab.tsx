@@ -52,7 +52,7 @@ export type { FollowTarget, JournalFrame, ResearchStatusTabInjected, ResearchSta
 
 export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const {
-    rows, hitl, face, unbound, trust, kickoffHold, error, reads, scanSettled, retry,
+    rows, hitl, face, unbound, trust, kickoffHold, error, reads, reviewVerdict, scanSettled, retry,
     memberSummaries, members, delivery, streamFailure, anchors, health, versionFace,
   } = useStatusFeed(props)
 
@@ -77,6 +77,8 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       pendingQuestions: pendingAnchor?.questions ?? 0,
       hasQuestion: face?.hasQuestion ?? false,
       questionLine: face?.questionLine ?? null,
+      questionIssue: reads.question === 'unreadable' ? 'unreadable' : reads.question === 'empty' ? 'empty' : null,
+      reviewUnconfirmed: reviewVerdict === 'unconfirmed',
       currentStage: face !== null ? steps.find((s) => s.state === 'current')?.label ?? null : null,
       findingsPresent: (face?.steps.find((s) => s.key === 'findings')?.state === 'done'),
       reviewFail: face?.reviewFail ?? null,
@@ -85,8 +87,16 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       lastDecisionKind: null,
       openItems: [],
     }, props.t),
-    [unbound, trust, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery, reads, scanSettled, props.t],
+    [unbound, trust, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery, reads, reviewVerdict, scanSettled, props.t],
   )
+  const receiptIssue = reads.receipt === 'unreadable' || reads.receipt === 'empty'
+    ? 'statusReceiptReadFailed'
+    : reads.receipt === 'invalid' ? 'statusReceiptInvalid' : null
+  const reviewIssueKey = reads.review === 'unreadable'
+    ? 'statusReviewReadFailed'
+    : reads.review === 'empty'
+      ? 'statusReviewEmpty'
+      : reviewVerdict === 'unconfirmed' ? 'statusReviewUnconfirmed' : null
   const stalledBanner = stalledBannerOf(
     { health, bound: trust.kind === 'bound', delivered: delivery !== null, hitlPending: hitl.pending },
     props.t,
@@ -135,9 +145,21 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
         <div style={{ opacity: 0.85 }}>{brief.knownLine}</div>
         {brief.unknownLine !== null && <div style={{ color: '#b45309' }}>⚠ {brief.unknownLine}</div>}
         <div style={{ fontWeight: brief.userActionNeeded ? 700 : 400, color: brief.userActionNeeded ? '#b45309' : undefined }}>{brief.actionLine}</div>
-        {reads.review === 'unreadable' && (
+        {reads.question === 'unreadable' && (
           <div style={{ color: '#b45309' }}>
-            ⚠ {props.t('statusReviewReadFailed')}
+            ⚠ {props.t('statusQuestionReadFailed')}
+            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+          </div>
+        )}
+        {reads.question === 'empty' && (
+          <div style={{ color: '#b45309' }}>
+            ⚠ {props.t('statusQuestionEmpty')}
+            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+          </div>
+        )}
+        {reviewIssueKey !== null && (
+          <div style={{ color: '#b45309' }}>
+            ⚠ {props.t(reviewIssueKey)}
             <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
           </div>
         )}
@@ -173,6 +195,12 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           ) : (
             <span>{props.t('statusEvidenceCount', { count: String(face.evidenceCount) })}</span>
           )}
+          {receiptIssue !== null && (
+            <span style={{ color: '#b45309' }}>
+              {props.t(receiptIssue)}
+              <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+            </span>
+          )}
           {delivery !== null && <span style={{ color: '#16a34a', fontWeight: 600 }}>{props.t('statusDelivered')}</span>}
           {delivery !== null && props.sessionId !== undefined && (
             <button
@@ -181,8 +209,8 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
               style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}
             >{props.t('statusOpenFinal')}</button>
           )}
-          {delivery === null && <span style={{ opacity: 0.6 }}>{props.t('statusFinalAfterDelivery')}</span>}
-          {versionFace !== null && (face.hasFinal || versionFace.ledgerFinalVersion >= 1) && (
+          {delivery === null && receiptIssue === null && <span style={{ opacity: 0.6 }}>{props.t('statusFinalAfterDelivery')}</span>}
+          {versionFace !== null && receiptIssue === null && (face.hasFinal || versionFace.ledgerFinalVersion >= 1) && (
             <span style={{ fontSize: 12, opacity: 0.8 }} title={props.t('versionReadonlyNote')}>
               {versionFace.label}
             </span>

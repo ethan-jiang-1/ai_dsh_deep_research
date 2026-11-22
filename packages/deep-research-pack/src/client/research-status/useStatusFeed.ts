@@ -50,8 +50,10 @@ export interface StatusFeed {
   readonly journalSeen: boolean
   readonly kickoffHold: boolean
   readonly error: string | null
-  /** 三个显示事实的读取态（bundle/review/evidence）；读失败不折成 absent/空/进度（BUG-358/359/360）。 */
+  /** 六个显示事实的读取态（bundle/question/review/readiness/evidence/receipt）。 */
   readonly reads: StatusReads
+  /** 审查终局判定（pass/fail/unconfirmed/absent）；unconfirmed 不得给 ✓（BUG-363/366）。 */
+  readonly reviewVerdict: 'pass' | 'fail' | 'unconfirmed' | 'absent'
   /** 首次扫描是否已落定；未落定不把「还没读到」显示成「读取失败」。 */
   readonly scanSettled: boolean
   /** 重扫一次（失败横幅的「重试」）。 */
@@ -81,6 +83,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   const [kickoffHold, setKickoffHold] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [reads, setReads] = useState<StatusReads>(ABSENT_READS)
+  const [reviewVerdict, setReviewVerdict] = useState<'pass' | 'fail' | 'unconfirmed' | 'absent'>('absent')
   const [scanSettled, setScanSettled] = useState(false)
   const [retryNonce, setRetryNonce] = useState(0)
   const retry = useCallback(() => { setScanSettled(false); setRetryNonce((n) => n + 1) }, [])
@@ -122,6 +125,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     setUnbound(false)
     setKickoffHold(false)
     setReads(ABSENT_READS)
+    setReviewVerdict('absent')
     setScanSettled(false)
     setMemberSummaries({})
     void (async () => {
@@ -206,6 +210,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           setFace(null)
           setReceiptDelivery(null)
           setReads({ ...ABSENT_READS, bundle: readStateOf(opened) })
+          setReviewVerdict('absent')
           setScanSettled(true)
           return
         }
@@ -242,20 +247,26 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         // 的 review 策略是读到 eof：终局判定在文末，固定行窗会读到中段旧 FAIL（BUG-036 同族）。
         const reviewArt = await readArtifact(view, 'review.md', { signal })
         if (stopped) return
-        // P1 保持既有步骤语义：empty 仍按「读到」处理（P3 再改成终局判定）；unreadable/absent 原样。
-        const reviewState: 'ok' | 'absent' | 'unreadable' = reviewArt.state === 'ok' || reviewArt.state === 'empty'
-          ? 'ok'
-          : reviewArt.state === 'absent' ? 'absent' : 'unreadable'
         const reviewText = reviewArt.state === 'ok' ? reviewArt.text : null
         // 终局 readiness 与门禁同源（D51）：声明件优先，散文只做副本；无 review/ 的旧场回退散文。
         const readinessArt = await readArtifact(view, 'review/readiness.json', { signal })
         if (stopped) return
         const declarationText = readinessArt.state === 'ok' ? readinessArt.text : null
         const reading = readinessOfSources({ reviewText, declarationText, hasReviewDir: names.has('review') })
-        const readiness = (reading.source === 'declaration' || reading.source === 'prose') && typeof reading.pass === 'boolean'
-          ? (reading.pass ? 'PASS' : 'FAIL')
-          : null
-        const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null
+        // 结论未定：空/读失败的 review 或 readiness 声明；或 readiness 的 missing/invalid/mismatch/ambiguous。
+        // 不把非 declaration/prose 的 source 折成 null 后让步骤条按 read ok 给 ✓（BUG-363/366）。
+        const reviewVerdict: 'pass' | 'fail' | 'unconfirmed' | 'absent' =
+          reviewArt.state === 'empty' || reviewArt.state === 'unreadable'
+            ? 'unconfirmed'
+            : readinessArt.state === 'empty' || readinessArt.state === 'unreadable' || readinessArt.state === 'invalid'
+              ? 'unconfirmed'
+              : reading.source === 'absent'
+                ? 'absent'
+                : (reading.source === 'declaration' || reading.source === 'prose') && typeof reading.pass === 'boolean'
+                  ? (reading.pass ? 'pass' : 'fail')
+                  : 'unconfirmed'
+        const reviewFail = reviewVerdict === 'fail' ? true : reviewVerdict === 'pass' ? false : null
+        setReviewVerdict(reviewVerdict)
         const questionArt = await readArtifact(view, 'question.md', { signal })
         if (stopped) return
         const questionText = questionArt.state === 'ok' ? questionArt.text : null
@@ -275,18 +286,19 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const firstLine = flat === null || flat === '' ? null : flat.length > 72 ? `${flat.slice(0, 72)}…` : flat
         setFace({
           questionLine: firstLine,
-          hasQuestion: view.hasFile('question.md'),
+          hasQuestion: questionArt.state === 'ok',
           steps: deriveSteps({
-            question: view.hasFile('question.md'),
-            team: view.hasFile('question.md'),
+            question: questionArt.state === 'ok',
+            team: questionArt.state === 'ok',
             leads: view.hasFile('leads.md'),
             evidence: evidenceCount,
             findings: view.hasFile('findings.md'),
-            review: reviewState === 'ok',
+            review: reviewVerdict !== 'unconfirmed',
             final: view.hasFile('final.md'),
             unknown: [
+              ...(questionArt.state === 'empty' || questionArt.state === 'unreadable' ? ['question'] : []),
               ...(evidenceState === 'unreadable' ? ['evidence'] : []),
-              ...(reviewState === 'unreadable' ? ['review'] : []),
+              ...(reviewVerdict === 'unconfirmed' ? ['review'] : []),
             ],
           }, props.t),
           evidenceCount,
@@ -305,6 +317,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         setFace(null)
         setReceiptDelivery(null)
         setReads({ ...ABSENT_READS, bundle: 'unreadable' })
+        setReviewVerdict('absent')
         setScanSettled(true)
       }
     }
@@ -353,7 +366,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   )
 
   return {
-    rows, hitl, journalEvents, face, unbound, trust, journalSeen, kickoffHold, error, reads, scanSettled, retry,
+    rows, hitl, journalEvents, face, unbound, trust, journalSeen, kickoffHold, error, reads, reviewVerdict, scanSettled, retry,
     memberSummaries, team, members, delivery, streamFailure, anchors, health, versionFace,
   }
 }

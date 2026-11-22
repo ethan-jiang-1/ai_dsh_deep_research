@@ -175,3 +175,36 @@ test('BUG-357 无矛盾性质：任何输入组合不得同时说「已交付」
     }
   }
 });
+
+// 负例留证 2026-11-22：BUG-361/367——question 读失败/为空仍显示「尚未确认」+ ✓ 立项。
+// 红配方：删 questionIssue 分支（goal 恒回落 briefGoalUnknownPending）→ 本组红。
+test('BUG-361/367 question 读失败/为空：目标行显式，不回落「尚未确认」', () => {
+  for (const [issue, pattern] of [['unreadable', /研究问题读取失败/], ['empty', /研究问题为空/]]) {
+    const b = deriveBusinessBrief({ ...base, questionIssue: issue, hasQuestion: false, questionLine: null });
+    assert.match(b.goal, pattern);
+    assert.doesNotMatch(b.goal, /尚未确认/);
+    assert.equal(b.goalKnown, false);
+  }
+});
+
+// 负例留证 2026-11-22：BUG-363/366——readiness 缺席/空 review 仍被当审查通过。
+// 红配方：删 reviewUnconfirmed 分支（回落到 delivered/推进中）→ 本组红。
+test('BUG-363/366 审查未定：已交付/未交付都不说审查通过，交付事实保留', () => {
+  const delivered = deriveBusinessBrief({ ...base, delivered: true, reviewUnconfirmed: true });
+  const text = [delivered.stageLine, delivered.knownLine, delivered.unknownLine ?? '', delivered.actionLine].join(' ');
+  assert.match(text, /报告已交付/);
+  assert.match(text, /审查结论未确认/);
+  assert.doesNotMatch([delivered.stageLine, delivered.knownLine].join(' '), /审查通过/, '交付阶段/已知行不得声称审查通过');
+  assert.match(delivered.unknownLine ?? '', /不能把交付当成审查通过/, '未定行必须明确否定「交付=审查通过」');
+  assert.equal(delivered.userActionNeeded, false);
+  const open = deriveBusinessBrief({ ...base, delivered: false, reviewUnconfirmed: true });
+  assert.match(open.stageLine, /审查未定/);
+  assert.match(open.actionLine, /重试/);
+});
+
+test('reviewUnconfirmed 与 reviewFail 不互串：FAIL 仍走交付前政策；unconfirmed 不走 FAIL 文案', () => {
+  const fail = deriveBusinessBrief({ ...base, reviewFail: true });
+  assert.match(fail.unknownLine ?? '', /报告不交付/);
+  const unconfirmed = deriveBusinessBrief({ ...base, reviewUnconfirmed: true, reviewFail: null });
+  assert.doesNotMatch(unconfirmed.unknownLine ?? '', /报告不交付/);
+});

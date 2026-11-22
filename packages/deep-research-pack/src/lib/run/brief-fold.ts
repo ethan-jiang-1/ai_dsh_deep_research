@@ -26,6 +26,10 @@ interface BriefInputs {
   readonly bundleBound?: boolean
   /** 绑定的 bundle 读取失败（missing / unreadable）；null = 已读或未绑定。 */
   readonly bundleReadFailure?: 'missing' | 'unreadable' | null
+  /** question.md 为空/读失败（BUG-361/367）：目标行不得再显示「尚未确认」。 */
+  readonly questionIssue?: 'empty' | 'unreadable' | null
+  /** 结构化审查结论未定（readiness 声明缺失/坏、review 为空/读失败）；BUG-363/366。 */
+  readonly reviewUnconfirmed?: boolean
   /** 立项预检窗口（读绑定 + kickoff 已见 + 无挂起——读到的是上一场上下文）。 */
   readonly kickoffHold?: boolean
   /** 末位 ask 仍开放（hitl-fold.foldHitlPending）。 */
@@ -80,6 +84,8 @@ export interface BusinessBrief {
 export function deriveBusinessBrief(inputs: BriefInputs, t: PackTranslate = translateZh): BusinessBrief {
   const bundleBound = inputs.bundleBound === true
   const bundleReadFailure = inputs.bundleReadFailure === 'missing' || inputs.bundleReadFailure === 'unreadable' ? inputs.bundleReadFailure : null
+  const questionIssue = inputs.questionIssue === 'empty' || inputs.questionIssue === 'unreadable' ? inputs.questionIssue : null
+  const reviewUnconfirmed = inputs.reviewUnconfirmed === true
   const kickoffHold = inputs.kickoffHold === true
   const hitlPending = inputs.hitlPending === true
   const pendingKind = inputs.pendingKind ?? null
@@ -94,8 +100,12 @@ export function deriveBusinessBrief(inputs: BriefInputs, t: PackTranslate = tran
   const lastDecisionKind = inputs.lastDecisionKind ?? null
   const openItems = Array.isArray(inputs.openItems) ? inputs.openItems.filter((x): x is string => typeof x === 'string' && x.trim() !== '') : []
 
-  const goalKnown = hasQuestion && questionLine !== null
-  const goal = goalKnown ? questionLine : t('briefGoalUnknownPending')
+  const goalKnown = questionIssue === null && hasQuestion && questionLine !== null
+  const goal = questionIssue === 'unreadable'
+    ? t('briefGoalQuestionUnreadable')
+    : questionIssue === 'empty'
+      ? t('briefGoalQuestionEmpty')
+      : goalKnown ? questionLine : t('briefGoalUnknownPending')
   const needless = t('briefActionNone')
   const pendingItems = openItems.length > 0
     ? t('briefPendingItems', { items: openItems.join(t('briefItemsSeparator')) })
@@ -186,6 +196,27 @@ export function deriveBusinessBrief(inputs: BriefInputs, t: PackTranslate = tran
       actionLine: t('briefActionDeliveredReviewFail'),
       userActionNeeded: false,
     }
+  }
+
+  // 审查结论未定（BUG-363/366）：结构化声明缺失/坏、review 空/读失败；不得当审查通过。
+  if (reviewUnconfirmed && reviewFail !== true) {
+    return delivered
+      ? {
+          goal, goalKnown,
+          stageLine: t('briefStageDeliveredReviewUnconfirmed'),
+          knownLine: t('briefKnownDeliveredReviewUnconfirmed'),
+          unknownLine: t('briefUnknownDeliveredReviewUnconfirmed'),
+          actionLine: t('briefActionDeliveredReviewUnconfirmed'),
+          userActionNeeded: false,
+        }
+      : {
+          goal, goalKnown,
+          stageLine: t('briefStageReviewUnconfirmed'),
+          knownLine: t('briefKnownReviewUnconfirmed'),
+          unknownLine: t('briefUnknownReviewUnconfirmed'),
+          actionLine: t('briefActionReviewUnconfirmed'),
+          userActionNeeded: false,
+        }
   }
 
   // 审查 FAIL（未交付）：质量修复静默推进（两点交互之间的自主区），用户无需介入。

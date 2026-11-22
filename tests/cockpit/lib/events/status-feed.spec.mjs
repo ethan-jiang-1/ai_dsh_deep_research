@@ -56,17 +56,25 @@ test('BUG-358/359/360 接线：bundle/review/evidence 的 Outcome 进 reads 三�
   assert.match(source, /readArtifact\(view, 'delivered\.json'/, '回执读取必须走统一入口')
   assert.match(source, /setReads\(\{\n\s+bundle: 'ok',\n\s+question: questionArt\.state,/, '成功扫描必须写回六事实状态')
   assert.match(source, /unknown: \[/, '读失败步必须进 deriveSteps unknown')
+  assert.match(source, /setReviewVerdict\(reviewVerdict\)/, 'reviewVerdict 必须写回 state')
   assert.match(source, /setRetryNonce\(/, '失败横幅必须有重试入口')
   assert.match(source, /const \[reads, setReads\]/, 'reads 必须是状态（视图可消费）')
   assert.match(source, /scanSettled/, '首扫未落定时不得把「还没读到」显示成失败')
   assert.doesNotMatch(source, /view\.read\(/, '状态页不得裸 view.read——工件读取必须走 readArtifact（G19）')
 })
 
-test('BUG-358/359/360 视图：失败横幅/重试/证据行使用三态文案键', () => {
+test('BUG-358/359/360/361…368 视图：失败/未定/空 keys 与变量取词', () => {
   const source = readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/ResearchStatusTab.tsx'), 'utf8')
-  for (const key of ['statusReadFailed', 'statusReviewReadFailed', 'statusEvidenceReadFailed']) {
-    assert.match(source, new RegExp(`props\\.t\\('${key}'\\)`), `视图缺 ${key}`)
+  for (const key of ['statusReadFailed', 'statusEvidenceReadFailed', 'statusQuestionReadFailed', 'statusQuestionEmpty']) {
+    assert.ok(source.includes(`props.t('${key}')`), `视图缺 ${key}`)
   }
+  for (const key of ['statusReviewReadFailed', 'statusReviewEmpty', 'statusReviewUnconfirmed', 'statusReceiptReadFailed', 'statusReceiptInvalid']) {
+    assert.ok(source.includes(`'${key}'`), `视图缺 ${key}`)
+  }
+  assert.ok(source.includes('props.t(reviewIssueKey)'), '审查未定/空/读失败必须按变量取词')
+  assert.ok(source.includes('props.t(receiptIssue)'), '回执读失败/非法必须按变量取词')
   assert.match(source, /onClick=\{retry\}/, '失败态必须接重试')
   assert.match(source, /reads\.bundle !== 'ok'/, 'bundle 读失败必须参与标题/摘要')
+  assert.ok(source.includes('reviewIssueKey'), '审查未定/空/读失败必须进警告')
+  assert.ok(source.includes('receiptIssue'), '回执读失败/非法必须进 ⑤ 行')
 })

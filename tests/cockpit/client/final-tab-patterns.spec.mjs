@@ -9,6 +9,9 @@
 // 本测试钉形态：pattern 只许写 basename，不带 `/`；精确性归 `canOpen: isFinalAddress`。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   RESEARCH_FINAL_PATTERN,
   RESEARCH_FINAL_PATTERN_LEDGER,
@@ -24,4 +27,15 @@ test('终稿页签认领 glob：三个 pattern 都是 basename（不含分隔符
     assert.ok(!pattern.includes(':'), `${pattern} 含 scheme 分隔符——那是「整地址匹配」的另一条路，别再混用`);
   }
   assert.deepEqual(patterns, ['final.md', 'v*.md', 'readable*.md'], '三个 pattern 覆盖工作稿 / 版本账 / 读者版');
+});
+
+// 负例留证 2026-11-22：BUG-364/365/368——终稿页签只判 read.ok，空 reader/body 或读失败被静默当内容。
+// 红配方：把 readArtifact 换回 viewIo.read，或删 finalViewOf 回退分支 → 本例红。
+test('BUG-364/365/368 终稿读取走 artifact-read + finalViewOf；零裸 view.read', () => {
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+  const source = readFileSync(join(root, 'packages', 'deep-research-pack', 'src', 'client', 'ResearchFinalTab.tsx'), 'utf8');
+  assert.match(source, /readArtifact\(viewIo/);
+  assert.match(source, /finalViewOf\(/);
+  assert.match(source, /finalReaderEmptyFallback|finalBodyReadFailedFallback|finalEmpty/);
+  assert.doesNotMatch(source, /viewIo\.read\(/, '终稿页签不得裸 viewIo.read——必须走 readArtifact（G19）');
 });

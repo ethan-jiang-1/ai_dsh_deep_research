@@ -106,7 +106,7 @@
 | ② 流程轨道 | ◆立项确认 + 立项→组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付（步序正本 = [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；↻ 图例仅在交付审阅锚点到达后出现，不证明已执行 rerun：补研究回挖掘并扩张版本 / 表述修订原位改 / 结构性重构另起新 bundle；显示 v2+ 才是本 bundle 已有证据扩张版的文件证据；交付节点带 `final/` 版本；步态符号 ✓已过 / ●进行中 / ○未到 / ?待定（读失败）——done 绿字、current 琥珀唯一、unknown 琥珀 `?` 且不给 ✓、回边落点重入描边，与仪表盘同语法） |
 | ⑥ 决策诚实线（条件：已过停靠点） | 指路 question.md §Decisions |
 | ③ 研究问题行 | 本场研究问题（读 question.md） |
-| ⑤ 证据与交付 | 证据计数（`ok` 时；`unreadable` → 「证据读取失败」+ 重试，不显示 0）+ 交付状态（present 见证）+ rerun 版本面一行（`run-version`：已交付版本/rerun 声明/HITL2 待审）；已交付后追加只读折叠块「还不满意？三种改法」 |
+| ⑤ 证据与交付 | 证据计数（`ok` 时；`unreadable` → 「证据读取失败」+ 重试，不显示 0）+ 交付状态（present 见证；回执 `unreadable/empty/invalid` → 「交付回执读取失败/不合法」+ 重试，不显示「交付未见证」）+ rerun 版本面一行（`run-version`：已交付版本/rerun 声明/HITL2 待审）；已交付后追加只读折叠块「还不满意？三种改法」 |
 | ④ 活动流 | 人性化活动行（检索 / 派出 / 成员 / 交付）；原始事件类型名不出正文 |
 | ⑦ 队员动态折叠区（条件：有队员） | [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)：agentTeam 投影取 roster → 多路 follow 队员会话 → 检索/抓取/出错动作行，每人一节默认折叠 + 计数徽标 |
 
@@ -131,9 +131,9 @@
 | [binding-trust](../../packages/deep-research-pack/src/lib/run/binding-trust.ts) | journal 事件 → 可信绑定三态（bound / unbound / suppressed） | write 永远可信；read 在 HITL 挂起 / 立项信号下抑制并带 reason（pending / kickoff）；其余 read 可信。三页签只消费结论，不再各自解释 raw binding；状态页另暴露 `data-research-face` 机器标记（cdp-probe 读，供 `--require-data` 正向判绑定） |
 | [tool-card](../../packages/deep-research-pack/src/lib/events/tool-card.ts) | call/result 切片 → 卡片状态 | running / ok / error / stopped |
 | [start-card](../../packages/deep-research-pack/src/lib/workspace/start-card.ts) | blank Session 事实（用户消息 + 工作区根条目）→ 首屏起步卡显隐 | 有用户消息或 `drt_*` 就收起；纯函数，keyless 钉 |
-| [final-target](../../packages/deep-research-pack/src/lib/run/final-target.ts) | journal 交付事件 / 文件地址 / 终稿路径 → 本次交付 + 会话文件 + 读面定表 + 地址目标版本 + 自动打开判据 | `present`（`deliverables/presented`）是交付的机械判据（node-gate 门②）；`final.md` 在场只说明"有终稿可审"（综合步就落盘），不是交付。地址认领终稿族（根 / `archive/` / `_abandoned/` 三位置 + `final/` 下 `vN.md`、`readable.md`、`readable-vN.md`），`drafts/final.md` 与绝对域全拒；`final/vN` / `readable-vN` 地址点名的版本是正文身份（缺失即失败，版本账最高号不得覆盖）；`final.md` / 通用地址才回退最高版本/工作稿；交付记录的位置失效时由 run-context 的 `openRun` 按三位置回退；自动打开 = `shouldOpenFinal`（有交付 / `callId` 未开过 / 焦点不在可编辑元素），present 同时带 reader 与 vN 时优先打开 reader |
+| [final-target](../../packages/deep-research-pack/src/lib/run/final-target.ts) | journal 交付事件 / 文件地址 / 终稿路径 → 本次交付 + 会话文件 + 读面定表 + 地址目标版本 + 自动打开判据 | `present`（`deliverables/presented`）是交付的机械判据（node-gate 门②）；`final.md` 在场只说明"有终稿可审"（综合步就落盘），不是交付。地址认领终稿族（根 / `archive/` / `_abandoned/` 三位置 + `final/` 下 `vN.md`、`readable.md`、`readable-vN.md`），`drafts/final.md` 与绝对域全拒；`final/vN` / `readable-vN` 地址点名的版本是正文身份（缺失即失败，版本账最高号不得覆盖）；`final.md` / 通用地址才回退最高版本/工作稿；交付记录的位置失效时由 run-context 的 `openRun` 按三位置回退；`finalViewOf`（body/reader × ok/absent/unreadable/empty/invalid × 请求视图）决定展示哪一版，互补回退必须带提示，双坏 → 空/失败态；自动打开 = `shouldOpenFinal`（有交付 / `callId` 未开过 / 焦点不在可编辑元素），present 同时带 reader 与 vN 时优先打开 reader |
 | [member-activity](../../packages/deep-research-pack/src/lib/events/member-activity.ts) | 队员 journal 事件 → 检索/抓取/出错动作行 + 全量计数 | 粒度定夺 = [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)（2026-10-10 用户三问：文件读写不入流）；失败行剥 "Error: " 工程前缀；行截尾窗与 activity-fold 同款 |
-| [brief-fold](../../packages/deep-research-pack/src/lib/run/brief-fold.ts) | 既有事实源投影 → 业务摘要五问 | 输入面**不含**证据计数与工具调用数（计数在类型层面进不了完成态文案，keyless 禁词单测钉）；优先级 = 挂起 > 立项预检窗 > 未绑定 > **bundle 读失败** > **已交付 × 审查 FAIL（两事实共存）** > 审查 FAIL（未交付政策） > 已交付 > 推进中；`ArtifactState` 五态（ok/absent/unreadable/empty/invalid）由 `artifact-read` 单一映射；派生不出的状态显式缺省，不虚构 |
+| [brief-fold](../../packages/deep-research-pack/src/lib/run/brief-fold.ts) | 既有事实源投影 → 业务摘要五问 | 输入面**不含**证据计数与工具调用数（计数在类型层面进不了完成态文案，keyless 禁词单测钉）；优先级 = 挂起 > 立项预检窗 > 未绑定 > **bundle 读失败** > **已交付 × 审查 FAIL（两事实共存）** > **审查未定** > 审查 FAIL（未交付政策） > 已交付 > 推进中；`questionIssue` 覆盖目标行、`reviewUnconfirmed` 覆盖审查行；`ArtifactState` 五态（ok/absent/unreadable/empty/invalid）由 `artifact-read` 单一映射；派生不出的状态显式缺省，不虚构 |
 | [workspace-title](../../packages/deep-research-pack/src/lib/workspace/workspace-title.ts) | 工作区目录名 → 产品标题 | 前缀单一正本（client 的 startsWith 过滤与 host 的登记标题共用）；空名 = `Deep Research` |
 | [review-readiness](../../packages/deep-research-pack/src/lib/review/review-readiness.ts) | review.md 全文 → 终局 readiness 三态 | 只认**行首**判定行、取最后一条：文末附录保留的轮次血统（如首轮 `readiness: FAIL`）是行内引用，不得夺权；空模板 `PASS \| FAIL`、无判定行或输入畸形 → `null`（不猜）。驾驶舱、仪表盘与 client-load.entry 直接消费；node-gate 在纯 `.mjs` 边界镜像同一规则并由 `gateBundle` 回归覆盖 |
 | [markdown-mask](../../packages/deep-research-pack/src/lib/shared/markdown-mask.ts) | Markdown 全文 → 剥离块级代码与 HTML 注释后的逐行正文 | 处理引用块与列表缩进容器、围栏代码、缩进代码、反斜杠转义、行内代码跨度及同行/跨行 HTML 注释；由 `review-readiness`、`note-scan` 与 `fix-evidence` 共用同一实现 |
@@ -364,9 +364,10 @@ composer 左侧 `conversation.input.left` 的状态按钮（有 session 才渲�
 - **失败态与空态必须可分（2026-10-27 BUG-045）**：读不到数据 ≠ 没有数据。图谱的 journal 绑定
   读取失败曾有与「本会话尚未绑定 run」同形的渲染，一次瞬断就被读成"这个会话还没开始研究"；
   现在失败走独立文案「绑定状态读取失败」+ 有界重试（3 次 / 2s），恢复后自动补上。状态页的
-  bundle / review / evidence 各持 `SourceRead` 三态（ok / absent / unreadable），读失败显示
-  独立失败文案 + 重试，步骤条标 `?`，不折成「研究推进中」「✓ 审查」「证据 0 份」；终稿地址
-  点名的版本缺失 = 失败态，不拿别的版本/工作稿冒充。新增观察面读取路径时同守此条：
+  bundle / question / review / readiness / evidence / receipt 各持 `ArtifactState`
+  （ok / absent / unreadable / empty / invalid），空 ≠ 缺席 ≠ 读失败 ≠ 非法；读失败/空显式
+  提示 + 重试，步骤条标 `?`，不折成「研究推进中」「尚未确认」「✓ 审查」「证据 0 份」；终稿
+  地址点名的版本缺失 = 失败态，不拿别的版本/工作稿冒充；reader↔audit 互补回退必须提示。新增观察面读取路径时同守此条：
   catch 里不许只 `console.error` 后落回"空"态。
 
 - **版本账 ≠ 交付凭证**：`final/vN.md` 是版本记账（听 HITL2 前模型就会先落 v1），

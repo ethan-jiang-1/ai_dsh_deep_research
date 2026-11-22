@@ -55,3 +55,11 @@ test('unknown 优先于待定/在场：只有点名步变 unknown，其余步态
   assert.equal(steps[3].state, 'unknown');
   assert.equal(steps[1].state, 'current');
 });
+
+// 负例留证 2026-11-22：BUG-361/367——question 读失败/为空仍按 hasFile 判 ✓ 立项。
+// 红配方：deriveSteps 忽略 unknown（把 question 当 false/在场）→ 本组断言红。
+test('BUG-361/367 立项步：question 读失败/为空 → unknown，不给 ✓', () => {
+  const steps = deriveSteps({ question: false, team: false, leads: true, evidence: 5, findings: true, review: true, final: true, unknown: ['question'] });
+  assert.equal(steps[0].state, 'unknown');
+  assert.notEqual(steps[0].state, 'done');
+});

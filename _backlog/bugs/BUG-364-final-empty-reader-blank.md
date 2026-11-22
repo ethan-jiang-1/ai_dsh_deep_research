@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 修复落地
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-364：空 readable-v1.md 让终稿页签显示空白「读者版」——非空审计版被藏起来
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复就绪 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S10 显示读者版为空提示）→ 绿证 exit 0（31/31）。
 > 现场 = `runtime/e2e/final-reader-empty-verdict.json` + `final-reader-empty.png`；
 > 夹具 = `runtime/e2e/final-reader-empty-e2e.mjs`。
 
@@ -100,4 +100,32 @@ const displayed = showingReader ? readerText : ...
 
 ## 修复关联
 
-P2 落地；守卫 = `tests/cockpit/lib/run/final-view.spec.mjs` 4×4 矩阵 + `checks/smoke/cockpit-artifact-truth.entry.mjs` S10；去向 = implemented — 批 Note。
+P2 落地；守卫 = `tests/run/gates/final-target.spec.mjs` + `tests/cockpit/client/final-tab-patterns.spec.mjs` 4×4 矩阵 + `checks/smoke/cockpit-artifact-truth.entry.mjs` S10；去向 = implemented — 批 Note。
+
+## 修复落地（2026-11-22）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/run/final-target.ts",
+    "packages/deep-research-pack/src/client/ResearchFinalTab.tsx",
+    "packages/deep-research-pack/src/client/locales/zh.ts",
+    "packages/deep-research-pack/src/client/locales/en.ts",
+    "tests/run/gates/final-target.spec.mjs",
+    "tests/cockpit/client/final-tab-patterns.spec.mjs",
+    "checks/smoke/cockpit-artifact-truth.entry.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-artifact-truth.entry.mjs",
+    "exit": 1,
+    "output": "FAIL S10 显示读者版为空提示 — 修复前九场景入口 15/31；还原/修复后 31/31"
+  },
+  "green": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-artifact-truth.entry.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/cockpit-artifact-truth.entry.mjs"
+  }
+}
+```

@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 修复落地
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-362：delivered.json 读不到时状态页说「交付未见证」——回执读失败被折成没有回执
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复就绪 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S7 显示交付回执读取失败）→ 绿证 exit 0（31/31）。
 > 现场 = `runtime/e2e/status-receipt-verdict.json` + `status-receipt.png`；
 > 夹具 = `runtime/e2e/status-fixture-e2e.mjs receipt`。
 
@@ -105,3 +105,32 @@ setReceiptDelivery(deliveryFromReceipt(receiptValue, boundSlug))
 ## 修复关联
 
 P3c 落地；守卫 = `tests/cockpit/lib/run/artifact-read.spec.mjs` receipt 矩阵 + `deliveryFromReceipt` 负控 + `checks/smoke/cockpit-artifact-truth.entry.mjs` S7；去向 = implemented — 批 Note。
+
+## 修复落地（2026-11-22）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/run/artifact-read.ts",
+    "packages/deep-research-pack/src/client/research-status/useStatusFeed.ts",
+    "packages/deep-research-pack/src/client/ResearchStatusTab.tsx",
+    "packages/deep-research-pack/src/client/locales/zh.ts",
+    "packages/deep-research-pack/src/client/locales/en.ts",
+    "tests/cockpit/lib/run/artifact-read.spec.mjs",
+    "tests/cockpit/lib/events/status-feed.spec.mjs",
+    "checks/smoke/cockpit-artifact-truth.entry.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-artifact-truth.entry.mjs",
+    "exit": 1,
+    "output": "FAIL S7 显示交付回执读取失败 — 修复前九场景入口 15/31；还原/修复后 31/31"
+  },
+  "green": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-artifact-truth.entry.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/cockpit-artifact-truth.entry.mjs"
+  }
+}
+```

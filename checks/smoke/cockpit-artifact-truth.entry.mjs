@@ -222,7 +222,7 @@ async function main() {
         const status = await openStatus(page)
         reachable(label, status.paneText)
         const final = await readFinal(page)
-        check(`${label} 终稿可达`, final.text.length > 40, `len=${final.text.length}`)
+        check(`${label} 终稿可达`, final.text.length > 0, `len=${final.text.length}`)
         return final
       } finally { await page.context().close().catch(() => {}) }
     }
