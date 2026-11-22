@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-23
 ---
 
 # BUG-376：research-defaults.json 有未知键时，合法 effort 被静默丢弃却提示「未知字段已忽略」
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复落地 — P0 复核非缺陷（select.value=deep）；纠正 E2E + mixed 回归；无产品代码变更。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：已修 — 结论：P0 复核非缺陷（select.value=deep）；纠正 E2E 假阳性 + mixed-key 回归，无产品代码变更；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 残余入口；修复落地记录：P0 复核非缺陷（select.value=deep）；纠正 E2E + mixed 回归；无产品代码变更。
 > 现场 = `runtime/e2e/config-defaults-mixed-verdict.json` + `config-defaults-mixed.png`；
 > 夹具 = `runtime/e2e/config-defaults-mixed-e2e.mjs`。
 

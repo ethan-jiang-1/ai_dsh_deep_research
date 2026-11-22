@@ -6,6 +6,10 @@
 
 | 对象 | 当前决定 | 具体观察（出现位置） | owner |
 |---|---|---|---|
+| 观察面残余八场景守卫（dev-only） | `checks/smoke/cockpit-truth-residuals.entry.mjs` 在树内，八场景本机 28/28；未进 CI/nightly（真浏览器 + 文件突变） | 连续两轮稳定，或 `cockpit-truth`/`client-load` 吸收八场景 → 升 nightly；任一场景复发 → 引用批 Note 建卡 | [批 Note](../notes/implemented/2026-11-23-observation-residuals.md) |
+| 配置观察 E2E 的 select 断言 | 376 的 paneText 假阳性已纠正；新观察必须读 `select.value`/`selectedOptions`，不能从面板全文猜选中值 | 新 E2E 再用 `paneText` 断言控件选中值 → 按 376 假阳性教训纠正，不写产品代码 | [批 Note](../notes/implemented/2026-11-23-observation-residuals.md) |
+| graph `plan.md` 裸读例外（G21） | `useGraphFeed` 仍裸读 `plan.md` 以保留 `truncated` 分态；G21 清单显式登记为唯一已知遗留 | 新增 canonical 文本读取点（question/review/plan/final/readiness 等）未进 `ARTIFACT_POLICY`/G21 → 源级守卫红；graph 需 truncated 以外原因裸读 → 先扩 artifact-read 再迁 | [批 Note](../notes/implemented/2026-11-23-observation-residuals.md) |
+| 371 stale 35s 等待 | 入口保持 35s（REFRESH_MS=30s），不降等待制造假绿；主机负载下可能 flake | 连续两轮因负载 flake → 记录 NOT-RUN，不把失败当产品回归；稳定后再议 nightly | [批 Note](../notes/implemented/2026-11-23-observation-residuals.md) |
 | 观察面九场景守卫（dev-only） | `checks/smoke/cockpit-artifact-truth.entry.mjs` 在树内、九场景本机真浏览器 31/31；未进 CI/nightly（真浏览器 + 文件突变） | 连续两轮稳定，或 `cockpit-truth`/`client-load` 吸收九场景 → 升 nightly；九场景任一在真实改动上复发 → 引用批 Note 建卡 | [批 Note](../notes/implemented/2026-11-22-observation-artifact-truth.md) |
 | 观察面 en 浏览器装配 | en 字典/折叠 i18n 有单测；浏览器仍以 zh-CN 为主，未跑 en 装配面 | 下一次 en 装配夹具出现，或用户报告英文界面混排 → 跑两条 cockpit 入口的 en 场景 + 补 locale 守卫 | [批 Note](../notes/implemented/2026-11-22-observation-artifact-truth.md) |
 | 观察面潜在读取点（§2.5） | `final/` list、`plan.md`、终稿 `review.md`、`final.md` 草稿读失败判 `none`（无用户可见假绿/假交付；target 地址 pin 版本；status 359 管 review 读失败；pinned delivery 无草稿 toggle） | 真实用户路径出现可见假绿/假交付，或 `final/` list 失败导致交付版本被工作稿顶替 → 新建卡（369+），不重开已修卡 | [批 Note](../notes/implemented/2026-11-22-observation-artifact-truth.md) |

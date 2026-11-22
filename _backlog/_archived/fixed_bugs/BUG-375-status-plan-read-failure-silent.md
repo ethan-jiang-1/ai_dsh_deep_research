@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-23
 ---
 
 # BUG-375：plan.md 读不到时状态页没有任何提示——版本面静默消失
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复落地 — 红证 residual full exit 1（S19 状态页显示计划读取失败）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：已修 — 结论：StatusReads.plan；plan 不可读/空 → warning，版本面「计划版本未知」；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 残余入口；修复落地记录：红证 residual full exit 1（S19 状态页显示计划读取失败）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
 > 现场 = `runtime/e2e/status-plan-unreadable-verdict.json` + `status-plan-unreadable.png`；
 > 夹具 = `runtime/e2e/status-plan-unreadable-e2e.mjs`。
 
@@ -34,7 +34,7 @@ bundle 的 `plan.md` 在场但读不到。打开「研究状态」：
 
 ## 批
 
-`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序](../issues/2026-11-23-observation-residuals-program.md)。
+`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序](../settled_issues/2026-11-23-observation-residuals-program.md)。
 
 ## 复现
 

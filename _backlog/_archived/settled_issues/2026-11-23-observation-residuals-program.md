@@ -1,16 +1,17 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-23
 ---
 
 # 观察面残余与跨面事实一致性修复程序：BUG-369…376 的次序、流程与系统修法
 
-> 立卡：2026-11-23 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
+> 立卡：2026-11-23 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
 > 对象：8 张活跃 P2 卡（369–376），全部有真浏览器 verdict；现场 = `runtime/e2e/*verdict.json` + `*.png`（gitignored）。
-> 去向：implemented — `notes/implemented/2026-11-23-observation-residuals.md`（批 Note，收口时写）
-> 上一批 = [观察面工件真实性 Note](../../notes/implemented/2026-11-22-observation-artifact-truth.md) · [程序卡](../_archived/settled_issues/2026-11-22-observation-artifact-truth-program.md)；
+> 结论：七卡已修归档（369–375）+ 376 按 not-a-bug 收口；批 Note = [2026-11-23-observation-residuals](../../../notes/implemented/2026-11-23-observation-residuals.md)。
+> 去向：implemented — [2026-11-23-observation-residuals](../../../notes/implemented/2026-11-23-observation-residuals.md)
+> 上一批 = [观察面工件真实性 Note](../../../notes/implemented/2026-11-22-observation-artifact-truth.md) · [程序卡](../settled_issues/2026-11-22-observation-artifact-truth-program.md)；
 > 本批是同一观察面的**第四批**（351–355、356–360、361–368 之后），但第一次跨出「状态页 + 终稿页签」。
-> 方法 = [bug-to-fix §2 批模式](../methods/bug-to-fix.md)；状态机 = [bugs/README](../bugs/README.md)；证据主人 = [guides/60](../../docs/guides/60-dev-loop.md)。
+> 方法 = [bug-to-fix §2 批模式](../../methods/bug-to-fix.md)；状态机 = [bugs/README](../../bugs/README.md)；证据主人 = [guides/60](../../../docs/guides/60-dev-loop.md)。
 
 ## 0. 结论
 
@@ -316,14 +317,21 @@ G23：每一种状态必须有**能区分邻态**的文案；不能用一个「�
 
 | 卡 | 机制 | P 阶段 | 守卫场景 | 状态（P0 回填） |
 |---|---|---|---|---|
-| 369 | readiness mismatch/ambiguous + 终稿单边 prose | P1 | S15 | 修复就绪 |
-| 370 | 空 plan/vN 快照空面板 | P3 | S22 | 修复就绪 |
-| 371 | watcher 只盯 audit | P1 | S17 | 修复就绪 |
-| 372 | config question 读失败当 missing | P4 | S20 | 修复就绪 |
-| 373 | final/ list 失败当 0 版本 | P2 | S18 | 修复就绪 |
-| 374 | 终稿 review unconfirmed 静默 | P1 | S16 | 修复就绪 |
-| 375 | plan 读失败静默消失 | P2 | S19 | 修复就绪 |
-| 376 | unknown 键 + 合法 effort（待证伪） | P4 | S21 | 排查中（假阳性） |
+| 369 | readiness mismatch/ambiguous + 终稿单边 prose | P1 | S15 | 已修 |
+| 370 | 空 plan/vN 快照空面板 | P3 | S22 | 已修 |
+| 371 | watcher 只盯 audit | P1 | S17 | 已修 |
+| 372 | config question 读失败当 missing | P4 | S20 | 已修 |
+| 373 | final/ list 失败当 0 版本 | P2 | S18 | 已修 |
+| 374 | 终稿 review unconfirmed 静默 | P1 | S16 | 已修 |
+| 375 | plan 读失败静默消失 | P2 | S19 | 已修 |
+| 376 | unknown 键 + 合法 effort（待证伪） | P4 | S21 | 已修（not-a-bug） |## 8.1 P5 收口结果（2026-11-23）
+
+- `pnpm verify/test/typecheck/build` 全绿；`export-dist` 重建后 verify 绿。
+- 三入口：`cockpit-truth` 24/24、`cockpit-artifact-truth` 31/31、`cockpit-truth-residuals` **28/28** 绿；残余入口修复前 **17/28 exit 1**。
+- 八卡：369/371/372/373/374/375/370 已修归档；376 P0 复核非缺陷（select.value=deep；E2E 假阳性），按 not-a-bug 收口并留 mixed 回归。
+- 批 Note = `notes/implemented/2026-11-23-observation-residuals.md`；本卡 `已结` 归档；README/triggers/docs 同变更。
+- 未跑：L2 安装/首启、真模型/snapshot、en 浏览器装配；三入口 dev-only，未进 CI/nightly。
+
 ## 9. 执行入口（goal 用）
 
 - 每轮先读本卡 §4；只推进当前阶段；阶段结束把「实际红/绿/未跑 + 卡状态」回填本卡。

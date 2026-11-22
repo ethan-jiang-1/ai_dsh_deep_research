@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-369：readiness 声明与 review.md 冲突时状态页说「声明缺失/不可读」——mismatch 被折成 unconfirmed
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 红证 residual full exit 1（S15 状态页显示审查冲突）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：已修 — 结论：共享 reviewVerdictOf 五态；mismatch/ambiguous → 审查冲突，状态/终稿同判；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 残余入口；修复落地记录：红证 residual full exit 1（S15 状态页显示审查冲突）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
 > 现场 = `runtime/e2e/review-conflict-verdict.json` + `review-conflict.png`；
 > 夹具 = `runtime/e2e/review-conflict-e2e.mjs`。
 
@@ -44,7 +44,7 @@ review.md 单独折成「审查未过」。同一 run 同一时刻，两个观�
 
 ## 批
 
-`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序](../issues/2026-11-23-observation-residuals-program.md)。
+`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序(../settled_issues/2026-11-23-observation-residuals-program.md)。
 
 ## 复现
 

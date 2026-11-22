@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-23
 ---
 
 # BUG-371：读者版更新后终稿页签不提示——stale watcher 只盯审计版
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复落地 — 红证 residual full exit 1（S17 读者版更新出现 stale 提示）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：已修 — 结论：watchTargetOf 盯当前显示件（reader/audit/draft）；reader 更新出现 stale 提示；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 残余入口；修复落地记录：红证 residual full exit 1（S17 读者版更新出现 stale 提示）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
 > 现场 = `runtime/e2e/final-reader-stale-verdict.json` + `final-reader-stale.png`；
 > 夹具 = `runtime/e2e/final-reader-stale-e2e.mjs`。
 
@@ -32,7 +32,7 @@ opened: 2026-11-23
 
 ## 批
 
-`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序](../issues/2026-11-23-observation-residuals-program.md)。
+`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序](../settled_issues/2026-11-23-observation-residuals-program.md)。
 
 ## 复现
 

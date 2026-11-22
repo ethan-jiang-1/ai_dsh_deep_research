@@ -6,6 +6,14 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [369](BUG-369-status-readiness-mismatch-misdiagnosed.md) | readiness 冲突误报「声明缺失」 | （共享 reviewVerdictOf conflict） | 2026-11-23 |
+| [370](BUG-370-graph-empty-snapshot-blank-panel.md) | 空 plan/vN 快照画空面板 | （snapshot empty/invalid） | 2026-11-23 |
+| [371](BUG-371-final-reader-stale-watch-audit-only.md) | watcher 只盯 audit | （watchTargetOf displayed） | 2026-11-23 |
+| [372](BUG-372-config-adoption-question-read-failure-as-missing.md) | config question 读失败当 missing | （adoption 七态） | 2026-11-23 |
+| [373](BUG-373-status-final-dir-read-failure-no-warning.md) | final/ 读失败仍「已交付」 | （StatusReads.final） | 2026-11-23 |
+| [374](BUG-374-final-review-unconfirmed-silent.md) | 终稿 review 未定静默 | （reviewVerdictOf 共用） | 2026-11-23 |
+| [375](BUG-375-status-plan-read-failure-silent.md) | plan 读失败静默消失 | （StatusReads.plan） | 2026-11-23 |
+| [376](BUG-376-defaults-valid-field-lost-on-unknown-key.md) | defaults mixed 假阳性 | （P0 复核 not-a-bug + 回归） | 2026-11-23 |
 | [361](BUG-361-status-question-read-failure-as-pending.md) | question 读失败冒充「尚未定稿」 | （question 四态 + 立项 unknown） | 2026-11-22 |
 | [362](BUG-362-status-receipt-read-failure-as-absent.md) | 回执读失败冒充「未见证」 | （receipt 五态） | 2026-11-22 |
 | [363](BUG-363-status-readiness-missing-false-green.md) | readiness 缺席/坏仍 ✓ 审查 | （reviewVerdict 四态） | 2026-11-22 |

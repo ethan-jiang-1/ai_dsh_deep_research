@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-23
 ---
 
 # BUG-373：final/ 目录读不到时状态页仍显示「✅ 已交付」且无警告——终稿入口点开报错
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复落地 — 红证 residual full exit 1（S18 状态页显示终稿目录读取失败）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：已修 — 结论：StatusReads.final；final/ 不可读 → 状态页 warning，不再无条件「v1 已交付」；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 残余入口；修复落地记录：红证 residual full exit 1（S18 状态页显示终稿目录读取失败）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
 > 现场 = `runtime/e2e/final-dir-unreadable-verdict.json` + `final-dir-unreadable.png`；
 > 夹具 = `runtime/e2e/final-dir-unreadable-e2e.mjs`。
 
@@ -36,7 +36,7 @@ bundle 的 `final/` 目录在场但不可读（权限/IO/工作区失败），`d
 
 ## 批
 
-`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序](../issues/2026-11-23-observation-residuals-program.md)。
+`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序](../settled_issues/2026-11-23-observation-residuals-program.md)。
 
 ## 复现
 

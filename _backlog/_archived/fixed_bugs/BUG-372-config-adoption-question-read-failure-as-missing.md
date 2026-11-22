@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-23
 ---
 
 # BUG-372：配置页把 question.md 读失败说成「文件不在/被移走」
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复落地 — 红证 residual full exit 1（S20 配置页显示研究问题读取失败）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：已修 — 结论：config adoption 走 readArtifact；question 读失败/空显式，不再说「不在/被移走」；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 残余入口；修复落地记录：红证 residual full exit 1（S20 配置页显示研究问题读取失败）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
 > 现场 = `runtime/e2e/config-question-unreadable-verdict.json` + `config-question-unreadable.png`；
 > 夹具 = `runtime/e2e/config-question-unreadable-e2e.mjs`。
 
@@ -32,7 +32,7 @@ opened: 2026-11-23
 
 ## 批
 
-`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序](../issues/2026-11-23-observation-residuals-program.md)。
+`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序](../settled_issues/2026-11-23-observation-residuals-program.md)。
 
 ## 复现
 

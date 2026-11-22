@@ -11,22 +11,26 @@
 > 2026-11-21 起的缺陷积压修复程序（20 张活跃分 5 簇，另有 11 张迁暂停池；不做旧产物兼容）= [修复计划](../_archived/settled_issues/2026-11-21-bug-stack-repair-program.md)。
 > 2026-11-22 起的观察面真实性修复程序（5 张活跃 356–360：读失败三态 / 交付目标 / 交付×审查）= [修复计划](../_archived/settled_issues/2026-11-22-observation-truthfulness-program.md)。
 > 2026-11-22 起的观察面工件真实性修复程序（8 张 361–368：空/坏工件 + 未登记读取点 + 回退可见）= [修复计划](../_archived/settled_issues/2026-11-22-observation-artifact-truth-program.md)。
-> 2026-11-23 起的观察面残余与跨面事实一致性修复程序（8 张活跃 369–376：跨面读取/审查冲突/显示件 watcher/默认值混合键）= [修复计划](../issues/2026-11-23-observation-residuals-program.md)。
+> 2026-11-23 起的观察面残余与跨面事实一致性修复程序（8 张 369–376：跨面读取/审查冲突/显示件 watcher/默认值混合键）= [修复计划](../_archived/settled_issues/2026-11-23-observation-residuals-program.md)。
 
 ## 活跃列表
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-369](BUG-369-status-readiness-mismatch-misdiagnosed.md) | 排查中 | P2 | readiness 声明与 review.md 冲突时状态页说「声明缺失/不可读」——mismatch 被折成 unconfirmed |
-| [BUG-370](BUG-370-graph-empty-snapshot-blank-panel.md) | 排查中 | P2 | 空的 plan/v1.md 快照在版本轨里显示空面板——没有「快照为空」态 |
-| [BUG-371](BUG-371-final-reader-stale-watch-audit-only.md) | 排查中 | P2 | 读者版更新后终稿页签不提示——stale watcher 只盯审计版 |
-| [BUG-372](BUG-372-config-adoption-question-read-failure-as-missing.md) | 排查中 | P2 | 配置页把 question.md 读失败说成「文件不在/被移走」 |
-| [BUG-373](BUG-373-status-final-dir-read-failure-no-warning.md) | 排查中 | P2 | final/ 目录读不到时状态页仍显示已交付且无警告 |
-| [BUG-374](BUG-374-final-review-unconfirmed-silent.md) | 排查中 | P2 | 终稿页签在 review 读不到时无「审查未定」提示 |
-| [BUG-375](BUG-375-status-plan-read-failure-silent.md) | 排查中 | P2 | plan.md 读不到时状态页没有任何提示 |
-| [BUG-376](BUG-376-defaults-valid-field-lost-on-unknown-key.md) | 排查中 | P2 | defaults 有未知键时合法 effort 被静默丢弃却提示「未知字段已忽略」 |
+| — | — | — | 当前无活跃卡（2026-11-23：369–376 批收口，含 376 not-a-bug） |
 
 ## 最近归档
+
+（2026-11-23 观察面残余与跨面事实一致性批（8 张，369–376），批 Note = [2026-11-23-observation-residuals](../../notes/implemented/2026-11-23-observation-residuals.md)：
+[369](../_archived/fixed_bugs/BUG-369-status-readiness-mismatch-misdiagnosed.md) 审查冲突；
+[370](../_archived/fixed_bugs/BUG-370-graph-empty-snapshot-blank-panel.md) 空快照；
+[371](../_archived/fixed_bugs/BUG-371-final-reader-stale-watch-audit-only.md) 显示件 watcher；
+[372](../_archived/fixed_bugs/BUG-372-config-adoption-question-read-failure-as-missing.md) config question；
+[373](../_archived/fixed_bugs/BUG-373-status-final-dir-read-failure-no-warning.md) final 目录；
+[374](../_archived/fixed_bugs/BUG-374-final-review-unconfirmed-silent.md) 终稿审查未定；
+[375](../_archived/fixed_bugs/BUG-375-status-plan-read-failure-silent.md) plan 读取；
+[376](../_archived/fixed_bugs/BUG-376-defaults-valid-field-lost-on-unknown-key.md) defaults mixed（P0 复核 not-a-bug）。
+）
 
 （2026-11-22 观察面工件真实性批（8 张，361–368），批 Note = [2026-11-22-observation-artifact-truth](../../notes/implemented/2026-11-22-observation-artifact-truth.md)：
 [361](../_archived/fixed_bugs/BUG-361-status-question-read-failure-as-pending.md) question 读失败；

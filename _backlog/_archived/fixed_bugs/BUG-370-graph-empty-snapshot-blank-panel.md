@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-23
 ---
 
 # BUG-370：空的 plan/v1.md 快照在版本轨里显示一个空面板——没有「快照为空」态
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复落地 — 红证 residual full exit 1（S22 显示「快照为空」）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：已修 — 结论：plan/vN 快照 empty/invalid 态；空快照显式「快照为空」，不画空面板；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 残余入口；修复落地记录：红证 residual full exit 1（S22 显示「快照为空」）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
 > 现场 = `runtime/e2e/graph-empty-snapshot-verdict.json` + `graph-empty-snapshot.png`；
 > 夹具 = `runtime/e2e/graph-empty-snapshot-e2e.mjs`。
 
@@ -33,7 +33,7 @@ bundle 有 `plan.md`（当前图正常），`plan/v1.md` 是 0 字节。展开�
 
 ## 批
 
-`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序](../issues/2026-11-23-observation-residuals-program.md)。
+`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序](../settled_issues/2026-11-23-observation-residuals-program.md)。
 
 ## 复现
 

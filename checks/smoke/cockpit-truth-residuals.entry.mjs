@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // cockpit-truth-residuals.entry.mjs — 观察面「残余跨面事实」八场景（BUG-369…376，keyless 真浏览器）。
+// 批 Note = notes/implemented/2026-11-23-observation-residuals.md（2026-11-23 收口；七卡已修 + 376 not-a-bug）。
 //
 // 与 cockpit-truth / cockpit-artifact-truth 同 seed、同边界；本入口只测上一批没覆盖的四个面：
 //   S15 readiness 声明 vs review.md 冲突（状态 + 终稿同判）；S16 终稿 review 不可读；
