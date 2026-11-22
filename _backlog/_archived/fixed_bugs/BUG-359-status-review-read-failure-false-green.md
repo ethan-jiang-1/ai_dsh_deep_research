@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-359：review.md 读不到时状态页仍显示「✓ 审查」——读失败被折成 absent
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S4 仍 ✓ 审查）→ 绿证 exit 0（24/24）。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：已修 — 结论：review 读失败独立失败态 + 步骤 unknown，不给 ✓ 审查；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 真浏览器五场景（2026-11-22）；原记录：真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S4 仍 ✓ 审查）→ 绿证 exit 0（24/24）。
 > 现场 = `runtime/e2e/review-read-error-verdict.json` + `review-read-error.png`；
 > 夹具 = `runtime/e2e/review-read-error-e2e.mjs`。
 
@@ -30,7 +30,7 @@ bundle 的 `review.md` 在场但读不到（权限/IO/工作区失败）。打�
 - DSH 不变量：fail-loud — 读失败 ≠ 文件缺席；审查读取失败必须有独立失败态，不得给 ✓ 或冒充 absent。
 - 触及面：none — 观察面 client + 测试；不碰入口链/门禁与验收合同/文档合同/pack 公共行为/D 号。
 - 授权：自授权（P2 修理型修复）；2026-11-22 用户 goal 放行。
-- 批：`status-truth-356-360` — 同批卡：356/357/358/360；批计划：[观察面真实性修复程序](../issues/2026-11-22-observation-truthfulness-program.md)。
+- 批：`status-truth-356-360` — 同批卡：356/357/358/360；批计划：[观察面真实性修复程序](../settled_issues/2026-11-22-observation-truthfulness-program.md)。
 
 ## 复现
 

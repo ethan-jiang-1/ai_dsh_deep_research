@@ -1,16 +1,17 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-22
 ---
 
 # 观察面真实性修复程序：BUG-356…360 的次序、流程与系统修法
 
-> 立卡：2026-11-22 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
-> 去向：implemented — `notes/implemented/2026-11-22-observation-truthfulness.md`（批 Note，交付时写）
+> 立卡：2026-11-22 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 结论：五卡已修归档（356–360）；批 Note = [2026-11-22-observation-truthfulness](../../../notes/implemented/2026-11-22-observation-truthfulness.md)。
+> 去向：implemented — [2026-11-22-observation-truthfulness](../../../notes/implemented/2026-11-22-observation-truthfulness.md)
 > 对象：5 张活跃 P2 卡（356–360），全部真浏览器已复现；现场 = `runtime/e2e/*-verdict.json` + `*.png`（gitignored）。
 > 执行载体 = 后续 goal 按 §4 阶段推进；本卡 = 批索引 + 决定账 + 卡→用例映射。
-> 方法 = [bug-to-fix §2 批模式](../methods/bug-to-fix.md)；状态机 = [bugs/README](../bugs/README.md)；证据主人 = [guides/60](../../docs/guides/60-dev-loop.md)；
-> 上一批 = [2026-11-21 批 Note](../../notes/implemented/2026-11-21-bug-stack-repair.md) · [修复程序卡](../_archived/settled_issues/2026-11-21-bug-stack-repair-program.md)。
+> 方法 = [bug-to-fix §2 批模式](../../methods/bug-to-fix.md)；状态机 = [bugs/README](../../bugs/README.md)；证据主人 = [guides/60](../../../docs/guides/60-dev-loop.md)；
+> 上一批 = [2026-11-21 批 Note](../../../notes/implemented/2026-11-21-bug-stack-repair.md) · [修复程序卡](../settled_issues/2026-11-21-bug-stack-repair-program.md)。
 
 ## 0. 结论
 
@@ -117,7 +118,7 @@ opened: 2026-11-22
    - 备选：在 `checks/smoke/client-load.entry.mjs` 追加 observation 相位；前提是不破坏既有 69 条断言。
    - 共同要求：seed 可 materialize；chmod/移走场景在运行时生成（提交物不依赖 chmod 位）；失败逐场景点名；
      运行前 `pnpm build`（`lib/client.js` 新鲜度自检会拦）。
-4. 填 §7 批表；更新 [bugs/README](../bugs/README.md) 与 [issues/README](README.md) 的活跃清单；`pnpm verify`。
+4. 填 §7 批表；更新 [bugs/README](../../bugs/README.md) 与 [issues/README](../../issues/README.md) 的活跃清单；`pnpm verify`。
 5. 退出：5 卡 `修复就绪`；守卫载体已定；`pnpm test` 基线绿；批表无空格。
 
 ### P1 356：交付目标优先（≈0.5–1 会话）
@@ -305,3 +306,40 @@ node --import tsx/esm checks/smoke/client-load.entry.mjs --seed tests/fixtures/c
 - 每轮先读本卡 §4；只推进当前阶段，阶段结束把「实际红/绿/未跑 + 卡状态」回填本卡，再进下一阶段。
 - 每卡翻状态前对照 §5.3 DoD；任何一步缺证据就停在该状态，不跳。
 - 收口按 §4 P3 与 §验收标准；完成条件 = §验收标准 全部成立，而不是「代码改完」。
+
+## 阶段结果（2026-11-22）
+
+### P0 再就绪与证据升格
+
+- 五条 runtime 夹具在 HEAD 上复跑仍红（356 `showsUndeliveredV2:true`；357 同页「报告不交付」+「已交付」；
+  358 `face:unknown` +「研究推进中」；359 `reviewFailShown:false` + ✓ 审查；360 `evidenceReadFailureShown:false` +「证据 0 份」）。
+- 五卡补 `## 分诊与授权` / `## 批` / `根因证据`，翻 `修复就绪`；`pnpm verify` 过 `backlog-liveness`。
+- 守卫载体 = 新入口 `checks/smoke/cockpit-truth.entry.mjs`（entry lane，dev-only，keyless 真浏览器；
+  S1 交付 v1+未交付 v2、S1b 目标缺失、S2 已交付×FAIL、S3 bundle 移走、S4 review 不可读、S5 evidence 不可读）；
+  登记 `checks/smoke/registry.json` + `checks/README.md`；README 消费列同步。
+- 预修复红证：full entry **15/24，exit 1**（S1/S2/S3/S4/S5 各自命中卡内症状）。
+
+### P1 356 交付目标
+
+- `finalTargetOf({addressPath, versionNames})` 落 `final-target`；`ResearchFinalTab` 按地址目标读正文/同版本 reader，
+  目标缺失走 `finalUnreadable` + 重试；`shownVersion` 单独出标签；旧「不论地址都回 final.md」测试**显式取代**。
+- S1 定向红绿：注入旧 `latestRunVersion` 分支 → `--scenario S1` **3/8，exit 1**（「审计版 · v2」+ v2 正文）；
+  还原 → **8/8，exit 0**。356 `修复落地` + `fix-evidence`（红/绿同命令 `--scenario S1`）。
+
+### P2 状态面事实模型 + 合成
+
+- **偏差记录**：计划的 `lib/run/status-facts.ts` 未新建；`SourceRead` / `StatusReads` / `readStateOf` 并入
+  `brief-fold`，步骤四态并入 `run-fold`（理由 = 体量小、现有纯件已有直测、避免新增文件/faces/索引机械面；
+  见批 Note「输掉的方案」）。`scanSettled` 防首扫把「还没读到」显示成失败。
+- 358/359/360：bundle/review/evidence 三态进 `reads`；失败横幅/⑤ 行 + `retry()`；步骤 unknown；
+  S3/S4/S5 各 4/3/3 断言绿。
+- 357：`delivered × reviewFail` 独立分支 + 未交付负控 + 全组合无矛盾性质；S2 绿。
+- full entry **24/24，exit 0**；四卡 `修复落地` + `fix-evidence`（红/绿同命令 full entry，红证 = 预修复 15/24）。
+- 机械：`pnpm verify` / `pnpm test`（266 checks）/ `pnpm typecheck` / `pnpm build` 全绿；`export-dist` 重建后 verify 绿。
+
+### P3 收口
+
+- 语义自审：docs/design/40 四态与三态事实、guides/60 驾驶舱行、evaluation 加跑面、旧批 Note 互链同变更。
+- 批 Note = [2026-11-22-observation-truthfulness](../../../notes/implemented/2026-11-22-observation-truthfulness.md)。
+- 五卡 `已修` 归档 fixed 池；本卡 `已结` 归档；triggers 记 dev-only/en 装配/下一次 client-load 复跑。
+- 未跑边界：L2 安装/首启、真模型/snapshot、en 浏览器装配（见批 Note §残余）。

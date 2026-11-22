@@ -103,10 +103,10 @@
 | ① HITL 挂起横幅（条件：有挂起） | 点名锚点 + 参与指引——"怎么参与"在需要那一刻说清 |
 | 流失败恢复横幅（条件：末位回合死于上游流失败） | 人话恢复路径「等一两分钟发『继续』」，不虚构"研究失败"；折算 = `stream-failure.ts` |
 | ⓪ 业务摘要层 | 五问业务语言（研究什么 / 已确认什么 / 未知什么 / 你现在要不要操作）；折算住 brief-fold，计数不进本层 |
-| ② 流程轨道 | ◆立项确认 + 立项→组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付（步序正本 = [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；↻ 图例仅在交付审阅锚点到达后出现，不证明已执行 rerun：补研究回挖掘并扩张版本 / 表述修订原位改 / 结构性重构另起新 bundle；显示 v2+ 才是本 bundle 已有证据扩张版的文件证据；交付节点带 `final/` 版本；步态符号 ✓已过 / ●进行中 / ○未到——done 绿字、current 琥珀唯一、回边落点重入描边，与仪表盘同语法） |
+| ② 流程轨道 | ◆立项确认 + 立项→组队→侦察→挖掘→综合→审查 + ◆交付审阅 + 交付（步序正本 = [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；↻ 图例仅在交付审阅锚点到达后出现，不证明已执行 rerun：补研究回挖掘并扩张版本 / 表述修订原位改 / 结构性重构另起新 bundle；显示 v2+ 才是本 bundle 已有证据扩张版的文件证据；交付节点带 `final/` 版本；步态符号 ✓已过 / ●进行中 / ○未到 / ?待定（读失败）——done 绿字、current 琥珀唯一、unknown 琥珀 `?` 且不给 ✓、回边落点重入描边，与仪表盘同语法） |
 | ⑥ 决策诚实线（条件：已过停靠点） | 指路 question.md §Decisions |
 | ③ 研究问题行 | 本场研究问题（读 question.md） |
-| ⑤ 证据与交付 | 证据计数 + 交付状态（present 见证）+ rerun 版本面一行（`run-version`：已交付版本/rerun 声明/HITL2 待审）；已交付后追加只读折叠块「还不满意？三种改法」 |
+| ⑤ 证据与交付 | 证据计数（`ok` 时；`unreadable` → 「证据读取失败」+ 重试，不显示 0）+ 交付状态（present 见证）+ rerun 版本面一行（`run-version`：已交付版本/rerun 声明/HITL2 待审）；已交付后追加只读折叠块「还不满意？三种改法」 |
 | ④ 活动流 | 人性化活动行（检索 / 派出 / 成员 / 交付）；原始事件类型名不出正文 |
 | ⑦ 队员动态折叠区（条件：有队员） | [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)：agentTeam 投影取 roster → 多路 follow 队员会话 → 检索/抓取/出错动作行，每人一节默认折叠 + 计数徽标 |
 
@@ -116,7 +116,7 @@
 |---|---|---|
 | [hitl-fold](../../packages/deep-research-pack/src/lib/events/hitl-fold.ts) | journal 事件 → 挂起态 + 流程锚点三态 | 末位 ask 状态机保留 timed pending；匹配的非 pending result 或 user/message 关闭挂起；`deriveAnchors` 按问卡内容签名与文件事实定锚，中途确认如实显示 |
 | [journal-wire](../../packages/deep-research-pack/src/lib/events/journal-wire.ts) | wire 入参/正文 → 解析共享核 | 「JSON 字符串或对象 + 截断容错」的单一正本 + queries / content text 归一；各消费方保留自己的失败哨兵（null / undefined / false / 0 / 'unknown'），本件只供解析核 |
-| [run-fold](../../packages/deep-research-pack/src/lib/run/run-fold.ts) | bundle 文件在场性 → 步骤条 | 驾驶舱与 HTML 仪表盘共用七步三态折算与最高版本号解析（仪表盘经 `deriveStep` 适配内容模型后复用；矩阵折算归仪表盘 `run-dashboard-core.mjs` 自持） |
+| [run-fold](../../packages/deep-research-pack/src/lib/run/run-fold.ts) | bundle 文件在场性 → 步骤条 | 驾驶舱与 HTML 仪表盘共用七步四态折算（done / current / pending / unknown——unknown = 读失败，不被后续在场步线性推断抹成 done）与最高版本号解析（仪表盘经 `deriveStep` 适配内容模型后复用；矩阵折算归仪表盘 `run-dashboard-core.mjs` 自持） |
 | [run-context](../../packages/deep-research-pack/src/lib/run/run-context.ts) | slug/ref ＋ 工作区文件事实 → 已定位 run 的读面 | 三位置发现（D28：位置只用于发现）、同名根优先、空根不让位、review/final 读到 eof、plan/question 限行、missing/unreadable 区分；I/O 由 `RunSource` 注入（浏览器/Node 各一适配器） |
 | [graph-model](../../packages/deep-research-pack/src/lib/plan/graph-model.ts) | `plan.md` 节点表 ＋ Team 任务 → 四态映射（mapped / unmapped / stale / plan-only）＋ 覆盖率 | 没有 mapped task 的节点显示「状态未知」，绝不回落「未执行」；`task_id` 有值但 Team 板没有该任务（恢复会话重建任务后必现）= stale，与未映射分开报；显式 `plan-only` 不算缺口；覆盖率分母 = active 节点（墓碑不算），Team 侧多余任务单列 |
 | [run-version](../../packages/deep-research-pack/src/lib/run/run-version.ts) | `plan.md` 头/重写记录 + `plan/vN` 快照 + `final/vN` 版本账 + present 见证 + question.md 的 `> rerun:` 行 → 版本面一行 | 版本只取机器可读声明（`图版本：vN` / `图版本 vN`），头与记录不一致两个都报；`present` 不带版本号，已交付版本按版本账推定且 >1 时标「推定」；无 present 不说已交付 |
@@ -130,9 +130,9 @@
 | [binding-trust](../../packages/deep-research-pack/src/lib/run/binding-trust.ts) | journal 事件 → 可信绑定三态（bound / unbound / suppressed） | write 永远可信；read 在 HITL 挂起 / 立项信号下抑制并带 reason（pending / kickoff）；其余 read 可信。三页签只消费结论，不再各自解释 raw binding；状态页另暴露 `data-research-face` 机器标记（cdp-probe 读，供 `--require-data` 正向判绑定） |
 | [tool-card](../../packages/deep-research-pack/src/lib/events/tool-card.ts) | call/result 切片 → 卡片状态 | running / ok / error / stopped |
 | [start-card](../../packages/deep-research-pack/src/lib/workspace/start-card.ts) | blank Session 事实（用户消息 + 工作区根条目）→ 首屏起步卡显隐 | 有用户消息或 `drt_*` 就收起；纯函数，keyless 钉 |
-| [final-target](../../packages/deep-research-pack/src/lib/run/final-target.ts) | journal 交付事件 / 文件地址 / 终稿路径 → 本次交付 + 会话文件 + 读面定表 + 自动打开判据 | `present`（`deliverables/presented`）是交付的机械判据（node-gate 门②）；`final.md` 在场只说明"有终稿可审"（综合步就落盘），不是交付。地址认领终稿族（根 / `archive/` / `_abandoned/` 三位置 + `final/` 下 `vN.md`、`readable.md`、`readable-vN.md`），`drafts/final.md` 与绝对域全拒；交付记录的位置失效时由 run-context 的 `openRun` 按三位置回退；自动打开 = `shouldOpenFinal`（有交付 / `callId` 未开过 / 焦点不在可编辑元素），present 同时带 reader 与 vN 时优先打开 reader |
+| [final-target](../../packages/deep-research-pack/src/lib/run/final-target.ts) | journal 交付事件 / 文件地址 / 终稿路径 → 本次交付 + 会话文件 + 读面定表 + 地址目标版本 + 自动打开判据 | `present`（`deliverables/presented`）是交付的机械判据（node-gate 门②）；`final.md` 在场只说明"有终稿可审"（综合步就落盘），不是交付。地址认领终稿族（根 / `archive/` / `_abandoned/` 三位置 + `final/` 下 `vN.md`、`readable.md`、`readable-vN.md`），`drafts/final.md` 与绝对域全拒；`final/vN` / `readable-vN` 地址点名的版本是正文身份（缺失即失败，版本账最高号不得覆盖）；`final.md` / 通用地址才回退最高版本/工作稿；交付记录的位置失效时由 run-context 的 `openRun` 按三位置回退；自动打开 = `shouldOpenFinal`（有交付 / `callId` 未开过 / 焦点不在可编辑元素），present 同时带 reader 与 vN 时优先打开 reader |
 | [member-activity](../../packages/deep-research-pack/src/lib/events/member-activity.ts) | 队员 journal 事件 → 检索/抓取/出错动作行 + 全量计数 | 粒度定夺 = [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)（2026-10-10 用户三问：文件读写不入流）；失败行剥 "Error: " 工程前缀；行截尾窗与 activity-fold 同款 |
-| [brief-fold](../../packages/deep-research-pack/src/lib/run/brief-fold.ts) | 既有事实源投影 → 业务摘要五问 | 输入面**不含**证据计数与工具调用数（计数在类型层面进不了完成态文案，keyless 禁词单测钉）；九态优先级 = 挂起 > 立项预检窗 > 未绑定 > 审查 FAIL > 已交付 > 推进中；派生不出的状态显式缺省，不虚构 |
+| [brief-fold](../../packages/deep-research-pack/src/lib/run/brief-fold.ts) | 既有事实源投影 → 业务摘要五问 | 输入面**不含**证据计数与工具调用数（计数在类型层面进不了完成态文案，keyless 禁词单测钉）；优先级 = 挂起 > 立项预检窗 > 未绑定 > **bundle 读失败** > **已交付 × 审查 FAIL（两事实共存）** > 审查 FAIL（未交付政策） > 已交付 > 推进中；`SourceRead` 三态（ok/absent/unreadable）由 `readStateOf` 单一映射；派生不出的状态显式缺省，不虚构 |
 | [workspace-title](../../packages/deep-research-pack/src/lib/workspace/workspace-title.ts) | 工作区目录名 → 产品标题 | 前缀单一正本（client 的 startsWith 过滤与 host 的登记标题共用）；空名 = `Deep Research` |
 | [review-readiness](../../packages/deep-research-pack/src/lib/review/review-readiness.ts) | review.md 全文 → 终局 readiness 三态 | 只认**行首**判定行、取最后一条：文末附录保留的轮次血统（如首轮 `readiness: FAIL`）是行内引用，不得夺权；空模板 `PASS \| FAIL`、无判定行或输入畸形 → `null`（不猜）。驾驶舱、仪表盘与 client-load.entry 直接消费；node-gate 在纯 `.mjs` 边界镜像同一规则并由 `gateBundle` 回归覆盖 |
 | [markdown-mask](../../packages/deep-research-pack/src/lib/shared/markdown-mask.ts) | Markdown 全文 → 剥离块级代码与 HTML 注释后的逐行正文 | 处理引用块与列表缩进容器、围栏代码、缩进代码、反斜杠转义、行内代码跨度及同行/跨行 HTML 注释；由 `review-readiness`、`note-scan` 与 `fix-evidence` 共用同一实现 |
@@ -362,8 +362,11 @@ composer 左侧 `conversation.input.left` 的状态按钮（有 session 才渲�
 
 - **失败态与空态必须可分（2026-10-27 BUG-045）**：读不到数据 ≠ 没有数据。图谱的 journal 绑定
   读取失败曾有与「本会话尚未绑定 run」同形的渲染，一次瞬断就被读成"这个会话还没开始研究"；
-  现在失败走独立文案「绑定状态读取失败」+ 有界重试（3 次 / 2s），恢复后自动补上。新增观察面
-  读取路径时同守此条：catch 里不许只 `console.error` 后落回"空"态。
+  现在失败走独立文案「绑定状态读取失败」+ 有界重试（3 次 / 2s），恢复后自动补上。状态页的
+  bundle / review / evidence 各持 `SourceRead` 三态（ok / absent / unreadable），读失败显示
+  独立失败文案 + 重试，步骤条标 `?`，不折成「研究推进中」「✓ 审查」「证据 0 份」；终稿地址
+  点名的版本缺失 = 失败态，不拿别的版本/工作稿冒充。新增观察面读取路径时同守此条：
+  catch 里不许只 `console.error` 后落回"空"态。
 
 - **版本账 ≠ 交付凭证**：`final/vN.md` 是版本记账（听 HITL2 前模型就会先落 v1），
   「已交付」只由状态页 ⑤ 的 `present` 见证说；终稿页签因此只标「vN（版本账）/当前工作稿」。

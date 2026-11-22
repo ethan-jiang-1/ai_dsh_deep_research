@@ -105,7 +105,7 @@
 |---|---|---|---|---|---|
 | 改 preset 结构（角色/工具行/roster 接线；新增 skill 文件按下行） | pack 源 `presets/` | **`render-overlay` 先于 L1**（L1 挂的是 overlay，不是 pack 源） | L0 + L1 | 行为/发布集变才写 Note | 全部 preset 真挂载绿 + 文档同步 |
 | 改 persona / skill / 手册文本（模型可见） | pack 源 + `research-workspace/` 正本 | `render-overlay` 先于 L1 → L1 → snapshot-replay B 层（CI `snapshot-replay` job 自动跑；本地 `--layers a,b` 定向；细则 = 表后脚注①）→ 重启 run 通道（web 缓存 boot 时文本） | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 + CI B 绿 |
-| **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../design/40-research-cockpit.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` + **可见文案 zh/en 键**（任何界面文本 day-one 双语，步骤 = [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)） | `pnpm build` → `client-load.entry`（改挂起显性化再跑 `client-hitl.entry`） | L0 + client-load.entry | 同上 | 真浏览器断言全绿 |
+| **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../design/40-research-cockpit.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` + **可见文案 zh/en 键**（任何界面文本 day-one 双语，步骤 = [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)） | `pnpm build` → `client-load.entry`（改挂起显性化再跑 `client-hitl.entry`；改状态页事实/终稿目标再跑 `cockpit-truth.entry`） | L0 + client-load.entry + cockpit-truth.entry | 同上 | 真浏览器断言全绿 |
 | 改 `src/lib/` 纯函数 / 类型面（pack 两半的编译面） | 对应 `src/lib` / `src/client` 类型位 | `pnpm typecheck` → `pnpm test`（typecheck 前置 = vendor 构建产物在场） | L0 + typecheck | 同上 | typecheck + 对应测试绿 |
 | **新增/修改机器判据**（门禁/审计/交付决定从散文里判值） | 设计卡 `## 判据形状` + 判据测试（不变量+矩阵） | 先写变异矩阵（红）→ 实现 → L0 | L0 + 判据测试 | 判据形状 + 反证 | 歧义会红 + 矩阵绿 |
 | 加 / 改机械门禁 | `context.mjs` gates 数组 + 该域 `verify/gates/<域>.mjs` + `evaluation.md` §L0 台账（案例表有增删再动 `gates.e2e.mjs`） | **注入回归红 → 还原 → 绿** → `gates.e2e --gate=<改的门禁>` | L0 + `gates.e2e --gate=<改的门禁>`（日常只跑该门禁的案例；全量 = 发布档，见下） | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + `--gate` 绿 |
@@ -166,6 +166,7 @@ node checks/smoke/preset.e2e.mjs         # L1 预检（keyless）；DSH_SMOKE_RE
 cd packages/deep-research-pack && pnpm build   # pack 双半构建（tsc -b . + tsdown → lib/index.js + lib/client.js——观察面 client 面，D18）
 node --import tsx/esm checks/smoke/client-load.entry.mjs    # 观察面 client 面真浏览器加载（keyless：boot web + headless chromium——插件零失败 + 页签与渐进面硬断言；渐进面断言 = 磁盘侧绑定会话的真值对账；失败留 png/html/console/meta 现场；无窗口内交付目标 = exit 2 SKIP；主机不健康 = exit 2 NOT-RUN（预检；失败时连接死亡同判，判据 = lib/host-health））
 node --import tsx/esm checks/smoke/client-load.entry.mjs --seed tests/fixtures/client-load-home --port 3109   # 干净机器/CI：用种子夹具自建 home（会话 + 已交付 bundle；不依赖 dev home/凭据），CI job `client-load` 跑的就是这条
+node --import tsx/esm checks/smoke/cockpit-truth.entry.mjs   # 观察面事实真实性五场景（S1 终稿地址版本 / S1b 目标缺失 / S2 已交付×审查 FAIL / S3 bundle 读失败 / S4 review 读失败 / S5 evidence 读失败）；keyless 真浏览器，dev-only；先 build；失败逐场景点名，exit 1
 node probes/browser/cdp-probe.mjs '<gui-url>' --open-session '<标题>' --open-status --expect-face '<文本>' [--expect-no-leak '<文本>'] [--ask '<消息>'] [--screenshot <path>]   # 交互探针（裸 CDP，借鉴 ai_dsh_loop_advisor）：Playwright actionability 被 DSH UI 挡死时的交互驱动工具——JS 派发点击/输入，JSON 判决；--ask = 完整交互环（输入→发送→等回复）。老会话可能要先在 GUI 里让它进侧栏近列表
 node checks/smoke/release.entry.mjs        # L2 真实安装形状：pack→干净 profile→plugin add→安装域冒烟；无模型调用，安装模式跳过模型就绪检查
 node checks/smoke/cold-start.entry.mjs     # L2 冷启动：独立 DSH_DEV_HOME/profile/端口/state；MCP 关闭；到浏览器面 GREEN

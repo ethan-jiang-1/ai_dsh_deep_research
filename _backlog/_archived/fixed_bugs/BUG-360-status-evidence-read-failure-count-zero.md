@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-360：evidence/ 读不到时状态页显示「证据 0 份」——失败被折成空计数
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S5 仍「0 份」+ ✓ 挖掘）→ 绿证 exit 0（24/24）。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：已修 — 结论：evidence 读失败独立失败态，不显示「证据 0 份」；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 真浏览器五场景（2026-11-22）；原记录：真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S5 仍「0 份」+ ✓ 挖掘）→ 绿证 exit 0（24/24）。
 > 现场 = `runtime/e2e/evidence-read-error-verdict.json` + `evidence-read-error.png`；
 > 夹具 = `runtime/e2e/evidence-read-error-e2e.mjs`。
 
@@ -29,7 +29,7 @@ run 没有证据卡（或证据被删），而实际上 10 张卡都在，只是
 - DSH 不变量：fail-loud — 目录读失败 ≠ 空目录；unreadable 不得折成 0，也不得让流程全绿。
 - 触及面：none — 观察面 client + 测试；不碰入口链/门禁与验收合同/文档合同/pack 公共行为/D 号。
 - 授权：自授权（P2 修理型修复）；2026-11-22 用户 goal 放行。
-- 批：`status-truth-356-360` — 同批卡：356/357/358/359；批计划：[观察面真实性修复程序](../issues/2026-11-22-observation-truthfulness-program.md)。
+- 批：`status-truth-356-360` — 同批卡：356/357/358/359；批计划：[观察面真实性修复程序](../settled_issues/2026-11-22-observation-truthfulness-program.md)。
 
 ## 复现
 

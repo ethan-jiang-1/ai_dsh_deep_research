@@ -6,6 +6,11 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [356](BUG-356-final-tab-ignores-delivered-version.md) | 终稿页签无视交付版本 | （地址目标版本 + 缺失失败） | 2026-11-22 |
+| [357](BUG-357-delivered-review-fail-contradiction.md) | 已交付 + review FAIL 互斥 | （交付×审查矩阵） | 2026-11-22 |
+| [358](BUG-358-status-bundle-read-failure-as-progress.md) | bundle 读失败冒充进度 | （reads 三态 + 重试） | 2026-11-22 |
+| [359](BUG-359-status-review-read-failure-false-green.md) | review 读失败仍 ✓ 审查 | （review 三态 + unknown 步） | 2026-11-22 |
+| [360](BUG-360-status-evidence-read-failure-count-zero.md) | evidence 读失败显示 0 份 | （evidence 三态 + unknown 步） | 2026-11-22 |
 | [353](BUG-353-stalled-banner-after-delivery.md) | 已交付 run 仍显示停摆 | （交付前置门） | 2026-11-22 |
 | [354](BUG-354-stalled-banner-unbound-session.md) | 未绑定会话显示停摆 | （绑定前置门） | 2026-11-22 |
 | [355](BUG-355-graph-plan-read-failure-as-missing.md) | 图谱读失败冒充无 plan | （planState error） | 2026-11-22 |

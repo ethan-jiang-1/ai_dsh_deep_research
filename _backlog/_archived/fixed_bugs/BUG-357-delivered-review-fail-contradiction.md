@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-357：已交付 run 的 review.md 变 FAIL 后，状态页同时说「报告不交付」和「已交付」
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S2 出现「报告不交付」）→ 绿证 exit 0（24/24）。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：已修 — 结论：已交付×审查 FAIL 合法共存，不再出现「报告不交付」；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 真浏览器五场景（2026-11-22）；原记录：真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S2 出现「报告不交付」）→ 绿证 exit 0（24/24）。
 > 现场 = `runtime/e2e/review-fail-verdict.json` + `review-fail.png`；
 > 夹具 = `runtime/e2e/review-fail-e2e.mjs`。
 
@@ -33,7 +33,7 @@ opened: 2026-11-22
 - DSH 不变量：fail-loud — 合法共存的两个事实（已交付历史 + 新审查失败）必须同时说清，不得互相否定。
 - 触及面：none — 观察面文案/折算 + 测试；不碰入口链/门禁与验收合同/文档合同/pack 公共行为/D 号。
 - 授权：自授权（P2 修理型修复）；2026-11-22 用户 goal 放行。
-- 批：`status-truth-356-360` — 同批卡：356/358/359/360；批计划：[观察面真实性修复程序](../issues/2026-11-22-observation-truthfulness-program.md)。
+- 批：`status-truth-356-360` — 同批卡：356/358/359/360；批计划：[观察面真实性修复程序](../settled_issues/2026-11-22-observation-truthfulness-program.md)。
 
 ## 复现
 

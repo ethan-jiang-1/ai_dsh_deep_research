@@ -6,6 +6,9 @@
 
 | 对象 | 当前决定 | 具体观察（出现位置） | owner |
 |---|---|---|---|
+| 观察面五场景守卫（dev-only） | `checks/smoke/cockpit-truth.entry.mjs` 在树内、五场景本机真浏览器 24/24；未进 CI/nightly（真浏览器 + 文件突变 + 主机负载敏感） | 连续两轮发布/nightly 稳定，或 client-load 相位吸收五场景 → 升 nightly；五场景任一在真实改动上复发 → 引用批 Note 建卡，不重开已修卡 | [批 Note](../notes/implemented/2026-11-22-observation-truthfulness.md) |
+| 观察面 en 浏览器装配 | en 字典/折叠 i18n 有单测；浏览器仍以 zh-CN 为主，未跑 en 装配面（J16 旧缺口） | 下一次 en 装配夹具出现，或用户报告英文界面混排 → 跑 cockpit-truth 五场景 en + en 文案断言；仍无夹具则不做 | [批 Note](../notes/implemented/2026-11-22-observation-truthfulness.md) |
+| 终稿通用地址（final.md）回退 | `final/vN` / `readable-vN` 地址目标优先；`final.md` / `readable.md` 通用地址保留「最新/工作稿」回退 | 用户要求 `final.md` 地址固定看当前工作稿（或固定看最新交付），或出现交付目标与工作稿混淆的真实阅读 → 改 `finalTargetOf` 的 fallback 合同并补 S1 邻接 | [BUG-356](_archived/fixed_bugs/BUG-356-final-tab-ignores-delivered-version.md) |
 | 图谱旧图快照读取失败 | plan/vN 快照读取失败仍落 `snapshotState='missing'`，但 UI 文案是 `oldGraphUnread`（读不到）——未发现「说成缺席」的措辞 | 若文案被改成缺席措辞，或快照读取失败需要独立失败态时，建卡 | [批 Note](../notes/implemented/2026-11-21-bug-stack-repair.md) |
 | Pack 生产源头强制（P） | **以后做**：D 已统一 plan 节点表解释（观察/硬门共用解码事实），但通用 write/edit、Task 创建/回填与派工链未受保护；不声称唯一写方 | 真实 run 出现坏 plan（缺/空 budget·task_id、多表、转义管道）被派工，或消费方因此误判 → 引用旧卡新建，不重开已结卡 | [已结卡](_archived/settled_issues/2026-11-20-pack-production-prevention.md) |
 | 351 的浏览器横幅/tick | fold + 真 follow 快照重放已证（`stalled=true`）；`client-load --seed` 因主机 load 20.6 NOT-RUN | 下一次 client-load/dev-home 运行：打开合成停摆会话应显示横幅，停留 2min 应在 ≤60s 内跨阈值；误报/漏报则建卡 | [BUG-351](_archived/fixed_bugs/BUG-351-stalled-banner-reset-by-open-events.md) |

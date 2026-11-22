@@ -2,6 +2,7 @@
 // cockpit-truth.entry.mjs — 驾驶舱观察面「事实真实性」五场景（keyless、真浏览器、entry lane）。
 //
 // 为什么独立成一条入口（2026-11-22 观察面真实性修复程序，BUG-356…360）：
+// 批 Note = notes/implemented/2026-11-22-observation-truthfulness.md（2026-11-22 收口；五卡 356–360）。
 //   五个缺陷都在「页面显示的事实」而不在 reader 层：终稿页签无视地址版本、交付×审查互相否定、
 //   bundle/review/evidence 读失败被折成进度/absent/0。单测各自自洽，只有把真实 seed 接上才看得见；
 //   五条一次性夹具住 runtime/e2e（gitignored），不能当永久守卫。本件把五场景升格为提交物：

@@ -131,3 +131,11 @@
   要做 reader 扫描。本轮有界扫描：final tab、method-library、run-context 已区分 missing/unreadable；
   图谱快照轨仍用 `snapshotState='missing'` 但文案是 `oldGraphUnread`，登记 trigger 复核，不建卡。
 - 未证边界：无（三张卡的现场浏览器脚本均复跑绿）。
+
+### 2026-11-22 第三批（BUG-356…360）
+
+- 第二批的「读失败 ≠ 缺席」按 reader 扫描，未覆盖消费者：`useStatusFeed` 仍把 `Outcome` 折平，
+  终稿页签仍按版本账重算目标。第三批把观察面事实模型（`SourceRead` / `StatusReads`）、地址目标版本、
+  交付×审查矩阵一次补齐；五卡证据与决定 = [观察面事实真实性 Note](2026-11-22-observation-truthfulness.md)。
+- 本批补充 355 的类级结论：读失败要修在消费者边界（bundle/review/evidence 三态 + 步骤 unknown），
+  不只在 reader；浏览器五场景入口 = `checks/smoke/cockpit-truth.entry.mjs`。

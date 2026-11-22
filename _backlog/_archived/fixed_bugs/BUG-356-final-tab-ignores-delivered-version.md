@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-356：终稿页签无视交付版本——已交付 v1，点「读终稿」却显示未交付的 v2 草稿
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 `--scenario S1` exit 1（v2 冒充）→ 绿证 exit 0（v1）。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：已修 — 结论：地址目标版本优先，目标缺失即失败态，不拿未交付版冒充；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 真浏览器五场景（2026-11-22）；原记录：真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 `--scenario S1` exit 1（v2 冒充）→ 绿证 exit 0（v1）。
 > 现场 = `runtime/e2e/final-version-verdict.json` + `final-version.png`；
 > 夹具 = `runtime/e2e/final-version-e2e.mjs`。
 
@@ -37,7 +37,7 @@ This v2 is a later draft; the delivered version is v1.
 - DSH 不变量：fail-loud — 地址指向的交付目标缺失时必须显式失败，不得静默换文件/换版本。
 - 触及面：none — 观察面 client + 测试；不碰入口链/门禁与验收合同/文档合同/pack 公共行为/D 号。
 - 授权：自授权（P2 修理型修复）；2026-11-22 用户 goal 放行。
-- 批：`status-truth-356-360` — 同批卡：357/358/359/360；批计划：[观察面真实性修复程序](../issues/2026-11-22-observation-truthfulness-program.md)。
+- 批：`status-truth-356-360` — 同批卡：357/358/359/360；批计划：[观察面真实性修复程序](../settled_issues/2026-11-22-observation-truthfulness-program.md)。
 
 ## 复现
 

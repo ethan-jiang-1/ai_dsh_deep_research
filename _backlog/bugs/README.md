@@ -8,20 +8,24 @@
 > （fixed + suspended）的已分配最大号 + 1（按盘上两区实算，不登记实值——登记 = 第二份手抄件必腐）。
 > 规矩手册 = [`../README.md`](../README.md)；本区子树指令 = [`../AGENTS.md`](../AGENTS.md)；
 > 方法 = [`../methods/bug-to-fix.md`](../methods/bug-to-fix.md)——先判表面/边界，再按状态翻转收证据（DSH 插件 = 多边界组合，低边界绿不算修好）。
-> 2026-11-21 起的缺陷积压修复程序（20 张活跃分 5 簇，另有 11 张迁暂停池；不做旧产物兼容）= [修复计划](../issues/2026-11-21-bug-stack-repair-program.md)。
-> 2026-11-22 起的观察面真实性修复程序（5 张活跃 356–360：读失败三态 / 交付目标 / 交付×审查）= [修复计划](../issues/2026-11-22-observation-truthfulness-program.md)。
+> 2026-11-21 起的缺陷积压修复程序（20 张活跃分 5 簇，另有 11 张迁暂停池；不做旧产物兼容）= [修复计划](../_archived/settled_issues/2026-11-21-bug-stack-repair-program.md)。
+> 2026-11-22 起的观察面真实性修复程序（5 张活跃 356–360：读失败三态 / 交付目标 / 交付×审查）= [修复计划](../_archived/settled_issues/2026-11-22-observation-truthfulness-program.md)。
 
 ## 活跃列表
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-356](BUG-356-final-tab-ignores-delivered-version.md) | 排查中 | P2 | 终稿页签无视交付版本——已交付 v1，点「读终稿」却显示未交付的 v2 草稿 |
-| [BUG-357](BUG-357-delivered-review-fail-contradiction.md) | 排查中 | P2 | 已交付 run 的 review.md 变 FAIL 后，状态页同时说「报告不交付」和「已交付」 |
-| [BUG-358](BUG-358-status-bundle-read-failure-as-progress.md) | 排查中 | P2 | 绑定 bundle 读不到时状态页仍说「研究推进中」——失败被折成进度 |
-| [BUG-359](BUG-359-status-review-read-failure-false-green.md) | 排查中 | P2 | review.md 读不到时状态页仍显示「✓ 审查」——读失败被折成 absent |
-| [BUG-360](BUG-360-status-evidence-read-failure-count-zero.md) | 排查中 | P2 | evidence/ 读不到时状态页显示「证据 0 份」——失败被折成空计数 |
+| — | — | — | 当前无活跃卡（2026-11-22：356–360 五卡修复归档） |
 
 ## 最近归档
+
+（2026-11-22 观察面真实性批（5 张，356–360），批 Note = [2026-11-22-observation-truthfulness](../../notes/implemented/2026-11-22-observation-truthfulness.md)：
+[356](../_archived/fixed_bugs/BUG-356-final-tab-ignores-delivered-version.md) 终稿地址版本；
+[357](../_archived/fixed_bugs/BUG-357-delivered-review-fail-contradiction.md) 交付×审查矩阵；
+[358](../_archived/fixed_bugs/BUG-358-status-bundle-read-failure-as-progress.md) bundle 读取失败；
+[359](../_archived/fixed_bugs/BUG-359-status-review-read-failure-false-green.md) review 读取失败；
+[360](../_archived/fixed_bugs/BUG-360-status-evidence-read-failure-count-zero.md) evidence 读取失败。
+）
 
 （2026-11-21 不再修的 12 张迁入[暂停池](../_archived/suspended_bugs/README.md)：320/321/322/323/324/325/326/330/331/332/337/339——8 张被 `71010fef` 的新启动所有权取代、2 张实现已入树而最终反控未跑、1 张为获批合同取向、1 张（330）已由 BUG-313 修复；用户直派，不按缺陷修，也不为它们制造修复证据。）
 
