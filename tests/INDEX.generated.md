@@ -145,6 +145,7 @@
 | plan | `plan/plan-graph` | `tests/cockpit/lib/plan/plan-graph.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | plan | `plan/plan-index` | `tests/cockpit/lib/plan/graph-model.spec.mjs`<br>`tests/cockpit/lib/plan/plan-diff.spec.mjs`<br>`tests/cockpit/lib/plan/plan-index.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | review | `review/review-readiness` | `tests/contracts/markdown-mask-conformance.spec.mjs`<br>`tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/review-readiness.spec.mjs`<br>`tests/run/gates/run-context.spec.mjs`<br>`tests/run/harness/run-accept-fixture.spec.mjs` |
+| run | `run/artifact-read` | `tests/cockpit/lib/run/artifact-read.spec.mjs` |
 | run | `run/binding-trust` | `tests/run/gates/binding-trust.spec.mjs` |
 | run | `run/brief-fold` | `tests/cockpit/lib/run/brief-fold.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | run | `run/bundle-bind` | `tests/run/gates/bundle-bind.spec.mjs` |

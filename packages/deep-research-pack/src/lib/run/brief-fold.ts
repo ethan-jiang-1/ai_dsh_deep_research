@@ -14,26 +14,10 @@
  */
 import { translateZh, type PackTranslate } from '../shared/i18n.ts'
 
-/** 一个观察面事实的读取三态（BUG-358/359/360）：读失败绝不折成 absent/空/进度。 */
-export type SourceRead = 'ok' | 'absent' | 'unreadable'
-
-/** 状态页三个显示事实的读取态（数据装配层构造，视图/摘要只消费）。 */
-export interface StatusReads {
-  readonly bundle: SourceRead
-  readonly review: SourceRead
-  readonly evidence: SourceRead
-}
-
-/**
- * `run-context.Outcome`（或「未尝试」的 null）→ 三态。
- * null = 文件/目录确实不在场（调用方先判 hasFile/hasDir）；ok=false 的 missing 仍是 absent；
- * unreadable 必须原样保留——这是「读失败 ≠ 缺席」的唯一映射点。
- */
-export function readStateOf(outcome: { readonly ok: boolean; readonly reason?: 'missing' | 'unreadable' } | null): SourceRead {
-  if (outcome === null) return 'absent'
-  if (outcome.ok) return 'ok'
-  return outcome.reason === 'missing' ? 'absent' : 'unreadable'
-}
+// 读取三态/工件五态的正本已收进 artifact-read（BUG-361…368：文本工件还需要 empty/invalid）；
+// 旧 import 点（useStatusFeed/测试）仍可从本文件取到同名符号。
+export type { ArtifactState, SourceRead, StatusReads } from './artifact-read.ts'
+export { readStateOf } from './artifact-read.ts'
 
 
 /** 业务摘要折算输入（全部为既有事实源的投影；调用方从 journal 流 + workspaceFiles 组装）。 */

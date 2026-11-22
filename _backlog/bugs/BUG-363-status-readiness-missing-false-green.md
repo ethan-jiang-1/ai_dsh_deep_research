@@ -1,12 +1,12 @@
 ---
-status: 排查中
+status: 修复就绪
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-363：review/ 在场但 readiness.json 缺席/不可读时，状态页仍显示「✓ 审查」
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：排查中 — 真浏览器现场已复现；按用户指令只报不修。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复就绪 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权。
 > 现场 = `runtime/e2e/status-readiness-verdict.json`（不可读）+
 > `runtime/e2e/status-readiness-missing-verdict.json`（缺席）；截图同名 png；
 > 夹具 = `runtime/e2e/status-fixture-e2e.mjs readiness` / `status-readiness-missing-e2e.mjs`。
@@ -26,7 +26,18 @@ bundle 有 `review/` 目录，但 `review/readiness.json` **缺席**或**不可�
 页面把「结构化审查声明缺失/坏掉」显示成「审查通过（✓ 审查）」。canonical 合同要求
 `review/readiness.json` v2 必须声明；缺席/非法在门禁侧是红，观察面却给绿。
 
-## 证据
+## 分诊与授权
+
+- 严重级：P2 — 结构化 readiness 声明缺席/坏掉被 prose PASS 顶替，页面给「✓ 审查」。
+- 表面 / 边界：pack client（状态页/终稿页签）/ 浏览器（真驾驶舱）。
+- DSH 不变量：fail-loud — canonical 声明缺席/非法必须显示审查未定/失败；prose 不是结构化声明的替代。
+- 触及面：none — 观察面 client + 测试；不碰入口链/门禁与验收合同/文档合同/pack 公共行为/D 号。
+- 授权：自授权（P2 修理型修复）；2026-11-22 用户 goal 放行。
+- 批：`artifact-truth-361-368` — 同批卡：361/362/363/364/365/366/367/368；批计划：[观察面工件真实性修复程序](../issues/2026-11-22-observation-artifact-truth-program.md)。
+
+## 复现
+
+复现状态：稳定 — 真浏览器 seed 夹具（2026-11-22 复跑仍红）。
 
 seed 已交付 run：
 
@@ -72,7 +83,16 @@ const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : 
 `reviewState === 'ok'`（review.md 可读）判 done → ✓ 审查。于是 canonical 声明的缺席/坏掉
 被静默吞掉，只剩 prose 的 PASS 在起作用。
 
-## 修法方向（未实施）
+根因证据：2026-11-22 复跑 `runtime/e2e/status-fixture-e2e.mjs readiness` 与 `status-readiness-missing-e2e.mjs readiness` → 二者均 `reviewFail:false`、text 命中「✓ 审查」；`readinessOfSources` 的 `source:'missing'` 被 `useStatusFeed` 折 `null`，步骤条又用 `reviewState==='ok'` 判 done。
+
+## 牵出的失败类
+
+- 同族第 2 次（359 review 读失败；363 判据来源缺席/坏被 prose PASS 顶替）｜处置：类修 — `reviewVerdict` 四态 + `readinessOfSources` 全 source 映射。
+- 探针价值：所有「结构化声明与散文副本并存的判据」。
+
+## 修法
+
+落层：`artifact-read` + `reviewVerdict` + `useStatusFeed` + `review-readiness` 全 source 映射 + `run-fold`；P3b 实施。
 
 - `useStatusFeed` 把 `source:'missing'`/`'ambiguous'`（以及 readiness 解析失败）映射成
   **审查未定/失败**，不要只认 declaration/prose。
@@ -90,3 +110,7 @@ const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : 
 - 红证：把 `source:'missing'` 分支改回 `null` → 本夹具再次出现 ✓ 审查，exit 1；还原后绿。
 - guard 落点：`useStatusFeed` 的 readiness 四态矩阵（declaration/prose/missing/ambiguous），
   或浏览器层用例（本 seed 夹具可升格）。
+
+## 修复关联
+
+P3b 落地；守卫 = `tests/run/gates/readiness-declaration.spec.mjs` 全 source + `brief-fold.spec` unconfirmed + `run-fold.spec` + `checks/smoke/cockpit-artifact-truth.entry.mjs` S8/S9；去向 = implemented — 批 Note。

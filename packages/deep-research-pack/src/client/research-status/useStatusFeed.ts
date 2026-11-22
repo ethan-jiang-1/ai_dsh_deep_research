@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { deriveAnchors, foldHitlPending, type HitlState } from '../../lib/events/hitl-fold.ts'
 import { deriveSteps, latestRunVersion } from '../../lib/run/run-fold.ts'
-import { readStateOf, type StatusReads } from '../../lib/run/brief-fold.ts'
+import { readArtifact, readStateOf, type StatusReads } from '../../lib/run/artifact-read.ts'
 import { foldActivityRows, type ActivityRow } from '../../lib/events/activity-fold.ts'
 import type { MemberActivitySummary } from '../../lib/events/member-activity.ts'
 import { bindingTrust, type BindingTrust } from '../../lib/run/binding-trust.ts'
@@ -27,6 +27,11 @@ import type { BundleFace } from './types.ts'
 
 /** 30s 重扫间隔（bundle 文件变化不高频；团队面板同款节奏）。 */
 const REFRESH_MS = 30_000
+
+/** 初始/无绑定时的读取态：六个事实都还没有读到。 */
+const ABSENT_READS: StatusReads = {
+  bundle: 'absent', question: 'absent', review: 'absent', readiness: 'absent', evidence: 'absent', receipt: 'absent',
+}
 
 /** 绑定可信性的值键（状态页全值比对重扫用：kind/slug/reason 任一变化都要重扫）。 */
 function trustKey(trust: BindingTrust): string {
@@ -75,7 +80,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   const [nowTick, setNowTick] = useState(() => Date.now())
   const [kickoffHold, setKickoffHold] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [reads, setReads] = useState<StatusReads>({ bundle: 'absent', review: 'absent', evidence: 'absent' })
+  const [reads, setReads] = useState<StatusReads>(ABSENT_READS)
   const [scanSettled, setScanSettled] = useState(false)
   const [retryNonce, setRetryNonce] = useState(0)
   const retry = useCallback(() => { setScanSettled(false); setRetryNonce((n) => n + 1) }, [])
@@ -116,7 +121,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     setFace(null)
     setUnbound(false)
     setKickoffHold(false)
-    setReads({ bundle: 'absent', review: 'absent', evidence: 'absent' })
+    setReads(ABSENT_READS)
     setScanSettled(false)
     setMemberSummaries({})
     void (async () => {
@@ -182,7 +187,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     if (sessionId === undefined || trust.kind !== 'bound') {
       setFace(null)
       setReceiptDelivery(null)
-      setReads({ bundle: 'absent', review: 'absent', evidence: 'absent' })
+      setReads(ABSENT_READS)
       setScanSettled(false)
       setUnbound(trust.kind === 'unbound' && journalSeen)
       setKickoffHold(trust.kind === 'suppressed' && trust.reason === 'kickoff')
@@ -200,7 +205,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         if (!opened.ok) {
           setFace(null)
           setReceiptDelivery(null)
-          setReads({ bundle: readStateOf(opened), review: 'absent', evidence: 'absent' })
+          setReads({ ...ABSENT_READS, bundle: readStateOf(opened) })
           setScanSettled(true)
           return
         }
@@ -217,19 +222,16 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const finalFileNames = finalDir !== null && finalDir.ok
           ? finalDir.value.filter((entry) => entry.type === 'file').map((entry) => entry.name)
           : []
-        // 交付回执（持久事实）：窗口外的 present 由它兜底；畸形回执只是不兜底，不冒充。
-        const receiptRead = names.has('delivered.json') ? await view.read('delivered.json', { signal }) : null
+        // 回执（持久事实）：统一工件读取；只有 ok 才尝试 deliveryFromReceipt（invalid/empty/unreadable
+        // 不冒充缺席，P3 再出「回执读取失败/不合法」提示）。
+        const receiptArt = await readArtifact(view, 'delivered.json', { signal })
         if (stopped) return
-        let receiptValue: unknown = null
-        if (receiptRead !== null && receiptRead.ok) {
-          try { receiptValue = JSON.parse(receiptRead.value.text) } catch { receiptValue = null }
-        }
-        setReceiptDelivery(deliveryFromReceipt(receiptValue, boundSlug))
+        setReceiptDelivery(receiptArt.state === 'ok' ? deliveryFromReceipt(receiptArt.json, boundSlug) : null)
         const versions = latestRunVersion(finalFileNames)
         // 版本面事实：plan 头/重写记录 + plan/ 快照清单（rerun 版本轨的数据源，折算住 run-version）。
-        const planRead = view.hasFile('plan.md') ? await view.read('plan.md', { signal }) : null
+        const planArt = await readArtifact(view, 'plan.md', { signal })
         if (stopped) return
-        const planText = planRead !== null && planRead.ok && !planRead.value.truncated ? planRead.value.text : null
+        const planText = planArt.state === 'ok' ? planArt.text : null
         const planDir = names.has('plan') ? await view.list('plan', { signal }) : null
         if (stopped) return
         const planSnapshotNames = planDir !== null && planDir.ok
@@ -238,25 +240,34 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         // review 终局 readiness（业务摘要审查态的数据源）：判定规则收在 pack lib
         // `review-readiness.terminalReadiness`——只认**行首**判定行、取最后一条。run-context
         // 的 review 策略是读到 eof：终局判定在文末，固定行窗会读到中段旧 FAIL（BUG-036 同族）。
-        const reviewRead = view.hasFile('review.md') ? await view.read('review.md', { signal }) : null
+        const reviewArt = await readArtifact(view, 'review.md', { signal })
         if (stopped) return
-        let reviewState = readStateOf(reviewRead)
-        if (reviewState === 'ok' && reviewRead !== null && reviewRead.ok && reviewRead.value.truncated) reviewState = 'unreadable'
-        const reviewText = reviewState === 'ok' && reviewRead !== null && reviewRead.ok ? reviewRead.value.text : null
+        // P1 保持既有步骤语义：empty 仍按「读到」处理（P3 再改成终局判定）；unreadable/absent 原样。
+        const reviewState: 'ok' | 'absent' | 'unreadable' = reviewArt.state === 'ok' || reviewArt.state === 'empty'
+          ? 'ok'
+          : reviewArt.state === 'absent' ? 'absent' : 'unreadable'
+        const reviewText = reviewArt.state === 'ok' ? reviewArt.text : null
         // 终局 readiness 与门禁同源（D51）：声明件优先，散文只做副本；无 review/ 的旧场回退散文。
-        const declRead = view.hasFile('review/readiness.json') ? await view.read('review/readiness.json', { signal }) : null
+        const readinessArt = await readArtifact(view, 'review/readiness.json', { signal })
         if (stopped) return
-        const declarationText = declRead !== null && declRead.ok && !declRead.value.truncated ? declRead.value.text : null
+        const declarationText = readinessArt.state === 'ok' ? readinessArt.text : null
         const reading = readinessOfSources({ reviewText, declarationText, hasReviewDir: names.has('review') })
         const readiness = (reading.source === 'declaration' || reading.source === 'prose') && typeof reading.pass === 'boolean'
           ? (reading.pass ? 'PASS' : 'FAIL')
           : null
         const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null
-        setReads({ bundle: 'ok', review: reviewState, evidence: evidenceState })
-        setScanSettled(true)
-        const questionRead = view.hasFile('question.md') ? await view.read('question.md', { signal }) : null
+        const questionArt = await readArtifact(view, 'question.md', { signal })
         if (stopped) return
-        const questionText = questionRead !== null && questionRead.ok ? questionRead.value.text : null
+        const questionText = questionArt.state === 'ok' ? questionArt.text : null
+        setReads({
+          bundle: 'ok',
+          question: questionArt.state,
+          review: reviewArt.state,
+          readiness: readinessArt.state,
+          evidence: evidenceState,
+          receipt: receiptArt.state,
+        })
+        setScanSettled(true)
         // G3（RFC cockpit-flow-face）：剥 markdown 强调符再截断——`**` 与反引号是源文件
         // 标记不是内容；截断补省略号，不在字中间装作完整句。
         const raw = questionText?.split('\n').find((l) => l.trim() !== '' && !l.startsWith('#')) ?? null
@@ -293,7 +304,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         if (stopped) return
         setFace(null)
         setReceiptDelivery(null)
-        setReads({ bundle: 'unreadable', review: 'absent', evidence: 'absent' })
+        setReads({ ...ABSENT_READS, bundle: 'unreadable' })
         setScanSettled(true)
       }
     }

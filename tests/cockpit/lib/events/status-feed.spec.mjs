@@ -41,22 +41,25 @@ test('BUG-117/118 切会话清 trust/face/unbound；leads/findings 走 hasFile',
 // 红配方：把 useStatusFeed 的声明读取删掉、退回 terminalReadiness → 本组断言红。
 test('D51 接线：状态页读 review/readiness.json，并与门禁共用 readinessOfSources', () => {
   const source = readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/research-status/useStatusFeed.ts'), 'utf8')
-  assert.match(source, /view\.hasFile\('review\/readiness\.json'\)/)
+  assert.match(source, /readArtifact\(view, 'review\/readiness\.json'/)
   assert.match(source, /readinessOfSources\(\{ reviewText, declarationText, hasReviewDir: names\.has\('review'\) \}\)/)
 })
 
 // 负例留证 2026-11-22：BUG-358/359/360——旧实现把 openRun/read/list 的 Outcome 折成 null/0，
-// 视图无法区分读失败与缺席/空/进度。红配方：把 readStateOf 换回 `ok ? ... : null/0` → 本组断言红。
+// 视图无法区分读失败与缺席/空/进度。红配方：把 readArtifact/readStateOf 换回 `ok ? ... : null/0` → 本组断言红。
 test('BUG-358/359/360 接线：bundle/review/evidence 的 Outcome 进 reads 三态，不折平', () => {
   const source = readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/research-status/useStatusFeed.ts'), 'utf8')
-  assert.match(source, /setReads\(\{ bundle: readStateOf\(opened\)/, 'bundle openRun 失败必须进 reads')
+  assert.match(source, /setReads\(\{ \.\.\.ABSENT_READS, bundle: readStateOf\(opened\)/, 'bundle openRun 失败必须进 reads')
   assert.match(source, /const evidenceState = readStateOf\(evidenceDir\)/, 'evidence list 失败必须进 reads')
-  assert.match(source, /let reviewState = readStateOf\(reviewRead\)/, 'review read 失败必须进 reads')
-  assert.match(source, /setReads\(\{ bundle: 'ok', review: reviewState, evidence: evidenceState \}\)/, '成功扫描必须写回三态')
+  assert.match(source, /readArtifact\(view, 'review\.md'/, 'review 工件读取必须走统一入口')
+  assert.match(source, /readArtifact\(view, 'question\.md'/, 'question 工件读取必须走统一入口')
+  assert.match(source, /readArtifact\(view, 'delivered\.json'/, '回执读取必须走统一入口')
+  assert.match(source, /setReads\(\{\n\s+bundle: 'ok',\n\s+question: questionArt\.state,/, '成功扫描必须写回六事实状态')
   assert.match(source, /unknown: \[/, '读失败步必须进 deriveSteps unknown')
   assert.match(source, /setRetryNonce\(/, '失败横幅必须有重试入口')
   assert.match(source, /const \[reads, setReads\]/, 'reads 必须是状态（视图可消费）')
   assert.match(source, /scanSettled/, '首扫未落定时不得把「还没读到」显示成失败')
+  assert.doesNotMatch(source, /view\.read\(/, '状态页不得裸 view.read——工件读取必须走 readArtifact（G19）')
 })
 
 test('BUG-358/359/360 视图：失败横幅/重试/证据行使用三态文案键', () => {

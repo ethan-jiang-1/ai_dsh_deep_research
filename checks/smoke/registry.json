@@ -118,6 +118,20 @@
     "sunset": "当 client-load 相位吸收五场景，或纯函数矩阵 + DOM 快照能覆盖用户可见结果时退役",
     "lane": "entry"
   },
+  "cockpit-artifact-truth.entry.mjs": {
+    "tier": "dev-only",
+    "reason": "真浏览器 + 九场景文件突变（chmod/空文件/会话日志）；主机负载敏感，先阶段验收/手动跑，稳定后再议 nightly",
+    "cost": "medium",
+    "uniqueClaim": "观察面工件真实性九场景：question/receipt/readiness 读失败，空 reader/body/review/question，读者版读失败回退可见",
+    "oracle": [
+      "tests/cockpit/lib/run/artifact-read.spec.mjs",
+      "tests/run/gates/final-target.spec.mjs",
+      "tests/cockpit/lib/run/brief-fold.spec.mjs",
+      "tests/run/shared/run-fold.spec.mjs"
+    ],
+    "sunset": "当 cockpit-truth 或 client-load 相位吸收九场景，或纯函数矩阵 + DOM 快照覆盖用户可见结果时退役",
+    "lane": "entry"
+  },
   "cold-start.entry.mjs": {
     "tier": "nightly",
     "reason": "干净室安装（仓外 home + tarball）——nightly 跑，失败可诊断",

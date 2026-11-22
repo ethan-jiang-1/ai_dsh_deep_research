@@ -1,0 +1,61 @@
+// artifact-read 回归 — 观察面工件五态与唯一读取器（keyless 纯函数 + 假 view）。
+// 反证口径：0 字节 question/review/final、坏 JSON 回执、truncated 都不得落 ok/absent；
+// 未登记工件不得猜策略（invalid），否则新读取点又会静默折平（BUG-361…368 的类）。
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import {
+  ARTIFACT_POLICY, artifactPolicyOf, artifactStateOf, readArtifact, readStateOf,
+} from '../../../../packages/deep-research-pack/src/lib/run/artifact-read.ts'
+
+const POLICY = { nonEmpty: true, json: false }
+const OUT = (text, extra = {}) => ({ ok: true, value: { text, ...extra } })
+const MISSING = { ok: false, reason: 'missing' }
+const UNREADABLE = { ok: false, reason: 'unreadable' }
+
+test('readStateOf：null/missing = absent；ok = ok；unreadable 原样', () => {
+  assert.equal(readStateOf(null), 'absent')
+  assert.equal(readStateOf({ ok: true }), 'ok')
+  assert.equal(readStateOf(MISSING), 'absent')
+  assert.equal(readStateOf(UNREADABLE), 'unreadable')
+  assert.equal(readStateOf({ ok: false }), 'unreadable')
+})
+
+test('artifactStateOf：outcome × 空/非空/truncated × policy → 五态', () => {
+  assert.equal(artifactStateOf(null, POLICY), 'absent')
+  assert.equal(artifactStateOf(MISSING, POLICY), 'absent')
+  assert.equal(artifactStateOf(UNREADABLE, POLICY), 'unreadable')
+  assert.equal(artifactStateOf(OUT('内容'), POLICY), 'ok')
+  assert.equal(artifactStateOf(OUT(''), POLICY), 'empty', '0 字节非空工件 = empty')
+  assert.equal(artifactStateOf(OUT('  \n\t'), POLICY), 'empty', '纯空白 = empty')
+  assert.equal(artifactStateOf(OUT('内容', { truncated: true }), POLICY), 'unreadable', 'truncated = 未读全，不是 ok')
+  assert.equal(artifactStateOf(OUT(''), { nonEmpty: false, json: false }), 'ok', '允许空的工件（plan）空 = ok')
+  assert.equal(artifactStateOf(OUT('内容'), null), 'invalid', '未登记策略 = invalid，不猜')
+})
+
+test('artifactPolicyOf：固定表 + final 动态名；未知 = null', () => {
+  for (const name of ['question.md', 'review.md', 'review/readiness.json', 'delivered.json', 'plan.md', 'final.md', 'final/readable.md']) {
+    assert.ok(artifactPolicyOf(name) !== null, `缺策略 ${name}`)
+    assert.ok(Object.hasOwn(ARTIFACT_POLICY, name), `固定表缺 ${name}`)
+  }
+  assert.deepEqual(artifactPolicyOf('final/v1.md'), { nonEmpty: true, json: false })
+  assert.deepEqual(artifactPolicyOf('final/readable-v2.md'), { nonEmpty: true, json: false })
+  assert.equal(artifactPolicyOf('final/v0.md'), null)
+  assert.equal(artifactPolicyOf('delivered.json.bak'), null)
+  assert.equal(artifactPolicyOf('notes/final.md'), null)
+})
+
+test('readArtifact：question 空/读失败；回执 JSON 好/坏；未登记不读', async () => {
+  const calls = []
+  const view = (outcome) => ({ read: async (name) => { calls.push(name); return outcome } })
+  assert.deepEqual(await readArtifact(view(OUT('Q')), 'question.md'), { state: 'ok', text: 'Q', json: null })
+  assert.deepEqual(await readArtifact(view(OUT('')), 'question.md'), { state: 'empty', text: null, json: null })
+  assert.deepEqual(await readArtifact(view(UNREADABLE), 'question.md'), { state: 'unreadable', text: null, json: null })
+  assert.deepEqual(await readArtifact(view(OUT('')), 'plan.md'), { state: 'ok', text: '', json: null })
+  const receipt = { version: 1, slug: 'drt_x', acceptedAt: 't', gate: { status: 'PASS' } }
+  assert.deepEqual(await readArtifact(view(OUT(JSON.stringify(receipt))), 'delivered.json'), { state: 'ok', text: JSON.stringify(receipt), json: receipt })
+  assert.deepEqual(await readArtifact(view(OUT('{bad json')), 'delivered.json'), { state: 'invalid', text: null, json: null })
+  assert.deepEqual(await readArtifact(view(OUT('{"version":1}')), 'review/readiness.json'), { state: 'ok', text: '{"version":1}', json: { version: 1 } })
+  calls.length = 0
+  assert.deepEqual(await readArtifact(view(OUT('x')), 'unknown.md'), { state: 'invalid', text: null, json: null })
+  assert.deepEqual(calls, [], '未登记工件不得发起读取')
+})
