@@ -69,9 +69,24 @@ export function shouldOpenFinal(
 
 /** 页签体允许读的三个路径——读面是一张定表，不是任意路径参数。 */
 interface FinalReadPlan {
+  readonly dir: string
   readonly final: string
   readonly review: string
   readonly versions: string
+  /** 地址在 bundle 内的相对路径（`final.md` / `final/v1.md` / `final/readable-v1.md`），目标身份的正本。 */
+  readonly target: string
+}
+
+/** 地址目标 → 正文/读者版/版本（BUG-356：地址目标优先，版本账最高号不得覆盖它）。 */
+export interface FinalTargetPlan {
+  /** 地址点名的版本；null = 通用地址（`final.md` / `readable.md`），允许回退最新。 */
+  readonly version: number | null
+  /** 审计版正文路径（`final/v1.md`；通用地址由版本账最高号决定）。 */
+  readonly audit: string
+  /** 同版本读者版路径；没有 → null。通用地址可回退 `readable.md`。 */
+  readonly reader: string | null
+  /** true = 通用地址（允许最新/工作稿回退）；false = 地址点名的版本，缺失即失败。 */
+  readonly fallback: boolean
 }
 
 /** 读面定表的文件名（finalReadPlan 与页签共用，避免两处硬编码）。 */
@@ -97,6 +112,17 @@ export function finalVersionOf(name: string): number | null {
 export function readableVersionOf(name: string): number | null {
   const match = FINAL_READABLE_VERSION_RE.exec(name)
   return match?.[1] === undefined ? null : Number(match[1])
+}
+
+/** 版本目录的最高 vN 编号；稀疏记账按真实最高编号显示，不用文件数冒充版本。
+ *  正本住本文件（final-target 拥有版本词法）；run-fold 只 re-export，避免两处解析分叉。 */
+export function latestRunVersion(files: readonly string[]): number {
+  let latest = 0
+  for (const file of files) {
+    const version = finalVersionOf(file)
+    if (version !== null) latest = Math.max(latest, version)
+  }
+  return latest
 }
 
 /**
@@ -299,7 +325,57 @@ export function deliveryFromReceipt(receipt: unknown, slug?: string): FinalDeliv
 export function finalReadPlan(path: string): FinalReadPlan | null {
   const dir = bundleDirOf(path)
   if (dir === null) return null
-  return { final: `${dir}${FINAL_NAME}`, review: `${dir}${FINAL_REVIEW_NAME}`, versions: `${dir}${FINAL_LEDGER_DIR}` }
+  return {
+    dir,
+    final: `${dir}${FINAL_NAME}`,
+    review: `${dir}${FINAL_REVIEW_NAME}`,
+    versions: `${dir}${FINAL_LEDGER_DIR}`,
+    target: path.slice(dir.length),
+  }
+}
+
+/**
+ * 地址目标 → 读哪一版（BUG-356）。规则：
+ *   - `final/vN.md` / `final/readable-vN.md`：地址点名的版本是权威；同版本读者版存在才展示；
+ *   - `final.md` / `final/readable.md`：通用地址，才允许回退版本账最高号 / 当前工作稿；
+ *   - 地址目标缺失时调用方必须走失败态，不得拿别的版本/工作稿冒充。
+ * @param plan - `finalReadPlan` 的产物。
+ * @param versionNames - `final/` 目录内的文件名（`vN.md` / `readable-vN.md` / `readable.md`）。
+ * @returns 目标计划；非终稿地址 → null。
+ */
+export function finalTargetOf(plan: FinalReadPlan, versionNames: readonly string[]): FinalTargetPlan | null {
+  const relative = plan.target.startsWith(`${FINAL_LEDGER_DIR}/`) ? plan.target.slice(FINAL_LEDGER_DIR.length + 1) : plan.target
+  if (relative === FINAL_NAME || relative === FINAL_READER_NAME) {
+    const latest = latestRunVersion(versionNames)
+    const version = latest >= 1 ? latest : null
+    const audit = version !== null && versionNames.includes(`v${String(version)}.md`)
+      ? `${FINAL_LEDGER_DIR}/v${String(version)}.md`
+      : FINAL_NAME
+    const versionedReader = version !== null && versionNames.includes(`readable-v${String(version)}.md`)
+      ? `${FINAL_LEDGER_DIR}/readable-v${String(version)}.md`
+      : null
+    const reader = versionedReader ?? (versionNames.includes(FINAL_READER_NAME) ? `${FINAL_LEDGER_DIR}/${FINAL_READER_NAME}` : null)
+    return { version, audit, reader, fallback: true }
+  }
+  const version = finalVersionOf(relative)
+  if (version !== null) {
+    return {
+      version,
+      audit: `${FINAL_LEDGER_DIR}/${relative}`,
+      reader: versionNames.includes(`readable-v${String(version)}.md`) ? `${FINAL_LEDGER_DIR}/readable-v${String(version)}.md` : null,
+      fallback: false,
+    }
+  }
+  const readerVersion = readableVersionOf(relative)
+  if (readerVersion !== null) {
+    return {
+      version: readerVersion,
+      audit: `${FINAL_LEDGER_DIR}/v${String(readerVersion)}.md`,
+      reader: `${FINAL_LEDGER_DIR}/${relative}`,
+      fallback: false,
+    }
+  }
+  return null
 }
 
 /** 会话域文件地址的解析结果。 */

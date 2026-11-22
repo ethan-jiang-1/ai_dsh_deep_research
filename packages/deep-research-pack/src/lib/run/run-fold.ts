@@ -8,7 +8,6 @@
  * parse*（文件 → 模型）留在 run-dashboard（它直接读盘，client 走 workspaceFiles 数据面
  * 自行取文件内容后喂这里的折算）。
  */
-import { finalVersionOf } from './final-target.ts'
 import { translateZh, type PackTranslate } from '../shared/i18n.ts'
 
 /** 一个 run 的文件在场性（步骤条输入——由调用方从文件内容/在场性构造）。
@@ -32,15 +31,9 @@ export interface RunStep {
   readonly state: 'done' | 'current' | 'pending'
 }
 
-/** 版本目录的最高 vN 编号；稀疏记账按真实最高编号显示，不用文件数冒充版本。 */
-export function latestRunVersion(files: readonly string[]): number {
-  let latest = 0
-  for (const file of files) {
-    const version = finalVersionOf(file)
-    if (version !== null) latest = Math.max(latest, version)
-  }
-  return latest
-}
+// 版本号词法正本已收进 final-target（BUG-356：地址目标与版本账共用一套 vN 解析）；
+// 旧 import 点（useStatusFeed/ResearchFinalTab/tests）仍可从本文件取到同名符号。
+export { latestRunVersion } from './final-target.ts'
 
 const STEP_ORDER = ['question', 'team', 'leads', 'evidence', 'findings', 'review', 'final'] as const
 const STEP_LABEL_KEYS = {

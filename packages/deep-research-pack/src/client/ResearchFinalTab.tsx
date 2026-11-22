@@ -25,7 +25,7 @@ import { MarkdownText } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
-  FINAL_LEDGER_DIR, FINAL_NAME, FINAL_READER_NAME, FINAL_REVIEW_NAME, finalReadPlan, sessionFileOf,
+  FINAL_LEDGER_DIR, FINAL_NAME, FINAL_REVIEW_NAME, finalReadPlan, finalTargetOf, sessionFileOf,
 } from '../lib/run/final-target.ts'
 import { openRun, type RunSource } from '../lib/run/run-context.ts'
 import { latestRunVersion } from '../lib/run/run-fold.ts'
@@ -105,6 +105,10 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const [failure, setFailure] = useState<'finalUnreadable' | 'finalReadFailed' | null>(null)
   const [loading, setLoading] = useState(true)
   const [versions, setVersions] = useState(0)
+  /** 当前展示的版本（地址目标优先）；null = 通用地址/当前工作稿。 */
+  const [shownVersion, setShownVersion] = useState<number | null>(null)
+  /** true = 通用地址（final.md / readable.md），允许最新/工作稿回退；false = 地址点名版本。 */
+  const [fallback, setFallback] = useState(false)
   const [readerName, setReaderName] = useState<string | null>(null)
   const [pass, setPass] = useState<boolean | null>(null)
   const [stale, setStale] = useState(false)
@@ -135,34 +139,50 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     const versionNames = listed.ok
       ? listed.value.filter((entry) => entry.type === 'file').map((entry) => entry.name)
       : []
-    const nextVersions = latestRunVersion(versionNames)
-    const nextReader = nextVersions >= 1 && versionNames.includes(`readable-v${String(nextVersions)}.md`)
-      ? `readable-v${String(nextVersions)}.md`
-      : versionNames.includes(FINAL_READER_NAME) ? FINAL_READER_NAME : null
-    const name = nextVersions === 0 ? FINAL_NAME : `${FINAL_LEDGER_DIR}/v${String(nextVersions)}.md`
-    const [body, draft, review, reader] = await Promise.all([
-      viewIo.read(name, { signal }),
-      viewIo.read(FINAL_NAME, { signal }),
-      viewIo.read(FINAL_REVIEW_NAME, { signal }),
-      nextReader === null ? Promise.resolve(null) : viewIo.read(`${FINAL_LEDGER_DIR}/${nextReader}`, { signal }),
-    ])
-    if (signal.aborted || !aliveRef.current) return
-    if (!body.ok) {
-      setFailure(body.reason === 'missing' ? 'finalUnreadable' : 'finalReadFailed')
+    const latest = latestRunVersion(versionNames)
+    const target = finalTargetOf(plan, versionNames)
+    if (target === null) {
+      setFailure('finalUnreadable')
       setLoading(false)
       return
     }
-    targetRef.current = { dir: viewIo.dir, name }
-    setResolved(body.value.path)
-    setText(body.value.text)
-    setTruncated(body.value.truncated)
+    const [body, draft, review, reader] = await Promise.all([
+      viewIo.read(target.audit, { signal }),
+      viewIo.read(FINAL_NAME, { signal }),
+      viewIo.read(FINAL_REVIEW_NAME, { signal }),
+      target.reader === null ? Promise.resolve(null) : viewIo.read(target.reader, { signal }),
+    ])
+    if (signal.aborted || !aliveRef.current) return
+    // 地址目标优先：正文缺失时只允许「同版本读者版」或「通用地址的工作稿」兜底；
+    // 点名的版本缺失 = 失败态，绝不拿更高版本/别的文件冒充（BUG-356）。
+    const primary = body.ok
+      ? body
+      : reader !== null && reader.ok
+        ? reader
+        : target.fallback && draft.ok
+          ? draft
+          : body
+    if (!primary.ok) {
+      setFailure(primary.reason === 'missing' ? 'finalUnreadable' : 'finalReadFailed')
+      setLoading(false)
+      return
+    }
+    const primaryName = primary.value.path.startsWith(viewIo.dir)
+      ? primary.value.path.slice(viewIo.dir.length)
+      : target.audit
+    targetRef.current = { dir: viewIo.dir, name: primaryName }
+    setResolved(primary.value.path)
+    setText(primary.value.text)
+    setTruncated(primary.value.truncated)
     setDraftText(draft.ok ? draft.value.text : null)
     setDraftTruncated(draft.ok ? draft.value.truncated : false)
     setReaderText(reader !== null && reader.ok ? reader.value.text : null)
     setReaderTruncated(reader !== null && reader.ok ? reader.value.truncated : false)
-    setReaderName(nextReader)
-    setVersions(nextVersions)
-    if (body.value.version !== undefined) versionRef.current = body.value.version
+    setReaderName(target.reader)
+    setShownVersion(target.version)
+    setFallback(target.fallback)
+    setVersions(latest)
+    if (primary.value.version !== undefined) versionRef.current = primary.value.version
     const readiness = review.ok && !review.value.truncated ? terminalReadiness(review.value.text) : null
     setPass(readiness === null ? null : readiness === 'PASS')
     setLoading(false)
@@ -177,6 +197,8 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     setReaderText(null)
     setDraftText(null)
     setReaderName(null)
+    setShownVersion(null)
+    setFallback(false)
     setStale(false)
     setResolved(null)
     setView('reader')
@@ -223,28 +245,28 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
 
   const hasReader = readerText !== null
   const showingReader = hasReader && view === 'reader'
-  const showingDraft = !hasReader && versions >= 1 && view === 'draft'
+  const showingDraft = !hasReader && fallback && versions >= 1 && view === 'draft'
   const displayed = showingReader ? readerText : showingDraft ? (draftText ?? text) : text
   const displayedTruncated = showingReader ? readerTruncated : showingDraft ? (draftText === null ? truncated : draftTruncated) : truncated
   const displayedPath = showingReader && readerName !== null
-    ? `${FINAL_LEDGER_DIR}/${readerName}`
+    ? readerName
     : showingDraft ? FINAL_NAME : resolved ?? plan.final
   const state = pass === false
     ? props.t('reviewFailed')
     : showingReader
-      ? versions >= 1 ? props.t('readerEditionVersion', { version: String(versions) }) : `${props.t('readerEdition')}${props.t('notFinalized')}`
-      : versions >= 1
-        ? (showingDraft ? props.t('workingDraft') : props.t('auditEdition', { version: String(versions) }))
+      ? shownVersion !== null ? props.t('readerEditionVersion', { version: String(shownVersion) }) : `${props.t('readerEdition')}${props.t('notFinalized')}`
+      : shownVersion !== null && shownVersion >= 1
+        ? (showingDraft ? props.t('workingDraft') : props.t('auditEdition', { version: String(shownVersion) }))
         : props.t('currentVersion')
   const stateStyle = pass === false
     ? { color: '#b45309', fontWeight: 600 }
     : undefined
   const toggleLabel = hasReader
     ? view === 'reader'
-      ? props.t('auditToggleLabel', { version: versions >= 1 ? props.t('versionV', { version: String(versions) }) : '' })
+      ? props.t('auditToggleLabel', { version: shownVersion !== null ? props.t('versionV', { version: String(shownVersion) }) : '' })
       : props.t('viewReader')
-    : versions >= 1
-      ? view === 'draft' ? props.t('viewVersion', { version: String(versions) }) : props.t('viewCurrentDraft')
+    : fallback && versions >= 1
+      ? view === 'draft' ? props.t('viewVersion', { version: String(shownVersion ?? versions) }) : props.t('viewCurrentDraft')
       : null
   // 滚动义务在页签体自己：vendor 的 `.tabBody` 是定高 flex 列且 `overflow: hidden`，
   // 内容超出即被裁且不可滚（2026-10-20 用户实测报障：终稿页签不滚）。同款约定见

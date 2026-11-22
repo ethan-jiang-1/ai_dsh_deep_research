@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  deliveryFromReceipt, draftInProgress, finalAddressOf, finalPathOf, finalPathOfWithin, finalReadPlan, finalVersionOfPath, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
+  deliveryFromReceipt, draftInProgress, finalAddressOf, finalPathOf, finalPathOfWithin, finalReadPlan, finalTargetOf, finalVersionOfPath, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
   sessionFileOf, shouldOpenFinal,
 } from '../../../packages/deep-research-pack/src/lib/run/final-target.ts';
 
@@ -66,12 +66,12 @@ test('latestFinalDelivery：畸形 data / 缺 callId / 非 present 事件 fail-s
   );
 });
 
-test('finalReadPlan：读面定表恰三条（终稿 / 审查 / 版本目录）', () => {
+test('finalReadPlan：读面定表恰三条（终稿 / 审查 / 版本目录）+ 地址目标', () => {
   assert.deepEqual(finalReadPlan('drt_x/final.md'), {
-    final: 'drt_x/final.md', review: 'drt_x/review.md', versions: 'drt_x/final',
+    dir: 'drt_x/', final: 'drt_x/final.md', review: 'drt_x/review.md', versions: 'drt_x/final', target: 'final.md',
   });
   assert.deepEqual(finalReadPlan('archive/drt_x/final.md'), {
-    final: 'archive/drt_x/final.md', review: 'archive/drt_x/review.md', versions: 'archive/drt_x/final',
+    dir: 'archive/drt_x/', final: 'archive/drt_x/final.md', review: 'archive/drt_x/review.md', versions: 'archive/drt_x/final', target: 'final.md',
   });
   assert.equal(finalReadPlan('drt_x/question.md'), null);
 });
@@ -133,14 +133,65 @@ test('终稿地址族：final.md / final/vN / final/readable(-vN) 都折成族�
   assert.equal(finalPathOf('drt_x/drafts/readable-v1.md'), null);
 });
 
-test('终稿族读面：不论地址是 vN 还是 reader，都回到同一个 bundle 的 final.md/review.md/final/', () => {
-  for (const path of ['drt_x/final.md', 'drt_x/final/v2.md', 'drt_x/final/readable.md', 'drt_x/final/readable-v2.md']) {
+test('终稿族读面：同一 bundle 的 final.md/review.md/final/ 不变；地址目标单独作为版本身份', () => {
+  for (const [path, target] of [
+    ['drt_x/final.md', 'final.md'],
+    ['drt_x/final/v2.md', 'final/v2.md'],
+    ['drt_x/final/readable.md', 'final/readable.md'],
+    ['drt_x/final/readable-v2.md', 'final/readable-v2.md'],
+  ]) {
     assert.deepEqual(finalReadPlan(path), {
-      final: 'drt_x/final.md', review: 'drt_x/review.md', versions: 'drt_x/final',
+      dir: 'drt_x/', final: 'drt_x/final.md', review: 'drt_x/review.md', versions: 'drt_x/final', target,
     }, path);
   }
   assert.deepEqual(finalReadPlan('archive/drt_x/final/readable-v2.md'), {
-    final: 'archive/drt_x/final.md', review: 'archive/drt_x/review.md', versions: 'archive/drt_x/final',
+    dir: 'archive/drt_x/', final: 'archive/drt_x/final.md', review: 'archive/drt_x/review.md', versions: 'archive/drt_x/final', target: 'final/readable-v2.md',
+  });
+});
+
+// 负例留证 2026-11-22：BUG-356——旧 finalReadPlan 让所有地址都回 final.md，版本账最高号 v2 顶替已交付 v1。
+// 红配方：把 finalTargetOf 的 pinned 分支改回 latestRunVersion（或让 audit 恒为 final.md）→ 下列断言红。
+test('BUG-356 地址目标优先：v1 地址 + v2 账 → 仍读 v1；同版本 reader 才展示', () => {
+  const v1 = finalReadPlan('drt_x/final/v1.md');
+  assert.deepEqual(finalTargetOf(v1, ['v1.md', 'v2.md']), {
+    version: 1, audit: 'final/v1.md', reader: null, fallback: false,
+  });
+  assert.deepEqual(finalTargetOf(v1, ['v1.md', 'v2.md', 'readable-v1.md']), {
+    version: 1, audit: 'final/v1.md', reader: 'final/readable-v1.md', fallback: false,
+  });
+  assert.deepEqual(finalTargetOf(v1, ['v1.md', 'v2.md', 'readable-v2.md']), {
+    version: 1, audit: 'final/v1.md', reader: null, fallback: false,
+  }, 'v2 的读者版不得冒充 v1（卡判据）');
+  // 地址目标缺失也返回 target（调用方走失败态），不返回替代版本。
+  assert.deepEqual(finalTargetOf(v1, ['v2.md']), {
+    version: 1, audit: 'final/v1.md', reader: null, fallback: false,
+  });
+});
+
+test('BUG-356 reader 地址：同版本 audit + reader；缺同版本 reader → 只读 audit', () => {
+  const readableV1 = finalReadPlan('drt_x/final/readable-v1.md');
+  assert.deepEqual(finalTargetOf(readableV1, ['v1.md', 'v2.md', 'readable-v1.md']), {
+    version: 1, audit: 'final/v1.md', reader: 'final/readable-v1.md', fallback: false,
+  });
+  assert.deepEqual(finalTargetOf(readableV1, ['v1.md', 'v2.md']), {
+    version: 1, audit: 'final/v1.md', reader: 'final/readable-v1.md', fallback: false,
+  }, '地址点名的 reader 即便不在账上也按地址读；缺失由读取层报失败');
+});
+
+test('BUG-356 通用地址才回退：final.md / readable.md → 最新版本或工作稿', () => {
+  const generic = finalReadPlan('drt_x/final.md');
+  assert.deepEqual(finalTargetOf(generic, ['v1.md', 'v2.md']), {
+    version: 2, audit: 'final/v2.md', reader: null, fallback: true,
+  });
+  assert.deepEqual(finalTargetOf(generic, ['v1.md', 'v2.md', 'readable-v2.md']), {
+    version: 2, audit: 'final/v2.md', reader: 'final/readable-v2.md', fallback: true,
+  });
+  assert.deepEqual(finalTargetOf(generic, []), {
+    version: null, audit: 'final.md', reader: null, fallback: true,
+  }, '无版本账 → 当前工作稿（既有行为不回退）');
+  const genericReader = finalReadPlan('drt_x/final/readable.md');
+  assert.deepEqual(finalTargetOf(genericReader, ['v1.md', 'readable.md']), {
+    version: 1, audit: 'final/v1.md', reader: 'final/readable.md', fallback: true,
   });
 });
 

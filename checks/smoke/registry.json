@@ -105,6 +105,19 @@
     ],
     "job": "client-load"
   },
+  "cockpit-truth.entry.mjs": {
+    "tier": "dev-only",
+    "reason": "真浏览器 + 五场景文件突变（chmod/移走/加 v2）；主机负载敏感，先阶段验收/手动跑，稳定后再议 nightly",
+    "cost": "medium",
+    "uniqueClaim": "观察面事实真实性五场景：交付地址版本优先、目标缺失失败态、交付×审查不互斥、bundle/review/evidence 读失败不折成进度/absent/0",
+    "oracle": [
+      "tests/run/gates/final-target.spec.mjs",
+      "tests/cockpit/lib/run/brief-fold.spec.mjs",
+      "tests/run/shared/run-fold.spec.mjs"
+    ],
+    "sunset": "当 client-load 相位吸收五场景，或纯函数矩阵 + DOM 快照能覆盖用户可见结果时退役",
+    "lane": "entry"
+  },
   "cold-start.entry.mjs": {
     "tier": "nightly",
     "reason": "干净室安装（仓外 home + tarball）——nightly 跑，失败可诊断",

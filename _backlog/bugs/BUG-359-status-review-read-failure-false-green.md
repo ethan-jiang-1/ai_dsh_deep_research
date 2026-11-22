@@ -1,12 +1,12 @@
 ---
-status: 排查中
+status: 修复就绪
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-359：review.md 读不到时状态页仍显示「✓ 审查」——读失败被折成 absent
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：排查中 — 真浏览器现场已复现；按用户指令只报不修。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复就绪 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权。
 > 现场 = `runtime/e2e/review-read-error-verdict.json` + `review-read-error.png`；
 > 夹具 = `runtime/e2e/review-read-error-e2e.mjs`。
 
@@ -23,7 +23,19 @@ bundle 的 `review.md` 在场但读不到（权限/IO/工作区失败）。打�
 页面把审查步骤标成绿勾、报告标成已交付，**没有任何「审查读取失败」**。用户会以为
 审查文件读过了、结论没问题；实际上 review.md 完全没读到。
 
-## 证据
+## 分诊与授权
+
+- 严重级：P2 — 观察面给出假绿；用户会以为审查文件读过了、结论没问题，实际完全没读到。
+- 表面 / 边界：pack client（`useStatusFeed.ts` + `lib/run/run-fold.ts` + `brief-fold.ts`）/ 浏览器。
+- DSH 不变量：fail-loud — 读失败 ≠ 文件缺席；审查读取失败必须有独立失败态，不得给 ✓ 或冒充 absent。
+- 触及面：none — 观察面 client + 测试；不碰入口链/门禁与验收合同/文档合同/pack 公共行为/D 号。
+- 授权：自授权（P2 修理型修复）；2026-11-22 用户 goal 放行。
+- 批：`status-truth-356-360` — 同批卡：356/357/358/360；批计划：[观察面真实性修复程序](../issues/2026-11-22-observation-truthfulness-program.md)。
+
+## 复现
+
+复现状态：稳定 — 真浏览器 seed 夹具（2026-11-22 复跑仍红）。
+边界：浏览器（真驾驶舱状态页）— 已交付 seed 的 `review.md` 设为不可读。
 
 seed 已交付 run（`drt_unsc-p5-members`）的 `review.md` 设为不可读：
 
@@ -67,12 +79,22 @@ const reading = readinessOfSources({ reviewText, declarationText, hasReviewDir: 
 - 读失败、文件缺席、无终局判定三种状态被折成同一条路径；`reviewRead.ok === false`
   没有进入任何失败态。
 
-## 修法方向（未实施）
+根因证据：2026-11-22 复跑 `runtime/e2e/review-read-error-e2e.mjs` → `reviewFailShown:false`，
+`paneText` 命中「✓ 审查」而 `review.md` 为 `chmod 000`；`read.ok === false` 落 `reviewText=null`，
+步骤条又用 `hasFile` 独立判 true。
+
+## 牵出的失败类
+
+- 同机制第 4 次（045 图谱绑定、355 图谱 plan、358 bundle 读失败、本卡 review 读失败）｜处置：类修 —
+  状态页 `StatusFacts` 三态 + 步骤 unknown + G12/G13；同类下一处（evidence）由 360 收口。
+- 探针价值：所有「在场性用 hasFile、内容用 read」分离判定的观察面。
+
+## 修法（P2a 实施）
 
 - 扫描区分 `review.md` 的「缺席」/「读失败」/「读到但无终局判定」；`read.ok === false`
-  或 catch 置 `reviewReadError`，不要落 `absent`。
+  或 catch 置 `review: unreadable`，不要落 `absent`。
 - 业务摘要：`reviewReadError` 显示「审查文件读取失败」+ 重试，不显示「审查通过」/「审查未过」。
-- 步骤条：`review` 在场性不能只靠 `hasFile`；读失败时不要给 ✓ 审查（可待定/失败）。
+- 步骤条：`review` 在场性不能只靠 `hasFile`；读失败时标 `unknown`（`?`），不给 ✓。
 - 保留 BUG-347 的 absent 语义：文件确实没有 → absent，不冒充 FAIL。
 
 ## 修复判据
@@ -84,3 +106,9 @@ const reading = readinessOfSources({ reviewText, declarationText, hasReviewDir: 
 - 红证：把 `read.ok === false` 分支改回 `reviewText=null`/absent → 本夹具再次出现 ✓ 审查，
   exit 1；还原后绿。
 - guard 落点：`useStatusFeed` 的 review 三态矩阵，或浏览器层用例（本 seed 夹具可升格）。
+
+## 修复关联
+
+P2a 落地；守卫 = 新 `tests/cockpit/lib/run/status-facts.spec.mjs` review 三态 +
+`tests/run/shared/run-fold.spec.mjs` unknown 步 + `brief-fold.spec` 审查读失败 +
+`checks/smoke/cockpit-truth.entry.mjs` S4；去向 = implemented — 批 Note。

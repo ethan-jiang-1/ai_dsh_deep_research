@@ -1676,6 +1676,14 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把 !read.ok/catch 分支改回 setPlanState('missing') → 状态例外红"
+    },
+    {
+      "id": "BUG-356",
+      "mechanism": "终稿页签按地址目标版本读正文；版本账最高号不得覆盖已交付目标",
+      "guard": "checks/smoke/cockpit-truth.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 finalTargetOf 的 pinned 分支改回 latestRunVersion → S1 夹具显示 v2、exit 1"
     }
   ]
 }
