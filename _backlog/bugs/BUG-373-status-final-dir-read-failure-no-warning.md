@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 修复落地
 severity: P2
 opened: 2026-11-23
 ---
 
 # BUG-373：final/ 目录读不到时状态页仍显示「✅ 已交付」且无警告——终稿入口点开报错
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复就绪 — P0 复跑仍红；根因证据见下；批 observation-residuals-369-376。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复落地 — 红证 residual full exit 1（S18 状态页显示终稿目录读取失败）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
 > 现场 = `runtime/e2e/final-dir-unreadable-verdict.json` + `final-dir-unreadable.png`；
 > 夹具 = `runtime/e2e/final-dir-unreadable-e2e.mjs`。
 
@@ -100,3 +100,31 @@ const versions = latestRunVersion(finalFileNames)
 - 终稿页签的读失败态保留；点入口能看到一致的失败说明。
 - 红证：把 final 目录读失败折回 `finalFileNames=[]` → 本夹具再次无警告，exit 1；还原后绿。
 - guard 落点：`useStatusFeed` 的 final 目录三态矩阵，或浏览器层用例。
+
+## 修复落地（2026-11-23）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/run/artifact-read.ts",
+    "packages/deep-research-pack/src/client/research-status/useStatusFeed.ts",
+    "packages/deep-research-pack/src/client/ResearchStatusTab.tsx",
+    "packages/deep-research-pack/src/client/locales/zh.ts",
+    "packages/deep-research-pack/src/client/locales/en.ts",
+    "tests/cockpit/lib/events/status-feed.spec.mjs",
+    "checks/smoke/cockpit-truth-residuals.entry.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth-residuals.entry.mjs",
+    "exit": 1,
+    "output": "FAIL S18 状态页显示终稿目录读取失败（P0 全入口 17/28，exit 1）"
+  },
+  "green": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth-residuals.entry.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/cockpit-truth-residuals.entry.mjs"
+  }
+}
+```

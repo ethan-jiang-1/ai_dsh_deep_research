@@ -79,6 +79,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       questionLine: face?.questionLine ?? null,
       questionIssue: reads.question === 'unreadable' ? 'unreadable' : reads.question === 'empty' ? 'empty' : null,
       reviewUnconfirmed: reviewVerdict === 'unconfirmed',
+      reviewConflict: reviewVerdict === 'conflict',
       currentStage: face !== null ? steps.find((s) => s.state === 'current')?.label ?? null : null,
       findingsPresent: (face?.steps.find((s) => s.key === 'findings')?.state === 'done'),
       reviewFail: face?.reviewFail ?? null,
@@ -92,11 +93,17 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const receiptIssue = reads.receipt === 'unreadable' || reads.receipt === 'empty'
     ? 'statusReceiptReadFailed'
     : reads.receipt === 'invalid' ? 'statusReceiptInvalid' : null
-  const reviewIssueKey = reads.review === 'unreadable'
-    ? 'statusReviewReadFailed'
-    : reads.review === 'empty'
-      ? 'statusReviewEmpty'
-      : reviewVerdict === 'unconfirmed' ? 'statusReviewUnconfirmed' : null
+  const reviewIssueKey = reviewVerdict === 'conflict'
+    ? 'statusReviewConflict'
+    : reads.review === 'unreadable'
+      ? 'statusReviewReadFailed'
+      : reads.review === 'empty'
+        ? 'statusReviewEmpty'
+        : reviewVerdict === 'unconfirmed' ? 'statusReviewUnconfirmed' : null
+  const planIssueKey = reads.plan === 'unreadable'
+    ? 'statusPlanReadFailed'
+    : reads.plan === 'empty' ? 'statusPlanEmpty' : null
+  const finalIssueKey = reads.final === 'unreadable' ? 'statusFinalDirReadFailed' : null
   const stalledBanner = stalledBannerOf(
     { health, bound: trust.kind === 'bound', delivered: delivery !== null, hitlPending: hitl.pending },
     props.t,
@@ -169,6 +176,18 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
             <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
           </div>
         )}
+        {planIssueKey !== null && (
+          <div style={{ color: '#b45309' }}>
+            ⚠ {props.t(planIssueKey)}
+            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+          </div>
+        )}
+        {finalIssueKey !== null && (
+          <div style={{ color: '#b45309' }}>
+            ⚠ {props.t(finalIssueKey)}
+            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+          </div>
+        )}
       </div>
       {/* ② 流程轨道：◆立项确认 + 主轨 + ◆交付审阅 + 交付；↻ 回边 = 拍板的分支后果画进流程 */}
       <TrackRail anchors={anchors} steps={steps} faceVersions={face?.versions ?? null} hitlPending={hitl.pending} t={props.t} />
@@ -210,10 +229,13 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
             >{props.t('statusOpenFinal')}</button>
           )}
           {delivery === null && receiptIssue === null && <span style={{ opacity: 0.6 }}>{props.t('statusFinalAfterDelivery')}</span>}
-          {versionFace !== null && receiptIssue === null && (face.hasFinal || versionFace.ledgerFinalVersion >= 1) && (
+          {versionFace !== null && receiptIssue === null && finalIssueKey === null && planIssueKey === null && (face.hasFinal || versionFace.ledgerFinalVersion >= 1) && (
             <span style={{ fontSize: 12, opacity: 0.8 }} title={props.t('versionReadonlyNote')}>
               {versionFace.label}
             </span>
+          )}
+          {planIssueKey !== null && (
+            <span style={{ fontSize: 12, color: '#b45309' }}>{props.t('statusPlanVersionUnknown')}</span>
           )}
         </div>
       )}

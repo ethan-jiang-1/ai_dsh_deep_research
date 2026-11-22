@@ -493,3 +493,26 @@ function failureOf(body: ArtifactState): 'empty' | 'unreadable' | 'missing' {
   if (body === 'empty') return 'empty'
   return 'unreadable'
 }
+
+/**
+ * 终稿 stale watcher 应盯的文件（BUG-371）：盯**当前显示件**，不是固定 audit。
+ *
+ * reader 视图且 reader 可读 → reader；draft 视图 → draft（final.md）；其余 → audit；
+ * 正文不可读但 reader 可读 → reader；两版都不可用 → audit（终稿页签已进入失败态）。
+ * @param input - 当前视图、body/reader 状态与三个候选文件名。
+ * @returns 相对 bundle 的文件名。
+ */
+export function watchTargetOf(input: {
+  readonly view: 'reader' | 'audit' | 'draft'
+  readonly body: ArtifactState
+  readonly reader: ArtifactState
+  readonly audit: string
+  readonly readerName: string | null
+  readonly draft: string
+}): string {
+  if (input.view === 'draft') return input.draft
+  if (input.view === 'reader' && input.reader === 'ok' && input.readerName !== null) return input.readerName
+  if (input.body === 'ok') return input.audit
+  if (input.reader === 'ok' && input.readerName !== null) return input.readerName
+  return input.audit
+}

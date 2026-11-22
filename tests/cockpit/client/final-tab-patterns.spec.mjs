@@ -36,6 +36,10 @@ test('BUG-364/365/368 终稿读取走 artifact-read + finalViewOf；零裸 view.
   const source = readFileSync(join(root, 'packages', 'deep-research-pack', 'src', 'client', 'ResearchFinalTab.tsx'), 'utf8');
   assert.match(source, /readArtifact\(viewIo/);
   assert.match(source, /finalViewOf\(/);
+  assert.match(source, /reviewVerdictOf\(/);
+  assert.match(source, /readinessOfSources\(/);
+  assert.match(source, /watchTargetOf\(/);
+  assert.doesNotMatch(source, /terminalReadiness\(/);
   assert.match(source, /finalReaderEmptyFallback|finalBodyReadFailedFallback|finalEmpty/);
   assert.doesNotMatch(source, /viewIo\.read\(/, '终稿页签不得裸 viewIo.read——必须走 readArtifact（G19）');
 });

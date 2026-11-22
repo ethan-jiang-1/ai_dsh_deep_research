@@ -13,6 +13,7 @@ import type { PlanIndex } from '../../lib/plan/plan-index.ts'
 import { planIndex } from '../../lib/plan/plan-index.ts'
 import { bindingTrust } from '../../lib/run/binding-trust.ts'
 import { openRun, type RunView } from '../../lib/run/run-context.ts'
+import { readArtifact } from '../../lib/run/artifact-read.ts'
 import type { ResearchGraphTabProps } from './types.ts'
 
 /** plan.md 重读间隔（任务靠投影推送；只有文件需要低频重扫）。 */
@@ -31,7 +32,7 @@ export interface GraphFeed {
   readonly graphView: 'current' | 'diff'
   readonly setGraphView: Dispatch<SetStateAction<'current' | 'diff'>>
   readonly snapshotPlan: PlanIndex | null
-  readonly snapshotState: 'idle' | 'loading' | 'ready' | 'missing'
+  readonly snapshotState: 'idle' | 'loading' | 'ready' | 'empty' | 'invalid' | 'missing' | 'unreadable'
   readonly showSnapshotPlan: boolean
   readonly setShowSnapshotPlan: Dispatch<SetStateAction<boolean>>
   readonly planLoadedAt: number | null
@@ -54,7 +55,7 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
   const [snapshots, setSnapshots] = useState<readonly number[]>([])
   const [graphView, setGraphView] = useState<'current' | 'diff'>('current')
   const [snapshotPlan, setSnapshotPlan] = useState<PlanIndex | null>(null)
-  const [snapshotState, setSnapshotState] = useState<'idle' | 'loading' | 'ready' | 'missing'>('idle')
+  const [snapshotState, setSnapshotState] = useState<'idle' | 'loading' | 'ready' | 'empty' | 'invalid' | 'missing' | 'unreadable'>('idle')
   const [showSnapshotPlan, setShowSnapshotPlan] = useState(false)
   // 最后成功读取 plan.md 的时刻：把“数据可能过期”显性化（BUG-043 §刷新），不把缺失当状态。
   const [planLoadedAt, setPlanLoadedAt] = useState<number | null>(null)
@@ -197,10 +198,15 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
     setSnapshotState('loading')
     setSnapshotPlan(null)
     void (async () => {
-      const text = await view.read(`plan/v${String(latestSnapshot)}.md`, { signal: controller.signal })
+      const art = await readArtifact(view, `plan/v${String(latestSnapshot)}.md`, { signal: controller.signal })
       if (stopped) return
-      if (!text.ok) { setSnapshotState('missing'); return }
-      setSnapshotPlan(planIndex(text.value.text))
+      if (art.state === 'absent') { setSnapshotState('missing'); setSnapshotPlan(null); return }
+      if (art.state === 'empty') { setSnapshotState('empty'); setSnapshotPlan(null); return }
+      if (art.state === 'unreadable') { setSnapshotState('unreadable'); setSnapshotPlan(null); return }
+      if (art.state !== 'ok' || art.text === null) { setSnapshotState('invalid'); setSnapshotPlan(null); return }
+      const parsed = planIndex(art.text)
+      if (parsed.topLevel.length === 0) { setSnapshotState('invalid'); setSnapshotPlan(null); return }
+      setSnapshotPlan(parsed)
       setSnapshotState('ready')
     })()
     return () => { stopped = true; controller.abort() }

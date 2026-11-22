@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  deliveryFromReceipt, draftInProgress, finalAddressOf, finalPathOf, finalPathOfWithin, finalReadPlan, finalTargetOf, finalViewOf, finalVersionOfPath, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
+  deliveryFromReceipt, draftInProgress, finalAddressOf, finalPathOf, finalPathOfWithin, finalReadPlan, finalTargetOf, finalViewOf, finalVersionOfPath, watchTargetOf, isFinalAddress, latestFinalDelivery, latestPresentedFinalVersion,
   sessionFileOf, shouldOpenFinal,
 } from '../../../packages/deep-research-pack/src/lib/run/final-target.ts';
 
@@ -310,4 +310,16 @@ test('finalViewOf 不变量：view=reader → reader ok；view=audit → body ok
       }
     }
   }
+});
+
+// 负例留证 2026-11-23：BUG-371——watcher 只盯 audit，reader/draft 更新不触发 stale。
+// 红配方：把 watchTargetOf 恒返回 audit → 本组红。
+test('BUG-371 watchTargetOf：盯当前显示件（reader/audit/draft）', () => {
+  const names = { audit: 'final/v1.md', readerName: 'final/readable-v1.md', draft: 'final.md' };
+  assert.equal(watchTargetOf({ view: 'reader', body: 'ok', reader: 'ok', ...names }), 'final/readable-v1.md');
+  assert.equal(watchTargetOf({ view: 'audit', body: 'ok', reader: 'ok', ...names }), 'final/v1.md');
+  assert.equal(watchTargetOf({ view: 'draft', body: 'ok', reader: 'ok', ...names }), 'final.md');
+  assert.equal(watchTargetOf({ view: 'reader', body: 'ok', reader: 'empty', ...names }), 'final/v1.md');
+  assert.equal(watchTargetOf({ view: 'reader', body: 'empty', reader: 'ok', ...names }), 'final/readable-v1.md');
+  assert.equal(watchTargetOf({ view: 'reader', body: 'absent', reader: 'absent', readerName: null, ...names }), 'final/v1.md');
 });

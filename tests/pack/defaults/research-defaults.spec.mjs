@@ -237,3 +237,12 @@ test('BUG-139 parseDefaults 容忍 UTF-8 BOM，坏 JSON 仍报 parse', () => {
   assert.equal(ok.value.effort, 'deep')
   assert.equal(parseDefaults('\uFEFF{broken').problems[0]?.code, 'parse')
 })
+
+// 负例留证 2026-11-23：BUG-376（P0 复核为假阳性）——mixed 未知键仍必须保留合法 effort。
+// 红配方：把 unknown 键分支改成整份 emptyDefaults → 本组红。
+test('BUG-376 mixed 未知键：合法 effort 生效，未知键只进 warnings', () => {
+  const r = parseDefaults(JSON.stringify({ schema: 1, effort: 'deep', unknown: 'x' }));
+  assert.equal(r.value.effort, 'deep');
+  assert.deepEqual(r.problems, []);
+  assert.ok(r.warnings.some((w) => w.field === 'unknown' && w.code === 'unknown'));
+});

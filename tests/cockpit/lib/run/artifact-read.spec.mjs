@@ -37,6 +37,7 @@ test('artifactPolicyOf：固定表 + final 动态名；未知 = null', () => {
     assert.ok(artifactPolicyOf(name) !== null, `缺策略 ${name}`)
     assert.ok(Object.hasOwn(ARTIFACT_POLICY, name), `固定表缺 ${name}`)
   }
+  assert.deepEqual(artifactPolicyOf('plan/v1.md'), { nonEmpty: true, json: false })
   assert.deepEqual(artifactPolicyOf('final/v1.md'), { nonEmpty: true, json: false })
   assert.deepEqual(artifactPolicyOf('final/readable-v2.md'), { nonEmpty: true, json: false })
   assert.equal(artifactPolicyOf('final/v0.md'), null)
@@ -80,7 +81,6 @@ test('G21 cockpit canonical 读取点清单：裸 view.read 只允许已知遗�
   walk(root)
   // P0 已知遗留：graph plan/snapshot、config question；P3/P4 迁到 readArtifact 后应为 {}。
   assert.deepEqual(counts, {
-    'research-config/useConfigFeed.ts': 1,
-    'research-graph/useGraphFeed.ts': 2,
+    'research-graph/useGraphFeed.ts': 1,
   })
 })

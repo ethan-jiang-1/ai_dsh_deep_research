@@ -19,7 +19,7 @@ import { streamFailureOf } from '../../lib/events/stream-failure.ts'
 import { deliveryFromReceipt, finalVersionOfPath, latestFinalDelivery, latestPresentedFinalVersion } from '../../lib/run/final-target.ts'
 import { runHealthOf } from '../../lib/run/health.ts'
 import { runVersionFaceOf, type RunVersionFace } from '../../lib/run/run-version.ts'
-import { readinessOfSources } from '../../lib/review/review-readiness.ts'
+import { readinessOfSources, reviewVerdictOf, type ReviewVerdict } from '../../lib/review/review-readiness.ts'
 import type { TeamProjection } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import { useMemberActivity } from './useMemberActivity.ts'
 import type { ResearchStatusTabProps } from './types.ts'
@@ -30,7 +30,7 @@ const REFRESH_MS = 30_000
 
 /** 初始/无绑定时的读取态：六个事实都还没有读到。 */
 const ABSENT_READS: StatusReads = {
-  bundle: 'absent', question: 'absent', review: 'absent', readiness: 'absent', evidence: 'absent', receipt: 'absent',
+  bundle: 'absent', question: 'absent', review: 'absent', readiness: 'absent', evidence: 'absent', plan: 'absent', final: 'absent', receipt: 'absent',
 }
 
 /** 绑定可信性的值键（状态页全值比对重扫用：kind/slug/reason 任一变化都要重扫）。 */
@@ -53,7 +53,9 @@ export interface StatusFeed {
   /** 六个显示事实的读取态（bundle/question/review/readiness/evidence/receipt）。 */
   readonly reads: StatusReads
   /** 审查终局判定（pass/fail/unconfirmed/absent）；unconfirmed 不得给 ✓（BUG-363/366）。 */
-  readonly reviewVerdict: 'pass' | 'fail' | 'unconfirmed' | 'absent'
+  readonly reviewVerdict: ReviewVerdict
+  /** 审查判据的细节（冲突/缺失原因）；只供视图文案，不参与分支。 */
+  readonly reviewDetail: string | null
   /** 首次扫描是否已落定；未落定不把「还没读到」显示成「读取失败」。 */
   readonly scanSettled: boolean
   /** 重扫一次（失败横幅的「重试」）。 */
@@ -83,7 +85,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   const [kickoffHold, setKickoffHold] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [reads, setReads] = useState<StatusReads>(ABSENT_READS)
-  const [reviewVerdict, setReviewVerdict] = useState<'pass' | 'fail' | 'unconfirmed' | 'absent'>('absent')
+  const [reviewVerdict, setReviewVerdict] = useState<ReviewVerdict>('absent')
+  const [reviewDetail, setReviewDetail] = useState<string | null>(null)
   const [scanSettled, setScanSettled] = useState(false)
   const [retryNonce, setRetryNonce] = useState(0)
   const retry = useCallback(() => { setScanSettled(false); setRetryNonce((n) => n + 1) }, [])
@@ -126,6 +129,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     setKickoffHold(false)
     setReads(ABSENT_READS)
     setReviewVerdict('absent')
+    setReviewDetail(null)
     setScanSettled(false)
     setMemberSummaries({})
     void (async () => {
@@ -211,6 +215,9 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           setReceiptDelivery(null)
           setReads({ ...ABSENT_READS, bundle: readStateOf(opened) })
           setReviewVerdict('absent')
+        setReviewDetail(null)
+          setReviewDetail(null)
+    setReviewDetail(null)
           setScanSettled(true)
           return
         }
@@ -224,6 +231,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           : 0
         const finalDir = names.has('final') ? await view.list('final', { signal }) : null
         if (stopped) return
+        const finalState = readStateOf(finalDir)
         const finalFileNames = finalDir !== null && finalDir.ok
           ? finalDir.value.filter((entry) => entry.type === 'file').map((entry) => entry.name)
           : []
@@ -255,18 +263,10 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const reading = readinessOfSources({ reviewText, declarationText, hasReviewDir: names.has('review') })
         // 结论未定：空/读失败的 review 或 readiness 声明；或 readiness 的 missing/invalid/mismatch/ambiguous。
         // 不把非 declaration/prose 的 source 折成 null 后让步骤条按 read ok 给 ✓（BUG-363/366）。
-        const reviewVerdict: 'pass' | 'fail' | 'unconfirmed' | 'absent' =
-          reviewArt.state === 'empty' || reviewArt.state === 'unreadable'
-            ? 'unconfirmed'
-            : readinessArt.state === 'empty' || readinessArt.state === 'unreadable' || readinessArt.state === 'invalid'
-              ? 'unconfirmed'
-              : reading.source === 'absent'
-                ? 'absent'
-                : (reading.source === 'declaration' || reading.source === 'prose') && typeof reading.pass === 'boolean'
-                  ? (reading.pass ? 'pass' : 'fail')
-                  : 'unconfirmed'
+        const reviewVerdict = reviewVerdictOf(reading, { review: reviewArt.state, readiness: readinessArt.state })
         const reviewFail = reviewVerdict === 'fail' ? true : reviewVerdict === 'pass' ? false : null
         setReviewVerdict(reviewVerdict)
+        setReviewDetail(reading.detail ?? null)
         const questionArt = await readArtifact(view, 'question.md', { signal })
         if (stopped) return
         const questionText = questionArt.state === 'ok' ? questionArt.text : null
@@ -276,6 +276,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           review: reviewArt.state,
           readiness: readinessArt.state,
           evidence: evidenceState,
+          plan: planArt.state,
+          final: finalState,
           receipt: receiptArt.state,
         })
         setScanSettled(true)
@@ -293,12 +295,12 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
             leads: view.hasFile('leads.md'),
             evidence: evidenceCount,
             findings: view.hasFile('findings.md'),
-            review: reviewVerdict !== 'unconfirmed',
+            review: reviewVerdict !== 'unconfirmed' && reviewVerdict !== 'conflict',
             final: view.hasFile('final.md'),
             unknown: [
               ...(questionArt.state === 'empty' || questionArt.state === 'unreadable' ? ['question'] : []),
               ...(evidenceState === 'unreadable' ? ['evidence'] : []),
-              ...(reviewVerdict === 'unconfirmed' ? ['review'] : []),
+              ...(reviewVerdict === 'unconfirmed' || reviewVerdict === 'conflict' ? ['review'] : []),
             ],
           }, props.t),
           evidenceCount,
@@ -366,7 +368,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   )
 
   return {
-    rows, hitl, journalEvents, face, unbound, trust, journalSeen, kickoffHold, error, reads, reviewVerdict, scanSettled, retry,
+    rows, hitl, journalEvents, face, unbound, trust, journalSeen, kickoffHold, error, reads, reviewVerdict, reviewDetail, scanSettled, retry,
     memberSummaries, team, members, delivery, streamFailure, anchors, health, versionFace,
   }
 }

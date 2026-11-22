@@ -99,3 +99,14 @@ test('no run 负例：四个非 recorded 态一律不携带默认打法名（互
     assert.equal(s.adopted, null, `${s.kind} 不得携带方法名（不回落默认）`);
   }
 });
+
+// 负例留证 2026-11-23：BUG-372——question 读失败/空被折成 missing（「不在/被移走」）。
+// 红配方：把 questionState 分支删掉（回落 missing）→ 本组红。
+test('BUG-372 question 读失败/空：独立态，不冒充 missing', () => {
+  const base = { bundle: true, question: true };
+  assert.equal(foldMethodAdoption(null, { ...base, questionState: 'unreadable' }).kind, 'question-unreadable');
+  assert.equal(foldMethodAdoption(null, { ...base, questionState: 'invalid' }).kind, 'question-unreadable');
+  assert.equal(foldMethodAdoption(null, { ...base, questionState: 'empty' }).kind, 'question-empty');
+  assert.equal(foldMethodAdoption(null, { ...base, questionState: 'absent', question: false }).kind, 'missing');
+  assert.equal(foldMethodAdoption(null, { ...base, questionState: 'ok' }).kind, 'missing');
+});

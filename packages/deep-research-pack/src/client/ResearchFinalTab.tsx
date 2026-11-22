@@ -25,12 +25,12 @@ import { MarkdownText } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
-  FINAL_LEDGER_DIR, FINAL_NAME, FINAL_REVIEW_NAME, finalReadPlan, finalTargetOf, finalViewOf, sessionFileOf,
+  FINAL_LEDGER_DIR, FINAL_NAME, FINAL_REVIEW_NAME, finalReadPlan, finalTargetOf, finalViewOf, sessionFileOf, watchTargetOf,
 } from '../lib/run/final-target.ts'
 import { readArtifact, type ArtifactState } from '../lib/run/artifact-read.ts'
 import { openRun, type RunSource } from '../lib/run/run-context.ts'
 import { latestRunVersion } from '../lib/run/run-fold.ts'
-import { terminalReadiness } from '../lib/review/review-readiness.ts'
+import { readinessOfSources, reviewVerdictOf, type ReviewVerdict } from '../lib/review/review-readiness.ts'
 import { RESEARCH_STATUS_TAB_KIND } from './keys.ts'
 
 /** 页签体注入面（index.ts 装配，绑定 remote.workspaceFiles）。 */
@@ -113,11 +113,13 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   /** true = 通用地址（final.md / readable.md），允许最新/工作稿回退；false = 地址点名版本。 */
   const [fallback, setFallback] = useState(false)
   const [readerName, setReaderName] = useState<string | null>(null)
-  const [pass, setPass] = useState<boolean | null>(null)
+  const [reviewVerdict, setReviewVerdict] = useState<ReviewVerdict>('absent')
+  const [reviewDetail, setReviewDetail] = useState<string | null>(null)
   const [stale, setStale] = useState(false)
   const [resolved, setResolved] = useState<string | null>(null)
   const [view, setView] = useState<FinalView>('reader')
   const targetRef = useRef<{ dir: string; name: string } | null>(null)
+  const targetNamesRef = useRef<{ audit: string; readerName: string | null }>({ audit: '', readerName: null })
 
   /** 打开终稿所在 run bundle，按同一套读策略读正文/读者版/工作稿/审查/版本目录。
    *  review.md 必须读到 eof——终局判定在文末，固定行窗会读到中段旧判定（BUG-036 同族）。 */
@@ -146,10 +148,11 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       setLoading(false)
       return
     }
-    const [bodyArt, draftArt, reviewArt, readerArt] = await Promise.all([
+    const [bodyArt, draftArt, reviewArt, readinessArt, readerArt] = await Promise.all([
       readArtifact(viewIo, target.audit, { signal }),
       readArtifact(viewIo, FINAL_NAME, { signal }),
       readArtifact(viewIo, FINAL_REVIEW_NAME, { signal }),
+      readArtifact(viewIo, 'review/readiness.json', { signal }),
       target.reader === null ? Promise.resolve(null) : readArtifact(viewIo, target.reader, { signal }),
     ])
     if (signal.aborted || !aliveRef.current) return
@@ -159,11 +162,11 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       setLoading(false)
       return
     }
-    const primaryName = bodyArt.state === 'ok'
-      ? target.audit
-      : readerArt?.state === 'ok' && target.reader !== null
-        ? target.reader
-        : target.audit
+    targetNamesRef.current = { audit: target.audit, readerName: target.reader }
+    const primaryName = watchTargetOf({
+      view: 'reader', body: bodyArt.state, reader: readerArt?.state ?? 'absent',
+      audit: target.audit, readerName: target.reader, draft: FINAL_NAME,
+    })
     targetRef.current = { dir: viewIo.dir, name: primaryName }
     setBodyState(bodyArt.state)
     setReaderState(readerArt?.state ?? 'absent')
@@ -176,8 +179,16 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     setFallback(target.fallback)
     setVersions(latest)
     versionRef.current = null
-    const readiness = reviewArt.state === 'ok' && reviewArt.text !== null ? terminalReadiness(reviewArt.text) : null
-    setPass(readiness === null ? null : readiness === 'PASS')
+    const reviewText = reviewArt.state === 'ok' ? reviewArt.text : null
+    const declarationText = readinessArt.state === 'ok' ? readinessArt.text : null
+    const reading = readinessOfSources({
+      reviewText, declarationText, hasReviewDir: viewIo.names.has('review'),
+    })
+    setReviewVerdict(reviewVerdictOf(reading, { review: reviewArt.state, readiness: readinessArt.state }))
+    setReviewDetail(reading.detail ?? null)
+    // 初始 baseline：读当前显示件的版本令牌；首轮 watcher 不会把「首读」当变化。
+    const token = await io.runSource(sessionId).version(`${viewIo.dir}/${primaryName}`, { signal })
+    if (!signal.aborted && token.ok) versionRef.current = token.value
     setLoading(false)
     setStale(false)
   }, [sessionId, plan])
@@ -194,6 +205,9 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     setFallback(false)
     setBodyState('absent')
     setReaderState('absent')
+    setReviewVerdict('absent')
+    setReviewDetail(null)
+    targetNamesRef.current = { audit: '', readerName: null }
     setStale(false)
     setResolved(null)
     setView('reader')
@@ -202,6 +216,25 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     void load(controller.signal)
     return () => { aliveRef.current = false; controller.abort() }
   }, [load])
+
+  // 视图切换：watcher 改盯当前显示件（reader/audit/draft），并重设 baseline（BUG-371）。
+  useEffect(() => {
+    const names = targetNamesRef.current
+    if (targetRef.current === null || names.audit === '' || sessionId === undefined) return
+    const name = watchTargetOf({
+      view, body: bodyState, reader: readerState,
+      audit: names.audit, readerName: names.readerName, draft: FINAL_NAME,
+    })
+    if (name === targetRef.current.name) return
+    targetRef.current = { dir: targetRef.current.dir, name }
+    versionRef.current = null
+    const controller = new AbortController()
+    void (async () => {
+      const token = await ioRef.current.runSource(sessionId).version(`${targetRef.current!.dir}/${name}`, { signal: controller.signal })
+      if (!controller.signal.aborted && token.ok) versionRef.current = token.value
+    })()
+    return () => controller.abort()
+  }, [view, bodyState, readerState, sessionId])
 
   // 文件改写：在看 → 提示重读；没在看 → 静默重读
   useEffect(() => {
@@ -257,16 +290,22 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
         : decision.notice === 'auditUnreadable'
           ? 'finalBodyReadFailedFallback'
           : decision.notice === 'auditMissing' ? 'finalBodyMissingFallback' : null
-  const state = pass === false
+  const reviewStateCopy = reviewVerdict === 'fail'
     ? props.t('reviewFailed')
-    : showingReader
-      ? shownVersion !== null ? props.t('readerEditionVersion', { version: String(shownVersion) }) : `${props.t('readerEdition')}${props.t('notFinalized')}`
-      : shownVersion !== null && shownVersion >= 1
-        ? (showingDraft ? props.t('workingDraft') : props.t('auditEdition', { version: String(shownVersion) }))
-        : props.t('currentVersion')
-  const stateStyle = pass === false
+    : reviewVerdict === 'conflict'
+      ? props.t('reviewConflict')
+      : reviewVerdict === 'unconfirmed' ? props.t('reviewUnconfirmed') : null
+  const state = reviewStateCopy ?? (showingReader
+    ? shownVersion !== null ? props.t('readerEditionVersion', { version: String(shownVersion) }) : `${props.t('readerEdition')}${props.t('notFinalized')}`
+    : shownVersion !== null && shownVersion >= 1
+      ? (showingDraft ? props.t('workingDraft') : props.t('auditEdition', { version: String(shownVersion) }))
+      : props.t('currentVersion'))
+  const stateStyle = reviewStateCopy !== null
     ? { color: '#b45309', fontWeight: 600 }
     : undefined
+  const reviewNoticeKey = reviewVerdict === 'conflict'
+    ? 'finalReviewConflict'
+    : reviewVerdict === 'unconfirmed' ? 'finalReviewUnconfirmed' : null
   const toggleLabel = hasReader && hasAudit
     ? view === 'reader'
       ? props.t('auditToggleLabel', { version: shownVersion !== null ? props.t('versionV', { version: String(shownVersion) }) : '' })
@@ -289,6 +328,12 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       {noticeKey !== null && (
         <div style={{ ...BAR, margin: '8px 12px 0', flexShrink: 0 }}>
           <span style={{ flex: 1 }}>{props.t(noticeKey)}</span>
+          <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal) }}>{props.t('retry')}</button>
+        </div>
+      )}
+      {reviewNoticeKey !== null && (
+        <div style={{ ...BAR, margin: '8px 12px 0', flexShrink: 0 }} title={reviewDetail ?? undefined}>
+          <span style={{ flex: 1 }}>{props.t(reviewNoticeKey)}</span>
           <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal) }}>{props.t('retry')}</button>
         </div>
       )}

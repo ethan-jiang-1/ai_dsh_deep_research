@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 修复落地
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-369：readiness 声明与 review.md 冲突时状态页说「声明缺失/不可读」——mismatch 被折成 unconfirmed
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复就绪 — P0 复跑仍红；根因证据见下；批 observation-residuals-369-376。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 红证 residual full exit 1（S15 状态页显示审查冲突）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
 > 现场 = `runtime/e2e/review-conflict-verdict.json` + `review-conflict.png`；
 > 夹具 = `runtime/e2e/review-conflict-e2e.mjs`。
 
@@ -111,3 +111,38 @@ node --import tsx/esm runtime/e2e/review-conflict-e2e.mjs
   exit 1；还原后绿。
 - guard 落点：`useStatusFeed` / `ResearchFinalTab` 共用 readiness 五态矩阵（declaration/prose/
   mismatch/ambiguous/absent），或浏览器层用例（本 seed 夹具可升格）。
+
+## 修复落地（2026-11-23）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/review/review-readiness.ts",
+    "packages/deep-research-pack/src/client/research-status/useStatusFeed.ts",
+    "packages/deep-research-pack/src/lib/run/brief-fold.ts",
+    "packages/deep-research-pack/src/client/ResearchStatusTab.tsx",
+    "packages/deep-research-pack/src/client/ResearchFinalTab.tsx",
+    "packages/deep-research-pack/src/client/locales/zh.ts",
+    "packages/deep-research-pack/src/client/locales/en.ts",
+    "packages/deep-research-pack/src/client/locales/zh-fold.ts",
+    "packages/deep-research-pack/src/client/locales/en-fold.ts",
+    "tests/run/gates/review-readiness.spec.mjs",
+    "tests/cockpit/lib/run/brief-fold.spec.mjs",
+    "tests/cockpit/lib/events/status-feed.spec.mjs",
+    "tests/cockpit/client/final-tab-patterns.spec.mjs",
+    "checks/smoke/cockpit-truth-residuals.entry.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth-residuals.entry.mjs",
+    "exit": 1,
+    "output": "FAIL S15 状态页显示审查冲突（P0 全入口 17/28，exit 1）"
+  },
+  "green": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth-residuals.entry.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/cockpit-truth-residuals.entry.mjs"
+  }
+}
+```

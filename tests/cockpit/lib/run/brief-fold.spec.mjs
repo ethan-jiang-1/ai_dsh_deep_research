@@ -208,3 +208,14 @@ test('reviewUnconfirmed 与 reviewFail 不互串：FAIL 仍走交付前政策；
   const unconfirmed = deriveBusinessBrief({ ...base, reviewUnconfirmed: true, reviewFail: null });
   assert.doesNotMatch(unconfirmed.unknownLine ?? '', /报告不交付/);
 });
+
+// 负例留证 2026-11-23：BUG-369——冲突被折成 unconfirmed/审查未定，交付页签与状态页不同判。
+test('BUG-369 审查冲突：交付/未交付都点名冲突，不说单边通过', () => {
+  const delivered = deriveBusinessBrief({ ...base, delivered: true, reviewConflict: true });
+  assert.match(delivered.stageLine, /审查结论冲突/);
+  assert.match(delivered.unknownLine ?? '', /声明与 review\.md 必须同判/);
+  assert.equal(delivered.userActionNeeded, false);
+  const open = deriveBusinessBrief({ ...base, delivered: false, reviewConflict: true });
+  assert.match(open.stageLine, /声明与 review\.md 冲突/);
+  assert.match(open.actionLine, /修正/);
+});

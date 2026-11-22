@@ -330,6 +330,18 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
         {adoption.kind === 'missing' && (
           <div style={{ marginTop: 2, opacity: 0.75 }}>{props.t('configMissingQuestion')}</div>
         )}
+        {adoption.kind === 'question-unreadable' && (
+          <div style={{ marginTop: 2, color: '#b45309' }}>
+            ⚠ {props.t('statusQuestionReadFailed')}
+            <button type="button" onClick={() => { if (sessionId !== undefined) void reload(sessionId) }} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+          </div>
+        )}
+        {adoption.kind === 'question-empty' && (
+          <div style={{ marginTop: 2, color: '#b45309' }}>
+            ⚠ {props.t('statusQuestionEmpty')}
+            <button type="button" onClick={() => { if (sessionId !== undefined) void reload(sessionId) }} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+          </div>
+        )}
         {adoption.kind === 'unrecorded' && (
           <div style={{ marginTop: 2, opacity: 0.75 }}>{props.t('configUnrecorded')}</div>
         )}

@@ -248,6 +248,7 @@ async function main() {
 
     if (selected('S15')) {
       const reviewBackup = readFileSync(reviewPath, 'utf8')
+      const hadReviewDir = existsSync(reviewDir)
       mkdirSync(reviewDir, { recursive: true })
       const readinessBackup = backupFile(readinessPath)
       writeFileSync(reviewPath, reviewBackup.replace(/readiness:\s*PASS/g, 'readiness: FAIL'))
@@ -265,6 +266,7 @@ async function main() {
       } finally {
         writeFileSync(reviewPath, reviewBackup)
         readinessBackup()
+        if (!hadReviewDir) rmSync(reviewDir, { recursive: true, force: true })
       }
     }
 

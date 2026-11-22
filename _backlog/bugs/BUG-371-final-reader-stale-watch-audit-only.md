@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 修复落地
 severity: P2
 opened: 2026-11-23
 ---
 
 # BUG-371：读者版更新后终稿页签不提示——stale watcher 只盯审计版
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复就绪 — P0 复跑仍红；根因证据见下；批 observation-residuals-369-376。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复落地 — 红证 residual full exit 1（S17 读者版更新出现 stale 提示）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
 > 现场 = `runtime/e2e/final-reader-stale-verdict.json` + `final-reader-stale.png`；
 > 夹具 = `runtime/e2e/final-reader-stale-e2e.mjs`。
 
@@ -93,3 +93,29 @@ targetRef.current = { dir: viewIo.dir, name: bodyArt.state === 'ok' ? target.aud
 - 无变化 → 不误报（负控）。
 - 红证：把 targetRef 改回只盯 audit → 本夹具再次无提示，exit 1；还原后绿。
 - guard 落点：`ResearchFinalTab` 的 watcher 目标矩阵，或浏览器层用例（本 seed 夹具可升格）。
+
+## 修复落地（2026-11-23）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/run/final-target.ts",
+    "packages/deep-research-pack/src/client/ResearchFinalTab.tsx",
+    "tests/run/gates/final-target.spec.mjs",
+    "tests/cockpit/client/final-tab-patterns.spec.mjs",
+    "checks/smoke/cockpit-truth-residuals.entry.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth-residuals.entry.mjs",
+    "exit": 1,
+    "output": "FAIL S17 读者版更新出现 stale 提示（P0 全入口 17/28，exit 1）"
+  },
+  "green": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth-residuals.entry.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/cockpit-truth-residuals.entry.mjs"
+  }
+}
+```

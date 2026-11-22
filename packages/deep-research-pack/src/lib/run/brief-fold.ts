@@ -30,6 +30,8 @@ interface BriefInputs {
   readonly questionIssue?: 'empty' | 'unreadable' | null
   /** 结构化审查结论未定（readiness 声明缺失/坏、review 为空/读失败）；BUG-363/366。 */
   readonly reviewUnconfirmed?: boolean
+  /** 声明与 review.md 冲突（mismatch/ambiguous）；BUG-369。 */
+  readonly reviewConflict?: boolean
   /** 立项预检窗口（读绑定 + kickoff 已见 + 无挂起——读到的是上一场上下文）。 */
   readonly kickoffHold?: boolean
   /** 末位 ask 仍开放（hitl-fold.foldHitlPending）。 */
@@ -86,6 +88,7 @@ export function deriveBusinessBrief(inputs: BriefInputs, t: PackTranslate = tran
   const bundleReadFailure = inputs.bundleReadFailure === 'missing' || inputs.bundleReadFailure === 'unreadable' ? inputs.bundleReadFailure : null
   const questionIssue = inputs.questionIssue === 'empty' || inputs.questionIssue === 'unreadable' ? inputs.questionIssue : null
   const reviewUnconfirmed = inputs.reviewUnconfirmed === true
+  const reviewConflict = inputs.reviewConflict === true
   const kickoffHold = inputs.kickoffHold === true
   const hitlPending = inputs.hitlPending === true
   const pendingKind = inputs.pendingKind ?? null
@@ -196,6 +199,27 @@ export function deriveBusinessBrief(inputs: BriefInputs, t: PackTranslate = tran
       actionLine: t('briefActionDeliveredReviewFail'),
       userActionNeeded: false,
     }
+  }
+
+  // 审查结论冲突（BUG-369）：声明与 review.md 不一致；不得单边取 PASS/FAIL。
+  if (reviewConflict && reviewFail !== true) {
+    return delivered
+      ? {
+          goal, goalKnown,
+          stageLine: t('briefStageDeliveredReviewConflict'),
+          knownLine: t('briefKnownDeliveredReviewConflict'),
+          unknownLine: t('briefUnknownDeliveredReviewConflict'),
+          actionLine: t('briefActionDeliveredReviewConflict'),
+          userActionNeeded: false,
+        }
+      : {
+          goal, goalKnown,
+          stageLine: t('briefStageReviewConflict'),
+          knownLine: t('briefKnownReviewConflict'),
+          unknownLine: t('briefUnknownReviewConflict'),
+          actionLine: t('briefActionReviewConflict'),
+          userActionNeeded: false,
+        }
   }
 
   // 审查结论未定（BUG-363/366）：结构化声明缺失/坏、review 空/读失败；不得当审查通过。

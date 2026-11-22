@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 修复落地
 severity: P2
 opened: 2026-11-23
 ---
 
 # BUG-372：配置页把 question.md 读失败说成「文件不在/被移走」
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复就绪 — P0 复跑仍红；根因证据见下；批 observation-residuals-369-376。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复落地 — 红证 residual full exit 1（S20 配置页显示研究问题读取失败）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
 > 现场 = `runtime/e2e/config-question-unreadable-verdict.json` + `config-question-unreadable.png`；
 > 夹具 = `runtime/e2e/config-question-unreadable-e2e.mjs`。
 
@@ -94,3 +94,29 @@ const adoption = foldMethodAdoption(text?.ok ? text.value.text : null, {
 - question.md 可读 → adoption 正常（正向不回退）。
 - 红证：把 `text?.ok` 分支改回 `null` → 本夹具再次出现「不在」，exit 1；还原后绿。
 - guard 落点：`useConfigFeed` 的 adoption question 三态矩阵，或浏览器层用例。
+
+## 修复落地（2026-11-23）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/method-library/method-of-question.ts",
+    "packages/deep-research-pack/src/client/research-config/useConfigFeed.ts",
+    "packages/deep-research-pack/src/client/ResearchConfigTab.tsx",
+    "tests/cockpit/lib/method-library/method-of-question.spec.mjs",
+    "checks/smoke/cockpit-truth-residuals.entry.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth-residuals.entry.mjs",
+    "exit": 1,
+    "output": "FAIL S20 配置页显示研究问题读取失败（P0 全入口 17/28，exit 1）"
+  },
+  "green": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth-residuals.entry.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/cockpit-truth-residuals.entry.mjs"
+  }
+}
+```

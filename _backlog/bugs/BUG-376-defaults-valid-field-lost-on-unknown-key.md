@@ -1,12 +1,12 @@
 ---
-status: 排查中
+status: 修复落地
 severity: P2
 opened: 2026-11-23
 ---
 
 # BUG-376：research-defaults.json 有未知键时，合法 effort 被静默丢弃却提示「未知字段已忽略」
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：排查中 — P0 复核为 E2E 假阳性（select.value=deep，合法 effort 生效）；待纠正夹具/卡，不修产品代码。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复落地 — P0 复核非缺陷（select.value=deep）；纠正 E2E + mixed 回归；无产品代码变更。
 > 现场 = `runtime/e2e/config-defaults-mixed-verdict.json` + `config-defaults-mixed.png`；
 > 夹具 = `runtime/e2e/config-defaults-mixed-e2e.mjs`。
 
@@ -84,3 +84,27 @@ node --import tsx/esm runtime/e2e/config-defaults-mixed-e2e.mjs
 - 红证：把 mixed 文件的 `value` 折回 empty 且保留“已忽略未知”文案 → 本夹具再次出现
   “自动 + 已忽略”，exit 1；还原后绿。
 - guard 落点：`parseDefaults`/`DefaultsStore` 的 mixed 键矩阵 + 面板文案，或浏览器层用例。
+
+## 修复落地（2026-11-23）
+
+```json fix-evidence
+{
+  "changes": [
+    "tests/pack/defaults/research-defaults.spec.mjs",
+    "checks/smoke/cockpit-truth-residuals.entry.mjs",
+    "tests/fixtures/guard-ledger/ledger.json"
+  ],
+  "red": {
+    "command": "TSX_TSCONFIG_PATH=\"$(pwd -P)/packages/deep-research-pack/tsconfig.client.json\" node --import tsx/esm --test tests/pack/defaults/research-defaults.spec.mjs",
+    "exit": 1,
+    "output": "变异：unknown 键 push 到 problems → BUG-376 mixed 回归红（合法 effort 仍保留，但 warnings 契约被破坏）"
+  },
+  "green": {
+    "command": "TSX_TSCONFIG_PATH=\"$(pwd -P)/packages/deep-research-pack/tsconfig.client.json\" node --import tsx/esm --test tests/pack/defaults/research-defaults.spec.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "tests/pack/defaults/research-defaults.spec.mjs"
+  }
+}
+```

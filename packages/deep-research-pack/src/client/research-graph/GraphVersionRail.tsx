@@ -16,7 +16,7 @@ export function GraphVersionRail(props: {
   readonly setShowSnapshotPlan: (update: boolean | ((current: boolean) => boolean)) => void
   readonly graphView: 'current' | 'diff'
   readonly setGraphView: (update: 'current' | 'diff' | ((current: 'current' | 'diff') => 'current' | 'diff')) => void
-  readonly snapshotState: 'idle' | 'loading' | 'ready' | 'missing'
+  readonly snapshotState: 'idle' | 'loading' | 'ready' | 'empty' | 'invalid' | 'missing' | 'unreadable'
   readonly snapshotPlan: PlanIndex | null
   readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
@@ -48,6 +48,9 @@ export function GraphVersionRail(props: {
         <div style={BANNER_STYLE}>
           <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{t('graphOldSnapshotTitle', { version: String(latestSnapshot) })}</div>
           {snapshotState === 'missing' && <div style={MUTED_STYLE}>{t('graphSnapshotMissing', { version: String(latestSnapshot) })}</div>}
+          {snapshotState === 'unreadable' && <div style={MUTED_STYLE}>{t('graphSnapshotUnreadable', { version: String(latestSnapshot) })}</div>}
+          {snapshotState === 'empty' && <div style={MUTED_STYLE}>{t('graphSnapshotEmpty', { version: String(latestSnapshot) })}</div>}
+          {snapshotState === 'invalid' && <div style={MUTED_STYLE}>{t('graphSnapshotInvalid', { version: String(latestSnapshot) })}</div>}
           {snapshotState === 'loading' && <div style={MUTED_STYLE}>{t('graphLoading')}</div>}
           {snapshotPlan !== null && snapshotPlan.topLevel.map((node) => (
             <div key={node.id} style={{ fontSize: 11, opacity: 0.85 }}>

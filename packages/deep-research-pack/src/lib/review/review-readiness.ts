@@ -316,3 +316,33 @@ export function readinessOfSources(input: {
   }
   return { pass: parsed.value.readiness === 'PASS', conditional: parsed.value.conditional, source: 'declaration' }
 }
+
+/** 观察面共享审查判定：pass/fail/conflict/unconfirmed/absent（BUG-369/374）。 */
+export type ReviewVerdict = 'pass' | 'fail' | 'conflict' | 'unconfirmed' | 'absent'
+
+/** 读取态的最小形状（与 ArtifactState 同形；本模块不依赖 run/artifact-read）。 */
+export interface ReviewVerdictStates {
+  readonly review?: 'ok' | 'absent' | 'unreadable' | 'empty' | 'invalid'
+  readonly readiness?: 'ok' | 'absent' | 'unreadable' | 'empty' | 'invalid'
+}
+
+/**
+ * 由 readiness reading + 读取态判共享审查结论。
+ *
+ * 规则：mismatch/ambiguous = conflict（声明与散文冲突，不能单边取 PASS/FAIL）；
+ * review/readiness 空/不可读/非法 = unconfirmed；无 review 面 = absent；其余按 pass/fail。
+ * 状态页、brief、终稿页签共用本函数，禁止各自把 source 折成 unconfirmed。
+ * @param reading - readinessOfSources 的判据。
+ * @param states - review.md / readiness.json 的 ArtifactState（可选）。
+ * @returns 共享判定。
+ */
+export function reviewVerdictOf(reading: ReadinessReading, states: ReviewVerdictStates = {}): ReviewVerdict {
+  const reviewBad = states.review === 'empty' || states.review === 'unreadable' || states.review === 'invalid'
+  const readinessBad = states.readiness === 'empty' || states.readiness === 'unreadable' || states.readiness === 'invalid'
+  if (reviewBad || readinessBad) return 'unconfirmed'
+  if (reading.source === 'mismatch' || reading.source === 'ambiguous') return 'conflict'
+  if (reading.source === 'absent') return 'absent'
+  if (reading.source === 'missing' || reading.source === 'invalid') return 'unconfirmed'
+  if (typeof reading.pass !== 'boolean') return 'unconfirmed'
+  return reading.pass ? 'pass' : 'fail'
+}

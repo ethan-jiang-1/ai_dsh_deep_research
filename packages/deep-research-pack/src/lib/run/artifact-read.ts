@@ -30,6 +30,8 @@ export interface StatusReads {
   readonly review: ArtifactState
   readonly readiness: ArtifactState
   readonly evidence: SourceRead
+  readonly plan: ArtifactState
+  readonly final: SourceRead
   readonly receipt: ArtifactState
 }
 
@@ -58,6 +60,7 @@ export const ARTIFACT_POLICY: Readonly<Record<string, ArtifactPolicy>> = {
 export function artifactPolicyOf(name: string): ArtifactPolicy | null {
   const fixed = ARTIFACT_POLICY[name]
   if (fixed !== undefined) return fixed
+  if (/^plan\/v[1-9]\d{0,5}\.md$/.test(name)) return { nonEmpty: true, json: false }
   if (/^final\/v[1-9]\d{0,5}\.md$/.test(name)) return { nonEmpty: true, json: false }
   if (/^final\/readable(?:-v[1-9]\d{0,5})?\.md$/.test(name)) return { nonEmpty: true, json: false }
   return null

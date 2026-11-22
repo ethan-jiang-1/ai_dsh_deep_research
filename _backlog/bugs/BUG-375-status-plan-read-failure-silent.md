@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 修复落地
 severity: P2
 opened: 2026-11-23
 ---
 
 # BUG-375：plan.md 读不到时状态页没有任何提示——版本面静默消失
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复就绪 — P0 复跑仍红；根因证据见下；批 observation-residuals-369-376。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复落地 — 红证 residual full exit 1（S19 状态页显示计划读取失败）→ 绿证 28/28 exit 0；批 observation-residuals-369-376。
 > 现场 = `runtime/e2e/status-plan-unreadable-verdict.json` + `status-plan-unreadable.png`；
 > 夹具 = `runtime/e2e/status-plan-unreadable-e2e.mjs`。
 
@@ -94,3 +94,31 @@ const planText = planArt.state === 'ok' ? planArt.text : null
 - 图谱页签的 plan 失败态保留（不回退）。
 - 红证：把 plan 的 `!ok` 分支折回 `planText=null` 且不展示 → 本夹具再次无提示，exit 1；还原后绿。
 - guard 落点：`useStatusFeed` 的 plan 三态矩阵，或浏览器层用例。
+
+## 修复落地（2026-11-23）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/run/artifact-read.ts",
+    "packages/deep-research-pack/src/client/research-status/useStatusFeed.ts",
+    "packages/deep-research-pack/src/client/ResearchStatusTab.tsx",
+    "packages/deep-research-pack/src/client/locales/zh.ts",
+    "packages/deep-research-pack/src/client/locales/en.ts",
+    "tests/cockpit/lib/events/status-feed.spec.mjs",
+    "checks/smoke/cockpit-truth-residuals.entry.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth-residuals.entry.mjs",
+    "exit": 1,
+    "output": "FAIL S19 状态页显示计划读取失败（P0 全入口 17/28，exit 1）"
+  },
+  "green": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth-residuals.entry.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/cockpit-truth-residuals.entry.mjs"
+  }
+}
+```

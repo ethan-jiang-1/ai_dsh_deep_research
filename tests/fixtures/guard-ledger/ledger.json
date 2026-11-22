@@ -1780,6 +1780,70 @@
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "把 reader.ok=false 改回 readerText=null → S14 夹具无提示"
+    },
+    {
+      "id": "BUG-369",
+      "mechanism": "readiness mismatch/ambiguous 不只折 unconfirmed；状态/终稿共用 conflict 文案，不误报「声明缺失」",
+      "guard": "checks/smoke/cockpit-truth-residuals.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 reviewVerdictOf 的 mismatch 分支删掉（回落 unconfirmed）→ S15 状态页再出现「声明缺失」"
+    },
+    {
+      "id": "BUG-370",
+      "mechanism": "空 plan/vN 快照独立 empty 态；非空零节点 → invalid，不画空面板",
+      "guard": "checks/smoke/cockpit-truth-residuals.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把空正文改回 planIndex('') + ready → S22 再出现空面板"
+    },
+    {
+      "id": "BUG-371",
+      "mechanism": "stale watcher 盯当前显示件（reader/audit/draft），不是固定 audit",
+      "guard": "checks/smoke/cockpit-truth-residuals.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "watchTargetOf 恒返回 audit → S17 reader 更新不再出现 stale 提示"
+    },
+    {
+      "id": "BUG-372",
+      "mechanism": "config adoption question 四态；读失败/空 → 读取失败/为空，不显示「不在/被移走」",
+      "guard": "checks/smoke/cockpit-truth-residuals.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 adoption 的 !ok 折回 text=null + hasFile → S20 再显示「question.md 不在」"
+    },
+    {
+      "id": "BUG-373",
+      "mechanism": "final/ list 失败进 StatusReads.final；状态页 warning + 不无条件 v1 已交付",
+      "guard": "checks/smoke/cockpit-truth-residuals.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 finalDir list 失败折回 finalFileNames=[] → S18 再出现无条件「已交付」"
+    },
+    {
+      "id": "BUG-374",
+      "mechanism": "终稿页签消费共享 reviewVerdict；review 空/读失败/声明缺 → 审查未定 + 重试，不静默",
+      "guard": "checks/smoke/cockpit-truth-residuals.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 final 的 pass=null 改回静默正常 → S16 终稿再次无审查提示"
+    },
+    {
+      "id": "BUG-375",
+      "mechanism": "plan 读失败/空进 StatusReads.plan；状态页 warning + 版本面「计划版本未知」",
+      "guard": "checks/smoke/cockpit-truth-residuals.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 planText=null 折回无 plan 轴/无展示 → S19 再次无提示"
+    },
+    {
+      "id": "BUG-376",
+      "mechanism": "mixed 未知键不丢合法 effort；P0 复核为 E2E 假阳性，回归钉保留合法值",
+      "guard": "tests/pack/defaults/research-defaults.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 unknown 键分支改成整份 emptyDefaults → mixed 回归红（卡本身按 not-a-bug 收口）"
     }
   ]
 }

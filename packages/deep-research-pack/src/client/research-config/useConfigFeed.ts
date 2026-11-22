@@ -9,6 +9,7 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { foldLibrary, type LibraryEntry } from '../../lib/method-library/library-fold.ts'
 import { bindingTrust } from '../../lib/run/binding-trust.ts'
 import { openRun, type RunSource } from '../../lib/run/run-context.ts'
+import { readArtifact } from '../../lib/run/artifact-read.ts'
 import { foldMethodAdoption, type MethodAdoption } from '../../lib/method-library/method-of-question.ts'
 import { assistantReplyAfter, libraryDiff, receiptOf, type LibraryDiff } from '../../lib/run/receipt-fold.ts'
 import type { PackTranslate } from '../../lib/shared/i18n.ts'
@@ -160,9 +161,15 @@ export function useConfigFeed(props: ConfigFeedInput) {
       }
       const view = opened.value
       const hasQuestion = view.hasFile('question.md')
-      const text = hasQuestion ? await view.read('question.md', { signal: controller.signal }) : null
+      if (!hasQuestion) {
+        setAdoption(foldMethodAdoption(null, { bundle: true, question: false, questionState: 'absent' }))
+        return
+      }
+      const art = await readArtifact(view, 'question.md', { signal: controller.signal })
       if (stopped) return
-      setAdoption(foldMethodAdoption(text?.ok === true ? text.value.text : null, { bundle: true, question: hasQuestion }))
+      setAdoption(foldMethodAdoption(art.state === 'ok' ? art.text : null, {
+        bundle: true, question: true, questionState: art.state,
+      }))
     })()
     return () => { stopped = true; controller.abort() }
   }, [sessionId, boundSlug, props.runSource])

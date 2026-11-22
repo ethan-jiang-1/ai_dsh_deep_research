@@ -15,7 +15,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readinessOf } from '../../../checks/lib/shared/node-gate-contracts.mjs'
-import { terminalReadiness } from '../../../packages/deep-research-pack/src/lib/review/review-readiness.ts';
+import { reviewVerdictOf, terminalReadiness } from '../../../packages/deep-research-pack/src/lib/review/review-readiness.ts';
 
 test('终局判定：首行 frontmatter 形态（readiness: PASS）→ PASS', () => {
   assert.equal(terminalReadiness('readiness: PASS\n\n## 定义\n...\n'), 'PASS');
@@ -233,3 +233,25 @@ test('BUG-150 散文前缀不夺权：随后/复核后/结论/本 run 一律不�
   // 结构形态（判定独立成行）仍读得出
   assert.equal(terminalReadiness('旧轮真实记录：`readiness: PASS`\n\n## readiness: FAIL\n'), 'FAIL')
 })
+
+// 负例留证 2026-11-23：BUG-369/374——mismatch/ambiguous 被状态页折 unconfirmed、终稿只看 prose。
+// 红配方：把 reviewVerdictOf 的 mismatch 分支删掉（回落 pass/fail）→ 本组断言红。
+test('BUG-369 reviewVerdictOf：冲突/未定/缺席/通过/未过五态', () => {
+  const base = { pass: true, conditional: false, source: 'declaration' };
+  assert.equal(reviewVerdictOf(base), 'pass');
+  assert.equal(reviewVerdictOf({ ...base, pass: false }), 'fail');
+  assert.equal(reviewVerdictOf({ ...base, pass: false, source: 'mismatch' }), 'conflict');
+  assert.equal(reviewVerdictOf({ ...base, pass: false, source: 'ambiguous' }), 'conflict');
+  assert.equal(reviewVerdictOf({ ...base, pass: false, source: 'missing' }), 'unconfirmed');
+  assert.equal(reviewVerdictOf({ ...base, pass: false, source: 'invalid' }), 'unconfirmed');
+  assert.equal(reviewVerdictOf({ ...base, pass: null, source: 'absent' }), 'absent');
+  assert.equal(reviewVerdictOf(base, { review: 'unreadable' }), 'unconfirmed');
+  assert.equal(reviewVerdictOf(base, { review: 'empty' }), 'unconfirmed');
+  assert.equal(reviewVerdictOf(base, { readiness: 'unreadable' }), 'unconfirmed');
+  assert.equal(reviewVerdictOf(base, { readiness: 'invalid' }), 'unconfirmed');
+  // 不变量：只有 declaration/prose + boolean 才能 pass/fail；冲突/未定绝不冒充 pass。
+  for (const source of ['mismatch', 'ambiguous', 'missing', 'invalid', 'absent']) {
+    const v = reviewVerdictOf({ pass: false, conditional: false, source });
+    assert.notEqual(v, 'pass', source);
+  }
+});

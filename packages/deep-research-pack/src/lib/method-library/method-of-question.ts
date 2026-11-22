@@ -21,7 +21,7 @@
 import { flattenMarkdownInline, truncateWithEllipsis } from '../shared/text-fold.ts'
 
 /** 「本次研究」区状态。 */
-type AdoptionKind = 'no-run' | 'missing' | 'unrecorded' | 'unparsable' | 'recorded'
+type AdoptionKind = 'no-run' | 'missing' | 'question-unreadable' | 'question-empty' | 'unrecorded' | 'unparsable' | 'recorded'
 
 /** 方法节折算结果（recorded 之外各态的内容字段恒为 null——如实，不借默认值占位）。 */
 export interface MethodAdoption {
@@ -87,14 +87,24 @@ export function parseMethodSection(questionText: string | null): {
 /**
  * 折算「本次研究」区状态。
  * @param questionText - question.md 全文（读不到 → null）；读取须显式传足额 limit（见文件头）。
- * @param presence - bundle 与会话绑定是否在场、question.md 是否在场（`listDir` 事实）。
- * @returns 五态之一；非 recorded 态的内容字段为 null。
+ * @param presence - bundle 与会话绑定是否在场、question.md 是否在场（`listDir` 事实）与读取态。
+ * @returns 七态之一；非 recorded 态的内容字段为 null。
  */
 export function foldMethodAdoption(
   questionText: string | null,
-  presence: { readonly bundle: boolean; readonly question: boolean },
+  presence: {
+    readonly bundle: boolean
+    readonly question: boolean
+    readonly questionState?: 'ok' | 'absent' | 'unreadable' | 'empty' | 'invalid'
+  },
 ): MethodAdoption {
   if (!presence.bundle) return { kind: 'no-run', adopted: null, origin: null, requirements: null }
+  if (presence.questionState === 'unreadable' || presence.questionState === 'invalid') {
+    return { kind: 'question-unreadable', adopted: null, origin: null, requirements: null }
+  }
+  if (presence.questionState === 'empty') {
+    return { kind: 'question-empty', adopted: null, origin: null, requirements: null }
+  }
   if (!presence.question || questionText === null) return { kind: 'missing', adopted: null, origin: null, requirements: null }
   const section = parseMethodSection(questionText)
   if (!section.sectionSeen || section.adoptedRaw === null) return { kind: 'unrecorded', adopted: null, origin: null, requirements: null }
