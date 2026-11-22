@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| — | — | 当前无活跃卡（2026-11-22：观察面工件真实性修复程序结案归档） |
+| [2026-11-23-observation-residuals-program](2026-11-23-observation-residuals-program.md) | 待落地 | 观察面残余与跨面事实一致性：369–376 的次序/流程/系统修法（P0 先复核 376 是否假阳性） |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

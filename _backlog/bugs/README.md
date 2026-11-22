@@ -11,6 +11,7 @@
 > 2026-11-21 起的缺陷积压修复程序（20 张活跃分 5 簇，另有 11 张迁暂停池；不做旧产物兼容）= [修复计划](../_archived/settled_issues/2026-11-21-bug-stack-repair-program.md)。
 > 2026-11-22 起的观察面真实性修复程序（5 张活跃 356–360：读失败三态 / 交付目标 / 交付×审查）= [修复计划](../_archived/settled_issues/2026-11-22-observation-truthfulness-program.md)。
 > 2026-11-22 起的观察面工件真实性修复程序（8 张 361–368：空/坏工件 + 未登记读取点 + 回退可见）= [修复计划](../_archived/settled_issues/2026-11-22-observation-artifact-truth-program.md)。
+> 2026-11-23 起的观察面残余与跨面事实一致性修复程序（8 张活跃 369–376：跨面读取/审查冲突/显示件 watcher/默认值混合键）= [修复计划](../issues/2026-11-23-observation-residuals-program.md)。
 
 ## 活跃列表
 
