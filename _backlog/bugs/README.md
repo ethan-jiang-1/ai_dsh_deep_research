@@ -15,7 +15,14 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| — | — | — | 当前无活跃卡（2026-11-22：356–360 五卡修复归档） |
+| [BUG-361](BUG-361-status-question-read-failure-as-pending.md) | 排查中 | P2 | question.md 读不到时状态页说「问题尚未定稿」——读失败被折成空 |
+| [BUG-362](BUG-362-status-receipt-read-failure-as-absent.md) | 排查中 | P2 | delivered.json 读不到时状态页说「交付未见证」——回执读失败被折成没有回执 |
+| [BUG-363](BUG-363-status-readiness-missing-false-green.md) | 排查中 | P2 | review/ 在场但 readiness.json 缺席/不可读时仍显示「✓ 审查」 |
+| [BUG-364](BUG-364-final-empty-reader-blank.md) | 排查中 | P2 | 空 readable-v1.md 让终稿页签显示空白「读者版」——审计版被藏起来 |
+| [BUG-365](BUG-365-final-empty-body-blank.md) | 排查中 | P2 | 0 字节 final/v1.md 让终稿页签显示空白——已交付报告被读成空 |
+| [BUG-366](BUG-366-status-empty-review-false-green.md) | 排查中 | P2 | 0 字节 review.md 让状态页显示「✓ 审查」——空文件被折成 absent |
+| [BUG-367](BUG-367-status-empty-question-false-pending.md) | 排查中 | P2 | 0 字节 question.md 让状态页说「问题尚未定稿」但步骤 ✓ 立项 |
+| [BUG-368](BUG-368-final-reader-unreadable-silent-fallback.md) | 排查中 | P2 | readable-v1.md 读不到时静默降级为审计版——读者版失败不可见 |
 
 ## 最近归档
 
