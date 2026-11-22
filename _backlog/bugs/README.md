@@ -10,6 +10,7 @@
 > 方法 = [`../methods/bug-to-fix.md`](../methods/bug-to-fix.md)——先判表面/边界，再按状态翻转收证据（DSH 插件 = 多边界组合，低边界绿不算修好）。
 > 2026-11-21 起的缺陷积压修复程序（20 张活跃分 5 簇，另有 11 张迁暂停池；不做旧产物兼容）= [修复计划](../_archived/settled_issues/2026-11-21-bug-stack-repair-program.md)。
 > 2026-11-22 起的观察面真实性修复程序（5 张活跃 356–360：读失败三态 / 交付目标 / 交付×审查）= [修复计划](../_archived/settled_issues/2026-11-22-observation-truthfulness-program.md)。
+> 2026-11-22 起的观察面工件真实性修复程序（8 张活跃 361–368：空/坏工件 + 未登记读取点 + 回退可见）= [修复计划](../issues/2026-11-22-observation-artifact-truth-program.md)。
 
 ## 活跃列表
 
