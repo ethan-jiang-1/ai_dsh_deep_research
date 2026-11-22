@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| [2026-11-22-observation-artifact-truth-program](2026-11-22-observation-artifact-truth-program.md) | 待落地 | 观察面工件真实性修复程序：BUG-361…368 的次序、流程与系统修法 |
+| — | — | 当前无活跃卡（2026-11-22：观察面工件真实性修复程序结案归档） |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

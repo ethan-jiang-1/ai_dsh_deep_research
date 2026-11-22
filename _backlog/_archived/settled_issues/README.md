@@ -5,6 +5,7 @@
 | [2026-11-13-workflow-substance-gates](2026-11-13-workflow-substance-gates.md) | 加工环路的实体检查：判据形状字段 + Note 同节 + 两道收口门（Note 早写、暂存区配对）+ 复发必答 + 判据测试负例 + 金标准理由；D52；1400 测试 / gates-smoke 108 全绿；[Note](../../../notes/implemented/2026-11-13-workflow-substance-gates.md) | 2026-11-13 |
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-22-observation-artifact-truth-program](2026-11-22-observation-artifact-truth-program.md) | 观察面工件真实性修复程序：361–368 八卡修复归档（五态工件读取 / 完整事实清单 / 回退可见）；[批 Note](../../../notes/implemented/2026-11-22-observation-artifact-truth.md) | 2026-11-22 |
 | [2026-11-22-observation-truthfulness-program](2026-11-22-observation-truthfulness-program.md) | 观察面真实性修复程序：356–360 五卡修复归档（读失败三态 / 地址目标版本 / 交付×审查矩阵）；[批 Note](../../../notes/implemented/2026-11-22-observation-truthfulness.md) | 2026-11-22 |
 | [2026-11-20-pack-production-prevention](2026-11-20-pack-production-prevention.md) | Pack 生产源头预防：D 节点表解释已交付并接受（装饰进支持域、多表/转义管道明确拒绝）；P 生产强制转「以后做」入 [triggers](../../triggers.md)；[Note](../../../notes/implemented/2026-11-20-pack-production-prevention.md) | 2026-11-22 |
 | [2026-11-20-preventive-quality-pilot](2026-11-20-preventive-quality-pilot.md) | 预防性质量首批 A+B：启动所有权 + 有限准入交付接受；A4 盲评失败如实留档（规则效力未证）；后续候选 1 项并 P、3 项 none；[Note](../../../notes/implemented/2026-11-20-preventive-quality-pilot.md) | 2026-11-22 |

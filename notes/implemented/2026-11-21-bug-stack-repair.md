@@ -139,3 +139,11 @@
   交付×审查矩阵一次补齐；五卡证据与决定 = [观察面事实真实性 Note](2026-11-22-observation-truthfulness.md)。
 - 本批补充 355 的类级结论：读失败要修在消费者边界（bundle/review/evidence 三态 + 步骤 unknown），
   不只在 reader；浏览器五场景入口 = `checks/smoke/cockpit-truth.entry.mjs`。
+
+### 2026-11-22 第四批（BUG-361…368）
+
+- 第三批的三态仍缺 `empty/invalid`，且事实清单只到 bundle/review/evidence；question/回执/readiness/
+  终稿 reader 的读取点各自折平。第四批把 `artifact-read` 五态 + 完整事实清单 + `finalViewOf`
+  回退可见一次补齐；八卡证据与决定 = [观察面工件真实性 Note](2026-11-22-observation-artifact-truth.md)。
+- 同一观察面第三次复发后的流程修正：G19 读取点收口（源级零裸 `view.read`）、G20「先闭合清单与
+  机械入口，再做卡片修复」；浏览器九场景入口 = `checks/smoke/cockpit-artifact-truth.entry.mjs`。

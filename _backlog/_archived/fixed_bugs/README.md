@@ -6,6 +6,14 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [361](BUG-361-status-question-read-failure-as-pending.md) | question 读失败冒充「尚未定稿」 | （question 四态 + 立项 unknown） | 2026-11-22 |
+| [362](BUG-362-status-receipt-read-failure-as-absent.md) | 回执读失败冒充「未见证」 | （receipt 五态） | 2026-11-22 |
+| [363](BUG-363-status-readiness-missing-false-green.md) | readiness 缺席/坏仍 ✓ 审查 | （reviewVerdict 四态） | 2026-11-22 |
+| [364](BUG-364-final-empty-reader-blank.md) | 空读者版显示空白 | （finalViewOf 回退提示） | 2026-11-22 |
+| [365](BUG-365-final-empty-body-blank.md) | 空终稿正文显示空白 | （finalViewOf 空态） | 2026-11-22 |
+| [366](BUG-366-status-empty-review-false-green.md) | 空 review 仍 ✓ 审查 | （empty 态 + 终局判定） | 2026-11-22 |
+| [367](BUG-367-status-empty-question-false-pending.md) | 空 question 仍「尚未定稿」+✓ | （empty 态 + 立项 unknown） | 2026-11-22 |
+| [368](BUG-368-final-reader-unreadable-silent-fallback.md) | 读者版读失败静默回退 | （finalViewOf 失败提示） | 2026-11-22 |
 | [356](BUG-356-final-tab-ignores-delivered-version.md) | 终稿页签无视交付版本 | （地址目标版本 + 缺失失败） | 2026-11-22 |
 | [357](BUG-357-delivered-review-fail-contradiction.md) | 已交付 + review FAIL 互斥 | （交付×审查矩阵） | 2026-11-22 |
 | [358](BUG-358-status-bundle-read-failure-as-progress.md) | bundle 读失败冒充进度 | （reads 三态 + 重试） | 2026-11-22 |

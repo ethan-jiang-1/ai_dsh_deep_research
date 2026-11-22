@@ -2,6 +2,7 @@
 // cockpit-artifact-truth.entry.mjs — 观察面「工件真实性」九场景（BUG-361…368，keyless 真浏览器）。
 //
 // 与 cockpit-truth.entry（S1–S5）同边界、同 seed，但专测工件的空/读失败/非法与回退可见：
+// 批 Note = notes/implemented/2026-11-22-observation-artifact-truth.md（2026-11-22 收口；八卡 361–368）。
 //   S6 question 不可读；S7 回执不可读；S8 readiness 缺席；S9 readiness 不可读；
 //   S10 空读者版；S11 空终稿正文；S12 空 review；S13 空 question；S14 读者版不可读。
 // 每场景断言「该出现的出现 + 不该出现的不出现」；状态页/终稿页签先要求可达，避免空页假绿。

@@ -6,6 +6,9 @@
 
 | 对象 | 当前决定 | 具体观察（出现位置） | owner |
 |---|---|---|---|
+| 观察面九场景守卫（dev-only） | `checks/smoke/cockpit-artifact-truth.entry.mjs` 在树内、九场景本机真浏览器 31/31；未进 CI/nightly（真浏览器 + 文件突变） | 连续两轮稳定，或 `cockpit-truth`/`client-load` 吸收九场景 → 升 nightly；九场景任一在真实改动上复发 → 引用批 Note 建卡 | [批 Note](../notes/implemented/2026-11-22-observation-artifact-truth.md) |
+| 观察面 en 浏览器装配 | en 字典/折叠 i18n 有单测；浏览器仍以 zh-CN 为主，未跑 en 装配面 | 下一次 en 装配夹具出现，或用户报告英文界面混排 → 跑两条 cockpit 入口的 en 场景 + 补 locale 守卫 | [批 Note](../notes/implemented/2026-11-22-observation-artifact-truth.md) |
+| 观察面潜在读取点（§2.5） | `final/` list、`plan.md`、终稿 `review.md`、`final.md` 草稿读失败判 `none`（无用户可见假绿/假交付；target 地址 pin 版本；status 359 管 review 读失败；pinned delivery 无草稿 toggle） | 真实用户路径出现可见假绿/假交付，或 `final/` list 失败导致交付版本被工作稿顶替 → 新建卡（369+），不重开已修卡 | [批 Note](../notes/implemented/2026-11-22-observation-artifact-truth.md) |
 | 观察面五场景守卫（dev-only） | `checks/smoke/cockpit-truth.entry.mjs` 在树内、五场景本机真浏览器 24/24；未进 CI/nightly（真浏览器 + 文件突变 + 主机负载敏感） | 连续两轮发布/nightly 稳定，或 client-load 相位吸收五场景 → 升 nightly；五场景任一在真实改动上复发 → 引用批 Note 建卡，不重开已修卡 | [批 Note](../notes/implemented/2026-11-22-observation-truthfulness.md) |
 | 观察面 en 浏览器装配 | en 字典/折叠 i18n 有单测；浏览器仍以 zh-CN 为主，未跑 en 装配面（J16 旧缺口） | 下一次 en 装配夹具出现，或用户报告英文界面混排 → 跑 cockpit-truth 五场景 en + en 文案断言；仍无夹具则不做 | [批 Note](../notes/implemented/2026-11-22-observation-truthfulness.md) |
 | 终稿通用地址（final.md）回退 | `final/vN` / `readable-vN` 地址目标优先；`final.md` / `readable.md` 通用地址保留「最新/工作稿」回退 | 用户要求 `final.md` 地址固定看当前工作稿（或固定看最新交付），或出现交付目标与工作稿混淆的真实阅读 → 改 `finalTargetOf` 的 fallback 合同并补 S1 邻接 | [BUG-356](_archived/fixed_bugs/BUG-356-final-tab-ignores-delivered-version.md) |

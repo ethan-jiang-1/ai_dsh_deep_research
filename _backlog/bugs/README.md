@@ -10,22 +10,26 @@
 > 方法 = [`../methods/bug-to-fix.md`](../methods/bug-to-fix.md)——先判表面/边界，再按状态翻转收证据（DSH 插件 = 多边界组合，低边界绿不算修好）。
 > 2026-11-21 起的缺陷积压修复程序（20 张活跃分 5 簇，另有 11 张迁暂停池；不做旧产物兼容）= [修复计划](../_archived/settled_issues/2026-11-21-bug-stack-repair-program.md)。
 > 2026-11-22 起的观察面真实性修复程序（5 张活跃 356–360：读失败三态 / 交付目标 / 交付×审查）= [修复计划](../_archived/settled_issues/2026-11-22-observation-truthfulness-program.md)。
-> 2026-11-22 起的观察面工件真实性修复程序（8 张活跃 361–368：空/坏工件 + 未登记读取点 + 回退可见）= [修复计划](../issues/2026-11-22-observation-artifact-truth-program.md)。
+> 2026-11-22 起的观察面工件真实性修复程序（8 张 361–368：空/坏工件 + 未登记读取点 + 回退可见）= [修复计划](../_archived/settled_issues/2026-11-22-observation-artifact-truth-program.md)。
 
 ## 活跃列表
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-361](BUG-361-status-question-read-failure-as-pending.md) | 排查中 | P2 | question.md 读不到时状态页说「问题尚未定稿」——读失败被折成空 |
-| [BUG-362](BUG-362-status-receipt-read-failure-as-absent.md) | 排查中 | P2 | delivered.json 读不到时状态页说「交付未见证」——回执读失败被折成没有回执 |
-| [BUG-363](BUG-363-status-readiness-missing-false-green.md) | 排查中 | P2 | review/ 在场但 readiness.json 缺席/不可读时仍显示「✓ 审查」 |
-| [BUG-364](BUG-364-final-empty-reader-blank.md) | 排查中 | P2 | 空 readable-v1.md 让终稿页签显示空白「读者版」——审计版被藏起来 |
-| [BUG-365](BUG-365-final-empty-body-blank.md) | 排查中 | P2 | 0 字节 final/v1.md 让终稿页签显示空白——已交付报告被读成空 |
-| [BUG-366](BUG-366-status-empty-review-false-green.md) | 排查中 | P2 | 0 字节 review.md 让状态页显示「✓ 审查」——空文件被折成 absent |
-| [BUG-367](BUG-367-status-empty-question-false-pending.md) | 排查中 | P2 | 0 字节 question.md 让状态页说「问题尚未定稿」但步骤 ✓ 立项 |
-| [BUG-368](BUG-368-final-reader-unreadable-silent-fallback.md) | 排查中 | P2 | readable-v1.md 读不到时静默降级为审计版——读者版失败不可见 |
+| — | — | — | 当前无活跃卡（2026-11-22：361–368 八卡修复归档） |
 
 ## 最近归档
+
+（2026-11-22 观察面工件真实性批（8 张，361–368），批 Note = [2026-11-22-observation-artifact-truth](../../notes/implemented/2026-11-22-observation-artifact-truth.md)：
+[361](../_archived/fixed_bugs/BUG-361-status-question-read-failure-as-pending.md) question 读失败；
+[362](../_archived/fixed_bugs/BUG-362-status-receipt-read-failure-as-absent.md) 回执读失败；
+[363](../_archived/fixed_bugs/BUG-363-status-readiness-missing-false-green.md) readiness 未定；
+[364](../_archived/fixed_bugs/BUG-364-final-empty-reader-blank.md) 空读者版；
+[365](../_archived/fixed_bugs/BUG-365-final-empty-body-blank.md) 空正文；
+[366](../_archived/fixed_bugs/BUG-366-status-empty-review-false-green.md) 空 review；
+[367](../_archived/fixed_bugs/BUG-367-status-empty-question-false-pending.md) 空 question；
+[368](../_archived/fixed_bugs/BUG-368-final-reader-unreadable-silent-fallback.md) 读者版读失败。
+）
 
 （2026-11-22 观察面真实性批（5 张，356–360），批 Note = [2026-11-22-observation-truthfulness](../../notes/implemented/2026-11-22-observation-truthfulness.md)：
 [356](../_archived/fixed_bugs/BUG-356-final-tab-ignores-delivered-version.md) 终稿地址版本；

@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-363：review/ 在场但 readiness.json 缺席/不可读时，状态页仍显示「✓ 审查」
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S8 显示审查未定）→ 绿证 exit 0（31/31）。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：已修 — 结论：readiness 声明缺席/坏 → 审查未定；不拿 prose PASS 给 ✓ 审查；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 两入口真浏览器；修复落地记录：真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S8 显示审查未定）→ 绿证 exit 0（31/31）。
 > 现场 = `runtime/e2e/status-readiness-verdict.json`（不可读）+
 > `runtime/e2e/status-readiness-missing-verdict.json`（缺席）；截图同名 png；
 > 夹具 = `runtime/e2e/status-fixture-e2e.mjs readiness` / `status-readiness-missing-e2e.mjs`。
@@ -33,7 +33,7 @@ bundle 有 `review/` 目录，但 `review/readiness.json` **缺席**或**不可�
 - DSH 不变量：fail-loud — canonical 声明缺席/非法必须显示审查未定/失败；prose 不是结构化声明的替代。
 - 触及面：none — 观察面 client + 测试；不碰入口链/门禁与验收合同/文档合同/pack 公共行为/D 号。
 - 授权：自授权（P2 修理型修复）；2026-11-22 用户 goal 放行。
-- 批：`artifact-truth-361-368` — 同批卡：361/362/363/364/365/366/367/368；批计划：[观察面工件真实性修复程序](../issues/2026-11-22-observation-artifact-truth-program.md)。
+- 批：`artifact-truth-361-368` — 同批卡：361/362/363/364/365/366/367/368；批计划：[观察面工件真实性修复程序](../settled_issues/2026-11-22-observation-artifact-truth-program.md)。
 
 ## 复现
 

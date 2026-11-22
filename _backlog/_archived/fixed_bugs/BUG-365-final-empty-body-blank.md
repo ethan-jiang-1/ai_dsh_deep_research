@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-365：0 字节的 final/v1.md 让终稿页签显示空白——已交付报告被读成空
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S11 显示终稿为空）→ 绿证 exit 0（31/31）。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：已修 — 结论：空终稿正文 → 明确空态 + 重试，不渲染空白；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 两入口真浏览器；修复落地记录：真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S11 显示终稿为空）→ 绿证 exit 0（31/31）。
 > 现场 = `runtime/e2e/final-empty-verdict.json` + `final-empty.png`；
 > 夹具 = `runtime/e2e/final-empty-e2e.mjs`。
 
@@ -29,7 +29,7 @@ opened: 2026-11-22
 - DSH 不变量：fail-loud — 空/纯空白正文必须有明确空态；不得渲染空白当作内容。
 - 触及面：none — 观察面 client + 测试；不碰入口链/门禁与验收合同/文档合同/pack 公共行为/D 号。
 - 授权：自授权（P2 修理型修复）；2026-11-22 用户 goal 放行。
-- 批：`artifact-truth-361-368` — 同批卡：361/362/363/364/365/366/367/368；批计划：[观察面工件真实性修复程序](../issues/2026-11-22-observation-artifact-truth-program.md)。
+- 批：`artifact-truth-361-368` — 同批卡：361/362/363/364/365/366/367/368；批计划：[观察面工件真实性修复程序](../settled_issues/2026-11-22-observation-artifact-truth-program.md)。
 
 ## 复现
 

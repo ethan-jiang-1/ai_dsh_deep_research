@@ -1,12 +1,12 @@
 ---
-status: 修复落地
+status: 已修
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-367：0 字节 question.md 让状态页说「问题尚未定稿」但步骤 ✓ 立项
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S13 显示研究问题为空）→ 绿证 exit 0（31/31）。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：已修 — 结论：空 question.md → 研究问题为空；立项步 unknown，不给 ✓；去向：implemented — 批 Note；审查：agent — 纯函数矩阵 + 两入口真浏览器；修复落地记录：真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S13 显示研究问题为空）→ 绿证 exit 0（31/31）。
 > 现场 = `runtime/e2e/status-question-empty-verdict.json` + `status-question-empty.png`；
 > 夹具 = `runtime/e2e/status-question-empty-e2e.mjs question`。
 
@@ -31,7 +31,7 @@ bundle 的 `question.md` 存在但是 0 字节（写坏/截断）。打开「研
 - DSH 不变量：fail-loud — 空问题文件是「为空」，不是「尚未定稿」；立项步只认有效正文。
 - 触及面：none — 观察面 client + 测试；不碰入口链/门禁与验收合同/文档合同/pack 公共行为/D 号。
 - 授权：自授权（P2 修理型修复）；2026-11-22 用户 goal 放行。
-- 批：`artifact-truth-361-368` — 同批卡：361/362/363/364/365/366/367/368；批计划：[观察面工件真实性修复程序](../issues/2026-11-22-observation-artifact-truth-program.md)。
+- 批：`artifact-truth-361-368` — 同批卡：361/362/363/364/365/366/367/368；批计划：[观察面工件真实性修复程序](../settled_issues/2026-11-22-observation-artifact-truth-program.md)。
 
 ## 复现
 

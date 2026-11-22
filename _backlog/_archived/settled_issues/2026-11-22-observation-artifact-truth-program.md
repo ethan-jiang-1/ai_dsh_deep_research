@@ -1,16 +1,17 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-22
 ---
 
 # 观察面工件真实性修复程序：BUG-361…368 的次序、流程与系统修法
 
-> 立卡：2026-11-22 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
-> 去向：implemented — `notes/implemented/2026-11-22-observation-artifact-truth.md`（批 Note，交付时写）
+> 立卡：2026-11-22 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 结论：八卡已修归档（361–368）；批 Note = [2026-11-22-observation-artifact-truth](../../../notes/implemented/2026-11-22-observation-artifact-truth.md)。
+> 去向：implemented — [2026-11-22-observation-artifact-truth](../../../notes/implemented/2026-11-22-observation-artifact-truth.md)
 > 对象：8 张活跃 P2 卡（361–368），全部真浏览器已复现；现场 = `runtime/e2e/*verdict.json` + `*.png`（gitignored）。
-> 上一批 = [观察面真实性 Note](../../notes/implemented/2026-11-22-observation-truthfulness.md) · [修复程序卡](../_archived/settled_issues/2026-11-22-observation-truthfulness-program.md)；
+> 上一批 = [观察面真实性 Note](../../../notes/implemented/2026-11-22-observation-truthfulness.md) · [修复程序卡](../settled_issues/2026-11-22-observation-truthfulness-program.md)；
 > 本批是同一观察面的**第三批**（351–355、356–360 之后）。
-> 方法 = [bug-to-fix §2 批模式](../methods/bug-to-fix.md)；状态机 = [bugs/README](../bugs/README.md)；证据主人 = [guides/60](../../docs/guides/60-dev-loop.md)。
+> 方法 = [bug-to-fix §2 批模式](../../methods/bug-to-fix.md)；状态机 = [bugs/README](../../bugs/README.md)；证据主人 = [guides/60](../../../docs/guides/60-dev-loop.md)。
 
 ## 0. 结论
 
@@ -164,7 +165,7 @@ P0 逐行判：若造成用户可见失真 → 新卡（编号续 369+）；若�
    真浏览器），旧 `cockpit-truth.entry.mjs`（S1–S5）保持不动；两条入口都按 `scripts-file-size` CAP
    控制（>550 行就按场景组再拆，不申请例外）。可提取共享 seed/boot/page helper 为
    `cockpit-truth.support.mjs`（support lane，`none:` oracle 有理由）；登记 registry + checks README。
-4. 填 §7 批表；更新 [bugs/README](../bugs/README.md) 的活跃表与计划行、[issues/README](README.md)；`pnpm verify`。
+4. 填 §7 批表；更新 [bugs/README](../../bugs/README.md) 的活跃表与计划行、[issues/README](../../issues/README.md)；`pnpm verify`。
 5. 退出：八卡 `修复就绪`；守卫入口/场景表已定；`pnpm test` 基线绿；§2.5 潜在行有处置。
 
 ### P1 共用工件状态核（≈1 会话，无用户可见行为变化）
@@ -363,3 +364,53 @@ TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" \
 - 每轮先读本卡 §4；只推进当前阶段；阶段结束把「实际红/绿/未跑 + 卡状态」回填本卡。
 - 每卡翻状态前对照 §5.3 DoD；缺证据停在该状态，不跳。
 - 收口按 §4 P4 与 §验收标准；完成条件 = §验收标准 全部成立，而不是「代码改完」。
+
+## 阶段结果（2026-11-22）
+
+### P0 再就绪与证据升格
+
+- 九条 runtime 夹具复跑仍红（361「尚未确认」；362「交付未见证」；363 缺席/不可读均 `reviewFail:false`；
+  364 空白读者版；365 空白正文；366 `reviewDone:true`；367「尚未确认」+✓ 立项；368 无提示审计版）。
+- 八卡补 `## 分诊与授权` / `## 批` / `根因证据`，翻 `修复就绪`；`pnpm verify` 过。
+- 守卫载体 = 新入口 `checks/smoke/cockpit-artifact-truth.entry.mjs`（S6–S14，dev-only，keyless 真浏览器）；
+  旧 `cockpit-truth.entry`（S1–S5）不动；登记 registry/checks README。旧入口 357 行 + 新入口 366 行，
+  均在 550 CAP 内，**未申请例外**。
+- 预修复红证：新入口 **15/31，exit 1**。
+- §2.5 潜在行判决：`final/` list 失败、`plan.md` 读失败、终稿页签 `review.md` 读失败、`final.md` 草稿
+  读失败均判 `none`（当前合同下无用户可见假绿/假交付；target 地址仍 pin 版本；status 359 已管 review
+  读失败；pinned delivery 无草稿 toggle），登记 trigger 而不建卡。未为凑数扩卡。
+
+### P1 共用工件状态核
+
+- 落 `lib/run/artifact-read.ts`：`ArtifactState` 五态（ok/absent/unreadable/empty/invalid）+
+  `ARTIFACT_POLICY` + `readArtifact` 唯一 `view.read` 入口；`brief-fold` 的 `SourceRead`/`readStateOf`
+  迁入并 re-export。
+- `useStatusFeed` 全部文本工件读取改走 `readArtifact`（question/review/readiness/receipt/plan），
+  `reads` 扩为 bundle/question/review/readiness/evidence/receipt；源级守卫断言状态页零裸 `view.read`。
+- `artifact-read.spec` 4 组矩阵；旧 `cockpit-truth.entry` **24/24 仍绿**（回归）。
+
+### P2 终稿三卡
+
+- `finalViewOf`（body/reader × 五态 × 请求视图）落 `final-target`；`ResearchFinalTab` 改走
+  `readArtifact` + `finalViewOf`；空读者版→审计+提示、空正文→空态（有 reader 则 reader+提示）、
+  读者版读失败→审计+提示+重试；终稿页签源级守卫零裸 `viewIo.read`。
+- S10/S11/S14 绿（S11 的「终稿可达」预检从 `len>40` 改为非空，失败文案本身是有效可达内容）；
+  旧 S1/S1b 回归绿。
+- **偏差**：计划的 `final-view.spec` 并入 `tests/run/gates/final-target.spec.mjs`（同一 owner，
+  避免新文件/索引/台账机械面）；卡内 guard 链接已同步。
+
+### P3 状态五卡
+
+- question 四态（ok/absent/unreadable/empty）+ 目标行显式（读取失败/为空）+ 立项步 unknown；
+  review 四态 `reviewVerdict`（pass/fail/unconfirmed/absent）+ 空/缺/坏声明不 ✓；receipt 五态 +
+  只有 ok 出交付 + 旧 install-only 不冒充；⑤ 回执失败行不显示「交付未见证」。
+- S6/S7/S8/S9/S12/S13 绿；全入口 **31/31，exit 0**；旧入口 **24/24 仍绿**。
+- **偏差**：计划的 `status-facts.spec` 并入 `artifact-read.spec` + `brief-fold.spec` + `run-fold.spec`
+  + `status-feed.spec`（现有 owner 已直测，避免重复文件）；卡内 guard 链接同步。
+
+### P4 收口（本阶段）
+
+- 语义自审：docs/design/40 五态/回退/reviewVerdict、guides/60 双入口、evaluation 加跑面、
+  checks README、旧批 Note 互链同变更。
+- 批 Note = `notes/implemented/2026-11-22-observation-artifact-truth.md`。
+- 八卡 `已修` 归档 fixed 池；本卡 `已结` 归档；triggers 记 dev-only/en 装配/潜在行。
