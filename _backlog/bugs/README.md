@@ -14,6 +14,11 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
+| [BUG-356](BUG-356-final-tab-ignores-delivered-version.md) | 排查中 | P2 | 终稿页签无视交付版本——已交付 v1，点「读终稿」却显示未交付的 v2 草稿 |
+| [BUG-357](BUG-357-delivered-review-fail-contradiction.md) | 排查中 | P2 | 已交付 run 的 review.md 变 FAIL 后，状态页同时说「报告不交付」和「已交付」 |
+| [BUG-358](BUG-358-status-bundle-read-failure-as-progress.md) | 排查中 | P2 | 绑定 bundle 读不到时状态页仍说「研究推进中」——失败被折成进度 |
+| [BUG-359](BUG-359-status-review-read-failure-false-green.md) | 排查中 | P2 | review.md 读不到时状态页仍显示「✓ 审查」——读失败被折成 absent |
+| [BUG-360](BUG-360-status-evidence-read-failure-count-zero.md) | 排查中 | P2 | evidence/ 读不到时状态页显示「证据 0 份」——失败被折成空计数 |
 
 ## 最近归档
 
