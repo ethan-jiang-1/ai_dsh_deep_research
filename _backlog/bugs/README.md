@@ -16,7 +16,14 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| — | — | — | 当前无活跃卡（2026-11-22：361–368 八卡修复归档） |
+| [BUG-369](BUG-369-status-readiness-mismatch-misdiagnosed.md) | 排查中 | P2 | readiness 声明与 review.md 冲突时状态页说「声明缺失/不可读」——mismatch 被折成 unconfirmed |
+| [BUG-370](BUG-370-graph-empty-snapshot-blank-panel.md) | 排查中 | P2 | 空的 plan/v1.md 快照在版本轨里显示空面板——没有「快照为空」态 |
+| [BUG-371](BUG-371-final-reader-stale-watch-audit-only.md) | 排查中 | P2 | 读者版更新后终稿页签不提示——stale watcher 只盯审计版 |
+| [BUG-372](BUG-372-config-adoption-question-read-failure-as-missing.md) | 排查中 | P2 | 配置页把 question.md 读失败说成「文件不在/被移走」 |
+| [BUG-373](BUG-373-status-final-dir-read-failure-no-warning.md) | 排查中 | P2 | final/ 目录读不到时状态页仍显示已交付且无警告 |
+| [BUG-374](BUG-374-final-review-unconfirmed-silent.md) | 排查中 | P2 | 终稿页签在 review 读不到时无「审查未定」提示 |
+| [BUG-375](BUG-375-status-plan-read-failure-silent.md) | 排查中 | P2 | plan.md 读不到时状态页没有任何提示 |
+| [BUG-376](BUG-376-defaults-valid-field-lost-on-unknown-key.md) | 排查中 | P2 | defaults 有未知键时合法 effort 被静默丢弃却提示「未知字段已忽略」 |
 
 ## 最近归档
 
