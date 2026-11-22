@@ -256,7 +256,7 @@ async function main() {
       }
     }
 
-    // ── S2 已交付 + review FAIL：不得再说「报告不交付」 ─────────────────────────
+    // ── S2（BUG-357）已交付 + review FAIL：不得再说「报告不交付」 ─────────────────────────
     if (selected('S2')) {
       writeFileSync(reviewPath, reviewText.replace(/readiness:\s*PASS/g, 'readiness: FAIL'), 'utf8')
       const page = await freshPage(browser, base, booted.token)
@@ -272,7 +272,7 @@ async function main() {
       }
     }
 
-    // ── S3 绑定 bundle 被移走：读取失败 + 重试，不得说「研究推进中」 ─────────────
+    // ── S3（BUG-358）绑定 bundle 被移走：读取失败 + 重试，不得说「研究推进中」 ─────────────
     if (selected('S3')) {
       const backup = join(WORKSPACE_ROOT, 'bundle-backup')
       renameSync(bundleDir, backup)
@@ -296,7 +296,7 @@ async function main() {
       }
     }
 
-    // ── S4 review.md 不可读：审查读取失败，不得给 ✓ 审查 ───────────────────────
+    // ── S4（BUG-359）review.md 不可读：审查读取失败，不得给 ✓ 审查 ───────────────────────
     if (selected('S4')) {
       chmodSync(reviewPath, 0o000)
       restore.push(() => chmodSync(reviewPath, 0o644))
@@ -313,7 +313,7 @@ async function main() {
       }
     }
 
-    // ── S5 evidence/ 不可读：证据读取失败，不得显示「证据 0 份」+ 全绿 ─────────
+    // ── S5（BUG-360）evidence/ 不可读：证据读取失败，不得显示「证据 0 份」+ 全绿 ─────────
     if (selected('S5')) {
       chmodSync(evidenceDir, 0o000)
       restore.push(() => chmodSync(evidenceDir, 0o755))

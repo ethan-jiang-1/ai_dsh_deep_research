@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 修复落地
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-357：已交付 run 的 review.md 变 FAIL 后，状态页同时说「报告不交付」和「已交付」
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复就绪 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S2 出现「报告不交付」）→ 绿证 exit 0（24/24）。
 > 现场 = `runtime/e2e/review-fail-verdict.json` + `review-fail.png`；
 > 夹具 = `runtime/e2e/review-fail-e2e.mjs`。
 
@@ -99,3 +99,29 @@ node --import tsx/esm runtime/e2e/review-fail-e2e.mjs
 
 P2b 落地；守卫 = `tests/cockpit/lib/run/brief-fold.spec.mjs` 四组合 + 无矛盾性质 +
 `checks/smoke/cockpit-truth.entry.mjs` S2；去向 = implemented — 批 Note。
+
+## 修复落地（2026-11-22）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/lib/run/brief-fold.ts",
+    "packages/deep-research-pack/src/client/locales/zh-fold.ts",
+    "packages/deep-research-pack/src/client/locales/en-fold.ts",
+    "tests/cockpit/lib/run/brief-fold.spec.mjs",
+    "checks/smoke/cockpit-truth.entry.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth.entry.mjs",
+    "exit": 1,
+    "output": "FAIL S2 已交付 + FAIL 不出现「报告不交付」— 旧实现 paneText 同时含「报告不交付」与「✅ 已交付」"
+  },
+  "green": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth.entry.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/cockpit-truth.entry.mjs"
+  }
+}
+```

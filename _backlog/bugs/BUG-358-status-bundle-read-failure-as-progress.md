@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 修复落地
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-358：绑定的 run bundle 读不到时，状态页仍说「研究推进中」——失败被折成进度
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复就绪 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S3 仍「研究推进中」）→ 绿证 exit 0（24/24）。
 > 现场 = `runtime/e2e/status-bundle-missing-verdict.json` + `status-bundle-missing.png`；
 > 夹具 = `runtime/e2e/status-bundle-missing-e2e.mjs`。
 
@@ -109,6 +109,37 @@ if (!opened.ok) { setFace(null); setReceiptDelivery(null); return }
 
 ## 修复关联
 
-P2a 落地；守卫 = 新 `tests/cockpit/lib/run/status-facts.spec.mjs` bundle 三态 +
-`tests/run/gates/binding-trust.spec.mjs` marker + `checks/smoke/cockpit-truth.entry.mjs` S3；
+P2a 落地；守卫 = `tests/cockpit/lib/run/brief-fold.spec.mjs` bundle 三态 +
+`tests/cockpit/lib/events/status-feed.spec.mjs` 接线 + `checks/smoke/cockpit-truth.entry.mjs` S3；
 去向 = implemented — 批 Note。
+
+## 修复落地（2026-11-22）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/client/research-status/useStatusFeed.ts",
+    "packages/deep-research-pack/src/lib/run/brief-fold.ts",
+    "packages/deep-research-pack/src/client/ResearchStatusTab.tsx",
+    "packages/deep-research-pack/src/client/locales/zh.ts",
+    "packages/deep-research-pack/src/client/locales/en.ts",
+    "packages/deep-research-pack/src/client/locales/zh-fold.ts",
+    "packages/deep-research-pack/src/client/locales/en-fold.ts",
+    "tests/cockpit/lib/events/status-feed.spec.mjs",
+    "tests/cockpit/lib/run/brief-fold.spec.mjs",
+    "checks/smoke/cockpit-truth.entry.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth.entry.mjs",
+    "exit": 1,
+    "output": "FAIL S3 显示研究状态读取失败；FAIL S3 不显示「研究推进中」— 旧实现 face=unknown 时仍用 journal 锚点渲染「研究推进中」"
+  },
+  "green": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth.entry.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/cockpit-truth.entry.mjs"
+  }
+}
+```

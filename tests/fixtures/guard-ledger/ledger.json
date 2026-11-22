@@ -1684,6 +1684,38 @@
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "把 finalTargetOf 的 pinned 分支改回 latestRunVersion → S1 夹具显示 v2、exit 1"
+    },
+    {
+      "id": "BUG-357",
+      "mechanism": "已交付 × 审查 FAIL 合法共存：brief-fold 交付后文案不再复用交付前「报告不交付」政策",
+      "guard": "checks/smoke/cockpit-truth.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "删掉 delivered+reviewFail 分支 → S2 夹具再次出现「报告不交付」、exit 1"
+    },
+    {
+      "id": "BUG-358",
+      "mechanism": "bundle 读取失败进 reads 三态；显式失败 + 重试，不落「研究推进中」",
+      "guard": "checks/smoke/cockpit-truth.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 !opened.ok 分支改回只 setFace(null) → S3 夹具再次出现「研究推进中」、exit 1"
+    },
+    {
+      "id": "BUG-359",
+      "mechanism": "review 读取失败 ≠ absent；步骤条 unknown，不拿 hasFile 给 ✓ 审查",
+      "guard": "checks/smoke/cockpit-truth.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 review read.ok=false 改回 reviewText=null/absent 且 review=hasFile → S4 夹具出现 ✓ 审查、exit 1"
+    },
+    {
+      "id": "BUG-360",
+      "mechanism": "evidence list 失败 ≠ 0；三态计数 + unknown 步，不显示「证据 0 份」",
+      "guard": "checks/smoke/cockpit-truth.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 list !ok 分支改回 0 → S5 夹具再次出现「证据 0 份」+ 全绿、exit 1"
     }
   ]
 }

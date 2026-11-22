@@ -35,12 +35,13 @@ export function TrackRail(props: {
       ◆{a.label}{a.state === 'pending' && a.questions > 0 ? t('questionCount', { count: String(a.questions) }) : ''} {a.state === 'pending' ? '⏳' : a.state === 'passed' ? '✓' : '·'}
     </span>
   )
-  // 步态符号（✓ 已过 / ● 进行中 / ○ 未到）与重入点虚线描边 = 既有视觉契约，逐字保留。
+  // 步态符号（✓ 已过 / ● 进行中 / ○ 未到 / ? 待定）与重入点虚线描边 = 既有视觉契约；? 只给读失败的步。
   const loopOn = anchors[1] !== undefined && anchors[1].state !== 'upcoming'
   const stepChip = (s: RunStep): ReactNode => {
     const reentry = hasFace && loopOn && s.key === 'evidence'
+    const unknown = s.state === 'unknown'
     return (
-      <span key={s.key} style={{ padding: '2px 8px', borderRadius: 4, opacity: !hasFace ? 0.35 : s.state === 'pending' ? 0.4 : 1, fontWeight: hasFace && s.state === 'current' ? 700 : 400, background: hasFace && s.state === 'current' ? '#f59e0b33' : hasFace && s.state === 'done' ? '#22c55e22' : '#0000000d', color: hasFace && s.state === 'done' ? '#16a34a' : undefined, outline: reentry ? '1.5px dashed #c08a2e' : undefined, outlineOffset: reentry ? 1 : undefined }}>{s.state === 'done' ? '✓ ' : s.state === 'current' ? '● ' : '○ '}{s.label}</span>
+      <span key={s.key} style={{ padding: '2px 8px', borderRadius: 4, opacity: !hasFace ? 0.35 : s.state === 'pending' ? 0.4 : 1, fontWeight: hasFace && s.state === 'current' ? 700 : unknown ? 600 : 400, background: hasFace && s.state === 'current' ? '#f59e0b33' : unknown ? '#f59e0b22' : hasFace && s.state === 'done' ? '#22c55e22' : '#0000000d', color: unknown ? '#b45309' : hasFace && s.state === 'done' ? '#16a34a' : undefined, outline: reentry ? '1.5px dashed #c08a2e' : undefined, outlineOffset: reentry ? 1 : undefined }}>{s.state === 'done' ? '✓ ' : s.state === 'current' ? '● ' : unknown ? '? ' : '○ '}{s.label}</span>
     )
   }
 

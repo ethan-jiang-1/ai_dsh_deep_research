@@ -52,7 +52,7 @@ export type { FollowTarget, JournalFrame, ResearchStatusTabInjected, ResearchSta
 
 export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const {
-    rows, hitl, face, unbound, trust, kickoffHold, error,
+    rows, hitl, face, unbound, trust, kickoffHold, error, reads, scanSettled, retry,
     memberSummaries, members, delivery, streamFailure, anchors, health, versionFace,
   } = useStatusFeed(props)
 
@@ -68,6 +68,9 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const brief: BusinessBrief = useMemo(
     () => deriveBusinessBrief({
       bundleBound: trust.kind === 'bound',
+      bundleReadFailure: scanSettled && trust.kind === 'bound' && reads.bundle !== 'ok'
+        ? (reads.bundle === 'unreadable' ? 'unreadable' : 'missing')
+        : null,
       kickoffHold,
       hitlPending: hitl.pending,
       pendingKind: pendingAnchor !== undefined ? (pendingAnchor.key === 'anchor-1' ? 'hitl1' : pendingAnchor.key === 'anchor-2' ? 'hitl2' : 'unknown') : null,
@@ -82,7 +85,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       lastDecisionKind: null,
       openItems: [],
     }, props.t),
-    [unbound, trust, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery, props.t],
+    [unbound, trust, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery, reads, scanSettled, props.t],
   )
   const stalledBanner = stalledBannerOf(
     { health, bound: trust.kind === 'bound', delivered: delivery !== null, hitlPending: hitl.pending },
@@ -93,7 +96,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     // 用户报告：活动流超长即被裁且不可滚）：根容器 flex:1 + minHeight:0 吃满宿主高，
     // 双轴 auto 自滚。
     // data-research-face = 机器可读数据面（cdp-probe 读它，不再靠“没写未绑定”反推）。
-    <div data-research-face={statusFaceMarker({ trust, unbound, kickoffHold, hasError: error !== null, hasFace: face !== null })} style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'auto' }}>
+    <div data-research-face={statusFaceMarker({ trust, unbound, kickoffHold, hasError: error !== null || (scanSettled && trust.kind === 'bound' && reads.bundle !== 'ok'), hasFace: face !== null })} style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'auto' }}>
       {/* ① HITL 挂起横幅（最醒目位置；点名锚点 + 参与指引——"怎么参与"在需要那一刻说清） */}
       {hitl.pending && (
         <div style={{ fontWeight: 700, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#f59e0b33', border: '1px solid #f59e0b66' }}>
@@ -116,6 +119,13 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           {stalledBanner}
         </div>
       )}
+      {/* 绑定 bundle 读取失败（BUG-358）：读不到不是「研究推进中」；失败态 + 重试，不拿 journal 锚点冒充进度。 */}
+      {scanSettled && trust.kind === 'bound' && reads.bundle !== 'ok' && (
+        <div style={{ fontWeight: 600, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#ef444418', border: '1px solid #ef444440', color: '#b91c1c' }}>
+          {props.t('statusReadFailed')}
+          <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+        </div>
+      )}
       {/* ⓪ 业务摘要层（issue 2026-10-11-executive-research-ux-delivery）：五问业务语言——
           研究什么 / 已确认什么 / 未知什么 / 我是否要操作；折算住 brief-fold（计数不进本层），
           组件薄渲染。 */}
@@ -125,6 +135,18 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
         <div style={{ opacity: 0.85 }}>{brief.knownLine}</div>
         {brief.unknownLine !== null && <div style={{ color: '#b45309' }}>⚠ {brief.unknownLine}</div>}
         <div style={{ fontWeight: brief.userActionNeeded ? 700 : 400, color: brief.userActionNeeded ? '#b45309' : undefined }}>{brief.actionLine}</div>
+        {reads.review === 'unreadable' && (
+          <div style={{ color: '#b45309' }}>
+            ⚠ {props.t('statusReviewReadFailed')}
+            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+          </div>
+        )}
+        {reads.evidence === 'unreadable' && (
+          <div style={{ color: '#b45309' }}>
+            ⚠ {props.t('statusEvidenceReadFailed')}
+            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+          </div>
+        )}
       </div>
       {/* ② 流程轨道：◆立项确认 + 主轨 + ◆交付审阅 + 交付；↻ 回边 = 拍板的分支后果画进流程 */}
       <TrackRail anchors={anchors} steps={steps} faceVersions={face?.versions ?? null} hitlPending={hitl.pending} t={props.t} />
@@ -143,7 +165,14 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           已交付 → 门（读终稿）；未交付 → 承诺（终稿将在交付后自动出现在右栏，许在用户已经在看的地方）。 */}
       {face !== null && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10, fontSize: 13, opacity: 0.85 }}>
-          <span>{props.t('statusEvidenceCount', { count: String(face.evidenceCount) })}</span>
+          {reads.evidence === 'unreadable' ? (
+            <span style={{ color: '#b45309' }}>
+              {props.t('statusEvidenceReadFailed')}
+              <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+            </span>
+          ) : (
+            <span>{props.t('statusEvidenceCount', { count: String(face.evidenceCount) })}</span>
+          )}
           {delivery !== null && <span style={{ color: '#16a34a', fontWeight: 600 }}>{props.t('statusDelivered')}</span>}
           {delivery !== null && props.sessionId !== undefined && (
             <button

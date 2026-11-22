@@ -44,3 +44,26 @@ test('D51 接线：状态页读 review/readiness.json，并与门禁共用 readi
   assert.match(source, /view\.hasFile\('review\/readiness\.json'\)/)
   assert.match(source, /readinessOfSources\(\{ reviewText, declarationText, hasReviewDir: names\.has\('review'\) \}\)/)
 })
+
+// 负例留证 2026-11-22：BUG-358/359/360——旧实现把 openRun/read/list 的 Outcome 折成 null/0，
+// 视图无法区分读失败与缺席/空/进度。红配方：把 readStateOf 换回 `ok ? ... : null/0` → 本组断言红。
+test('BUG-358/359/360 接线：bundle/review/evidence 的 Outcome 进 reads 三态，不折平', () => {
+  const source = readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/research-status/useStatusFeed.ts'), 'utf8')
+  assert.match(source, /setReads\(\{ bundle: readStateOf\(opened\)/, 'bundle openRun 失败必须进 reads')
+  assert.match(source, /const evidenceState = readStateOf\(evidenceDir\)/, 'evidence list 失败必须进 reads')
+  assert.match(source, /let reviewState = readStateOf\(reviewRead\)/, 'review read 失败必须进 reads')
+  assert.match(source, /setReads\(\{ bundle: 'ok', review: reviewState, evidence: evidenceState \}\)/, '成功扫描必须写回三态')
+  assert.match(source, /unknown: \[/, '读失败步必须进 deriveSteps unknown')
+  assert.match(source, /setRetryNonce\(/, '失败横幅必须有重试入口')
+  assert.match(source, /const \[reads, setReads\]/, 'reads 必须是状态（视图可消费）')
+  assert.match(source, /scanSettled/, '首扫未落定时不得把「还没读到」显示成失败')
+})
+
+test('BUG-358/359/360 视图：失败横幅/重试/证据行使用三态文案键', () => {
+  const source = readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/ResearchStatusTab.tsx'), 'utf8')
+  for (const key of ['statusReadFailed', 'statusReviewReadFailed', 'statusEvidenceReadFailed']) {
+    assert.match(source, new RegExp(`props\\.t\\('${key}'\\)`), `视图缺 ${key}`)
+  }
+  assert.match(source, /onClick=\{retry\}/, '失败态必须接重试')
+  assert.match(source, /reads\.bundle !== 'ok'/, 'bundle 读失败必须参与标题/摘要')
+})

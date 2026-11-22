@@ -7,9 +7,10 @@
 //
 // 失败语义不变：读不到一律降级为 null / 空态（fail-soft），控制台留因（console.error），
 // 不把"读失败"渲染成"没有数据"——那是各视图自己的措辞责任（BUG-045 的原则）。
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { deriveAnchors, foldHitlPending, type HitlState } from '../../lib/events/hitl-fold.ts'
 import { deriveSteps, latestRunVersion } from '../../lib/run/run-fold.ts'
+import { readStateOf, type StatusReads } from '../../lib/run/brief-fold.ts'
 import { foldActivityRows, type ActivityRow } from '../../lib/events/activity-fold.ts'
 import type { MemberActivitySummary } from '../../lib/events/member-activity.ts'
 import { bindingTrust, type BindingTrust } from '../../lib/run/binding-trust.ts'
@@ -44,6 +45,12 @@ export interface StatusFeed {
   readonly journalSeen: boolean
   readonly kickoffHold: boolean
   readonly error: string | null
+  /** 三个显示事实的读取态（bundle/review/evidence）；读失败不折成 absent/空/进度（BUG-358/359/360）。 */
+  readonly reads: StatusReads
+  /** 首次扫描是否已落定；未落定不把「还没读到」显示成「读取失败」。 */
+  readonly scanSettled: boolean
+  /** 重扫一次（失败横幅的「重试」）。 */
+  readonly retry: () => void
   readonly memberSummaries: Readonly<Record<string, MemberActivitySummary>>
   readonly team: TeamProjection | undefined
   readonly members: TeamProjection['members']
@@ -68,6 +75,10 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   const [nowTick, setNowTick] = useState(() => Date.now())
   const [kickoffHold, setKickoffHold] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [reads, setReads] = useState<StatusReads>({ bundle: 'absent', review: 'absent', evidence: 'absent' })
+  const [scanSettled, setScanSettled] = useState(false)
+  const [retryNonce, setRetryNonce] = useState(0)
+  const retry = useCallback(() => { setScanSettled(false); setRetryNonce((n) => n + 1) }, [])
   const trustRef = useRef<BindingTrust>({ kind: 'unbound' })
   const prevPending = useRef(false)
   // 观察连续性（UX 清扫 F1，2026-09-30）：vendor 在切换会话时收起右栏——观察面板每次
@@ -105,6 +116,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     setFace(null)
     setUnbound(false)
     setKickoffHold(false)
+    setReads({ bundle: 'absent', review: 'absent', evidence: 'absent' })
+    setScanSettled(false)
     setMemberSummaries({})
     void (async () => {
       try {
@@ -169,6 +182,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     if (sessionId === undefined || trust.kind !== 'bound') {
       setFace(null)
       setReceiptDelivery(null)
+      setReads({ bundle: 'absent', review: 'absent', evidence: 'absent' })
+      setScanSettled(false)
       setUnbound(trust.kind === 'unbound' && journalSeen)
       setKickoffHold(trust.kind === 'suppressed' && trust.reason === 'kickoff')
       return
@@ -182,12 +197,19 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const signal = new AbortController().signal
         const opened = await openRun(props.runSource(sessionId), `drt_${boundSlug}`, { signal })
         if (stopped) return
-        if (!opened.ok) { setFace(null); setReceiptDelivery(null); return }
+        if (!opened.ok) {
+          setFace(null)
+          setReceiptDelivery(null)
+          setReads({ bundle: readStateOf(opened), review: 'absent', evidence: 'absent' })
+          setScanSettled(true)
+          return
+        }
         const view = opened.value
         const names = view.names
         const evidenceDir = names.has('evidence') ? await view.list('evidence', { signal }) : null
         if (stopped) return
-        const evidenceCount = evidenceDir !== null && evidenceDir.ok
+        const evidenceState = readStateOf(evidenceDir)
+        const evidenceCount = evidenceState === 'ok' && evidenceDir !== null && evidenceDir.ok
           ? evidenceDir.value.filter((entry) => entry.type === 'file' && entry.name.endsWith('.md')).length
           : 0
         const finalDir = names.has('final') ? await view.list('final', { signal }) : null
@@ -218,7 +240,9 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         // 的 review 策略是读到 eof：终局判定在文末，固定行窗会读到中段旧 FAIL（BUG-036 同族）。
         const reviewRead = view.hasFile('review.md') ? await view.read('review.md', { signal }) : null
         if (stopped) return
-        const reviewText = reviewRead !== null && reviewRead.ok && !reviewRead.value.truncated ? reviewRead.value.text : null
+        let reviewState = readStateOf(reviewRead)
+        if (reviewState === 'ok' && reviewRead !== null && reviewRead.ok && reviewRead.value.truncated) reviewState = 'unreadable'
+        const reviewText = reviewState === 'ok' && reviewRead !== null && reviewRead.ok ? reviewRead.value.text : null
         // 终局 readiness 与门禁同源（D51）：声明件优先，散文只做副本；无 review/ 的旧场回退散文。
         const declRead = view.hasFile('review/readiness.json') ? await view.read('review/readiness.json', { signal }) : null
         if (stopped) return
@@ -228,6 +252,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           ? (reading.pass ? 'PASS' : 'FAIL')
           : null
         const reviewFail = readiness === 'FAIL' ? true : readiness === 'PASS' ? false : null
+        setReads({ bundle: 'ok', review: reviewState, evidence: evidenceState })
+        setScanSettled(true)
         const questionRead = view.hasFile('question.md') ? await view.read('question.md', { signal }) : null
         if (stopped) return
         const questionText = questionRead !== null && questionRead.ok ? questionRead.value.text : null
@@ -245,8 +271,12 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
             leads: view.hasFile('leads.md'),
             evidence: evidenceCount,
             findings: view.hasFile('findings.md'),
-            review: view.hasFile('review.md'),
+            review: reviewState === 'ok',
             final: view.hasFile('final.md'),
+            unknown: [
+              ...(evidenceState === 'unreadable' ? ['evidence'] : []),
+              ...(reviewState === 'unreadable' ? ['review'] : []),
+            ],
           }, props.t),
           evidenceCount,
           delivered: view.hasFile('final.md'),
@@ -258,12 +288,19 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           finalFileNames,
           hasFinal: view.hasFile('final.md'),
         })
-      } catch (cause) { console.error('[research-status] scan 异常', String(cause)) }
+      } catch (cause) {
+        console.error('[research-status] scan 异常', String(cause))
+        if (stopped) return
+        setFace(null)
+        setReceiptDelivery(null)
+        setReads({ bundle: 'unreadable', review: 'absent', evidence: 'absent' })
+        setScanSettled(true)
+      }
     }
     void scan()
     const timer = setInterval(() => { void scan() }, REFRESH_MS)
     return () => { stopped = true; clearInterval(timer) }
-  }, [props.sessionId, trust, journalSeen, props.runSource, props.t])
+  }, [props.sessionId, trust, journalSeen, props.runSource, props.t, retryNonce])
 
   // 锚点 = 混合折算（尾窗约束的实测产物，RFC cockpit-flow-face）：passed 态由文件事实承载
   // （question.md/final.md 在场），pending 态由 journal 尾窗承载——face 缺席时退化为纯尾窗判定。
@@ -305,7 +342,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   )
 
   return {
-    rows, hitl, journalEvents, face, unbound, trust, journalSeen, kickoffHold, error,
+    rows, hitl, journalEvents, face, unbound, trust, journalSeen, kickoffHold, error, reads, scanSettled, retry,
     memberSummaries, team, members, delivery, streamFailure, anchors, health, versionFace,
   }
 }

@@ -39,3 +39,19 @@ test('步骤条：中间断档（evidence 有 findings 无）→ 挖掘 current'
   assert.equal(steps[2].state, 'done');
   assert.equal(steps[4].state, 'pending');
 });
+
+// 负例留证 2026-11-22：BUG-359/360——读失败的 evidence/review 仍被 hasFile/计数推断成 ✓。
+// 红配方：deriveSteps 忽略 unknown（或把 unknown 当 false）→ 本组断言红。
+test('BUG-359/360 读失败步：unknown 不被线性推断抹成 done', () => {
+  const steps = deriveSteps({
+    question: true, team: true, leads: true, evidence: 5, findings: true, review: true, final: true,
+    unknown: ['evidence', 'review'],
+  });
+  assert.deepEqual(steps.map((s) => s.state), ['done', 'done', 'done', 'unknown', 'done', 'unknown', 'current']);
+});
+
+test('unknown 优先于待定/在场：只有点名步变 unknown，其余步态不变', () => {
+  const steps = deriveSteps({ question: true, team: true, leads: false, evidence: 0, findings: false, review: false, final: false, unknown: ['evidence'] });
+  assert.equal(steps[3].state, 'unknown');
+  assert.equal(steps[1].state, 'current');
+});

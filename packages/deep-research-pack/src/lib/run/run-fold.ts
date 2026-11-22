@@ -22,13 +22,15 @@ interface RunStepInputs {
   readonly findings: boolean
   readonly review: boolean
   readonly final: boolean
+  /** 明确读不到的步骤键（BUG-359/360）：标 unknown，不让线性推断抹成 done。 */
+  readonly unknown?: readonly string[]
 }
 
-/** 步骤条的一步。 */
+/** 步骤条的一步。unknown = 读取失败/无法确认（不是 pending，也不是 done）。 */
 export interface RunStep {
   readonly key: string
   readonly label: string
-  readonly state: 'done' | 'current' | 'pending'
+  readonly state: 'done' | 'current' | 'pending' | 'unknown'
 }
 
 // 版本号词法正本已收进 final-target（BUG-356：地址目标与版本账共用一套 vN 解析）；
@@ -64,11 +66,13 @@ export function deriveSteps(inputs: RunStepInputs, t: PackTranslate = translateZ
     review: inputs.review,
     final: inputs.final,
   }
+  const unknown = new Set(inputs.unknown ?? [])
   let lastDone = -1
-  for (const [i, k] of STEP_ORDER.entries()) if (has[k]) lastDone = i
+  for (const [i, k] of STEP_ORDER.entries()) if (has[k] && !unknown.has(k)) lastDone = i
   return STEP_ORDER.map((k, i) => ({
     key: k,
     label: t(STEP_LABEL_KEYS[k]),
-    state: i < lastDone ? 'done' : i === lastDone ? 'current' : 'pending',
+    // unknown 优先：读失败不参与「最后在场步」线性推断，也不被后续步的存在抹成 done。
+    state: unknown.has(k) ? 'unknown' : i < lastDone ? 'done' : i === lastDone ? 'current' : 'pending',
   }))
 }

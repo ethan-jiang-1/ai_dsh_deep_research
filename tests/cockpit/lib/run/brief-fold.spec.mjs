@@ -5,7 +5,7 @@
 // 红证：测试先于实现提交（模块缺席 = 红）；实现后九态逐态绿。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { deriveBusinessBrief } from '../../../../packages/deep-research-pack/src/lib/run/brief-fold.ts';
+import { deriveBusinessBrief, readStateOf } from '../../../../packages/deep-research-pack/src/lib/run/brief-fold.ts';
 
 const base = {
   bundleBound: true,
@@ -122,6 +122,56 @@ test('禁词：全部输出行不含证据计数形态（「份」字与「证�
     for (const line of [b.goal, b.stageLine, b.knownLine, b.unknownLine ?? '', b.actionLine]) {
       assert.ok(!line.includes('份'), `输出行含「份」计数形态：${line}`);
       assert.ok(!/证据\s*\d/.test(line), `输出行含「证据 N」计数形态：${line}`);
+    }
+  }
+});
+
+// 负例留证 2026-11-22：BUG-358——bundle 读不到时旧实现落默认「研究推进中」。
+// 红配方：删 bundleReadFailure 分支（或把它放到 delivered 之后）→ 本组断言红。
+test('BUG-358 bundle 读失败：显式失败 + 重试，不落「研究推进中」', () => {
+  for (const state of ['missing', 'unreadable']) {
+    const b = deriveBusinessBrief({ ...base, bundleReadFailure: state });
+    assert.match(b.stageLine, /读取失败/);
+    assert.match(b.actionLine, /重试/);
+    assert.doesNotMatch(b.stageLine, /推进/);
+    assert.equal(b.userActionNeeded, false);
+  }
+});
+
+test('readStateOf：null/缺席 = absent；ok = ok；unreadable 原样保留', () => {
+  assert.equal(readStateOf(null), 'absent');
+  assert.equal(readStateOf({ ok: true }), 'ok');
+  assert.equal(readStateOf({ ok: false, reason: 'missing' }), 'absent');
+  assert.equal(readStateOf({ ok: false, reason: 'unreadable' }), 'unreadable');
+  assert.equal(readStateOf({ ok: false }), 'unreadable', '未知失败原因按 unreadable，不冒充缺席');
+});
+
+// 负例留证 2026-11-22：BUG-357——reviewFail 分支先于 delivered，已交付页面仍说「报告不交付」。
+// 红配方：把 delivered+reviewFail 分支删掉/放回旧单态 → 本组与无矛盾性质红。
+test('BUG-357 已交付 + review FAIL：不出现「报告不交付」，两事实共存', () => {
+  const b = deriveBusinessBrief({ ...base, delivered: true, reviewFail: true });
+  const all = [b.stageLine, b.knownLine, b.unknownLine ?? '', b.actionLine].join(' ');
+  assert.doesNotMatch(all, /报告不交付/);
+  assert.match(all, /仍可用/);
+  assert.match(all, /新审查|复审/);
+});
+
+test('BUG-357 负控：未交付 + review FAIL 仍是交付前政策', () => {
+  const b = deriveBusinessBrief({ ...base, delivered: false, reviewFail: true });
+  assert.match(b.unknownLine ?? '', /报告不交付/);
+});
+
+test('BUG-357 无矛盾性质：任何输入组合不得同时说「已交付」与「报告不交付」', () => {
+  for (const delivered of [false, true]) {
+    for (const reviewFail of [null, false, true]) {
+      for (const bundleReadFailure of [null, 'missing', 'unreadable']) {
+        for (const hitlPending of [false, true]) {
+          const b = deriveBusinessBrief({ ...base, delivered, reviewFail, bundleReadFailure, hitlPending, pendingKind: hitlPending ? 'hitl2' : null });
+          const all = [b.goal, b.stageLine, b.knownLine, b.unknownLine ?? '', b.actionLine].join(' ');
+          assert.ok(!(all.includes('已交付') && all.includes('报告不交付')),
+            `矛盾组合 delivered=${String(delivered)} reviewFail=${String(reviewFail)} read=${String(bundleReadFailure)} hitl=${String(hitlPending)}：${all}`);
+        }
+      }
     }
   }
 });

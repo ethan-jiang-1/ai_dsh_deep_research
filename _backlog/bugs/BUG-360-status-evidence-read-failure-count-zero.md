@@ -1,12 +1,12 @@
 ---
-status: 修复就绪
+status: 修复落地
 severity: P2
 opened: 2026-11-22
 ---
 
 # BUG-360：evidence/ 读不到时状态页显示「证据 0 份」——失败被折成空计数
 
-> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复就绪 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权。
+> 严重级别：P2 ｜ 发现：2026-11-22 ｜ 状态：修复落地 — 真浏览器现场已复现（2026-11-22 复跑仍红）；原「只报不修」由 2026-11-22 goal 放行，P2 修理型自授权；红证 full entry exit 1（S5 仍「0 份」+ ✓ 挖掘）→ 绿证 exit 0（24/24）。
 > 现场 = `runtime/e2e/evidence-read-error-verdict.json` + `evidence-read-error.png`；
 > 夹具 = `runtime/e2e/evidence-read-error-e2e.mjs`。
 
@@ -102,6 +102,36 @@ const evidenceCount = evidenceDir !== null && evidenceDir.ok
 
 ## 修复关联
 
-P2a 落地；守卫 = 新 `tests/cockpit/lib/run/status-facts.spec.mjs` evidence 三态 +
-`tests/run/shared/run-fold.spec.mjs` unknown 步 + `checks/smoke/cockpit-truth.entry.mjs` S5；
-去向 = implemented — 批 Note。
+P2a 落地；守卫 = `tests/run/shared/run-fold.spec.mjs` unknown 步 +
+`tests/cockpit/lib/events/status-feed.spec.mjs` evidence 三态接线 +
+`checks/smoke/cockpit-truth.entry.mjs` S5；去向 = implemented — 批 Note。
+
+## 修复落地（2026-11-22）
+
+```json fix-evidence
+{
+  "changes": [
+    "packages/deep-research-pack/src/client/research-status/useStatusFeed.ts",
+    "packages/deep-research-pack/src/lib/run/run-fold.ts",
+    "packages/deep-research-pack/src/client/ResearchStatusTab.tsx",
+    "packages/deep-research-pack/src/lib/run/brief-fold.ts",
+    "packages/deep-research-pack/src/client/locales/zh.ts",
+    "packages/deep-research-pack/src/client/locales/en.ts",
+    "tests/run/shared/run-fold.spec.mjs",
+    "tests/cockpit/lib/events/status-feed.spec.mjs",
+    "checks/smoke/cockpit-truth.entry.mjs"
+  ],
+  "red": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth.entry.mjs",
+    "exit": 1,
+    "output": "FAIL S5 显示证据读取失败；FAIL S5 不显示「证据 0 份」；FAIL S5 不把挖掘标 ✓ — 旧实现 list 失败落 0 + 线性步骤全绿"
+  },
+  "green": {
+    "command": "node --import tsx/esm checks/smoke/cockpit-truth.entry.mjs",
+    "exit": 0
+  },
+  "guard": {
+    "path": "checks/smoke/cockpit-truth.entry.mjs"
+  }
+}
+```

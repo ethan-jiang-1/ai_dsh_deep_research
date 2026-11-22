@@ -14,10 +14,34 @@
  */
 import { translateZh, type PackTranslate } from '../shared/i18n.ts'
 
+/** 一个观察面事实的读取三态（BUG-358/359/360）：读失败绝不折成 absent/空/进度。 */
+export type SourceRead = 'ok' | 'absent' | 'unreadable'
+
+/** 状态页三个显示事实的读取态（数据装配层构造，视图/摘要只消费）。 */
+export interface StatusReads {
+  readonly bundle: SourceRead
+  readonly review: SourceRead
+  readonly evidence: SourceRead
+}
+
+/**
+ * `run-context.Outcome`（或「未尝试」的 null）→ 三态。
+ * null = 文件/目录确实不在场（调用方先判 hasFile/hasDir）；ok=false 的 missing 仍是 absent；
+ * unreadable 必须原样保留——这是「读失败 ≠ 缺席」的唯一映射点。
+ */
+export function readStateOf(outcome: { readonly ok: boolean; readonly reason?: 'missing' | 'unreadable' } | null): SourceRead {
+  if (outcome === null) return 'absent'
+  if (outcome.ok) return 'ok'
+  return outcome.reason === 'missing' ? 'absent' : 'unreadable'
+}
+
+
 /** 业务摘要折算输入（全部为既有事实源的投影；调用方从 journal 流 + workspaceFiles 组装）。 */
 interface BriefInputs {
   /** 本会话已绑定 run bundle（binding.slug 在场且未处于抑制窗）。 */
   readonly bundleBound?: boolean
+  /** 绑定的 bundle 读取失败（missing / unreadable）；null = 已读或未绑定。 */
+  readonly bundleReadFailure?: 'missing' | 'unreadable' | null
   /** 立项预检窗口（读绑定 + kickoff 已见 + 无挂起——读到的是上一场上下文）。 */
   readonly kickoffHold?: boolean
   /** 末位 ask 仍开放（hitl-fold.foldHitlPending）。 */
@@ -71,6 +95,7 @@ export interface BusinessBrief {
  */
 export function deriveBusinessBrief(inputs: BriefInputs, t: PackTranslate = translateZh): BusinessBrief {
   const bundleBound = inputs.bundleBound === true
+  const bundleReadFailure = inputs.bundleReadFailure === 'missing' || inputs.bundleReadFailure === 'unreadable' ? inputs.bundleReadFailure : null
   const kickoffHold = inputs.kickoffHold === true
   const hitlPending = inputs.hitlPending === true
   const pendingKind = inputs.pendingKind ?? null
@@ -153,7 +178,33 @@ export function deriveBusinessBrief(inputs: BriefInputs, t: PackTranslate = tran
     }
   }
 
-  // 审查 FAIL：质量修复静默推进（两点交互之间的自主区），用户无需介入。
+  // 绑定可读性失败（BUG-358）：读不到 bundle 不是「研究推进中」；显式失败 + 重试。
+  if (bundleReadFailure !== null) {
+    return {
+      goal: t('briefGoalUnknown'),
+      goalKnown: false,
+      stageLine: t('briefStageReadFailed'),
+      knownLine: t('briefKnownReadFailed'),
+      unknownLine: t('briefUnknownReadFailed'),
+      actionLine: t('briefActionReadFailed'),
+      userActionNeeded: false,
+    }
+  }
+
+  // 已交付 + 审查 FAIL（BUG-357）：交付是历史事实、复审失败是新增事实；两者合法共存。
+  // 这句话必须说「已交付版本仍可用 + 新审查发现问题」，不能复用交付前的「报告不交付」政策。
+  if (reviewFail === true && delivered) {
+    return {
+      goal, goalKnown,
+      stageLine: t('briefStageDeliveredReviewFail'),
+      knownLine: t('briefKnownDeliveredReviewFail'),
+      unknownLine: t('briefUnknownDeliveredReviewFail'),
+      actionLine: t('briefActionDeliveredReviewFail'),
+      userActionNeeded: false,
+    }
+  }
+
+  // 审查 FAIL（未交付）：质量修复静默推进（两点交互之间的自主区），用户无需介入。
   if (reviewFail === true) {
     return {
       goal, goalKnown,
