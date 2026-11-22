@@ -6,7 +6,7 @@ opened: 2026-11-23
 
 # BUG-376：research-defaults.json 有未知键时，合法 effort 被静默丢弃却提示「未知字段已忽略」
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：排查中 — 真浏览器现场已复现；按用户指令只报不修。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：排查中 — P0 复核为 E2E 假阳性（select.value=deep，合法 effort 生效）；待纠正夹具/卡，不修产品代码。
 > 现场 = `runtime/e2e/config-defaults-mixed-verdict.json` + `config-defaults-mixed.png`；
 > 夹具 = `runtime/e2e/config-defaults-mixed-e2e.mjs`。
 
@@ -56,6 +56,14 @@ node --import tsx/esm runtime/e2e/config-defaults-mixed-e2e.mjs
 - 文案声称只忽略未知键；
 - 合法 `effort: deep` 没有进入按钮/面板状态；
 - 用户看到「自动」，与磁盘文件冲突，且没有“整份文件无效”的提示。
+
+## P0 复核（2026-11-23）— 非缺陷（假阳性）
+
+- `parseDefaults({schema:1,effort:"deep",unknown:"x"})` → `value.effort="deep"`，`problems=[]`，`warnings` 仅 unknown 顶层键；`DefaultsStore` 写 `value: parsed.value`。
+- 真浏览器同 seed：`[data-testid="defaults-depth"]` 的 `value="deep"`、`selectedOptions[0]` 文本「深度档」；`[data-testid="deep-research-defaults"]` 的 `data-defaults-state="count"`；截图可见「深度档」与「研究默认: 已设 1 项」。
+- 376 的 verdict 只读 `paneText`（包含 select 的全部 option 标签「自动（由 Lead 判断）」），没有读 select.value；因此「深度自动」是断言假阳性，不是产品丢值。
+- 处置：不写产品代码；纠正 E2E 断言（读 select.value/selectedOptions），补 mixed-key 回归；卡在 P4 按 not-a-bug 收口（证据 + 夹具纠正，不伪造产品 fix-red）。
+- 红/绿：本卡无产品修复；若 P4 加回归，以「把 parser 的 mixed 键折回 empty」的变异红证明回归会咬人，还原后绿。
 
 ## 修法方向（未实施）
 

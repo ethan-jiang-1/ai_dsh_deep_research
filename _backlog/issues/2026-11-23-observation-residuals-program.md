@@ -60,6 +60,14 @@ opened: 2026-11-23
 | 现有入口 | 旧五场景入口 357 行 + 新九场景入口 366 行；慢资产 15/15 满额（新入口按 `medium`，不加 slow） |
 | 376 反证线索 | `parseDefaults({schema:1,effort:'deep',unknown:'x'})` 在代码上返回 `value.effort='deep'` + unknown warning；`DefaultsStore` 写 `value: parsed.value`；但 verdict 的 `paneText` 无法证明 select 选中的是 auto；`config-defaults-mixed-e2e.mjs` 也没有读 select.value。**P0 必须复核** |
 
+## 1.1 P0 结果（2026-11-23）
+
+- 八条夹具复跑：七条仍红（369 状态页/终稿分歧、370 空快照无文案、371 无 stale、372 配置误报「不在」、373 状态页无警告、374 终稿无审查提示、375 状态页无计划提示）；**376 证伪**。
+- 376 三方对照：`parseDefaults` mixed 键 → `value.effort='deep'`；真浏览器 select.value='deep'、selectedOptions 文本「深度档」、defaults-state=count；原 verdict 只读 `paneText`（包含全部 option 标签）→ **E2E 假阳性，不写产品代码**。处置 = P4 纠正夹具/卡 + mixed-key 回归，按 not-a-bug 收口；红/绿以「把 parser mixed 键折回 empty」的变异红证明回归会咬人。
+- 新入口 `cockpit-truth-residuals.entry.mjs` 预修复：**17/28 PASS，exit 1**；11 条红分别落 369/374/371/373/375/372/370，S21（376）正向绿（select.value=deep）。
+- 七卡已补 `## 分诊与授权` / `## 批` / `## 复现` / `根因证据`，翻 `修复就绪`；376 留 `排查中` + `## P0 复核（非缺陷）`。
+- G21 清单：`artifact-read.spec` 新增跨面裸 `view.read` 清点（当前只允许 graph/config 三处已知遗留），P3/P4 迁移后清空。
+
 ## 2. 系统视角
 
 ### 2.1 F1：事实清单仍按「面」而非「事实」建
@@ -308,15 +316,14 @@ G23：每一种状态必须有**能区分邻态**的文案；不能用一个「�
 
 | 卡 | 机制 | P 阶段 | 守卫场景 | 状态（P0 回填） |
 |---|---|---|---|---|
-| 369 | readiness mismatch/ambiguous + 终稿单边 prose | P1 | S15 | 排查中 |
-| 370 | 空 plan/vN 快照空面板 | P3 | S22 | 排查中 |
-| 371 | watcher 只盯 audit | P1 | S17 | 排查中 |
-| 372 | config question 读失败当 missing | P4 | S20 | 排查中 |
-| 373 | final/ list 失败当 0 版本 | P2 | S18 | 排查中 |
-| 374 | 终稿 review unconfirmed 静默 | P1 | S16 | 排查中 |
-| 375 | plan 读失败静默消失 | P2 | S19 | 排查中 |
-| 376 | unknown 键 + 合法 effort（待证伪） | P4 | S21 | 排查中 |
-
+| 369 | readiness mismatch/ambiguous + 终稿单边 prose | P1 | S15 | 修复就绪 |
+| 370 | 空 plan/vN 快照空面板 | P3 | S22 | 修复就绪 |
+| 371 | watcher 只盯 audit | P1 | S17 | 修复就绪 |
+| 372 | config question 读失败当 missing | P4 | S20 | 修复就绪 |
+| 373 | final/ list 失败当 0 版本 | P2 | S18 | 修复就绪 |
+| 374 | 终稿 review unconfirmed 静默 | P1 | S16 | 修复就绪 |
+| 375 | plan 读失败静默消失 | P2 | S19 | 修复就绪 |
+| 376 | unknown 键 + 合法 effort（待证伪） | P4 | S21 | 排查中（假阳性） |
 ## 9. 执行入口（goal 用）
 
 - 每轮先读本卡 §4；只推进当前阶段；阶段结束把「实际红/绿/未跑 + 卡状态」回填本卡。

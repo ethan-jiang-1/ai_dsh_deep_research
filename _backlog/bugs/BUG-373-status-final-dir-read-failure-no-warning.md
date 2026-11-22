@@ -1,12 +1,12 @@
 ---
-status: 排查中
+status: 修复就绪
 severity: P2
 opened: 2026-11-23
 ---
 
 # BUG-373：final/ 目录读不到时状态页仍显示「✅ 已交付」且无警告——终稿入口点开报错
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：排查中 — 真浏览器现场已复现；按用户指令只报不修。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复就绪 — P0 复跑仍红；根因证据见下；批 observation-residuals-369-376。
 > 现场 = `runtime/e2e/final-dir-unreadable-verdict.json` + `final-dir-unreadable.png`；
 > 夹具 = `runtime/e2e/final-dir-unreadable-e2e.mjs`。
 
@@ -24,6 +24,27 @@ bundle 的 `final/` 目录在场但不可读（权限/IO/工作区失败），`d
 
 状态页没有任何「终稿目录读取失败」警告；点「读终稿 →」后终稿页签报「读不到终稿文件」。
 用户会先被告知已交付，再在入口处撞错。
+
+## 分诊与授权
+
+- 严重级：P2 — 观察面把工件/派生的读失败、空、冲突折成良性态，用户会把旧内容/缺失当正常。
+- 表面 / 边界：pack client（驾驶舱观察面）/ 真浏览器；本批跨 status/final/graph/config 四个页签。
+- DSH 不变量：fail-loud — 文件在场但读不到/为空/冲突必须与缺席分开，并给出可行动提示。
+- 触及面：none — 观察面 client + 测试；不碰入口链/门禁与验收合同/文档合同/pack 公共行为/D 号。
+- 授权：自授权（P2 修理型修复）；2026-11-23 用户 goal 放行。
+- 批：`observation-residuals-369-376`。
+
+## 批
+
+`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序](../issues/2026-11-23-observation-residuals-program.md)。
+
+## 复现
+
+复现状态：稳定 — 真浏览器 seed 夹具（2026-11-23 复跑仍红）。
+
+```sh
+node --import tsx/esm runtime/e2e/final-dir-unreadable-e2e.mjs
+```
 
 ## 证据
 
@@ -60,6 +81,8 @@ const versions = latestRunVersion(finalFileNames)
 `list` 失败与「目录缺席/空」同形 → `finalFileNames=[]`、`versions=0`；`face.versions=0` 不参与
 交付态（交付来自 present/回执），所以 ⑤ 仍 ✅ 已交付；没有 read 失败的提示。终稿页签自己
 `list('final')` 失败后按地址读文件，才报读不到。
+
+**P0 根因证据（2026-11-23）**：P0 复跑 `final-dir-unreadable-e2e.mjs`：`deliveredBadge:true`、`statusFailure:false`，状态页仍「✅ 已交付 / v1 已交付 · 当前工作稿」，终稿页签 `finalFailure:true`；`useStatusFeed` 的 `finalDir` list 失败折成 `finalFileNames=[]`，`StatusReads` 没有 final 轴。
 
 ## 修法方向（未实施）
 

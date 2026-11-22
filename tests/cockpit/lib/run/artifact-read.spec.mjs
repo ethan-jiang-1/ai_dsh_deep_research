@@ -59,3 +59,28 @@ test('readArtifact：question 空/读失败；回执 JSON 好/坏；未登记不
   assert.deepEqual(await readArtifact(view(OUT('x')), 'unknown.md'), { state: 'invalid', text: null, json: null })
   assert.deepEqual(calls, [], '未登记工件不得发起读取')
 })
+
+// 负例留证 2026-11-23：G21 跨面读取点清单——status/final 已收口，graph/config 仍是裸 view.read。
+// 迁移 graph/config 后在 EXPECTED 里删掉对应项；新增任何裸 view.read 会让本清单多出一项 → 红。
+test('G21 cockpit canonical 读取点清单：裸 view.read 只允许已知遗留（graph/config）', async () => {
+  const { readFileSync, readdirSync, statSync } = await import('node:fs')
+  const { join } = await import('node:path')
+  const { fileURLToPath } = await import('node:url')
+  const root = fileURLToPath(new URL('../../../../packages/deep-research-pack/src/client/', import.meta.url))
+  const counts = {}
+  const walk = (dir) => {
+    for (const ent of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, ent.name)
+      if (ent.isDirectory()) { walk(p); continue }
+      if (!/\.(ts|tsx)$/.test(ent.name)) continue
+      const hits = (readFileSync(p, 'utf8').match(/\bview\.read\(/g) ?? []).length
+      if (hits > 0) counts[p.slice(root.length)] = hits
+    }
+  }
+  walk(root)
+  // P0 已知遗留：graph plan/snapshot、config question；P3/P4 迁到 readArtifact 后应为 {}。
+  assert.deepEqual(counts, {
+    'research-config/useConfigFeed.ts': 1,
+    'research-graph/useGraphFeed.ts': 2,
+  })
+})

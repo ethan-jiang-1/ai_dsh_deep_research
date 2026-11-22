@@ -1009,7 +1009,7 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "artifact-read 回归 — 观察面工件五态与唯一读取器（keyless 纯函数 + 假 view）。",
-      "oracleType": "structured",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {

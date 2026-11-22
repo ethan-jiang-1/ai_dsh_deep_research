@@ -132,6 +132,23 @@
     "sunset": "当 cockpit-truth 或 client-load 相位吸收九场景，或纯函数矩阵 + DOM 快照覆盖用户可见结果时退役",
     "lane": "entry"
   },
+  "cockpit-truth-residuals.entry.mjs": {
+    "tier": "dev-only",
+    "reason": "真浏览器 + 八场景文件突变（chmod/空快照/改写 reader/默认值）；主机负载敏感，先阶段验收/手动跑，稳定后再议 nightly",
+    "cost": "medium",
+    "uniqueClaim": "观察面残余跨面事实八场景：review 冲突/读失败，reader stale，final 目录/plan/config question 读失败，defaults mixed 键合法值，空 plan 快照",
+    "oracle": [
+      "tests/run/gates/review-readiness.spec.mjs",
+      "tests/run/gates/final-target.spec.mjs",
+      "tests/cockpit/lib/events/status-feed.spec.mjs",
+      "tests/cockpit/lib/run/brief-fold.spec.mjs",
+      "tests/cockpit/lib/method-library/method-of-question.spec.mjs",
+      "tests/cockpit/client/research-graph/graph-notices.spec.mjs",
+      "tests/pack/defaults/research-defaults.spec.mjs"
+    ],
+    "sunset": "当 cockpit-truth/cockpit-artifact-truth 相位吸收八场景，或纯函数矩阵 + DOM 快照覆盖用户可见结果时退役",
+    "lane": "entry"
+  },
   "cold-start.entry.mjs": {
     "tier": "nightly",
     "reason": "干净室安装（仓外 home + tarball）——nightly 跑，失败可诊断",

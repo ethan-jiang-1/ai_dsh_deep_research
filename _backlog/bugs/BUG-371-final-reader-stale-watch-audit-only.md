@@ -1,12 +1,12 @@
 ---
-status: 排查中
+status: 修复就绪
 severity: P2
 opened: 2026-11-23
 ---
 
 # BUG-371：读者版更新后终稿页签不提示——stale watcher 只盯审计版
 
-> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：排查中 — 真浏览器现场已复现；按用户指令只报不修。
+> 严重级别：P2 ｜ 发现：2026-11-23 ｜ 状态：修复就绪 — P0 复跑仍红；根因证据见下；批 observation-residuals-369-376。
 > 现场 = `runtime/e2e/final-reader-stale-verdict.json` + `final-reader-stale.png`；
 > 夹具 = `runtime/e2e/final-reader-stale-e2e.mjs`。
 
@@ -20,6 +20,27 @@ opened: 2026-11-23
 - 审计版未变，所以 watcher 也认为没有变化。
 
 用户会把旧读者版当成最新稿。
+
+## 分诊与授权
+
+- 严重级：P2 — 观察面把工件/派生的读失败、空、冲突折成良性态，用户会把旧内容/缺失当正常。
+- 表面 / 边界：pack client（驾驶舱观察面）/ 真浏览器；本批跨 status/final/graph/config 四个页签。
+- DSH 不变量：fail-loud — 文件在场但读不到/为空/冲突必须与缺席分开，并给出可行动提示。
+- 触及面：none — 观察面 client + 测试；不碰入口链/门禁与验收合同/文档合同/pack 公共行为/D 号。
+- 授权：自授权（P2 修理型修复）；2026-11-23 用户 goal 放行。
+- 批：`observation-residuals-369-376`。
+
+## 批
+
+`observation-residuals-369-376` — 同批卡：369/370/371/372/373/374/375/376；批计划：[观察面残余与跨面事实一致性修复程序](../issues/2026-11-23-observation-residuals-program.md)。
+
+## 复现
+
+复现状态：稳定 — 真浏览器 seed 夹具（2026-11-23 复跑仍红）。
+
+```sh
+node --import tsx/esm runtime/e2e/final-reader-stale-e2e.mjs
+```
 
 ## 证据
 
@@ -54,6 +75,8 @@ targetRef.current = { dir: viewIo.dir, name: bodyArt.state === 'ok' ? target.aud
 最常见的展示路径。
 
 同样的洞也覆盖 `draft` 视图：`view='draft'` 时 watcher 仍盯 audit。
+
+**P0 根因证据（2026-11-23）**：P0 复跑 `final-reader-stale-e2e.mjs`（35s）：`staleBanner:false`、`updatedReaderShown:false`，页面仍显示 `first reader text`；`ResearchFinalTab` 的 `targetRef` 在 body ok 时固定为 `target.audit`，默认 view=reader，reader 文件令牌变化不被比较。
 
 ## 修法方向（未实施）
 
