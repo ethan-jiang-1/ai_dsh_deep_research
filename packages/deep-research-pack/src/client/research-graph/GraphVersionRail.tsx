@@ -17,10 +17,12 @@ export function GraphVersionRail(props: {
   readonly graphView: 'current' | 'diff'
   readonly setGraphView: (update: 'current' | 'diff' | ((current: 'current' | 'diff') => 'current' | 'diff')) => void
   readonly snapshotState: 'idle' | 'loading' | 'ready' | 'empty' | 'invalid' | 'missing' | 'unreadable'
+  /** plan/ 目录读取态（BUG-390）；unreadable 不得显示成「无旧图快照」。 */
+  readonly snapshotsState: 'ok' | 'absent' | 'unreadable'
   readonly snapshotPlan: PlanIndex | null
   readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
-  const { hasPlan, planVersion, snapshots, latestSnapshot, showSnapshotPlan, setShowSnapshotPlan, graphView, setGraphView, snapshotState, snapshotPlan, t } = props
+  const { hasPlan, planVersion, snapshots, latestSnapshot, showSnapshotPlan, setShowSnapshotPlan, graphView, setGraphView, snapshotState, snapshotPlan, snapshotsState, t } = props
   return (
     <>
       {/* 版本轨（rerun 版本面，只读）：只切观察，不改图/不派工。 */}
@@ -37,6 +39,8 @@ export function GraphVersionRail(props: {
                 {graphView === 'diff' ? t('graphHideDiff') : t('graphShowDiff')}
               </button>
             </>
+          ) : snapshotsState === 'unreadable' ? (
+            <span style={{ color: '#b45309' }}>{t('graphSnapshotListFailed')}</span>
           ) : (
             <span>{t('graphNoSnapshot')}</span>
           )}

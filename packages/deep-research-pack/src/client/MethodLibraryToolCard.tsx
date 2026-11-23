@@ -22,9 +22,13 @@ export function MethodLibraryToolCard(props: MethodLibraryToolCardProps): ReactN
   const argsRaw = (source !== undefined && source !== null && 'argsRaw' in source ? source.argsRaw : undefined) ?? ''
   const args = parseArgsObject(argsRaw) as { entry?: unknown; action?: unknown; name?: unknown } | null
   const entry = typeof args?.entry === 'string' ? args.entry : ''
-  const name = /^##\s+(.+?)(?:（|〔|\n|$)/m.exec(entry)?.[1]?.trim() ?? ''
   const removing = props.toolName === METHOD_LIBRARY_REMOVE
   const defaulting = props.toolName === METHOD_LIBRARY_DEFAULT
+  // 名称来源按工具契约取：remove/set_default 的入参是 `{ name }`（没有 entry 正文），
+  // 只有 upsert 的 entry 才带 `## 标题`——用 entry 取 remove 名会恒空退化成「方法条目」（BUG-400）。
+  const name = removing
+    ? (typeof args?.name === 'string' ? args.name.trim() : '')
+    : (/^##\s+(.+?)(?:（|〔|\n|$)/m.exec(entry)?.[1]?.trim() ?? '')
   const defaultAction = args?.action === 'set' ? 'set' : 'clear'
   const target = name === '' ? props.t('methodEntries') : name
   const label = state === 'running'

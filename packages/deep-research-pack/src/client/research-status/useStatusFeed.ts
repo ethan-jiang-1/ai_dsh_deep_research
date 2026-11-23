@@ -290,6 +290,9 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
             leadsIssue,
             findingsIssue,
             evidenceIssue,
+            // 部分卡读失败不得因为「至少有一张可读」被吞掉（BUG-388）：计数照给可读卡，另记缺口数。
+            evidenceUnreadable: evidenceUnreadableCount,
+            finalBodyIssue: artifactBodyIssueOf(finalArt.state, finalBody),
             steps: deriveSteps({
               question: questionIssue !== null ? 'unknown' : (questionArt.state === 'ok' && questionBody !== null ? 'present' : 'absent'),
               team: questionArt.state === 'ok' && questionBody !== null ? 'present' : 'absent',

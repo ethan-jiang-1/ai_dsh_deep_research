@@ -316,3 +316,29 @@ test('D28 总表：_abandoned/ 作为停放场被 listScenes 列出（不再从�
     assert.equal(isArchivedScene(scenes.find((s) => s.slug === 'drt_p')), false);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
+
+// 负例留证 2026-11-23：BUG-402——真实中文 run 依 SKILL 模板写全角冒号（`## F1：…`、`- 支撑证据：…`、
+// `- gap：supported`、`## T1：…`、`## 方向：…`），旧正则只认半角 `:` → findings/topics/leads 全 0 且
+// synthesis 误判 pending。红配方：把 `[:：]` 改回 `:`。
+test('BUG-402 findings/topics/leads 兼容全角「：」；deriveStep 不再误判 synthesis pending', () => {
+  const root = mktmp();
+  try {
+    writeFileSync(join(root, 'question.md'), '## 研究问题（定稿）\n问题\n\n## HITL1 Alignment Snapshot\n- 研究类型：exploratory_map\n- 深度与篇幅：标准报告\n');
+    writeFileSync(join(root, 'topics.md'), '## T1：主题一\n- must_answer:\n  - 子问题 a\n  - 子问题 b\n\n## T2: 主题二\n- must_answer:\n  - 子问题 c\n');
+    writeFileSync(join(root, 'leads.md'), '## 方向：官方定价\n- 状态：建议挖深\n- 支持来源：官方页（A）\n\n## 方向: 第三方对比\n- 状态：已排除（单一二手来源）\n');
+    writeFileSync(join(root, 'findings.md'), '## F1：核心结论\n- 支撑证据：evidence/e1.md\n- gap：supported\n\n## F2: 第二条\n- 支撑证据：evidence/e2.md\n- gap：partial\n');
+    const model = buildModel(root);
+    assert.equal(model.topics.length, 2);
+    assert.equal(model.topics[0].questions, 2);
+    assert.equal(model.leads.length, 2);
+    assert.equal(model.leads[0].status, 'dig');
+    assert.equal(model.leads[1].status, 'excluded');
+    assert.equal(model.findings.length, 2);
+    assert.equal(model.findings[0].gap, 'supported');
+    assert.deepEqual(model.findings[0].evidence, ['evidence/e1.md']);
+    assert.equal(model.question.profile, 'exploratory_map');
+    assert.equal(model.question.depth, '标准报告');
+    const synth = deriveStep(model).find((s) => s.label === '综合');
+    assert.notEqual(synth.state, 'pending', '综合已产出却仍判 pending');
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});

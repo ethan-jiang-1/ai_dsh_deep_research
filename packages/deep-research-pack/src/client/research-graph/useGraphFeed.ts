@@ -13,9 +13,12 @@ import type { PlanIndex } from '../../lib/plan/plan-index.ts'
 import { planIndex } from '../../lib/plan/plan-index.ts'
 import { bindingTrust } from '../../lib/run/binding-trust.ts'
 import { openRun, type RunView } from '../../lib/run/run-context.ts'
-import { readArtifact } from '../../lib/run/artifact-read.ts'
+import { readArtifact, readStateOf, type SourceRead } from '../../lib/run/artifact-read.ts'
 import { INITIAL_GRAPH_FEED_STATE, reduceGraphFeed, type PlanState, type SnapshotState } from './graph-state.ts'
 import type { ResearchGraphTabProps } from './types.ts'
+
+/** `plan/` 目录列举的最小三态（读失败不得冒充缺席）。 */
+type PlanListing = { readonly ok: true; readonly value: readonly { readonly type: string; readonly name: string }[] } | { readonly ok: false; readonly reason: 'missing' | 'unreadable' } | null
 
 /** plan.md 重读间隔（任务靠投影推送；只有文件需要低频重扫）。 */
 const PLAN_REFRESH_MS = 5_000
@@ -28,6 +31,7 @@ export interface GraphFeed {
   readonly retry: () => void
   readonly planVersion: number | null
   readonly snapshots: readonly number[]
+  readonly snapshotsState: SourceRead
   /** `plan/` 里最高快照号（无快照 = null）；旧图轨与按钮文案都用它。 */
   readonly latestSnapshot: number | null
   readonly graphView: 'current' | 'diff'
@@ -50,6 +54,7 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
   const {
     boundSlug, followError, followAttempt, plan, planText, planState, retryTick,
     planVersion, snapshots, graphView, snapshotPlan, snapshotState, showSnapshotPlan, planLoadedAt,
+    snapshotsState,
   } = state
   const viewRef = useRef<RunView | null>(null)
   const setGraphView = useCallback<Dispatch<SetStateAction<'current' | 'diff'>>>((value) => {
@@ -135,10 +140,18 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
         const text = planArt.text
         const parsed = planIndex(text)
         const rawVersion = parsed.version?.replace(/^v/i, '') ?? ''
-        const planList = view.names.has('plan')
-          ? await view.list('plan', { signal: controller.signal }).catch(() => null)
-          : null
+        // 快照目录读取态（BUG-390）：list 抛错 ≠ 目录不存在。抛错记 unreadable，
+        // 目录不在场才是 absent——两者都不能折成「没有快照」。
+        let planList: PlanListing = null
+        if (view.names.has('plan')) {
+          try {
+            planList = await view.list('plan', { signal: controller.signal })
+          } catch {
+            planList = { ok: false, reason: 'unreadable' }
+          }
+        }
         if (stopped) return
+        const listedState = readStateOf(planList)
         const found = (planList?.ok === true ? planList.value : [])
           .map((entry) => /^v([1-9]\d*)\.md$/.exec(entry.name)?.[1])
           .filter((raw): raw is string => raw !== undefined)
@@ -152,6 +165,7 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
           // 版本号取 plan 解析器（已按“最后一条声明”）的结论，不另写一份正则。
           planVersion: /^\d+$/.test(rawVersion) ? Number(rawVersion) : null,
           snapshots: found,
+          snapshotsState: listedState,
         })
       } catch (cause) {
         if (stopped) return
@@ -186,10 +200,11 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
       dispatch({ kind: 'snapshot-ready', plan: parsed })
     })()
     return () => { stopped = true; controller.abort() }
-  }, [graphView, showSnapshotPlan, latestSnapshot, leadSessionId])
+  }, [graphView, showSnapshotPlan, latestSnapshot, leadSessionId, retryTick])
 
   return {
     boundSlug, plan, planText, planState, planVersion, snapshots, latestSnapshot, graphView, setGraphView,
     snapshotPlan, snapshotState, showSnapshotPlan, setShowSnapshotPlan, planLoadedAt, followError, retry,
+    snapshotsState,
   }
 }

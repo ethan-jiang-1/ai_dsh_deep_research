@@ -783,3 +783,49 @@ test('BUG-329：critical 范围未知 → 只给 notice，不逐卡比 quality',
   assert.match(scoped[0].message, /crit\.md/)
   assert.deepEqual(checkEvidenceThreshold(protocol, [{ file: 'background.md', quality: 'C' }], 'deep', []), [])
 })
+
+// 负例留证 2026-11-23：BUG-403——protocol-audit CLI 自带方法库影子解析：
+//   ① 用 startsWith('## ' + name) 命中前缀同名条目（「方案比较」抢走「方案」的字段）；
+//   ② candidates.find() 的 undefined 落进 `!== null` 分支被吞成 null，使 checkMethodLibrary 的
+//      「找不到方法库文件」(BUG-307) 分支成为死代码。
+// 红配方：把 methodLibraryEntryOf 退回前缀 startsWith 匹配，或让 evaluateBundle 吞掉显式 undefined。
+test('BUG-403 方法库条目解析：精确名称匹配（前缀同名不抢）+ 文件缺失保持 undefined', async () => {
+  const { methodLibraryEntryOf } = await import('../../../checks/lib/gates/protocol-audit-core.mjs')
+  const libraryText = [
+    '## 方案比较（2026-11-20，用户）',
+    '- 找来源: source-long',
+    '- 怎么核实: verify-long',
+    '- 报告怎么写: report-long',
+    '- 不承诺: limit-long',
+    '',
+    '## 方案（2026-11-21，用户）',
+    '- 找来源：source-short',
+    '- 怎么核实: verify-short',
+    '- 报告怎么写: report-short',
+    '- 不承诺: limit-short',
+    '',
+  ].join('\n')
+  const fields = { source: 'source-short', verify: 'verify-short', report: 'report-short', limit: 'limit-short' }
+  const protocol = baseProtocol({ method: { ...baseProtocol().method, library_name: '方案', fields, library_fields_sha256: 'a'.repeat(64) } })
+
+  const found = methodLibraryEntryOf({ protocol, libraryText, found: true })
+  assert.equal(found.name, '方案')
+  assert.deepEqual(found.fields, fields)
+
+  // 文件不在场：必须保留 undefined（= core 的「找不到方法库文件」，BUG-307），不是 null。
+  assert.equal(methodLibraryEntryOf({ protocol, libraryText: '', found: false }), undefined)
+  // 文件在场但无此条目：null（= 「方法库里找不到」）。
+  assert.equal(methodLibraryEntryOf({ protocol, libraryText: '## 别的（2026-11-20）\n- 找来源: x\n', found: true }), null)
+  // 协议没声明库 → 不解析条目（null）且不去看文件。
+  const noLibrary = baseProtocol()
+  assert.equal(methodLibraryEntryOf({ protocol: noLibrary, libraryText, found: false }), null)
+})
+
+// 负例留证 2026-11-23：BUG-403——CLI 壳不得再留一份影子字段解析（单事实源 = foldLibrary /
+// methodLibraryEntryOf）。红配方：在 protocol-audit.mjs 里重新写 `startsWith('## ' + name)`。
+test('BUG-403 protocol-audit CLI 复用 core 的条目解析，不再内联影子 parser', () => {
+  const source = readFileSync(resolve(ROOT, 'checks/run-gates/protocol-audit.mjs'), 'utf8')
+  assert.doesNotMatch(source, /startsWith\('## ' \+ name\)/, '仍保留前缀撞库的影子解析')
+  assert.match(source, /methodLibraryEntryOf/, 'CLI 必须调用 core 的条目解析')
+  assert.doesNotMatch(source, /if \(foundLibrary !== null\)/, 'undefined 仍被折成 null（BUG-307 分支死代码）')
+})

@@ -17,7 +17,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 import { epochDateOf, runType } from '../lib/gates/schema-scan-core.mjs'
 import { PROTOCOL_CONTRACT_DATE, designSha256, preContractByDelivery } from '../lib/gates/protocol-core.mjs'
-import { evaluateBundle, requiredByProtocolContract } from '../lib/gates/protocol-audit-core.mjs'
+import { evaluateBundle, methodLibraryEntryOf, requiredByProtocolContract } from '../lib/gates/protocol-audit-core.mjs'
 import { splitFrontmatter } from '../lib/shared/frontmatter.mjs'
 import { finalTextFromBundle } from '../lib/shared/final-version.mjs'
 import { isMain } from '../lib/shared/cli-entry.mjs'
@@ -171,34 +171,17 @@ if (isMain(import.meta.url)) {
       criticalEvidence = [...new Set(claims.filter((claim) => claim?.critical === true).flatMap((claim) => claim?.evidence ?? []))]
     } catch { criticalEvidence = null }
   }
-  const libraryPath = join(bundle, '..', 'method-library.md')
-  let methodLibraryEntry
-  const candidates = [libraryPath, join(bundle, '..', '..', 'method-library.md')]
-  if (process.env.DEEP_RESEARCH_WORKSPACE) candidates.push(join(process.env.DEEP_RESEARCH_WORKSPACE, 'method-library.md'))
-  const foundLibrary = protocol === null || protocol.method?.library_name === null || protocol.method?.library_name === undefined
-    ? null
-    : candidates.find((candidate) => existsSync(candidate))
-  if (foundLibrary !== null) {
-    const libText = readIf(foundLibrary)
-    const name = String(protocol.method.library_name)
-    const lines = libText.split('\n')
-    const start = lines.findIndex((line) => line.startsWith('## ' + name))
-    const section = start === -1 ? '' : (() => {
-      const out = []
-      for (let i = start + 1; i < lines.length; i += 1) {
-        if (/^##\s/.test(lines[i])) break
-        out.push(lines[i])
-      }
-      return out.join('\n')
-    })()
-    const labels = { 找来源: 'source', 怎么核实: 'verify', 报告怎么写: 'report', 不承诺: 'limit' }
-    const fields = {}
-    for (const [label, key] of Object.entries(labels)) {
-      const m = new RegExp('^-\\s*' + label + '\\s*[:：]\\s*(.+)$', 'm').exec(section)
-      if (m) fields[key] = m[1].trim()
-    }
-    methodLibraryEntry = Object.keys(fields).length > 0 ? { name, fields } : null
-  }
+  // 方法库条目 = core 的单一解析（foldLibrary 精确名称匹配；BUG-403）。文件在场性与条目分开：
+  // 找不到文件 = undefined（BUG-307 红），文件在场但无此条目 = null（BUG-276 红）。
+  const declaresLibrary = protocol !== null && protocol.method?.library_name !== null && protocol.method?.library_name !== undefined
+  const libraryCandidates = [join(bundle, '..', 'method-library.md'), join(bundle, '..', '..', 'method-library.md')]
+  if (process.env.DEEP_RESEARCH_WORKSPACE) libraryCandidates.push(join(process.env.DEEP_RESEARCH_WORKSPACE, 'method-library.md'))
+  const foundLibrary = declaresLibrary ? libraryCandidates.find((candidate) => existsSync(candidate)) : undefined
+  const methodLibraryEntry = methodLibraryEntryOf({
+    protocol,
+    libraryText: typeof foundLibrary === 'string' ? readIf(foundLibrary) : '',
+    found: typeof foundLibrary === 'string',
+  })
   const findings = evaluateBundle({
     protocol,
     questionText: readIf(join(bundle, 'question.md')),

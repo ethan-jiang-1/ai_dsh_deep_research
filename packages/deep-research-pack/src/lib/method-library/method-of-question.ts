@@ -34,20 +34,29 @@ export interface MethodAdoption {
   readonly requirements: string | null
 }
 
-/** 方法节标题形态：`## 研究方法（本次实际采用）`（模板正本）。 */
+/** 方法节标题形态：`## 研究方法（本次实际采用）`（模板正本；行尾 `\r` 已在归一后消失）。 */
 const SECTION_HEADING = /^##\s*研究方法/
+/** 任意二级标题（节尾判定）：`##` 后接空白——`###` 不算（不截断节）。 */
+const NEXT_SECTION = /^##\s/
 
 /** 模板占位符（`<…>`）——在场但读不出内容，属"无法判定"而非"未记录"。 */
 function isPlaceholder(value: string): boolean {
   return value.startsWith('<') || value.endsWith('>')
 }
 
-/** 值行取值：`- <字段>:` 后的内容（不存在 → null）。 */
+/**
+ * 值行取值：`- <字段>:` 后的内容（不存在 → null）。容错口径与 `library-fold.ts` 的字段行一致
+ * （BUG-393）：前导空白、`-`/`*`/`+` 列表符、加粗键名（`**采用**`）、半角 `:` 与全角 `：`、
+ * 冒号前可有空白。字段名是中文键，不做大小写归一。
+ */
 function fieldValue(lines: readonly string[], field: string): string | null {
-  const prefix = `- ${field}:`
-  const line = lines.find((l) => l.startsWith(prefix))
-  if (line === undefined) return null
-  return line.slice(prefix.length).trim() || null
+  const key = field.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const line = new RegExp(`^\\s*[-*+]\\s*(?:\\*\\*)?${key}(?:\\*\\*)?\\s*[:：]\\s*(.*)$`)
+  for (const raw of lines) {
+    const match = line.exec(raw)
+    if (match !== null) return (match[1] ?? '').trim() || null
+  }
+  return null
 }
 
 /**
@@ -70,11 +79,12 @@ export function parseMethodSection(questionText: string | null): {
   readonly requirements: string | null
 } {
   if (questionText === null) return { sectionSeen: false, adoptedRaw: null, origin: null, requirements: null }
-  const lines = questionText.split('\n')
+  // CRLF / BOM 归一（BUG-393）：Windows 落盘的 question.md 与编辑器写入的 BOM 都是合法输入。
+  const lines = questionText.replace(/^\uFEFF/, '').split(/\r\n|\r|\n/)
   const start = lines.findIndex((l) => SECTION_HEADING.test(l))
   if (start === -1) return { sectionSeen: false, adoptedRaw: null, origin: null, requirements: null }
   const rest = lines.slice(start + 1)
-  const end = rest.findIndex((l) => l.startsWith('## '))
+  const end = rest.findIndex((l) => NEXT_SECTION.test(l))
   const body = end === -1 ? rest : rest.slice(0, end)
   return {
     sectionSeen: true,

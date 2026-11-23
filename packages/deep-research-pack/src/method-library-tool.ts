@@ -157,14 +157,17 @@ export function apply(ctx: Context): void {
       })
       const persisted = mutated.after
       const defaults = foldLibrary(persisted).filter((entry) => entry.isDefault).map((entry) => entry.name)
-      if (defaults.length > 1 || (args.action === 'set' && (defaults.length !== 1 || defaults[0] !== name))
+      // 回读与回执都只认**请求名**：模块级 `name` 是本插件的名字（'method-library-tool'），
+      // 曾把它当方法名比较/回传，导致合法 set 在写盘之后必抛「回读未通过」（BUG-396）。
+      const target = args.action === 'set' ? (requestedName ?? '') : ''
+      if (defaults.length > 1 || (args.action === 'set' && (defaults.length !== 1 || defaults[0] !== target))
         || (args.action === 'clear' && defaults.length !== 0)) {
         throw new Error('默认操作回读未通过：库默认标记不符合操作结果')
       }
       return Promise.resolve({
         operationId: args.operationId,
         action: args.action,
-        name: args.action === 'set' ? name ?? '' : '',
+        name: target,
         changed: persisted !== mutated.before,
         defaults,
       })

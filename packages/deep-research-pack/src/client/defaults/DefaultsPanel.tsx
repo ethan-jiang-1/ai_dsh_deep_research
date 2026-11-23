@@ -88,6 +88,10 @@ export function DefaultsPanel({ sessionId, store, t }: DefaultsPanelProps): Reac
   useEffect(() => {
     setAudience(state.value.output?.audience ?? '')
   }, [state.value.output?.audience])
+  // 二次确认是**本会话的**瞬态：切 sessionId 必须复位，否则 B 会话首点即清空 B 的研究默认（BUG-399）。
+  useEffect(() => {
+    setConfirmClear(false)
+  }, [sessionId])
   const busy = state.pending || state.phase === 'loading'
   const output = state.value.output
   const shape = output?.shape

@@ -49,6 +49,8 @@ import {
   projectionPendingState,
   type GraphCoverage,
 } from '../lib/plan/graph-model.ts'
+import { assertNever } from '../lib/run/artifact-read.ts'
+import type { SnapshotState } from './research-graph/graph-state.ts'
 import { useGraphFeed } from './research-graph/useGraphFeed.ts'
 import type { GraphNodeView, ResearchGraphTabProps } from './research-graph/types.ts'
 import { shortLabel } from './research-graph/format.ts'
@@ -82,6 +84,31 @@ const BANNER_STYLE: CSSProperties = {
 
 
 
+/**
+ * 差异卡里「旧图快照为何不可用」的文案（BUG-391）：按 SnapshotState 穷举——除 ready 外每个
+ * 状态都要有话说，只有 loading/idle 才是「读取中」。旧实现把 missing 之外的全部折成加载中，
+ * 于是 unreadable/empty/invalid 永远显示「旧图快照读取中…」。
+ */
+function snapshotDiffMessage(state: SnapshotState, t: ResearchGraphTabProps['t']): string {
+  switch (state) {
+    case 'idle':
+    case 'loading':
+      return t('oldGraphLoading')
+    case 'missing':
+      return t('oldGraphUnread')
+    case 'empty':
+      return t('graphSnapshotEmpty', { version: '' })
+    case 'invalid':
+      return t('graphSnapshotInvalid', { version: '' })
+    case 'unreadable':
+      return t('graphSnapshotUnreadable', { version: '' })
+    case 'ready':
+      return t('oldGraphUnread')
+    default:
+      return assertNever(state)
+  }
+}
+
 /** 本地时钟 `HH:MM:SS`（“最后刷新”用；不引入日期库）。 */
 function formatClock(ms: number): string {
   const date = new Date(ms)
@@ -105,6 +132,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const {
     boundSlug, plan, planText, planState, planVersion, snapshots, latestSnapshot, graphView, setGraphView, retry,
     snapshotPlan, snapshotState, showSnapshotPlan, setShowSnapshotPlan, planLoadedAt, followError,
+    snapshotsState,
   } = useGraphFeed(props, leadSessionId)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
@@ -285,6 +313,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         setGraphView={setGraphView}
         snapshotState={snapshotState}
         snapshotPlan={snapshotPlan}
+        snapshotsState={snapshotsState}
         t={props.t}
       />
 
@@ -293,7 +322,12 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         <div style={CARD_STYLE}>
           <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{props.t('graphStructDiff', { from: String(latestSnapshot) })}</div>
           {planDiff === null ? (
-            <div style={MUTED_STYLE}>{snapshotState === 'missing' ? props.t('oldGraphUnread') : props.t('oldGraphLoading')}</div>
+            <>
+              <div style={MUTED_STYLE}>{snapshotDiffMessage(snapshotState, props.t)}</div>
+              {(snapshotState === 'missing' || snapshotState === 'empty' || snapshotState === 'invalid' || snapshotState === 'unreadable') && (
+                <button type="button" onClick={retry} style={{ marginTop: 6, fontSize: 12 }}>{props.t('graphRetryRead')}</button>
+              )}
+            </>
           ) : (
             <>
               <div style={{ fontSize: 12, marginBottom: 2 }}>{planDiff.summary}</div>

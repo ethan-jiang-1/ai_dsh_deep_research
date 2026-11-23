@@ -195,7 +195,10 @@ export function collectStatusNotices(input: {
     ? 'statusEvidenceReadFailed'
     : face?.evidenceIssue === 'failed-only'
       ? 'statusEvidenceFailedOnly'
-      : face?.evidenceIssue === 'empty' ? 'statusEvidenceEmpty' : null
+      : face?.evidenceIssue === 'empty'
+        ? 'statusEvidenceEmpty'
+        // 部分卡不可读（BUG-388）：目录可读、也有可读卡时，缺口仍必须显性。
+        : (face?.evidenceUnreadable ?? 0) > 0 ? 'statusEvidencePartialUnreadable' : null
   const reviewKey: DeepResearchPackLocaleKey | null = reviewVerdict === 'conflict'
     ? 'statusReviewConflict'
     : reads.review === 'unreadable'
@@ -204,7 +207,11 @@ export function collectStatusNotices(input: {
         ? 'statusReviewEmpty'
         : reviewVerdict === 'unconfirmed' ? 'statusReviewUnconfirmed' : null
   const planKey = planIssueKeyOf(reads.plan)
-  const finalKey: DeepResearchPackLocaleKey | null = reads.final === 'unreadable' ? 'statusFinalDirReadFailed' : null
+  // final/ 目录读失败与工作稿 final.md 读失败是两件事（BUG-389）：目录不可读 → 版本/入口失效；
+  // 工作稿不可读 → 正文暂不可用。两者都要显性。
+  const finalKey: DeepResearchPackLocaleKey | null = reads.final === 'unreadable'
+    ? 'statusFinalDirReadFailed'
+    : face?.finalBodyIssue === 'unreadable' ? 'statusFinalReadFailed' : null
 
   const candidates: readonly (StatusNotice | null)[] = [
     questionKey !== null ? { id: 'question', key: questionKey } : null,

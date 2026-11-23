@@ -68,8 +68,8 @@ function parseQuestion(text) {
   }
   const hSec = sectionBody(text, 'HITL1 Alignment Snapshot');
   if (hSec) {
-    let p = /^-\s+研究类型:\s*(.+)$/m.exec(hSec);
-    let d = /^-\s+深度与篇幅:\s*(.+)$/m.exec(hSec);
+    let p = /^-\s+研究类型\s*[:：]\s*(.+)$/m.exec(hSec);
+    let d = /^-\s+深度与篇幅\s*[:：]\s*(.+)$/m.exec(hSec);
     if (!p) p = /^\|\s*研究类型\s*\|\s*([^|]+)\|/m.exec(hSec); // ad-hoc 表格行
     if (!d) d = /^\|\s*深度与篇幅\s*\|\s*([^|]+)\|/m.exec(hSec);
     if (p) out.profile = p[1].trim();
@@ -86,7 +86,7 @@ function parseTopics(text) {
   let cur = null;
   let inMust = false;
   for (const raw of text.split(/\r?\n/)) {
-    const h = /^##\s+T(\d+):\s*(.+?)\s*$/.exec(raw);
+    const h = /^##\s+T(\d+)\s*[:：]\s*(.+?)\s*$/.exec(raw);
     if (h) {
       cur = { id: `T${h[1]}`, name: h[2], questions: 0 };
       topics.push(cur);
@@ -94,7 +94,7 @@ function parseTopics(text) {
       continue;
     }
     if (!cur) continue;
-    if (/^-\s+must_answer:\s*$/.test(raw)) {
+    if (/^-\s+must_answer\s*[:：]\s*$/.test(raw)) {
       inMust = true;
       continue;
     }
@@ -153,14 +153,14 @@ function parseLeads(text) {
   const leads = [];
   let cur = null;
   for (const raw of text.split(/\r?\n/)) {
-    const h = /^##\s+方向:\s*(.+?)\s*$/.exec(raw);
+    const h = /^##\s+方向\s*[:：]\s*(.+?)\s*$/.exec(raw);
     if (h) {
       cur = /** @type {{ direction: string, status: string | null, excludedReason: string | null, grades: string[] }} */ ({ direction: h[1], status: null, excludedReason: null, grades: [] });
       leads.push(cur);
       continue;
     }
     if (!cur) continue;
-    const st = /^-\s+状态:\s*(.+)$/.exec(raw);
+    const st = /^-\s+状态\s*[:：]\s*(.+)$/.exec(raw);
     if (st) {
       const v = st[1].trim();
       if (v.startsWith('建议挖深')) cur.status = 'dig';
@@ -171,7 +171,7 @@ function parseLeads(text) {
       }
       continue;
     }
-    if (/^-\s+支持来源:/.test(raw)) {
+    if (/^-\s+支持来源\s*[:：]/.test(raw)) {
       for (const g of raw.matchAll(/（([ABCD])）/g)) cur.grades.push(g[1]);
     }
   }
@@ -185,19 +185,19 @@ function parseFindings(text) {
   /** @type {{ id: string, conclusion: string, gap: string | null, evidence: string[] } | null} */
   let cur = null;
   for (const raw of text.split(/\r?\n/)) {
-    const h = /^##\s+F(\d+):\s*(.+?)\s*$/.exec(raw);
+    const h = /^##\s+F(\d+)\s*[:：]\s*(.+?)\s*$/.exec(raw);
     if (h) {
       cur = { id: `F${h[1]}`, conclusion: h[2], gap: null, evidence: [] };
       findings.push(cur);
       continue;
     }
     if (!cur) continue;
-    const g = /^-\s+gap:\s*(\w+)\s*$/.exec(raw);
+    const g = /^-\s+gap\s*[:：]\s*(\w+)\s*$/.exec(raw);
     if (g) {
       cur.gap = g[1];
       continue;
     }
-    if (/^-\s+支撑证据:/.test(raw)) {
+    if (/^-\s+支撑证据\s*[:：]/.test(raw)) {
       cur.evidence = [...raw.matchAll(/evidence\/[\w.-]+\.md/g)].map((m) => m[0]);
     }
   }

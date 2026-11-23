@@ -228,6 +228,19 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     return result
   }
 
+  /**
+   * 排队等待的收尾（BUG-401）：教练流失败/卸载时必须清掉队列 ref 与 30s 超时器——
+   * 只写错误回执会让 `sending` 悬在 true（按钮永久禁用）且 30s 后把明确错误覆写成
+   * 「方法编辑不可用」。
+   */
+  const clearQueuedOperation = (): boolean => {
+    const queued = queuedOperationRef.current !== null
+    if (queuedOperationTimeoutRef.current !== null) clearTimeout(queuedOperationTimeoutRef.current)
+    queuedOperationTimeoutRef.current = null
+    queuedOperationRef.current = null
+    return queued
+  }
+
   useEffect(() => {
     if (coachId === null) return undefined
     const controller = new AbortController()
@@ -305,13 +318,15 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       setCoachReady(true)
       const queued = queuedOperationRef.current
       if (queued !== null) {
-        if (queuedOperationTimeoutRef.current !== null) clearTimeout(queuedOperationTimeoutRef.current)
-        queuedOperationTimeoutRef.current = null
-        queuedOperationRef.current = null
+        clearQueuedOperation()
         void runOperationRef.current(queued, true)
       }
     }).catch((cause) => {
-      if (!controller.signal.aborted) setReceipt({ ok: false, detail: t('operationFailed', { detail: String(cause) }) })
+      if (controller.signal.aborted) return
+      // 建连失败 = 排队操作永远等不到 onReady：清队列 + 释放 sending，再如实报错（BUG-401）。
+      const hadQueued = clearQueuedOperation()
+      if (hadQueued) setSending(false)
+      setReceipt({ ok: false, detail: t('operationFailed', { detail: String(cause) }) })
     })
     return () => controller.abort()
   // oxlint-disable-next-line react-hooks/exhaustive-deps -- sibling-hook refs/setters are stable; watch stream rebinds only when coachId/callbacks change

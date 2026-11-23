@@ -27,7 +27,7 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
   FINAL_LEDGER_DIR, FINAL_NAME, FINAL_REVIEW_NAME, finalReadPlan, finalTargetOf, finalViewOf, sessionFileOf, watchTargetOf,
 } from '../lib/run/final-target.ts'
-import { assertNever, readArtifact, type ArtifactState } from '../lib/run/artifact-read.ts'
+import { assertNever, readArtifact, readStateOf, type ArtifactState } from '../lib/run/artifact-read.ts'
 import { openRun, type RunSource } from '../lib/run/run-context.ts'
 import { latestRunVersion } from '../lib/run/run-fold.ts'
 import { parseReadinessDeclaration, readinessOfSources, reviewVerdictOf, type ReviewVerdict } from '../lib/review/review-readiness.ts'
@@ -105,7 +105,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const [readerText, setReaderText] = useState<string | null>(null)
   const [draftText, setDraftText] = useState<string | null>(null)
   // 失败态存字典键（不存译文）：locale 切换后同一失败仍按当前语言渲染。
-  const [failure, setFailure] = useState<'finalUnreadable' | 'finalReadFailed' | 'finalEmpty' | null>(null)
+  const [failure, setFailure] = useState<'finalUnreadable' | 'finalReadFailed' | 'finalEmpty' | 'finalDirUnreadable' | null>(null)
   const [bodyState, setBodyState] = useState<ArtifactState>('absent')
   const [readerState, setReaderState] = useState<ArtifactState>('absent')
   const [loading, setLoading] = useState(true)
@@ -123,6 +123,21 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const targetRef = useRef<{ dir: string; name: string } | null>(null)
   const targetNamesRef = useRef<{ audit: string; readerName: string | null }>({ audit: '', readerName: null })
 
+  /**
+   * 失败出口：**原子**清掉上一轮的展示正文与降级条（BUG-387）——失败态不得被旧 `text` 遮蔽
+   * （旧渲染守卫是 `failure !== null && text === null`，残留正文会绕过失败屏只留页尾小字）。
+   */
+  const failLoad = useCallback((key: 'finalUnreadable' | 'finalReadFailed' | 'finalEmpty' | 'finalDirUnreadable'): void => {
+    setText(null)
+    setReaderText(null)
+    setDraftText(null)
+    setReaderName(null)
+    setShownVersion(null)
+    setStale(false)
+    setFailure(key)
+    setLoading(false)
+  }, [])
+
   /** 打开终稿所在 run bundle，按同一套读策略读正文/读者版/工作稿/审查/版本目录。
    *  review.md 必须读到 eof——终局判定在文末，固定行窗会读到中段旧判定（BUG-036 同族）。 */
   const load = useCallback(async (signal: AbortSignal): Promise<void> => {
@@ -133,21 +148,25 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     const opened = await openRun(io.runSource(sessionId), plan.final, { signal })
     if (signal.aborted || !aliveRef.current) return
     if (!opened.ok) {
-      setFailure(opened.reason === 'missing' ? 'finalUnreadable' : 'finalReadFailed')
-      setLoading(false)
+      failLoad(opened.reason === 'missing' ? 'finalUnreadable' : 'finalReadFailed')
       return
     }
     const viewIo = opened.value
     const listed = await viewIo.list(FINAL_LEDGER_DIR, { signal })
     if (signal.aborted || !aliveRef.current) return
+    // final/ 目录读失败 ≠ 没有版本账（BUG-386 / BUG-373 同族）：折成空数组会把工作稿 final.md
+    // 伪装成「没有版本的当前终稿」，并静默隐藏同版读者版 readable-vN.md。缺目录才是合法回落。
+    if (readStateOf(listed) === 'unreadable') {
+      failLoad('finalDirUnreadable')
+      return
+    }
     const versionNames = listed.ok
       ? listed.value.filter((entry) => entry.type === 'file').map((entry) => entry.name)
       : []
     const latest = latestRunVersion(versionNames)
     const target = finalTargetOf(plan, versionNames)
     if (target === null) {
-      setFailure('finalUnreadable')
-      setLoading(false)
+      failLoad('finalUnreadable')
       return
     }
     const [bodyArt, draftArt, reviewArt, readinessArt, readerArt] = await Promise.all([
@@ -160,8 +179,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     if (signal.aborted || !aliveRef.current) return
     const initial = finalViewOf({ body: bodyArt.state, reader: readerArt?.state ?? 'absent', requested: 'reader' })
     if (initial.failure !== null) {
-      setFailure(initial.failure === 'empty' ? 'finalEmpty' : initial.failure === 'missing' ? 'finalUnreadable' : 'finalReadFailed')
-      setLoading(false)
+      failLoad(initial.failure === 'empty' ? 'finalEmpty' : initial.failure === 'missing' ? 'finalUnreadable' : 'finalReadFailed')
       return
     }
     targetNamesRef.current = { audit: target.audit, readerName: target.reader }
@@ -193,7 +211,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     if (!signal.aborted && token.ok) versionRef.current = token.value
     setLoading(false)
     setStale(false)
-  }, [sessionId, plan])
+  }, [sessionId, plan, failLoad])
 
   // 首读 + 地址/会话变化重读
   useEffect(() => {

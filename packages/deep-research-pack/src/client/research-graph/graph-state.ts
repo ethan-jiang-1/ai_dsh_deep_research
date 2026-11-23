@@ -1,7 +1,7 @@
 // graph-state.ts — 「研究图谱」页签纯状态机（从 useGraphFeed 抽出，不碰 React/IO）。
 import type { SetStateAction } from 'react'
 import type { PlanIndex } from '../../lib/plan/plan-index.ts'
-import { assertNever } from '../../lib/run/artifact-read.ts'
+import { assertNever, type SourceRead } from '../../lib/run/artifact-read.ts'
 
 export type PlanState = 'loading' | 'missing' | 'unbound' | 'ready' | 'truncated' | 'error'
 export type SnapshotState = 'idle' | 'loading' | 'ready' | 'empty' | 'invalid' | 'missing' | 'unreadable'
@@ -16,6 +16,8 @@ export interface GraphFeedState {
   readonly retryTick: number
   readonly planVersion: number | null
   readonly snapshots: readonly number[]
+  /** `plan/` 快照目录的读取态（BUG-390）：unreadable 不得折成「没有快照」。 */
+  readonly snapshotsState: SourceRead
   readonly graphView: 'current' | 'diff'
   readonly snapshotPlan: PlanIndex | null
   readonly snapshotState: SnapshotState
@@ -33,6 +35,7 @@ export const INITIAL_GRAPH_FEED_STATE: GraphFeedState = {
   retryTick: 0,
   planVersion: null,
   snapshots: [],
+  snapshotsState: 'absent',
   graphView: 'current',
   snapshotPlan: null,
   snapshotState: 'idle',
@@ -56,6 +59,7 @@ export type GraphFeedAction =
     readonly planText: string
     readonly planVersion: number | null
     readonly snapshots: readonly number[]
+    readonly snapshotsState: SourceRead
     readonly loadedAt: number
   }
   | { readonly kind: 'plan-retry' }
@@ -101,6 +105,7 @@ export function reduceGraphFeed(state: GraphFeedState, action: GraphFeedAction):
         planText: null,
         planVersion: null,
         snapshots: [],
+        snapshotsState: 'absent',
         planState: 'truncated',
         planLoadedAt: action.loadedAt,
       }
@@ -111,6 +116,7 @@ export function reduceGraphFeed(state: GraphFeedState, action: GraphFeedAction):
         planText: null,
         planVersion: null,
         snapshots: [],
+        snapshotsState: 'absent',
         planState: 'missing',
         planLoadedAt: null,
       }
@@ -123,6 +129,7 @@ export function reduceGraphFeed(state: GraphFeedState, action: GraphFeedAction):
         planText: action.planText,
         planVersion: action.planVersion,
         snapshots: action.snapshots,
+        snapshotsState: action.snapshotsState,
         planState: 'ready',
         planLoadedAt: action.loadedAt,
       }

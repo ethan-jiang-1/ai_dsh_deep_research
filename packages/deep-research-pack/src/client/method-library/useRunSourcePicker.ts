@@ -7,7 +7,7 @@
 //
 // 竞态判据 = `sourceReadControllerRef.current !== controller`：只有最近一次读取能写状态；
 // 旧 controller 在每次新读取/复位前 abort，被 abort 的那次只允许写取消态。
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { isCompletedMethodSourceRun, latestFinalVersion, type SourcePreview } from '../../lib/method-library/method-library-source.ts'
@@ -34,10 +34,20 @@ export function useRunSourcePicker(deps: RunSourcePickerDeps) {
   const [selectedRunLoading, setSelectedRunLoading] = useState(false)
   const sourceReadControllerRef = useRef<AbortController | null>(null)
 
-  /** 取消当前 run 读取（不改变已落地的选择）。 */
+  /** 取消当前 run 读取（不改变已落地的选择）。
+   *  **必须同时清空 ref**（BUG-398）：只 abort 不清引用时，被取消那次读取的续体仍满足
+   *  `sourceReadControllerRef.current === controller` 的代际守卫，会在 reset 之后把
+   *  `idle`/`null` 覆写成 `cancelled`。 */
   const abortRunRead = (): void => {
     sourceReadControllerRef.current?.abort()
+    sourceReadControllerRef.current = null
   }
+
+  /** 卸载即中止（同上）：组件走了不该再回写任何状态。 */
+  useEffect(() => () => {
+    sourceReadControllerRef.current?.abort()
+    sourceReadControllerRef.current = null
+  }, [])
 
   /** 会话切换复位：取消读取并清空 run 列表/选择。 */
   const resetRunPicker = (): void => {
@@ -77,7 +87,8 @@ export function useRunSourcePicker(deps: RunSourcePickerDeps) {
       setRunNames(names)
       setRunState('ready')
     })().catch(() => {
-      if (!controller.signal.aborted) setRunState('error')
+      if (sourceReadControllerRef.current !== controller || controller.signal.aborted) return
+      setRunState('error')
     })
   }
 
@@ -150,17 +161,16 @@ export function useRunSourcePicker(deps: RunSourcePickerDeps) {
       setSelectedRunSource({ name, finalPath, question, deliverable, eligible, status })
       setSelectedRunLoading(false)
     })().catch((cause: unknown) => {
-      if (!controller.signal.aborted) {
-        setSelectedRunSource({
-          name,
-          finalPath: `${name}/final/v1.md`,
-          question: { kind: 'error', detail: String(cause) },
-          deliverable: { kind: 'error', detail: String(cause) },
-          eligible: false,
-          status: t('sourceReadFailure'),
-        })
-        setSelectedRunLoading(false)
-      }
+      if (sourceReadControllerRef.current !== controller || controller.signal.aborted) return
+      setSelectedRunSource({
+        name,
+        finalPath: `${name}/final/v1.md`,
+        question: { kind: 'error', detail: String(cause) },
+        deliverable: { kind: 'error', detail: String(cause) },
+        eligible: false,
+        status: t('sourceReadFailure'),
+      })
+      setSelectedRunLoading(false)
     })
   }
 

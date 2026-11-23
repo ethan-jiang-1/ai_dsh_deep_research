@@ -6,6 +6,25 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [386](BUG-386-final-tab-swallows-unreadable-final-dir.md) | final/ 目录不可读静默回落工作稿 | （readStateOf 分流 + 失败屏） | 2026-11-24 |
+| [387](BUG-387-final-tab-reload-failure-keeps-stale-text.md) | 终稿重读失败保留陈旧正文 | （failLoad 原子清展示态） | 2026-11-24 |
+| [388](BUG-388-status-feed-partial-unreadable-evidence-silent.md) | 部分证据卡读失败被静默 | （evidenceUnreadable 通知） | 2026-11-24 |
+| [389](BUG-389-status-feed-ignores-unreadable-final-draft.md) | 工作稿 final.md 读失败零告警 | （finalBodyIssue 通知） | 2026-11-24 |
+| [390](BUG-390-graph-feed-swallows-unreadable-plan-dir.md) | plan/ 快照目录读失败伪装「无旧图」 | （snapshotsState 分流） | 2026-11-24 |
+| [391](BUG-391-graph-tab-diff-stuck-loading-on-snapshot-error.md) | 差异卡永久「读取中」且无重试 | （快照状态穷举 + retryTick） | 2026-11-24 |
+| [392](BUG-392-config-feed-send-poll-aborts-next-session.md) | send 对账轮询跨会话串染 | （会话代际 + AbortController） | 2026-11-24 |
+| [393](BUG-393-method-of-question-misses-crlf-and-fullwidth-colon.md) | 方法节不兼容 CRLF/全角冒号 | （对齐 library-fold 口径） | 2026-11-24 |
+| [394](BUG-394-readiness-unicode-escape-bypasses-duplicate-key.md) | readiness 重复键可被转义绕过 | （JSON key scanner） | 2026-11-24 |
+| [396](BUG-396-method-library-set-default-uses-plugin-name.md) | set_default 用插件名核对方法名 | （requestedName） | 2026-11-24 |
+| [397](BUG-397-operation-queue-sending-stuck-on-preflight-failure.md) | 方法库队列失败不解锁 sending | （failOperation 收口） | 2026-11-24 |
+| [398](BUG-398-run-source-picker-reset-overwritten-cancelled.md) | reset 后旧读取覆写为 cancelled | （abort 清 ref + 代际守卫） | 2026-11-24 |
+| [399](BUG-399-defaults-panel-confirm-clear-leaks-across-sessions.md) | 清除默认的二次确认跨会话泄漏 | （[sessionId] 复位） | 2026-11-24 |
+| [400](BUG-400-method-library-tool-card-remove-ignores-name.md) | remove 卡名称退化成占位 | （args.name 取值） | 2026-11-24 |
+| [401](BUG-401-method-library-watch-coach-reject-locks-queue.md) | watchCoach 失败锁死队列 | （clearQueuedOperation 收口） | 2026-11-24 |
+| [402](BUG-402-run-dashboard-core-misses-fullwidth-colon-headings.md) | 观察解析漏全角冒号 | （统一 [:：]） | 2026-11-24 |
+| [403](BUG-403-protocol-audit-shadow-library-prefix-collision.md) | protocol-audit 影子库解析/undefined 折 null | （foldLibrary + 三态） | 2026-11-24 |
+| [385](BUG-385-run-context-line-caps-truncate-real-artifacts.md) | canonical 工件 40/80 行截断 | （EOF_NAME 扩展） | 2026-11-23 |
+| [395](BUG-395-client-dom-helpers-missing-domparser-crashes-tex.md) | JSDOM 缺 DOMParser 致 TeX 崩溃 | （DOMParser 绑定） | 2026-11-23 |
 | [377](BUG-377-evidence-failed-log-counted-as-card.md) | `_failed.md` 算证据 | （sentinel 排除） | 2026-11-23 |
 | [378](BUG-378-empty-evidence-card-counted.md) | 0 字节证据卡算证据 | （证据卡正文谓词） | 2026-11-23 |
 | [379](BUG-379-english-plural-counts-no-singular.md) | en 计数无单数 | （countText） | 2026-11-23 |

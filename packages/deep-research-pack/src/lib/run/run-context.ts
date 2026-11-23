@@ -10,12 +10,13 @@
  *   - 不做 I/O（无 node:*、无 React）——可被 client 与 scripts 同时导入；
  *   - 永不 throw：每个结果都是 `Outcome`；missing 不是 empty，也不是 unreadable；
  *   - 空目录 / 空文件是合法值（`ok` + 空值）；`unreadable` 只表示通道/权限/畸形；
- *   - 读策略是一张表：review.md / final.md / final/vN.md 读到 eof，其余按行数上限；
+ *   - 读策略是一张表：canonical 文本/JSON 工件读到 eof（有页上限），plan 800 行，其余按默认行上限；
  *   - 到 eof 的翻页有页数上限；触顶返回 `truncated: true`，绝不静默短读。
  *
  * 当前读策略（与 design/40 的驾驶舱边界同步）：
- *   review.md / final.md / final/vN.md → eof（500 行/页，最多 64 页）
- *   question.md → 80 行；plan.md → 800 行；其余 → 40 行
+ *   question.md / leads.md / findings.md / evidence/*.md / review.md / review/readiness.json /
+ *   delivered.json / final.md / final/vN.md / final/readable*.md → eof（500 行/页，最多 64 页）
+ *   plan.md / plan/vN.md → 800 行；其余 → 40 行
  */
 
 /** D28 的三种操作桶；发现顺序 = 根 → archive → _abandoned。 */
@@ -92,11 +93,10 @@ const RANK: Readonly<Record<Bucket, number>> = { root: 0, archive: 1, abandoned:
 const PAGE_LINES = 500
 const MAX_PAGES = 64
 const DEFAULT_LINES = 40
-const FIXED_LINES: Readonly<Record<string, number>> = { 'question.md': 80 }
 /** plan.md 与其版本快照 plan/vN.md 共用 800 行上限（旧实现分别 800/240）。 */
 const PLAN_NAME = /^(?:plan\.md|plan\/v[1-9]\d*\.md)$/
-/** 这些文件必须读到 eof：终局判定在文末，固定行窗会读到中段的旧判定。 */
-const EOF_NAME = /^(?:review\.md|final\.md|final\/v[1-9]\d*\.md)$/
+/** canonical 研究工件必须读到 eof（最多 MAX_PAGES 页），避免真实长度文件被固定行窗截断成 unreadable（BUG-385）。 */
+const EOF_NAME = /^(?:question\.md|leads\.md|findings\.md|evidence\/[^/]+\.md|review\.md|review\/readiness\.json|delivered\.json|final\.md|final\/v[1-9]\d*\.md|final\/readable(?:-v[1-9]\d*)?\.md)$/
 /** run bundle slug 形态（与 bundle-bind 的 `drt_<slug>/` 词法一致）。 */
 /** run bundle slug 字符集（成文；binding/门/CLI 共用——BUG-135）。 */
 export const RUN_SLUG = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
@@ -108,7 +108,7 @@ type Failure = { readonly ok: false; readonly reason: 'missing' | 'unreadable'; 
 export function readPolicyOf(name: string): 'eof' | number {
   if (EOF_NAME.test(name)) return 'eof'
   if (PLAN_NAME.test(name)) return 800
-  return FIXED_LINES[name] ?? DEFAULT_LINES
+  return DEFAULT_LINES
 }
 
 /** 目录相对路径：允许空（bundle 根），拒绝对路径、`..`、空段。 */

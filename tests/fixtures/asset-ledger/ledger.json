@@ -683,6 +683,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/defaults/defaults-panel-confirm.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "「项目默认」面板的局部确认态必须跟随会话切换复位（BUG-399）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/defaults/defaults-store.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -743,12 +753,32 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/method-library/method-library-queue.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "方法库写队列的「失败出口必须解锁」回归（BUG-397 / BUG-401）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/method-library/method-library-selection.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "method-library-selection.spec.mjs — 方法库选区样式不得静默失效（BUG-047 的机械守卫）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/method-library/method-library-tool-card.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "方法库写库工具卡的标题取值回归（BUG-400）。",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
@@ -789,6 +819,16 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "config-feed-behavior.spec.mjs — useConfigFeed 的 JSDOM/React 异步行为测试（补强静态源码测试）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/research-config/config-feed-poll.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "config feed 的「发送后对账轮询」会话代际回归（BUG-392）。",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
@@ -1430,6 +1470,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "method-library 写入边界：symlink 拒绝 / 原子 temp+rename / 跨进程锁（BUG-097/098/111）。",
       "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/pack/contract/method-library-tool-defaults.spec.mjs",
+      "domain": "pack",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "method-library-tool（host 半）的默认操作回归：`method_library_set_default` 的核对与回执",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {

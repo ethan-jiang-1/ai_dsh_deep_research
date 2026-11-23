@@ -136,6 +136,17 @@ export function useOperationQueue(deps: OperationQueueDeps) {
     return controller.signal
   }
 
+  /**
+   * 预检/发送失败的统一出口（BUG-397）：写回调 + **释放忙态与教练句柄**。
+   * 为什么必须集中：`sending` 可能在「排队等待教练」时已被置 true，此后任何早退分支若只写
+   * 回执就 return，按钮会永久禁用（同族出口 = 排队超时、watchCoach 失败、unmount）。
+   */
+  const failOperation = (detail: string): void => {
+    setSending(false)
+    releaseCoachIfIdle()
+    setReceipt({ ok: false, detail })
+  }
+
   const markOperationUnknown = (operation: PendingMethodOperation): void => {
     if (pendingOperationRef.current !== operation) return
     clearTimeout(operation.timeout)
@@ -269,31 +280,34 @@ export function useOperationQueue(deps: OperationQueueDeps) {
       }, 30000)
       return
     }
-    if (sessionId === undefined) return
+    if (sessionId === undefined) {
+      failOperation(t('operationUnknown'))
+      return
+    }
     let baseline: string | null
     try {
       const read = await readLibrary(sessionId, LIBRARY_PATH, nextQueueSignal())
       if (read.kind === 'error') {
         applyLibraryRead(read)
-        setReceipt({ ok: false, detail: t('loadBeforeWrite') })
+        failOperation(t('loadBeforeWrite'))
         return
       }
       baseline = read.kind === 'ok' ? read.text : null
       applyLibraryRead(read)
     } catch {
-      setReceipt({ ok: false, detail: t('loadBeforeWrite') })
+      failOperation(t('loadBeforeWrite'))
       return
     }
     const targetMatches = input.name === undefined ? [] : foldLibrary(baseline).filter((entry) => entry.name === input.name)
     if (targetMatches.length > 1) {
-      setReceipt({ ok: false, detail: t('duplicateNames') })
+      failOperation(t('duplicateNames'))
       return
     }
     if (input.action === 'save' || input.action === 'save-and-set-default') {
       const currentDraftName = draftRef.current?.currentName
       const renaming = currentDraftName !== undefined && currentDraftName !== input.name
       if (targetMatches.length === 1 && (modeRef.current === 'new' || renaming) && input.confirmOverwrite !== true) {
-        setReceipt({ ok: false, detail: t('overwriteNotConfirmed') })
+        failOperation(t('overwriteNotConfirmed'))
         return
       }
     }
@@ -304,7 +318,7 @@ export function useOperationQueue(deps: OperationQueueDeps) {
       ...(input.entryText === undefined ? {} : { entryText: input.entryText }),
     })
     if (expected === null) {
-      setReceipt({ ok: false, detail: t('operationTargetChanged') })
+      failOperation(t('operationTargetChanged'))
       return
     }
     const operationId = crypto.randomUUID()
@@ -313,7 +327,7 @@ export function useOperationQueue(deps: OperationQueueDeps) {
     try {
       payloadHash = input.entryText === undefined ? undefined : await methodLibraryEntryHash(input.entryText)
     } catch (cause) {
-      setReceipt({ ok: false, detail: t('operationFailed', { detail: String(cause) }) })
+      failOperation(t('operationFailed', { detail: String(cause) }))
       return
     }
     const command = {
@@ -338,7 +352,18 @@ export function useOperationQueue(deps: OperationQueueDeps) {
     setOperationUnknown(false)
     setSending(true)
     setReceipt({ ok: true, detail: t('operationSent') })
-    const sent = await sendCoach(activeCoachId, envelope, requestId)
+    let sent: { readonly ok: boolean; readonly detail?: string; readonly uncertain?: boolean }
+    try {
+      sent = await sendCoach(activeCoachId, envelope, requestId)
+    } catch (cause) {
+      // 发送抛错 = 没有拿到任何投递回执：按「发送失败」收尾（释放 pending/timeout/sending），
+      // 不冒充成功也不冒充未知（uncertain 由传输层显式表达——BUG-397）。
+      clearTimeout(operation.timeout)
+      pendingOperationRef.current = null
+      operationUnknownRef.current = false
+      failOperation(t('operationFailed', { detail: cause instanceof Error ? cause.message : String(cause) }))
+      return
+    }
     if (sent.ok) return
     if (sent.uncertain === true) {
       markOperationUnknown(operation)

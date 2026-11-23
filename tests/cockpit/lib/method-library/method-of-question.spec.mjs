@@ -110,3 +110,53 @@ test('BUG-372 question 读失败/空：独立态，不冒充 missing', () => {
   assert.equal(foldMethodAdoption(null, { ...base, questionState: 'absent', question: false }).kind, 'missing');
   assert.equal(foldMethodAdoption(null, { ...base, questionState: 'ok' }).kind, 'missing');
 });
+
+// 负例留证 2026-11-23：BUG-393——合法 question.md 用 CRLF / 全角冒号 / `*` 列表符 / 加粗键名时，
+// 旧解析器退化成 unrecorded。红配方：fieldValue 退回 `- ${field}:` 字面前缀、parseMethodSection 退回 split('\n')。
+test('BUG-393 方法节兼容 CRLF、BOM、全角冒号、`*`/`+` 列表符与加粗键名', () => {
+  const crlfFullWidth = [
+    '\uFEFF# Question',
+    '',
+    '## 研究方法（本次实际采用）',
+    '- 采用：方案比较',
+    '- 来源：内置推荐',
+    '- 调查要求：至少两个独立注册域',
+    '',
+    '## HITL1 Alignment Snapshot',
+    '- 采用: 不该被读到',
+  ].join('\r\n')
+  const parsed = parseMethodSection(crlfFullWidth)
+  assert.equal(parsed.sectionSeen, true)
+  assert.equal(parsed.adoptedRaw, '方案比较')
+  assert.equal(parsed.origin, '内置推荐')
+  assert.equal(parsed.requirements, '至少两个独立注册域')
+
+  const variants = [
+    '* 采用: 事实核查',
+    '+ 采用: 事实核查',
+    '  - 采用: 事实核查',
+    '- **采用**: 事实核查',
+    '- **采用**：事实核查',
+    '-   采用 ：事实核查',
+  ]
+  for (const line of variants) {
+    const text = `## 研究方法（本次实际采用）\n${line}\n`
+    assert.equal(parseMethodSection(text).adoptedRaw, '事实核查', `未兼容：${line}`)
+    const folded = foldMethodAdoption(text, { bundle: true, question: true, questionState: 'ok' })
+    assert.equal(folded.kind, 'recorded', `未兼容：${line}`)
+    assert.equal(folded.adopted, '事实核查', `未兼容：${line}`)
+  }
+
+  const folded = foldMethodAdoption(crlfFullWidth, { bundle: true, question: true, questionState: 'ok' })
+  assert.equal(folded.kind, 'recorded')
+  assert.equal(folded.adopted, '方案比较')
+  assert.equal(folded.origin, '内置推荐')
+});
+
+// 负例留证 2026-11-23：BUG-393 负控——放宽后不得开始臆断：缺方法节、空值、占位符仍各归其态。
+test('BUG-393 负控：格式放宽不影响未记录 / 无法判定 的分界', () => {
+  assert.equal(foldMethodAdoption('## 研究问题\n\n- 采用: 方案比较\n', { bundle: true, question: true }).kind, 'unrecorded')
+  assert.equal(foldMethodAdoption('## 研究方法（本次实际采用）\r\n- 采用：   \r\n', { bundle: true, question: true }).kind, 'unrecorded')
+  assert.equal(foldMethodAdoption('## 研究方法（本次实际采用）\r\n- 采用：<待定>\r\n', { bundle: true, question: true }).kind, 'unparsable')
+  assert.equal(foldMethodAdoption('## 研究方法（本次实际采用）\r\n- 来源：内置\r\n', { bundle: true, question: true }).kind, 'unrecorded')
+});

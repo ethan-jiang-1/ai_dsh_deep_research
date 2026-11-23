@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto'
 // 单文件行数上限；拆开后 protocol-core 只答「JSON 形状对不对」，本件只答「bundle 的设计合同齐不齐」。
 
 import { planIndex, isActivePlanNode } from '../../../packages/deep-research-pack/src/lib/plan/plan-index.ts'
+import { foldLibrary } from '../../../packages/deep-research-pack/src/lib/method-library/library-fold.ts'
 import { strategyOf } from './strategy-core.mjs'
 import {
   BAND_LABELS,
@@ -67,13 +68,17 @@ export function evaluateBundle(input) {
     finalText = '',
     evidences = [],
     criticalEvidence = null,
-    methodLibraryEntry = null,
+    methodLibraryEntry,
     runKind = '',
     hasSnapshot = false,
     snapshot = null,
     snapshots = null,
     legacy = false,
   } = input ?? {}
+  // `methodLibraryEntry` 的三态是判据本体（BUG-403）：**未提供** = 调用方不判方法库（null）；
+  // **显式 undefined** = 候选路径上没有方法库文件（BUG-307 红）；null = 文件在场但无此条目（BUG-276 红）。
+  // 解构默认值会把「显式传 undefined」吞成 null——按属性在场性区分。
+  const libraryEntry = Object.prototype.hasOwnProperty.call(input ?? {}, 'methodLibraryEntry') ? methodLibraryEntry : null
   if (legacy) return [warn('legacy-not-applicable', '契约日前 / 旧 bundle：不判 Protocol')]
   if (protocol === null || protocol === undefined) return [red('no-protocol', '契约日后缺 protocol.json')]
   const shape = validateProtocol(protocol)
@@ -85,7 +90,7 @@ export function evaluateBundle(input) {
     ...checkFinalSections(protocol, finalText),
     ...checkEvidenceThreshold(protocol, evidences, runKind, criticalEvidence),
     ...checkOutputLength(protocol, finalText, runKind),
-    ...checkMethodLibrary(protocol, methodLibraryEntry),
+    ...checkMethodLibrary(protocol, libraryEntry),
     ...checkStrategy(protocol, planText, topicsText),
     ...checkProtocolStatus(protocol, questionText),
     ...checkPlanRef(protocol, planText),
@@ -476,6 +481,34 @@ export function checkOutputLength(protocol, finalText, runKind = '') {
 /** 方法库字段 sha 重算（BUG-276）：entry = {name, fields}；null = 无库可核。 */
 export function libraryFieldsSha(fields) {
   return createHash('sha256').update(canonicalize(fields), 'utf8').digest('hex')
+}
+
+/**
+ * 方法库条目解析（BUG-403）：单事实源 = pack `foldLibrary`（标题 grammar 与写路径同一 codec）。
+ *
+ * 为什么收在这里：CLI 曾内联影子 parser，用 `line.startsWith('## ' + name)` 找条目——前缀同名条目
+ * （`## 方案比较` 先于 `## 方案`）会抢走字段，`candidates.find()` 的 `undefined` 又被
+ * `!== null` 当成「文件在场」吞成 null，使本文件「找不到方法库文件」(BUG-307) 的红判据成为死代码。
+ *
+ * @param {{ protocol: any, libraryText: string, found: boolean }} input
+ *   `found` = 候选路径上是否真的存在 `method-library.md`（与文本分离，缺席不得折成空文本）。
+ * @returns {{ name: string, fields: Record<string, string> } | null | undefined}
+ *   `undefined` = 文件不在场（BUG-307 红）；`null` = 协议未声明库 / 文件在场但无此条目。
+ */
+export function methodLibraryEntryOf({ protocol, libraryText, found }) {
+  const method = protocol?.method
+  const name = method?.library_name
+  if (name === null || name === undefined) return null
+  if (!found) return undefined
+  const entry = foldLibrary(libraryText).find((item) => item.name === name)
+  if (entry === undefined) return null
+  /** @type {Record<string, string>} */
+  const fields = {}
+  for (const key of ['source', 'verify', 'report', 'limit']) {
+    const value = entry.sections[key]
+    if (value !== null) fields[key] = value
+  }
+  return Object.keys(fields).length > 0 ? { name: String(name), fields } : null
 }
 
 export function checkMethodLibrary(protocol, entry) {

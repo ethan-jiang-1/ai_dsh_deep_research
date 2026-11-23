@@ -140,7 +140,7 @@
 | lib/shared/port.mjs | client-load.entry、cold-start.entry、port.spec、run-driver、snapshot-replay.entry | 端口参数唯一解析正本（1–65535 整数；tools/channel 与 checks/smoke 入口共用） |
 | lib/shared/plan-card.mjs | node-gate-session-gates、plan-card-stats、plan-card.spec | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
 | lib/gates/protocol-core.mjs | content-coverage.spec、protocol-audit、protocol-audit-core、protocol-core.spec、research-defaults.spec、skill-parser-contract.spec、strategy-core、evidence-audit-core、run-accept | Protocol **schema 半**：枚举/canonical/hash/validateProtocol/§研究方法 与 §Decisions 解析（无 IO；口径 = 核验 §6 + 表达层补篇 §4–§7） |
-| lib/gates/protocol-audit-core.mjs | protocol-audit、protocol-core.spec、run-accept.e2e | Protocol **bundle 级判据**：effort 合同/投影/策略行投影（通道/worker/预算 cap；fail-loud）/批准链/plan 引用/audit hash/版本快照 + `projectionOf`/卡文（无 IO） |
+| lib/gates/protocol-audit-core.mjs | protocol-audit、protocol-core.spec、run-accept.e2e | Protocol **bundle 级判据**：effort 合同/投影/策略行投影（通道/worker/预算 cap；fail-loud）/批准链/plan 引用/audit hash/版本快照 + `projectionOf`/卡文 + `methodLibraryEntryOf`（条目解析复用 pack `foldLibrary`，文件缺失=undefined / 条目缺失=null；无 IO） |
 | lib/gates/strategy-core.mjs | protocol-audit-core、strategy-core.spec | Strategy 投影（K/O/G/B）纯派生：Protocol + plan + topics → 通道/worker/角色/拓扑/门/预算；不读模型/会话 |
 | lib/analyze/stream-diagnostics-core.mjs | stream-diagnostics、stream-diagnostics.spec | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
 | lib/shared/run-state.mjs | bundle-sessions、cdp-ask.entry、hitl-answer、run-kickoff、run-state.spec、session-events、session-replay、watch-run | run 操作面状态谓词 |

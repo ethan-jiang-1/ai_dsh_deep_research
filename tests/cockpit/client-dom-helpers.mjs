@@ -65,6 +65,7 @@ export function installClientDom() {
     MouseEvent: win.MouseEvent,
     KeyboardEvent: win.KeyboardEvent,
     MutationObserver: win.MutationObserver,
+    DOMParser: win.DOMParser,
     navigator: win.navigator,
     getComputedStyle: win.getComputedStyle.bind(win),
   }

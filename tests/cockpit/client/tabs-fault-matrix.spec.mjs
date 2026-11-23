@@ -304,3 +304,252 @@ test('ResearchGraphTab：followError 如实报警、版本轨看差异与节点�
   await flushUi(act)
   assert.match(container.textContent ?? '', /结构差异/)
 })
+
+// 负例留证 2026-11-23：BUG-385 / BUG-395——真实 >100 行工件（含 >80 行 question.md 与 >40 行 leads/findings/evidence/readable-v1）
+// 与含 LaTeX 公式（$...$）报告在 StatusTab 与 FinalTab 均应正常读取并渲染；去掉 EOF_NAME 扩展或删掉 DOMParser 绑定即红。
+test('BUG-385 BUG-395 真实规模 >100 行研究束与含 TeX 公式报告在状态/终稿页签正常读取与渲染', async () => {
+  const pad = (head, n) => `${head}\n${Array.from({ length: n }, (_, i) => `- 明细行 ${String(i + 1)}`).join('\n')}\n`
+  const realLengthBundle = {
+    drt_real: {
+      'question.md': pad('# 研究主题\n\n分析真实长度研究束与公式渲染', 110),
+      'leads.md': pad('# 线索', 140),
+      'findings.md': pad('# 综合', 140),
+      evidence: { 'e1.md': pad('# 证据 e1', 140) },
+      'review.md': pad('# Review\n\nreadiness: PASS', 100),
+      review: { 'readiness.json': VALID_READINESS_PASS },
+      'plan.md': '图版本：v1\n| id | kind | owner | deps | output |\n|---|---|---|---|---|\n| W1 | scout | S1 | — | leads |\n',
+      'final.md': pad('# 终稿工作稿\n\n完整审计正文', 120),
+      final: {
+        'v1.md': pad('# 终稿 v1 审计版\n\n审计正文公式 $E = mc^2$', 120),
+        'readable-v1.md': pad('# 终稿 v1 读者版\n\n核心公式：$a + b = c$\n\n$$\n\\sum_{i=1}^n x_i\n$$', 120),
+      },
+      'delivered.json': JSON.stringify({
+        version: 1,
+        slug: 'real',
+        acceptedAt: '2026-11-23T00:00:00Z',
+        gate: { status: 'PASS' },
+        present: { path: 'drt_real/final/v1.md', version: 1, callId: 'call-real-1' },
+      }),
+    },
+  }
+  const run = makeMaliciousRunSource({ tree: realLengthBundle })
+  const statusRender = render(createElement(ResearchStatusTab, {
+    sessionId: 's-real-len',
+    t: tZh,
+    useSession: () => undefined,
+    useSessions: () => undefined,
+    useSessionStatus: () => undefined,
+    openFinal: () => {},
+    openOwner: () => {},
+    revealStatusTab: () => {},
+    follow: followWithWrite('real'),
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  const statusText = statusRender.container.textContent ?? ''
+  assert.doesNotMatch(statusText, /读取失败/)
+  assert.match(statusText, /分析真实长度研究束与公式渲染/)
+  assert.match(statusText, /1\s*份/)
+
+  cleanup()
+  const finalRender = render(createElement(ResearchFinalTab, {
+    sessionId: 's-real-len',
+    t: tZh,
+    useTabInfo: () => ({
+      tab: {
+        navigation: { address: 'dsh-resource://file/session/s-real-len/drt_real/final.md' },
+        visible: true,
+        actions: { openTab: () => {} },
+      },
+    }),
+    useSession: () => undefined,
+    useSessions: () => undefined,
+    useSessionStatus: () => undefined,
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  const finalText = finalRender.container.textContent ?? ''
+  assert.doesNotMatch(finalText, /读者版读取失败/)
+  assert.match(finalText, /读者版 · v1/)
+  assert.match(finalText, /核心公式/)
+})
+
+// 负例留证 2026-11-23：BUG-386——final/ 目录不可读被 `listed.ok ? … : []` 折成空版本账，
+// 页面静默回落成「当前工作稿 final.md」并隐藏同版读者版。红配方：把 readStateOf 判定删回三元式。
+test('BUG-386 终稿：final/ 目录不可读 → 显式失败 + 重试，不得拿工作稿冒充终稿', async () => {
+  const run = makeMaliciousRunSource({
+    tree: { drt_demo: { 'final.md': '# 工作稿\n\n完整审计正文（工作稿）\n', final: { 'v1.md': '# v1\n\nv1\n' } } },
+    dirFaults: { 'drt_demo/final': 'unreadable' },
+  })
+  const props = {
+    sessionId: 's-386',
+    t: tZh,
+    useTabInfo: () => ({ tab: { navigation: { address: 'dsh-resource://file/session/s-386/drt_demo/final.md' }, visible: true, actions: { openTab: () => {} } } }),
+    useSession: () => undefined,
+    useSessions: () => undefined,
+    useSessionStatus: () => undefined,
+    runSource: () => run.source,
+    visible: true,
+  }
+  const { container } = render(createElement(ResearchFinalTab, props))
+  await flushUi(act)
+  const text = container.textContent ?? ''
+  assert.doesNotMatch(text, /完整审计正文（工作稿）/, '目录不可读时不得静默展示工作稿')
+  assert.match(text, /终稿目录|final\//, '必须显式提示终稿目录读取失败')
+  assert.ok([...container.querySelectorAll('button')].some((b) => b.textContent === zh.retry), '必须给重试入口')
+})
+
+// 负控：final/ 缺席（合法旧形态）仍回落 final.md 工作稿。
+test('BUG-386 负控：final/ 目录缺席 → 照常回落工作稿', async () => {
+  const run = makeMaliciousRunSource({ tree: { drt_demo: { 'final.md': '# 工作稿\n\n只有工作稿正文\n' } } })
+  const { container } = render(createElement(ResearchFinalTab, {
+    sessionId: 's-386b',
+    t: tZh,
+    useTabInfo: () => ({ tab: { navigation: { address: 'dsh-resource://file/session/s-386b/drt_demo/final.md' }, visible: true, actions: { openTab: () => {} } } }),
+    useSession: () => undefined,
+    useSessions: () => undefined,
+    useSessionStatus: () => undefined,
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  assert.match(container.textContent ?? '', /只有工作稿正文/)
+})
+
+// 负例留证 2026-11-23：BUG-387——重读失败不清旧正文，`failure !== null && text === null` 守卫被绕过。
+// 红配方：失败分支改回只 setFailure/setLoading（不清 text/readerText/draftText/stale）。
+test('BUG-387 终稿：重读失败原子清旧正文与降级条，切回带重试的失败界面', async () => {
+  const run = makeMaliciousRunSource({
+    tree: { drt_demo: { 'final.md': '# Draft\n\nBody\n', final: { 'v1.md': '# Audit\n\n旧审计正文\n', 'readable-v1.md': '' } } },
+  })
+  const { container } = render(createElement(ResearchFinalTab, {
+    sessionId: 's-387',
+    t: tZh,
+    useTabInfo: () => ({ tab: { navigation: { address: 'dsh-resource://file/session/s-387/drt_demo/final/v1.md' }, visible: true, actions: { openTab: () => {} } } }),
+    useSession: () => undefined,
+    useSessions: () => undefined,
+    useSessionStatus: () => undefined,
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  assert.match(container.textContent ?? '', /旧审计正文/, '前置：首读成功')
+  run.update({ fileFaults: { 'drt_demo/final/v1.md': 'unreadable' } })
+  fireEvent.click(screen.getByRole('button', { name: zh.retry }))
+  await flushUi(act)
+  assert.doesNotMatch(container.textContent ?? '', /旧审计正文/, '失败后不得残留旧正文')
+  assert.match(container.textContent ?? '', /读取失败|读不到/, '必须切回失败界面')
+})
+
+// 负例留证 2026-11-23：BUG-388——evidence 目录可读且有可读卡时，另一张卡的读失败被静默吞掉。
+// 红配方：删掉 face.evidenceUnreadable 与通知里的 partial 分支 → 本例红。
+test('BUG-388 状态：部分证据卡不可读时计数照给 + 显性告警（不冒充全集）', async () => {
+  const run = makeMaliciousRunSource({
+    tree: { drt_demo: { 'question.md': '# Q\n\nBody\n', evidence: { 'e1.md': '# E1\nbody\n', 'e2.md': '# E2\nbody\n' } } },
+    fileFaults: { 'drt_demo/evidence/e2.md': 'unreadable' },
+  })
+  const { container } = render(createElement(ResearchStatusTab, {
+    sessionId: 's-388',
+    t: tZh,
+    useSession: () => undefined,
+    useSessions: () => undefined,
+    useSessionStatus: () => undefined,
+    openFinal: () => {},
+    openOwner: () => {},
+    revealStatusTab: () => {},
+    follow: followWithWrite('demo'),
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  const text = container.textContent ?? ''
+  assert.match(text, /证据 1 份/, '可读卡的计数照给')
+  assert.match(text, /部分证据卡读取失败/, '部分读失败必须显性提示')
+})
+
+// 负例留证 2026-11-23：BUG-389——工作稿 final.md 的 unreadable 只被折成 finalBody=false。
+// 红配方：删掉 face.finalBodyIssue 与 statusFinalReadFailed 通知 → 本例红。
+test('BUG-389 状态：工作稿 final.md 不可读 → 显性告警 + 重试入口', async () => {
+  const run = makeMaliciousRunSource({
+    tree: { drt_demo: { 'question.md': '# Q\n\nBody\n', 'final.md': '# Final\n\nBody\n' } },
+    fileFaults: { 'drt_demo/final.md': 'unreadable' },
+  })
+  const { container } = render(createElement(ResearchStatusTab, {
+    sessionId: 's-389',
+    t: tZh,
+    useSession: () => undefined,
+    useSessions: () => undefined,
+    useSessionStatus: () => undefined,
+    openFinal: () => {},
+    openOwner: () => {},
+    revealStatusTab: () => {},
+    follow: followWithWrite('demo'),
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  const text = container.textContent ?? ''
+  assert.match(text, /final\.md 读取失败/, '工作稿读失败必须显性')
+  assert.ok([...container.querySelectorAll('button')].some((b) => b.textContent === zh.retry), '必须给重试入口')
+})
+
+// 负例留证 2026-11-23：BUG-390——`list('plan')` 的 unreadable/抛错被折成空快照数组，
+// 版本轨显示「无旧图快照，不能 diff」。红配方：删掉 snapshotsState 与 rail 的 unreadable 分支。
+test('BUG-390 图谱：plan/ 快照目录不可读 → 显性提示，不伪装「无旧图快照」', async () => {
+  const run = makeMaliciousRunSource({
+    tree: {
+      drt_demo: {
+        'plan.md': '图版本：v2\n| id | kind |\n|---|---|\n| W1.1 | broad-scan |\n',
+        plan: { 'v1.md': '| id | kind |\n|---|---|\n| W1.1 | broad-scan |\n' },
+      },
+    },
+    dirFaults: { 'drt_demo/plan': 'unreadable' },
+  })
+  const { container } = render(createElement(ResearchGraphTab, {
+    sessionId: 's-390',
+    t: tZh,
+    useSession: () => undefined,
+    useSessions: () => undefined,
+    useSessionStatus: () => undefined,
+    follow: followWithWrite('demo'),
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  const text = container.textContent ?? ''
+  assert.doesNotMatch(text, /无旧图快照/, '读失败不得显示成「没有快照」')
+  assert.match(text, /快照目录/, '必须显性提示快照目录读取失败')
+})
+
+// 负例留证 2026-11-23：BUG-391——差异视图把 missing 之外的状态全折成「读取中」且无重试。
+// 红配方：把 snapshotDiffMessage 的穷举改回 `missing ? unread : loading`，或删掉重试按钮。
+test('BUG-391 图谱：旧图快照 unreadable → 差异卡报错并可重试（不卡在读取中）', async () => {
+  const run = makeMaliciousRunSource({
+    tree: {
+      drt_demo: {
+        'plan.md': '图版本：v2\n| id | kind |\n|---|---|\n| W1.1 | broad-scan |\n',
+        plan: { 'v1.md': '| id | kind |\n|---|---|\n| W1.1 | broad-scan |\n', 'v2.md': '| id | kind |\n|---|---|\n| W1.1 | broad-scan |\n| W1.2 | broad-scan |\n' },
+      },
+    },
+    fileFaults: { 'drt_demo/plan/v2.md': 'unreadable' },
+  })
+  const { container } = render(createElement(ResearchGraphTab, {
+    sessionId: 's-391',
+    t: tZh,
+    useSession: () => undefined,
+    useSessions: () => undefined,
+    useSessionStatus: () => undefined,
+    follow: followWithWrite('demo'),
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  fireEvent.click(screen.getByRole('button', { name: zh.graphShowDiff }))
+  await flushUi(act)
+  const text = container.textContent ?? ''
+  assert.doesNotMatch(text, /旧图快照读取中/, '不得永久显示读取中')
+  assert.match(text, /读取失败/, '要如实说明快照读取失败')
+  assert.ok([...container.querySelectorAll('button')].some((b) => b.textContent === zh.graphRetryRead), '必须给重试入口')
+})

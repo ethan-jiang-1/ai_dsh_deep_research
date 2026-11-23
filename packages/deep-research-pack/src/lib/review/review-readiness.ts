@@ -213,6 +213,74 @@ export interface ReadinessDeclaration {
   readonly counts: ReadinessCounts
 }
 
+/**
+ * 轻量 JSON **成员键**扫描器（BUG-394）：不解值、不校验语法，只回答「有没有同一对象里出现两次的
+ * 解码后键名」。为什么要它：`JSON.parse` 对重复键静默取末值，而字面正则看不见 `"\u0072eadiness"`
+ * 这类合法转义写法——两种读法就是 fail-open 通道。
+ *
+ * 口径：
+ * - 只有「字符串字面量 + 其后（跳过空白）为 `:`」才算成员键；字符串值不会误判；
+ * - `\"`/`\\`/`\/`/`\b`/`\f`/`\n`/`\r`/`\t`/`\uXXXX` 全部解码（代理对按码元拼接，与 JSON.parse 取值同形）；
+ * - 畸形输入不 throw：扫描中断即返回「没发现重复键」，把语法判定留给 `JSON.parse` 的既有报错。
+ * @returns 首个重复键名（已解码）；无重复 / 无法扫描 → null。
+ */
+function duplicateKeyOf(text: string): string | null {
+  const decode = (raw: string): string => {
+    let out = ''
+    for (let i = 0; i < raw.length; i += 1) {
+      const ch = raw[i]
+      if (ch !== '\\') { out += ch; continue }
+      const next = raw[i + 1]
+      if (next === undefined) return out
+      if (next === 'u') {
+        const hex = raw.slice(i + 2, i + 6)
+        if (!/^[0-9a-fA-F]{4}$/.test(hex)) return out
+        out += String.fromCharCode(Number.parseInt(hex, 16))
+        i += 5
+        continue
+      }
+      const simple: Record<string, string> = { '"': '"', '\\': '\\', '/': '/', b: '\b', f: '\f', n: '\n', r: '\r', t: '\t' }
+      const mapped = simple[next]
+      if (mapped === undefined) return out
+      out += mapped
+      i += 1
+    }
+    return out
+  }
+  /** 从 `index`（须指向开引号）读一个字符串字面量；返回解码值与收尾下标（越界 → null）。 */
+  const readString = (index: number): { readonly value: string; readonly next: number } | null => {
+    let i = index + 1
+    let raw = ''
+    while (i < text.length) {
+      const ch = text[i]
+      if (ch === '\\') { raw += ch + (text[i + 1] ?? ''); i += 2; continue }
+      if (ch === '"') return { value: decode(raw), next: i + 1 }
+      raw += ch
+      i += 1
+    }
+    return null
+  }
+  const stack: Array<Set<string>> = []
+  for (let i = 0; i < text.length; i += 1) {
+    const ch = text[i]
+    if (ch === '{') { stack.push(new Set()); continue }
+    if (ch === '[') { stack.push(new Set()); continue } // 数组里不存在键，占位保持嵌套深度
+    if (ch === '}' || ch === ']') { stack.pop(); continue }
+    if (ch !== '"') continue
+    const literal = readString(i)
+    if (literal === null) return null
+    i = literal.next - 1
+    let look = literal.next
+    while (look < text.length && /\s/.test(text[look] ?? '')) look += 1
+    if (text[look] !== ':') continue
+    const frame = stack[stack.length - 1]
+    if (frame === undefined) continue
+    if (frame.has(literal.value)) return literal.value
+    frame.add(literal.value)
+  }
+  return null
+}
+
 const DECLARATION_KEYS = ['version', 'readiness', 'conditional', 'round', 'at', 'counts']
 const COUNT_KEYS = ['critical', 'major', 'minor', 'unverified', 'rechecked_urls']
 
@@ -222,10 +290,10 @@ const COUNT_KEYS = ['critical', 'major', 'minor', 'unverified', 'rechecked_urls'
  * 门禁与驾驶舱共用本函数——同一份声明在两侧必须同判。
  */
 export function parseReadinessDeclaration(text: string): { readonly ok: true; readonly value: ReadinessDeclaration } | { readonly ok: false; readonly detail: string } {
-  // 重复键 = 两种读法（JSON.parse 静默取末值）——按已知键计数，fail-closed（含 counts 子键）。
-  const declaredKeys = [...text.matchAll(/"(version|readiness|conditional|round|at|critical|major|minor|unverified|rechecked_urls)"\s*:/g)].map((match) => match[1])
-  const duplicate = declaredKeys.find((key, index) => declaredKeys.indexOf(key) !== index)
-  if (duplicate !== undefined) return { ok: false, detail: `review/readiness.json 重复键 ${duplicate}（拒绝取末值）` }
+  // 重复键 = 两种读法（JSON.parse 静默取末值）——任意层级按**解码后**的键名判重，fail-closed。
+  // 键名可能写成 JSON 合法 Unicode 转义（"\u0072eadiness"），字面正则看不见 → 用轻量 key scanner（BUG-394）。
+  const duplicate = duplicateKeyOf(text)
+  if (duplicate !== null) return { ok: false, detail: `review/readiness.json 重复键 ${duplicate}（拒绝取末值）` }
   let raw: unknown
   try { raw = JSON.parse(text) } catch { return { ok: false, detail: 'review/readiness.json 不是合法 JSON' } }
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return { ok: false, detail: 'review/readiness.json 顶层必须是对象' }

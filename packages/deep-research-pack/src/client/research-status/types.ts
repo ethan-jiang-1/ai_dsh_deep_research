@@ -53,6 +53,10 @@ export interface BundleFace {
   readonly leadsIssue: 'empty' | 'unreadable' | 'body-empty' | null
   readonly findingsIssue: 'empty' | 'unreadable' | 'body-empty' | null
   readonly evidenceIssue: 'empty' | 'unreadable' | 'failed-only' | null
+  /** 可读证据卡之外的读失败/非法卡数（>0 时摘要要显性提示「部分读取失败」，计数不冒充全集）。 */
+  readonly evidenceUnreadable: number
+  /** 工作稿 final.md 的内容问题（空/读失败）——与 final/ 目录读失败分开记（BUG-389）。 */
+  readonly finalBodyIssue: 'empty' | 'unreadable' | 'body-empty' | null
   readonly steps: readonly RunStep[]
   readonly evidenceCount: number
   readonly delivered: boolean

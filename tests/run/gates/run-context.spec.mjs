@@ -163,15 +163,18 @@ test('review.md：读到 eof，长文件终局 PASS 不被 600 行窗内的旧 F
   assert.ok(source.calls.filter(([kind, path]) => kind === 'read' && path === 'drt_a/review.md').length >= 2);
 });
 
-test('读策略：plan.md 800、question.md 80、其它 40；截断如实标记', async () => {
+test('读策略：plan.md 800、canonical 研究工件读到 eof、其余 40；截断如实标记', async () => {
   const long = (n) => Array.from({ length: n }, (_, i) => `l${String(i + 1)}`).join('\n');
   const source = fakeSource({
     drt_a: {
       'plan.md': long(1000),
       plan: { 'v1.md': long(1000) },
       'question.md': long(120),
-      evidence: { 'e.md': long(100) },
-      final: { 'v2.md': long(1200) },
+      'leads.md': long(120),
+      'findings.md': long(120),
+      evidence: { 'e.md': long(120) },
+      final: { 'v2.md': long(1200), 'readable-v2.md': long(120) },
+      'other.md': long(100),
     },
   });
   const opened = await openRun(source, 'drt_a');
@@ -188,20 +191,24 @@ test('读策略：plan.md 800、question.md 80、其它 40；截断如实标记'
   assert.equal(snapshot.value.lines, 800);
   assert.equal(snapshot.value.truncated, true);
 
-  const question = await view.read('question.md');
-  assert.equal(question.ok, true);
-  assert.equal(question.value.lines, 80);
-  assert.equal(question.value.truncated, true);
+  for (const [name, expectedLines] of [
+    ['question.md', 120],
+    ['leads.md', 120],
+    ['findings.md', 120],
+    ['evidence/e.md', 120],
+    ['final/v2.md', 1200],
+    ['final/readable-v2.md', 120],
+  ]) {
+    const res = await view.read(name);
+    assert.equal(res.ok, true, name);
+    assert.equal(res.value.lines, expectedLines, name);
+    assert.equal(res.value.truncated, false, name);
+  }
 
-  const evidence = await view.read('evidence/e.md');
-  assert.equal(evidence.ok, true);
-  assert.equal(evidence.value.lines, 40);
-  assert.equal(evidence.value.truncated, true);
-
-  const finalV2 = await view.read('final/v2.md');
-  assert.equal(finalV2.ok, true);
-  assert.equal(finalV2.value.lines, 1200);
-  assert.equal(finalV2.value.truncated, false);
+  const other = await view.read('other.md');
+  assert.equal(other.ok, true);
+  assert.equal(other.value.lines, 40);
+  assert.equal(other.value.truncated, true);
 });
 
 test('read：缺文件 → missing；绝对/上跳/空名 → unreadable；目录 → unreadable', async () => {
@@ -305,11 +312,44 @@ test('bundleCandidates / readPolicyOf：候选顺序与读策略表是纯函数'
   assert.deepEqual(bundleCandidates('archive/drt_x/final.md'), ['archive/drt_x', 'drt_x', '_abandoned/drt_x']);
   assert.deepEqual(bundleCandidates('../evil'), []);
   assert.equal(readPolicyOf('review.md'), 'eof');
+  assert.equal(readPolicyOf('review/readiness.json'), 'eof');
+  assert.equal(readPolicyOf('delivered.json'), 'eof');
   assert.equal(readPolicyOf('final/v3.md'), 'eof');
+  assert.equal(readPolicyOf('final/readable.md'), 'eof');
+  assert.equal(readPolicyOf('final/readable-v1.md'), 'eof');
   assert.equal(readPolicyOf('plan.md'), 800);
   assert.equal(readPolicyOf('plan/v1.md'), 800);
-  assert.equal(readPolicyOf('question.md'), 80);
-  assert.equal(readPolicyOf('evidence/e.md'), 40);
+  assert.equal(readPolicyOf('question.md'), 'eof');
+  assert.equal(readPolicyOf('leads.md'), 'eof');
+  assert.equal(readPolicyOf('findings.md'), 'eof');
+  assert.equal(readPolicyOf('evidence/e.md'), 'eof');
+  assert.equal(readPolicyOf('drafts/note.md'), 40);
+});
+
+// 负例留证 2026-11-23：BUG-385——把 final/readable-v1.md 或 leads.md 退回 40 行上限，或把 question.md 退回 80 行上限，
+// 真实 >100 行工件即 truncated=true → artifactStateOf 映射为 unreadable。
+test('BUG-385 canonical 研究工件 >100 行不触发 40/80 行截断；超过 64 页上限仍保 truncated 保护', async () => {
+  const lines = (n) => Array.from({ length: n }, (_, i) => `line ${String(i + 1)}`).join('\n');
+  const source = fakeSource({
+    drt_real: {
+      'question.md': lines(125),
+      'leads.md': lines(600),
+      'findings.md': lines(200),
+      evidence: { 'e1.md': lines(610) },
+      final: { 'readable.md': lines(120), 'readable-v1.md': lines(120) },
+      'review.md': lines(64 * 500 + 1),
+    },
+  });
+  const opened = await openRun(source, 'drt_real');
+  assert.equal(opened.ok, true);
+  for (const name of ['question.md', 'leads.md', 'findings.md', 'evidence/e1.md', 'final/readable.md', 'final/readable-v1.md']) {
+    const res = await opened.value.read(name);
+    assert.equal(res.ok, true, name);
+    assert.equal(res.value.truncated, false, `${name} 不得截断`);
+  }
+  const tooLong = await opened.value.read('review.md');
+  assert.equal(tooLong.ok, true);
+  assert.equal(tooLong.value.truncated, true);
 });
 
 // 负例留证 2026-11-12：BUG-089——修复前一桶有结果就丢另一桶 unreadable；BUG-100——names 只按名字。

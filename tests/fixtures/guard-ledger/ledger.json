@@ -1908,6 +1908,159 @@
       "oracleType": "external",
       "status": "closed",
       "redRecipe": "把 plan policy 改回 nonEmpty:false 且无 empty 分支 → S26 再次无提示"
+    },
+    {
+      "id": "BUG-385",
+      "mechanism": "run-context canonical 研究工件纳入 eof 读策略（500 行/页 × 64 页上限），避免真实长度工件被 40/80 行窗截断成 unreadable",
+      "guard": "tests/run/gates/run-context.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 final/readable-v1.md 或 leads.md 退回 40 行上限 → run-context.spec.mjs 与 tabs-fault-matrix.spec.mjs 必红"
+    },
+    {
+      "id": "BUG-395",
+      "mechanism": "client-dom-helpers.mjs 绑定 DOMParser，使 JSDOM 行为测试可渲染含 LaTeX 公式的真实研究报告",
+      "guard": "tests/cockpit/client/tabs-fault-matrix.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "移除 client-dom-helpers.mjs 的 DOMParser 绑定 → 含公式报告渲染抛 ReferenceError: DOMParser is not defined"
+    },
+    {
+      "id": "BUG-393",
+      "mechanism": "method-of-question 方法节解析只认 `- 采用:` 字面前缀（CRLF/BOM/全角冒号/`*`+ 列表符/加粗键名全退化成 unrecorded）",
+      "guard": "tests/cockpit/lib/method-library/method-of-question.spec.mjs",
+      "oracleType": "self-referential",
+      "status": "provisional",
+      "redRecipe": "把 fieldValue 退回 `- ${field}:` 字面前缀、parseMethodSection 退回 split('\\n') → BUG-393 用例红",
+      "trigger": "方法节字段语法改由与 library-fold 同一 codec 的共享解析器承载并给独立 oracle 时，重评为 canonical"
+    },
+    {
+      "id": "BUG-394",
+      "mechanism": "review/readiness.json 重复键检测用字面正则，Unicode 转义键名（\"\\\\u0072eadiness\"）绕过 fail-closed",
+      "guard": "tests/run/gates/readiness-declaration.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 duplicateKeyOf 退回已知键字面正则 → BUG-394 顶/子层转义重复键用例红"
+    },
+    {
+      "id": "BUG-402",
+      "mechanism": "run-dashboard-core 解析 topics/leads/findings 只认半角冒号，中文模板的全角「：」产出被漏算为 0",
+      "guard": "tests/run/analyze/run-dashboard.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 parseFindings/parseTopics/parseLeads 的 `[:：]` 改回 `:` → BUG-402 用例红"
+    },
+    {
+      "id": "BUG-403",
+      "mechanism": "protocol-audit CLI 自带方法库影子解析（startsWith 前缀撞库 + undefined 折成 null，BUG-307 分支死代码）",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 methodLibraryEntryOf 退回前缀 startsWith 匹配，或让 evaluateBundle 吞掉显式 undefined → BUG-403 用例红"
+    },
+    {
+      "id": "BUG-386",
+      "mechanism": "ResearchFinalTab 把 final/ 目录 list 失败折成空版本账，静默回落工作稿并隐藏同版读者版",
+      "guard": "tests/cockpit/client/tabs-fault-matrix.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 readStateOf(listed) 判定删回 `listed.ok ? … : []` → BUG-386 用例红"
+    },
+    {
+      "id": "BUG-387",
+      "mechanism": "ResearchFinalTab 重读失败不清旧正文，失败屏被 `failure !== null && text === null` 遮蔽",
+      "guard": "tests/cockpit/client/tabs-fault-matrix.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "失败分支改回只 setFailure/setLoading（不清 text/readerText/draftText/stale）→ BUG-387 用例红"
+    },
+    {
+      "id": "BUG-388",
+      "mechanism": "useStatusFeed 在至少一张证据卡可读时吞掉其余卡的读失败（计数冒充全集）",
+      "guard": "tests/cockpit/client/tabs-fault-matrix.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 face.evidenceUnreadable 与 statusEvidencePartialUnreadable 通知分支 → BUG-388 用例红"
+    },
+    {
+      "id": "BUG-389",
+      "mechanism": "useStatusFeed 读取 final.md 后丢弃 unreadable/invalid（工作稿读失败零告警）",
+      "guard": "tests/cockpit/client/tabs-fault-matrix.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 face.finalBodyIssue 与 statusFinalReadFailed 通知 → BUG-389 用例红"
+    },
+    {
+      "id": "BUG-390",
+      "mechanism": "useGraphFeed 把 plan/ 目录 list 失败/抛错折成空快照数组，显示「无旧图快照」",
+      "guard": "tests/cockpit/client/tabs-fault-matrix.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 snapshotsState 与 GraphVersionRail 的 unreadable 分支 → BUG-390 用例红"
+    },
+    {
+      "id": "BUG-391",
+      "mechanism": "ResearchGraphTab 差异卡把 missing 之外的状态全折成「读取中」且无重试（快照 effect 不随 retry 重跑）",
+      "guard": "tests/cockpit/client/tabs-fault-matrix.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 snapshotDiffMessage 改回 `missing ? unread : loading` 或删重试按钮 → BUG-391 用例红"
+    },
+    {
+      "id": "BUG-392",
+      "mechanism": "useConfigFeed.send() 对账轮询跨会话改写 epoch、中止新会话 reload 并串染库列表",
+      "guard": "tests/cockpit/client/research-config/config-feed-poll.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 send 的会话守卫/中止接线删掉（只检查 aliveRef）→ BUG-392 用例红"
+    },
+    {
+      "id": "BUG-396",
+      "mechanism": "method_library_set_default 用插件名常量核对与回传方法名（合法 set 写盘后必抛）",
+      "guard": "tests/pack/contract/method-library-tool-defaults.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 execute 里的 requestedName/target 改回模块级 name → BUG-396 用例红"
+    },
+    {
+      "id": "BUG-397",
+      "mechanism": "useOperationQueue 预检早退与 sendCoach 抛错不重置 sending（方法库按钮永久锁死）",
+      "guard": "tests/cockpit/client/method-library/method-library-queue.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 failOperation 或 sendCoach 的 try/catch → BUG-397 用例红"
+    },
+    {
+      "id": "BUG-398",
+      "mechanism": "useRunSourcePicker.reset 只 abort 不清 controller ref，旧读取结算后覆写为 cancelled",
+      "guard": "tests/cockpit/lib/method-library/run-source-picker.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "resetRunPicker 只 abort 不置 null（或删 catch 的代际守卫）→ BUG-398 用例红"
+    },
+    {
+      "id": "BUG-399",
+      "mechanism": "DefaultsPanel 的 confirmClear 二次确认跨 sessionId 泄漏（新会话首点即清空默认）",
+      "guard": "tests/cockpit/client/defaults/defaults-panel-confirm.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 `useEffect(() => setConfirmClear(false), [sessionId])` → BUG-399 用例红"
+    },
+    {
+      "id": "BUG-400",
+      "mechanism": "MethodLibraryToolCard 对 method_library_remove 只读 args.entry，名称退化成「方法条目」",
+      "guard": "tests/cockpit/client/method-library/method-library-tool-card.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 remove 的名称来源改回 args.entry → BUG-400 用例红"
+    },
+    {
+      "id": "BUG-401",
+      "mechanism": "MethodLibraryView 的 watchCoach reject 不清排队 ref/timeout 与 sending（UI 锁死 + 30s 覆写回执）",
+      "guard": "tests/cockpit/client/method-library/method-library-queue.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 watchCoach .catch 里的 clearQueuedOperation()/setSending(false) → BUG-401 用例红"
     }
   ]
 }

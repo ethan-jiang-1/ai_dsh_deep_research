@@ -18,9 +18,14 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| — | — | — | 当前无活跃卡（2026-11-23：377–384 内容实质/英文批收口） |
+| — | — | — | 当前无活跃卡（2026-11-24：385–403 十九卡收口） |
 
 ## 最近归档
+
+（2026-11-23 读面行数策略与 JSDOM DOMParser 底座批：
+[385](../_archived/fixed_bugs/BUG-385-run-context-line-caps-truncate-real-artifacts.md) canonical EOF 读策略；
+[395](../_archived/fixed_bugs/BUG-395-client-dom-helpers-missing-domparser-crashes-tex.md) JSDOM DOMParser。
+）
 
 （2026-11-23 观察面内容实质与英文批（8 张，377–384），批 Note = [2026-11-23-observation-substance](../../notes/implemented/2026-11-23-observation-substance.md)：
 [377](../_archived/fixed_bugs/BUG-377-evidence-failed-log-counted-as-card.md) 失败登记；

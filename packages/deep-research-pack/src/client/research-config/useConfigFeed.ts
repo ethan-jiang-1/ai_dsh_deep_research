@@ -66,7 +66,9 @@ export function useConfigFeed(props: ConfigFeedInput) {
   const diffBase = useRef<readonly LibraryEntry[] | null>(null)
   /** 卸载闸：落盘对账是有界轮询（20×3s），组件卸载后不该继续发 RPC／setState。 */
   const aliveRef = useRef(true)
-  useEffect(() => () => { aliveRef.current = false }, [])
+  /** 发送后轮询的中止柄（BUG-392）：切会话/卸载时立即停掉旧会话的对账循环。 */
+  const sendAbortRef = useRef<AbortController | null>(null)
+  useEffect(() => () => { aliveRef.current = false; sendAbortRef.current?.abort(); sendAbortRef.current = null }, [])
 
   const sessionRef = useRef(sessionId)
   sessionRef.current = sessionId
@@ -94,6 +96,10 @@ export function useConfigFeed(props: ConfigFeedInput) {
     // 切会话：取消上一轮读 + 推进 epoch（旧 resolve 不再回写，BUG-086）；交互态归零（BUG-108）。
     const epoch = epochRef.current
     abortReload()
+    // 切会话 = 旧会话的发送后轮询立即失效（BUG-392）：先中止再推进 epoch，
+    // 旧轮询的 stillMine() 立刻为 false，不会再用旧 sid 调 reload。
+    sendAbortRef.current?.abort()
+    sendAbortRef.current = null
     epoch.seq += 1
     epoch.current = sessionId
     setReceiptBase(null)
@@ -187,6 +193,21 @@ export function useConfigFeed(props: ConfigFeedInput) {
   const send = async (text: string, intent: { target: string | null; expectsChange: boolean }, onOk?: () => void) => {
     if (sessionId === undefined || sending) return
     const sid = sessionId
+    // 会话代际（BUG-392）：发送后的后台轮询属于**发起时**的会话。切会话/卸载立即中止，
+    // 且旧代次不得再调用共享 reload（reload 会改写 epochRef 并 abort 新会话的在途读）。
+    const controller = new AbortController()
+    // 注意：不能比 epoch.seq——轮询自身的 reload 每步都会推进 seq（那是「读取代次」，不是「会话代次」）。
+    // 归属判据 = 组件存活 + 未被中止 + 当前会话仍是发起会话 + epoch 指向本会话。
+    const stillMine = (): boolean => aliveRef.current && !controller.signal.aborted
+      && sessionRef.current === sid && epochRef.current.current === sid
+    const sleep = (ms: number): Promise<void> => new Promise((resolve) => {
+      const timer = setTimeout(done, ms)
+      const onAbort = () => { clearTimeout(timer); done() }
+      function done() { controller.signal.removeEventListener('abort', onAbort); resolve() }
+      controller.signal.addEventListener('abort', onAbort, { once: true })
+    })
+    sendAbortRef.current?.abort()
+    sendAbortRef.current = controller
     setSending(true)
     setReceiptDiff(null)
     setReplied(false)
@@ -194,25 +215,28 @@ export function useConfigFeed(props: ConfigFeedInput) {
       repliedMarker.current = events.length
       diffBase.current = entries
       const result = await props.sendInstruction(sid, text)
-      if (sessionRef.current !== sid) return
+      if (!stillMine()) return
       setReceiptBase({ ok: result.ok, detail: result.detail, target: intent.target, expectsChange: intent.expectsChange })
       if (!result.ok) return
       onOk?.()
       if (!intent.expectsChange) {
-        setTimeout(() => { if (sessionRef.current === sid) void reload(sid) }, 2500)
+        await sleep(2500)
+        if (stillMine()) await reload(sid)
         return
       }
       // 落盘对账：有界轮询（20 × 3s）。Lead 是模型，落笔时间不可预期——轮询到对账出 diff 即停，
-      // 超时停在「已发送／已回话」态（不冒充落地）。
-      for (let i = 0; i < 20 && aliveRef.current; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 3000))
-        if (!aliveRef.current) return
+      // 超时停在「已发送／已回话」态（不冒充落地）。每一步都必须仍是本会话的活代次。
+      for (let i = 0; i < 20 && stillMine(); i++) {
+        await sleep(3000)
+        if (!stillMine()) return
         const after = await reload(sid)
+        if (!stillMine()) return
         const diff = libraryDiff(diffBase.current ?? [], after, intent.target, props.t)
         if (diff.landed) { setReceiptDiff(diff); return }
       }
     } finally {
-      setSending(false)
+      if (sendAbortRef.current === controller) sendAbortRef.current = null
+      if (stillMine() || sessionRef.current === sid) setSending(false)
     }
   }
 

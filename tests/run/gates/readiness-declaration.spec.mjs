@@ -160,3 +160,30 @@ test('BUG-347：无 review 面 = absent（pass=null）；review.md 无终局行�
   assert.equal(broken.pass, false)
   assert.equal(broken.source, 'prose')
 })
+
+// 负例留证 2026-11-23：BUG-394——键名写成 JSON 合法 Unicode 转义（"\u0072eadiness"）时，旧的字面
+// 正则重复键检测看不见它，JSON.parse 静默取末值（PASS 放行）。红配方：把解码型 key 扫描退回字面正则。
+test('BUG-394 负例：\\uXXXX 转义键构造的重复键同样 fail-closed（顶层与 counts 子层）', () => {
+  const escapedTop = '{"version":2,"\\u0072eadiness":"PASS","readiness":"FAIL","conditional":false,"counts":{"critical":0,"major":0,"minor":0,"unverified":0,"rechecked_urls":0}}'
+  const top = parseReadinessDeclaration(escapedTop)
+  assert.equal(top.ok, false)
+  assert.match(top.detail, /重复键/)
+
+  const escapedSub = '{"version":2,"readiness":"PASS","counts":{"critical":0,"\\u006dajor":1,"major":2,"minor":0,"unverified":0,"rechecked_urls":0}}'
+  const sub = parseReadinessDeclaration(escapedSub)
+  assert.equal(sub.ok, false)
+  assert.match(sub.detail, /重复键/)
+});
+
+// 负例留证 2026-11-23：BUG-394 负控——放宽解码后不得开始误伤：字符串值里的 `"version":` 字样、
+// 转义但唯一的非键名字符串都不算重复键。
+test('BUG-394 负控：字符串值内的键名字样与唯一的转义字符串不得误判重复键', () => {
+  const inString = '{"version":2,"readiness":"PASS","conditional":false,"counts":{"critical":0,"major":0,"minor":0,"unverified":0,"rechecked_urls":0},"at":"note \\"version\\": 2 \\"readiness\\": PASS"}'
+  const ok = parseReadinessDeclaration(inString)
+  assert.equal(ok.ok, true, ok.ok ? '' : ok.detail)
+
+  const escapedUnique = '{"version":2,"\\u0072eadiness":"PASS","counts":{"critical":0,"major":0,"minor":0,"unverified":0,"rechecked_urls":0}}'
+  const unique = parseReadinessDeclaration(escapedUnique)
+  assert.equal(unique.ok, true, unique.ok ? '' : unique.detail)
+  assert.equal(unique.value.readiness, 'PASS')
+});

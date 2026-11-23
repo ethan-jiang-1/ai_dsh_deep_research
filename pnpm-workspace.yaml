@@ -17,6 +17,11 @@ packages:
 #   vendor 换 tag 时随升级环同步 diff 这一段。
 linkWorkspacePackages: true
 
+# 运行前 deps 预检关闭（设置从 .npmrc 迁入：pnpm 11 只从本文件读 settings，.npmrc 的
+# `verify-deps-before-run=false` 已静默失效——非 TTY 下 pnpm run 会因 node_modules 判旧而中断）。
+# 依赖状态由根 install 保证。
+verifyDepsBeforeRun: false
+
 # cordis 强制链接为本仓实证新增（company 未写但它的历史 lock 已链接；本仓 2026-09-24
 # 全新解析时 registry 4.0.2 混进闭包 → profile-boot 的 FiberState 命名导出炸——
 # registry 版与 vendored fork 导出面不同。cosmokit/schemastery 照抄 company）。
