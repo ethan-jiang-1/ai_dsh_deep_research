@@ -115,8 +115,12 @@
 
 ## 未证边界（留给触发）
 
-- 浏览器真机：本批的 386–391 用 JSDOM 故障矩阵覆盖；观感（失败条位置、按钮可用性）仍需
-  `client-load.entry` / run 通道真机复核（触发 = 下一次发布前收尾或用户首次撞见观感问题）。
+- **浏览器真机未跑成（NOT-RUN ≠ pass）**：本批的 386–391 用 JSDOM 故障矩阵覆盖；`client-load.entry`
+  本环境两次尝试均未产出判据——① 主机健康预检拒绝（load/cpu 1.66 > 1.5，机器被其它负载占满）；
+  ② 预检通过后 dev web 起不来：`node-addon-require-builtin` 的原生 `build/napi/.../require_builtin.node`
+  在 node_modules 里缺席（安装期 prebuild 未落地），与本次代码改动无关。观感（失败条位置、按钮
+  可用性）仍需在能起 dev web 的环境跑 `client-load.entry --seed tests/fixtures/client-load-home`
+  复核（触发 = 下一次发布前收尾 / 换环境重跑）。
 - `useConfigFeed.send` 的 20×3s 轮询上限仍是固定值；模型落笔更慢时停在「已发送/已回话」态是
   设计内行为，未做自适应退避。
 - `pnpm store` 仍可能落在全局默认（`.npmrc` 的 `store-dir` 对 pnpm 11 已失效）；本批只修
