@@ -6,7 +6,9 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| — | — | 当前无活跃卡（2026-11-23：观察面内容实质/英文批结案归档） |
+| [2026-11-23-static-semantic-guardrails.md](2026-11-23-static-semantic-guardrails.md) | 待落地 | Issue 1：补齐 `.mjs` `checkJs`、`oxlint` 与 TS `TypeChecker` 领域 Linter 并修实抓隐患 |
+| [2026-11-23-l0-client-and-property-testing.md](2026-11-23-l0-client-and-property-testing.md) | 待落地 | Issue 2：建 `jsdom`+Hook 行为测试、恶意 `RunSource` 故障矩阵与 `fast-check`/`mdast` 寻虫底座 |
+| [2026-11-23-state-machine-and-contract-architecture.md](2026-11-23-state-machine-and-contract-architecture.md) | 待落地 | Issue 3：Hook 纯状态机抽干、判别联合收紧、Skill↔Parser 双向扫描与防御模式内化 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 
