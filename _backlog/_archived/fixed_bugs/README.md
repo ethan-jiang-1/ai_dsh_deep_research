@@ -6,6 +6,14 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [377](BUG-377-evidence-failed-log-counted-as-card.md) | `_failed.md` 算证据 | （sentinel 排除） | 2026-11-23 |
+| [378](BUG-378-empty-evidence-card-counted.md) | 0 字节证据卡算证据 | （证据卡正文谓词） | 2026-11-23 |
+| [379](BUG-379-english-plural-counts-no-singular.md) | en 计数无单数 | （countText） | 2026-11-23 |
+| [380](BUG-380-english-method-library-tab-truncated.md) | en 主 tab 截断 | （短标签 Methods） | 2026-11-23 |
+| [381](BUG-381-empty-findings-step-done.md) | 空 findings 综合 ✓ | （内容谓词 + unknown） | 2026-11-23 |
+| [382](BUG-382-empty-leads-step-done.md) | 空 leads 侦察 ✓ | （内容谓词 + unknown） | 2026-11-23 |
+| [383](BUG-383-headings-only-question-false-kickoff.md) | 标题-only question 立项 ✓ | （question body 谓词） | 2026-11-23 |
+| [384](BUG-384-empty-plan-status-silent.md) | 空 plan 状态页无提示 | （plan policy/empty） | 2026-11-23 |
 | [369](BUG-369-status-readiness-mismatch-misdiagnosed.md) | readiness 冲突误报「声明缺失」 | （共享 reviewVerdictOf conflict） | 2026-11-23 |
 | [370](BUG-370-graph-empty-snapshot-blank-panel.md) | 空 plan/vN 快照画空面板 | （snapshot empty/invalid） | 2026-11-23 |
 | [371](BUG-371-final-reader-stale-watch-audit-only.md) | watcher 只盯 audit | （watchTargetOf displayed） | 2026-11-23 |

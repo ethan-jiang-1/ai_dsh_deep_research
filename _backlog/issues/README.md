@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| [2026-11-23-observation-substance-program](2026-11-23-observation-substance-program.md) | 待落地 | 观察面内容实质与英文文案：377–384 的次序/流程/系统修法（非空≠实质、失败登记、en 计数/导航） |
+| — | — | 当前无活跃卡（2026-11-23：观察面内容实质/英文批结案归档） |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

@@ -149,6 +149,33 @@
     "sunset": "当 cockpit-truth/cockpit-artifact-truth 相位吸收八场景，或纯函数矩阵 + DOM 快照覆盖用户可见结果时退役",
     "lane": "entry"
   },
+  "cockpit-truth-substance.entry.mjs": {
+    "tier": "dev-only",
+    "reason": "真浏览器 + 六场景文件突变（空 findings/leads/question/plan/证据卡）；主机负载敏感，先阶段验收/手动跑，稳定后再议 nightly",
+    "cost": "medium",
+    "uniqueClaim": "观察面内容实质六场景：空 findings/leads、标题-only question、空 plan、失败登记/空证据卡 → 步骤/证据不假绿",
+    "oracle": [
+      "tests/cockpit/lib/run/artifact-content.spec.mjs",
+      "tests/run/shared/run-fold.spec.mjs",
+      "tests/cockpit/lib/events/status-feed.spec.mjs",
+      "tests/cockpit/lib/run/brief-fold.spec.mjs",
+      "tests/cockpit/lib/run/artifact-read.spec.mjs"
+    ],
+    "sunset": "当 cockpit-truth/client-load 吸收内容实质场景，或纯函数矩阵 + DOM 快照覆盖时退役",
+    "lane": "entry"
+  },
+  "cockpit-locale.entry.mjs": {
+    "tier": "dev-only",
+    "reason": "en locale overlay + 真浏览器；主机负载敏感，先阶段验收/手动跑，稳定后再议 nightly",
+    "cost": "medium",
+    "uniqueClaim": "观察面英文二场景：1 evidence file 单数；主 tab 完整可读（短标签/无截断）",
+    "oracle": [
+      "tests/cockpit/shared/i18n.spec.mjs",
+      "tests/cockpit/client/locales/client-locale.spec.mjs"
+    ],
+    "sunset": "当 client-load 吸收 en 装配面，或 locale 矩阵 + DOM 宽度断言覆盖时退役",
+    "lane": "entry"
+  },
   "cold-start.entry.mjs": {
     "tier": "nightly",
     "reason": "干净室安装（仓外 home + tarball）——nightly 跑，失败可诊断",

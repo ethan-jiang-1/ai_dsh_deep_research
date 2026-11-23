@@ -46,8 +46,13 @@ export type ResearchStatusTabProps = PropsRuntime<'sidebar.right.pane.tab'> & Pr
 /** bundle 渐进面模型（问题行 + 步骤 + 证据 + 交付）。 */
 export interface BundleFace {
   readonly questionLine: string | null
-  /** question.md 在场（锚点 passed 态的文件事实——与 questionLine 区分：首行可能缺席）。 */
+  /** question.md 在场且有正文（锚点 passed 态的事实；标题-only 不算）。 */
   readonly hasQuestion: boolean
+  /** question/leads/findings 的内容问题；evidence 有独立 union（含 failed-only）。 */
+  readonly questionIssue: 'empty' | 'unreadable' | 'body-empty' | null
+  readonly leadsIssue: 'empty' | 'unreadable' | 'body-empty' | null
+  readonly findingsIssue: 'empty' | 'unreadable' | 'body-empty' | null
+  readonly evidenceIssue: 'empty' | 'unreadable' | 'failed-only' | null
   readonly steps: readonly RunStep[]
   readonly evidenceCount: number
   readonly delivered: boolean

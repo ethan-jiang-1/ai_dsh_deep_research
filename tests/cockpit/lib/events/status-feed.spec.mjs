@@ -28,13 +28,15 @@ test('BUG-087 接线：切会话清空 journalEvents/rows/journalSeen', () => {
 
 // 负例留证 2026-11-13：BUG-117——切会话只清 journal，旧 trust/face 继续驱动扫描；
 // BUG-118——leads/findings 仍用 names.has。还原法 = 删 policy reset / 改回 names.has。
-test('BUG-117/118 切会话清 trust/face/unbound；leads/findings 走 hasFile', () => {
+test('BUG-117/118 切会话清 trust/face/unbound；leads/findings 读入工件而非 hasFile', () => {
   const source = readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/research-status/useStatusFeed.ts'), 'utf8')
   for (const line of ["setTrust({ kind: 'unbound' })", 'setFace(null)', 'setUnbound(false)', 'setKickoffHold(false)', 'setMemberSummaries({})']) {
     assert.ok(source.includes(line), `切会话必须复位 ${line}`)
   }
-  assert.match(source, /leads: view\.hasFile\('leads\.md'\)/)
-  assert.match(source, /findings: view\.hasFile\('findings\.md'\)/)
+  assert.match(source, /readArtifact\(view, 'leads\.md'/)
+  assert.match(source, /readArtifact\(view, 'findings\.md'/)
+  assert.match(source, /hasBodyText\(leadsArt\.text\)/)
+  assert.match(source, /hasBodyText\(findingsArt\.text\)/)
 })
 
 // 负例留证 2026-11-13：D51——状态页 readiness 曾只读 review.md 散文，与门禁（读声明件）分叉。
@@ -67,10 +69,10 @@ test('BUG-358/359/360 接线：bundle/review/evidence 的 Outcome 进 reads 三�
 
 test('BUG-358/359/360/361…368 视图：失败/未定/空 keys 与变量取词', () => {
   const source = readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/ResearchStatusTab.tsx'), 'utf8')
-  for (const key of ['statusReadFailed', 'statusEvidenceReadFailed', 'statusQuestionReadFailed', 'statusQuestionEmpty']) {
+  for (const key of ['statusReadFailed', 'statusEvidenceReadFailed']) {
     assert.ok(source.includes(`props.t('${key}')`), `视图缺 ${key}`)
   }
-  for (const key of ['statusReviewReadFailed', 'statusReviewEmpty', 'statusReviewUnconfirmed', 'statusReviewConflict', 'statusPlanReadFailed', 'statusPlanEmpty', 'statusPlanVersionUnknown', 'statusFinalDirReadFailed', 'statusReceiptReadFailed', 'statusReceiptInvalid']) {
+  for (const key of ['statusReviewReadFailed', 'statusReviewEmpty', 'statusReviewUnconfirmed', 'statusReviewConflict', 'statusPlanReadFailed', 'statusPlanEmpty', 'statusPlanVersionUnknown', 'statusFinalDirReadFailed', 'statusReceiptReadFailed', 'statusReceiptInvalid', 'statusQuestionReadFailed', 'statusQuestionEmpty', 'statusQuestionBodyEmpty', 'statusLeadsEmpty', 'statusLeadsReadFailed', 'statusFindingsEmpty', 'statusFindingsReadFailed', 'statusEvidenceEmpty', 'statusEvidenceFailedOnly']) {
     assert.ok(source.includes(`'${key}'`), `视图缺 ${key}`)
   }
   assert.ok(source.includes('props.t(reviewIssueKey)'), '审查未定/空/读失败必须按变量取词')

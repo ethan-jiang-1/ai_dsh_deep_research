@@ -27,3 +27,24 @@ export function interpolate(template: string, params?: Record<string, unknown>):
 
 /** 缺省翻译器 = 中文（非 UI 消费面用；UI 必须显式传 `props.t`）。 */
 export const translateZh: PackTranslate = (key, params) => interpolate(zh[key], params)
+
+
+/**
+ * 计数文案的本地化选择：count===1 用 oneKey，其余（0/≥2）用 otherKey。
+ * 中文两键同值；英文由 locale 字典提供单数/复数。params 可带额外占位符（如 done/top）。
+ * @param t - 翻译器。
+ * @param count - 计数。
+ * @param oneKey - 单数键。
+ * @param otherKey - 复数键。
+ * @param params - 额外插值参数。
+ * @returns 本地化文案。
+ */
+export function countText(
+  t: PackTranslate,
+  count: number,
+  oneKey: DeepResearchPackLocaleKey,
+  otherKey: DeepResearchPackLocaleKey,
+  params: Record<string, unknown> = {},
+): string {
+  return t(count === 1 ? oneKey : otherKey, { ...params, count: String(count) })
+}

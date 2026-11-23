@@ -26,6 +26,7 @@ export const enFold = {
   briefUnknownReviewFail: 'Review findings remain — the report is not delivered until they are fixed and re-review passes',
   briefGoalQuestionUnreadable: 'The research question could not be read — this run’s question cannot be confirmed',
   briefGoalQuestionEmpty: 'The research question is empty — question.md exists but has no body',
+  briefGoalQuestionBodyEmpty: 'The research question has no body — only headings/empty sections, no question text to finalize',
   briefStageReviewConflict: 'Review is unconfirmed — the declaration conflicts with review.md',
   briefKnownReviewConflict: 'Whether review passed cannot be confirmed; the two verdicts must agree',
   briefUnknownReviewConflict: 'The declaration PASS/FAIL disagrees with review.md — it must not be treated as a pass',

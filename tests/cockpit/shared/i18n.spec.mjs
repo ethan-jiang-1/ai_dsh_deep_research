@@ -6,7 +6,7 @@
 //   ② 每个产文案的折层函数在 `en` 字典下输出零 CJK（组件漏传 t = 字典缺键时函数仍可断言红）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { interpolate, translateZh } from '../../../packages/deep-research-pack/src/lib/shared/i18n.ts'
+import { countText, interpolate, translateZh } from '../../../packages/deep-research-pack/src/lib/shared/i18n.ts'
 import { en, zh } from '../../../packages/deep-research-pack/src/client/locales.ts'
 import { deriveSteps } from '../../../packages/deep-research-pack/src/lib/run/run-fold.ts'
 import { deriveAnchors } from '../../../packages/deep-research-pack/src/lib/events/hitl-fold.ts'
@@ -131,3 +131,17 @@ test('数据面：rerun 三改法 / 工具卡 / 回执 / 配置执行面与标�
   const specimens = specimenSkeletonsOf(tEn)
   assertNoCjk('specimenSkeletonsOf', Object.values(specimens).flat())
 })
+
+// 负例留证 2026-11-23：BUG-379——en 计数固定复数；countText 必须按 1 选单数。
+test('BUG-379 countText：en 1 单数 / 0·≥2 复数；zh 两形同值', () => {
+  const enT = (key, params = {}) => interpolate(String(en[key]), params);
+  assert.equal(countText(enT, 1, 'statusEvidenceCountOne', 'statusEvidenceCountOther'), '1 evidence file');
+  assert.equal(countText(enT, 0, 'statusEvidenceCountOne', 'statusEvidenceCountOther'), '0 evidence files');
+  assert.equal(countText(enT, 2, 'statusEvidenceCountOne', 'statusEvidenceCountOther'), '2 evidence files');
+  assert.equal(countText(enT, 1, 'statusDecisionStopsOne', 'statusDecisionStopsOther'), '1 checkpoint passed · each decision is recorded in question.md §Decisions');
+  assert.equal(countText(enT, 1, 'graphKeptOne', 'graphKeptOther'), 'Kept 1 node');
+  assert.equal(countText(enT, 1, 'graphCoverageOne', 'graphCoverageOther', { top: '4' }), '4 top-level / 1 node');
+  assert.equal(countText(enT, 1, 'graphTeamTasksOne', 'graphTeamTasksOther', { done: '0' }), 'Team 1 task · 0 done');
+  assert.equal(countText(translateZh, 1, 'statusEvidenceCountOne', 'statusEvidenceCountOther'), '证据 1 份');
+  assert.equal(countText(translateZh, 2, 'statusEvidenceCountOne', 'statusEvidenceCountOther'), '证据 2 份');
+});

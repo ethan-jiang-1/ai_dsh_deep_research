@@ -28,6 +28,7 @@ export const zhFold = {
   briefUnknownReviewFail: '审查未决项存在——修复完成并通过复审前报告不交付',
   briefGoalQuestionUnreadable: '研究问题读取失败——无法确认本场研究问题',
   briefGoalQuestionEmpty: '研究问题为空——question.md 在场但没有正文',
+  briefGoalQuestionBodyEmpty: '研究问题正文为空——只有标题/空小节，没有可定稿的问题正文',
   briefStageReviewConflict: '审查未定——声明与 review.md 冲突',
   briefKnownReviewConflict: '无法确认审查是否通过；两份判据必须同判',
   briefUnknownReviewConflict: '声明 PASS/FAIL 与 review.md 判定行不一致——不能当作审查通过',

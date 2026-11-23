@@ -13,6 +13,7 @@
   "client": [
     "activity-fold.ts",
     "artifact-read.ts",
+    "artifact-content.ts",
     "binding-trust.ts",
     "brief-fold.ts",
     "bundle-bind.ts",

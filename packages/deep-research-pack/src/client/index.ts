@@ -268,7 +268,7 @@ export function apply(ctx: ClientContext): void {
       name: METHOD_LIBRARY_VIEW,
       id: 'method-library',
       order: 20,
-      label: () => t('methodLibrary'),
+      label: () => t('methodLibraryTab'),
       locale: 'deepResearchPack',
       inject: () => ({
         readLibrary,

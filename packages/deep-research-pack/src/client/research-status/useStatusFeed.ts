@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { deriveAnchors, foldHitlPending, type HitlState } from '../../lib/events/hitl-fold.ts'
 import { deriveSteps, latestRunVersion } from '../../lib/run/run-fold.ts'
 import { readArtifact, readStateOf, type StatusReads } from '../../lib/run/artifact-read.ts'
+import { hasBodyText, isEvidenceCard, isEvidenceCardName, questionBodyLineOf } from '../../lib/run/artifact-content.ts'
 import { foldActivityRows, type ActivityRow } from '../../lib/events/activity-fold.ts'
 import type { MemberActivitySummary } from '../../lib/events/member-activity.ts'
 import { bindingTrust, type BindingTrust } from '../../lib/run/binding-trust.ts'
@@ -30,7 +31,7 @@ const REFRESH_MS = 30_000
 
 /** 初始/无绑定时的读取态：六个事实都还没有读到。 */
 const ABSENT_READS: StatusReads = {
-  bundle: 'absent', question: 'absent', review: 'absent', readiness: 'absent', evidence: 'absent', plan: 'absent', final: 'absent', receipt: 'absent',
+  bundle: 'absent', question: 'absent', review: 'absent', readiness: 'absent', evidence: 'absent', plan: 'absent', leads: 'absent', findings: 'absent', final: 'absent', receipt: 'absent',
 }
 
 /** 绑定可信性的值键（状态页全值比对重扫用：kind/slug/reason 任一变化都要重扫）。 */
@@ -226,15 +227,30 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const evidenceDir = names.has('evidence') ? await view.list('evidence', { signal }) : null
         if (stopped) return
         const evidenceState = readStateOf(evidenceDir)
-        const evidenceCount = evidenceState === 'ok' && evidenceDir !== null && evidenceDir.ok
-          ? evidenceDir.value.filter((entry) => entry.type === 'file' && entry.name.endsWith('.md')).length
-          : 0
+        const evidenceEntries = evidenceState === 'ok' && evidenceDir !== null && evidenceDir.ok
+          ? evidenceDir.value.filter((entry) => entry.type === 'file' && entry.name.endsWith('.md'))
+          : []
+        const evidenceFailedLog = evidenceEntries.some((entry) => entry.name === '_failed.md')
+        let evidenceCount = 0
+        let evidenceEmptyCount = 0
+        let evidenceUnreadableCount = 0
+        for (const entry of evidenceEntries.filter((item) => isEvidenceCardName(item.name))) {
+          const card = await readArtifact(view, `evidence/${entry.name}`, { signal })
+          if (stopped) return
+          if (card.state === 'ok' && card.text !== null && isEvidenceCard(card.text)) evidenceCount += 1
+          else if (card.state === 'unreadable' || card.state === 'invalid') evidenceUnreadableCount += 1
+          else evidenceEmptyCount += 1
+        }
         const finalDir = names.has('final') ? await view.list('final', { signal }) : null
         if (stopped) return
         const finalState = readStateOf(finalDir)
         const finalFileNames = finalDir !== null && finalDir.ok
           ? finalDir.value.filter((entry) => entry.type === 'file').map((entry) => entry.name)
           : []
+        const leadsArt = await readArtifact(view, 'leads.md', { signal })
+        if (stopped) return
+        const findingsArt = await readArtifact(view, 'findings.md', { signal })
+        if (stopped) return
         // 回执（持久事实）：统一工件读取；只有 ok 才尝试 deliveryFromReceipt（invalid/empty/unreadable
         // 不冒充缺席，P3 再出「回执读取失败/不合法」提示）。
         const receiptArt = await readArtifact(view, 'delivered.json', { signal })
@@ -270,6 +286,25 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const questionArt = await readArtifact(view, 'question.md', { signal })
         if (stopped) return
         const questionText = questionArt.state === 'ok' ? questionArt.text : null
+        const questionBody = questionBodyLineOf(questionText)
+        const raw = questionBody
+        const flat = raw
+        const firstLine = flat === null || flat === '' ? null : flat.length > 72 ? `${flat.slice(0, 72)}…` : flat
+        const questionIssue = questionArt.state === 'unreadable'
+          ? 'unreadable'
+          : questionArt.state === 'empty'
+            ? 'empty'
+            : questionArt.state === 'ok' && questionBody === null ? 'body-empty' : null
+        const leadsBody = leadsArt.state === 'ok' && hasBodyText(leadsArt.text)
+        const findingsBody = findingsArt.state === 'ok' && hasBodyText(findingsArt.text)
+        const bodyIssue = (art: 'ok' | 'absent' | 'unreadable' | 'empty' | 'invalid') => art === 'empty' ? 'empty' : art === 'unreadable' ? 'unreadable' : art === 'ok' ? 'body-empty' : null
+        const leadsIssue = leadsArt.state === 'ok' ? (leadsBody ? null : 'body-empty') : bodyIssue(leadsArt.state)
+        const findingsIssue = findingsArt.state === 'ok' ? (findingsBody ? null : 'body-empty') : bodyIssue(findingsArt.state)
+        const evidenceIssue = evidenceState === 'unreadable'
+          ? 'unreadable'
+          : evidenceCount === 0 && (evidenceEntries.length > 0 || evidenceFailedLog)
+            ? (evidenceUnreadableCount > 0 ? 'unreadable' : evidenceFailedLog && evidenceEmptyCount === 0 ? 'failed-only' : 'empty')
+            : null
         setReads({
           bundle: 'ok',
           question: questionArt.state,
@@ -277,29 +312,34 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           readiness: readinessArt.state,
           evidence: evidenceState,
           plan: planArt.state,
+          leads: leadsArt.state,
+          findings: findingsArt.state,
           final: finalState,
           receipt: receiptArt.state,
         })
         setScanSettled(true)
         // G3（RFC cockpit-flow-face）：剥 markdown 强调符再截断——`**` 与反引号是源文件
         // 标记不是内容；截断补省略号，不在字中间装作完整句。
-        const raw = questionText?.split('\n').find((l) => l.trim() !== '' && !l.startsWith('#')) ?? null
-        const flat = raw !== null ? raw.replace(/\*\*/g, '').replace(/`/g, '').trim() : null
-        const firstLine = flat === null || flat === '' ? null : flat.length > 72 ? `${flat.slice(0, 72)}…` : flat
         setFace({
           questionLine: firstLine,
-          hasQuestion: questionArt.state === 'ok',
+          questionIssue,
+          hasQuestion: questionArt.state === 'ok' && questionBody !== null,
+          leadsIssue,
+          findingsIssue,
+          evidenceIssue,
           steps: deriveSteps({
-            question: questionArt.state === 'ok',
-            team: questionArt.state === 'ok',
-            leads: view.hasFile('leads.md'),
+            question: questionArt.state === 'ok' && questionBody !== null,
+            team: questionArt.state === 'ok' && questionBody !== null,
+            leads: leadsBody,
             evidence: evidenceCount,
-            findings: view.hasFile('findings.md'),
+            findings: findingsBody,
             review: reviewVerdict !== 'unconfirmed' && reviewVerdict !== 'conflict',
             final: view.hasFile('final.md'),
             unknown: [
-              ...(questionArt.state === 'empty' || questionArt.state === 'unreadable' ? ['question'] : []),
-              ...(evidenceState === 'unreadable' ? ['evidence'] : []),
+              ...(questionIssue !== null ? ['question'] : []),
+              ...(leadsIssue !== null ? ['leads'] : []),
+              ...(evidenceIssue !== null ? ['evidence'] : []),
+              ...(findingsIssue !== null ? ['findings'] : []),
               ...(reviewVerdict === 'unconfirmed' || reviewVerdict === 'conflict' ? ['review'] : []),
             ],
           }, props.t),

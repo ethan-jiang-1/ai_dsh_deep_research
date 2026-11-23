@@ -31,6 +31,8 @@ export interface StatusReads {
   readonly readiness: ArtifactState
   readonly evidence: SourceRead
   readonly plan: ArtifactState
+  readonly leads: ArtifactState
+  readonly findings: ArtifactState
   readonly final: SourceRead
   readonly receipt: ArtifactState
 }
@@ -47,7 +49,9 @@ export const ARTIFACT_POLICY: Readonly<Record<string, ArtifactPolicy>> = {
   'review.md': { nonEmpty: true, json: false },
   'review/readiness.json': { nonEmpty: true, json: true },
   'delivered.json': { nonEmpty: true, json: true },
-  'plan.md': { nonEmpty: false, json: false },
+  'plan.md': { nonEmpty: true, json: false },
+  'leads.md': { nonEmpty: true, json: false },
+  'findings.md': { nonEmpty: true, json: false },
   'final.md': { nonEmpty: true, json: false },
   'final/readable.md': { nonEmpty: true, json: false },
 }
@@ -61,6 +65,7 @@ export function artifactPolicyOf(name: string): ArtifactPolicy | null {
   const fixed = ARTIFACT_POLICY[name]
   if (fixed !== undefined) return fixed
   if (/^plan\/v[1-9]\d{0,5}\.md$/.test(name)) return { nonEmpty: true, json: false }
+  if (/^evidence\/[^/]+\.md$/.test(name)) return { nonEmpty: true, json: false }
   if (/^final\/v[1-9]\d{0,5}\.md$/.test(name)) return { nonEmpty: true, json: false }
   if (/^final\/readable(?:-v[1-9]\d{0,5})?\.md$/.test(name)) return { nonEmpty: true, json: false }
   return null

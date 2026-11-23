@@ -6,6 +6,11 @@
 
 | 对象 | 当前决定 | 具体观察（出现位置） | owner |
 |---|---|---|---|
+| 内容实质两入口（dev-only） | `cockpit-truth-substance`（zh 六场景）与 `cockpit-locale`（en 二场景）在树内，分别 19/19、3/3；未进 CI/nightly | 连续两轮稳定，或 `client-load` 吸收 → 升 nightly；任一场景复发 → 引用批 Note 建卡 | [批 Note](../notes/implemented/2026-11-23-observation-substance.md) |
+| 379 subagent 顶栏计数 | vendor-owned（pack locale 无该键）；本批只修 pack-owned evidence/questions/checkpoints/nodes/tasks | vendor 暴露 locale 计数键或用户报告顶栏 `1 subagents` → 另立 vendor 边界卡，不冒充 pack 修好 | [批 Note](../notes/implemented/2026-11-23-observation-substance.md) |
+| 380 主 tab 短标签 | pack 用 `Methods` + 完整 `Method library` 页标题；不改 vendor 宽度 | 用户要求完整 `Method Library` 标签或短标签仍被截断 → 另议布局/标题，不改 vendor | [批 Note](../notes/implemented/2026-11-23-observation-substance.md) |
+| evidence 逐卡读性能 | 状态页每次扫描逐卡 `readArtifact`；10 卡级已跑 | 真实大 evidence 目录扫描超时/卡顿 → 加 limit/缓存，不把读失败当 0 | [批 Note](../notes/implemented/2026-11-23-observation-substance.md) |
+| graph `plan.md` 裸读例外（G21） | 仍裸读以保留 `truncated` 分态；G21 清单登记 | 新增 canonical 读取点未进 `ARTIFACT_POLICY`/G21 → 源级守卫红 | [批 Note](../notes/implemented/2026-11-23-observation-substance.md) |
 | 观察面残余八场景守卫（dev-only） | `checks/smoke/cockpit-truth-residuals.entry.mjs` 在树内，八场景本机 28/28；未进 CI/nightly（真浏览器 + 文件突变） | 连续两轮稳定，或 `cockpit-truth`/`client-load` 吸收八场景 → 升 nightly；任一场景复发 → 引用批 Note 建卡 | [批 Note](../notes/implemented/2026-11-23-observation-residuals.md) |
 | 配置观察 E2E 的 select 断言 | 376 的 paneText 假阳性已纠正；新观察必须读 `select.value`/`selectedOptions`，不能从面板全文猜选中值 | 新 E2E 再用 `paneText` 断言控件选中值 → 按 376 假阳性教训纠正，不写产品代码 | [批 Note](../notes/implemented/2026-11-23-observation-residuals.md) |
 | graph `plan.md` 裸读例外（G21） | `useGraphFeed` 仍裸读 `plan.md` 以保留 `truncated` 分态；G21 清单显式登记为唯一已知遗留 | 新增 canonical 文本读取点（question/review/plan/final/readiness 等）未进 `ARTIFACT_POLICY`/G21 → 源级守卫红；graph 需 truncated 以外原因裸读 → 先扩 artifact-read 再迁 | [批 Note](../notes/implemented/2026-11-23-observation-residuals.md) |

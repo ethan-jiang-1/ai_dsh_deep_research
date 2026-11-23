@@ -38,6 +38,8 @@ test('artifactPolicyOf：固定表 + final 动态名；未知 = null', () => {
     assert.ok(Object.hasOwn(ARTIFACT_POLICY, name), `固定表缺 ${name}`)
   }
   assert.deepEqual(artifactPolicyOf('plan/v1.md'), { nonEmpty: true, json: false })
+  assert.deepEqual(artifactPolicyOf('evidence/card.md'), { nonEmpty: true, json: false })
+  assert.equal(artifactPolicyOf('evidence/_failed.md')?.nonEmpty, true)
   assert.deepEqual(artifactPolicyOf('final/v1.md'), { nonEmpty: true, json: false })
   assert.deepEqual(artifactPolicyOf('final/readable-v2.md'), { nonEmpty: true, json: false })
   assert.equal(artifactPolicyOf('final/v0.md'), null)
@@ -51,7 +53,7 @@ test('readArtifact：question 空/读失败；回执 JSON 好/坏；未登记不
   assert.deepEqual(await readArtifact(view(OUT('Q')), 'question.md'), { state: 'ok', text: 'Q', json: null })
   assert.deepEqual(await readArtifact(view(OUT('')), 'question.md'), { state: 'empty', text: null, json: null })
   assert.deepEqual(await readArtifact(view(UNREADABLE), 'question.md'), { state: 'unreadable', text: null, json: null })
-  assert.deepEqual(await readArtifact(view(OUT('')), 'plan.md'), { state: 'ok', text: '', json: null })
+  assert.deepEqual(await readArtifact(view(OUT('')), 'plan.md'), { state: 'empty', text: null, json: null })
   const receipt = { version: 1, slug: 'drt_x', acceptedAt: 't', gate: { status: 'PASS' } }
   assert.deepEqual(await readArtifact(view(OUT(JSON.stringify(receipt))), 'delivered.json'), { state: 'ok', text: JSON.stringify(receipt), json: receipt })
   assert.deepEqual(await readArtifact(view(OUT('{bad json')), 'delivered.json'), { state: 'invalid', text: null, json: null })

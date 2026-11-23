@@ -1844,6 +1844,70 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把 unknown 键分支改成整份 emptyDefaults → mixed 回归红（卡本身按 not-a-bug 收口）"
+    },
+    {
+      "id": "BUG-377",
+      "mechanism": "evidence/_failed.md 是失败登记 sentinel，不计入证据卡数/挖掘完成",
+      "guard": "checks/smoke/cockpit-truth-substance.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 _failed.md 加回 evidenceCount → S27 再次显示 1 份 + ✓ 挖掘"
+    },
+    {
+      "id": "BUG-378",
+      "mechanism": "0 字节/frontmatter-only 证据卡不计入有效证据；空卡 → 挖掘 unknown",
+      "guard": "checks/smoke/cockpit-truth-substance.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "按后缀计数不看正文 → S28 再次把空卡算 1 份"
+    },
+    {
+      "id": "BUG-379",
+      "mechanism": "en 计数 countText：1 单数、0/≥2 复数；zh 不变",
+      "guard": "checks/smoke/cockpit-locale.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 countText 改回固定复数键 → S29 再出现 1 evidence files"
+    },
+    {
+      "id": "BUG-380",
+      "mechanism": "en 主 tab 用短标签 Methods + 完整页标题；不被 CSS 截断",
+      "guard": "checks/smoke/cockpit-locale.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 methodLibraryTab 改回长标签/固定宽度 → S30 检出 scrollWidth>clientWidth"
+    },
+    {
+      "id": "BUG-381",
+      "mechanism": "空 findings 正文 → 综合不 done；hasBodyText 进 unknown",
+      "guard": "checks/smoke/cockpit-truth-substance.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 findings 改回 view.hasFile 且不设 unknown → S23 再次 ✓ 综合"
+    },
+    {
+      "id": "BUG-382",
+      "mechanism": "空 leads 正文 → 侦察不 done；hasBodyText 进 unknown",
+      "guard": "checks/smoke/cockpit-truth-substance.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 leads 改回 view.hasFile 且不设 unknown → S24 再次 ✓ 侦察"
+    },
+    {
+      "id": "BUG-383",
+      "mechanism": "标题-only question 无正文 → 立项不 done；questionIssue=body-empty",
+      "guard": "checks/smoke/cockpit-truth-substance.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 hasQuestion 改回 state==='ok' → S25 再次 ✓ 立项 + 尚未确认"
+    },
+    {
+      "id": "BUG-384",
+      "mechanism": "plan.md nonEmpty:true；空 plan → 状态页计划为空/版本未知",
+      "guard": "checks/smoke/cockpit-truth-substance.entry.mjs",
+      "oracleType": "external",
+      "status": "closed",
+      "redRecipe": "把 plan policy 改回 nonEmpty:false 且无 empty 分支 → S26 再次无提示"
     }
   ]
 }

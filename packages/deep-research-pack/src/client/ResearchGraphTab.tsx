@@ -28,6 +28,7 @@
  */
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
+import { countText } from '../lib/shared/i18n.ts'
 import type { TeamMemberProjection, TeamProjection, TeamTaskView } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import {
   DEFAULT_ATTENTION_THRESHOLDS,
@@ -264,7 +265,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         <span style={BADGE_STYLE}>{props.t('graphReadonly')}</span>
         {boundSlug !== null && <span style={{ ...MUTED_STYLE, opacity: 0.5 }}>run drt_{shortLabel(boundSlug, 32)}</span>}
         <span style={MUTED_STYLE}>
-          {hasPlan ? `${props.t('graphPlanLoaded', { version: '' })} ${String(topPlanNodes.length)} ${topPlanNodes.length === 1 ? 'top-level' : 'top-level'}${planNodes.length !== topPlanNodes.length ? ` / ${String(planNodes.length)} nodes` : ''} · ` : ''}{props.t('graphTeamTasks', { total: String(counts.total), done: String(counts.done) })}
+          {hasPlan ? `${props.t('graphPlanLoaded', { version: '' })} ${String(topPlanNodes.length)} ${topPlanNodes.length === 1 ? 'top-level' : 'top-level'}${planNodes.length !== topPlanNodes.length ? ` / ${String(planNodes.length)} nodes` : ''} · ` : ''}{countText(props.t, counts.total, 'graphTeamTasksOne', 'graphTeamTasksOther', { done: String(counts.done) })}
         </span>
         {counts.running > 0 && <span style={{ ...MUTED_STYLE, color: '#2563eb' }}>● {props.t('graphRunning', { count: String(counts.running) })}</span>}
         {counts.ready > 0 && <span style={{ ...MUTED_STYLE, color: '#b45309' }}>○ {props.t('graphReady', { count: String(counts.ready) })}</span>}
@@ -298,7 +299,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
               {planDiff.removed.length > 0 && <div style={{ fontSize: 11, color: '#b45309' }}>{props.t('planRemoved', { items: planDiff.removed.join(', ') })}</div>}
               {planDiff.aliases.length > 0 && <div style={{ fontSize: 11, color: '#6366f1' }}>{props.t('planRenumbered', { items: planDiff.aliases.map((alias) => `${alias.from} → ${alias.to}`).join('、') })}</div>}
               {planDiff.dependencyChanges.length > 0 && <div style={{ fontSize: 11, color: '#b45309' }}>{props.t('planDepsChanged', { items: planDiff.dependencyChanges.map((change) => `${change.id}（${change.from.join(',') || '—'} → ${change.to.join(',') || '—'}）`).join('；') })}</div>}
-              {planDiff.kept.length > 0 && <div style={MUTED_STYLE}>{props.t('graphKept', { count: String(planDiff.kept.length) })}</div>}
+              {planDiff.kept.length > 0 && <div style={MUTED_STYLE}>{countText(props.t, planDiff.kept.length, 'graphKeptOne', 'graphKeptOther')}</div>}
             </>
           )}
         </div>
@@ -324,7 +325,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
 
       {hasPlan && (
         <div style={{ ...MUTED_STYLE, marginBottom: 6 }}>
-          {props.t('graphPlanLoaded', { version: plan?.version !== undefined ? ` ${String(plan.version)}` : '' })} · {props.t('graphCoverage', { top: String(coverage.topNodes), nodes: String(coverage.planNodes) })} · {teamReady ? coverageLineOf(coverage, props.t) : props.t('graphWaitingTeam')}
+          {props.t('graphPlanLoaded', { version: plan?.version !== undefined ? ` ${String(plan.version)}` : '' })} · {countText(props.t, coverage.planNodes, 'graphCoverageOne', 'graphCoverageOther', { top: String(coverage.topNodes) })} · {teamReady ? coverageLineOf(coverage, props.t) : props.t('graphWaitingTeam')}
           {planLoadedAt !== null ? props.t('refreshAt', { clock: formatClock(planLoadedAt) }) : ''}
         </div>
       )}

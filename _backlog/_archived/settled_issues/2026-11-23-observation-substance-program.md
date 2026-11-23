@@ -1,16 +1,17 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-23
 ---
 
 # 观察面内容实质与英文文案修复程序：BUG-377…384 的次序、流程与系统修法
 
-> 立卡：2026-11-23 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
-> 去向：implemented — `notes/implemented/2026-11-23-observation-substance.md`（批 Note，收口时写）
+> 立卡：2026-11-23 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 结论：八卡已修归档（377–384）；批 Note = [2026-11-23-observation-substance](../../../notes/implemented/2026-11-23-observation-substance.md)。
+> 去向：implemented — [2026-11-23-observation-substance](../../../notes/implemented/2026-11-23-observation-substance.md)
 > 对象：8 张活跃 P2 卡（377–384），全部有真浏览器 verdict；现场 = `runtime/e2e/*verdict.json` + `*.png`（gitignored）。
-> 上一批 = [观察面残余 Note](../../notes/implemented/2026-11-23-observation-residuals.md) · [程序卡](../_archived/settled_issues/2026-11-23-observation-residuals-program.md)；
+> 上一批 = [观察面残余 Note](../../../notes/implemented/2026-11-23-observation-residuals.md) · [程序卡](../settled_issues/2026-11-23-observation-residuals-program.md)；
 > 本批是同一观察面的**第五批**（351–355、356–360、361–368、369–376 之后），第一次把「非空」与「有实质内容」分开。
-> 方法 = [bug-to-fix §2 批模式](../methods/bug-to-fix.md)；状态机 = [bugs/README](../bugs/README.md)；证据主人 = [guides/60](../../docs/guides/60-dev-loop.md)。
+> 方法 = [bug-to-fix §2 批模式](../../methods/bug-to-fix.md)；状态机 = [bugs/README](../../bugs/README.md)；证据主人 = [guides/60](../../../docs/guides/60-dev-loop.md)。
 
 ## 0. 结论
 
@@ -40,8 +41,8 @@ opened: 2026-11-23
    不按 BUG 号逐张修：381/382/384 共享 `useStatusFeed`/`run-fold`，383 也共享 question 读取；
    377/378 共享 evidence 计数；379/380 共享 locale/导航面。
 4. **流程保障**：G1–G24 继承；新增 G25 内容谓词、G26 sentinel 排除、G27 本地化计数语法。
-   新增第四条浏览器入口 `checks/smoke/cockpit-truth-substance.entry.mjs`（S23–S30，dev-only、
-   keyless、真浏览器、cost medium）；现有三条入口不动，不申请 550 行 CAP 例外。
+   新增第四/第五条浏览器入口：`cockpit-truth-substance.entry.mjs`（S23–S28，zh 内容实质）+ `cockpit-locale.entry.mjs`（S29–S30，en overlay）；现有三条入口不动，不申请 550 行 CAP 例外。
+   **P0 偏差**：locale 是 boot-level overlay，不能在同一入口里混 zh/en，故拆两条入口（记录在 P0 结果）。
 5. 预算约 4–5 个会话（goal 60 轮）；每卡 `json fix-evidence`，红→绿同一命令；若 379 的 subagent
    计数落在 vendor 而非 pack，P0 记边界与 trigger，不冒充修好 vendor。
 
@@ -56,6 +57,16 @@ opened: 2026-11-23
 | 现有步骤 | `deriveSteps` 输入是布尔/计数；`unknown` 已存在但只用于 question/review/evidence 读失败；线性推断 `i < lastDone => done` 会把 false 早步补成 done |
 | 现有文案 | `statusEvidenceCount: '{count} evidence files'`；`questionCount`/`statusDecisionStops`/`graphKept`/`graphCoverage`/`graphTeamTasks` 均固定复数；主 tab label = `methodLibrary`（en `Method library`），由 `conversation.view` 槽渲染 |
 | 入口预算 | 旧 24/24、31/31、28/28；三条入口均 dev-only；慢资产 15/15 已满（新入口用 medium） |
+
+## 1.1 P0/P1/P2/P3 结果（2026-11-23）
+
+- P0 复跑：七条夹具仍红（377/378/381/382/383/384 + 379/380 en）；383 的 `questionPending:true` 与 `questionStepDone:true` 同帧，384 图谱 `empty-source` 与状态页无提示同帧。
+- 379/380 owner：en 计数键是 pack `en.ts`；主 tab label 是 pack `index.ts` 的 `t('methodLibrary')`，vendor tab 槽按固定宽度 + ellipsis 截断；subagent 顶栏计数 vendor-owned，卡内只修 pack 键并记 trigger。
+- **入口拆分**：locale 是 boot-level overlay，不能在同一入口混 zh/en；S23–S28 进 `cockpit-truth-substance.entry.mjs`，S29/S30 进 `cockpit-locale.entry.mjs`（两条 dev-only/medium，分别于 zh/en boot 执行）。
+- 内容实质预修复：substance 入口 **9/24 PASS，exit 1**（S23/S24/S25/S26/S27/S28 命中）；P1/P2 后 **19/19 PASS**。
+- locale 变异红：把 `countText` 固定复数 + tab 长标签 → **1/3，exit 1**（S29/S30 各自命中）；还原后 **3/3，exit 0**。
+- 旧三入口回归：`cockpit-truth` 24/24、`cockpit-artifact-truth` 31/31、`cockpit-truth-residuals` 28/28。
+- G25 `artifact-content` 矩阵、G26 sentinel、G27 countText 矩阵已落；八卡 `修复落地`。
 
 ## 2. 系统视角
 
@@ -244,14 +255,19 @@ opened: 2026-11-23
 
 | 卡 | 机制 | P 阶段 | 守卫场景 | 状态（P0 回填） |
 |---|---|---|---|---|
-| 377 | `_failed.md` 算证据 | P2 | S27 | 排查中 |
-| 378 | 0 字节证据卡算证据 | P2 | S28 | 排查中 |
-| 379 | en 计数无单数 | P3 | S29 | 排查中 |
-| 380 | en 主 tab 截断 | P3 | S30 | 排查中 |
-| 381 | 空 findings → 综合 ✓ | P1 | S23 | 排查中 |
-| 382 | 空 leads → 侦察 ✓ | P1 | S24 | 排查中 |
-| 383 | 标题-only question → 立项 ✓ | P1 | S25 | 排查中 |
-| 384 | 空 plan 状态页无提示 | P1 | S26 | 排查中 |
+| 377 | `_failed.md` 算证据 | P2 | S27 | 已修 |
+| 378 | 0 字节证据卡算证据 | P2 | S28 | 已修 |
+| 379 | en 计数无单数 | P3 | S29 | 已修 |
+| 380 | en 主 tab 截断 | P3 | S30 | 已修 |
+| 381 | 空 findings → 综合 ✓ | P1 | S23 | 已修 |
+| 382 | 空 leads → 侦察 ✓ | P1 | S24 | 已修 |
+| 383 | 标题-only question → 立项 ✓ | P1 | S25 | 已修 |
+| 384 | 空 plan 状态页无提示 | P1 | S26 | 已修 |## P4 收口结果（2026-11-23）
+
+- `pnpm verify/test/typecheck/build` 全绿；`export-dist` 后 verify 绿。
+- 五入口：`cockpit-truth` 24/24、`cockpit-artifact-truth` 31/31、`cockpit-truth-residuals` 28/28、`cockpit-truth-substance` 19/19、`cockpit-locale` 3/3；content 修复前 9/24，locale 变异 1/3。
+- 八卡已修归档；批 Note = `notes/implemented/2026-11-23-observation-substance.md`；本卡 `已结`；README/triggers/docs 同变更。
+- 379 的 subagent 顶栏计数 vendor-owned，只在卡内记边界 + trigger；380 用短标签，不改 vendor。
 
 ## 执行入口（goal 用）
 

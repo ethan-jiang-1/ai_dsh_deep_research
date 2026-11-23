@@ -34,6 +34,7 @@ import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { deriveSteps } from '../lib/run/run-fold.ts'
 import { foldHitlPending, type HitlState } from '../lib/events/hitl-fold.ts'
 import { deriveBusinessBrief, type BusinessBrief } from '../lib/run/brief-fold.ts'
+import { countText } from '../lib/shared/i18n.ts'
 import { rerunTriageRowsOf } from '../lib/run/rerun-triage.ts'
 import { statusFaceMarker } from '../lib/run/binding-trust.ts'
 import { stalledBannerOf } from '../lib/run/health.ts'
@@ -77,7 +78,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       pendingQuestions: pendingAnchor?.questions ?? 0,
       hasQuestion: face?.hasQuestion ?? false,
       questionLine: face?.questionLine ?? null,
-      questionIssue: reads.question === 'unreadable' ? 'unreadable' : reads.question === 'empty' ? 'empty' : null,
+      questionIssue: face?.questionIssue ?? null,
       reviewUnconfirmed: reviewVerdict === 'unconfirmed',
       reviewConflict: reviewVerdict === 'conflict',
       currentStage: face !== null ? steps.find((s) => s.state === 'current')?.label ?? null : null,
@@ -93,6 +94,22 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const receiptIssue = reads.receipt === 'unreadable' || reads.receipt === 'empty'
     ? 'statusReceiptReadFailed'
     : reads.receipt === 'invalid' ? 'statusReceiptInvalid' : null
+  const questionIssueKey = face?.questionIssue === 'body-empty'
+    ? 'statusQuestionBodyEmpty'
+    : reads.question === 'unreadable'
+      ? 'statusQuestionReadFailed'
+      : reads.question === 'empty' ? 'statusQuestionEmpty' : null
+  const leadsIssueKey = face?.leadsIssue === 'unreadable'
+    ? 'statusLeadsReadFailed'
+    : face?.leadsIssue !== null && face?.leadsIssue !== undefined ? 'statusLeadsEmpty' : null
+  const findingsIssueKey = face?.findingsIssue === 'unreadable'
+    ? 'statusFindingsReadFailed'
+    : face?.findingsIssue !== null && face?.findingsIssue !== undefined ? 'statusFindingsEmpty' : null
+  const evidenceIssueKey = face?.evidenceIssue === 'failed-only'
+    ? 'statusEvidenceFailedOnly'
+    : face?.evidenceIssue === 'unreadable'
+      ? 'statusEvidenceReadFailed'
+      : face?.evidenceIssue === 'empty' ? 'statusEvidenceEmpty' : null
   const reviewIssueKey = reviewVerdict === 'conflict'
     ? 'statusReviewConflict'
     : reads.review === 'unreadable'
@@ -119,7 +136,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
         <div style={{ fontWeight: 700, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#f59e0b33', border: '1px solid #f59e0b66' }}>
           {props.t('hitlBanner', {
             label: pendingAnchor?.label ?? props.t('decideLabel'),
-            count: pendingAnchor !== undefined && pendingAnchor.questions > 0 ? props.t('questionCount', { count: String(pendingAnchor.questions) }) : '',
+            count: pendingAnchor !== undefined && pendingAnchor.questions > 0 ? countText(props.t, pendingAnchor.questions, 'questionCountOne', 'questionCountOther') : '',
           })}
         </div>
       )}
@@ -152,15 +169,27 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
         <div style={{ opacity: 0.85 }}>{brief.knownLine}</div>
         {brief.unknownLine !== null && <div style={{ color: '#b45309' }}>⚠ {brief.unknownLine}</div>}
         <div style={{ fontWeight: brief.userActionNeeded ? 700 : 400, color: brief.userActionNeeded ? '#b45309' : undefined }}>{brief.actionLine}</div>
-        {reads.question === 'unreadable' && (
+        {questionIssueKey !== null && (
           <div style={{ color: '#b45309' }}>
-            ⚠ {props.t('statusQuestionReadFailed')}
+            ⚠ {props.t(questionIssueKey)}
             <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
           </div>
         )}
-        {reads.question === 'empty' && (
+        {leadsIssueKey !== null && (
           <div style={{ color: '#b45309' }}>
-            ⚠ {props.t('statusQuestionEmpty')}
+            ⚠ {props.t(leadsIssueKey)}
+            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+          </div>
+        )}
+        {findingsIssueKey !== null && (
+          <div style={{ color: '#b45309' }}>
+            ⚠ {props.t(findingsIssueKey)}
+            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+          </div>
+        )}
+        {evidenceIssueKey !== null && reads.evidence !== 'unreadable' && (
+          <div style={{ color: '#b45309' }}>
+            ⚠ {props.t(evidenceIssueKey)}
             <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
           </div>
         )}
@@ -194,7 +223,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       {/* ⑥ 决策诚实线（指路不复制——谁答的家在 question.md §Decisions） */}
       {passedCount > 0 && (
         <div style={{ marginBottom: 8, fontSize: 12, opacity: 0.55 }}>
-          {props.t('statusDecisionStops', { count: String(passedCount) })}
+          {countText(props.t, passedCount, 'statusDecisionStopsOne', 'statusDecisionStopsOther')}
         </div>
       )}
       {/* ③ 研究问题行 */}
@@ -212,7 +241,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
               <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
             </span>
           ) : (
-            <span>{props.t('statusEvidenceCount', { count: String(face.evidenceCount) })}</span>
+            <span>{countText(props.t, face.evidenceCount, 'statusEvidenceCountOne', 'statusEvidenceCountOther')}</span>
           )}
           {receiptIssue !== null && (
             <span style={{ color: '#b45309' }}>

@@ -27,7 +27,7 @@ interface BriefInputs {
   /** 绑定的 bundle 读取失败（missing / unreadable）；null = 已读或未绑定。 */
   readonly bundleReadFailure?: 'missing' | 'unreadable' | null
   /** question.md 为空/读失败（BUG-361/367）：目标行不得再显示「尚未确认」。 */
-  readonly questionIssue?: 'empty' | 'unreadable' | null
+  readonly questionIssue?: 'empty' | 'unreadable' | 'body-empty' | null
   /** 结构化审查结论未定（readiness 声明缺失/坏、review 为空/读失败）；BUG-363/366。 */
   readonly reviewUnconfirmed?: boolean
   /** 声明与 review.md 冲突（mismatch/ambiguous）；BUG-369。 */
@@ -86,7 +86,7 @@ export interface BusinessBrief {
 export function deriveBusinessBrief(inputs: BriefInputs, t: PackTranslate = translateZh): BusinessBrief {
   const bundleBound = inputs.bundleBound === true
   const bundleReadFailure = inputs.bundleReadFailure === 'missing' || inputs.bundleReadFailure === 'unreadable' ? inputs.bundleReadFailure : null
-  const questionIssue = inputs.questionIssue === 'empty' || inputs.questionIssue === 'unreadable' ? inputs.questionIssue : null
+  const questionIssue = inputs.questionIssue === 'empty' || inputs.questionIssue === 'unreadable' || inputs.questionIssue === 'body-empty' ? inputs.questionIssue : null
   const reviewUnconfirmed = inputs.reviewUnconfirmed === true
   const reviewConflict = inputs.reviewConflict === true
   const kickoffHold = inputs.kickoffHold === true
@@ -108,7 +108,9 @@ export function deriveBusinessBrief(inputs: BriefInputs, t: PackTranslate = tran
     ? t('briefGoalQuestionUnreadable')
     : questionIssue === 'empty'
       ? t('briefGoalQuestionEmpty')
-      : goalKnown ? questionLine : t('briefGoalUnknownPending')
+      : questionIssue === 'body-empty'
+        ? t('briefGoalQuestionBodyEmpty')
+        : goalKnown ? questionLine : t('briefGoalUnknownPending')
   const needless = t('briefActionNone')
   const pendingItems = openItems.length > 0
     ? t('briefPendingItems', { items: openItems.join(t('briefItemsSeparator')) })

@@ -12,6 +12,7 @@ import type { ReactNode } from 'react'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { RunAnchor } from '../../lib/events/hitl-fold.ts'
 import type { RunStep } from '../../lib/run/run-fold.ts'
+import { countText } from '../../lib/shared/i18n.ts'
 
 /** 列位（1 起）：a1=1，steps[0..5]=2..7，a2=8，final=9；回边跨"挖掘列 → a2 列"。 */
 const EV_COL = 5
@@ -32,7 +33,7 @@ export function TrackRail(props: {
 
   const anchorChip = (a: RunAnchor): ReactNode => (
     <span key={a.key} style={{ padding: '2px 8px', borderRadius: 4, fontWeight: a.state === 'pending' ? 700 : 400, background: a.state === 'pending' ? '#f59e0b33' : a.state === 'passed' ? '#22c55e22' : '#0000000d', color: a.state === 'pending' ? '#b45309' : a.state === 'passed' ? '#16a34a' : '#888' }}>
-      ◆{a.label}{a.state === 'pending' && a.questions > 0 ? t('questionCount', { count: String(a.questions) }) : ''} {a.state === 'pending' ? '⏳' : a.state === 'passed' ? '✓' : '·'}
+      ◆{a.label}{a.state === 'pending' && a.questions > 0 ? countText(t, a.questions, 'questionCountOne', 'questionCountOther') : ''} {a.state === 'pending' ? '⏳' : a.state === 'passed' ? '✓' : '·'}
     </span>
   )
   // 步态符号（✓ 已过 / ● 进行中 / ○ 未到 / ? 待定）与重入点虚线描边 = 既有视觉契约；? 只给读失败的步。

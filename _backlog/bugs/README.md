@@ -12,22 +12,26 @@
 > 2026-11-22 起的观察面真实性修复程序（5 张活跃 356–360：读失败三态 / 交付目标 / 交付×审查）= [修复计划](../_archived/settled_issues/2026-11-22-observation-truthfulness-program.md)。
 > 2026-11-22 起的观察面工件真实性修复程序（8 张 361–368：空/坏工件 + 未登记读取点 + 回退可见）= [修复计划](../_archived/settled_issues/2026-11-22-observation-artifact-truth-program.md)。
 > 2026-11-23 起的观察面残余与跨面事实一致性修复程序（8 张 369–376：跨面读取/审查冲突/显示件 watcher/默认值混合键）= [修复计划](../_archived/settled_issues/2026-11-23-observation-residuals-program.md)。
-> 2026-11-23 起的观察面内容实质与英文文案修复程序（8 张活跃 377–384：非空≠实质/失败登记计证据/英文计数与导航）= [修复计划](../issues/2026-11-23-observation-substance-program.md)。
+> 2026-11-23 起的观察面内容实质与英文文案修复程序（8 张 377–384：非空≠实质/失败登记计证据/英文计数与导航）= [修复计划](../_archived/settled_issues/2026-11-23-observation-substance-program.md)。
 
 ## 活跃列表
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [BUG-377](BUG-377-evidence-failed-log-counted-as-card.md) | 排查中 | P2 | evidence/_failed.md 被算成证据——只有失败登记也显示 1 份 + 挖掘 ✓ |
-| [BUG-378](BUG-378-empty-evidence-card-counted.md) | 排查中 | P2 | 0 字节证据卡也被算成 1 份——挖掘 ✓，没有空证据提示 |
-| [BUG-379](BUG-379-english-plural-counts-no-singular.md) | 排查中 | P2 | 英文计数没有单数形态——1 evidence files / 1 questions / 1 checkpoints |
-| [BUG-380](BUG-380-english-method-library-tab-truncated.md) | 排查中 | P2 | 英文主 tab「Method Library」被截成「Method libr...」 |
-| [BUG-381](BUG-381-empty-findings-step-done.md) | 排查中 | P2 | 空 findings.md 让「综合」✓——只查文件在场不查正文 |
-| [BUG-382](BUG-382-empty-leads-step-done.md) | 排查中 | P2 | 空 leads.md 让「侦察」✓——只查文件在场不查正文 |
-| [BUG-383](BUG-383-headings-only-question-false-kickoff.md) | 排查中 | P2 | 只有标题的 question.md 仍「尚未确认」+「✓ 立项」 |
-| [BUG-384](BUG-384-empty-plan-status-silent.md) | 排查中 | P2 | 空 plan.md 图谱报无法解析，状态页无提示 |
+| — | — | — | 当前无活跃卡（2026-11-23：377–384 内容实质/英文批收口） |
 
 ## 最近归档
+
+（2026-11-23 观察面内容实质与英文批（8 张，377–384），批 Note = [2026-11-23-observation-substance](../../notes/implemented/2026-11-23-observation-substance.md)：
+[377](../_archived/fixed_bugs/BUG-377-evidence-failed-log-counted-as-card.md) 失败登记；
+[378](../_archived/fixed_bugs/BUG-378-empty-evidence-card-counted.md) 空证据卡；
+[379](../_archived/fixed_bugs/BUG-379-english-plural-counts-no-singular.md) en 单复数；
+[380](../_archived/fixed_bugs/BUG-380-english-method-library-tab-truncated.md) en tab；
+[381](../_archived/fixed_bugs/BUG-381-empty-findings-step-done.md) 空 findings；
+[382](../_archived/fixed_bugs/BUG-382-empty-leads-step-done.md) 空 leads；
+[383](../_archived/fixed_bugs/BUG-383-headings-only-question-false-kickoff.md) 标题-only question；
+[384](../_archived/fixed_bugs/BUG-384-empty-plan-status-silent.md) 空 plan。
+）
 
 （2026-11-23 观察面残余与跨面事实一致性批（8 张，369–376），批 Note = [2026-11-23-observation-residuals](../../notes/implemented/2026-11-23-observation-residuals.md)：
 [369](../_archived/fixed_bugs/BUG-369-status-readiness-mismatch-misdiagnosed.md) 审查冲突；

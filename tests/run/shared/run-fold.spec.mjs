@@ -63,3 +63,15 @@ test('BUG-361/367 立项步：question 读失败/为空 → unknown，不给 ✓
   assert.equal(steps[0].state, 'unknown');
   assert.notEqual(steps[0].state, 'done');
 });
+
+
+// 负例留证 2026-11-23：BUG-381/382——早步内容空但后续 final 在场，线性推断会把早步补成 done。
+// 红配方：把 leads/findings/evidence 的 unknown 去掉，只留 has=false → 本组红。
+test('BUG-381/382 空内容步骤进 unknown，不被后续 final 补成 done', () => {
+  const steps = deriveSteps({ question: true, team: true, leads: false, evidence: 0, findings: false, review: true, final: true, unknown: ['leads', 'evidence', 'findings'] });
+  const state = Object.fromEntries(steps.map((s) => [s.key, s.state]));
+  assert.equal(state.leads, 'unknown');
+  assert.equal(state.evidence, 'unknown');
+  assert.equal(state.findings, 'unknown');
+  assert.notEqual(state.findings, 'done');
+});
