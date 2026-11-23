@@ -85,7 +85,7 @@ export function appendProvenance({ bundle, date, pick, answered }) {
  */
 export function attributionBundleOf(events) {
   const binding = sessionBindingOf(events);
-  return binding.boundBy === 'write' ? binding.slug : null;
+  return binding.boundBy === 'write' ? (binding.slug ?? null) : null;
 }
 
 /**

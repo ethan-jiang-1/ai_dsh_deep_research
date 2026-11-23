@@ -100,7 +100,7 @@ function writeValue(target: string, value: DefaultsValue): CommandResultLike {
     writeFileSync(temp, serializeDefaults(value), 'utf8')
     renameSync(temp, target)
   } catch (error) {
-    try { rmSync(temp, { force: true }) } catch { /* 清临时文件失败不盖住主错误 */ }
+    try { rmSync(temp, { force: true }) } catch { /* @silent-catch: 清临时文件失败不盖住主错误 */ }
     return failure(`error io ${(error as Error).message}`)
   }
   // 写后回读：文件事实优先，不信内存值。

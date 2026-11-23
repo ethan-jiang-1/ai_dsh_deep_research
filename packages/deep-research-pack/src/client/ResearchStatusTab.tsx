@@ -32,6 +32,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { deriveSteps } from '../lib/run/run-fold.ts'
+import { artifactReadIssueOf } from '../lib/run/artifact-read.ts'
 import { foldHitlPending, type HitlState } from '../lib/events/hitl-fold.ts'
 import { deriveBusinessBrief, type BusinessBrief } from '../lib/run/brief-fold.ts'
 import { countText } from '../lib/shared/i18n.ts'
@@ -89,7 +90,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       lastDecisionKind: null,
       openItems: [],
     }, props.t),
-    [unbound, trust, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery, reads, reviewVerdict, scanSettled, props.t],
+    [trust, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery, reads, reviewVerdict, scanSettled, props.t],
   )
   const receiptIssue = reads.receipt === 'unreadable' || reads.receipt === 'empty'
     ? 'statusReceiptReadFailed'
@@ -117,9 +118,10 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       : reads.review === 'empty'
         ? 'statusReviewEmpty'
         : reviewVerdict === 'unconfirmed' ? 'statusReviewUnconfirmed' : null
-  const planIssueKey = reads.plan === 'unreadable'
+  const planIssue = artifactReadIssueOf(reads.plan)
+  const planIssueKey = planIssue === 'unreadable'
     ? 'statusPlanReadFailed'
-    : reads.plan === 'empty' ? 'statusPlanEmpty' : null
+    : planIssue === 'empty' ? 'statusPlanEmpty' : null
   const finalIssueKey = reads.final === 'unreadable' ? 'statusFinalDirReadFailed' : null
   const stalledBanner = stalledBannerOf(
     { health, bound: trust.kind === 'bound', delivered: delivery !== null, hitlPending: hitl.pending },
@@ -343,14 +345,14 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
 /** 活标题（HITL 挂起时"研究状态 · ⏳ 等你拍板"）——共享 journal 流折算。 */
 export function ResearchStatusTitle(props: PropsRuntime<'sidebar.right.pane.tab.title'> & ResearchStatusTitleInjected): ReactNode {
   const [hitl, setHitl] = useState<HitlState>({ pending: false, since: undefined })
-  const sessionId = props.sessionId
+  const { sessionId, follow } = props
   useEffect(() => {
     if (sessionId === undefined) return
     const controller = new AbortController()
     void (async () => {
       try {
         let events: unknown[] = []
-        for await (const frame of props.follow(sessionId, controller.signal)) {
+        for await (const frame of follow(sessionId, controller.signal)) {
           if (frame.kind === 'history') events = [...frame.events]
           else events = [...events, frame.event]
           setHitl(foldHitlPending(events))
@@ -358,6 +360,6 @@ export function ResearchStatusTitle(props: PropsRuntime<'sidebar.right.pane.tab.
       } catch (err) { /* 活标题 fail-soft；卸载 abort 不算失败 */ if (!controller.signal.aborted) console.error('[ResearchStatusTab] 活标题流失败', err) }
     })()
     return () => { controller.abort() }
-  }, [sessionId])
+  }, [sessionId, follow])
   return hitl.pending ? props.labels.pending : props.labels.idle
 }

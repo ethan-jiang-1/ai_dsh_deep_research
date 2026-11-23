@@ -23,6 +23,44 @@ export type SourceRead = 'ok' | 'absent' | 'unreadable'
 /** 文本工件五态：空（0 字节/纯空白）与非法（JSON 坏）是独立状态，不折成 absent/unreadable。 */
 export type ArtifactState = SourceRead | 'empty' | 'invalid'
 
+/** 编译期穷举守卫：分支必须覆盖闭集全部成员，否则参数类型无法收敛为 `never`。 */
+export function assertNever(value: never): never {
+  throw new Error(`Unexpected union member: ${String(value)}`)
+}
+
+/** `ArtifactState` → 纯读取问题（不检查内容是否有正文；`ok`/`absent` 为 null）。 */
+export function artifactReadIssueOf(state: ArtifactState): 'empty' | 'unreadable' | null {
+  switch (state) {
+    case 'ok':
+    case 'absent':
+      return null
+    case 'empty':
+      return 'empty'
+    case 'unreadable':
+    case 'invalid':
+      return 'unreadable'
+    default:
+      return assertNever(state)
+  }
+}
+
+/** `ArtifactState` × 正文存在性 → 内容问题（`ok` 但无正文 → `'body-empty'`）。 */
+export function artifactBodyIssueOf(state: ArtifactState, hasBody: boolean): 'empty' | 'unreadable' | 'body-empty' | null {
+  switch (state) {
+    case 'ok':
+      return hasBody ? null : 'body-empty'
+    case 'absent':
+      return null
+    case 'empty':
+      return 'empty'
+    case 'unreadable':
+    case 'invalid':
+      return 'unreadable'
+    default:
+      return assertNever(state)
+  }
+}
+
 /** 状态页六个显示事实的读取态（视图/摘要只消费；新增事实必须同时改测试）。 */
 export interface StatusReads {
   readonly bundle: SourceRead

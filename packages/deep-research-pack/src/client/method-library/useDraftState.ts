@@ -234,7 +234,7 @@ export function useDraftState(deps: DraftStateDeps) {
     setLibraryOpen(false)
   }
 
-  const useBuiltinReference = (source: (typeof BUILTIN_PREFERENCES)[number]): void => {
+  const applyBuiltinReference = (source: (typeof BUILTIN_PREFERENCES)[number]): void => {
     if (operationLocked() || !confirmDiscard()) return
     const draftKey = crypto.randomUUID()
     activeDraftKeyRef.current = draftKey
@@ -360,7 +360,7 @@ export function useDraftState(deps: DraftStateDeps) {
     previousRef,
     bumpDraftRevision, resetDraftRevision, dirty, confirmDiscard, operationLocked,
     switchSegment, releaseCoachIfIdle, beginNew, beginEdit, selectMine, selectBuiltin,
-    restartSource, useBuiltinReference, startBlank, startBuiltinSource, startRunSource,
+    restartSource, applyBuiltinReference, startBlank, startBuiltinSource, startRunSource,
     cancel, updateSection, markManual, onNameChange, undoCoach,
   }
 }

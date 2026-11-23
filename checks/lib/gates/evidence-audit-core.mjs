@@ -116,7 +116,10 @@ const hostOf = (u) => { try { return new URL(u).host } catch { return null } }
  * 返回：webUrls（取回事件里出现过的 URL——含搜索结果列表、编码/协议相对/裸域名形态的归一）/
  * bareHosts（只以裸域名形态出现过的 host，仅供域名级判定）/ fetchedOk / fetchFailed（web_fetch 的
  * 成败，按 call 的 url 与 result 的 `Fetched …` vs `Error:` 判定——**MCP 不计入**：浏览器内容里
- * 出现某 URL 不等于"单独抓取过该 URL"，档位不许因此升级）/ webChunks（取回结果正文分片）。
+ * （MCP 不计入：浏览器内容里出现某 URL 不等于"单独抓取过该 URL"，档位不许因此升级）/ webChunks（取回结果正文分片）。
+ * @param {string} root
+ * @param {string | null} [slug]
+ * @param {(path: string) => string | null} [readLog]
  */
 export function buildCorpus(root, slug = null, readLog = skipUnreadableLogReader) {
   const webUrls = new Set()
@@ -196,9 +199,10 @@ export function buildCorpus(root, slug = null, readLog = skipUnreadableLogReader
 /**
  * 审计一个 run bundle（核心逻辑，可导入；keyless）。opts.readLog 注入日志 reader（默认纯
  * reader——.zstd 跳过文件偏红；驱动壳注入 zstd CLI reader 读全帧）。
- * @param bundleDir - run bundle 目录（drt_*）。
- * @param sessionsRoot - 会话日志根。
- * @returns { findings, criticalCount, stats, report }——findings: { level: CRITICAL|MAJOR|INFO, file, kind, detail }。
+ * @param {string} bundleDir - run bundle 目录（drt_*）。
+ * @param {string} sessionsRoot - 会话日志根。
+ * @param {{ readLog?: (path: string) => string | null }} [opts]
+ * @returns {{ findings: Array<{ level: 'CRITICAL'|'MAJOR'|'INFO', file: string, kind: string, detail: string }>, criticalCount: number, stats: any, report: string }}
  */
 // 已知限制（2026-09-26 跑 run 实测，如实记档）：
 //   · ① URL 溯源 = 逐字 / 仅域名 / 都没有 三档——"域名抓过但路径是派生态"不再误判为伪造。
@@ -218,6 +222,7 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = skipUnreadableL
     for (const f of readdirSync(evDir).filter((x) => x.endsWith('.md')).sort()) {
       const raw = readFileSync(join(evDir, f), 'utf8')
       const { fm, body } = splitFrontmatter(raw)
+      /** @type {{ file: string, fm: Record<string, any> | null, claimedUrls: string[], quotes: string[], shortQuotes: string[] }} */
       const rec = { file: f, fm, claimedUrls: [], quotes: [], shortQuotes: [] }
       if (fm?.source_url) rec.claimedUrls.push(fm.source_url)
       rec.claimedUrls.push(...urlsOf(body))

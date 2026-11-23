@@ -57,7 +57,7 @@ export function writeLibraryFileAtomic(cwd: string, text: string): void {
     writeFileSync(fd, text, 'utf8')
     fsyncSync(fd)
   } catch (error) {
-    if (fd !== undefined) try { closeSync(fd) } catch { /* ignore */ }
+    if (fd !== undefined) try { closeSync(fd) } catch { /* @silent-catch: closeSync cleanup must not mask primary error */ }
     rmSync(temp, { force: true })
     throw error
   }

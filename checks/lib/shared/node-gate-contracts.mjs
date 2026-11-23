@@ -61,7 +61,7 @@ export function readinessOf(reviewText) {
  * 要求条件 = `review/` 目录在场（D44 的结构化审查面）；无 `review/` 的旧场回退散文判据。
  * 缺声明、JSON 非法、未知键、值与散文不一致 → `pass:false`（fail-closed）。
  * @param {string} bundleDir run bundle 根。
- * @returns {{pass:boolean, conditional:boolean, source:'declaration'|'prose'|'missing'|'invalid'|'mismatch', detail?:string}}
+ * @returns {import('../../../packages/deep-research-pack/src/lib/review/review-readiness.ts').ReadinessReading}
  */
 export function readinessOfBundle(bundleDir) {
   const reviewPath = join(bundleDir, 'review.md')

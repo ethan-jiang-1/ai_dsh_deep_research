@@ -9,7 +9,7 @@
 /**
  * 捕获目标判定：URL 含主机子串 → 抄写。
  * 子串语义（与 session-log.findGroup 同款）而非 host 解析——仪器宁可多抄（透明，不改
- * 行为）不可漏抄（丢证据）；host 解析器对怪形态（IPv6、userinfo 里的 @）各有陷阱。
+ * 行为）不可漏抄（丢证据）；host 解析器对怪形态（IPv6、userinfo 里的 at 符号）各有陷阱。
  * 缺省子串 = api.deepseek.com（本仓 LLM 流/web_search 的真实端点——先读代码确认端点
  * 再打，技能红线）；fail-closed：空/空白子串与空/非字符串 URL 一律 false——空子串
  * `includes('')` 恒真会静默全捕获，是脚枪不是特性；要全捕获请显式给一个通配度高的子串。

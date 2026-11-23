@@ -43,8 +43,13 @@ export function packagedInputEntries(packDir) {
     .sort()
 }
 
-/** 文件/目录树的最新 mtime（目录本身也算；symlink 不跟随——避免环）。 */
+/**
+ * 文件/目录树的最新 mtime（目录本身也算；symlink 不跟随——避免环）。
+ * @param {string[]} roots
+ * @returns {{ mtimeMs: number, path: string } | null}
+ */
 export function newestMtimeIn(roots) {
+  /** @type {{ mtimeMs: number, path: string } | null} */
   let newest = null
   const visit = (path) => {
     const stat = statSync(path)
@@ -140,7 +145,10 @@ export function artifactFileSetProblems({ artifactEntries, sourceEntries }) {
 
 /**
  * 产物新鲜度：有构建清单时对「源指纹 + artifact 哈希」；无清单才退回 mtime 预检。
- * @returns {{fresh:boolean, artifactMtimeMs:number|null, newest:{mtimeMs:number,path:string}|null, mode:'manifest'|'mtime-only', reason:string}}
+ * @param {string} artifact
+ * @param {string[]} roots
+ * @param {{ toleranceMs?: number, manifestPath?: string | null, artifactEntries?: string[] | null, sourceEntries?: string[] | null }} [opts]
+ * @returns {{fresh:boolean, artifactMtimeMs:number|null, newest:{mtimeMs:number,path:string}|null, mode:'manifest'|'mtime-only'|'file-set', reason:string}}
  */
 export function artifactFreshness(artifact, roots, { toleranceMs = 0, manifestPath = null, artifactEntries = null, sourceEntries = null } = {}) {
   let artifactMtimeMs = null

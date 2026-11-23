@@ -47,7 +47,10 @@ const allocateEphemeralPort = async () => {
   const server = createServer();
   const chosen = await new Promise((resolve, reject) => {
     server.once('error', reject);
-    server.listen(0, '127.0.0.1', () => resolve(server.address().port));
+    server.listen(0, '127.0.0.1', () => {
+      const addr = server.address();
+      resolve(addr && typeof addr === 'object' ? addr.port : 0);
+    });
   });
   await new Promise((resolve) => server.close(resolve));
   return chosen;

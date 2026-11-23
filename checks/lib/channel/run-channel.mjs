@@ -35,8 +35,8 @@ export function guiUrlFromWebLog(text) {
  * 实测：通道 18:47 起、pack `lib/client.js` 02:50 重建，probe 仍报 GREEN——通道加载的是
  * 五天前的镜像。复用通道必须先过镜像门，否则"绿"只是旧页面的绿。
  *
- * @param {{probe: object, expectFace: string, drift: {clean: boolean, detail?: string} | null}} input
- * @returns {{exit: 0|1|2, level: 'GREEN'|'RED'|'NOT-RUN', checks: Array<{id: string, ok: boolean, detail: string}>, reason: string}}
+ * @param {{probe: object, expectFace?: string, drift: {clean: boolean, detail?: string} | null, requireData?: boolean}} input
+ * @returns {{exit: 0|1|2, level: 'GREEN'|'RED'|'NOT-RUN', checks: Array<{id: string, ok: boolean, detail: string}>, dataFace?: string, dataFaceMarker?: string, reason: string}}
  */
 export function runDriverVerdict({ probe, expectFace, drift, requireData = false }) {
   if (drift === null || drift === undefined || drift.clean !== true) {
@@ -94,7 +94,7 @@ export function runDriverVerdict({ probe, expectFace, drift, requireData = false
 /**
  * 探针崩溃/输出不可解析时的判定：仍走同一 verdict 契约，但带 probeError 并落盘。
  * 不返回裸错误——否则 latest-verdict 会停在上一次（可能是 GREEN）。
- * @param {{ error: unknown, expectFace?: string, drift: unknown, requireData?: boolean }} input
+ * @param {{ error: unknown, expectFace?: string, drift: { clean: boolean, detail?: string } | null, requireData?: boolean }} input
  * @returns verdict payload（exit 1）。
  */
 export function probeFailureVerdict({ error, expectFace, drift, requireData = false }) {

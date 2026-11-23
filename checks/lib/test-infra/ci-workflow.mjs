@@ -163,7 +163,8 @@ function smokeFilesOfSegment(rawSegment) {
   while (words[0] === '(' || words[0] === '{') words = words.slice(1)
   while (words.at(-1) === ')' || words.at(-1) === '}') words = words.slice(0, -1)
   if (words[0]?.startsWith('(')) words[0] = words[0].slice(1)
-  if (words.at(-1)?.endsWith(')')) words[words.length - 1] = words.at(-1).slice(0, -1)
+  const tailWord = words.at(-1)
+  if (tailWord !== undefined && tailWord.endsWith(')')) words[words.length - 1] = tailWord.slice(0, -1)
   while (words.length > 0) {
     if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(words[0])) { words = words.slice(1); continue }
     if (WRAPPERS.has(words[0])) { words = words.slice(1); continue }

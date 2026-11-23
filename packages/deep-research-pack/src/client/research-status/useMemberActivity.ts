@@ -53,6 +53,6 @@ export function useMemberActivity({ memberIds, sessionId, follow, t, setMemberSu
       }
     }))
     return () => { alive = false; controller.abort() }
-  }, [memberIds, sessionId, t])
+  }, [memberIds, sessionId, follow, t, setMemberSummaries])
 
 }

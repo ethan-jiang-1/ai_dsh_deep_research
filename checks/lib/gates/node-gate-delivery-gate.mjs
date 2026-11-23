@@ -24,7 +24,7 @@ import { reviewContractIssues } from './review-contract.mjs'
  * 断代：交付日 < AUDIT_CONTRACT_DATE → PRE-CONTRACT 不计红（run bundle 是交付记录；
  * 存量由 RFC 对账步处置）。guides61 §4 时序：evidence-audit 拍板前跑（audit.md 先落盘），
  * v1 记账拍板后落——拍板前 A2 的 v1 缺席 = 预期态（同门②/④），交付后复跑全绿。
- * @returns { status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail }
+ * @returns {{ status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail: string }}
  */
 export function deliveryGate(bundleDir, auditDate, { requireReview = true } = {}) {
   const finalPath = join(bundleDir, 'final.md')
@@ -41,7 +41,7 @@ export function deliveryGate(bundleDir, auditDate, { requireReview = true } = {}
   const quickFactual = runType(bundleDir) === 'quick_factual'
   const delivered = versionFiles.length > 0
   const problems = []
-  if (hasReview) problems.push(...reviewContractIssues(bundleDir, { readinessPass: reviewPass }))
+  if (hasReview) problems.push(...reviewContractIssues(bundleDir, { readinessPass: reviewPass ?? undefined }))
   // A1 的**升级路径**（BUG-039，2026-10-18 端到端实测）：readiness FAIL 且审查轮用尽时，手册与
   // brief-fold 的既定处置 = 「审查未决项已按上限升级到本次审阅——由你裁决」；此时 §Decisions 有
   // HITL2 拍板行（含代理代答 provenance）= 处置已显式记账 → 不判"越过审查前置"（原来只写在修正

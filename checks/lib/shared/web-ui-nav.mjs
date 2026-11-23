@@ -91,7 +91,10 @@ async function showMoreOnce(page, { clickTimeoutMs = 4_000, settleMs = 1_500 } =
  * 类名扫描（`span[class*="_root_"]` 前缀匹配——2026-10-13 收敛版，vendor 行键缺席的旧形态
  * 兜底）。找不到返回 false。点击落空容忍（catch 吞）与原两份一致——调用方靠后续断言/谓词
  * 判成败，不靠本函数报错。
- * @param opts.settleMs 点击后稳定窗（默认 2s = client-load.entry 原值； 传 3s）。
+ * @param {any} page
+ * @param {string} groupTitle
+ * @param {object} [opts]
+ * @param {number} [opts.settleMs] 点击后稳定窗（默认 2s = client-load.entry 原值； 传 3s）。
  */
 export async function expandGroup(page, groupTitle, { settleMs = 2_000 } = {}) {
   const wsRows = page.locator('[data-row-key^="workspace:"]')
@@ -134,8 +137,8 @@ export async function typeIntoSessionSearch(page, text, { settleMs = 2500 } = {}
   await page.evaluate((t) => {
     const i = Array.from(document.querySelectorAll('input')).find((x) => x.getBoundingClientRect().width > 0)
     if (i === undefined) return
-    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-    setter.call(i, t)
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
+    setter?.call(i, t)
     i.dispatchEvent(new Event('input', { bubbles: true }))
   }, text)
   await page.waitForTimeout(settleMs)
@@ -154,7 +157,7 @@ export async function typeIntoSessionSearch(page, text, { settleMs = 2500 } = {}
 export async function searchSessionByTitle(page, title, { settleMs = 2500 } = {}) {
   const opened = await page.evaluate(() => {
     const b = document.querySelector('[aria-label="Search sessions"]')
-    if (b === null) return false
+    if (!(b instanceof HTMLElement)) return false
     b.click()
     return true
   })
@@ -168,19 +171,21 @@ export async function searchSessionByTitle(page, title, { settleMs = 2500 } = {}
  * 点搜索结果（**搜索结果不带 `data-row-key`**——2026-10-18 实测：搜索后 `[data-row-key]` 计数 0，
  * 而搜索前列表里是有行键的；故只能按文本点最具体的那个匹配行）。点完由调用方复核
  * "主视图 session id 是否切到目标"（hitl-answer 已有该复核，点错也不代答）。
- * @param page - Playwright Page（鸭子类型）。
- * @param title - 目标会话标题。
- * @param settleMs - 点击后稳定窗。
- * @returns 是否点到（不代表切换成功）。
+ * @param {any} page - Playwright Page（鸭子类型）。
+ * @param {string} title - 目标会话标题。
+ * @param {object} [opts]
+ * @param {number} [opts.settleMs] - 输入后的稳定窗。
+ * @returns {Promise<boolean>} 是否点到（不代表切换成功）。
  */
 export async function clickSearchResultByTitle(page, title, { settleMs = 2500 } = {}) {
   const clicked = await page.evaluate((t) => {
     const nodes = [...document.querySelectorAll('button,a,div,li,span')]
-      .filter((n) => n.getClientRects().length > 0 && n.getBoundingClientRect().x < 320)
+      .filter((n) => n instanceof HTMLElement && n.getClientRects().length > 0 && n.getBoundingClientRect().x < 320)
       .filter((n) => ((n.textContent ?? '').trim()).includes(t))
       .sort((a, b) => (a.textContent ?? '').length - (b.textContent ?? '').length)
-    if (nodes.length === 0) return false
-    nodes[0].click()
+    const target = nodes[0]
+    if (!(target instanceof HTMLElement)) return false
+    target.click()
     return true
   }, title)
   await page.waitForTimeout(settleMs)
@@ -211,8 +216,13 @@ export function locateSessionStrategy(obs) {
  *      workspace 行；手风琴回正（点后行数不增反减 = 把已展开的组点收了 → 再点一次）；
  *   ③ 通用扫展：逐个展开仍折叠的组行（aria-expanded，无具名假设——hitl-answer 语义）；
  *   ④ 「Show N more」逐层（openSessionByRowKey 原语义：40 层上限）。
- * @param opts.groupTitle 具名组步的组名（null 跳过该步）；sweepAttempts / showMoreRounds 上限。
- * @returns `{ row, via }`（via = 'direct'|'named-group'|'sweep'|'show-more'）或 null。
+ * @param {any} page
+ * @param {string} sessionId
+ * @param {object} [opts]
+ * @param {string | null} [opts.groupTitle] 具名组步的组名（null 跳过该步）；sweepAttempts / showMoreRounds 上限。
+ * @param {number} [opts.sweepAttempts]
+ * @param {number} [opts.showMoreRounds]
+ * @returns {Promise<{ row: any, via: string } | null>}（via = 'direct'|'named-group'|'sweep'|'show-more'）或 null。
  */
 export async function revealSessionRow(page, sessionId, opts = {}) {
   const { groupTitle = DEFAULT_GROUP_TITLE, sweepAttempts = 300, showMoreRounds = 40 } = opts
@@ -332,7 +342,12 @@ export async function clickRowByText(page, text, opts = {}) {
  * **等本轮行键真的 `aria-selected="true"`**（与 client-load 的 activeSessionRowKey 同源）；
  * 不成立 → `{ found: true, opened: false, reason }`。`found` 语义保持向后兼容（找到并点了行），
  * 新判据是 `opened`；旧调用方不读它也不改变行为。
- * @returns {{ found: boolean, opened: boolean, reason?: string, via: 'direct'|'named-group'|'sweep'|'show-more'|'search'|'miss', tried: string[] }}。
+ * 展开组/深列表后重试。
+ * @param {any} page
+ * @param {string} sessionId
+ * @param {string | null} [title]
+ * @param {object} [opts]
+ * @returns {Promise<{ found: boolean, opened: boolean, reason?: string, via: 'direct'|'named-group'|'sweep'|'show-more'|'search'|'miss', tried: string[] }>}。
  */
 export async function openSessionById(page, sessionId, title = null, opts = {}) {
   const { clickTimeoutMs = 8_000, searchSettleMs = 2500, activateTimeoutMs = 5_000 } = opts

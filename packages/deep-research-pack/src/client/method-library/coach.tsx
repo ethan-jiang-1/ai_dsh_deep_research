@@ -198,7 +198,7 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
         setTimeout(() => { reference.release() }, 0)
       }
     }
-  }, [sessionId, draftKey, ensure, onCoach, onError])
+  }, [sessionId, draftKey, ensure, onCoach, onError, t])
 
   useEffect(() => {
     if (coach === null || host === null) return undefined

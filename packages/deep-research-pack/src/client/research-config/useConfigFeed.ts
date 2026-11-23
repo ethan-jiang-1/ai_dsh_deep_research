@@ -61,7 +61,7 @@ export function useConfigFeed(props: ConfigFeedInput) {
   // 2026-10-21 方法库迁移：侧栏只留本次研究摘要 + 入口；管理/编辑在主界面 conversation.view。
   const COMPACT = true
 
-  const sessionId = props.sessionId
+  const { sessionId, readLibrary, follow, runSource } = props
   const repliedMarker = useRef(0)
   const diffBase = useRef<readonly LibraryEntry[] | null>(null)
   /** 卸载闸：落盘对账是有界轮询（20×3s），组件卸载后不该继续发 RPC／setState。 */
@@ -72,6 +72,7 @@ export function useConfigFeed(props: ConfigFeedInput) {
   sessionRef.current = sessionId
   const epochRef = useRef<FeedEpoch>({ current: sessionId, seq: 0 })
   const reloadControllerRef = useRef<AbortController | null>(null)
+  const abortReload = useCallback((): void => { reloadControllerRef.current?.abort() }, [])
 
   const reload = useCallback(async (sid: SessionId): Promise<readonly LibraryEntry[]> => {
     const seq = ++epochRef.current.seq
@@ -80,20 +81,21 @@ export function useConfigFeed(props: ConfigFeedInput) {
     const controller = new AbortController()
     reloadControllerRef.current = controller
     // 完整读面（readLibrary 分页到 eof）：固定 1000 行会在 >1000 行时静默短读（BUG-088）。
-    const result = await props.readLibrary(sid, LIBRARY_PATH, controller.signal)
+    const result = await readLibrary(sid, LIBRARY_PATH, controller.signal)
     const folded = result.kind === 'ok' ? foldLibrary(result.text) : []
     if (!isReloadCurrent(epochRef.current, sid, seq) || sessionRef.current !== sid) return folded
     if (result.kind === 'ok') { setEntries(folded); setLibraryRead('ok') }
     else if (result.kind === 'absent') { setEntries([]); setLibraryRead('absent') }
     else { setEntries(null); setLibraryRead('unreadable') }
     return folded
-  }, [props.readLibrary])
+  }, [readLibrary])
 
   useEffect(() => {
     // 切会话：取消上一轮读 + 推进 epoch（旧 resolve 不再回写，BUG-086）；交互态归零（BUG-108）。
-    reloadControllerRef.current?.abort()
-    epochRef.current.seq += 1
-    epochRef.current.current = sessionId
+    const epoch = epochRef.current
+    abortReload()
+    epoch.seq += 1
+    epoch.current = sessionId
     setReceiptBase(null)
     setReceiptDiff(null)
     setReplied(false)
@@ -108,10 +110,10 @@ export function useConfigFeed(props: ConfigFeedInput) {
     if (sessionId === undefined) { setEntries(null); setLibraryRead('absent'); return }
     void reload(sessionId)
     return () => {
-      reloadControllerRef.current?.abort()
-      epochRef.current.seq += 1
+      abortReload()
+      epoch.seq += 1
     }
-  }, [sessionId, reload])
+  }, [sessionId, reload, abortReload])
 
   // journal 流（只为本面板的两件事：会话绑定 → bundle 定位；发送后的 assistant 事件 → 已回话）。
   useEffect(() => {
@@ -119,17 +121,15 @@ export function useConfigFeed(props: ConfigFeedInput) {
     const controller = new AbortController()
     void (async () => {
       try {
-        for await (const frame of props.follow(sessionId, controller.signal)) {
+        for await (const frame of follow(sessionId, controller.signal)) {
           setEvents((prev) => (frame.kind === 'history' ? [...frame.events] : [...prev, frame.event]))
         }
       } catch {
-        // 流失败不打断面板：绑定与回话信号退化为"未知"，其余面照常（fail-soft 同状态页签）。
+        /* @silent-catch: 流失败不打断面板：绑定与回话信号退化为"未知"，其余面照常（fail-soft 同状态页签）。 */
       }
     })()
     return () => controller.abort()
-    // 依赖只留 sessionId：注入面闭包（follow/listDir/readFile）不进依赖——状态页签与
-    // useMemberActivity 同款约定（闭包标识可变时会把订阅/扫描打成重复回路）。
-  }, [sessionId])
+  }, [sessionId, follow])
 
   // 「Lead 已回话」：只看**本面板发出的那条指令之后**出现的 assistant 事件（发送前的不算）。
   useEffect(() => {
@@ -153,26 +153,25 @@ export function useConfigFeed(props: ConfigFeedInput) {
     let stopped = false
     const controller = new AbortController()
     void (async () => {
-      const opened = await openRun(props.runSource(sid), `drt_${slug}`, { signal: controller.signal })
+      const opened = await openRun(runSource(sid), `drt_${slug}`, { signal: controller.signal })
       if (stopped) return
       if (!opened.ok) {
         setAdoption(foldMethodAdoption(null, { bundle: opened.reason !== 'missing', question: false }))
         return
       }
       const view = opened.value
-      const hasQuestion = view.hasFile('question.md')
-      if (!hasQuestion) {
+      const art = await readArtifact(view, 'question.md', { signal: controller.signal })
+      if (stopped) return
+      if (art.state === 'absent') {
         setAdoption(foldMethodAdoption(null, { bundle: true, question: false, questionState: 'absent' }))
         return
       }
-      const art = await readArtifact(view, 'question.md', { signal: controller.signal })
-      if (stopped) return
       setAdoption(foldMethodAdoption(art.state === 'ok' ? art.text : null, {
         bundle: true, question: true, questionState: art.state,
       }))
     })()
     return () => { stopped = true; controller.abort() }
-  }, [sessionId, boundSlug, props.runSource])
+  }, [sessionId, boundSlug, runSource])
 
   /** 回执文案（三态优先级 = 失败 > 已落盘 > 已回话 > 已发送）。 */
   const receipt = receiptBase === null

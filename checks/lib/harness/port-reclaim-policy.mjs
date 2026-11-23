@@ -16,6 +16,8 @@ export const isOwnListener = (command) => {
 /**
  * 探针启动前端口准备（BUG-136）：先尝试按归属策略回收首选端口；若端口仍被非本仓进程占住或无法清空，
  * 自动分配临时空闲端口，避免探针自锁。
+ * @param {number} preferredPort
+ * @param {{ reclaim: (port: number) => Promise<string | null>, allocateFreePort: () => Promise<number>, onFallback?: (from: number, to: number, reason: string) => void }} opts
  */
 export async function resolveProbePort(preferredPort, { reclaim, allocateFreePort, onFallback = () => {} }) {
   const stale = await reclaim(preferredPort)

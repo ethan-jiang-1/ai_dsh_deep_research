@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { deriveAnchors, foldHitlPending, type HitlState } from '../../lib/events/hitl-fold.ts'
 import { deriveSteps, latestRunVersion } from '../../lib/run/run-fold.ts'
-import { readArtifact, readStateOf, type StatusReads } from '../../lib/run/artifact-read.ts'
+import { assertNever, artifactBodyIssueOf, readArtifact, readStateOf, type StatusReads } from '../../lib/run/artifact-read.ts'
 import { hasBodyText, isEvidenceCard, isEvidenceCardName, questionBodyLineOf } from '../../lib/run/artifact-content.ts'
 import { foldActivityRows, type ActivityRow } from '../../lib/events/activity-fold.ts'
 import type { MemberActivitySummary } from '../../lib/events/member-activity.ts'
@@ -72,6 +72,7 @@ export interface StatusFeed {
 }
 
 export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
+  const { sessionId, follow, runSource, revealStatusTab, t, useSessions } = props
   const [rows, setRows] = useState<readonly ActivityRow[]>([])
   const [hitl, setHitl] = useState<HitlState>({ pending: false, since: undefined })
   const [journalEvents, setJournalEvents] = useState<readonly unknown[]>([])
@@ -102,18 +103,14 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   //    通道探明材料实证：spawn_teammate 返回不带 id）。2026-10-21 复跑实红：`useProjection`
   //    在切到没有 agentTeam 的会话时会保留上一条投影（活动流已切、队员区仍是别家的 roster）；
   //    改用 `useSessions` 按 sessionId 取，缺席即 undefined，不冒充。
-  const useSessions = props.useSessions
-  const team: TeamProjection | undefined = useSessions !== undefined
-    ? useSessions((state) => props.sessionId === undefined
-      ? undefined
-      : state.projectionsBySession[props.sessionId]?.values.agentTeam)
-    : undefined
+  const team: TeamProjection | undefined = useSessions((state) => sessionId === undefined
+    ? undefined
+    : state.projectionsBySession[sessionId]?.values.agentTeam)
   const members = team?.members.filter((m) => m.role === 'teammate') ?? []
   const memberIds = members.map((m) => m.id).sort().join(',')
 
   // ① journal 流 → 活动行 + HITL 谓词 + 会话绑定输入
   useEffect(() => {
-    const sessionId = props.sessionId
     if (sessionId === undefined) return
     const controller = new AbortController()
     trustRef.current = { kind: 'unbound' }
@@ -136,17 +133,17 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     void (async () => {
       try {
         let events: unknown[] = []
-        for await (const frame of props.follow(sessionId, controller.signal)) {
+        for await (const frame of follow(sessionId, controller.signal)) {
           if (frame.kind === 'history') events = [...frame.events]
           else events = [...events, frame.event]
           setJournalEvents(events)
           setJournalSeen(true)
-          setRows(foldActivityRows(events, props.t))
+          setRows(foldActivityRows(events, t))
           const next = foldHitlPending(events)
           setHitl(next)
           // 挂起信号显性化（RFC right-pane-ux-debt）：false→true 迁移时打开本页签——
           // openTab 落定时右栏同步骤展开；页签体折叠态保持挂载，观察者常在。
-          if (next.pending && !prevPending.current) props.revealStatusTab()
+          if (next.pending && !prevPending.current) revealStatusTab()
           prevPending.current = next.pending
           const nextTrust = bindingTrust(events)
           // 全值比对（BUG-001 附带修复）：只比 slug 会漏 boundBy 翻转（同 slug 的 read→write，
@@ -163,24 +160,24 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
       }
     })()
     return () => { controller.abort() }
-  }, [props.sessionId, props.t])
+  }, [sessionId, follow, revealStatusTab, t])
 
   // 切换会话时重开状态页签（F1）：仅在"上一个会话正被观察"时触发；初始挂载与
   // 未观察会话之间的切换不动作（不覆盖用户刻意收起的常态——只在观察被切断时续上）。
   useEffect(() => {
     const prev = prevSidRef.current
-    if (prev !== undefined && prev !== props.sessionId && wasObservingRef.current) {
-      props.revealStatusTab()
+    if (prev !== undefined && prev !== sessionId && wasObservingRef.current) {
+      revealStatusTab()
     }
-    prevSidRef.current = props.sessionId
-  }, [props.sessionId])
+    prevSidRef.current = sessionId
+  }, [sessionId, revealStatusTab])
 
   // ⑦ 队员动作流（member-activity-stream）：roster 变化即重开多路 follow。
   useMemberActivity({
     memberIds,
-    sessionId: props.sessionId,
-    follow: props.follow,
-    t: props.t,
+    sessionId,
+    follow,
+    t,
     setMemberSummaries,
   })
 
@@ -192,7 +189,6 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   // ask 拍板后 → 落笔前）同样错呈旧 run——kickoffSeen（ask_user_question 调用或
   // research-brief skill 加载 = 本会话在开新 run）把整个立项轨道的仅读绑定都抑制。
   useEffect(() => {
-    const sessionId = props.sessionId
     if (sessionId === undefined || trust.kind !== 'bound') {
       setFace(null)
       setReceiptDelivery(null)
@@ -206,19 +202,21 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     setKickoffHold(false)
     const boundSlug = trust.slug
     let stopped = false
+    let scanController: AbortController | null = null
     const scan = async (): Promise<void> => {
       try {
-        const signal = new AbortController().signal
-        const opened = await openRun(props.runSource(sessionId), `drt_${boundSlug}`, { signal })
+        scanController?.abort()
+        const currentController = new AbortController()
+        scanController = currentController
+        const { signal } = currentController
+        const opened = await openRun(runSource(sessionId), `drt_${boundSlug}`, { signal })
         if (stopped) return
         if (!opened.ok) {
           setFace(null)
           setReceiptDelivery(null)
           setReads({ ...ABSENT_READS, bundle: readStateOf(opened) })
           setReviewVerdict('absent')
-        setReviewDetail(null)
           setReviewDetail(null)
-    setReviewDetail(null)
           setScanSettled(true)
           return
         }
@@ -279,9 +277,20 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const reading = readinessOfSources({ reviewText, declarationText, hasReviewDir: names.has('review') })
         // 结论未定：空/读失败的 review 或 readiness 声明；或 readiness 的 missing/invalid/mismatch/ambiguous。
         // 不把非 declaration/prose 的 source 折成 null 后让步骤条按 read ok 给 ✓（BUG-363/366）。
-        const reviewVerdict = reviewVerdictOf(reading, { review: reviewArt.state, readiness: readinessArt.state })
-        const reviewFail = reviewVerdict === 'fail' ? true : reviewVerdict === 'pass' ? false : null
-        setReviewVerdict(reviewVerdict)
+        const nextReviewVerdict = reviewVerdictOf(reading, { review: reviewArt.state, readiness: readinessArt.state })
+        const reviewFail = (() => {
+          switch (nextReviewVerdict) {
+            case 'fail': return true
+            case 'pass': return false
+            case 'conflict':
+            case 'unconfirmed':
+            case 'absent':
+              return null
+            default:
+              return assertNever(nextReviewVerdict)
+          }
+        })()
+        setReviewVerdict(nextReviewVerdict)
         setReviewDetail(reading.detail ?? null)
         const questionArt = await readArtifact(view, 'question.md', { signal })
         if (stopped) return
@@ -290,16 +299,14 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const raw = questionBody
         const flat = raw
         const firstLine = flat === null || flat === '' ? null : flat.length > 72 ? `${flat.slice(0, 72)}…` : flat
-        const questionIssue = questionArt.state === 'unreadable'
-          ? 'unreadable'
-          : questionArt.state === 'empty'
-            ? 'empty'
-            : questionArt.state === 'ok' && questionBody === null ? 'body-empty' : null
+        const questionIssue = artifactBodyIssueOf(questionArt.state, questionBody !== null)
         const leadsBody = leadsArt.state === 'ok' && hasBodyText(leadsArt.text)
         const findingsBody = findingsArt.state === 'ok' && hasBodyText(findingsArt.text)
-        const bodyIssue = (art: 'ok' | 'absent' | 'unreadable' | 'empty' | 'invalid') => art === 'empty' ? 'empty' : art === 'unreadable' ? 'unreadable' : art === 'ok' ? 'body-empty' : null
-        const leadsIssue = leadsArt.state === 'ok' ? (leadsBody ? null : 'body-empty') : bodyIssue(leadsArt.state)
-        const findingsIssue = findingsArt.state === 'ok' ? (findingsBody ? null : 'body-empty') : bodyIssue(findingsArt.state)
+        const finalArt = await readArtifact(view, 'final.md', { signal })
+        if (stopped) return
+        const finalBody = finalArt.state === 'ok' && hasBodyText(finalArt.text)
+        const leadsIssue = artifactBodyIssueOf(leadsArt.state, leadsBody)
+        const findingsIssue = artifactBodyIssueOf(findingsArt.state, findingsBody)
         const evidenceIssue = evidenceState === 'unreadable'
           ? 'unreadable'
           : evidenceCount === 0 && (evidenceEntries.length > 0 || evidenceFailedLog)
@@ -333,25 +340,25 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
             leads: leadsBody,
             evidence: evidenceCount,
             findings: findingsBody,
-            review: reviewVerdict !== 'unconfirmed' && reviewVerdict !== 'conflict',
-            final: view.hasFile('final.md'),
+            review: nextReviewVerdict !== 'unconfirmed' && nextReviewVerdict !== 'conflict',
+            final: finalBody,
             unknown: [
               ...(questionIssue !== null ? ['question'] : []),
               ...(leadsIssue !== null ? ['leads'] : []),
               ...(evidenceIssue !== null ? ['evidence'] : []),
               ...(findingsIssue !== null ? ['findings'] : []),
-              ...(reviewVerdict === 'unconfirmed' || reviewVerdict === 'conflict' ? ['review'] : []),
+              ...(nextReviewVerdict === 'unconfirmed' || nextReviewVerdict === 'conflict' ? ['review'] : []),
             ],
-          }, props.t),
+          }, t),
           evidenceCount,
-          delivered: view.hasFile('final.md'),
+          delivered: finalBody,
           versions,
           reviewFail,
           planText,
           planSnapshotNames,
           questionText,
           finalFileNames,
-          hasFinal: view.hasFile('final.md'),
+          hasFinal: finalBody,
         })
       } catch (cause) {
         console.error('[research-status] scan 异常', String(cause))
@@ -365,8 +372,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     }
     void scan()
     const timer = setInterval(() => { void scan() }, REFRESH_MS)
-    return () => { stopped = true; clearInterval(timer) }
-  }, [props.sessionId, trust, journalSeen, props.runSource, props.t, retryNonce])
+    return () => { stopped = true; clearInterval(timer); scanController?.abort() }
+  }, [sessionId, trust, journalSeen, runSource, t, retryNonce])
 
   // 锚点 = 混合折算（尾窗约束的实测产物，RFC cockpit-flow-face）：passed 态由文件事实承载
   // （question.md/final.md 在场），pending 态由 journal 尾窗承载——face 缺席时退化为纯尾窗判定。
@@ -384,8 +391,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   }, [])
   const health = useMemo(() => (journalEvents.length === 0 ? null : runHealthOf(journalEvents, { now: nowTick })), [journalEvents, nowTick])
   const anchors = useMemo(
-    () => deriveAnchors(journalEvents, face !== null ? { question: face.hasQuestion, delivered: delivery !== null } : undefined, props.t),
-    [journalEvents, face, props.t],
+    () => deriveAnchors(journalEvents, face !== null ? { question: face.hasQuestion, delivered: delivery !== null } : undefined, t),
+    [journalEvents, face, delivery, t],
   )
 
   // rerun 版本面（只读投影）：交付版本由 present 见证 + `final/vN` 版本账推定；

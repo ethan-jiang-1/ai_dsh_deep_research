@@ -12,6 +12,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  finalTextFromBundle,
   finalVersionOf,
   finalVersionsIn,
   hasFinalVersion,
@@ -51,6 +52,19 @@ test('目录扫描：final/ 只收版本账，升序；目录缺席 = 空（不�
   assert.deepEqual(finalVersionsIn(join(dir, 'final')), [1, 2]);
   assert.deepEqual(readableVersionsIn(join(dir, 'final')), [2]);
   assert.equal(hasFinalVersion(join(dir, 'final')), true);
+});
+
+test('finalTextFromBundle：root final.md 优先，缺席时取 final/ 最新 vN.md（protocol-audit 回归）', (t) => {
+  const bundle = mkdtempSync(join(tmpdir(), 'final-text-bundle-'));
+  t.after(() => rmSync(bundle, { recursive: true, force: true }));
+  assert.equal(finalTextFromBundle(bundle), '', '无终稿文件时返回空串');
+  mkdirSync(join(bundle, 'final'), { recursive: true });
+  writeFileSync(join(bundle, 'final', 'v1.md'), 'v1 content\n');
+  writeFileSync(join(bundle, 'final', 'v2.md'), 'v2 content\n');
+  writeFileSync(join(bundle, 'final', 'readable-v2.md'), 'reader v2\n');
+  assert.equal(finalTextFromBundle(bundle), 'v2 content\n', 'root 缺席时取最新版本 v2.md');
+  writeFileSync(join(bundle, 'final.md'), 'root final\n');
+  assert.equal(finalTextFromBundle(bundle), 'root final\n', 'root 在场时优先返回 root');
 });
 
 test('run-fold.latestRunVersion 与单一判据同源（边界形态一致）', () => {

@@ -219,6 +219,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     try {
       opener(leadSessionId, member.id)
     } catch (cause) {
+      /* @silent-catch: opener telemetry is fail-soft in read-only graph pane */
       console.error('[research-graph] 打开负责人失败', String(cause))
     }
   }
@@ -232,6 +233,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       setCopiedId(node.id)
       setTimeout(() => { setCopiedId((current) => current === node.id ? null : current) }, 1800)
     }).catch((cause: unknown) => {
+      /* @silent-catch: clipboard write failure is non-fatal in browser pane */
       console.error('[research-graph] 复制引用失败', String(cause))
     })
   }

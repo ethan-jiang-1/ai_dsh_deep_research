@@ -27,7 +27,7 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
   FINAL_LEDGER_DIR, FINAL_NAME, FINAL_REVIEW_NAME, finalReadPlan, finalTargetOf, finalViewOf, sessionFileOf, watchTargetOf,
 } from '../lib/run/final-target.ts'
-import { readArtifact, type ArtifactState } from '../lib/run/artifact-read.ts'
+import { assertNever, readArtifact, type ArtifactState } from '../lib/run/artifact-read.ts'
 import { openRun, type RunSource } from '../lib/run/run-context.ts'
 import { latestRunVersion } from '../lib/run/run-fold.ts'
 import { readinessOfSources, reviewVerdictOf, type ReviewVerdict } from '../lib/review/review-readiness.ts'
@@ -98,6 +98,8 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   visibleRef.current = tab.tab.visible
   const versionRef = useRef<string | null>(null)
   const aliveRef = useRef(true)
+  const manualControllerRef = useRef<AbortController | null>(null)
+  useEffect(() => () => { manualControllerRef.current?.abort() }, [])
 
   const [text, setText] = useState<string | null>(null)
   const [readerText, setReaderText] = useState<string | null>(null)
@@ -257,6 +259,13 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     return () => { clearInterval(timer); controller.abort() }
   }, [sessionId, load])
 
+  const reloadManually = (): void => {
+    manualControllerRef.current?.abort()
+    const next = new AbortController()
+    manualControllerRef.current = next
+    void load(next.signal)
+  }
+
   if (file === null || plan === null) return <div style={MESSAGE}>{props.t('notFinalFile')}</div>
   if (loading && text === null) return <div style={MESSAGE}>{props.t('finalLoading')}</div>
   if (failure !== null && text === null) {
@@ -264,7 +273,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       <div style={MESSAGE}>
         {props.t(failure)}
         <div style={{ marginTop: 6 }}>
-          <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal) }}>{props.t('retry')}</button>
+          <button type="button" style={LINK_BUTTON} onClick={reloadManually}>{props.t('retry')}</button>
         </div>
       </div>
     )
@@ -290,11 +299,18 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
         : decision.notice === 'auditUnreadable'
           ? 'finalBodyReadFailedFallback'
           : decision.notice === 'auditMissing' ? 'finalBodyMissingFallback' : null
-  const reviewStateCopy = reviewVerdict === 'fail'
-    ? props.t('reviewFailed')
-    : reviewVerdict === 'conflict'
-      ? props.t('reviewConflict')
-      : reviewVerdict === 'unconfirmed' ? props.t('reviewUnconfirmed') : null
+  const reviewStateCopy = (() => {
+    switch (reviewVerdict) {
+      case 'fail': return props.t('reviewFailed')
+      case 'conflict': return props.t('reviewConflict')
+      case 'unconfirmed': return props.t('reviewUnconfirmed')
+      case 'pass':
+      case 'absent':
+        return null
+      default:
+        return assertNever(reviewVerdict)
+    }
+  })()
   const state = reviewStateCopy ?? (showingReader
     ? shownVersion !== null ? props.t('readerEditionVersion', { version: String(shownVersion) }) : `${props.t('readerEdition')}${props.t('notFinalized')}`
     : shownVersion !== null && shownVersion >= 1
@@ -303,9 +319,18 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const stateStyle = reviewStateCopy !== null
     ? { color: '#b45309', fontWeight: 600 }
     : undefined
-  const reviewNoticeKey = reviewVerdict === 'conflict'
-    ? 'finalReviewConflict'
-    : reviewVerdict === 'unconfirmed' ? 'finalReviewUnconfirmed' : null
+  const reviewNoticeKey = (() => {
+    switch (reviewVerdict) {
+      case 'conflict': return 'finalReviewConflict'
+      case 'unconfirmed': return 'finalReviewUnconfirmed'
+      case 'pass':
+      case 'fail':
+      case 'absent':
+        return null
+      default:
+        return assertNever(reviewVerdict)
+    }
+  })()
   const toggleLabel = hasReader && hasAudit
     ? view === 'reader'
       ? props.t('auditToggleLabel', { version: shownVersion !== null ? props.t('versionV', { version: String(shownVersion) }) : '' })
@@ -322,19 +347,19 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       {stale && (
         <div style={{ ...BAR, margin: '8px 12px 0', flexShrink: 0 }}>
           <span style={{ flex: 1 }}>{props.t('finalUpdated')}</span>
-          <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal) }}>{props.t('finalReload')}</button>
+          <button type="button" style={LINK_BUTTON} onClick={reloadManually}>{props.t('finalReload')}</button>
         </div>
       )}
       {noticeKey !== null && (
         <div style={{ ...BAR, margin: '8px 12px 0', flexShrink: 0 }}>
           <span style={{ flex: 1 }}>{props.t(noticeKey)}</span>
-          <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal) }}>{props.t('retry')}</button>
+          <button type="button" style={LINK_BUTTON} onClick={reloadManually}>{props.t('retry')}</button>
         </div>
       )}
       {reviewNoticeKey !== null && (
         <div style={{ ...BAR, margin: '8px 12px 0', flexShrink: 0 }} title={reviewDetail ?? undefined}>
           <span style={{ flex: 1 }}>{props.t(reviewNoticeKey)}</span>
-          <button type="button" style={LINK_BUTTON} onClick={() => { void load(new AbortController().signal) }}>{props.t('retry')}</button>
+          <button type="button" style={LINK_BUTTON} onClick={reloadManually}>{props.t('retry')}</button>
         </div>
       )}
       <div style={{ ...STRIP, padding: '3px 12px 7px', flexShrink: 0 }} title={displayedPath}>

@@ -220,7 +220,7 @@ export function scanCiCommands(text) {
     const at = index + 1
     if (blockIndent !== null) {
       if (line.trim() === '') continue
-      const indent = line.match(/^\s*/)[0].length
+      const indent = (line.match(/^\s*/) ?? [''])[0].length
       if (indent > blockIndent) {
         const { command, paths } = commandPathsOf(line)
         out.push({ line: at, form: 'ci-run', kind: 'command', text: line.trim(), command: command || line.trim(), paths })
@@ -231,7 +231,7 @@ export function scanCiCommands(text) {
     const m = line.match(/^\s*(?:-\s*)?run:\s*(.*)$/)
     if (!m) continue
     const value = m[1].trim()
-    if (/^[|>][+-]?\d*$/.test(value)) { blockIndent = line.match(/^\s*/)[0].length; continue }
+    if (/^[|>][+-]?\d*$/.test(value)) { blockIndent = (line.match(/^\s*/) ?? [''])[0].length; continue }
     const { command, paths } = commandPathsOf(value)
     out.push({ line: at, form: 'ci-run', kind: 'command', text: value, command: command || value, paths })
   }

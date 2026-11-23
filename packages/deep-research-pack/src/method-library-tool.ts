@@ -96,7 +96,7 @@ export function apply(ctx: Context): void {
       const expectedDefaults = args.defaultAction === 'set' ? [result.name] : priorDefaults
       const actualNames = savedEntries.map((entry) => entry.name)
       if (savedMatches.length !== 1 || saved === undefined
-        || (result.action === 'created' && priorNames.some((name) => !actualNames.includes(name)))
+        || (result.action === 'created' && priorNames.some((priorName) => !actualNames.includes(priorName)))
         || JSON.stringify(defaults.map((entry) => entry.name)) !== JSON.stringify(expectedDefaults)
         || saved.provenance !== parsed.provenance
         || saved.sections.source !== parsed.sections.source
@@ -138,20 +138,20 @@ export function apply(ctx: Context): void {
       if (session === undefined || session.header.agentPreset !== 'method-editor') {
         throw new Error('method_library_set_default 只允许 Method Editor owning session')
       }
-      const name = args.action === 'set' ? args.name : undefined
+      const requestedName = args.action === 'set' ? args.name : undefined
       const state = ctx.sessionProjections.stateOf(session, 'method-library-operation')
       if (state === undefined || !hasMethodLibraryClaim(state, {
         operationId: args.operationId,
         action: args.action === 'set' ? 'set-default' : 'clear-default',
-        name,
+        name: requestedName,
         callId: exec.callId,
       })) throw new Error('默认操作没有匹配到当前 UI 操作，拒绝修改')
-      if (args.action === 'set' && (name === undefined || name.trim() === '')) throw new Error('设默认需要方法名称')
+      if (args.action === 'set' && (requestedName === undefined || requestedName.trim() === '')) throw new Error('设默认需要方法名称')
       const cwd = session.header.cwd
       if (cwd === undefined) throw new Error('默认操作需要 owning agent session（没有 cwd）')
       const mutated = mutateMethodLibrary(cwd, (text) => {
         const result = args.action === 'set'
-          ? setDefaultMethodEntry(text, name ?? '')
+          ? setDefaultMethodEntry(text, requestedName ?? '')
           : clearDefaultMethodEntry(text)
         return { text: result.text, value: result }
       })

@@ -89,6 +89,8 @@ export function formatEventLine(event) {
 /**
  * 筛选：type 子串 + 原文 grep（对 JSON 文本做大小写不敏感包含）。
  * 空筛选 = 原样返回。未知字段不影响。
+ * @param {any[]} events
+ * @param {{ type?: string, grep?: string }} [opts]
  */
 export function filterEvents(events, { type, grep } = {}) {
   let out = Array.isArray(events) ? events : []

@@ -53,7 +53,7 @@ export function stagedChangePairingProblems({ staged, read, exists }) {
   for (const entry of staged) {
     if (entry.status === 'D') continue
     const card = entry.paths.at(-1)
-    if (!/^_backlog\/_archived\/settled_issues\/[^/]+\.md$/.test(card)) continue
+    if (card === undefined || !/^_backlog\/_archived\/settled_issues\/[^/]+\.md$/.test(card)) continue
     const text = read(card)
     if (text === null) continue
     const target = dispositionTargetOf(text)
@@ -97,7 +97,7 @@ export function stagedChangePairingProblems({ staged, read, exists }) {
   for (const entry of staged) {
     if (!/^[AM]/.test(entry.status)) continue
     const card = entry.paths.at(-1)
-    if (!/^_backlog\/bugs\/BUG-\d{3}-.+\.md$/.test(card)) continue
+    if (card === undefined || !/^_backlog\/bugs\/BUG-\d{3}-.+\.md$/.test(card)) continue
     const text = read(card)
     if (text === null) continue
     if (!/^status:\s*修复落地\s*$/m.test(text)) continue
@@ -107,7 +107,7 @@ export function stagedChangePairingProblems({ staged, read, exists }) {
     // 只判**新归档**（R/A）；已归档卡的链接/措辞维护是 M，不应被倒查历史改动。
     if (!/^[RA]/.test(entry.status)) continue
     const card = entry.paths.at(-1)
-    if (!/^_backlog\/_archived\/fixed_bugs\/BUG-\d{3}-.+\.md$/.test(card)) continue
+    if (card === undefined || !/^_backlog\/_archived\/fixed_bugs\/BUG-\d{3}-.+\.md$/.test(card)) continue
     const text = read(card)
     if (text === null) continue
     if (!/^status:\s*已修\s*$/m.test(text)) {

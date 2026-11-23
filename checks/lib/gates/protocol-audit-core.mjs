@@ -48,6 +48,7 @@ export const FINAL_SECTION_OF = Object.freeze({
   risks: '目前不能判断',
 })
 
+/** @param {{ hasRunMd?: boolean, epoch?: string | null, acceptedAt?: string | null, forced?: boolean }} [input] */
 export function requiredByProtocolContract({ hasRunMd = true, epoch = null, acceptedAt = null, forced = false } = {}) {
   if (forced) return true
   if (!hasRunMd) return false
@@ -300,6 +301,7 @@ function checkPlanRef(protocol, planText) {
   return []
 }
 
+/** @param {any} protocol @param {string} auditText @param {boolean} hasSnapshot @param {any} snapshot @param {any[] | null} [snapshots] */
 function checkAudit(protocol, auditText, hasSnapshot, snapshot, snapshots = null) {
   const out = []
   if (protocol.version > 1) {
@@ -416,7 +418,13 @@ export function checkFinalSections(protocol, finalText) {
   return issues
 }
 
-/** 证据门槛 vs evidence.quality（BUG-271）；quick_factual 豁免。 */
+/**
+ * 证据门槛 vs evidence.quality（BUG-271）；quick_factual 豁免。
+ * @param {any} protocol
+ * @param {any[]} evidences
+ * @param {string} [runKind]
+ * @param {string[] | null} [criticalEvidence]
+ */
 export function checkEvidenceThreshold(protocol, evidences, runKind = '', criticalEvidence = null) {
   if (runKind === 'quick_factual') return []
   const threshold = protocol?.gates?.evidence_threshold

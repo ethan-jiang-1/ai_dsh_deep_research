@@ -12,10 +12,12 @@ const SECRET = /(KEY|SECRET|TOKEN|PASSWORD)/i;
 
 /**
  * 洗掉继承环境里的密钥类变量，再叠加调用点显式的白名单条目。
- * @param explicit - 调用点显式加入的条目（优先于清洗结果）。
- * @param env - 源环境；缺省 = 进程环境。注入位让清洗谓词可 keyless 直测（2026-11-03 卫生审计）。
+ * @param {Record<string, string | undefined>} [explicit] - 调用点显式加入的条目（优先于清洗结果）。
+ * @param {Record<string, string | undefined>} [env] - 源环境；缺省 = 进程环境。注入位让清洗谓词可 keyless 直测（2026-11-03 卫生审计）。
+ * @returns {Record<string, string | undefined>}
  */
 export function scrubbedEnv(explicit = {}, env = process.env) {
+  /** @type {Record<string, string | undefined>} */
   const out = {};
   for (const [k, v] of Object.entries(env)) {
     if (SECRET.test(k)) continue;
@@ -24,7 +26,11 @@ export function scrubbedEnv(explicit = {}, env = process.env) {
   return { ...out, ...explicit };
 }
 
-/** 真模型档专用：显式带白名单的那一把 key（未配置则不带，交由下层 fail-loud）。 */
+/**
+ * 真模型档专用：显式带白名单的那一把 key（未配置则不带，交由下层 fail-loud）。
+ * @param {Record<string, string | undefined>} [explicit]
+ * @param {Record<string, string | undefined>} [env]
+ */
 export function withModelKey(explicit = {}, env = process.env) {
   const out = scrubbedEnv(explicit, env);
   if (typeof env.DEEPSEEK_API_KEY === 'string' && env.DEEPSEEK_API_KEY !== '') {
@@ -43,6 +49,8 @@ export function credentialsPresent(home) {
  * 是否本仓开发 home（纯判定）：默认 `runtime/harness-home`，或 `DSH_DEV_HOME` 指定的隔离实例。
  * 为什么需要：会话/agent shell 的 ambient `DSH_HOME` 常是日用平台 home（~/.dsh）；只查
  * `DSH_HOME` 在场会让探针去 boot 日用 home，失败成 exit 1，违反「未 source 自拒 exit 2」。
+ * @param {string | undefined} home
+ * @param {{ root?: string, customHome?: string }} [opts]
  */
 export function isDevHome(home, { root, customHome = process.env.DSH_DEV_HOME } = {}) {
   if (typeof home !== 'string' || home === '' || typeof root !== 'string' || root === '') return false;
@@ -54,6 +62,8 @@ export function isDevHome(home, { root, customHome = process.env.DSH_DEV_HOME } 
 /**
  * 探针/真模型档的开发 home 前置：不是开发 home → exit 2（未跑 ≠ 通过）。
  * 只拒绝环境面错误，不判业务；凭据仍由 requireCredentials 单独检查。
+ * @param {string} label
+ * @param {{ home?: string, root?: string, customHome?: string }} [opts]
  */
 export function requireDevHome(label, { home, root, customHome } = {}) {
   if (!home) {
@@ -71,13 +81,14 @@ export function requireDevHome(label, { home, root, customHome } = {}) {
 /**
  * 真模型档前置：凭据文件缺席 → exit 2（未跑 ≠ 通过）。
  * 这是 8 个真模型档脚本唯一的前置检查实现；档位闭集检测器认本 helper 的调用。
- * @param label - 脚本名（错误消息前缀）。
- * @param opts.home - 已解析的 dev home（调用方必须先 source tools/env.sh 或显式传入）。
- * @returns home。
+ * @param {string} label - 脚本名（错误消息前缀）。
+ * @param {object} [opts]
+ * @param {string} [opts.home] - 已解析的 dev home（调用方必须先 source tools/env.sh 或显式传入）。
+ * @returns {string} home。
  */
 export function requireCredentials(label, { home } = {}) {
   const path = typeof home === 'string' && home !== '' ? join(home, '.credentials.yaml') : '(DSH_HOME 未设置)';
-  if (!credentialsPresent(home)) {
+  if (typeof home !== 'string' || home === '' || !credentialsPresent(home)) {
     console.error(`${label}: 真模型档前置缺席——${path} 不在（先配置 DEEPSEEK_API_KEY）；未跑 ≠ 通过`);
     process.exit(2);
   }

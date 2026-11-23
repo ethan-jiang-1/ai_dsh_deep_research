@@ -199,7 +199,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | `snapshots/`（session 回放 fixture） | **已具备（带证据适配）**：[snapshots/](../snapshots/README.md) 场景证据层——研究角色场景 [场景证据层 snapshots/](../snapshots/README.md) 的 `snapshot.json` 由 [replay-scene](../checks/lib/harness/replay-scene.mjs) 消费并驱动 [snapshot-replay.entry](../checks/smoke/snapshot-replay.entry.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）；纯函数夹具仍住 `tests/fixtures/`；判据见本表源 2 "Snapshot tests" 行 |
 | `benchmarks/` · `native/` · `python/` · `patches/` · `apps/` | 不适用：本仓无这些发布 lane 与运行时面 |
 | `CONTRIBUTING.md` · `SAFETY.md` · `SECURITY` · `THIRD_PARTY_NOTICES.md` · `BRAND_GUIDELINES.md` | **已具备（2026-10-25 开源发布）**：`CONTRIBUTING.md` / `SECURITY.md` / `.github/workflows/ci.yml`；`SAFETY.md`、`THIRD_PARTY_NOTICES.md`、`BRAND_GUIDELINES.md` 仍不适用（无运行时安全授权面、无捆绑第三方代码、无独立品牌资产政策）；重估触发 = 出现外部贡献分级审批或捆绑第三方代码时 |
-| `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 前两件已具备（`repo-conventions` 门禁强制与 vendor 对齐）；后四件未引入（TS 面 = 一个包的 `src/`，测试栈 = node:test）；Markdown 纪律由门禁（md-utf8-newline / md-links / md-anchors / doc-budgets）承担，git 钩子 = `tools/hooks/pre-commit` |
+| `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 前两件已具备（`repo-conventions` 门禁强制与 vendor 对齐）；**`oxlint` 已采纳**（`.oxlintrc.json` + `pnpm lint` + verify `pack-lint`；因 CI `keyless` 无 `vendor-build` 暂不引入 `oxlint-tsgolint`，领域语义由 `semantic-guardrails.test.mjs` 承担）；后三件未引入（测试栈 = node:test），Markdown 纪律由门禁承担，git 钩子 = `tools/hooks/pre-commit` |
 | `LICENSE` | **已定：MIT**（2026-10-25 开源发布；根与 pack 各一份 [LICENSE](../LICENSE)，两处 `package.json` 均 `license: MIT`；pack `private: false` 可发布）——决定与输掉的方案 = [开源发布 Note](../notes/implemented/2026-10-25-open-source-launch.md) |
 
 <a id="source-10"></a>

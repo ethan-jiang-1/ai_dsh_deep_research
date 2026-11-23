@@ -8,7 +8,8 @@
 // 正本 = `packages/deep-research-pack/src/lib/run/final-target.ts`（client 终稿面与 run-fold
 // 已消费它）。本文件只把「目录 → 版本号数组」的 IO 薄壳补齐；纯判据一律从 pack 导入。
 // 依赖方向：scripts → pack src（已有先例 = node-gate-contracts 直引 review-readiness.ts）。
-import { readdirSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { finalVersionOf, readableVersionOf } from '../../../packages/deep-research-pack/src/lib/run/final-target.ts'
 
 export { finalVersionOf, readableVersionOf }
@@ -40,4 +41,19 @@ export function readableVersionsIn(dir) {
 /** final/ 是否已有任何版本账。 */
 export function hasFinalVersion(dir) {
   return finalVersionsIn(dir).length > 0
+}
+
+/**
+ * 读 bundle 终稿文本：优先 root final.md，其次 final/ 最新版本 `vN.md`。
+ * 缺席或不可读返回空串（由调用方按缺席判级）。
+ * @param {string} bundle
+ * @returns {string}
+ */
+export function finalTextFromBundle(bundle) {
+  const root = join(bundle, 'final.md')
+  if (existsSync(root)) return readFileSync(root, 'utf8')
+  const dir = join(bundle, 'final')
+  if (!existsSync(dir)) return ''
+  const versions = finalVersionsIn(dir)
+  return versions.length > 0 ? readFileSync(join(dir, `v${versions[versions.length - 1]}.md`), 'utf8') : ''
 }

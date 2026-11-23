@@ -64,8 +64,9 @@ export function sha256Text(text) {
 /**
  * 语料根的**可复算标签**：`$DSH_HOME` 下写成 `$DSH_HOME/<rel>`；其它根只留 basename（不写裸绝对路径，
  * 回执不得自带换机即断的绝对路径）。绝对路径只出现在控制台输出里。
- * @param sessions 语料根（调用方传入，可能为绝对路径）。@param home DSH_HOME（可空）。
- * @returns 非绝对路径标签。
+ * @param {string} sessions 语料根（调用方传入，可能为绝对路径）。
+ * @param {{ home?: string | null }} [opts] DSH_HOME（可空）。
+ * @returns {string} 非绝对路径标签。
  */
 export function corpusRootLabel(sessions, { home = null } = {}) {
   const raw = String(sessions ?? '')
@@ -149,7 +150,9 @@ export function receiptProblems(bundleDir) {
   return { problems, receipt }
 }
 
-/** 生成 delivered.json 的主体（调用方负责写盘；值域与 RFC §11.1 一致）。 */
+/** 生成 delivered.json 的主体（调用方负责写盘；值域与 RFC §11.1 一致）。
+ * @param {{ slug: string, bundleDir: string, corpusRoot: string, acceptedAt: string, presented: any[], witness?: string[] }} input
+ */
 export function buildDelivered({ slug, bundleDir, corpusRoot, acceptedAt, presented, witness = [] }) {
   const finalDir = join(bundleDir, 'final')
   const versions = finalVersionsIn(finalDir)
@@ -304,7 +307,9 @@ export function repairReceiptPaths(bundleDir) {
   return { ok: true, actions }
 }
 
-/** 生成 manifest.json 的主体（目录说明书，不是指令；不自我引用、不含后写的 acceptance）。 */
+/** 生成 manifest.json 的主体（目录说明书，不是指令；不自我引用、不含后写的 acceptance）。
+ * @param {{ slug: string, bundleDir: string, contract?: string | null, schema?: number | null, generatedAt: string, extra?: Array<{ path: string, role: string, sha256: string | null }> }} input
+ */
 export function buildManifest({ slug, bundleDir, contract, schema = null, generatedAt, extra = [] }) {
   const files = []
   for (const ent of readdirSync(bundleDir, { withFileTypes: true })) {
@@ -365,7 +370,9 @@ export function buildManifest({ slug, bundleDir, contract, schema = null, genera
   }
 }
 
-/** 渲染 acceptance.md（ops 回执；语料根只写可复算标签，不写绝对路径）。 */
+/** 渲染 acceptance.md（ops 回执；语料根只写可复算标签，不写绝对路径）。
+ * @param {{ slug: string, stamp: string, critical: number | null, finalVersion: number | null, readableVersion?: number | null, present?: any, corpusRoot: string, legacy?: boolean }} input
+ */
 export function renderAcceptance({ slug, stamp, critical, finalVersion, readableVersion = null, present, corpusRoot, legacy = false }) {
   const presentLabel = present === null || present === undefined || present.path === null
     ? '—'

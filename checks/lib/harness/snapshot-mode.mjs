@@ -8,6 +8,7 @@
 // - `--read-only`/`DSH_SNAPSHOT=replay` 与 `--update-expected` 互斥；
 // - `DSH_SNAPSHOT` 只认 `replay`（record/refresh 不走本脚本：record 归 record-role-fixture，
 //   refresh = --update-expected）。
+/** @param {{ argv: string[], env?: Record<string, string | undefined> }} opts */
 export function resolveSnapshotMode({ argv, env = {} }) {
   const updateExpected = argv.includes('--update-expected')
   const whyIndex = argv.indexOf('--why')

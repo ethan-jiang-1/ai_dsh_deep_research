@@ -4,6 +4,7 @@
  * 自动选端口后的有界重选（BUG-338）：检查与 bind 之间的窗口不可能靠预留消除，只能兜住。
  * 显式端口只试一次（用户指定，冲突即报）；自动端口遇 EADDRINUSE 重选，最多 attempts 次，
  * 仍失败抛最后一次错误——不无限重试，也不声称 TOCTOU 已消除。
+ * @param {{ explicitPort?: number | null, attempts?: number, boot: (port: number) => Promise<any>, pick?: () => Promise<number | null>, onRetry?: (info: { port: number, attempt: number, attempts: number }) => void }} opts
  */
 export async function bootOnFreePort({ explicitPort = null, attempts = 3, boot, pick, onRetry = () => {} }) {
   if (explicitPort !== null) return { port: explicitPort, value: await boot(explicitPort) }

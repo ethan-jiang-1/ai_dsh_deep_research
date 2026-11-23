@@ -74,9 +74,11 @@ export async function migrateCoachTitles(
     if (!id.startsWith(COACH_SESSION_PREFIX)) continue
     const next = coachTitleMigrationOf(row?.title, current)
     if (next === null) continue
-    try { await remote.rename({ sessionId: id as SessionId, title: next }) } catch { /* non-fatal */ }
+    try { await remote.rename({ sessionId: id as SessionId, title: next }) } catch { /* @silent-catch: title migration is best-effort display polish */ }
   }
 }
+
+const NEVER_ABORTED = new AbortController().signal
 
 export function createCoachSessions(ctx: { get(name: string): unknown }, remote: CoachRemote, t: PackTranslate = translateZh) {
   /** 打开已有会话时把自动标题迁到当前 locale；失败不阻塞访谈（标题只是展示）。 */
@@ -84,7 +86,7 @@ export function createCoachSessions(ctx: { get(name: string): unknown }, remote:
     const existing = sessions.list.getSnapshot().byId[sessionId]?.title
     const next = coachTitleMigrationOf(existing, t('methodEditorTitle'))
     if (next === null) return
-    try { await remote.rename({ sessionId, title: next }) } catch { /* non-fatal */ }
+    try { await remote.rename({ sessionId, title: next }) } catch { /* @silent-catch: title migration is best-effort display polish */ }
   }
 
   /** locale 切换时调用：扫全会话列表里本包的自动标题（见 migrateCoachTitles）。 */
@@ -106,7 +108,7 @@ export function createCoachSessions(ctx: { get(name: string): unknown }, remote:
     try {
       reference = sessions.retain(deterministicId, { source: 'methodCoach' })
     } catch {
-      // A missing Session is created below from the current page's selected workspace.
+      /* @silent-catch: missing session is created right below from workspace/cwd */
     }
     if (reference !== null) {
       await migrateCoachTitle(sessions, deterministicId)
@@ -118,7 +120,7 @@ export function createCoachSessions(ctx: { get(name: string): unknown }, remote:
       ...(workspaceId === undefined && cwd !== undefined ? { cwd } : {}),
       agentPreset: 'method-editor',
     })
-    try { await remote.rename({ sessionId: created, title: t('methodEditorTitle') }) } catch { /* non-fatal */ }
+    try { await remote.rename({ sessionId: created, title: t('methodEditorTitle') }) } catch { /* @silent-catch: initial title rename is best-effort display polish */ }
     return { id: created, reference: sessions.retain(created, { source: 'methodCoach' }) }
   }
 
@@ -131,7 +133,7 @@ export function createCoachSessions(ctx: { get(name: string): unknown }, remote:
     try {
       const result = await remote.prompt(
         { requestId: typedRequestId, sessionId, mode: 'queue', content: [{ type: 'text' as const, text }] },
-        new AbortController().signal,
+        NEVER_ABORTED,
       )
       return result.ok ? { ok: true } : { ok: false, detail: String(result.error ?? 'prompt rejected') }
     } catch (cause) {

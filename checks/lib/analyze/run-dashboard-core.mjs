@@ -53,6 +53,7 @@ function sectionBody(text, title) {
 /** question.md → { question, purpose, profile, depth, decisions }（缺节为 null）。
  *  双形态容纳（debug-dashboard-plus）：模板契约节名 + ad-hoc 场的变体节名/表格行。 */
 function parseQuestion(text) {
+  /** @type {{ question: string | null, purpose: string | null, profile: string | null, depth: string | null, decisions: number }} */
   const out = { question: null, purpose: null, profile: null, depth: null, decisions: 0 };
   let qSec = sectionBody(text, '研究问题（定稿）');
   if (!qSec) qSec = sectionBody(text, '一句话问题'); // ad-hoc 变体
@@ -154,7 +155,7 @@ function parseLeads(text) {
   for (const raw of text.split(/\r?\n/)) {
     const h = /^##\s+方向:\s*(.+?)\s*$/.exec(raw);
     if (h) {
-      cur = { direction: h[1], status: null, excludedReason: null, grades: [] };
+      cur = /** @type {{ direction: string, status: string | null, excludedReason: string | null, grades: string[] }} */ ({ direction: h[1], status: null, excludedReason: null, grades: [] });
       leads.push(cur);
       continue;
     }
@@ -179,7 +180,9 @@ function parseLeads(text) {
 
 /** findings.md → [{ id, conclusion, gap, evidence: [evidence/xx.md] }] */
 function parseFindings(text) {
+  /** @type {Array<{ id: string, conclusion: string, gap: string | null, evidence: string[] }>} */
   const findings = [];
+  /** @type {{ id: string, conclusion: string, gap: string | null, evidence: string[] } | null} */
   let cur = null;
   for (const raw of text.split(/\r?\n/)) {
     const h = /^##\s+F(\d+):\s*(.+?)\s*$/.exec(raw);
@@ -338,10 +341,13 @@ export function deriveStep(model) {
 
 /** HITL 等待检测：会话日志选择与状态折算分别复用 shared modules；扫描范围（**只扫 run 工作区组**，
  * 见循环内注释）与最近时间策略由 dashboard owner 保持。损坏的 canonical 日志不降级到旧代。
- * @param opts.groupMarker 组名必须含该子串；传 `null` 表示不筛（测试与特殊场景用）。 */
+ * @param {string} [sessionsRoot]
+ * @param {{ maxAgeMs?: number, groupMarker?: string | null }} [opts] 组名必须含该子串；传 `null` 表示不筛（测试与特殊场景用）。 */
 export function detectHitlWait(sessionsRoot = SESSIONS_ROOT, { maxAgeMs = 12 * 3600 * 1000, groupMarker = 'research-workspace' } = {}) {
+  /** @type {Array<{ session: string, group: string, since: string }>} */
   const waiting = [];
   const cutoff = Date.now() - maxAgeMs;
+  /** @type {string[]} */
   let groups = [];
   try { groups = readdirSync(sessionsRoot); } catch { return waiting; }
   for (const g of groups) {
@@ -351,6 +357,7 @@ export function detectHitlWait(sessionsRoot = SESSIONS_ROOT, { maxAgeMs = 12 * 3
     // 组名 = cwd 的 slug，故 run 工作区的判据与 watch-run 同款（`includes('research-workspace')`）。
     if (groupMarker !== null && !g.includes(groupMarker)) continue;
     const gdir = join(sessionsRoot, g);
+    /** @type {string[]} */
     let sessions = [];
     try { sessions = readdirSync(gdir); } catch { continue; }
     for (const s of sessions) {
@@ -397,7 +404,7 @@ export function readGuiBase(webLog = WEB_LOG) {
  *  final：final/v*.md（契约，取最大版号）或 final.md（ad-hoc 化石命名）→ { file, versioned }；
  *  review：review.md 或 review-critic.md（ad-hoc 化石命名）双命名容纳。 */
 export function buildModel(runDir) {
-  const model = {
+  const model = /** @type {any} */ ({
     runDir,
     slug: basename(runDir),
     generatedAt: new Date().toISOString(),
@@ -411,7 +418,7 @@ export function buildModel(runDir) {
     final: null,
     journal: [],
     stats: { evidence: 0, drafts: 0, lastModified: null },
-  };
+  });
   const read = (f) => {
     try {
       return readFileSync(join(runDir, f), 'utf8');

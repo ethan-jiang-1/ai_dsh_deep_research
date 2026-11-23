@@ -60,8 +60,8 @@ function targetOptionIndex(labels, pick) {
  * recommended → 带 Recommended 标签的首个（缺席 → 回退首项，resolved='fallback'——回退是
  * 确定性的，对账仍可判）；first → 首项；数字 N → 第 N 项；越界/空标签 → label=null（不可
  * 解析，不猜——对账据此红）。
- * @param optionLabels string[]；pick string（'recommended' | 'first' | '<1-based index>'）。
- * @returns {label: string|null, resolved: 'exact'|'fallback'|null}
+ * @param {string[]} optionLabels string[]；@param {string} pick string（'recommended' | 'first' | '<1-based index>'）。
+ * @returns {{label: string|null, resolved: 'exact'|'fallback'|null}}
  */
 export function pickTargetLabel(optionLabels, pick) {
   const labels = Array.isArray(optionLabels) ? optionLabels.filter((l) => typeof l === 'string') : []
@@ -96,6 +96,7 @@ export function questionCardKeyOf(sessionId, callId) {
  * page 边界无法共享闭包，故本函数 + 下方 hitlUiIdentityOf 是同一组规则的 keyless 可测正本
  * （tests/ask-drive.spec.mjs 钉 mutation：会话不符/歧义/缺席、卡陈旧/歧义/缺身份）。两处规则
  * 改动必须同步——这是有意的重复，不是可删的死 API。
+ * @param {{ targetSessionId?: string, activeSessionIds?: string[], selectedSessionIds?: string[] }} [input]
  */
 export function hitlUiSessionOf({ targetSessionId, activeSessionIds = [], selectedSessionIds = [] } = {}) {
   if (typeof targetSessionId !== 'string' || targetSessionId.trim() === '') {
@@ -135,6 +136,8 @@ export function hitlUiIdentityOf(facts) {
 /**
  * Select one pending session: the newest pending candidate by default, or one unique title-substring match.
  * Both the directory ID (UI row) and canonical log-header ID must exist and agree.
+ * @param {any[]} candidates
+ * @param {string | null} [requestedTitle]
  */
 export function selectPendingSession(candidates, requestedTitle = null) {
   const sessions = Array.isArray(candidates) ? candidates.filter((candidate) => candidate && typeof candidate === 'object') : []
@@ -209,9 +212,8 @@ export function nextDriveAction(obs) {
 /**
  * 意图对账（BUG-015 裁决后半）：盘侧 answer 批已落地 ≠ 命令的答案已落地——落地的选择
  * 逐题对 pick 目标解析结果，不符即红（答案内容仍如实记录，但意图未达成必须响亮）。
- * @param batch answerBatchOf 的批（逐题 selected）；questions parseAskQuestions 的选项面；
- *   pick 驱动收到的 pick 参数。
- * @returns {ok: boolean, mismatches: Array<{id, expected, landed}>}——expected 为
+ * @param {{ batch: any[], questions: any[], pick: string }} input batch=answerBatchOf 的批（逐题 selected）；questions=parseAskQuestions 的选项面；pick=驱动收到的 pick 参数。
+ * @returns {{ok: boolean, mismatches: Array<{id: string, expected: string, landed: string}>}}——expected 为
  *   '(pick 目标不可解析)' 时表示解析失败（不猜，直接红）。
  */
 export function intentReconcile({ batch, questions, pick }) {
@@ -279,7 +281,7 @@ export function driveVerdict(s) {
  *   workspace·overflow 组数——>0 说明还没展开完，不能断言老化）/ capHit（是否有行扫命中上限）/
  *   diskPending（盘侧是否确有该会话的挂起问询——去答的前提；facts: 盘侧为准）/
  *   triedSearch·searchHit（**兜底尝试史**：是否已走搜索、搜索是否命中——BUG-037 加）。
- * @returns {kind: 'cap'|'aging'|'not-in-scope'|'absent', message}——kind 决定处置，message 人话依据。
+ * @returns {{kind: 'cap'|'aging'|'not-in-scope'|'absent', message: string}}——kind 决定处置，message 人话依据。
  */
 export function sidebarMissVerdict(obs) {
   const { renderedSessionRows, collapsedGroups, capHit, diskPending, triedSearch, searchHit } = obs ?? {}
@@ -345,8 +347,8 @@ export function isDeliveryReviewCard(questions, askText = '') {
  * 交付代答闸（2026-10-18 端到端实测的**运行纪律**）：交付审阅卡在场而 review readiness 非 PASS 时，
  * **默认推荐档**会把「定稿」投给一份未过审的报告 = 交付越过前置（NODES 第 6 行「PASS = HITL2 前置」）。
  * 故默认档自拒；操作者**显式**指定（--pick/--custom）视为有意为之，放行并留痕。
- * @param obs isDeliveryCard（isDeliveryReviewCard）/ readiness（'PASS'|'FAIL'|null）/ pick（默认档名）。
- * @returns {allow, reason}——allow=false 时 reason 给人话出路。
+ * @param {{ isDeliveryCard?: boolean, readiness?: 'PASS' | 'FAIL' | null, pick?: string }} obs isDeliveryCard（isDeliveryReviewCard）/ readiness / pick（默认档名）。
+ * @returns {{ allow: boolean, reason: string }}——allow=false 时 reason 给人话出路。
  */
 export function deliveryAnswerGuard(obs) {
   const { isDeliveryCard = false, readiness = null, pick = 'recommended' } = obs ?? {}

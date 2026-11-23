@@ -66,7 +66,10 @@ export function declaredNamesOf(text) {
   return names
 }
 
-/** 前向：发布物实际用到的包必须都在 peers。 */
+/**
+ * 前向：发布物实际用到的包必须都在 peers。
+ * @param {{ peers: any, requires?: Array<{ spec: string, name?: string }>, imports?: Array<{ spec: string, name?: string }> }} input
+ */
 export function forwardDepIssues({ peers, requires = [], imports = [] }) {
   const declared = new Set(Object.keys(peers ?? {}))
   const issues = []
@@ -106,7 +109,10 @@ export function hostRowIssues(pkg, hostRowPeers = HOST_ROW_PEERS) {
   return issues
 }
 
-/** 反向：每个 peer 必须被发布物用到、在随包 YAML 行里点名，或在显式 host-row allowlist 里（BUG-246）。 */
+/**
+ * 反向：每个 peer 必须被发布物用到、在随包 YAML 行里点名，或在显式 host-row allowlist 里（BUG-246）。
+ * @param {{ peers: any, requires?: Array<{ spec: string, name?: string }>, imports?: Array<{ spec: string, name?: string }>, declaredYaml?: Set<string>, hostRowPeers?: Record<string, string> }} input
+ */
 export function unusedPeerIssues({ peers, requires = [], imports = [], declaredYaml = new Set(), hostRowPeers = HOST_ROW_PEERS }) {
   const used = new Set([...requires, ...imports].map(({ spec }) => packageNameOf(spec)).filter(Boolean))
   return Object.keys(peers ?? {})
@@ -127,7 +133,10 @@ export function peerRangeIssues(pkg, { tagPrefix = '@deepseek-ai/dsh-' } = {}) {
   return issues
 }
 
-/** 汇总：消费方传发布物文本与已解析 YAML 声明名。 */
+/**
+ * 汇总：消费方传发布物文本与已解析 YAML 声明名。
+ * @param {{ pkg: any, jsTexts?: string[], dtsTexts?: string[], yamlTexts?: string[] }} input
+ */
 export function packDepsIssues({ pkg, jsTexts = [], dtsTexts = [], yamlTexts = [] }) {
   const peers = pkg?.peerDependencies ?? {}
   const requires = jsTexts.flatMap((text) => [...requiresOf(text), ...dynamicImportsOf(text)])

@@ -19,10 +19,13 @@ import { epochDateOf, runType } from '../lib/gates/schema-scan-core.mjs'
 import { PROTOCOL_CONTRACT_DATE, designSha256, preContractByDelivery } from '../lib/gates/protocol-core.mjs'
 import { evaluateBundle, requiredByProtocolContract } from '../lib/gates/protocol-audit-core.mjs'
 import { splitFrontmatter } from '../lib/shared/frontmatter.mjs'
+import { finalTextFromBundle } from '../lib/shared/final-version.mjs'
 import { isMain } from '../lib/shared/cli-entry.mjs'
 
 const readIf = (path) => (existsSync(path) ? readFileSync(path, 'utf8') : '')
 const versionOf = (protocol) => (typeof protocol?.version === 'number' ? protocol.version : null)
+
+export { finalTextFromBundle }
 
 /** 读 protocol.json；缺失 → { protocol: null }；解析失败 → { error }（红，不抛）。 */
 function readProtocol(bundle) {
@@ -118,20 +121,20 @@ if (isMain(import.meta.url)) {
   // 断代：交付回执时刻优先于日粒度 created（同日早场不追溯适用新契约）；无回执 → 日期口径从严。
   const required = requiredByProtocolContract({
     hasRunMd: !legacy,
-    epoch,
-    acceptedAt,
+    epoch: epoch ?? undefined,
+    acceptedAt: acceptedAt ?? undefined,
     forced: argv.includes('--require'),
   })
 
   if (!required) {
-    const reason = !legacy && preContractByDelivery({ acceptedAt }) === true
+    const reason = !legacy && preContractByDelivery({ acceptedAt: acceptedAt ?? undefined }) === true
       ? `交付回执早于契约落地时刻（acceptedAt=${acceptedAt}）`
       : legacy ? '旧 bundle 无 run.md' : `契约日前（epoch=${String(epoch)}）`
     console.log(`protocol-audit: 不适用（${reason}）——Protocol 不判，未写报告`)
     process.exit(0)
   }
 
-  const { protocol, error } = readProtocol(bundle)
+  const { protocol = null, error } = readProtocol(bundle)
   if (error !== undefined) {
     console.log(`protocol-audit: RED（1 项）`)
     console.log(`  [protocol-schema] protocol.json 无法解析：${error}`)
@@ -202,14 +205,7 @@ if (isMain(import.meta.url)) {
     planText: readIf(join(bundle, 'plan.md')),
     topicsText: readIf(join(bundle, 'topics.md')),
     auditText: readIf(join(bundle, 'protocol-audit.md')),
-    finalText: (() => {
-      const root = join(bundle, 'final.md')
-      if (existsSync(root)) return readIf(root)
-      const dir = join(bundle, 'final')
-      if (!existsSync(dir)) return ''
-      const versions = finalVersionsIn(dir)
-      return versions.length > 0 ? readIf(join(dir, `v${versions[versions.length - 1]}.md`)) : ''
-    })(),
+    finalText: finalTextFromBundle(bundle),
     evidences,
     criticalEvidence,
     methodLibraryEntry,
@@ -228,12 +224,13 @@ if (isMain(import.meta.url)) {
     process.exit(1)
   }
   const hash = designSha256(protocol)
+  const hashLabel = hash === null ? 'null' : `${hash.slice(0, 12)}…`
   if (write) {
     const out = join(bundle, 'protocol-audit.md')
     writeFileSync(out, renderReport({ bundle, epoch, type, required, findings, version, hash }))
-    console.log(`protocol-audit: PASS（v${version} / ${hash.slice(0, 12)}…）→ ${out}`)
+    console.log(`protocol-audit: PASS（v${version} / ${hashLabel}）→ ${out}`)
   } else {
-    console.log(`protocol-audit: PASS（v${version} / ${hash.slice(0, 12)}…）— 报告未写（--write 才落盘）`)
+    console.log(`protocol-audit: PASS（v${version} / ${hashLabel}）— 报告未写（--write 才落盘）`)
   }
   process.exit(0)
 }

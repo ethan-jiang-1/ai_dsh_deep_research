@@ -10,6 +10,9 @@
 //
 // 契约：返回 `{ ready, reason, ...观察值 }`；**不得**在这里做业务判定（选哪个选项、能不能交付
 // 由 lib/ask-drive 的决定函数给）。改动本函数即改浏览器行为，必须跑一次真实 HITL 卡验证。
+/**
+ * @param {{ targetSessionId: string, expectedCardKey: string, action?: string, index?: number, value?: string, expectedLabels?: string[] }} input
+ */
 export function operateOnTargetCard({ targetSessionId, expectedCardKey, action = 'identity', index, value, expectedLabels }) {
   // ⚠ expectedLabels 必须在这里绑定：click-option 分支的"题面未变"校验引用它，而它是**未绑定即抛
   // ReferenceError**（2026-10-16 实卡现场：`expectedLabels is not defined`）。存取自 e42155b 引入校验时
@@ -60,12 +63,13 @@ export function operateOnTargetCard({ targetSessionId, expectedCardKey, action =
   // 由判据层（lib/ask-drive）决定填文本；推进钮认 Next/继续（**仅零 radio 时**，选项题面照旧只认 Submit）。
   if (radios.length === 0 && (action === 'observe' || action === 'custom')) {
     const fields = [...card.querySelectorAll('textarea, input[type="text"]')].filter(visible)
+      .filter((el) => el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement)
     if (action === 'custom') {
       if (fields.length !== 1) return { ready: false, reason: fields.length === 0 ? 'custom-field-unavailable' : 'custom-field-ambiguous' }
       const field = fields[0]
       if (field.disabled) return { ready: false, reason: 'custom-field-disabled' }
       const proto = field instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype
-      Object.getOwnPropertyDescriptor(proto, 'value').set.call(field, value)
+      Object.getOwnPropertyDescriptor(proto, 'value')?.set?.call(field, value)
       field.dispatchEvent(new InputEvent('input', { bubbles: true, data: value, inputType: 'insertText' }))
       field.dispatchEvent(new Event('change', { bubbles: true }))
       return { ready: true, reason: null, filled: true }
@@ -89,7 +93,9 @@ export function operateOnTargetCard({ targetSessionId, expectedCardKey, action =
   }
   if (groups.length !== 1) return { ready: false, reason: 'radio-group-unavailable' }
   if (action === 'observe') {
+    /** @type {Element | null} */
     let scope = group
+    /** @type {HTMLButtonElement[]} */
     let submits = []
     for (let up = 0; up < 4 && scope && submits.length === 0; up++) {
       scope = scope.parentElement
@@ -122,7 +128,7 @@ export function operateOnTargetCard({ targetSessionId, expectedCardKey, action =
       || expectedLabels.some((label, i) => label !== labels[i]))) {
       return { ready: false, reason: 'question-options-changed' }
     }
-    if (!Number.isInteger(index) || index < 0 || index >= radios.length) return { ready: false, reason: 'radio-index-unavailable' }
+    if (typeof index !== 'number' || !Number.isInteger(index) || index < 0 || index >= radios.length) return { ready: false, reason: 'radio-index-unavailable' }
     const radio = radios[index]
     radio.scrollIntoView({ block: 'center' })
     radio.click()
@@ -139,11 +145,13 @@ export function operateOnTargetCard({ targetSessionId, expectedCardKey, action =
     // 推进钮可能**同时**有 Skip 与 Next（2026-10-16 实卡实测：两个都可用 → 旧版判 ambiguous 而停）。
     // 按 UI 自身语义定序，取第一个"在场且可用"的：**文本域有正文 → 先 Next（带正文推进）；
     // 空 → 先 Skip（跳过可选题）**。定序后不再有歧义分支。
-    const field = [...card.querySelectorAll('textarea, input[type="text"]')].filter(visible)[0] ?? null
+    const field = [...card.querySelectorAll('textarea, input[type="text"]')].filter(visible)
+      .filter((el) => el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement)[0] ?? null
     const hasText = field !== null && String(field.value ?? '').trim() !== ''
     const order = hasText ? ['Next', '继续', '下一题', 'Skip', '跳过'] : ['Skip', '跳过', 'Next', '继续', '下一题']
     // ⚠ 逐层搜、每层按序找（2026-10-16 自伤修正）：旧版从 radiogroup 起搜且"pool 非空即停"，
     // 于是只看到该题自身的选项钮——**卡片层的 Skip/Next 永远看不到**（实测 advance-unavailable）。
+    /** @type {Element | null} */
     let scope = group
     for (let up = 0; up < 5 && scope !== null; up++) {
       const buttons = [...scope.querySelectorAll('button')].filter((b) => !b.disabled)
@@ -161,6 +169,7 @@ export function operateOnTargetCard({ targetSessionId, expectedCardKey, action =
   }
   if (action === 'click-submit') {
     const re = /^(Submit|提交)$/i // 推进钮（Next/Skip…）走 click-advance——此处只点终局提交
+    /** @type {HTMLButtonElement[]} */
     const submits = []
     if (radios.length === 0) {
       // 零 radio 题面：锚点就是 card（见上面的锚点选择），而本函数是"从锚点**向上**找"——
@@ -168,6 +177,7 @@ export function operateOnTargetCard({ targetSessionId, expectedCardKey, action =
       // 故零 radio 时**直接在 card 内找**（2026-10-17 自检卡实测：卡在 Q2 空转 7 轮）。
       submits.push(...[...card.querySelectorAll('button')].filter((button) => re.test((button.textContent ?? '').trim())))
     } else {
+      /** @type {Element | null} */
       let scope = group
       for (let up = 0; up < 4 && scope !== null && submits.length === 0; up++) {
         scope = scope.parentElement
@@ -187,11 +197,12 @@ export function operateOnTargetCard({ targetSessionId, expectedCardKey, action =
   }
   if (action === 'custom') {
     const fields = [...card.querySelectorAll('textarea, input[type="text"]')].filter(visible)
+      .filter((el) => el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement)
     if (fields.length !== 1) return { ready: false, reason: fields.length === 0 ? 'custom-field-unavailable' : 'custom-field-ambiguous' }
     const field = fields[0]
     if (field.disabled) return { ready: false, reason: 'custom-field-disabled' }
     const prototype = field instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype
-    Object.getOwnPropertyDescriptor(prototype, 'value').set.call(field, value)
+    Object.getOwnPropertyDescriptor(prototype, 'value')?.set?.call(field, value)
     field.dispatchEvent(new InputEvent('input', { bubbles: true, data: value, inputType: 'insertText' }))
     field.dispatchEvent(new Event('change', { bubbles: true }))
     return { ready: true, reason: null, filled: true }

@@ -49,6 +49,9 @@ jobs:
       - name: Verify (structural gates)
         run: source tools/env.sh && pnpm verify
 
+      - name: Lint (oxlint)
+        run: source tools/env.sh && pnpm lint
+
       - name: Test (keyless regression)
         run: source tools/env.sh && pnpm test
 

@@ -154,7 +154,7 @@
 | lib/analyze/scene-pack.mjs | scene-capture、scene-pack.spec | 场景包读取/列示纯函数（五件套概要如实——缺件与坏 meta 不静默；mtime 降序） |
 | lib/channel/inject-reconcile.mjs | cdp-probe、inject-reconcile.spec、run-kickoff | 注入消息「落盘对账」判据（BUG-021 正修：日志里出现本条 user/message 才算送达；时间下界防同文假阳） |
 | lib/probes/probe-send-target.mjs | cdp-probe、probe-send-target.spec | 提交按钮判定纯函数（BUG-021 正修：send 家族六标签状态机 + **stop 家族拒点** + composer 邻近窗；页面只读 DOM 与执行点击） |
-| lib/shared/final-version.mjs | final-version.spec、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、run-accept、run-dashboard-core、run-receipt、schema-scan-core、verdict-audit | 终稿版本文件名的唯一判据（纯判据从 pack `src/lib/final-target.ts` 取；目录扫描 = final/ 与 readable-vN）；旧 vN 正则的机械漂移锁 = `tests/run/gates/final-version.spec.mjs` |
+| lib/shared/final-version.mjs | final-version.spec、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、protocol-audit、run-accept、run-dashboard-core、run-receipt、schema-scan-core、verdict-audit | 终稿版本文件名的唯一判据（纯判据从 pack `src/lib/final-target.ts` 取；目录扫描 = final/ 与 readable-vN、bundle 终稿文本回退 `finalTextFromBundle`）；旧 vN 正则的机械漂移锁 = `tests/run/gates/final-version.spec.mjs` |
 | lib/shared/probe-status-tab.mjs | cdp-probe、probe-status-tab.spec、session-replay | 右栏「研究状态」页签判定纯函数：胶囊按**标题 span 逐字**匹配（拒绝描述串入 / 近似标题）、页签体只认 `[data-sidebar-right-tab]`（不拿会话正文当观察面） |
 | lib/shared/probe-index.mjs | f-repo、probes/_index.mjs、probe-index.spec、smoke-contract.test | 探针索引纯函数（递归扫描 `probes/`、解析头注六字段、按域分组渲染；门禁 probe-registry 消费同一渲染；索引不复制判据/不证明长文） |
 | lib/channel/run-channel.mjs | run-driver、run-driver-contract.spec | run 通道驱动判据纯函数：web.log → 当前 GUI URL（取最后一条横幅）、浏览器面 verdict → 呈交判决（GREEN / RED / NOT-RUN） |

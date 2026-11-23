@@ -151,7 +151,7 @@ export function createDefaultsStore(deps: DefaultsStoreDeps): DefaultsStore {
 
   const notify = (): void => {
     for (const listener of [...listeners]) {
-      try { listener() } catch { /* 订阅者失败不阻断其他订阅者 */ }
+      try { listener() } catch { /* @silent-catch: 订阅者失败不阻断其他订阅者 */ }
     }
   }
 
@@ -216,7 +216,7 @@ export function createDefaultsStore(deps: DefaultsStoreDeps): DefaultsStore {
   /** 同会话写串行化：pending 期间的第二次写排队，不静默丢弃（BUG-107）。 */
   const enqueueWrite = (sessionId: SessionId, task: () => Promise<void>): Promise<void> => {
     const previous = writeQueues.get(sessionId) ?? Promise.resolve()
-    const next = previous.catch(() => {}).then(task)
+    const next = previous.catch(() => { /* @silent-catch: serialize subsequent writes regardless of prior failure */ }).then(task)
     writeQueues.set(sessionId, next)
     void next.finally(() => { if (writeQueues.get(sessionId) === next) writeQueues.delete(sessionId) })
     return next

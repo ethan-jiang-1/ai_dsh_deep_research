@@ -210,7 +210,10 @@ export function apply(ctx: ClientContext): void {
 
     const openFinal = (sessionId: SessionId, path: string) => {
       try { scoped.sidebarRight.openResource(finalAddressOf(sessionId, path)) }
-      catch (cause) { console.error('[research-final] openResource 失败', String(cause)) }
+      catch (cause) {
+        /* @silent-catch: sidebar openResource fails soft when host frame is closing */
+        console.error('[research-final] openResource 失败', String(cause))
+      }
     }
 
     // 挂起显性化入口（RFC right-pane-ux-debt）：pending 迁移时页签体调用——openTab 落定时
@@ -230,8 +233,8 @@ export function apply(ctx: ClientContext): void {
           sessionId,
           workspaceTitle: workspace?.title ?? null,
           workspacePath: workspace?.path ?? null,
-          listDir: async (sessionId, path, signal) => (await listDir(sessionId, path, signal)) ?? [],
-          hasUserMessage: (sessionId: SessionId) => hasUserMessage(follow, sessionId),
+          listDir: async (targetSessionId, path, signal) => (await listDir(targetSessionId, path, signal)) ?? [],
+          hasUserMessage: (targetSessionId: SessionId) => hasUserMessage(follow, targetSessionId),
           chooseWorkspace,
         }
       },

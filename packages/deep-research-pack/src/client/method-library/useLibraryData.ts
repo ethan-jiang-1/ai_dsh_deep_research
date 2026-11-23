@@ -83,7 +83,7 @@ export function useLibraryData({ sessionId, readLibrary }: LibraryDataDeps) {
     if (selectedName === null || !entries.some((entry) => entry.name === selectedName)) {
       setSelectedName(entries[0]?.name ?? null)
     }
-  }, [text])
+  }, [entries, selectedName])
 
   return {
     text, setText, loadState, setLoadState, loadError, setLoadError,

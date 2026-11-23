@@ -24,6 +24,10 @@ export const emptyOnUnreadableLogReader = (p) => {
  * 旧场（无 run.md）的 present 见证：只认 present 的 `files[].path`（以及单个 `path`/`file`）
  * 经 `portableBundlePath` 归一到本 bundle 的 `final.md` / `final/vN.md`。整段载荷子串不再算——
  * 别的 bundle 的 present 在 note 里提一句本 slug 不能冒充路径（BUG-168）。
+ * @param {string} sessionsRoot
+ * @param {string} slug
+ * @param {(path: string) => string | null} [readLog]
+ * @param {string | null} [bundleDir]
  */
 function presentInLogs(sessionsRoot, slug, readLog = emptyOnUnreadableLogReader, bundleDir = null) {
   if (!bundleDir || !sessionsRoot || !existsSync(sessionsRoot) || !slug) return false
@@ -53,6 +57,7 @@ function presentInLogs(sessionsRoot, slug, readLog = emptyOnUnreadableLogReader,
       if (ent.isDirectory()) { if (walk(p)) return true; continue }
       if (!/\.jsonl(\.zstd)?$/.test(ent.name)) continue
       const text = readLog(p)
+      if (!text) continue
       for (const line of text.split('\n')) {
         if (!line.includes('"type":"tool/call"') && !line.includes('"type":"tool-call"')) continue
         if (!line.includes('"present"')) continue
@@ -165,10 +170,11 @@ const collectLabels = (o, labels) => {
  * 绑定 = 该 lead 顶层会话写过 `drt_<slug>/`（bundle-bind 写强信号）——别的 run 的会话、
  * 子 agent 会话、只在用户消息里被提及，都不构成见证。`contract` = 契约纪元
  * （YYYY-MM-DD）：早于它的事件不计（删后重开同名 slug 不继承旧见证）。
- * @returns {{logs:number, boundLogs:number, presented:Array, replies:Array, stalePresented:number, staleReplies:number}}
+ * @param {string} sessionsRoot @param {string} slug @param {{ readLog?: (path: string) => string | null, contract?: string | null }} [opts]
+ * @returns {{logs:number, boundLogs:number, presented:Array, replies:Array, stalePresented:number, staleReplies:number, boundSessions:Array<{sessionId:string, group:string}>, latestAsk?:any, latestReply?:any}}
  */
 export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadableLogReader, contract = null } = {}) {
-  const out = { logs: 0, boundLogs: 0, presented: [], replies: [], stalePresented: 0, staleReplies: 0, boundSessions: [], latestAsk: undefined, latestReply: null }
+  const out = /** @type {any} */ ({ logs: 0, boundLogs: 0, presented: [], replies: [], stalePresented: 0, staleReplies: 0, boundSessions: [], latestAsk: undefined, latestReply: null })
   const bare = String(slug ?? '').replace(/^drt_/, '')
   if (!sessionsRoot || !bare || !existsSync(sessionsRoot)) return out
   const pathRe = new RegExp(`(?:^|/)(?:archive/|_abandoned/)?drt_${escapeRe(bare)}/(final(?:/v(\\d+))?\\.md)$`)
@@ -282,33 +288,34 @@ export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadabl
 
 /** 扫描结果 → present 见证三态（FOUND / NONE / UNATTESTED）。 */
 function presentedStatusOf(scan) {
-  if (scan.logs === 0) return { status: 'UNATTESTED', detail: '会话语料缺席——present 无证据', events: [], logs: 0, boundLogs: 0, stale: 0 }
+  if (scan.logs === 0) return { status: /** @type {'UNATTESTED'} */ ('UNATTESTED'), detail: '会话语料缺席——present 无证据', events: [], logs: 0, boundLogs: 0, stale: 0 }
   const base = { events: [], logs: scan.logs, boundLogs: scan.boundLogs, stale: scan.stalePresented }
   if (scan.presented.length > 0) {
-    return { ...base, status: 'FOUND', events: scan.presented, detail: `deliverables/presented ${scan.presented.length} 条（绑定本 bundle 的 lead 会话 ${scan.boundLogs} 个）` }
+    return { ...base, status: /** @type {'FOUND'} */ ('FOUND'), events: scan.presented, detail: `deliverables/presented ${scan.presented.length} 条（绑定本 bundle 的 lead 会话 ${scan.boundLogs} 个）` }
   }
-  if (scan.stalePresented > 0) return { ...base, status: 'NONE', detail: `会话语料在场，但有 ${scan.stalePresented} 条 present 早于契约纪元——本 run 无有效见证` }
-  if (scan.boundLogs === 0) return { ...base, status: 'NONE', detail: '会话语料在场，但无绑定本 bundle 的 lead 会话——present 无归属（跨 run 会话不得作证）' }
-  return { ...base, status: 'NONE', detail: '会话语料在场，但无指向本 bundle 的 deliverables/presented 事件' }
+  if (scan.stalePresented > 0) return { ...base, status: /** @type {'NONE'} */ ('NONE'), detail: `会话语料在场，但有 ${scan.stalePresented} 条 present 早于契约纪元——本 run 无有效见证` }
+  if (scan.boundLogs === 0) return { ...base, status: /** @type {'NONE'} */ ('NONE'), detail: '会话语料在场，但无绑定本 bundle 的 lead 会话——present 无归属（跨 run 会话不得作证）' }
+  return { ...base, status: /** @type {'NONE'} */ ('NONE'), detail: '会话语料在场，但无指向本 bundle 的 deliverables/presented 事件' }
 }
 
 /** 扫描结果 → HITL2 答复见证三态。 */
 function repliesStatusOf(scan) {
-  if (scan.logs === 0) return { status: 'UNATTESTED', detail: '会话语料缺席——HITL2 答复无证据', replies: [], logs: 0, boundLogs: 0, stale: 0 }
+  if (scan.logs === 0) return { status: /** @type {'UNATTESTED'} */ ('UNATTESTED'), detail: '会话语料缺席——HITL2 答复无证据', replies: [], logs: 0, boundLogs: 0, stale: 0, latestAsk: undefined, latestReply: null }
   const base = { replies: [], logs: scan.logs, boundLogs: scan.boundLogs, stale: scan.staleReplies, latestAsk: scan.latestAsk, latestReply: scan.latestReply ?? null }
   if (scan.replies.length > 0) {
-    return { ...base, status: 'FOUND', replies: scan.replies, detail: `user-question-reply ${scan.replies.length} 条（绑定本 bundle 的 lead 会话 ${scan.boundLogs} 个）` }
+    return { ...base, status: /** @type {'FOUND'} */ ('FOUND'), replies: scan.replies, detail: `user-question-reply ${scan.replies.length} 条（绑定本 bundle 的 lead 会话 ${scan.boundLogs} 个）` }
   }
-  if (scan.staleReplies > 0) return { ...base, status: 'NONE', detail: `会话语料在场，但有 ${scan.staleReplies} 条答复早于契约纪元——本 run 无有效见证` }
-  if (scan.boundLogs === 0) return { ...base, status: 'NONE', detail: '会话语料在场，但无绑定本 bundle 的 lead 会话——HITL2 答复无归属（跨 run 会话不得作证）' }
-  return { ...base, status: 'NONE', detail: '会话语料在场，但无绑定本 bundle 的 callId 答复（选定定稿）' }
+  if (scan.staleReplies > 0) return { ...base, status: /** @type {'NONE'} */ ('NONE'), detail: `会话语料在场，但有 ${scan.staleReplies} 条答复早于契约纪元——本 run 无有效见证` }
+  if (scan.boundLogs === 0) return { ...base, status: /** @type {'NONE'} */ ('NONE'), detail: '会话语料在场，但无绑定本 bundle 的 lead 会话——HITL2 答复无归属（跨 run 会话不得作证）' }
+  return { ...base, status: /** @type {'NONE'} */ ('NONE'), detail: '会话语料在场，但无绑定本 bundle 的 callId 答复（选定定稿）' }
 }
 
 /**
  * 门② 的结构化见证：`deliverables/presented` 的 files[].path（D28 新 run 用）。
  * 只认**绑定本 bundle 的 lead 顶层会话**；路径精确 `drt_<slug>/final[/vN].md`（前缀 slug 不算）；
  * 早于契约纪元的 present 不计（不继承旧 run 的见证）。
- * @returns {{status:'FOUND'|'NONE'|'UNATTESTED', detail:string, events:Array, logs:number}}
+ * @param {string} sessionsRoot @param {string} slug @param {(path: string) => string | null} [readLog] @param {{ contract?: string | null }} [opts]
+ * @returns {{status:'FOUND'|'NONE'|'UNATTESTED', detail:string, events:Array, logs:number, boundLogs:number, stale:number}}
  */
 export function presentedInLogs(sessionsRoot, slug, readLog = emptyOnUnreadableLogReader, opts = {}) {
   return presentedStatusOf(scanWitnessLogs(sessionsRoot, slug, { readLog, contract: opts.contract ?? null }))
@@ -317,7 +324,8 @@ export function presentedInLogs(sessionsRoot, slug, readLog = emptyOnUnreadableL
 /**
  * 门③ 的结构化见证：`user-question-reply`（callId 绑定 ask 的 §Decisions 拍板行）。
  * 只认**绑定本 bundle 的 lead 顶层会话**；要求 outcome=answered 且选定标签含「定稿」；代理标记随行。
- * @returns {{status:'FOUND'|'NONE'|'UNATTESTED', detail:string, replies:Array, logs:number}}
+ * @param {string} sessionsRoot @param {string} slug @param {(path: string) => string | null} [readLog] @param {{ contract?: string | null }} [opts]
+ * @returns {{status:'FOUND'|'NONE'|'UNATTESTED', detail:string, replies:Array, logs:number, boundLogs:number, stale:number, latestAsk?:any, latestReply?:any}}
  */
 export function hitl2ReplyInLogs(sessionsRoot, slug, readLog = emptyOnUnreadableLogReader, opts = {}) {
   return repliesStatusOf(scanWitnessLogs(sessionsRoot, slug, { readLog, contract: opts.contract ?? null }))
@@ -332,7 +340,8 @@ export function hitl2ReplyInLogs(sessionsRoot, slug, readLog = emptyOnUnreadable
  * 邻场与历史场次的 ask 串进来——时间锚也漏历史场次）。
  * 零例外合同（persona「ask 调用硬约束」同日落地）——无豁免形态。
  * 断代：交付日 < HITL_CONTRACT_DATE → PRE-CONTRACT 不计红（run bundle 是交付记录）。
- * @returns { status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail }
+ * @param {string} bundleDir @param {string} sessionsRoot @param {string | undefined} [hitlDate] @param {(path: string) => string | null} [readLog]
+ * @returns {{ status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT'|'UNATTESTED', detail: string }}
  */
 export function hitlAskGate(bundleDir, sessionsRoot, hitlDate, readLog = emptyOnUnreadableLogReader) {
   const qPath = join(bundleDir, 'question.md')
@@ -359,7 +368,7 @@ export function hitlAskGate(bundleDir, sessionsRoot, hitlDate, readLog = emptyOn
         if (ent.isDirectory()) { scan(p); continue }
         if (!/\.jsonl(\.zstd)?$/.test(ent.name)) continue
         const text = readLog(p)
-        if (!text.includes('ask_user_question') && !text.includes(bindMark.split('/')[0])) continue
+        if (!text || (!text.includes('ask_user_question') && !text.includes(bindMark.split('/')[0]))) continue
         let sessionWrites = false
         let sessionAsks = 0
         let sessionSigned = 0
@@ -408,17 +417,19 @@ function planCardNote(planCards, planCardOver) {
 }
 
 /**
- * 门③：final/ 版本记账在场 → §Decisions 须含 HITL2 拍板行（从 gateBundle 内联提函数——
- * 与其余各门同构；rows 供门② 的操作侧补齐判定复用，单一来源）。
- * @returns { gate: { status, detail }, rows: HITL2 拍板行列表 }
- */
-/**
  * 一行 §Decisions 是否是 HITL2 的**记录行**（人读副本；不参与交付决策）。
  * 两条已文档化形态：① 字面 `HITL2`；② 代理代答 provenance 行（`hitl-answer` 驱动，行内点明「交付审阅」
  * 且带「代理模拟」标记）。决策由门③ 的事件链判（D51），记录行只要求在场。
+ * @param {string} line
  */
 export const isHitl2Mention = (line) => /HITL2/i.test(line) || (/交付审阅/.test(line) && /代理模拟|hitl-answer/.test(line))
 
+/**
+ * 门③：final/ 版本记账在场 → §Decisions 须含 HITL2 拍板行（从 gateBundle 内联提函数——
+ * 与其余各门同构；rows 供门② 的操作侧补齐判定复用，单一来源）。
+ * @param {string} bundleDir @param {string} sessionsRoot @param {(path: string) => string | null} [readLog] @param {any} [witness]
+ * @returns {{ gate: { status: string, detail: string }, rows: string[] }}
+ */
 export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadableLogReader, witness = null) {
   const finalDir = join(bundleDir, 'final')
   // 只认版本副本 `vN.md`；`readable.md`/`readable-vN.md` 是读者版，不是版本记账。
@@ -471,6 +482,7 @@ export function hitl2RowGate(bundleDir, sessionsRoot, readLog = emptyOnUnreadabl
 /**
  * 门②：final.md 当前版 + review readiness PASS → present 声明在日志（或显式操作侧补齐记账）。
  * 从 gateBundle 内联提函数（与其余各门同构）；hitl2Rows 由门③ 供给（操作侧补齐行的唯一来源）。
+ * @param {string} bundleDir @param {string} sessionsRoot @param {string[]} hitl2Rows @param {(path: string) => string | null} [readLog] @param {any} [witness]
  */
 export function presentGate(bundleDir, sessionsRoot, hitl2Rows, readLog = emptyOnUnreadableLogReader, witness = null) {
   const slug = basename(bundleDir)

@@ -20,7 +20,7 @@ opened: 2026-11-23
 
 **未决问题：** 若恶意 `RunSource` 故障矩阵与 PBT 在执行过程中立刻挖出一批现存代码的新 bug，是随本卡并行建 `bugs/` 卡还是按批消化（停损边界预设：发现新 bug 先建独立缺陷记录或按小范围收口，不无限扩大本卡范围）。
 
-**下一步：** 建议在 [Issue 1](2026-11-23-static-semantic-guardrails.md) 修完已知实时隐患后（或同步安装测试 devDependencies 后）按 §实施顺序 启动落地。
+**下一步：** 建议在 [Issue 1](../_archived/settled_issues/2026-11-23-static-semantic-guardrails.md) 修完已知实时隐患后（或同步安装测试 devDependencies 后）按 §实施顺序 启动落地。
 
 ## 已知与未决
 

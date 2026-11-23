@@ -39,7 +39,7 @@ export const PRESETS = join(PACK, 'presets');
 // 新增门禁两处同步）。数组与文件块同按域分组（A–F）排序，域横幅见各节。
 export const gates = [
   'md-utf8-newline', 'md-links', 'md-anchors', 'doc-paths', 'doc-drefs', 'archived-note-pointer', 'count-free', 'doc-now-only', 'doc-budgets', 'surface-claims',
-  'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'cockpit-doc-registry', 'run-context-single-source',
+  'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'pack-lint', 'cockpit-doc-registry', 'run-context-single-source',
   'pack-manifest', 'market-index', 'readme-shape', 'release-vocab',
   'note-tree', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
   'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'discipline-state-vocab', 'repo-conventions', 'vendor-links',
@@ -56,10 +56,13 @@ export const VENDOR_TAG = 'dsh-v0.2.1-rc.5';
 // --only=<名>`，不必读 1800 行也不必等无关门禁的输出（2026-10-27 卫生轮）。**不改变判据**：
 // 其余门禁照常执行（读文件、无副作用），只是失败不计入、汇总不打印——所以它省的是噪声与
 // 注意力，不是时间；想跑全量就省略该参数。
+/** @type {Set<string> | null} */
 export let only = null;
 export const failures = [];
 export const notes = [];
-/** 由入口按 argv 配置（`--only=<gate[,gate]>`；空 = 全量）。 */
+/** 由入口按 argv 配置（`--only=<gate[,gate]>`；空 = 全量）。
+ * @param {string[]} names
+ */
 export function configureOnly(names) {
   only = names.length === 0 ? null : new Set(names);
 }
@@ -77,6 +80,7 @@ export function walk(dir, out = []) {
   }
   return out;
 }
+/** @type {string[] | null} */
 let allFilesCache = null;
 /** 全树懒扫描（只有 align-ledger 的 globAbsent 需要；role-list-sync 走 walkMany 的定向扫描）。 */
 export function allFiles() { return allFilesCache ??= walk(ROOT); }
@@ -113,7 +117,10 @@ export function gitOnce(args) {
  *  缺席走稀疏态防御的 md 链接族（md-utf8-newline / md-links / md-anchors /
  *  archived-note-pointer——缺席对它们是合法稀疏态）、纯名单不读盘的门禁（secrets-untracked /
  *  doc-budgets）、-z 定径枚举（backlog-liveness）。
- *  返回 null = 枚举层已红（②③），调用方结束本门禁；否则返回 [{rel, text}]（rel = 仓根相对路径）。 */
+ *  返回 null = 枚举层已红（②③），调用方结束本门禁；否则返回 [{rel, text}]（rel = 仓根相对路径）。
+ * @param {{ gate: string, glob?: string, exclude?: (rel: string) => boolean, emptyMsg?: string }} opts
+ * @returns {Array<{ rel: string, text: string }> | null}
+ */
 export function trackedFiles({ gate, glob, exclude, emptyMsg }) {
   const r = gitOnce(['-c', 'core.quotepath=false', 'ls-files', ...(glob ? [glob] : [])]);
   if (r.status !== 0) {

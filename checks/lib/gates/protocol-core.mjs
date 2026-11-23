@@ -26,7 +26,9 @@ export const PROTOCOL_CONTRACT_DATE = '2026-11-11'
  *  仍是旧 bundle——日期串 `>=` 分不出同日早场/晚场（BUG-052）。 */
 export const PROTOCOL_CONTRACT_AT = '2026-11-11T10:01:02+08:00'
 
-/** 交付回执时间是否早于契约落地时刻；返回 true/false，无可用证据 → null（调用方回退日期口径）。 */
+/** 交付回执时间是否早于契约落地时刻；返回 true/false，无可用证据 → null（调用方回退日期口径）。
+ * @param {{ acceptedAt?: string | null, contractAt?: string }} [input]
+ */
 export function preContractByDelivery({ acceptedAt = null, contractAt = PROTOCOL_CONTRACT_AT } = {}) {
   if (typeof acceptedAt !== 'string' || acceptedAt.trim() === '') return null
   const delivered = Date.parse(acceptedAt)

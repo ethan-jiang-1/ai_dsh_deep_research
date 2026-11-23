@@ -50,6 +50,11 @@ export function findGroup(sessionsRoot, substring) {
  *  组不在场（未 source env.sh / 无 run 历史）→ undefined。三消费方（client-load.entry /
  *  hitl-answer / watch-run）原各写一份同款一行——收敛为唯一正本（2026-10-13 结构重构）；
  *  判据本体复用 findGroup（子串可参数化的那一份），缺省子串 = research-workspace。 */
+/**
+ * @param {string} sessionsRoot
+ * @param {string | null} [workspace]
+ * @returns {string | undefined}
+ */
 export function researchWorkspaceGroup(sessionsRoot, workspace = null) {
   if (typeof workspace === 'string' && workspace !== '') {
     const key = projectKey(resolve(workspace))

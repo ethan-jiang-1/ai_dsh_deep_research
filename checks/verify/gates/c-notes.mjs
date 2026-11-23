@@ -91,6 +91,7 @@ export function runC() {
   };
   // 状态行 = 头七行内的唯一一条 `> 状态：`；fenced code 里的引用行不算状态（BUG-165/175）。
   // 先 mask 围栏再取值：引文即使在头七行内也不得冒充第二条状态。
+  /** @returns {{ ok: false, why: string } | { ok: true, value: string, line: number, lines: string[] }} */
   const statusOf = (text, { strict = true } = {}) => {
     const lines = text.split('\n');
     const found = statusLines(text);
@@ -103,7 +104,7 @@ export function runC() {
     if (strict && !/^> 状态：[a-z]+(?:\s+——?\s+.+)?$/.test(lines[item.line - 1] ?? '')) {
       return { ok: false, why: '状态行须为规范形 `> 状态：<裸值>`（全角冒号；无加粗/反引号/HTML；不带日期/括号）' };
     }
-    return { ok: true, value: item.value, line: item.line - 1, lines };
+    return { ok: true, value: String(item.value ?? ''), line: item.line - 1, lines };
   };
   const validDate = (y, m, d) => {
     const dt = new Date(Date.UTC(y, m - 1, d));
@@ -262,6 +263,7 @@ export function runC() {
     if (files.length === 0) {
       fail(gate, 'notes/implemented/ 扫描范围为空——门禁失去保护面（防空语料），检查目录是否被误清');
     }
+    /** @type {Array<[string, RegExp]>} */
     const markers = [
       ['RFC 裸节名 ## 验收', /^##\s*验收\s*$/],
       ['计划体标记 TODO', /TODO/],

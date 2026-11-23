@@ -9,14 +9,16 @@ export interface LeadPromptRemote {
   prompt(input: unknown, signal: AbortSignal): Promise<{ ok: boolean; error?: unknown }>
 }
 
+const NEVER_ABORTED = new AbortController().signal
+
 export function createLeadPrompt(remote: LeadPromptRemote, t: PackTranslate = translateZh) {
   const sendInstruction = async (sessionId: SessionId, text: string): Promise<{ ok: boolean; detail: string }> => {
     const requestId = crypto.randomUUID() as import('@deepseek-ai/dsh-api-remotes/client').SessionRequestId
     const base = { requestId, sessionId, content: [{ type: 'text' as const, text }] }
     try {
-      const steer = await remote.prompt({ ...base, mode: 'steer' }, new AbortController().signal)
+      const steer = await remote.prompt({ ...base, mode: 'steer' }, NEVER_ABORTED)
       if (steer.ok) return { ok: true, detail: t('leadSent') }
-      const queued = await remote.prompt({ ...base, mode: 'queue' }, new AbortController().signal)
+      const queued = await remote.prompt({ ...base, mode: 'queue' }, NEVER_ABORTED)
       return queued.ok ? { ok: true, detail: t('leadSent') } : { ok: false, detail: String(queued.error ?? t('unknownError')) }
     } catch (cause) {
       return { ok: false, detail: String(cause) }

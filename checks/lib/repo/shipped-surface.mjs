@@ -187,6 +187,8 @@ export function typeClosureOf(pkg, { read, exists }) {
 /**
  * `files` 必须逐条列出每个公开类型文件（入口 + 闭包），且不得用 `lib/**` / `lib/types/**` 这类广模式。
  * typeClosure 缺省 = 入口集合（兼容无构建产物的场景）；调用方应传 typeClosureOf(...).files。
+ * @param {any} pkg
+ * @param {{ typeClosure?: string[] }} [opts]
  */
 export function filesAllowlistIssues(pkg, { typeClosure } = {}) {
   const files = Array.isArray(pkg?.files) ? pkg.files : []

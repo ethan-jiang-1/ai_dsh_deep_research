@@ -44,14 +44,22 @@ export function pinnedDshBin(root) {
   return wrapper
 }
 
-/** `dsh --version` → { status, version }（版本行可能是多行，取最后一个 semver）。 */
+/** `dsh --version` → { status, version }（版本行可能是多行，取最后一个 semver）。
+ * @param {string} bin
+ * @param {{ cwd?: string }} [opts]
+ */
 export function versionOf(bin, { cwd } = {}) {
   const result = spawnSync(bin, ['--version'], { encoding: 'utf8', env: scrubbedEnv(), cwd })
   const output = `${result.stdout ?? ''}${result.stderr ?? ''}`.trim()
   return { status: result.status, version: dshVersionOfOutput(output), output: output.slice(-400) }
 }
 
-/** 版本对账：dsh --version 必须落在 pkg.engines.dsh。返回问题数组（空 = 绿）。 */
+/** 版本对账：dsh --version 必须落在 pkg.engines.dsh。返回问题数组（空 = 绿）。
+ * @param {string} root
+ * @param {string} bin
+ * @param {any} pkg
+ * @param {{ cwd?: string }} [opts]
+ */
 export function engineIssues(root, bin, pkg, { cwd } = {}) {
   const { status, output } = versionOf(bin, { cwd })
   if (status !== 0) return [`dsh --version 不可用（exit ${String(status)}）：${output}`]

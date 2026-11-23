@@ -44,6 +44,7 @@ export interface GraphFeed {
  * @param leadSessionId teammate 时读 Lead 的会话（与页签体的团队投影同源）。
  */
 export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: SessionId): GraphFeed {
+  const { follow, runSource } = props
   const [boundSlug, setBoundSlug] = useState<string | null>(null)
   const viewRef = useRef<RunView | null>(null)
   const [plan, setPlan] = useState<PlanIndex | null>(null)
@@ -73,7 +74,7 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
     setFollowError(null)
     void (async () => {
       try {
-        for await (const frame of props.follow(leadSessionId, controller.signal)) {
+        for await (const frame of follow(leadSessionId, controller.signal)) {
           if (frame.kind === 'history') events = [...frame.events]
           else events = [...events, frame.event]
           const trust = bindingTrust(events)
@@ -97,7 +98,7 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
       }
     })()
     return () => { stopped = true; controller.abort(); if (retryTimer !== undefined) clearTimeout(retryTimer) }
-  }, [leadSessionId, followAttempt])
+  }, [leadSessionId, follow, followAttempt])
 
   // plan.md 可选读：缺文件/读失败都降级 missing（不阻塞图；任务真相仍来自投影）。
   // 基址必须带 `drt_<slug>/`（三位置回退）——workspace 根没有 plan.md。
@@ -122,7 +123,7 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
     setPlanState('loading')
     const load = async (): Promise<void> => {
       try {
-        const opened = await openRun(props.runSource(leadSessionId), `drt_${boundSlug}`, { signal: controller.signal })
+        const opened = await openRun(runSource(leadSessionId), `drt_${boundSlug}`, { signal: controller.signal })
         if (stopped) return
         if (!opened.ok) {
           viewRef.current = null
@@ -185,7 +186,7 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
     void load()
     timer = setInterval(() => { void load() }, PLAN_REFRESH_MS)
     return () => { stopped = true; controller.abort(); if (timer !== undefined) clearInterval(timer) }
-  }, [leadSessionId, boundSlug, props.runSource, retryTick])
+  }, [leadSessionId, boundSlug, runSource, retryTick])
 
   // 旧图快照按需读（没有快照就不读；`plan/vN.md` 不在场就如实 missing）。
   const latestSnapshot = snapshots.length > 0 ? (snapshots[snapshots.length - 1] ?? null) : null

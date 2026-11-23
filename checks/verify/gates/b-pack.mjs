@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { satisfiesVersion } from '../../../packages/deep-research-pack/scripts/lib/version-range.mjs';
 import { readmeUserSectionIssues } from '../../lib/repo/shipped-surface.mjs';
 import { ROOT, PACK, PRESETS, VENDOR_TAG, fail, walk, walkMany, trackedFiles } from '../context.mjs';
+import { runPackLint } from './b-pack-lint.mjs';
 
 export function runB() {
 // ── preset-structure（0.1.7 形态：presets/<role>.patch.yml 一条 @deepseek-ai/dsh-agent-preset
@@ -94,6 +95,7 @@ export function runB() {
       const range = engine.trim();
       const endpoints = range.match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/g) ?? [];
       if (endpoints.length < 2) fail(gate, `engines.dsh ${range} 解析不出两个端点——无法对账人类副本`);
+      /** @type {Array<[string, boolean]>} */
       const copies = [
         ['packages/deep-research-pack/README.md', true],
         ['docs/design/40-research-cockpit.md', true],
@@ -294,6 +296,8 @@ export function runB() {
     });
   }
 }
+
+runPackLint();
 
 // ── cockpit-doc-registry（驾驶舱构成正本 ↔ 盘上模块登记；issue ③-b 用户拍板
 //    「补一条窄 verify 门」）。规则：`packages/deep-research-pack/src/client/` 任意层级与 `src/lib/`
@@ -533,16 +537,12 @@ export function runB() {
   else {
     const marker = '## 一、';
     const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'));
-    const source = readFileSync(sourcePath, 'utf8');
-    const generated = readFileSync(generatedPath, 'utf8');
-    const a = source.slice(source.indexOf(marker))
+    const a = readFileSync(sourcePath, 'utf8').slice(readFileSync(sourcePath, 'utf8').indexOf(marker))
       .replaceAll('{{version}}', pkg.version)
       .replaceAll('{{tarballName}}', `dsh-deep-research-pack-${pkg.version}.tgz`)
       .replaceAll('{{dshEngine}}', pkg.engines?.dsh ?? '');
-    const b = generated.slice(generated.indexOf(marker));
-    if (a !== b) fail(gate, '源手册正文与 _dist/安装手册.md 不一致——改源后跑 node tools/release/export-dist.mjs');
+    const g = readFileSync(generatedPath, 'utf8');
+    if (a !== g.slice(g.indexOf(marker))) fail(gate, '源手册正文与 _dist/安装手册.md 不一致——改源后跑 node tools/release/export-dist.mjs');
   }
 }
-
-// ══ 域 C · notes 与开发技能（开发记忆骨架与时态/技能形状/RFC 指针） ══
 }

@@ -30,7 +30,9 @@ const isTopField = (line) => /^\s*-\s*[A-Za-z_\u4e00-\u9fff]+\s*[:：]/.test(lin
 /** topics.md → { topics: Map<T#, {role,lenses,dependsOn,mustAnswer}>, duplicates, issues }。 */
 export function parseTopicsReport(text) {
   const topics = new Map()
+  /** @type {string[]} */
   const duplicates = []
+  /** @type {{ id: string, role: string, lenses: string[], dependsOn: string[], mustAnswer: string[] } | null} */
   let cur = null
   let inMustAnswer = false
   for (const line of String(text ?? '').split('\n')) {
@@ -62,6 +64,7 @@ export function parseTopicsReport(text) {
     const deps = /^\s*-\s*depends_on\s*[:：]\s*(.*)$/m.exec(line)
     if (deps !== null) cur.dependsOn = listOf(deps[1])
   }
+  /** @type {string[]} */
   const issues = []
   for (const dup of duplicates) issues.push(`topics.md 重复 T#：${dup}（后出现的节覆盖了前一个）`)
   const ids = new Set(topics.keys())
@@ -100,6 +103,7 @@ export function parseTopicsOf(text) {
 /** findings.md → 每个 F# 的块对象（保留 lens_gaps 行是否存在/原文）。 */
 export function parseFindingsOf(text) {
   const findings = []
+  /** @type {{ id: string, evidence: string[], lenses: string[], lensGaps: string[], lensGapsRaw: string, hasLensGapsLine: boolean, gap: string } | null} */
   let cur = null
   for (const line of String(text ?? '').split('\n')) {
     const h = /^##\s*F(\d+)\s*[:：]/.exec(line)

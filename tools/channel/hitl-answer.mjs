@@ -116,6 +116,7 @@ let pendingBundle = null
 }
 // 驱动计划（点击前读盘侧形态，BUG-005）：卡共几题 + ask 形态。活等待（wait:-1）下
 // timed 600s 放行与文本消息兜底**都不可用**——脚本必须真浏览器答满，操作者必须知道这点。
+/** @type {{ questionCount: number|null, indefinite: boolean|null, callId: string|null, questions: any[] }} */
 let plan = { questionCount: null, indefinite: null, callId: null, questions: [] }
 {
   const s1 = pendingLogPath !== null ? readSessionEvents(pendingLogPath) : { readable: false, events: [] }
@@ -438,6 +439,9 @@ try {
         if (candidate.pass) { verdict = candidate; landedBatch = batch; break }
         verdict = candidate // 保留最后一次（红），继续重试窗
       }
+    }
+    if (verdict === null) {
+      verdict = driveVerdict({ dryRun: false, settled: false, batch: [], clickCount: answered.length })
     }
     log(`hitl-answer: 盘侧裁决——${verdict.reason}`)
     process.exitCode = verdict.exitCode

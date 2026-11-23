@@ -38,7 +38,7 @@ const CHROME_CANDIDATES = [
   process.env.DSH_PROBE_CHROME,
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
-].filter(Boolean);
+].filter(/** @returns {candidate is string} */ (candidate) => typeof candidate === 'string' && candidate !== '');
 
 function findChromeBinary() {
   return CHROME_CANDIDATES.find(candidate => fs.existsSync(candidate));
@@ -46,14 +46,16 @@ function findChromeBinary() {
 
 /**
  * Launch a throwaway headless Chrome and attach to its page target.
- * @param {object} options
- * @param {string} options.url - the page to load (include any auth token).
+ * @param {object} [options]
+ * @param {string} [options.url] - the page to load (include any auth token).
  * @param {string} [options.chromeBin] - browser binary; auto-detected when absent.
  * @param {string} [options.windowSize] - `--window-size` value; default `1600,1000`.
  * @param {number} [options.bootTimeoutMs] - how long to wait for CDP + the page.
+ * @param {any} [options.cookie] - optional auth cookie to inject before navigation.
  * @returns {Promise<object>} handle: { evaluate, click, consoleProblems, exceptions, close }.
  */
 export async function launchCdpBrowser({ url, chromeBin, windowSize = '1600,1000', bootTimeoutMs = 20000, cookie } = {}) {
+  if (typeof url !== 'string' || url === '') throw new Error('launchCdpBrowser: url is required');
   const bin = chromeBin ?? findChromeBinary();
   if (bin === undefined) throw new Error('no Chrome/Edge binary found (set DSH_PROBE_CHROME)');
   const profileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cdp-driver-'));
@@ -201,7 +203,7 @@ export async function launchCdpBrowser({ url, chromeBin, windowSize = '1600,1000
     close: () => {
       try { if (chrome.pid !== undefined) process.kill(-chrome.pid, 'SIGTERM') } catch {}
       try { chrome.kill() } catch {}
-      return new Promise((resolve) => {
+      return new Promise(/** @param {(value?: void) => void} resolve */ (resolve) => {
         if (chrome.exitCode !== null || chrome.signalCode !== null) return resolve()
         const t0 = Date.now();
         const tick = () => (chrome.exitCode !== null || chrome.signalCode !== null || Date.now() - t0 > 3000)
@@ -215,7 +217,7 @@ export async function launchCdpBrowser({ url, chromeBin, windowSize = '1600,1000
     chrome.kill();
     // Chrome releases the throwaway profile asynchronously; a plain settle —
     // an unref'd timer would let node drain the loop before this resolves.
-    await new Promise((resolve) => { setTimeout(resolve, 1200) });
+    await new Promise(/** @param {(value?: void) => void} resolve */ (resolve) => { setTimeout(resolve, 1200) });
     try { fs.rmSync(profileDir, { recursive: true, force: true, maxRetries: 3 }) } catch {}
   };
   void bootTimeoutMs;

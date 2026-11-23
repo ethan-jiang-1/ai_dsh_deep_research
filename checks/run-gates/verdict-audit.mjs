@@ -163,6 +163,7 @@ if (isMain(import.meta.url)) {
   const finalVersion = existsSync(finalDir) ? (finalVersionsIn(finalDir).at(-1) ?? null) : null
 
   // 会话事实：只读——按 batches 里点名的 session 取，不扫全量目录。
+  /** @type {Record<string, { preset: string | null, depth: number | null, parentSession: string | null, assistantTexts: string[], toolNames: string[] }>} */
   const sessions = {}
   for (const item of roundTexts) {
     const parsed = parseVerdicts(item.text)

@@ -303,6 +303,26 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/repo/scripts-typecheck.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "修复前 protocol-audit.mjs:210 (missing finalVersionsIn)、run-driver.mjs:453 (v.dataFace undefined) 等 367 条诊断直接判红。",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
+      "path": "tests/checks/repo/semantic-guardrails.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "红证配方：修复前实跑捕获 useStatusFeed.ts:337/347/354 与 useConfigFeed.ts:163 的 RunView.hasFile、useStatusFeed.ts:293/300 与 ResearchStatusTab.tsx:120 的闭集遗漏、",
+      "oracleType": "external",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/repo/shipped-surface.test.mjs",
       "domain": "checks",
       "lane": "checks",

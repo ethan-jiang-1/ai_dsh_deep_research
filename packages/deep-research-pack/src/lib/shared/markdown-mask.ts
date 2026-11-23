@@ -113,7 +113,7 @@ function stripInlineCommentsInScope(scope: string): string {
 export function maskMarkdownLines(text: string): string[] {
   const rawLines = String(text ?? '').replace(/\r\n?/g, '\n').split('\n')
   const working = [...rawLines]
-  const kinds: LineKind[] = new Array<LineKind>(rawLines.length).fill('other')
+  const kinds: LineKind[] = Array.from<LineKind>({ length: rawLines.length }).fill('other')
 
   const listStack: ListFrame[] = []
   let nextListId = 1

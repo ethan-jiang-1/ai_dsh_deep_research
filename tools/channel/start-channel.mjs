@@ -20,7 +20,8 @@ if (SANDBOX_AVAILABLE === false) env.DSH_SANDBOX_UNAVAILABLE = '1'
 function probeSandbox() {
   if (process.platform !== 'darwin') return null
   const result = spawnSync('/usr/bin/sandbox-exec', ['-p', '(version 1)', '/usr/bin/true'], { encoding: 'utf8', timeout: 1000 })
-  return sandboxAvailability({ platform: process.platform, status: result.status, errorCode: result.error?.code })
+  const errCode = /** @type {NodeJS.ErrnoException | undefined} */ (result.error)?.code
+  return sandboxAvailability({ platform: process.platform, status: result.status, errorCode: errCode })
 }
 const argv = process.argv.slice(2)
 const background = argv.includes('--background')
@@ -58,9 +59,7 @@ function safeDiagnostic(message) {
 }
 
 function fail(message, exit = 1) {
-  const error = new Error(message)
-  error.exit = exit
-  return error
+  return Object.assign(new Error(message), { exit })
 }
 
 function canonicalDirectory(path) {
@@ -194,10 +193,12 @@ async function main() {
   process.on('disconnect', () => {
     if (background && !handedOff) void stop(1, 'driver disconnected before handoff')
   })
-  process.on('message', message => {
-    if (message === null || typeof message !== 'object' || message.generation !== generation) return
-    if (message.type === 'cancel' && !handedOff) { void stop(1, 'driver cancelled startup'); return }
-    if (message.type !== 'handoff' || !ready || handedOff || stopping !== null) return
+  process.on('message', (rawMessage) => {
+    if (rawMessage === null || typeof rawMessage !== 'object') return
+    const msg = /** @type {{ generation?: unknown, type?: unknown }} */ (rawMessage)
+    if (msg.generation !== generation) return
+    if (msg.type === 'cancel' && !handedOff) { void stop(1, 'driver cancelled startup'); return }
+    if (msg.type !== 'handoff' || !ready || handedOff || stopping !== null) return
     handedOff = true
     clearTimeout(handoffTimer)
     void send('handed-off', { pid: process.pid }).then(sent => {

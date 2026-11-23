@@ -88,7 +88,7 @@ export function sessionMetaOf(events) {
 /**
  * 判读整形（给人看，CLI 直接 print）：四要素 + 成败 + 诚实边界一句。
  * @param {{sessionId: string, group?: string, cwd?: string|null, title?: string|null, logPath: string,
- *   sceneDir?: string|null, openedVia?: string|null}} facts
+ *   sceneDir?: string|null, openedVia?: string|null, statusPane?: string|null}} facts
  * @returns {string[]}
  */
 export function formatReplaySummary(facts) {

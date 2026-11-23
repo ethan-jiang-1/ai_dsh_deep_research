@@ -11,7 +11,7 @@ opened: 2026-11-23
 
 **问题与期望结果：** 仅靠外部工具和后验测试仍是在“写完再抓”；从根本上减少 bug 生成，必须让数据结构本身使“非法状态不可表示”。目前 `useStatusFeed.ts`（414 行）等 Hook 把异步副作用与 13 个分散 `useState` 耦合在一起，`BriefInputs`（17 个散可选字段）与 `deriveSteps` 允许调用方传入互相矛盾的布尔值，`readArtifact` 返回 `json: unknown` 让下游各自猜测字段，且模型 skill/模板样例与门禁 parser 仍需手动同步。期望完成结构级治本，同时按 [discipline-map.md](../../docs/discipline-map.md) 原定触发将 `vendor/dsh` 防御模式清单本地化。
 
-**当前情况：** `packages/deep-research-pack/src/` 已扩展到 114 个 `.ts/.tsx` 文件，触发了 `docs/discipline-map.md` 第 189 行的重估条件（*「本仓 TS 面扩大到需独立缺陷模式清单时」*）。前置保护依赖于 [Issue 1](2026-11-23-static-semantic-guardrails.md) 与 [Issue 2](2026-11-23-l0-client-and-property-testing.md) 提供的 L0 回归护栏。
+**当前情况：** `packages/deep-research-pack/src/` 已扩展到 114 个 `.ts/.tsx` 文件，触发了 `docs/discipline-map.md` 第 189 行的重估条件（*「本仓 TS 面扩大到需独立缺陷模式清单时」*）。前置保护依赖于 [Issue 1](../_archived/settled_issues/2026-11-23-static-semantic-guardrails.md) 与 [Issue 2](2026-11-23-l0-client-and-property-testing.md) 提供的 L0 回归护栏。
 
 **未决问题：** `BriefInputs`、`deriveSteps`、`readArtifact` 属于包内导出/跨测试接口，收紧类型时需同步更新所有合法调用方和测试夹具（不保留两套平行旧接口）。
 

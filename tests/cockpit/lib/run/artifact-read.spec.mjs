@@ -4,7 +4,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  ARTIFACT_POLICY, artifactPolicyOf, artifactStateOf, readArtifact, readStateOf,
+  ARTIFACT_POLICY, artifactBodyIssueOf, artifactPolicyOf, artifactReadIssueOf, artifactStateOf, assertNever, readArtifact, readStateOf,
 } from '../../../../packages/deep-research-pack/src/lib/run/artifact-read.ts'
 
 const POLICY = { nonEmpty: true, json: false }
@@ -85,4 +85,21 @@ test('G21 cockpit canonical 读取点清单：裸 view.read 只允许已知遗�
   assert.deepEqual(counts, {
     'research-graph/useGraphFeed.ts': 1,
   })
+})
+
+test('artifactReadIssueOf / artifactBodyIssueOf / assertNever：闭集五态穷举不漏 invalid', () => {
+  assert.equal(artifactReadIssueOf('ok'), null)
+  assert.equal(artifactReadIssueOf('absent'), null)
+  assert.equal(artifactReadIssueOf('empty'), 'empty')
+  assert.equal(artifactReadIssueOf('unreadable'), 'unreadable')
+  assert.equal(artifactReadIssueOf('invalid'), 'unreadable')
+
+  assert.equal(artifactBodyIssueOf('ok', true), null)
+  assert.equal(artifactBodyIssueOf('ok', false), 'body-empty')
+  assert.equal(artifactBodyIssueOf('absent', false), null)
+  assert.equal(artifactBodyIssueOf('empty', false), 'empty')
+  assert.equal(artifactBodyIssueOf('unreadable', false), 'unreadable')
+  assert.equal(artifactBodyIssueOf('invalid', false), 'unreadable')
+
+  assert.throws(() => assertNever(/** @type {never} */ ('bogus')), /Unexpected union member: bogus/)
 })

@@ -46,6 +46,7 @@ export function discoverReplayFaces(replayRoot, { only } = {}) {
 
 // Check each component with lstat: realpath alone would accept in-scene symlinks.
 function scenePath(base, path, field, directory = false) {
+  /** @type {(rule: string) => never} */
   const fail = (rule) => { throw new Error(`Replay ${field} ${String(path)}: ${rule}; fix snapshot.json`); };
   if (typeof path !== 'string' || path.trim() === '' || isAbsolute(path) || win32.isAbsolute(path) || path.includes('\\') || path.includes('\0')) fail('path must be relative');
   const parts = path.split('/');
@@ -66,7 +67,12 @@ function scenePath(base, path, field, directory = false) {
   return target;
 }
 
-/** Load a snapshot.json scene. roles = allowed preset roster; scene roleFace (or roles) selects cases; only filters after validation. */
+/**
+ * Load a snapshot.json scene. roles = allowed preset roster; scene roleFace (or roles) selects cases; only filters after validation.
+ * @param {string} sceneDir
+ * @param {any} roles
+ * @param {{ only?: string }} [opts]
+ */
 export function loadReplayScene(sceneDir, roles, { only } = {}) {
   const requested = resolve(sceneDir);
   const dirStat = lstatSync(requested);

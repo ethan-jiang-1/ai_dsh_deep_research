@@ -284,8 +284,11 @@ export function scanBundle(bundleDir) {
   return { slug, core, exempt, warn, tail }
 }
 
-/** 全量扫描 + 断代定红。dates 可按 slug 注入交付日（tests 用——夹具 mtime 不可靠）。 */
-export function scanAll(bundleDirs, { contractDate = CONTRACT_DATE, today, dates = {} } = {}) {
+/** 全量扫描 + 断代定红。dates 可按 slug 注入交付日（tests 用——夹具 mtime 不可靠）。
+ * @param {string[]} bundleDirs
+ * @param {{ contractDate?: string, today?: string, dates?: Record<string, string> }} [opts]
+ */
+export function scanAll(bundleDirs, { contractDate = CONTRACT_DATE, today = undefined, dates = {} } = {}) {
   const now = today ?? toDateStr(new Date())
   const rows = bundleDirs.map((d) => {
     const b = scanBundle(d)

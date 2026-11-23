@@ -8,7 +8,7 @@ import { findingsContractIssues, SCOPE_ROLES, topicsContractIssues } from './fin
 
 /**
  * 门 L（leads 交接门，可导入；keyless）。断代日期可注入（tests——夹具 mtime 不可靠）。
- * @returns { status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail }
+ * @returns {{ status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail: string }}
  */
 export function leadsGate(bundleDir, leadsDate) {
   const leadsPath = join(bundleDir, 'leads.md')
@@ -26,7 +26,9 @@ export function leadsGate(bundleDir, leadsDate) {
   // 判断）：任意层级 #{2,4} 的节都是单元——组织轴自由（方向轴/实体轴/前提校验段皆合法，
   // 门不判轴，按题型分形是 scout 的专业判断）；门守不变量 = 可派发的字段齐单元。
   // 「lead 尝试」= 含状态行或 owner 行的单元；字段齐检查只施加于 lead 尝试。
+  /** @type {Array<{ heading: string, body: string[] }>} */
   const sections = []
+  /** @type {{ heading: string, body: string[] } | null} */
   let cur = null
   for (const line of text.split('\n')) {
     if (/^#{2,4}\s+/.test(line)) {
@@ -67,7 +69,7 @@ export function leadsGate(bundleDir, leadsDate) {
       const digProbe = sv !== null && /^建议挖深/.test(sv)
       if (digProbe) for (const m of (s.heading + ' ' + ownerM[0]).matchAll(/T\d+/g)) covered.add(m[0])
     }
-    if (!statusM) {
+    if (sv === null) {
       problems.push(`「${title}」缺「- 状态:」行（修正 = 按 templates/run/leads.md 补状态行）`)
       continue
     }
@@ -106,7 +108,8 @@ export function leadsGate(bundleDir, leadsDate) {
     coverageNote = '（覆盖未判：topics.md 不在场——在场级归 schema-scan）'
   } else {
     const tText = readFileSync(topicsPath, 'utf8')
-    const tSections = []
+    const tSections = /** @type {Array<{ heading: string, body: string[] }>} */ ([])
+    /** @type {{ heading: string, body: string[] } | null} */
     let tcur = null
     for (const line of tText.split('\n')) {
       if (/^##\s+/.test(line)) {
@@ -135,6 +138,7 @@ export function leadsGate(bundleDir, leadsDate) {
   }
   // 断代（同 schema-scan 成例）：无日期可断 = 从严；pre-contract = 如实报告不计红
   const preContract = isPreContract(bundleDir, leadsDate, LEADS_CONTRACT_DATE)
+  /** @type {'PASS'|'RED'|'N/A'|'PRE-CONTRACT'} */
   let status
   let detail
   if (problems.length === 0) {
@@ -158,7 +162,7 @@ export function leadsGate(bundleDir, leadsDate) {
  * selfhosted 索引表/siliconflow「当前交付版 v2」）；v1.md 缺席 = RED（fail-loud）。
  * 断代：交付日 < VERSION_CONTRACT_DATE → PRE-CONTRACT 不计红（kimi 09-26 §Decisions 零
  * v2 记账 = 真实契约前形态，不追溯红）。
- * @returns { status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail }
+ * @returns {{ status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail: string }}
  */
 export function versionGate(bundleDir, versionDate) {
   const finalDir = join(bundleDir, 'final')
@@ -227,7 +231,7 @@ export function versionGate(bundleDir, versionDate) {
  * 断代：交付日 < HEADING_CONTRACT_DATE → PRE-CONTRACT 不计红（run bundle 是交付记录）。
  * 本门不防什么（bound on the reported failure，同 LDR docstring 诚实声明）：近似改写标题、
  * 正文循环、代码围栏内的 `#` 行计入比对（final.md 罕见围栏标题，误报面可忽略）、无标题退化。
- * @returns { status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail }
+ * @returns {{ status: 'PASS'|'RED'|'N/A'|'PRE-CONTRACT', detail: string }}
  */
 export function headingGate(bundleDir, headingDate) {
   const finalPath = join(bundleDir, 'final.md')

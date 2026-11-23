@@ -67,7 +67,7 @@ function walkLogs(dir, out = []) {
  * 带缓存的反查。语义与 `sessionsOfBundle` 相同（绑定 + present 计数），只是跳过未变日志的解压。
  * @param {string} sessionsRoot 会话根。
  * @param {string} slug bundle 名（`drt_<slug>` 或裸 slug）。
- * @param {{readLog?:(p:string)=>string, cachePath?:string, useCache?:boolean}} [opts]
+ * @param {{readLog?:(p:string)=>string, cachePath?:string, useCache?:boolean, roots?:string[]}} [opts]
  * @returns {{slug:string, logs:number, sessions:Array, cacheHits:number, cacheMisses:number}}
  */
 export function sessionsOfBundleCached(sessionsRoot, slug, opts = {}) {

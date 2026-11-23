@@ -60,8 +60,11 @@ const hasFilledSection = (text, heading) => {
 // 规则 = 围栏内的同边界命令，或 `复现状态：未复现` + 读法/协议行（方法 §3 的两种合法形态）。
 const REPRO_COMMAND_HEAD = /^\s*(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*(?:node|pnpm|npx|bash|sh|git|timeout)\b/;
 function fencedBlocksOf(text) {
+  /** @type {string[]} */
   const blocks = [];
+  /** @type {{ ch: string, len: number } | null} */
   let fence = null;
+  /** @type {string[]} */
   let current = [];
   for (const line of text.split('\n')) {
     if (fence !== null) {
@@ -109,6 +112,7 @@ const conclusionOf = (text) => /^>\s*结论[：:]\s*(.*)$/m.exec(text)?.[1]?.tri
 /** Check current backlog structure over tracked files; empty active shelves are deliberately legal. */
 export function backlogLivenessProblems(backlogRoot, trackedFiles) {
   if (!Array.isArray(trackedFiles)) throw new TypeError('backlog checker requires tracked files');
+  /** @type {string[]} */
   const problems = [];
   const tracked = new Set(trackedFiles);
   const read = (rel) => readFileSync(join(backlogRoot, rel), 'utf8');
@@ -164,8 +168,9 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
           continue;
         }
         const bf = parsedBanner.fields;
+        if (!bf) continue;
         if ([...bf.keys()][0] !== 'status') problems.push(`_backlog/${bannerRel} needs status as first field`);
-        if (!RESEARCH_STATES.includes(bf.get('status'))) problems.push(`_backlog/${bannerRel} invalid status for research topic (${RESEARCH_STATES.join('/')})`);
+        if (!RESEARCH_STATES.includes(bf.get('status') ?? '')) problems.push(`_backlog/${bannerRel} invalid status for research topic (${RESEARCH_STATES.join('/')})`);
         if (!DATE.test(bf.get('opened') ?? '')) problems.push(`_backlog/${bannerRel} needs opened: YYYY-MM-DD`);
         const bannerStatusLine = statusLineOf(banner);
         if (!bannerStatusLine) problems.push(`_backlog/${bannerRel} active research topic needs a status line (状态：<调研中|已定性>)`);
@@ -201,26 +206,28 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
       }
       const parsed = metadata(text);
       if (archived && (research || parsed.error === 'missing frontmatter')) continue; // Legacy bodies stay untouched.
-      if (parsed.error) { problems.push(`${loc} ${parsed.error}`); continue; }
+      if (parsed.error || !parsed.fields) { problems.push(`${loc} ${parsed.error ?? 'missing metadata'}`); continue; }
       const fields = parsed.fields;
       if (research) {
         if ([...fields.keys()][0] !== 'topic' || !fields.get('topic')?.trim()) problems.push(`${loc} needs topic as first field`);
-        if (!fields.get('intent')?.trim() || fields.get('intent').includes('\\n')) problems.push(`${loc} needs one-line intent`);
+        if (!fields.get('intent')?.trim() || (fields.get('intent') ?? '').includes('\\n')) problems.push(`${loc} needs one-line intent`);
         if (fields.has('status')) problems.push(`${loc} research metadata must not contain status`);
       } else if (shelf === 'methods') {
         if (fields.get('name') !== name.replace(/\.md$/, '')) problems.push(`${loc} name must match filename`);
         for (const key of ['description', 'whenToUse']) if (!fields.get(key)?.trim()) problems.push(`${loc} needs ${key}`);
       } else {
+        const cardStatus = fields.get('status') ?? '';
+        const allowedStates = CARD_STATES[/** @type {keyof typeof CARD_STATES} */ (shelf)] ?? [];
         if ([...fields.keys()][0] !== 'status') problems.push(`${loc} needs status as first field`);
-        if (!CARD_STATES[shelf].includes(fields.get('status'))) problems.push(`${loc} invalid status for shelf`);
+        if (!allowedStates.includes(cardStatus)) problems.push(`${loc} invalid status for shelf`);
         if (!DATE.test(fields.get('opened') ?? '')) problems.push(`${loc} needs opened: YYYY-MM-DD`);
-        if (shelf.endsWith('bugs') && !['P0', 'P1', 'P2'].includes(fields.get('severity'))) problems.push(`${loc} needs severity: P0/P1/P2`);
-        if (shelf.endsWith('bugs') && ['修复就绪', '修复落地'].includes(fields.get('status')) && !hasFilledSection(text, '修复判据'))
-          problems.push(`${loc} ${fields.get('status')} requires a non-empty ## 修复判据`);
-        if (shelf === 'bugs' && fields.get('status') === '修复就绪') {
+        if (shelf.endsWith('bugs') && !['P0', 'P1', 'P2'].includes(fields.get('severity') ?? '')) problems.push(`${loc} needs severity: P0/P1/P2`);
+        if (shelf.endsWith('bugs') && ['修复就绪', '修复落地'].includes(cardStatus) && !hasFilledSection(text, '修复判据'))
+          problems.push(`${loc} ${cardStatus} requires a non-empty ## 修复判据`);
+        if (shelf === 'bugs' && cardStatus === '修复就绪') {
           for (const problem of reproProblems(text)) problems.push(`${loc} ${problem}`);
         }
-        if (shelf === 'bugs' && fields.get('status') === '修复落地') {
+        if (shelf === 'bugs' && cardStatus === '修复落地') {
           for (const problem of fixEvidenceProblems(text)) problems.push(`${loc} ${problem}`);
           const guard = fixGuardOf(text);
           if (guard !== null && typeof guard.path === 'string' && !existsSync(resolve(backlogRoot, '..', guard.path))) {
@@ -237,10 +244,10 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
         const statusLine = statusLineOf(text);
         // 归档卡的退出值：已结/已修 = 已离开活跃区，状态行（含历史头）不得再写可关闭：否。
         // 只看卡头 25 行——正文里的历史讨论可以引用旧值，卡头是当前记账面。
-        if (archived && ['已结', '已修'].includes(fields.get('status'))) {
+        if (archived && ['已结', '已修'].includes(cardStatus)) {
           const head = text.split('\n').slice(0, 25).join('\n');
           if (/可关闭\s*[：:=＝]\s*否/.test(head))
-            problems.push(`${loc} 已归档（${fields.get('status')}）仍写可关闭：否——退出值必须与归档同次翻转为是`);
+            problems.push(`${loc} 已归档（${cardStatus}）仍写可关闭：否——退出值必须与归档同次翻转为是`);
         }
         if (shelf === 'issues') {
           if (!DATE_SLUG.test(name)) problems.push(`${loc} filename must be YYYY-MM-DD-<slug>.md`);
@@ -248,7 +255,7 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
             problems.push(`${loc} active status line must declare 可关闭：否`);
           if (statusLine && /可关闭\s*[：:=＝]\s*是(?=[｜|\n（(]|$)/.test(statusLine))
             problems.push(`${loc} is closeable but still active; archive in the same change`);
-          if (fields.get('status') === '待落地') {
+          if (cardStatus === '待落地') {
             if (!statusLine || !/结论倾向[：:]\s*现在做/.test(statusLine))
               problems.push(`${loc} 待落地 requires 结论倾向：现在做`);
             if (!hasFilledSection(text, '验收标准'))
@@ -273,10 +280,10 @@ export function backlogLivenessProblems(backlogRoot, trackedFiles) {
         if (!archived) {
           if (statusLine) {
             const phase = phaseOf(statusLine);
-            if (phase !== fields.get('status'))
-              problems.push(`${loc} status line must mirror frontmatter status (状态：${fields.get('status')}；记号 = ${phase ?? '（无）'})`);
+            if (phase !== cardStatus)
+              problems.push(`${loc} status line must mirror frontmatter status (状态：${cardStatus}；记号 = ${phase ?? '（无）'})`);
           } else if (shelf === 'bugs') {
-            problems.push(`${loc} active bug needs a status line mirroring frontmatter status (状态：${fields.get('status')})`);
+            problems.push(`${loc} active bug needs a status line mirroring frontmatter status (状态：${cardStatus})`);
           }
           if (shelf === 'issues' && statusLine
             && !new RegExp(`结论倾向[：:]\\s*(?:${GRADUATION.join('|')})`).test(statusLine))

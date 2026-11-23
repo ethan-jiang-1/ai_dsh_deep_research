@@ -48,6 +48,7 @@ export const isHttpUrl = (value) => {
   try { const u = new URL(value); return u.protocol === 'http:' || u.protocol === 'https:' } catch { return false }
 }
 
+/** @param {unknown} text @param {string} code @returns {{ value: any, problems: Array<{ code: string, detail: string }> }} */
 const parseJson = (text, code) => {
   if (typeof text !== 'string' || text.trim() === '') return { value: null, problems: [{ code, detail: '文件为空' }] }
   try {
@@ -79,6 +80,7 @@ export function parseClaims(text) {
     return { value: null, problems }
   }
   const ids = new Set()
+  /** @type {Array<{ id: string, text: string, critical: boolean, topics: string[], evidence: string[], urls: string[] }>} */
   const claims = []
   for (const [i, raw] of value.claims.entries()) {
     const where = `claims[${i}]`
@@ -133,6 +135,7 @@ export function parseVerdicts(text) {
     problems.push({ code: 'verdicts-invalid', detail: 'verdicts 必须是数组' })
     return { value: null, problems }
   }
+  /** @type {Array<{ session: string, preset: string, depth: number, raw: string }>} */
   const batches = []
   for (const [i, raw] of value.batches.entries()) {
     const where = `batches[${i}]`
@@ -146,6 +149,7 @@ export function parseVerdicts(text) {
     if (typeof raw.raw !== 'string' || raw.raw.trim() === '') problems.push({ code: 'verdicts-invalid', detail: `${where}.raw 必须是 child 最终正文原文` })
     batches.push({ session: raw.session, preset: raw.preset, depth: raw.depth, raw: raw.raw })
   }
+  /** @type {Array<{ claim_id: string, batch: number, verdict: string, quote: string, reason: string, rechecked_urls: string[], source_tier_ok: boolean | undefined }>} */
   const verdicts = []
   for (const [i, raw] of value.verdicts.entries()) {
     const where = `verdicts[${i}]`
@@ -188,10 +192,15 @@ export function parseVerdicts(text) {
  * @param {string} text 会话日志全文（`.jsonl` 行式；zstd 解压由调用方做）。
  */
 export function parseSessionFacts(text) {
+  /** @type {string | null} */
   let preset = null
+  /** @type {number | null} */
   let depth = null
+  /** @type {string | null} */
   let parentSession = null
+  /** @type {string[]} */
   const assistantTexts = []
+  /** @type {string[]} */
   const toolNames = []
   for (const line of String(text ?? '').split('\n')) {
     if (line.trim() === '') continue
@@ -260,7 +269,10 @@ const projectFileVerdict = (v) => ({
  * @param {string|null} [input.finalText] `final/v<claims.finalRef>.md` 全文。
  * @param {string|null} [input.reviewText] `review.md` 全文。
  * @param {Record<string,{preset:string|null,depth:number|null,parentSession:string|null,assistantTexts:string[],toolNames:string[]}>} [input.sessions] child 会话事实（CLI 注入）。
- * @returns {{problems:Array<{code:string,detail:string}>,warnings:Array<{code:string,detail:string}>,stats:object}}
+ * @param {string[]|null} [input.bundleFiles]
+ * @param {string|null} [input.topicsText]
+ * @param {boolean|null} [input.readinessPass]
+ * @returns {{problems:Array<{code:string,detail:string}>,warnings:Array<{code:string,detail:string}>,stats:any}}
  */
 export function auditClaimVerdicts({
   required = false,
@@ -274,8 +286,11 @@ export function auditClaimVerdicts({
   topicsText = null,
   readinessPass = null,
 } = {}) {
+  /** @type {Array<{ code: string, detail: string }>} */
   const problems = []
+  /** @type {Array<{ code: string, detail: string }>} */
   const warnings = []
+  /** @type {{ applicable: boolean, claims: number, critical: number, rounds: number, verdicts: number, covered: number, unverified: number, unsupported: number, claimsSha256: string | null, verdictsSha256: Array<{ round: number, sha256: string }> }} */
   const stats = {
     applicable: false, claims: 0, critical: 0, rounds: 0, verdicts: 0,
     covered: 0, unverified: 0, unsupported: 0, claimsSha256: null, verdictsSha256: [],
@@ -369,6 +384,7 @@ export function auditClaimVerdicts({
   }
   stats.rounds = parsedRounds.length
   const latest = parsedRounds.at(-1)
+  if (latest === undefined) return { problems, warnings, stats }
 
   // 逐轮：形状纪律 + batch 对照 + 原文重解析。
   const cursor = new Map()

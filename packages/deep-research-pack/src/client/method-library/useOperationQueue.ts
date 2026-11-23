@@ -11,7 +11,7 @@ import { methodNameIssue } from '../../lib/method-library/library-fold.ts'
 // 同名；setState 顺序、timeout 时序与文案 key 未动。`runOperationRef.current = runOperation`
 // 仍由组件在 hook 返回后赋值。coach 事件流 effect、`startInterview`、首问上下文与复位 effect
 // 仍留组件（时序敏感）。
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
@@ -123,6 +123,19 @@ export function useOperationQueue(deps: OperationQueueDeps) {
     operationUnknownRef, setOperationUnknown, setReceipt, setSending, setPendingDelete,
   } = deps
 
+  const queueControllerRef = useRef<AbortController | null>(null)
+  const refreshControllerRef = useRef<AbortController | null>(null)
+  useEffect(() => () => {
+    queueControllerRef.current?.abort()
+    refreshControllerRef.current?.abort()
+  }, [])
+  const nextQueueSignal = (): AbortSignal => {
+    const controller = new AbortController()
+    queueControllerRef.current?.abort()
+    queueControllerRef.current = controller
+    return controller.signal
+  }
+
   const markOperationUnknown = (operation: PendingMethodOperation): void => {
     if (pendingOperationRef.current !== operation) return
     clearTimeout(operation.timeout)
@@ -136,7 +149,7 @@ export function useOperationQueue(deps: OperationQueueDeps) {
     if (pendingOperationRef.current !== operation) return
     let current: MethodLibraryReadResult
     try {
-      current = await readLibrary(operation.sourceSessionId, LIBRARY_PATH, new AbortController().signal)
+      current = await readLibrary(operation.sourceSessionId, LIBRARY_PATH, nextQueueSignal())
     } catch (cause) {
       markOperationUnknown(operation)
       setLoadError(String(cause))
@@ -259,7 +272,7 @@ export function useOperationQueue(deps: OperationQueueDeps) {
     if (sessionId === undefined) return
     let baseline: string | null
     try {
-      const read = await readLibrary(sessionId, LIBRARY_PATH, new AbortController().signal)
+      const read = await readLibrary(sessionId, LIBRARY_PATH, nextQueueSignal())
       if (read.kind === 'error') {
         applyLibraryRead(read)
         setReceipt({ ok: false, detail: t('loadBeforeWrite') })
@@ -414,7 +427,9 @@ export function useOperationQueue(deps: OperationQueueDeps) {
   }
 
   const refresh = (): void => {
+    refreshControllerRef.current?.abort()
     const controller = new AbortController()
+    refreshControllerRef.current = controller
     setLoadState('loading')
     void (async () => {
       const result = await load(controller.signal)

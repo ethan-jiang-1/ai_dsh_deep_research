@@ -59,12 +59,15 @@ test('BUG-358/359/360 接线：bundle/review/evidence 的 Outcome 进 reads 三�
   assert.match(source, /setReads\(\{\n\s+bundle: 'ok',\n\s+question: questionArt\.state,/, '成功扫描必须写回六事实状态')
   assert.match(source, /unknown: \[/, '读失败步必须进 deriveSteps unknown')
   assert.match(source, /reviewVerdictOf\(/, '审查判定必须走共享 reviewVerdictOf')
-  assert.match(source, /setReviewVerdict\(reviewVerdict\)/, 'reviewVerdict 必须写回 state')
+  assert.match(source, /setReviewVerdict\(nextReviewVerdict\)/, 'reviewVerdict 必须写回 state')
   assert.match(source, /setReviewDetail\(/, '审查判据细节必须写回 state')
   assert.match(source, /setRetryNonce\(/, '失败横幅必须有重试入口')
   assert.match(source, /const \[reads, setReads\]/, 'reads 必须是状态（视图可消费）')
   assert.match(source, /scanSettled/, '首扫未落定时不得把「还没读到」显示成失败')
   assert.doesNotMatch(source, /view\.read\(/, '状态页不得裸 view.read——工件读取必须走 readArtifact（G19）')
+  assert.doesNotMatch(source, /view\.hasFile\(/, '状态页不得裸 view.hasFile——final.md 等工件读取必须走 readArtifact + 内容谓词')
+  assert.match(source, /readArtifact\(view, 'final\.md'/, 'final.md 必须走 readArtifact')
+  assert.match(source, /\[journalEvents, face, delivery, t\]/, 'anchors useMemo 必须依赖 delivery（防已交付后锚点滞后）')
 })
 
 test('BUG-358/359/360/361…368 视图：失败/未定/空 keys 与变量取词', () => {

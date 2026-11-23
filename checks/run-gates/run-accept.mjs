@@ -28,6 +28,7 @@ import { readZstdText } from '../lib/shared/zstd-read.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const argv = process.argv.slice(2)
+/** @param {string} name @param {string} [fallback] @returns {string | undefined} */
 const opt = (name, fallback = undefined) => {
   const i = argv.indexOf(name)
   return i >= 0 && argv[i + 1] !== undefined ? argv[i + 1] : fallback
@@ -66,7 +67,7 @@ if (!/^drt_[A-Za-z0-9][A-Za-z0-9._-]*$/.test(slug)) {
   process.exit(2)
 }
 const wsRoot = dirname(bundle)
-const sessions = opt('--sessions', join(home, 'sessions'))
+const sessions = opt('--sessions') ?? join(home, 'sessions')
 const legacy = !shouldWriteReceipts(bundle)
 // 历史回执修复（BUG-044）：旧 run-accept 把 present 绝对路径写进了 delivered/acceptance/node-gate。
 // 显式 --repair 才动，且只动可再生产物；修完照常走预检，红项仍需操作者修。
@@ -155,7 +156,8 @@ const verdict = verifyClaims ? run('verdict-audit（claim 覆盖）', 'checks/ru
 const protocol = run('protocol-audit（Protocol 工件）', 'checks/run-gates/protocol-audit.mjs', [bundle, '--write'])
 const auditPath = join(bundle, 'audit.md')
 const auditText = existsSync(auditPath) ? readFileSync(auditPath, 'utf8') : ''
-const critical = /CRITICAL\s+(\d+)/.exec(auditText)?.[1] ?? null
+const criticalRaw = /CRITICAL\s+(\d+)/.exec(auditText)?.[1] ?? null
+const critical = criticalRaw === null ? null : Number(criticalRaw)
 const green = gate.status === 0 && audit.status === 0 && verdict.status === 0 && protocol.status === 0
 if (!green) {
   console.error(`run-accept: RED（${slug}）——预检绿但落盘门禁/审计失败；未写 acceptance.md/delivered.json（protocol-audit.md 可能未落）`)
@@ -186,6 +188,7 @@ if (legacy) {
   console.log('  note 旧契约 bundle（无 run.md）：只写 acceptance.md，不补 delivered.json/manifest.json（D28 epoch 豁免）')
 } else {
   // 见证会话 = present 事件所在会话（bundle → 语料的反查键；诊断入口要会话 id/标题）。
+  /** @type {string[]} */
   const witness = [...new Set((presented.status === 'FOUND' ? presented.events : [])
     .map((e) => e.sessionId).filter((id) => typeof id === 'string' && id.length > 0))]
   delivered = buildDelivered({

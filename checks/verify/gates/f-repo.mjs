@@ -435,7 +435,7 @@ export function runF() {
   if (docs) for (const { rel, text } of docs) {
     for (const token of scanDocument(text)) {
       if (token.kind !== 'command') continue;
-      for (const p of token.paths) {
+      for (const p of token.paths ?? []) {
         md++;
         if (!resolvable(p, rel)) fail(gate, `${rel}:${token.line} 文档命令（${token.form}）指向不存在的路径 ${p}——agent 会照它敲；改文档或改路径（生成物则重跑生成器）`);
       }

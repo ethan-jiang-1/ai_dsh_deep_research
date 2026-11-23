@@ -25,10 +25,7 @@ const TITLE_SPAN_CHARS = 80;
 
 /**
  * 从页面读到的按钮表里选页签胶囊。
- * @param {{buttons: Array<{tag: string, label: string, title: string, guideEntry: string|null}>}} dom - 页面只读表。
- * @param {string|string[]} [title] - 目标页签标题（本地化候选，如「研究状态」与 'Research Status'）。
- * @param {string} [entry] - 稳定的 guide-entry id（vendor `data-sidebar-right-guide-entry`，如
- *   'research-status'）；界面语言变化不改变它，优先于标题使用。
+ * @param {{buttons: Array<{tag: string, label: string, title: string, guideEntry: string|null}>, title?: string|string[], entry?: string}} input - 页面只读表与目标页签参数（title 本地化候选；entry 为稳定 guide-entry id）。
  * @returns {{pickedIndex: number|null, reason: string, title?: string, candidateTitles: string[]}}
  *   pickedIndex = 按钮表下标（页面按同一下标点击）；null 时 reason 说明为什么没点。
  */

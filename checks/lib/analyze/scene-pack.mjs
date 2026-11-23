@@ -53,10 +53,12 @@ export function readScenePack(dir) {
  */
 export function listScenePacks(root) {
   if (!existsSync(root)) return [];
+  /** @type {any[]} */
   const out = [];
   for (const ent of readdirSync(root, { withFileTypes: true })) {
     if (!ent.isDirectory() || ent.name.startsWith('.')) continue;
-    out.push(readScenePack(join(root, ent.name)));
+    const pack = readScenePack(join(root, ent.name));
+    if (pack !== null) out.push(pack);
   }
   return out.sort((a, b) => b.mtime - a.mtime);
 }

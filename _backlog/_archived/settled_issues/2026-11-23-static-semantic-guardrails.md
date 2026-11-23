@@ -1,13 +1,13 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-23
 ---
 
 # 实施计划：静态与语义防线补齐（checkJs · oxlint · TS TypeChecker 领域规则）
 
-> 立卡：2026-11-23 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
-> 去向：implemented — `notes/implemented/2026-11-23-static-semantic-guardrails.md`；业务验收：用户
-> 研究依据：[预防试点后缺陷复盘调研](../research/post-pilot-bug-prevention-and-discovery/README.md) · [实证基线](../../_backlog/research/post-pilot-bug-prevention-and-discovery/2026-11-23-empirical-baseline-and-issue-plan.md) · [自研语义 Linter](../../_backlog/research/post-pilot-bug-prevention-and-discovery/2026-11-23-custom-semantic-linters-and-probes.md)
+> 立卡：2026-11-23 ｜ 状态：已结（2026-11-23）— 结论：checkJs · oxlint · TS TypeChecker 领域防线落地且实抓隐患清零；审查：agent — reviewing-a-delivery 对抗自审无 blocker；可关闭：是 ｜ 类型：Task ｜ 结论倾向：现在做
+> 归档：2026-11-23 ｜ 去向：implemented — [静态语义防线 Note](../../../notes/implemented/2026-11-23-static-semantic-guardrails.md)；业务验收：用户 `/goal` 授权实施与收尾归档（本地缺 native addon，真浏览器装配留 CI nightly）
+> 研究依据：[预防试点后缺陷复盘调研](../../research/post-pilot-bug-prevention-and-discovery/README.md) · [实证基线](../../research/post-pilot-bug-prevention-and-discovery/2026-11-23-empirical-baseline-and-issue-plan.md) · [自研语义 Linter](../../research/post-pilot-bug-prevention-and-discovery/2026-11-23-custom-semantic-linters-and-probes.md)
 
 **问题与期望结果：** 当前 `pnpm typecheck` 只覆盖 `packages/deep-research-pack`（114 个 `.ts/.tsx`），`checks/` 与 `tools/` 共 179 个 `.mjs` 脚本几乎裸奔（`smoke-identifiers` 只扫 `checks/smoke/*.mjs`）；TS 源码也缺少 React Hooks/async lint，且现有的“禁裸读”测试仅用字符串正则匹配变量名，挡不住改名或 `view.hasFile()` 绕过。期望把这三层静态防线补齐到日常 `verify`/`test`/`typecheck` 链路中，并在立防线时先抓红并修掉干跑已发现的真实隐患。
 
@@ -25,7 +25,7 @@ opened: 2026-11-23
 
 - **已证噪音边界**：`.mjs` `checkJs` 若开 `noImplicitAny: true` 会产生 2,145 条形参/变量隐式 `any` 噪音；配置必须设为 `noImplicitAny: false` + `strictNullChecks: true` + `allowImportingTsExtensions: true`。
 - **已证性能边界**：`oxlint` 跑全 `src/`（114 文件）仅 ~35ms；不得在日常热路径引入耗时 >2s 的重工具，守住 `verify + test ≈ 15s` 纪律。
-- **关联后续卡**：[L0 客户端测试与高密度寻虫底座](2026-11-23-l0-client-and-property-testing.md)（Issue 2）、[Hook 状态机与契约/防御模式内化](2026-11-23-state-machine-and-contract-architecture.md)（Issue 3）。
+- **关联后续卡**：[L0 客户端测试与高密度寻虫底座](../../issues/2026-11-23-l0-client-and-property-testing.md)（Issue 2）、[Hook 状态机与契约/防御模式内化](../../issues/2026-11-23-state-machine-and-contract-architecture.md)（Issue 3）。
 
 ## 方案与取舍
 
@@ -58,9 +58,9 @@ opened: 2026-11-23
 
 1. **P0 红证基线**：先落 `tsconfig.scripts.json` 草案、`.oxlintrc.json` 草案与 TS `TypeChecker` 扫描测试草案，跑出对当前工作树的真实红清单并分类存量（真 bug vs 合法适配）。
 2. **P1 修真虫**：先修 `protocol-audit.mjs:210`、`useStatusFeed.ts`（`delivery` 依赖、`hasFile('final.md')`、`bodyIssue` `'invalid'`、`AbortController.abort()`、重复行）、`useConfigFeed.ts` `hasFile('question.md')`、以及 `checkJs` 扫出的高危 `TS2339`/`TS18047`/`TS18048`/`TS2365` 真缺陷。
-3. **P2 落门禁与反证**：四类变异注入分别看红再还原；登记 [docs/evaluation.md](../../docs/evaluation.md)、[checks/README.md](../../checks/README.md)、[tests/AGENTS.md](../../tests/AGENTS.md) 与 [docs/discipline-map.md](../../docs/discipline-map.md)（若引入 `oxlint`）。
+3. **P2 落门禁与反证**：四类变异注入分别看红再还原；登记 [docs/evaluation.md](../../../docs/evaluation.md)、[checks/README.md](../../../checks/README.md)、[tests/AGENTS.md](../../../tests/AGENTS.md) 与 [docs/discipline-map.md](../../../docs/discipline-map.md)（若引入 `oxlint`）。
 4. **停损**：若 `checks/` 非产品测试辅助脚本的 `TS2339` 存量改造量远超收益，按决策表先将强阻断收窄到 `checks/lib/`、`checks/run-gates/`、`checks/verify/`、`tools/channel/`，并在卡内记录。
 
 ## 关闭条件
 
-全部 4 条验收标准有实际命令输出与反证证据，[notes/implemented](../../notes/implemented/README.md) 落地对应 Note，用户完成业务验收，且本卡与交付物同变更归档至 `_archived/settled_issues/`。
+全部 4 条验收标准有实际命令输出与反证证据，[notes/implemented](../../../notes/implemented/README.md) 落地对应 Note，用户完成业务验收，且本卡与交付物同变更归档至 `_archived/settled_issues/`。

@@ -48,7 +48,8 @@ export function turnOpenOf(events) {
 /**
  * 在飞子代理（BUG-344）：`subagent/catalog` 声明了 childId；childId 的会话日志可读时按 turnOpen 判，
  * 读不到 = 未知（保守视为在飞）。没有 catalog = 无子代理。
- * @param events 父会话事件。@param readChildEvents (childId) => events[]|null；null = 无读取能力。
+ * @param {any[]} events 父会话事件。
+ * @param {((childId: string) => any[] | null) | null} [readChildEvents] (childId) => events[]|null；null = 无读取能力。
  */
 export function liveSubagentsOf(events, readChildEvents = null) {
   const children = events
@@ -136,9 +137,12 @@ function isRegularFile(path) {
  * 会话 + 工作区组合快照（watcher 与前置自拒的判定输入；全字段可 JSON 序列化打日志）。
  * activeBundle / finalWritten / runSettled 只跟**本会话绑定**的 bundle 走；无绑定 = null
  * （不猜、不拿别的 bundle 的 final 冒充落定）。
- * @param params.logPath canonical 会话日志路径。
- * @param params.wsRoot 研究工作区根。
- * @param params.includeSessionIdentity 仅需按 UI 会话身份选路时设 true；默认日志快照不暴露标题与 id。
+ * @param {object} params
+ * @param {string} params.logPath canonical 会话日志路径。
+ * @param {string} params.wsRoot 研究工作区根。
+ * @param {boolean} [params.includeSessionIdentity] 仅需按 UI 会话身份选路时设 true；默认日志快照不暴露标题与 id。
+ * @param {number} [params.now]
+ * @param {((childId: string) => any[] | null) | null} [params.readChildEvents]
  */
 export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false, now = Date.now(), readChildEvents = null }) {
   const { readable, events } = readSessionEvents(logPath)
@@ -167,7 +171,7 @@ export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false, no
   // null = 无绑定/不可读，不能判；false = 绑定的 bundle 无 final；true = 有。
   // D28：final 判定跨三操作桶，不因归档/停放把已落 final 误报成未落。
   const finalWritten = bundleDir === null ? null : isRegularFile(join(bundleDir, 'final.md'))
-  const bundleLocation = bundleDir === null ? null
+  const bundleLocation = activeBundle === null || bundleDir === null ? null
     : bundleDir === join(wsRoot, 'archive', activeBundle) ? 'archive'
       : bundleDir === join(wsRoot, '_abandoned', activeBundle) ? 'abandoned' : 'root'
   return {

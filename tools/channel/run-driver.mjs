@@ -160,20 +160,21 @@ async function startOwnedChannel({ port, profile }) {
     const deadline = setTimeout(() => cancel('启动超时；已请求收束，详情见启动日志'), 120_000);
     process.once('SIGINT', interrupt);
     process.once('SIGTERM', terminate);
-    child.on('message', (message) => {
-      if (message?.type === 'acquired') generation = message.generation;
+    child.on('message', (rawMessage) => {
+      const message = /** @type {{ type?: string, generation?: number, reason?: string, exit?: number, url?: string } | null} */ (rawMessage)
+      if (message?.type === 'acquired') generation = message.generation
       if (message?.type === 'failed' && failure === undefined) {
-        failure = { ok: false, reason: message.reason ?? '启动失败', exit: message.exit ?? 1 };
+        failure = { ok: false, reason: message.reason ?? '启动失败', exit: message.exit ?? 1 }
       }
       if (message?.type === 'ready' && message.generation === generation && failure === undefined) {
-        readyUrl = guiUrlFromWebLog(`dsh web: ${message.url}`);
+        readyUrl = guiUrlFromWebLog(`dsh web: ${message.url}`)
         if (readyUrl === null || String(portOf(readyUrl)) !== String(port)) {
-          cancel('本次启动 READY 的 URL/端口不匹配');
-        } else child.send({ type: 'handoff', generation });
+          cancel('本次启动 READY 的 URL/端口不匹配')
+        } else child.send({ type: 'handoff', generation })
       }
       if (message?.type === 'handed-off' && message.generation === generation && readyUrl !== undefined && failure === undefined) {
-        child.unref();
-        finish({ ok: true, url: readyUrl });
+        child.unref()
+        finish({ ok: true, url: readyUrl })
       }
     });
     child.once('error', (error) => finish({ ok: false, reason: error.message, exit: 1 }));
@@ -185,6 +186,12 @@ async function startOwnedChannel({ port, profile }) {
 
 // ── 浏览器面验证（子进程 = probes/browser/cdp-probe.mjs，真值的唯一实现）──────────
 
+/**
+ * @param {string} url
+ * @param {string | undefined} expectFace
+ * @param {string | undefined} [screenshotPath]
+ * @param {string | undefined} [htmlPath]
+ */
 function probeFace(url, expectFace, screenshotPath = undefined, htmlPath = undefined) {
   const args = [
     join(ROOT, 'probes/browser/cdp-probe.mjs'),
@@ -255,9 +262,14 @@ function persistVerdict(kind, payload, screenshotPath, htmlPath) {
 
 // ── 子命令 ─────────────────────────────────────────────────────────────────
 
+/**
+ * @param {string} name
+ * @param {string | undefined | null} dflt
+ * @returns {string | undefined}
+ */
 const arg = (name, dflt) => {
   const i = process.argv.indexOf(name);
-  return i >= 0 ? (process.argv[i + 1] ?? dflt) : dflt;
+  return i >= 0 ? (process.argv[i + 1] ?? dflt ?? undefined) : (dflt ?? undefined);
 };
 const has = (name) => process.argv.includes(name);
 // CLI 守卫：本文件同时被 tests/run-driver-contract.spec.mjs import（纯函数面），import 时不许
@@ -342,7 +354,7 @@ const requireData = has('--require-data');
 let state = channelState();
 let drift = null;
 if (state.alive) {
-  console.log(`run-driver: 通道已存活，复用（端口 ${state.port}，pid ${state.pids.join(',')}）——不另起（guides/61 §0：在飞通道别另起）`);
+  console.log(`run-driver: 通道已存活，复用（端口 ${state.port}，pid ${(state.pids ?? []).join(',')}）——不另起（guides/61 §0：在飞通道别另起）`);
   // 复用不是免检：先证明通道加载的镜像 = 当前 pack 源。旧实现直接 probe，把旧页面判成当前绿。
   drift = mirrorDrift();
   if (!drift.clean) {
@@ -378,7 +390,7 @@ if (state.alive) {
     process.exit(started.exit);
   }
   // Only the current supervisor's private READY+handoff can establish this generation.
-  state = { url: started.url, port: portOf(started.url), alive: true };
+  state = { url: started.url, port: portOf(started.url), pids: [], listening: true, alive: true };
   console.log(`run-driver: 横幅已出（端口 ${state.port}）`);
   // 刚起的通道已经过 boot-run 的漂移门（红则起不来）——此处只记录取证结果。
   drift = { clean: true, detail: 'boot-run 漂移门绿（起通道时已验）' };
@@ -428,6 +440,10 @@ if (!forceProbe && drift?.clean === true) {
   }
 }
 
+if (state.url === null) {
+  console.error('run-driver: 通道状态缺少 URL');
+  process.exit(2);
+}
 const shot = join(STATE_DIR, 'run-driver-status.png');
 const html = join(STATE_DIR, 'run-driver-status.html');
 const { verdict, error } = probeFace(state.url, expectFace, shot, html);

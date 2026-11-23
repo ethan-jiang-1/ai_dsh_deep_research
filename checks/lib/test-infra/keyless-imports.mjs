@@ -37,17 +37,19 @@ export function parseKeylessImports(text, fileName = 'module.mjs') {
         : ts.isPropertyAccessExpression(callee) ? callee.name.text
           : ts.isElementAccessExpression(callee) && callee.argumentExpression && ts.isStringLiteralLike(callee.argumentExpression)
             ? callee.argumentExpression.text : undefined
-      const forbidden = ts.isIdentifier(callee)
+      const forbidden = name !== undefined && (ts.isIdentifier(callee)
         ? FORBIDDEN_DIRECT_CALLS.has(name) || FORBIDDEN_CALLS.has(name)
-        : FORBIDDEN_CALLS.has(name)
+        : FORBIDDEN_CALLS.has(name))
       if (forbidden) forbiddenCalls.push(name)
     }
     ts.forEachChild(node, visit)
   }
   visit(source)
+  /** @type {readonly ts.Diagnostic[]} */
+  const parseDiagnostics = /** @type {any} */ (source).parseDiagnostics ?? []
   return {
     imports, forbiddenCalls, unresolvedImports,
-    syntaxErrors: source.parseDiagnostics.map(d => ts.flattenDiagnosticMessageText(d.messageText, '\n')),
+    syntaxErrors: parseDiagnostics.map(d => ts.flattenDiagnosticMessageText(d.messageText, '\n')),
   }
 }
 

@@ -12,8 +12,8 @@
 import { readFileSync, readdirSync, realpathSync, statSync } from 'node:fs'
 import { join, resolve, sep } from 'node:path'
 
-const missing = () => ({ ok: false, reason: 'missing' })
-const unreadable = (detail) => ({ ok: false, reason: 'unreadable', detail })
+const missing = () => ({ ok: /** @type {const} */ (false), reason: /** @type {const} */ ('missing') })
+const unreadable = (/** @type {string} */ detail) => ({ ok: /** @type {const} */ (false), reason: /** @type {const} */ ('unreadable'), detail })
 
 const isMissing = (error) => error?.code === 'ENOENT'
 
@@ -27,8 +27,8 @@ function linesOf(text) {
 
 /**
  * 以工作区根为基准的 RunSource。
- * @param root - 工作区绝对路径（或相对当前 cwd 的路径）。
- * @returns `{ list, read, version }`，方法全部返回 Promise<Outcome>。
+ * @param {string} root - 工作区绝对路径（或相对当前 cwd 的路径）。
+ * @returns {import('../../../packages/deep-research-pack/src/lib/run/run-context.ts').RunSource} `{ list, read, version }`，方法全部返回 Promise<Outcome>。
  */
 export function nodeRunSource(root) {
   const base = resolve(root)
@@ -55,7 +55,7 @@ export function nodeRunSource(root) {
           try { mtimeMs = statSync(full).mtimeMs } catch { mtimeMs = undefined }
           return {
             name: entry.name,
-            type: entry.isSymbolicLink() ? 'other' : entry.isDirectory() ? 'directory' : entry.isFile() ? 'file' : 'other',
+            type: /** @type {'file' | 'directory' | 'other'} */ (entry.isSymbolicLink() ? 'other' : entry.isDirectory() ? 'directory' : entry.isFile() ? 'file' : 'other'),
             ...(mtimeMs !== undefined ? { mtimeMs } : {}),
           }
         })

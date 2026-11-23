@@ -23,8 +23,8 @@ const SKIP_DIRS = new Set(['node_modules', '.git'])
 export const PROBE_CACHE_TTL_MS = 30 * 60 * 1000
 
 /**
- * pack 源指纹：把 `[{rel,size,mtimeMs}]` 排序后哈希。
- * @param {Array<{rel: string, size: number, mtimeMs: number}>} entries
+ * pack 源指纹：把 `[{rel,size,mtimeMs,sha256?,link?}]` 排序后哈希。
+ * @param {Array<{rel: string, size: number, mtimeMs: number, sha256?: string, link?: string}>} entries
  * @returns {string} sha256 hex
  */
 export function packFingerprint(entries) {
@@ -37,8 +37,8 @@ export function packFingerprint(entries) {
  * 遍历 pack 源目录，收集参与指纹的文件条目（跳过 node_modules/.git）。
  * @param {string} root
  * @param {string} [rel]
- * @param {Array<{rel: string, size: number, mtimeMs: number}>} [out]
- * @returns {Array<{rel: string, size: number, mtimeMs: number}>}
+ * @param {Array<{rel: string, size: number, mtimeMs: number, sha256?: string, link?: string}>} [out]
+ * @returns {Array<{rel: string, size: number, mtimeMs: number, sha256?: string, link?: string}>}
  */
 export function collectPackEntries(root, rel = '', out = []) {
   for (const entry of readdirSync(join(root, rel), { withFileTypes: true })) {
@@ -91,7 +91,7 @@ export function writeShippedCache(path, key, files) {
  * 探针缓存键 = pack 源指纹 + runtime 构建指纹 + dev 外壳指纹（可带 web 进程身份）。
  * 冷启动同样要能命中（同 pack + 同 runtime 的页面内容不变），故默认 **不带 pid**；
  * 需要进程内绑定时传 `pids`。
- * @param {{pids?: string[]|number[]|null, packFingerprint: string, runtime?: string}} input
+ * @param {{pids?: string[]|number[]|null, packFingerprint: string, runtime?: string, extra?: string}} input
  * @returns {string}
  */
 export function probeCacheKey({ pids = null, packFingerprint: fingerprint, runtime = 'unknown', extra = '' }) {
@@ -193,6 +193,7 @@ export function probeIdentityOf({ profile, bootstrap = false, workspace = '', mc
 /**
  * probe 缓存键的唯一构造器（BUG-327）：读与写必须用同一个函数。
  * 旧实现两处内联，写侧漏了 mcp——MCP=on 写的 GREEN 被 MCP=off 命中。
+ * @param {{ packFingerprint: string, runtime?: string, devShell?: string, probeSource?: string, profile?: string, bootstrap?: boolean, workspace?: string, mcp?: string, expectFace?: string | null, requireData?: boolean }} input
  */
 export function probeCacheKeyOf({
   packFingerprint,

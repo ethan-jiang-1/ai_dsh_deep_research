@@ -11,7 +11,7 @@ export const bannerRe = (port) => new RegExp(`http://127\\.0\\.0\\.1:${port}/\\?
 /**
  * 监听已派生的 web 子进程流直到打出启动横幅、提前退出或超时；任一路径落定即清理 timer 与流/退出监听。
  *
- * @param {{ stdout: import('node:events').EventEmitter, stderr: import('node:events').EventEmitter } & import('node:events').EventEmitter} child
+ * @param {{ stdout: import('node:events').EventEmitter & { setEncoding: (encoding: BufferEncoding) => unknown }, stderr: import('node:events').EventEmitter & { setEncoding: (encoding: BufferEncoding) => unknown } } & import('node:events').EventEmitter} child
  * @param {{ port: number, profile: string, timeoutMs: number, tailChars: number }} options
  * @returns {Promise<{ token: string, output: () => string }>}
  */
@@ -20,7 +20,12 @@ export function waitForWebBanner(child, { port, profile, timeoutMs, tailChars })
   const targetRe = bannerRe(port)
   return new Promise((resolve, reject) => {
     let settled = false
+    /** @type {ReturnType<typeof setTimeout> | undefined} */
     let timer = undefined
+    /**
+     * @param {(value: any) => void} fn
+     * @param {any} value
+     */
     const settle = (fn, value) => {
       if (settled) return
       settled = true

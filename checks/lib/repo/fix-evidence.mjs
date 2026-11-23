@@ -74,8 +74,8 @@ const duplicateKeyOf = (text) => {
         return null
       }
       const isKey = expectKey && stack.length > 0 && stack[stack.length - 1] !== null && /^\s*:/.test(text.slice(j + 1))
-      if (isKey) {
-        const set = stack[stack.length - 1]
+      const set = stack[stack.length - 1]
+      if (isKey && set !== null) {
         if (set.has(decoded)) return decoded
         set.add(decoded)
         expectKey = false
@@ -151,8 +151,9 @@ const validateStructured = (value) => {
       else seen.add(path)
     }
   }
-  for (const [label, mustFail] of [['red', true], ['green', false]]) {
-    const step = value[label]
+  for (const label of ['red', 'green']) {
+    const mustFail = label === 'red'
+    const step = label === 'red' ? value.red : value.green
     if (!isPlainObject(step)) { problems.push(`${label} 必须是对象（command / exit / output?）`); continue }
     if (typeof step.command !== 'string' || step.command.trim() === '') problems.push(`${label}.command 必须是非空字符串`)
     if (!Number.isInteger(step.exit)) problems.push(`${label}.exit 必须是整数（实跑退出码）`)

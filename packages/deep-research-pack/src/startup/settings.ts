@@ -86,7 +86,7 @@ export function readSettings(env: NodeJS.ProcessEnv = process.env): SettingsRead
     try {
       writeFileSync(`${path}.corrupt`, raw)
       rmSync(path, { force: true })
-    } catch { /* 备份失败不阻断读取方 */ }
+    } catch { /* @silent-catch: 备份失败不阻断读取方 */ }
     return { ok: false, reason: 'corrupt', detail: path }
   }
   if (parsed === null || typeof parsed !== 'object') return { ok: false, reason: 'corrupt', detail: path }

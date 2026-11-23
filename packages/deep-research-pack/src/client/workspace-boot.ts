@@ -81,6 +81,7 @@ export function createWorkspaceBoot({ workspaces, sessions, uiWorkspace, storage
       if (cancelled()) return
       uiWorkspace.startSession(workspace.workspaceId, { agentPreset: 'lead' })
     } catch (error) {
+      /* @silent-catch: startup auto-recovery logs error and yields control to manual workspace selection */
       console.error('[research-startup] 工作区记忆恢复失败', String(error))
     }
   }

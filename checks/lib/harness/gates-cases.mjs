@@ -14,6 +14,7 @@ const stripFirstStatusLine = (dirRel) => (dir) => {
   const d = join(dir, dirRel);
   const target = readdirSync(d).filter((f) => f.endsWith('.md') && f !== 'README.md').sort()
     .find((f) => readFileSync(join(d, f), 'utf8').includes('> 状态：'));
+  if (target === undefined) throw new Error(`找不到含状态行的文件：${dirRel}`);
   const p = join(d, target);
   writeFileSync(p, readFileSync(p, 'utf8').split('\n').filter((l) => !l.startsWith('> 状态：')).join('\n'));
 };
@@ -399,6 +400,7 @@ const addIgnoredClientPaths = () => (dir) => {
 const writeRedirectRegistry = (entries) => (dir) => {
   // 追加而非覆盖：真实登记簿已承载搬家历史，覆盖会把冻结层链接全部打红（2026-11-15 实证）。
   const path = join(dir, 'checks', 'test-path-redirects.json');
+  /** @type {{ comment: string, redirects: Array<{ from: string, to: string, reason?: string }> }} */
   let base = { comment: 'gates.e2e 注入', redirects: [] };
   try { base = JSON.parse(readFileSync(path, 'utf8')); } catch { /* 缺席或坏 JSON：从空开始，由注入条目判红 */ }
   const map = new Map((Array.isArray(base.redirects) ? base.redirects : []).map((r) => [r.from, r]));
@@ -1106,6 +1108,12 @@ export const CASES = [
     const p = join(dir, '_dist', '安装手册.md');
     if (!existsSync(p)) throw new Error('夹具缺 _dist/安装手册.md——案例失效');
     writeFileSync(p, `${readFileSync(p, 'utf8')}\n<!-- drift -->\n`);
+  } },
+  // pack-lint：删除 .oxlintrc.json 配置正本 → 门禁必须报缺席红（live 规则违规由真仓红证验证）。
+  { id: 'pack-lint-missing-config', gate: 'pack-lint', mutate: (dir) => {
+    const p = join(dir, '.oxlintrc.json');
+    if (!existsSync(p)) throw new Error('夹具缺 .oxlintrc.json——案例失效');
+    rmSync(p);
   } },
 
 ];
