@@ -32,9 +32,6 @@ const CLIENT_SMOKE_ONLY = {
   'method-library/useLibraryData': 'React hook：需要 DOM/React harness；当前由 client-load 真浏览器覆盖',
   'method-library/useOperationQueue': 'React hook：需要 DOM/React harness；当前由 client-load 真浏览器覆盖',
   'method-library/useRunSourcePicker': 'React hook：需要 DOM/React harness；当前由 client-load 真浏览器覆盖',
-  'research-graph/useGraphFeed': 'React hook：需要 DOM/React harness；当前由 client-load 真浏览器覆盖',
-  'research-status/useMemberActivity': 'React hook：需要 DOM/React harness；当前由 client-load 真浏览器覆盖',
-  'research-status/useStatusFeed': 'React hook：需要 DOM/React harness；当前由 client-load 真浏览器覆盖',
 }
 
 const TSX_SMOKE_ONLY = '所有 .tsx 组件归真浏览器装配面（client-load.entry）；组件逻辑抽到 src/lib 或 src/client 纯件后由本契约接管'

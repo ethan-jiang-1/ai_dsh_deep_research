@@ -128,7 +128,8 @@ export function maskMarkdownLines(text: string): string[] {
   for (let lineIdx = 0; lineIdx < rawLines.length; lineIdx += 1) {
     const rawLine = rawLines[lineIdx] ?? ''
 
-    // 1. 剥除行首 blockquote 前缀并统计深度
+    // 1. 剥除行首 blockquote 前缀并记录每层剩余文本
+    const restAtDepth: string[] = [rawLine]
     let quoteDepth = 0
     let quoteRest = rawLine
     while (true) {
@@ -136,9 +137,10 @@ export function maskMarkdownLines(text: string): string[] {
       if (m === null) break
       quoteDepth += 1
       quoteRest = quoteRest.slice(m[0].length)
+      restAtDepth.push(quoteRest)
     }
 
-    // 2. 先弹出因 quote 深度下降或非空行缩进不足而退出的列表项
+    // 2. 先弹出因 quote 深度下降、未缩进就新开 '>'、或非空行缩进不足而退出的列表项
     while (listStack.length > 0) {
       const top = listStack[listStack.length - 1]
       if (top === undefined) break
@@ -146,7 +148,15 @@ export function maskMarkdownLines(text: string): string[] {
         listStack.pop()
         continue
       }
-      if (top.quoteDepth === quoteDepth && quoteRest.trim() !== '' && leadingSpacesOf(quoteRest) < top.contentIndent) {
+      if (top.quoteDepth < quoteDepth) {
+        const atTop = restAtDepth[top.quoteDepth] ?? ''
+        if (leadingSpacesOf(atTop) < top.contentIndent) {
+          listStack.pop()
+          continue
+        }
+        break
+      }
+      if (quoteRest.trim() !== '' && leadingSpacesOf(quoteRest) < top.contentIndent) {
         listStack.pop()
         continue
       }
@@ -169,9 +179,9 @@ export function maskMarkdownLines(text: string): string[] {
       ? quoteRest.slice(activeTop.contentIndent)
       : quoteRest
 
-    // 4. 活跃围栏内：只认匹配的闭合围栏行，其余一律遮罩（`<!--` 不开注释）
+    // 4. 活跃围栏内：只认同层匹配的闭合围栏行，其余一律遮罩（`<!--` 不开注释）
     if (fence !== null) {
-      const closeMatch = FENCE_RE.exec(content)
+      const closeMatch = quoteDepth === fence.quoteDepth ? FENCE_RE.exec(content) : null
       const marker = closeMatch?.[2] ?? ''
       if (
         closeMatch !== null

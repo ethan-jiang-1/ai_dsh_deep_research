@@ -783,6 +783,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/research-config/config-feed-behavior.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "config-feed-behavior.spec.mjs — useConfigFeed 的 JSDOM/React 异步行为测试（补强静态源码测试）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/research-config/config-feed-session.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -790,6 +800,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "config feed 会话切换：reload epoch + 交互态复位（BUG-086 / BUG-108）。",
       "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/research-graph/graph-feed-behavior.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "graph-feed-behavior.spec.mjs — useGraphFeed 的 JSDOM/React 行为测试。",
+      "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
     {
@@ -809,6 +829,16 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "红配方：删掉 followError 分支 → 失败态落到「尚未绑定」→ 本例红。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/research-status/status-feed-behavior.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "status-feed-behavior.spec.mjs — useStatusFeed 与 useMemberActivity 的 JSDOM/React 行为测试。",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
@@ -840,6 +870,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "session-follow.spec.mjs — journal 流装配的纯函数契约（2026-11-03 P4 拆分）。",
       "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/tabs-fault-matrix.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tabs-fault-matrix.spec.mjs — 四页签组件在 JSDOM + CSS module loader 下的行为与恶意 RunSource 故障矩阵。",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {
@@ -1023,6 +1063,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/lib/plan/plan-mdast.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "plan-mdast.spec.mjs — planIndex / planDiffOf 对照 mdast-util-from-markdown 的属性与诱饵抗干扰测试。",
+      "oracleType": "external",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/lib/run/artifact-content.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -1083,6 +1133,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/lib/run/run-property.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "run-property.spec.mjs — src/lib/run 核心折算纯函数的 fast-check 属性与蜕变测试。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/lib/run/run-version.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -1090,6 +1150,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "tests/cockpit/lib/run/run-version.spec.mjs —— rerun 版本面的 keyless 契约。",
       "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/shared/markdown-mask-diff.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "markdown-mask-diff.spec.mjs — maskMarkdownLines 对照 mdast-util-from-markdown 的差分模糊测试。",
+      "oracleType": "external",
       "sunset": "随被测模块删除"
     },
     {
@@ -1110,6 +1180,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "text-fold 回归 — pack 折算文本口径的共享缝直接钉（keyless 纯函数）。",
       "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/workspace/research-defaults-property.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "research-defaults-property.spec.mjs — research-defaults parseDefaults 的 fast-check 属性测试。",
+      "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
     {
@@ -1969,6 +2049,16 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "review-contract.spec.mjs — review 覆盖表与 severity 交叉（BUG-254 / 257）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/review-readiness-property.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "review-readiness-property.spec.mjs — review-readiness 终局判据与双源一致性属性测试。",
       "oracleType": "structured",
       "sunset": "随被测模块删除"
     },

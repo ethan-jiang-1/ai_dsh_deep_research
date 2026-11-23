@@ -208,7 +208,7 @@
 | lib/harness/gates-cases.mjs | gates.e2e、verify-gates.test、doc-surface-shapes.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
 | lib/harness/gates-cli.mjs | gates.e2e、gates-cli.spec | gates.e2e 的 flag/数值输入归一（--case/--jobs 两形状，空值/未知参数 exit 2）与有界并发（BUG-195/203） |
 | lib/repo/fix-evidence.mjs | fix-evidence.test、staged-change-pairing、backlog-liveness | bug 修复卡实证合同：改动/红证/绿证 + 可重放红证/测试资产；活跃 修复落地 与归档共用 |
-| lib/test-infra/workspace-parsers.mjs | ci-workflow、markdown-mask-conformance.spec、note-scan.test、record-ci-oracle、replay-fixtures.spec、verdict-conformance.spec、workspace-parsers.test | 锁定在 `node_modules/.pnpm` 内的外部纯函数解析器加载器（`yaml@2` + `mdast-util-from-markdown@2`；防向上穿透宿主机目录） |
+| lib/test-infra/workspace-parsers.mjs | ci-workflow、markdown-mask-conformance.spec、markdown-mask-diff.spec、note-scan.test、plan-mdast.spec、record-ci-oracle、replay-fixtures.spec、verdict-conformance.spec、workspace-parsers.test | 锁定在 `node_modules/.pnpm` 内的外部纯函数解析器加载器（`yaml@2` + `mdast-util-from-markdown@2`；防向上穿透宿主机目录） |
 | lib/repo/note-scan.mjs | c-notes、note-scan.test、markdown-mask-conformance.spec | notes 门禁的 Markdown 块级扫描：复用 `src/lib/markdown-mask.ts` 单一正本，与 `mdast` 直接在测试进程内逐行对账（BUG-169/175/178/179/183/185） |
 | lib/test-infra/asset-ledger.mjs | asset-ledger.test、guard-ledger.test、record-asset-ledger | 测试资产组合账生成器：lane/class/cost/uniqueClaim/oracleType/sunset（AST 自动推导 oracleType，禁手写 OVERRIDES）；与盘上测试和守卫账双向对账 |
 | lib/test-infra/ci-workflow.mjs | ci-jobs.test、ci-workflow-oracle.test、ci-workflow.test、model-workflow.test、record-ci-oracle、smoke-registry.test | GitHub Actions 执行面与写入侧规范门：`yaml@2` 解析 `on:`/`jobs:`/`needs` + `bash -eo pipefail` 执行面 + `ciWorkflowRunProblems`（BUG-172/184/187/190） |

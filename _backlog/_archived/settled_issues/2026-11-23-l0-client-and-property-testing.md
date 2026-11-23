@@ -1,31 +1,31 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-23
 ---
 
 # 实施计划：填补 L0 客户端测试盲区与高密度自动化寻虫底座
 
-> 立卡：2026-11-23 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
-> 去向：implemented — `notes/implemented/2026-11-23-l0-client-and-property-testing.md`；业务验收：用户
-> 研究依据：[预防试点后缺陷复盘调研](../research/post-pilot-bug-prevention-and-discovery/README.md) · [实证基线](../research/post-pilot-bug-prevention-and-discovery/2026-11-23-empirical-baseline-and-issue-plan.md) · [非 E2E 寻虫手段](../research/post-pilot-bug-prevention-and-discovery/2026-11-23-non-e2e-bug-discovery-methods.md)
+> 立卡：2026-11-23 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 去向：implemented — [L0 客户端与寻虫底座 Note](../../../notes/implemented/2026-11-23-l0-client-and-property-testing.md)；业务验收：用户
+> 研究依据：[预防试点后缺陷复盘调研](../../research/post-pilot-bug-prevention-and-discovery/README.md) · [实证基线](../../research/post-pilot-bug-prevention-and-discovery/2026-11-23-empirical-baseline-and-issue-plan.md) · [非 E2E 寻虫手段](../../research/post-pilot-bug-prevention-and-discovery/2026-11-23-non-e2e-bug-discovery-methods.md)
 
 **问题与期望结果：** 11-20～23 爆发的 44 张真缺陷中有 32 张集中在观察面客户端。根本原因是 `tests/cockpit/client/` 只做 `renderToStaticMarkup` 静态渲染，对 `useStatusFeed`/`useGraphFeed`/`useConfigFeed` 与 4 个 Tab 的异步流、竞态、定时器和故障状态在 L0 几乎零覆盖，迫使每次都靠缓慢的 Playwright 端到端“挤牙膏式”抓虫。期望在 L0 建起毫秒级客户端行为测试底座、**通用恶意 `RunSource` 故障注入矩阵**，以及针对纯折算与解析器的 `fast-check` PBT + `mdast` 差分测试。
 
 **当前情况：** `pnpm test:coverage` 实测基线：
-- `ResearchStatusTab.tsx` 分支覆盖仅 **8.00%**，[useStatusFeed.ts](../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts) 行 **56.28%**（扫描主体 86–228 行零覆盖）；
-- `ResearchGraphTab.tsx` 分支覆盖仅 **10.34%**，[useGraphFeed.ts](../../packages/deep-research-pack/src/client/research-graph/useGraphFeed.ts) 函数 **33.33%**；
-- [useConfigFeed.ts](../../packages/deep-research-pack/src/client/research-config/useConfigFeed.ts) 行 **58.04%**；
-- `ResearchFinalTab.tsx`、`ResearchConfigTab.tsx` 在 [tests/INDEX.generated.md](../../tests/INDEX.generated.md) 中测试覆盖为空（`—`）；
+- `ResearchStatusTab.tsx` 分支覆盖仅 **8.00%**，[useStatusFeed.ts](../../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts) 行 **56.28%**（扫描主体 86–228 行零覆盖）；
+- `ResearchGraphTab.tsx` 分支覆盖仅 **10.34%**，[useGraphFeed.ts](../../../packages/deep-research-pack/src/client/research-graph/useGraphFeed.ts) 函数 **33.33%**；
+- [useConfigFeed.ts](../../../packages/deep-research-pack/src/client/research-config/useConfigFeed.ts) 行 **58.04%**；
+- `ResearchFinalTab.tsx`、`ResearchConfigTab.tsx` 在 [tests/INDEX.generated.md](../../../tests/INDEX.generated.md) 中测试覆盖为空（`—`）；
 - `vendor/dsh/` 已验证 `@testing-library/react` + `jsdom` + `fast-check` + `mdast-util-from-markdown`，但本仓根 `package.json` 尚未引入。
 
 **未决问题：** 若恶意 `RunSource` 故障矩阵与 PBT 在执行过程中立刻挖出一批现存代码的新 bug，是随本卡并行建 `bugs/` 卡还是按批消化（停损边界预设：发现新 bug 先建独立缺陷记录或按小范围收口，不无限扩大本卡范围）。
 
-**下一步：** 建议在 [Issue 1](../_archived/settled_issues/2026-11-23-static-semantic-guardrails.md) 修完已知实时隐患后（或同步安装测试 devDependencies 后）按 §实施顺序 启动落地。
+**下一步：** 建议在 [Issue 1](2026-11-23-static-semantic-guardrails.md) 修完已知实时隐患后（或同步安装测试 devDependencies 后）按 §实施顺序 启动落地。
 
 ## 已知与未决
 
 - **现有 `test:spec` 加载约束**：根脚本使用 `node --import tsx/esm --test`，部分组件若直接 import CSS 模块会触发 Node loader 报错（见 `research-config-source.spec.mjs` 头注）；`jsdom` + `@testing-library/react` 测试需验证 CSS/primitives 导入兼容方案（如按需 mock 或独立 loader hook）。
-- **前置关系**：Issue 1 与本卡可独立验收，但本卡是后续 [Issue 3（Hook 状态机重构）](2026-11-23-state-machine-and-contract-architecture.md) 的安全前置护栏。
+- **前置关系**：Issue 1 与本卡可独立验收，但本卡是后续 [Issue 3（Hook 状态机重构）](../../issues/2026-11-23-state-machine-and-contract-architecture.md) 的安全前置护栏。
 
 ## 方案与取舍
 
@@ -63,4 +63,4 @@ opened: 2026-11-23
 
 ## 关闭条件
 
-全部 4 条验收标准实测通过并记录 `test:coverage` 前后对比，[notes/implemented](../../notes/implemented/README.md) 落地对应 Note，用户完成验收后本卡同变更归档至 `_archived/settled_issues/`。
+全部 4 条验收标准实测通过并记录 `test:coverage` 前后对比，[notes/implemented](../../../notes/implemented/README.md) 落地对应 Note，用户完成验收后本卡同变更归档至 `_archived/settled_issues/`。

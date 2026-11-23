@@ -5,6 +5,7 @@
 | [2026-11-13-workflow-substance-gates](2026-11-13-workflow-substance-gates.md) | 加工环路的实体检查：判据形状字段 + Note 同节 + 两道收口门（Note 早写、暂存区配对）+ 复发必答 + 判据测试负例 + 金标准理由；D52；1400 测试 / gates-smoke 108 全绿；[Note](../../../notes/implemented/2026-11-13-workflow-substance-gates.md) | 2026-11-13 |
 | 卡 | 结论与去向 | 日期 |
 |---|---|---|
+| [2026-11-23-l0-client-and-property-testing](2026-11-23-l0-client-and-property-testing.md) | L0 客户端行为与高密度寻虫底座：进程内 CSS stub + `jsdom`/`@testing-library/react` 打通四页签与三大 Hook/teammate 行为测试、恶意 `RunSource` 七类故障矩阵、`fast-check` + `mdast` 五组 PBT/差分捕获并修复 `markdown-mask` 容器嵌套真实缺陷；[Note](../../../notes/implemented/2026-11-23-l0-client-and-property-testing.md) | 2026-11-23 |
 | [2026-11-23-static-semantic-guardrails](2026-11-23-static-semantic-guardrails.md) | 静态与语义防线补齐：`.mjs` 4 域 `checkJs` 清零 446 诊断并修 `protocol-audit` 缺导入 + `web-banner` ASI 缺陷、`oxlint` + `pack-lint` 门禁清零 31 报错、TS `TypeChecker` 四类领域规则 + 变异自证清零 37 违规；[Note](../../../notes/implemented/2026-11-23-static-semantic-guardrails.md) | 2026-11-23 |
 | [2026-11-23-observation-substance-program](2026-11-23-observation-substance-program.md) | 观察面内容实质/英文：八卡已修归档；[批 Note](../../../notes/implemented/2026-11-23-observation-substance.md) | 2026-11-23 |
 | [2026-11-23-observation-residuals-program](2026-11-23-observation-residuals-program.md) | 观察面残余/跨面事实一致性：七卡已修 + 376 not-a-bug；[批 Note](../../../notes/implemented/2026-11-23-observation-residuals.md) | 2026-11-23 |
