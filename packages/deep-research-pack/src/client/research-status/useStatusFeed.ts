@@ -7,7 +7,7 @@
 //
 // 失败语义不变：读不到一律降级为 null / 空态（fail-soft），控制台留因（console.error），
 // 不把"读失败"渲染成"没有数据"——那是各视图自己的措辞责任（BUG-045 的原则）。
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type SetStateAction } from 'react'
 import { deriveAnchors, foldHitlPending, type HitlState } from '../../lib/events/hitl-fold.ts'
 import { deriveSteps, latestRunVersion } from '../../lib/run/run-fold.ts'
 import { assertNever, artifactBodyIssueOf, readArtifact, readStateOf, type StatusReads } from '../../lib/run/artifact-read.ts'
@@ -17,29 +17,17 @@ import type { MemberActivitySummary } from '../../lib/events/member-activity.ts'
 import { bindingTrust, type BindingTrust } from '../../lib/run/binding-trust.ts'
 import { openRun } from '../../lib/run/run-context.ts'
 import { streamFailureOf } from '../../lib/events/stream-failure.ts'
-import { deliveryFromReceipt, finalVersionOfPath, latestFinalDelivery, latestPresentedFinalVersion } from '../../lib/run/final-target.ts'
+import { decodeDeliveredReceipt, deliveryFromReceipt, finalVersionOfPath, latestFinalDelivery, latestPresentedFinalVersion } from '../../lib/run/final-target.ts'
 import { runHealthOf } from '../../lib/run/health.ts'
 import { runVersionFaceOf, type RunVersionFace } from '../../lib/run/run-version.ts'
-import { readinessOfSources, reviewVerdictOf, type ReviewVerdict } from '../../lib/review/review-readiness.ts'
+import { parseReadinessDeclaration, readinessOfSources, reviewVerdictOf, type ReviewVerdict } from '../../lib/review/review-readiness.ts'
 import type { TeamProjection } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import { useMemberActivity } from './useMemberActivity.ts'
-import type { ResearchStatusTabProps } from './types.ts'
-import type { BundleFace } from './types.ts'
+import { ABSENT_READS, INITIAL_STATUS_FEED_STATE, reduceStatusFeed } from './status-state.ts'
+import type { BundleFace, ResearchStatusTabProps } from './types.ts'
 
 /** 30s 重扫间隔（bundle 文件变化不高频；团队面板同款节奏）。 */
 const REFRESH_MS = 30_000
-
-/** 初始/无绑定时的读取态：六个事实都还没有读到。 */
-const ABSENT_READS: StatusReads = {
-  bundle: 'absent', question: 'absent', review: 'absent', readiness: 'absent', evidence: 'absent', plan: 'absent', leads: 'absent', findings: 'absent', final: 'absent', receipt: 'absent',
-}
-
-/** 绑定可信性的值键（状态页全值比对重扫用：kind/slug/reason 任一变化都要重扫）。 */
-function trustKey(trust: BindingTrust): string {
-  if (trust.kind === 'bound') return `bound:${trust.slug}:${trust.boundBy}`
-  if (trust.kind === 'suppressed') return `suppressed:${trust.slug}:${trust.reason}`
-  return 'unbound'
-}
 
 export interface StatusFeed {
   readonly rows: readonly ActivityRow[]
@@ -73,39 +61,33 @@ export interface StatusFeed {
 
 export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   const { sessionId, follow, runSource, revealStatusTab, t, useSessions } = props
-  const [rows, setRows] = useState<readonly ActivityRow[]>([])
-  const [hitl, setHitl] = useState<HitlState>({ pending: false, since: undefined })
-  const [journalEvents, setJournalEvents] = useState<readonly unknown[]>([])
-  const [face, setFace] = useState<BundleFace | null>(null)
-  const [unbound, setUnbound] = useState(false)
-  const [trust, setTrust] = useState<BindingTrust>({ kind: 'unbound' })
-  const [journalSeen, setJournalSeen] = useState(false)
-  // 交付回执兜底（D51）：会话窗口可能不含旧的 present 事件；回执是持久事实。
-  const [receiptDelivery, setReceiptDelivery] = useState<ReturnType<typeof deliveryFromReceipt> | null>(null)
+  const [state, dispatch] = useReducer(reduceStatusFeed, INITIAL_STATUS_FEED_STATE)
+  const {
+    rows, hitl, journalEvents, face, unbound, trust, journalSeen, receiptDelivery,
+    kickoffHold, error, reads, reviewVerdict, reviewDetail, scanSettled, memberSummaries,
+  } = state
   // 时间推进面（BUG-351）：静默阈值必须能在观察期间跨过，不能把 now 冻在 memo 里。
   const [nowTick, setNowTick] = useState(() => Date.now())
-  const [kickoffHold, setKickoffHold] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [reads, setReads] = useState<StatusReads>(ABSENT_READS)
-  const [reviewVerdict, setReviewVerdict] = useState<ReviewVerdict>('absent')
-  const [reviewDetail, setReviewDetail] = useState<string | null>(null)
-  const [scanSettled, setScanSettled] = useState(false)
   const [retryNonce, setRetryNonce] = useState(0)
-  const retry = useCallback(() => { setScanSettled(false); setRetryNonce((n) => n + 1) }, [])
-  const trustRef = useRef<BindingTrust>({ kind: 'unbound' })
+  const retry = useCallback(() => {
+    dispatch({ kind: 'retry-requested' })
+    setRetryNonce((n) => n + 1)
+  }, [])
+  const setMemberSummaries = useCallback((value: SetStateAction<Readonly<Record<string, MemberActivitySummary>>>) => {
+    dispatch({ kind: 'member-summaries', value })
+  }, [])
   const prevPending = useRef(false)
   // 观察连续性（UX 清扫 F1，2026-09-30）：vendor 在切换会话时收起右栏——观察面板每次
   // 切换丢失。旧会话正被观察（绑定/挂起）时，切换后重开状态页签（revealStatusTab）。
   const prevSidRef = useRef<string | undefined>(undefined)
   const wasObservingRef = useRef(false)
-  const [memberSummaries, setMemberSummaries] = useState<Readonly<Record<string, MemberActivitySummary>>>({})
   // ⑦ 队员 roster（agentTeam 投影——**按当前 sessionId 显式取**；队员会话 id 的唯一发现源，
   //    通道探明材料实证：spawn_teammate 返回不带 id）。2026-10-21 复跑实红：`useProjection`
   //    在切到没有 agentTeam 的会话时会保留上一条投影（活动流已切、队员区仍是别家的 roster）；
   //    改用 `useSessions` 按 sessionId 取，缺席即 undefined，不冒充。
-  const team: TeamProjection | undefined = useSessions((state) => sessionId === undefined
+  const team: TeamProjection | undefined = useSessions((sessionsState) => sessionId === undefined
     ? undefined
-    : state.projectionsBySession[sessionId]?.values.agentTeam)
+    : sessionsState.projectionsBySession[sessionId]?.values.agentTeam)
   const members = team?.members.filter((m) => m.role === 'teammate') ?? []
   const memberIds = members.map((m) => m.id).sort().join(',')
 
@@ -113,50 +95,33 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   useEffect(() => {
     if (sessionId === undefined) return
     const controller = new AbortController()
-    trustRef.current = { kind: 'unbound' }
     prevPending.current = false
-    setJournalEvents([])
-    setRows([])
-    setJournalSeen(false)
-    setHitl({ pending: false, since: undefined })
-    setError(null)
-    // policy state 也必须复位：旧 trust 会驱动新 session 的 bundle 扫描（BUG-117）。
-    setTrust({ kind: 'unbound' })
-    setFace(null)
-    setUnbound(false)
-    setKickoffHold(false)
-    setReads(ABSENT_READS)
-    setReviewVerdict('absent')
-    setReviewDetail(null)
-    setScanSettled(false)
-    setMemberSummaries({})
+    // 切换会话同步复位 journal 与 policy state（BUG-087/117）：旧 trust 会驱动新 session 的 bundle 扫描。
+    dispatch({ kind: 'reset-session' })
     void (async () => {
       try {
         let events: unknown[] = []
         for await (const frame of follow(sessionId, controller.signal)) {
           if (frame.kind === 'history') events = [...frame.events]
           else events = [...events, frame.event]
-          setJournalEvents(events)
-          setJournalSeen(true)
-          setRows(foldActivityRows(events, t))
           const next = foldHitlPending(events)
-          setHitl(next)
           // 挂起信号显性化（RFC right-pane-ux-debt）：false→true 迁移时打开本页签——
           // openTab 落定时右栏同步骤展开；页签体折叠态保持挂载，观察者常在。
           if (next.pending && !prevPending.current) revealStatusTab()
           prevPending.current = next.pending
           const nextTrust = bindingTrust(events)
-          // 全值比对（BUG-001 附带修复）：只比 slug 会漏 boundBy 翻转（同 slug 的 read→write，
-          // rerun 场景）与抑制原因翻转（pending ↔ kickoff）——两者都改变渐进面判定。
-          if (trustKey(nextTrust) !== trustKey(trustRef.current)) {
-            trustRef.current = nextTrust
-            setTrust(nextTrust)
-          }
+          dispatch({
+            kind: 'journal-frame',
+            events,
+            rows: foldActivityRows(events, t),
+            hitl: next,
+            trust: nextTrust,
+          })
           // 观察连续性的采样点：旧会话的末态（绑定/抑制）在切换那一刻经此 ref 供切换效应读。
           wasObservingRef.current = nextTrust.kind !== 'unbound' || prevPending.current
         }
       } catch (cause) {
-        if (!controller.signal.aborted) setError(String(cause))
+        if (!controller.signal.aborted) dispatch({ kind: 'journal-error', message: String(cause) })
       }
     })()
     return () => { controller.abort() }
@@ -190,16 +155,10 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   // research-brief skill 加载 = 本会话在开新 run）把整个立项轨道的仅读绑定都抑制。
   useEffect(() => {
     if (sessionId === undefined || trust.kind !== 'bound') {
-      setFace(null)
-      setReceiptDelivery(null)
-      setReads(ABSENT_READS)
-      setScanSettled(false)
-      setUnbound(trust.kind === 'unbound' && journalSeen)
-      setKickoffHold(trust.kind === 'suppressed' && trust.reason === 'kickoff')
+      dispatch({ kind: 'unsettled-trust', trust })
       return
     }
-    setUnbound(false)
-    setKickoffHold(false)
+    dispatch({ kind: 'scan-started' })
     const boundSlug = trust.slug
     let stopped = false
     let scanController: AbortController | null = null
@@ -212,12 +171,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const opened = await openRun(runSource(sessionId), `drt_${boundSlug}`, { signal })
         if (stopped) return
         if (!opened.ok) {
-          setFace(null)
-          setReceiptDelivery(null)
-          setReads({ ...ABSENT_READS, bundle: readStateOf(opened) })
-          setReviewVerdict('absent')
-          setReviewDetail(null)
-          setScanSettled(true)
+          dispatch({ kind: 'scan-bundle-failed', reads: { ...ABSENT_READS, bundle: readStateOf(opened) } })
           return
         }
         const view = opened.value
@@ -249,11 +203,11 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         if (stopped) return
         const findingsArt = await readArtifact(view, 'findings.md', { signal })
         if (stopped) return
-        // 回执（持久事实）：统一工件读取；只有 ok 才尝试 deliveryFromReceipt（invalid/empty/unreadable
-        // 不冒充缺席，P3 再出「回执读取失败/不合法」提示）。
-        const receiptArt = await readArtifact(view, 'delivered.json', { signal })
+        // 回执（持久事实）：统一工件读取 + 边界解码器；只有 ok 才尝试 deliveryFromReceipt（invalid/empty/unreadable
+        // 不冒充缺席，出「回执读取失败/不合法」提示）。
+        const receiptArt = await readArtifact(view, 'delivered.json', { signal, decoder: decodeDeliveredReceipt })
         if (stopped) return
-        setReceiptDelivery(receiptArt.state === 'ok' ? deliveryFromReceipt(receiptArt.json, boundSlug) : null)
+        const nextReceiptDelivery = receiptArt.state === 'ok' ? deliveryFromReceipt(receiptArt.value, boundSlug) : null
         const versions = latestRunVersion(finalFileNames)
         // 版本面事实：plan 头/重写记录 + plan/ 快照清单（rerun 版本轨的数据源，折算住 run-version）。
         const planArt = await readArtifact(view, 'plan.md', { signal })
@@ -270,8 +224,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const reviewArt = await readArtifact(view, 'review.md', { signal })
         if (stopped) return
         const reviewText = reviewArt.state === 'ok' ? reviewArt.text : null
-        // 终局 readiness 与门禁同源（D51）：声明件优先，散文只做副本；无 review/ 的旧场回退散文。
-        const readinessArt = await readArtifact(view, 'review/readiness.json', { signal })
+        // 终局 readiness 与门禁同源（D51）：声明件优先（边界 Decoder 验证 schema + 重复键），散文只做副本。
+        const readinessArt = await readArtifact(view, 'review/readiness.json', { signal, decoder: (_raw, rawText) => parseReadinessDeclaration(rawText) })
         if (stopped) return
         const declarationText = readinessArt.state === 'ok' ? readinessArt.text : null
         const reading = readinessOfSources({ reviewText, declarationText, hasReviewDir: names.has('review') })
@@ -290,8 +244,6 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
               return assertNever(nextReviewVerdict)
           }
         })()
-        setReviewVerdict(nextReviewVerdict)
-        setReviewDetail(reading.detail ?? null)
         const questionArt = await readArtifact(view, 'question.md', { signal })
         if (stopped) return
         const questionText = questionArt.state === 'ok' ? questionArt.text : null
@@ -312,62 +264,58 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           : evidenceCount === 0 && (evidenceEntries.length > 0 || evidenceFailedLog)
             ? (evidenceUnreadableCount > 0 ? 'unreadable' : evidenceFailedLog && evidenceEmptyCount === 0 ? 'failed-only' : 'empty')
             : null
-        setReads({
-          bundle: 'ok',
-          question: questionArt.state,
-          review: reviewArt.state,
-          readiness: readinessArt.state,
-          evidence: evidenceState,
-          plan: planArt.state,
-          leads: leadsArt.state,
-          findings: findingsArt.state,
-          final: finalState,
-          receipt: receiptArt.state,
-        })
-        setScanSettled(true)
-        // G3（RFC cockpit-flow-face）：剥 markdown 强调符再截断——`**` 与反引号是源文件
-        // 标记不是内容；截断补省略号，不在字中间装作完整句。
-        setFace({
-          questionLine: firstLine,
-          questionIssue,
-          hasQuestion: questionArt.state === 'ok' && questionBody !== null,
-          leadsIssue,
-          findingsIssue,
-          evidenceIssue,
-          steps: deriveSteps({
-            question: questionArt.state === 'ok' && questionBody !== null,
-            team: questionArt.state === 'ok' && questionBody !== null,
-            leads: leadsBody,
-            evidence: evidenceCount,
-            findings: findingsBody,
-            review: nextReviewVerdict !== 'unconfirmed' && nextReviewVerdict !== 'conflict',
-            final: finalBody,
-            unknown: [
-              ...(questionIssue !== null ? ['question'] : []),
-              ...(leadsIssue !== null ? ['leads'] : []),
-              ...(evidenceIssue !== null ? ['evidence'] : []),
-              ...(findingsIssue !== null ? ['findings'] : []),
-              ...(nextReviewVerdict === 'unconfirmed' || nextReviewVerdict === 'conflict' ? ['review'] : []),
-            ],
-          }, t),
-          evidenceCount,
-          delivered: finalBody,
-          versions,
-          reviewFail,
-          planText,
-          planSnapshotNames,
-          questionText,
-          finalFileNames,
-          hasFinal: finalBody,
+        dispatch({
+          kind: 'scan-succeeded',
+          receiptDelivery: nextReceiptDelivery,
+          reviewVerdict: nextReviewVerdict,
+          reviewDetail: reading.detail ?? null,
+          reads: {
+            bundle: 'ok',
+            question: questionArt.state,
+            review: reviewArt.state,
+            readiness: readinessArt.state,
+            evidence: evidenceState,
+            plan: planArt.state,
+            leads: leadsArt.state,
+            findings: findingsArt.state,
+            final: finalState,
+            receipt: receiptArt.state,
+          },
+          // G3（RFC cockpit-flow-face）：剥 markdown 强调符再截断——`**` 与反引号是源文件
+          // 标记不是内容；截断补省略号，不在字中间装作完整句。
+          face: {
+            questionLine: firstLine,
+            questionIssue,
+            hasQuestion: questionArt.state === 'ok' && questionBody !== null,
+            leadsIssue,
+            findingsIssue,
+            evidenceIssue,
+            steps: deriveSteps({
+              question: questionIssue !== null ? 'unknown' : (questionArt.state === 'ok' && questionBody !== null ? 'present' : 'absent'),
+              team: questionArt.state === 'ok' && questionBody !== null ? 'present' : 'absent',
+              leads: leadsIssue !== null ? 'unknown' : (leadsBody ? 'present' : 'absent'),
+              evidence: evidenceIssue !== null ? 'unknown' : evidenceCount,
+              findings: findingsIssue !== null ? 'unknown' : (findingsBody ? 'present' : 'absent'),
+              review: nextReviewVerdict === 'unconfirmed' || nextReviewVerdict === 'conflict'
+                ? 'unknown'
+                : (nextReviewVerdict === 'pass' || nextReviewVerdict === 'fail' ? 'present' : 'absent'),
+              final: finalBody ? 'present' : 'absent',
+            }, t),
+            evidenceCount,
+            delivered: finalBody,
+            versions,
+            reviewFail,
+            planText,
+            planSnapshotNames,
+            questionText,
+            finalFileNames,
+            hasFinal: finalBody,
+          },
         })
       } catch (cause) {
         console.error('[research-status] scan 异常', String(cause))
         if (stopped) return
-        setFace(null)
-        setReceiptDelivery(null)
-        setReads({ ...ABSENT_READS, bundle: 'unreadable' })
-        setReviewVerdict('absent')
-        setScanSettled(true)
+        dispatch({ kind: 'scan-threw' })
       }
     }
     void scan()

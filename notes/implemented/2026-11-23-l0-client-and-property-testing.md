@@ -25,7 +25,7 @@
 - **权威事实**：四页签 DOM 渲染/交互行为 = `tests/cockpit/client/tabs-fault-matrix.spec.mjs`；三大 Hook 时序/竞态/重试行为 = 对应 `research-{status,graph,config}/*-behavior.spec.mjs`；纯折算不变量/CommonMark 等价性 = `fast-check` + `mdast-util-from-markdown`。
 - **读取方**：`pnpm test:spec`、`pnpm test:coverage`、`tests/checks/test-infra/client-surface.test.mjs`、`tests/checks/shared/pack-mirror.test.mjs`、`tests/checks/repo/navigability-contract.test.mjs`。
 - **坏输入**：`RunSource` 返回 `missing`/`unreadable`/`truncated`/`empty`/仅标题/坏 JSON/互斥声明或乱序慢返回，或随机 Markdown 容器交错输入 `markdown-mask`。
-- **旧形态**：`renderToStaticMarkup` 空态静态渲染（[research-tabs.spec.mjs](../../tests/cockpit/client/research-tabs.spec.mjs)）保留作最小 SSR 壳回归；`CLIENT_SMOKE_ONLY` 仅保留 `method-library` 四个 Hook 与类型/风格文件。
+- **旧形态**：`renderToStaticMarkup` 空态静态渲染（[research-tabs.spec.mjs](../../tests/cockpit/client/research-tabs.spec.mjs)）保留作最小 SSR 壳回归；`CLIENT_SMOKE_ONLY` 仅保留 `method-library` 四个 Hook 与类型/风格文件；后续状态机纯 Reducer 抽干承接见 [结构治本 Note](2026-11-23-state-machine-and-contract-architecture.md)。
 - **反证**：`markdown-mask` 真实 `mdast` 反例先红后绿；对 `useStatusFeed.ts` 注入退化变异（去掉 `if (next.pending && !prevPending.current)` 守卫使 `revealStatusTab` 每次重复触发）触发 `status-feed-behavior.spec.mjs` 红（`2 !== 1`，exit `1`）。
 
 ## 输掉的方案

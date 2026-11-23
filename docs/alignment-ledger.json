@@ -668,6 +668,7 @@
       "owns": "写生命周期、并发、子进程或 teardown 代码前先读这份缺陷模式清单（0.2.1 起原单文件拆为 docs/defensive-patterns/ 分卷：general + client-components + conversation-and-session + package-surface + remote-and-api；general 为通用卷）。",
       "verdict": "adapted",
       "landing": [
+        "docs/design/40-research-cockpit.md",
         "checks/AGENTS.md",
         "notes/README.md"
       ]

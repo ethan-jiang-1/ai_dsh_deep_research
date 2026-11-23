@@ -42,7 +42,7 @@ export function planGate(bundleDir) {
   if (index.nodes.length === 0) issues.push('plan.md 节点表为空/畸形——执行图正本不能 0 节点（BUG-280）')
   const taskIds = new Set()
   for (const node of index.nodes) {
-    if (node.taskId !== undefined && node.taskId !== '') {
+    if (node.taskId !== undefined && node.taskId !== '' && node.taskId !== 'plan-only') {
       if (taskIds.has(node.taskId)) issues.push(`task_id 重复：${node.taskId}（BUG-283）`)
       taskIds.add(node.taskId)
     }

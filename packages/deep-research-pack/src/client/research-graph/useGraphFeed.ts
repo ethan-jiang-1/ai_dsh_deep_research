@@ -6,7 +6,7 @@
 //   ① 读不到 ≠ 没有（BUG-045）：journal 绑定失败落 `followError` 并对可恢复错误做有界重试，
 //      绝不落回"未绑定"空态；
 //   ② 缺文件是合法形态：plan.md 缺席 → `planState='missing'`，旧图快照缺席 → 如实 missing。
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useReducer, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { PlanIndex } from '../../lib/plan/plan-index.ts'
@@ -14,6 +14,7 @@ import { planIndex } from '../../lib/plan/plan-index.ts'
 import { bindingTrust } from '../../lib/run/binding-trust.ts'
 import { openRun, type RunView } from '../../lib/run/run-context.ts'
 import { readArtifact } from '../../lib/run/artifact-read.ts'
+import { INITIAL_GRAPH_FEED_STATE, reduceGraphFeed, type PlanState, type SnapshotState } from './graph-state.ts'
 import type { ResearchGraphTabProps } from './types.ts'
 
 /** plan.md 重读间隔（任务靠投影推送；只有文件需要低频重扫）。 */
@@ -23,7 +24,7 @@ export interface GraphFeed {
   readonly boundSlug: string | null
   readonly plan: PlanIndex | null
   readonly planText: string | null
-  readonly planState: 'loading' | 'missing' | 'unbound' | 'ready' | 'truncated' | 'error'
+  readonly planState: PlanState
   readonly retry: () => void
   readonly planVersion: number | null
   readonly snapshots: readonly number[]
@@ -32,7 +33,7 @@ export interface GraphFeed {
   readonly graphView: 'current' | 'diff'
   readonly setGraphView: Dispatch<SetStateAction<'current' | 'diff'>>
   readonly snapshotPlan: PlanIndex | null
-  readonly snapshotState: 'idle' | 'loading' | 'ready' | 'empty' | 'invalid' | 'missing' | 'unreadable'
+  readonly snapshotState: SnapshotState
   readonly showSnapshotPlan: boolean
   readonly setShowSnapshotPlan: Dispatch<SetStateAction<boolean>>
   readonly planLoadedAt: number | null
@@ -45,24 +46,19 @@ export interface GraphFeed {
  */
 export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: SessionId): GraphFeed {
   const { follow, runSource } = props
-  const [boundSlug, setBoundSlug] = useState<string | null>(null)
+  const [state, dispatch] = useReducer(reduceGraphFeed, INITIAL_GRAPH_FEED_STATE)
+  const {
+    boundSlug, followError, followAttempt, plan, planText, planState, retryTick,
+    planVersion, snapshots, graphView, snapshotPlan, snapshotState, showSnapshotPlan, planLoadedAt,
+  } = state
   const viewRef = useRef<RunView | null>(null)
-  const [plan, setPlan] = useState<PlanIndex | null>(null)
-  const [planText, setPlanText] = useState<string | null>(null)
-  const [planState, setPlanState] = useState<'loading' | 'missing' | 'unbound' | 'ready' | 'truncated' | 'error'>('loading')
-  const [retryTick, setRetryTick] = useState(0)
-  // 版本轨（rerun 版本面）：plan 基址 + `plan/` 快照 + 当前图版本；view 只切只看，不改图。
-  const [planVersion, setPlanVersion] = useState<number | null>(null)
-  const [snapshots, setSnapshots] = useState<readonly number[]>([])
-  const [graphView, setGraphView] = useState<'current' | 'diff'>('current')
-  const [snapshotPlan, setSnapshotPlan] = useState<PlanIndex | null>(null)
-  const [snapshotState, setSnapshotState] = useState<'idle' | 'loading' | 'ready' | 'empty' | 'invalid' | 'missing' | 'unreadable'>('idle')
-  const [showSnapshotPlan, setShowSnapshotPlan] = useState(false)
-  // 最后成功读取 plan.md 的时刻：把“数据可能过期”显性化（BUG-043 §刷新），不把缺失当状态。
-  const [planLoadedAt, setPlanLoadedAt] = useState<number | null>(null)
-  // 绑定读取失败的显性态 + 有界重试计数（BUG-045）：瞬时断连曾与"本会话未绑定 run"同形。
-  const [followError, setFollowError] = useState<string | null>(null)
-  const [followAttempt, setFollowAttempt] = useState(0)
+  const setGraphView = useCallback<Dispatch<SetStateAction<'current' | 'diff'>>>((value) => {
+    dispatch({ kind: 'set-graph-view', value })
+  }, [])
+  const setShowSnapshotPlan = useCallback<Dispatch<SetStateAction<boolean>>>((value) => {
+    dispatch({ kind: 'set-show-snapshot', value })
+  }, [])
+  const retry = useCallback(() => { dispatch({ kind: 'plan-retry' }) }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -70,8 +66,7 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
     let events: unknown[] = []
     let lastSlug: string | null = null
     let retryTimer: ReturnType<typeof setTimeout> | undefined
-    setBoundSlug(null)
-    setFollowError(null)
+    dispatch({ kind: 'follow-start' })
     void (async () => {
       try {
         for await (const frame of follow(leadSessionId, controller.signal)) {
@@ -81,7 +76,7 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
           const nextSlug = trust.kind === 'bound' ? trust.slug : null
           if (nextSlug !== lastSlug) {
             lastSlug = nextSlug
-            if (!stopped) setBoundSlug(nextSlug)
+            if (!stopped) dispatch({ kind: 'bind-slug', slug: nextSlug })
           }
         }
       } catch (cause) {
@@ -91,9 +86,9 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
         // 瞬时断连（Remote stream WebSocket closed 族）此前静默落成"本会话未绑定 run"——
         // 与真实未绑定不可分辨（BUG-045）。有界重试 3 次（2s 间隔）；仍失败则保留错误态，
         // 由图面如实说"读不到 ≠ 没有 run"。
-        if (!stopped) setFollowError(message.slice(0, 160))
+        if (!stopped) dispatch({ kind: 'follow-error', message: message.slice(0, 160) })
         if (followAttempt < 3) {
-          retryTimer = setTimeout(() => { if (!stopped) setFollowAttempt((n) => n + 1) }, 2_000)
+          retryTimer = setTimeout(() => { if (!stopped) dispatch({ kind: 'follow-retry' }) }, 2_000)
         }
       }
     })()
@@ -106,63 +101,40 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
     const controller = new AbortController()
     let stopped = false
     let timer: ReturnType<typeof setInterval> | undefined
-    setPlan(null)
-    setPlanText(null)
     if (boundSlug === null) {
-      setPlanLoadedAt(null)
       viewRef.current = null
-      setPlanVersion(null)
-      setSnapshots([])
-      setGraphView('current')
-      setSnapshotPlan(null)
-      setSnapshotState('idle')
-      setShowSnapshotPlan(false)
-      setPlanState('unbound')
+      dispatch({ kind: 'plan-unbound' })
       return () => { stopped = true; controller.abort() }
     }
-    setPlanState('loading')
+    dispatch({ kind: 'plan-loading' })
     const load = async (): Promise<void> => {
       try {
         const opened = await openRun(runSource(leadSessionId), `drt_${boundSlug}`, { signal: controller.signal })
         if (stopped) return
         if (!opened.ok) {
           viewRef.current = null
-          setPlan(null)
-          setPlanText(null)
-          setPlanState('error')
-          setPlanLoadedAt(null)
+          dispatch({ kind: 'plan-error' })
           return
         }
         const view = opened.value
-        const read = await view.read('plan.md', { signal: controller.signal })
+        const planArt = await readArtifact(view, 'plan.md', { signal: controller.signal })
         if (stopped) return
-        if (!read.ok) {
-          viewRef.current = view
-          setPlan(null)
-          setPlanText(null)
-          setPlanState('error')
-          setPlanLoadedAt(null)
-          return
-        }
         viewRef.current = view
-        const text = read.value.text
-        if (read.value.truncated) {
-          setPlan(null)
-          setPlanText(text)
-          setPlanVersion(null)
-          setSnapshots([])
-          setPlanState('truncated')
-          setPlanLoadedAt(Date.now())
+        if (planArt.truncated) {
+          dispatch({ kind: 'plan-truncated', loadedAt: Date.now() })
           return
         }
+        if (planArt.state === 'absent') {
+          dispatch({ kind: 'plan-missing' })
+          return
+        }
+        if (planArt.state !== 'ok' || planArt.text === null) {
+          dispatch({ kind: 'plan-error' })
+          return
+        }
+        const text = planArt.text
         const parsed = planIndex(text)
         const rawVersion = parsed.version?.replace(/^v/i, '') ?? ''
-        setPlan(parsed)
-        setPlanText(text)
-        setPlanState('ready')
-        setPlanLoadedAt(Date.now())
-        // 版本号取 plan 解析器（已按“最后一条声明”）的结论，不另写一份正则。
-        setPlanVersion(/^\d+$/.test(rawVersion) ? Number(rawVersion) : null)
         const planList = view.names.has('plan')
           ? await view.list('plan', { signal: controller.signal }).catch(() => null)
           : null
@@ -172,14 +144,19 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
           .filter((raw): raw is string => raw !== undefined)
           .map(Number)
           .sort((a, b) => a - b)
-        setSnapshots(found)
+        dispatch({
+          kind: 'plan-ready',
+          plan: parsed,
+          planText: text,
+          loadedAt: Date.now(),
+          // 版本号取 plan 解析器（已按“最后一条声明”）的结论，不另写一份正则。
+          planVersion: /^\d+$/.test(rawVersion) ? Number(rawVersion) : null,
+          snapshots: found,
+        })
       } catch (cause) {
         if (stopped) return
         viewRef.current = null
-        setPlan(null)
-        setPlanText(null)
-        setPlanState('error')
-        setPlanLoadedAt(null)
+        dispatch({ kind: 'plan-error' })
         console.error('[research-graph] plan.md 读取失败', String(cause))
       }
     }
@@ -191,31 +168,28 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
   // 旧图快照按需读（没有快照就不读；`plan/vN.md` 不在场就如实 missing）。
   const latestSnapshot = snapshots.length > 0 ? (snapshots[snapshots.length - 1] ?? null) : null
   useEffect(() => {
-    if (graphView !== 'diff' && !showSnapshotPlan) { setSnapshotState('idle'); return }
+    if (graphView !== 'diff' && !showSnapshotPlan) { dispatch({ kind: 'snapshot-idle' }); return }
     const view = viewRef.current
-    if (view === null || latestSnapshot === null) { setSnapshotState('missing'); return }
+    if (view === null || latestSnapshot === null) { dispatch({ kind: 'snapshot-missing' }); return }
     let stopped = false
     const controller = new AbortController()
-    setSnapshotState('loading')
-    setSnapshotPlan(null)
+    dispatch({ kind: 'snapshot-loading' })
     void (async () => {
       const art = await readArtifact(view, `plan/v${String(latestSnapshot)}.md`, { signal: controller.signal })
       if (stopped) return
-      if (art.state === 'absent') { setSnapshotState('missing'); setSnapshotPlan(null); return }
-      if (art.state === 'empty') { setSnapshotState('empty'); setSnapshotPlan(null); return }
-      if (art.state === 'unreadable') { setSnapshotState('unreadable'); setSnapshotPlan(null); return }
-      if (art.state !== 'ok' || art.text === null) { setSnapshotState('invalid'); setSnapshotPlan(null); return }
+      if (art.state === 'absent') { dispatch({ kind: 'snapshot-missing' }); return }
+      if (art.state === 'empty') { dispatch({ kind: 'snapshot-failed', state: 'empty' }); return }
+      if (art.state === 'unreadable') { dispatch({ kind: 'snapshot-failed', state: 'unreadable' }); return }
+      if (art.state !== 'ok' || art.text === null) { dispatch({ kind: 'snapshot-failed', state: 'invalid' }); return }
       const parsed = planIndex(art.text)
-      if (parsed.topLevel.length === 0) { setSnapshotState('invalid'); setSnapshotPlan(null); return }
-      setSnapshotPlan(parsed)
-      setSnapshotState('ready')
+      if (parsed.topLevel.length === 0) { dispatch({ kind: 'snapshot-failed', state: 'invalid' }); return }
+      dispatch({ kind: 'snapshot-ready', plan: parsed })
     })()
     return () => { stopped = true; controller.abort() }
   }, [graphView, showSnapshotPlan, latestSnapshot, leadSessionId])
 
   return {
     boundSlug, plan, planText, planState, planVersion, snapshots, latestSnapshot, graphView, setGraphView,
-    snapshotPlan, snapshotState, showSnapshotPlan, setShowSnapshotPlan, planLoadedAt, followError,
-    retry: () => setRetryTick((value) => value + 1),
+    snapshotPlan, snapshotState, showSnapshotPlan, setShowSnapshotPlan, planLoadedAt, followError, retry,
   }
 }

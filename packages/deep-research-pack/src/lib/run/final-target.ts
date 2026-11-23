@@ -291,23 +291,48 @@ const bareBundleSlugOf = (value: unknown): string | null => {
   return bare === '' ? null : bare
 }
 
+/** canonical `delivered.json` 边界校验结构（D51）。 */
+export interface DeliveredReceiptData {
+  readonly version: 1
+  readonly slug: string
+  readonly acceptedAt: string
+  readonly gate: { readonly status: 'PASS' }
+  readonly present?: { readonly path?: string; readonly callId?: string; readonly version?: number }
+  readonly final?: { readonly version?: number }
+}
+
+/** 边界 Schema 解码器：验证 `delivered.json` 必须具备 `version=1`、非空 `slug/acceptedAt` 与 `gate.status=PASS`。 */
+export function decodeDeliveredReceipt(raw: unknown): { readonly ok: true; readonly value: DeliveredReceiptData } | { readonly ok: false; readonly detail: string } {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    return { ok: false, detail: 'delivered.json root must be an object' }
+  }
+  const record = raw as { version?: unknown; slug?: unknown; acceptedAt?: unknown; gate?: unknown; present?: unknown; final?: unknown }
+  if (record.version !== 1) return { ok: false, detail: 'delivered.json version must be 1' }
+  const slug = typeof record.slug === 'string' && bareBundleSlugOf(record.slug) !== null ? record.slug : null
+  if (slug === null) return { ok: false, detail: 'delivered.json missing valid slug' }
+  if (typeof record.acceptedAt !== 'string' || record.acceptedAt.trim() === '') {
+    return { ok: false, detail: 'delivered.json missing acceptedAt' }
+  }
+  const gate = typeof record.gate === 'object' && record.gate !== null ? record.gate as { status?: unknown } : null
+  if (gate?.status !== 'PASS') return { ok: false, detail: 'delivered.json gate.status must be PASS' }
+  return {
+    ok: true,
+    value: record as DeliveredReceiptData,
+  }
+}
+
 export function deliveryFromReceipt(receipt: unknown, slug?: string): FinalDelivery | null {
-  if (typeof receipt !== 'object' || receipt === null) return null
-  const record = receipt as { version?: unknown; slug?: unknown; acceptedAt?: unknown; gate?: unknown; present?: unknown; final?: unknown }
-  // BUG-345：只认工具写的回执（run-accept 的 buildDelivered：version 1 + slug + acceptedAt + gate.PASS）。
-  // 手写的 install-only 形状（final_copy/presented）或缺 gate 的仿制品不是回执——不做旧形兼容。
-  if (record.version !== 1 || typeof record.slug !== 'string' || record.slug === '') return null
+  const decoded = decodeDeliveredReceipt(receipt)
+  if (!decoded.ok) return null
+  const record = decoded.value
   const receiptSlug = bareBundleSlugOf(record.slug)
   if (receiptSlug === null) return null
-  if (typeof record.acceptedAt !== 'string' || record.acceptedAt.trim() === '') return null
   if (slug !== undefined && bareBundleSlugOf(slug) !== receiptSlug) return null
-  const gate = typeof record.gate === 'object' && record.gate !== null ? record.gate as { status?: unknown } : null
-  if (gate?.status !== 'PASS') return null
   const present = typeof record.present === 'object' && record.present !== null
-    ? record.present as { path?: unknown; callId?: unknown; version?: unknown }
+    ? record.present
     : null
   const final = typeof record.final === 'object' && record.final !== null
-    ? record.final as { version?: unknown }
+    ? record.final
     : null
   const version = typeof present?.version === 'number' ? present.version : (typeof final?.version === 'number' ? final.version : null)
   const declared = typeof present?.path === 'string' && present.path.trim() !== '' ? present.path : null

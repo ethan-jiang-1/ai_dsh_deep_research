@@ -8,16 +8,12 @@ import assert from 'node:assert/strict';
 import { deriveBusinessBrief, readStateOf } from '../../../../packages/deep-research-pack/src/lib/run/brief-fold.ts';
 
 const base = {
-  bundleBound: true,
-  kickoffHold: false,
-  hitlPending: false,
-  pendingKind: null,
-  pendingQuestions: 0,
-  hasQuestion: true,
-  questionLine: '明年是否进入东南亚市场试点？',
+  kind: 'bound',
+  hitl: { kind: 'idle' },
+  question: { kind: 'ok', line: '明年是否进入东南亚市场试点？' },
+  review: { kind: 'absent' },
   currentStage: '挖掘',
   findingsPresent: false,
-  reviewFail: null,
   delivered: false,
   versions: 1,
   lastDecisionKind: null,
@@ -25,14 +21,19 @@ const base = {
 };
 
 test('未绑定 bundle：目标尚未确认、无需操作（不显示别家数据）', () => {
-  const b = deriveBusinessBrief({ ...base, bundleBound: false });
+  const b = deriveBusinessBrief({ kind: 'unbound', hitl: { kind: 'idle' }, question: { kind: 'absent' } });
   assert.equal(b.goalKnown, false, '未绑定态不得显示目标——无 question 事实');
   assert.match(b.actionLine, /无需操作/);
   assert.equal(b.userActionNeeded, false);
 });
 
 test('HITL1 挂起：立项确认 + 问数点名 + 需要你操作', () => {
-  const b = deriveBusinessBrief({ ...base, hitlPending: true, pendingKind: 'hitl1', pendingQuestions: 3, hasQuestion: false, questionLine: null, currentStage: '立项' });
+  const b = deriveBusinessBrief({
+    ...base,
+    hitl: { kind: 'pending', target: 'hitl1', questions: 3 },
+    question: { kind: 'absent' },
+    currentStage: '立项',
+  });
   assert.match(b.stageLine, /立项确认/);
   assert.match(b.stageLine, /3 问/);
   assert.equal(b.userActionNeeded, true);
@@ -40,7 +41,11 @@ test('HITL1 挂起：立项确认 + 问数点名 + 需要你操作', () => {
 });
 
 test('HITL1 契约外形态（kind unknown 且无 question 文件）→ 同立项确认（对齐 deriveAnchors a1Pending）', () => {
-  const b = deriveBusinessBrief({ ...base, hitlPending: true, pendingKind: 'unknown', hasQuestion: false, questionLine: null });
+  const b = deriveBusinessBrief({
+    ...base,
+    hitl: { kind: 'pending', target: 'unknown', questions: 0 },
+    question: { kind: 'absent' },
+  });
   assert.match(b.stageLine, /立项确认/);
   assert.equal(b.userActionNeeded, true);
 });
@@ -52,7 +57,7 @@ test('缺输入态：openItems 显性为待确认行（不猜补、不冒充完�
 });
 
 test('Critic FAIL：审查修复静默推进 + 无需用户操作 + 未知显性', () => {
-  const b = deriveBusinessBrief({ ...base, reviewFail: true, currentStage: '审查' });
+  const b = deriveBusinessBrief({ ...base, review: { kind: 'fail' }, currentStage: '审查' });
   assert.match(b.stageLine, /审查/);
   assert.match(b.stageLine, /修复/);
   assert.equal(b.userActionNeeded, false);
@@ -60,13 +65,13 @@ test('Critic FAIL：审查修复静默推进 + 无需用户操作 + 未知显性
 });
 
 test('超复审上限升级：reviewFail + HITL2 挂起 → 交付审阅优先（升级走既有交互点）', () => {
-  const b = deriveBusinessBrief({ ...base, reviewFail: true, hitlPending: true, pendingKind: 'hitl2' });
+  const b = deriveBusinessBrief({ ...base, review: { kind: 'fail' }, hitl: { kind: 'pending', target: 'hitl2', questions: 0 } });
   assert.match(b.stageLine, /交付审阅/);
   assert.equal(b.userActionNeeded, true);
 });
 
 test('HITL2 挂起：三选一动作点名（定稿/补研究/修订表述）', () => {
-  const b = deriveBusinessBrief({ ...base, hitlPending: true, pendingKind: 'hitl2' });
+  const b = deriveBusinessBrief({ ...base, hitl: { kind: 'pending', target: 'hitl2', questions: 0 } });
   assert.match(b.stageLine, /交付审阅/);
   assert.match(b.actionLine, /定稿/);
   assert.match(b.actionLine, /补研究/);
@@ -101,8 +106,8 @@ test('研究推进中：阶段业务语言 + 无结论不冒充（findings 缺�
   assert.equal(b.userActionNeeded, false);
 });
 
-test('fail-soft：空/畸形输入不 throw，输出如实缺省', () => {
-  const b = deriveBusinessBrief({});
+test('fail-soft：极简未绑定输入稳定返回缺省摘要', () => {
+  const b = deriveBusinessBrief({ kind: 'unbound', hitl: { kind: 'idle' }, question: { kind: 'absent' } });
   assert.equal(typeof b.stageLine, 'string');
   assert.equal(b.userActionNeeded, false);
 });
@@ -110,10 +115,10 @@ test('fail-soft：空/畸形输入不 throw，输出如实缺省', () => {
 test('禁词：全部输出行不含证据计数形态（「份」字与「证据 N」）——计数不冒充完成度', () => {
   const inputs = [
     base,
-    { ...base, bundleBound: false },
-    { ...base, hitlPending: true, pendingKind: 'hitl1', pendingQuestions: 3 },
-    { ...base, hitlPending: true, pendingKind: 'hitl2' },
-    { ...base, reviewFail: true },
+    { kind: 'unbound', hitl: { kind: 'idle' }, question: { kind: 'absent' } },
+    { ...base, hitl: { kind: 'pending', target: 'hitl1', questions: 3 } },
+    { ...base, hitl: { kind: 'pending', target: 'hitl2', questions: 0 } },
+    { ...base, review: { kind: 'fail' } },
     { ...base, delivered: true, versions: 2, lastDecisionKind: 'more' },
     { ...base, openItems: ['预算上限'] },
   ];
@@ -127,10 +132,10 @@ test('禁词：全部输出行不含证据计数形态（「份」字与「证�
 });
 
 // 负例留证 2026-11-22：BUG-358——bundle 读不到时旧实现落默认「研究推进中」。
-// 红配方：删 bundleReadFailure 分支（或把它放到 delivered 之后）→ 本组断言红。
+// 红配方：删 bundle-error 分支（或把它放到 bound 之后）→ 本组断言红。
 test('BUG-358 bundle 读失败：显式失败 + 重试，不落「研究推进中」', () => {
-  for (const state of ['missing', 'unreadable']) {
-    const b = deriveBusinessBrief({ ...base, bundleReadFailure: state });
+  for (const failure of ['missing', 'unreadable']) {
+    const b = deriveBusinessBrief({ kind: 'bundle-error', failure, hitl: { kind: 'idle' }, question: { kind: 'absent' } });
     assert.match(b.stageLine, /读取失败/);
     assert.match(b.actionLine, /重试/);
     assert.doesNotMatch(b.stageLine, /推进/);
@@ -147,9 +152,9 @@ test('readStateOf：null/缺席 = absent；ok = ok；unreadable 原样保留', (
 });
 
 // 负例留证 2026-11-22：BUG-357——reviewFail 分支先于 delivered，已交付页面仍说「报告不交付」。
-// 红配方：把 delivered+reviewFail 分支删掉/放回旧单态 → 本组与无矛盾性质红。
+// 红配方：把 delivered + review.kind===fail 分支删掉/放回旧单态 → 本组与无矛盾性质红。
 test('BUG-357 已交付 + review FAIL：不出现「报告不交付」，两事实共存', () => {
-  const b = deriveBusinessBrief({ ...base, delivered: true, reviewFail: true });
+  const b = deriveBusinessBrief({ ...base, delivered: true, review: { kind: 'fail' } });
   const all = [b.stageLine, b.knownLine, b.unknownLine ?? '', b.actionLine].join(' ');
   assert.doesNotMatch(all, /报告不交付/);
   assert.match(all, /仍可用/);
@@ -157,19 +162,25 @@ test('BUG-357 已交付 + review FAIL：不出现「报告不交付」，两事�
 });
 
 test('BUG-357 负控：未交付 + review FAIL 仍是交付前政策', () => {
-  const b = deriveBusinessBrief({ ...base, delivered: false, reviewFail: true });
+  const b = deriveBusinessBrief({ ...base, delivered: false, review: { kind: 'fail' } });
   assert.match(b.unknownLine ?? '', /报告不交付/);
 });
 
 test('BUG-357 无矛盾性质：任何输入组合不得同时说「已交付」与「报告不交付」', () => {
   for (const delivered of [false, true]) {
-    for (const reviewFail of [null, false, true]) {
-      for (const bundleReadFailure of [null, 'missing', 'unreadable']) {
-        for (const hitlPending of [false, true]) {
-          const b = deriveBusinessBrief({ ...base, delivered, reviewFail, bundleReadFailure, hitlPending, pendingKind: hitlPending ? 'hitl2' : null });
+    for (const reviewKind of ['absent', 'pass', 'fail', 'unconfirmed', 'conflict']) {
+      for (const hitlPending of [false, true]) {
+        const hitl = hitlPending ? { kind: 'pending', target: 'hitl2', questions: 0 } : { kind: 'idle' };
+        const variants = [
+          { ...base, delivered, review: { kind: reviewKind }, hitl },
+          { kind: 'bundle-error', failure: 'missing', hitl, question: { kind: 'absent' } },
+          { kind: 'bundle-error', failure: 'unreadable', hitl, question: { kind: 'absent' } },
+        ];
+        for (const v of variants) {
+          const b = deriveBusinessBrief(v);
           const all = [b.goal, b.stageLine, b.knownLine, b.unknownLine ?? '', b.actionLine].join(' ');
           assert.ok(!(all.includes('已交付') && all.includes('报告不交付')),
-            `矛盾组合 delivered=${String(delivered)} reviewFail=${String(reviewFail)} read=${String(bundleReadFailure)} hitl=${String(hitlPending)}：${all}`);
+            `矛盾组合 delivered=${String(delivered)} review=${reviewKind} kind=${v.kind} hitl=${String(hitlPending)}：${all}`);
         }
       }
     }
@@ -177,10 +188,10 @@ test('BUG-357 无矛盾性质：任何输入组合不得同时说「已交付」
 });
 
 // 负例留证 2026-11-22：BUG-361/367——question 读失败/为空仍显示「尚未确认」+ ✓ 立项。
-// 红配方：删 questionIssue 分支（goal 恒回落 briefGoalUnknownPending）→ 本组红。
+// 红配方：删 question issue 分支（goal 恒回落 briefGoalUnknownPending）→ 本组红。
 test('BUG-361/367 question 读失败/为空：目标行显式，不回落「尚未确认」', () => {
-  for (const [issue, pattern] of [['unreadable', /研究问题读取失败/], ['empty', /研究问题为空/]]) {
-    const b = deriveBusinessBrief({ ...base, questionIssue: issue, hasQuestion: false, questionLine: null });
+  for (const [reason, pattern] of [['unreadable', /研究问题读取失败/], ['empty', /研究问题为空/]]) {
+    const b = deriveBusinessBrief({ ...base, question: { kind: 'issue', reason } });
     assert.match(b.goal, pattern);
     assert.doesNotMatch(b.goal, /尚未确认/);
     assert.equal(b.goalKnown, false);
@@ -188,34 +199,34 @@ test('BUG-361/367 question 读失败/为空：目标行显式，不回落「尚�
 });
 
 // 负例留证 2026-11-22：BUG-363/366——readiness 缺席/空 review 仍被当审查通过。
-// 红配方：删 reviewUnconfirmed 分支（回落到 delivered/推进中）→ 本组红。
+// 红配方：删 unconfirmed 分支（回落到 delivered/推进中）→ 本组红。
 test('BUG-363/366 审查未定：已交付/未交付都不说审查通过，交付事实保留', () => {
-  const delivered = deriveBusinessBrief({ ...base, delivered: true, reviewUnconfirmed: true });
+  const delivered = deriveBusinessBrief({ ...base, delivered: true, review: { kind: 'unconfirmed' } });
   const text = [delivered.stageLine, delivered.knownLine, delivered.unknownLine ?? '', delivered.actionLine].join(' ');
   assert.match(text, /报告已交付/);
   assert.match(text, /审查结论未确认/);
   assert.doesNotMatch([delivered.stageLine, delivered.knownLine].join(' '), /审查通过/, '交付阶段/已知行不得声称审查通过');
   assert.match(delivered.unknownLine ?? '', /不能把交付当成审查通过/, '未定行必须明确否定「交付=审查通过」');
   assert.equal(delivered.userActionNeeded, false);
-  const open = deriveBusinessBrief({ ...base, delivered: false, reviewUnconfirmed: true });
+  const open = deriveBusinessBrief({ ...base, delivered: false, review: { kind: 'unconfirmed' } });
   assert.match(open.stageLine, /审查未定/);
   assert.match(open.actionLine, /重试/);
 });
 
-test('reviewUnconfirmed 与 reviewFail 不互串：FAIL 仍走交付前政策；unconfirmed 不走 FAIL 文案', () => {
-  const fail = deriveBusinessBrief({ ...base, reviewFail: true });
+test('unconfirmed 与 fail 在类型与输出上互斥不互串', () => {
+  const fail = deriveBusinessBrief({ ...base, review: { kind: 'fail' } });
   assert.match(fail.unknownLine ?? '', /报告不交付/);
-  const unconfirmed = deriveBusinessBrief({ ...base, reviewUnconfirmed: true, reviewFail: null });
+  const unconfirmed = deriveBusinessBrief({ ...base, review: { kind: 'unconfirmed' } });
   assert.doesNotMatch(unconfirmed.unknownLine ?? '', /报告不交付/);
 });
 
 // 负例留证 2026-11-23：BUG-369——冲突被折成 unconfirmed/审查未定，交付页签与状态页不同判。
 test('BUG-369 审查冲突：交付/未交付都点名冲突，不说单边通过', () => {
-  const delivered = deriveBusinessBrief({ ...base, delivered: true, reviewConflict: true });
+  const delivered = deriveBusinessBrief({ ...base, delivered: true, review: { kind: 'conflict' } });
   assert.match(delivered.stageLine, /审查结论冲突/);
   assert.match(delivered.unknownLine ?? '', /声明与 review\.md 必须同判/);
   assert.equal(delivered.userActionNeeded, false);
-  const open = deriveBusinessBrief({ ...base, delivered: false, reviewConflict: true });
+  const open = deriveBusinessBrief({ ...base, delivered: false, review: { kind: 'conflict' } });
   assert.match(open.stageLine, /声明与 review\.md 冲突/);
   assert.match(open.actionLine, /修正/);
 });

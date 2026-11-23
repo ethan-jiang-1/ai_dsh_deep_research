@@ -32,15 +32,16 @@ import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { deriveSteps } from '../lib/run/run-fold.ts'
-import { artifactReadIssueOf } from '../lib/run/artifact-read.ts'
+import { assertNever } from '../lib/run/artifact-read.ts'
 import { foldHitlPending, type HitlState } from '../lib/events/hitl-fold.ts'
-import { deriveBusinessBrief, type BusinessBrief } from '../lib/run/brief-fold.ts'
+import { deriveBusinessBrief, type BriefHitlState, type BriefQuestionState, type BriefReviewState, type BusinessBrief } from '../lib/run/brief-fold.ts'
 import { countText } from '../lib/shared/i18n.ts'
 import { rerunTriageRowsOf } from '../lib/run/rerun-triage.ts'
 import { statusFaceMarker } from '../lib/run/binding-trust.ts'
 import { stalledBannerOf } from '../lib/run/health.ts'
 import type { ResearchStatusTabProps, ResearchStatusTitleInjected } from './research-status/types.ts'
 import { TrackRail } from './research-status/TrackRail.tsx'
+import { collectStatusNotices, planIssueKeyOf, receiptIssueKeyOf } from './research-status/status-state.ts'
 import { useStatusFeed } from './research-status/useStatusFeed.ts'
 export type { FollowTarget, JournalFrame, ResearchStatusTabInjected, ResearchStatusTabProps, ResearchStatusTitleInjected } from './research-status/types.ts'
 
@@ -62,67 +63,62 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   // 步骤段从文件在场性折算——face 缺席时以占位态渲染（不冒充进度）。
   const passedCount = anchors.filter((a) => a.state === 'passed').length
   const pendingAnchor = anchors.find((a) => a.state === 'pending')
-  const steps = face !== null ? face.steps : deriveSteps({ question: false, team: false, leads: false, evidence: 0, findings: false, review: false, final: false }, props.t)
-  // 业务摘要（issue 2026-10-11-executive-research-ux-delivery）：既有事实源 → 五问折算。
-  // 计数进不了本层（brief-fold 输入面无计数——类型级禁词，keyless 单测钉）；挂起种类由
-  // 锚点 key 折算（anchor-1=hitl1 / anchor-2=hitl2 / 其余=契约外 unknown），不引 hitl-fold
-  // 内部函数；§Decisions 末位拍板当前数据面未读——lastDecisionKind 如实 null。
+  const steps = face !== null
+    ? face.steps
+    : deriveSteps({ question: 'absent', team: 'absent', leads: 'absent', evidence: 0, findings: 'absent', review: 'absent', final: 'absent' }, props.t)
+  // 业务摘要（issue 2026-10-11-executive-research-ux-delivery）：既有事实源 → 判别联合五问折算。
   const brief: BusinessBrief = useMemo(
-    () => deriveBusinessBrief({
-      bundleBound: trust.kind === 'bound',
-      bundleReadFailure: scanSettled && trust.kind === 'bound' && reads.bundle !== 'ok'
-        ? (reads.bundle === 'unreadable' ? 'unreadable' : 'missing')
-        : null,
-      kickoffHold,
-      hitlPending: hitl.pending,
-      pendingKind: pendingAnchor !== undefined ? (pendingAnchor.key === 'anchor-1' ? 'hitl1' : pendingAnchor.key === 'anchor-2' ? 'hitl2' : 'unknown') : null,
-      pendingQuestions: pendingAnchor?.questions ?? 0,
-      hasQuestion: face?.hasQuestion ?? false,
-      questionLine: face?.questionLine ?? null,
-      questionIssue: face?.questionIssue ?? null,
-      reviewUnconfirmed: reviewVerdict === 'unconfirmed',
-      reviewConflict: reviewVerdict === 'conflict',
-      currentStage: face !== null ? steps.find((s) => s.state === 'current')?.label ?? null : null,
-      findingsPresent: (face?.steps.find((s) => s.key === 'findings')?.state === 'done'),
-      reviewFail: face?.reviewFail ?? null,
-      delivered: delivery !== null,
-      versions: face?.versions ?? 0,
-      lastDecisionKind: null,
-      openItems: [],
-    }, props.t),
+    () => {
+      const hitlInput: BriefHitlState = hitl.pending
+        ? {
+            kind: 'pending',
+            target: pendingAnchor !== undefined ? (pendingAnchor.key === 'anchor-1' ? 'hitl1' : pendingAnchor.key === 'anchor-2' ? 'hitl2' : 'unknown') : 'unknown',
+            questions: pendingAnchor?.questions ?? 0,
+          }
+        : { kind: 'idle' }
+      const questionInput: BriefQuestionState = face?.questionIssue !== undefined && face.questionIssue !== null
+        ? { kind: 'issue', reason: face.questionIssue }
+        : face?.hasQuestion && face.questionLine !== null
+          ? { kind: 'ok', line: face.questionLine }
+          : { kind: 'absent' }
+      if (kickoffHold) return deriveBusinessBrief({ kind: 'kickoff-hold', hitl: hitlInput, question: questionInput }, props.t)
+      if (trust.kind !== 'bound') return deriveBusinessBrief({ kind: 'unbound', hitl: hitlInput, question: questionInput }, props.t)
+      if (scanSettled && reads.bundle !== 'ok') {
+        return deriveBusinessBrief({
+          kind: 'bundle-error',
+          failure: reads.bundle === 'unreadable' ? 'unreadable' : 'missing',
+          hitl: hitlInput,
+          question: questionInput,
+        }, props.t)
+      }
+      const reviewInput: BriefReviewState = (() => {
+        switch (reviewVerdict) {
+          case 'pass': return { kind: 'pass' }
+          case 'fail': return { kind: 'fail' }
+          case 'unconfirmed': return { kind: 'unconfirmed' }
+          case 'conflict': return { kind: 'conflict' }
+          case 'absent': return { kind: 'absent' }
+          default: return assertNever(reviewVerdict)
+        }
+      })()
+      return deriveBusinessBrief({
+        kind: 'bound',
+        hitl: hitlInput,
+        question: questionInput,
+        review: reviewInput,
+        currentStage: face !== null ? steps.find((s) => s.state === 'current')?.label ?? null : null,
+        findingsPresent: face?.steps.find((s) => s.key === 'findings')?.state === 'done',
+        delivered: delivery !== null,
+        versions: face?.versions ?? 0,
+        lastDecisionKind: null,
+        openItems: [],
+      }, props.t)
+    },
     [trust, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery, reads, reviewVerdict, scanSettled, props.t],
   )
-  const receiptIssue = reads.receipt === 'unreadable' || reads.receipt === 'empty'
-    ? 'statusReceiptReadFailed'
-    : reads.receipt === 'invalid' ? 'statusReceiptInvalid' : null
-  const questionIssueKey = face?.questionIssue === 'body-empty'
-    ? 'statusQuestionBodyEmpty'
-    : reads.question === 'unreadable'
-      ? 'statusQuestionReadFailed'
-      : reads.question === 'empty' ? 'statusQuestionEmpty' : null
-  const leadsIssueKey = face?.leadsIssue === 'unreadable'
-    ? 'statusLeadsReadFailed'
-    : face?.leadsIssue !== null && face?.leadsIssue !== undefined ? 'statusLeadsEmpty' : null
-  const findingsIssueKey = face?.findingsIssue === 'unreadable'
-    ? 'statusFindingsReadFailed'
-    : face?.findingsIssue !== null && face?.findingsIssue !== undefined ? 'statusFindingsEmpty' : null
-  const evidenceIssueKey = face?.evidenceIssue === 'failed-only'
-    ? 'statusEvidenceFailedOnly'
-    : face?.evidenceIssue === 'unreadable'
-      ? 'statusEvidenceReadFailed'
-      : face?.evidenceIssue === 'empty' ? 'statusEvidenceEmpty' : null
-  const reviewIssueKey = reviewVerdict === 'conflict'
-    ? 'statusReviewConflict'
-    : reads.review === 'unreadable'
-      ? 'statusReviewReadFailed'
-      : reads.review === 'empty'
-        ? 'statusReviewEmpty'
-        : reviewVerdict === 'unconfirmed' ? 'statusReviewUnconfirmed' : null
-  const planIssue = artifactReadIssueOf(reads.plan)
-  const planIssueKey = planIssue === 'unreadable'
-    ? 'statusPlanReadFailed'
-    : planIssue === 'empty' ? 'statusPlanEmpty' : null
-  const finalIssueKey = reads.final === 'unreadable' ? 'statusFinalDirReadFailed' : null
+  const receiptIssue = receiptIssueKeyOf(reads.receipt)
+  const planIssueKey = planIssueKeyOf(reads.plan)
+  const statusNotices = collectStatusNotices({ face, reads, reviewVerdict })
   const stalledBanner = stalledBannerOf(
     { health, bound: trust.kind === 'bound', delivered: delivery !== null, hitlPending: hitl.pending },
     props.t,
@@ -171,54 +167,12 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
         <div style={{ opacity: 0.85 }}>{brief.knownLine}</div>
         {brief.unknownLine !== null && <div style={{ color: '#b45309' }}>⚠ {brief.unknownLine}</div>}
         <div style={{ fontWeight: brief.userActionNeeded ? 700 : 400, color: brief.userActionNeeded ? '#b45309' : undefined }}>{brief.actionLine}</div>
-        {questionIssueKey !== null && (
-          <div style={{ color: '#b45309' }}>
-            ⚠ {props.t(questionIssueKey)}
+        {statusNotices.map((notice) => (
+          <div key={notice.id} style={{ color: '#b45309' }}>
+            ⚠ {props.t(notice.key)}
             <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
           </div>
-        )}
-        {leadsIssueKey !== null && (
-          <div style={{ color: '#b45309' }}>
-            ⚠ {props.t(leadsIssueKey)}
-            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
-          </div>
-        )}
-        {findingsIssueKey !== null && (
-          <div style={{ color: '#b45309' }}>
-            ⚠ {props.t(findingsIssueKey)}
-            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
-          </div>
-        )}
-        {evidenceIssueKey !== null && reads.evidence !== 'unreadable' && (
-          <div style={{ color: '#b45309' }}>
-            ⚠ {props.t(evidenceIssueKey)}
-            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
-          </div>
-        )}
-        {reviewIssueKey !== null && (
-          <div style={{ color: '#b45309' }}>
-            ⚠ {props.t(reviewIssueKey)}
-            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
-          </div>
-        )}
-        {reads.evidence === 'unreadable' && (
-          <div style={{ color: '#b45309' }}>
-            ⚠ {props.t('statusEvidenceReadFailed')}
-            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
-          </div>
-        )}
-        {planIssueKey !== null && (
-          <div style={{ color: '#b45309' }}>
-            ⚠ {props.t(planIssueKey)}
-            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
-          </div>
-        )}
-        {finalIssueKey !== null && (
-          <div style={{ color: '#b45309' }}>
-            ⚠ {props.t(finalIssueKey)}
-            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
-          </div>
-        )}
+        ))}
       </div>
       {/* ② 流程轨道：◆立项确认 + 主轨 + ◆交付审阅 + 交付；↻ 回边 = 拍板的分支后果画进流程 */}
       <TrackRail anchors={anchors} steps={steps} faceVersions={face?.versions ?? null} hitlPending={hitl.pending} t={props.t} />
@@ -260,7 +214,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
             >{props.t('statusOpenFinal')}</button>
           )}
           {delivery === null && receiptIssue === null && <span style={{ opacity: 0.6 }}>{props.t('statusFinalAfterDelivery')}</span>}
-          {versionFace !== null && receiptIssue === null && finalIssueKey === null && planIssueKey === null && (face.hasFinal || versionFace.ledgerFinalVersion >= 1) && (
+          {versionFace !== null && receiptIssue === null && reads.final !== 'unreadable' && planIssueKey === null && (face.hasFinal || versionFace.ledgerFinalVersion >= 1) && (
             <span style={{ fontSize: 12, opacity: 0.8 }} title={props.t('versionReadonlyNote')}>
               {versionFace.label}
             </span>

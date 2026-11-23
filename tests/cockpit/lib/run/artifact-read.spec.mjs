@@ -47,26 +47,45 @@ test('artifactPolicyOf：固定表 + final 动态名；未知 = null', () => {
   assert.equal(artifactPolicyOf('notes/final.md'), null)
 })
 
-test('readArtifact：question 空/读失败；回执 JSON 好/坏；未登记不读', async () => {
+test('readArtifact：question 空/读失败；回执 JSON 强制 decoder 且 schema 不符 fail-closed；未登记不读', async () => {
   const calls = []
   const view = (outcome) => ({ read: async (name) => { calls.push(name); return outcome } })
-  assert.deepEqual(await readArtifact(view(OUT('Q')), 'question.md'), { state: 'ok', text: 'Q', json: null })
-  assert.deepEqual(await readArtifact(view(OUT('')), 'question.md'), { state: 'empty', text: null, json: null })
-  assert.deepEqual(await readArtifact(view(UNREADABLE), 'question.md'), { state: 'unreadable', text: null, json: null })
-  assert.deepEqual(await readArtifact(view(OUT('')), 'plan.md'), { state: 'empty', text: null, json: null })
+  const receiptDecoder = (raw) => (raw && raw.version === 1 ? { ok: true, value: raw } : { ok: false, detail: 'bad' })
+  assert.deepEqual(await readArtifact(view(OUT('Q')), 'question.md'), { state: 'ok', text: 'Q' })
+  assert.deepEqual(await readArtifact(view(OUT('')), 'question.md'), { state: 'empty', text: null })
+  assert.deepEqual(await readArtifact(view(UNREADABLE), 'question.md'), { state: 'unreadable', text: null })
+  assert.deepEqual(await readArtifact(view(OUT('')), 'plan.md'), { state: 'empty', text: null })
   const receipt = { version: 1, slug: 'drt_x', acceptedAt: 't', gate: { status: 'PASS' } }
-  assert.deepEqual(await readArtifact(view(OUT(JSON.stringify(receipt))), 'delivered.json'), { state: 'ok', text: JSON.stringify(receipt), json: receipt })
-  assert.deepEqual(await readArtifact(view(OUT('{bad json')), 'delivered.json'), { state: 'invalid', text: null, json: null })
-  assert.deepEqual(await readArtifact(view(OUT('{"version":1}')), 'review/readiness.json'), { state: 'ok', text: '{"version":1}', json: { version: 1 } })
+  assert.deepEqual(
+    await readArtifact(view(OUT(JSON.stringify(receipt))), 'delivered.json', { decoder: receiptDecoder }),
+    { state: 'ok', text: JSON.stringify(receipt), value: receipt },
+  )
+  assert.deepEqual(
+    await readArtifact(view(OUT(JSON.stringify({ version: 99 }))), 'delivered.json', { decoder: receiptDecoder }),
+    { state: 'invalid', text: null, value: null },
+  )
+  assert.deepEqual(
+    await readArtifact(view(OUT('{bad json')), 'delivered.json', { decoder: receiptDecoder }),
+    { state: 'invalid', text: null, value: null },
+  )
+  assert.deepEqual(
+    await readArtifact(view(OUT('{"version":1}')), 'review/readiness.json', { decoder: (raw) => ({ ok: true, value: raw }) }),
+    { state: 'ok', text: '{"version":1}', value: { version: 1 } },
+  )
+  // 运行期防绕过：未传 decoder 读 JSON 工件强制 fail-closed 为 invalid
+  assert.deepEqual(
+    await readArtifact(view(OUT(JSON.stringify(receipt))), 'delivered.json'),
+    { state: 'invalid', text: null, value: null },
+  )
   calls.length = 0
-  assert.deepEqual(await readArtifact(view(OUT('x')), 'unknown.md'), { state: 'invalid', text: null, json: null })
+  assert.deepEqual(await readArtifact(view(OUT('x')), 'unknown.md'), { state: 'invalid', text: null })
   assert.deepEqual(calls, [], '未登记工件不得发起读取')
 })
 
-// 负例留证 2026-11-23：G21 跨面读取点清单——status/final 已收口，graph/config 仍是裸 view.read。
-// 迁移 graph/config 后在 EXPECTED 里删掉对应项；新增任何裸 view.read 会让本清单多出一项 → 红。
-test('G21 cockpit canonical 读取点清单：裸 view.read 只允许已知遗留（graph/config）', async () => {
-  const { readFileSync, readdirSync, statSync } = await import('node:fs')
+// 负例留证 2026-11-23：G21 跨面读取点清单——status/final/graph/config 已全部收口至 readArtifact。
+// 新增任何裸 view.read 会让本清单多出一项 → 红。
+test('G21 cockpit canonical 读取点清单：裸 view.read 已清零（0 处逃逸）', async () => {
+  const { readFileSync, readdirSync } = await import('node:fs')
   const { join } = await import('node:path')
   const { fileURLToPath } = await import('node:url')
   const root = fileURLToPath(new URL('../../../../packages/deep-research-pack/src/client/', import.meta.url))
@@ -81,10 +100,7 @@ test('G21 cockpit canonical 读取点清单：裸 view.read 只允许已知遗�
     }
   }
   walk(root)
-  // P0 已知遗留：graph plan/snapshot、config question；P3/P4 迁到 readArtifact 后应为 {}。
-  assert.deepEqual(counts, {
-    'research-graph/useGraphFeed.ts': 1,
-  })
+  assert.deepEqual(counts, {})
 })
 
 test('artifactReadIssueOf / artifactBodyIssueOf / assertNever：闭集五态穷举不漏 invalid', () => {

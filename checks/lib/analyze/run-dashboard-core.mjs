@@ -329,13 +329,13 @@ export function sceneState(dir) {
  *  挖掘 → 综合 → 审查 → 交付；组队无独立文件，在场性随立项（cursor 停靠语义，与 run-fold 同）。 */
 export function deriveStep(model) {
   return deriveSteps({
-    question: !!model.question,
-    team: !!model.question,
-    leads: model.leads.length > 0,
+    question: model.question ? 'present' : 'absent',
+    team: model.question ? 'present' : 'absent',
+    leads: model.leads.length > 0 ? 'present' : 'absent',
     evidence: model.stats.evidence,
-    findings: model.findings.length > 0,
-    review: !!model.review,
-    final: !!model.final,
+    findings: model.findings.length > 0 ? 'present' : 'absent',
+    review: model.review ? 'present' : 'absent',
+    final: model.final ? 'present' : 'absent',
   });
 }
 

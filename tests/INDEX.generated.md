@@ -27,21 +27,21 @@
 | channel | `checks/lib/channel/start-lock` | `tests/checks/channel/start-lock.test.mjs` |
 | gates | `checks/lib/gates/acceptance-check` | `tests/run/gates/acceptance-check.spec.mjs` |
 | gates | `checks/lib/gates/bundle-date-sanity` | `tests/run/gates/bundle-date-sanity.spec.mjs` |
-| gates | `checks/lib/gates/evidence-audit-core` | `tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/evidence-audit.spec.mjs`<br>`tests/run/gates/provenance.spec.mjs` |
-| gates | `checks/lib/gates/findings-core` | `tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/topics-contract.spec.mjs` |
+| gates | `checks/lib/gates/evidence-audit-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/evidence-audit.spec.mjs`<br>`tests/run/gates/provenance.spec.mjs` |
+| gates | `checks/lib/gates/findings-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/topics-contract.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-core` | `tests/run/gates/node-gate-delivery.spec.mjs`<br>`tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-delivery-gate` | `tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-reader-gate` | `tests/run/gates/node-gate-reader.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-run-gates` | `tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs` |
-| gates | `checks/lib/gates/plan-gate` | `tests/run/gates/plan-gate.spec.mjs` |
+| gates | `checks/lib/gates/plan-gate` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/run/gates/plan-gate.spec.mjs` |
 | gates | `checks/lib/gates/protocol-audit-core` | `tests/run/gates/protocol-core.spec.mjs` |
-| gates | `checks/lib/gates/protocol-core` | `tests/pack/contract/content-coverage.spec.mjs`<br>`tests/pack/defaults/research-defaults.spec.mjs`<br>`tests/run/gates/protocol-core.spec.mjs` |
+| gates | `checks/lib/gates/protocol-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/content-coverage.spec.mjs`<br>`tests/pack/defaults/research-defaults.spec.mjs`<br>`tests/run/gates/protocol-core.spec.mjs` |
 | gates | `checks/lib/gates/provenance` | `tests/run/gates/provenance.spec.mjs` |
 | gates | `checks/lib/gates/review-contract` | `tests/run/gates/review-contract.spec.mjs` |
 | gates | `checks/lib/gates/run-source-node` | `tests/run/gates/run-context-node.spec.mjs` |
 | gates | `checks/lib/gates/schema-scan-core` | `tests/contracts/run-bundle-charter.spec.mjs`<br>`tests/run/gates/node-gate-contracts.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs`<br>`tests/run/gates/schema-scan.spec.mjs` |
 | gates | `checks/lib/gates/strategy-core` | `tests/run/gates/strategy-core.spec.mjs` |
-| gates | `checks/lib/gates/verdict-audit-core` | `tests/run/gates/verdict-audit-fixture.spec.mjs`<br>`tests/run/gates/verdict-audit.spec.mjs` |
+| gates | `checks/lib/gates/verdict-audit-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/run/gates/verdict-audit-fixture.spec.mjs`<br>`tests/run/gates/verdict-audit.spec.mjs` |
 | harness | `checks/lib/harness/browser-cache` | `tests/run/harness/browser-cache.spec.mjs` |
 | harness | `checks/lib/harness/clean-room` | — |
 | harness | `checks/lib/harness/clean-room-policy` | `tests/checks/harness/clean-room-policy.test.mjs` |
@@ -85,7 +85,7 @@
 | shared | `checks/lib/shared/cli-exit` | `tests/checks/shared/cli-exit-contract.test.mjs` |
 | shared | `checks/lib/shared/env` | `tests/run/channel/env-credentials.spec.mjs` |
 | shared | `checks/lib/shared/final-version` | `tests/run/gates/final-version.spec.mjs` |
-| shared | `checks/lib/shared/frontmatter` | `tests/run/shared/frontmatter.spec.mjs` |
+| shared | `checks/lib/shared/frontmatter` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/run/shared/frontmatter.spec.mjs` |
 | shared | `checks/lib/shared/hitl-provenance` | `tests/run/channel/ask-drive.spec.mjs`<br>`tests/run/channel/hitl-provenance.spec.mjs`<br>`tests/run/gates/node-gate-witness.spec.mjs` |
 | shared | `checks/lib/shared/local-date` | `tests/run/gates/schema-scan.spec.mjs`<br>`tests/run/shared/local-date.spec.mjs` |
 | shared | `checks/lib/shared/node-gate-contracts` | `tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/gates/node-gate-contracts.spec.mjs`<br>`tests/run/gates/node-gate-delivery.spec.mjs`<br>`tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/review-readiness.spec.mjs` |
@@ -117,7 +117,7 @@
 | test-infra | `checks/lib/test-infra/selftest-library` | `tests/cockpit/lib/method-library/library-fold.spec.mjs` |
 | test-infra | `checks/lib/test-infra/smoke-assets` | `tests/checks/test-infra/smoke-assets.test.mjs`<br>`tests/checks/test-infra/smoke-cost-budget.test.mjs`<br>`tests/checks/test-infra/smoke-oracle-surface.test.mjs`<br>`tests/checks/test-infra/smoke-registry.test.mjs` |
 | test-infra | `checks/lib/test-infra/test-index` | `tests/checks/shared/pack-mirror.test.mjs`<br>`tests/checks/shared/test-owner-mirror.test.mjs`<br>`tests/checks/test-infra/test-index.test.mjs`<br>`tests/checks/test-infra/test-surface.test.mjs` |
-| test-infra | `checks/lib/test-infra/workspace-parsers` | `tests/checks/shared/note-scan.test.mjs`<br>`tests/checks/test-infra/workspace-parsers.test.mjs`<br>`tests/cockpit/lib/plan/plan-mdast.spec.mjs`<br>`tests/cockpit/lib/shared/markdown-mask-diff.spec.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs`<br>`tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs` |
+| test-infra | `checks/lib/test-infra/workspace-parsers` | `tests/checks/shared/note-scan.test.mjs`<br>`tests/checks/test-infra/workspace-parsers.test.mjs`<br>`tests/cockpit/lib/plan/plan-mdast.spec.mjs`<br>`tests/cockpit/lib/shared/markdown-mask-diff.spec.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs`<br>`tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs` |
 
 ## pack src/lib（产品面）
 
@@ -129,7 +129,7 @@
 | events | `events/member-activity` | `tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/shared/member-activity-fold.spec.mjs` |
 | events | `events/stream-failure` | `tests/run/shared/stream-failure.spec.mjs` |
 | events | `events/tool-card` | `tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/shared/tool-card.spec.mjs` |
-| method-library | `method-library/library-fold` | `tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/lib/method-library/library-fold.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-codec.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs`<br>`tests/cockpit/lib/method-library/method-library-write.spec.mjs`<br>`tests/cockpit/lib/run/receipt-fold.spec.mjs` |
+| method-library | `method-library/library-fold` | `tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/lib/method-library/library-fold.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-codec.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs`<br>`tests/cockpit/lib/method-library/method-library-write.spec.mjs`<br>`tests/cockpit/lib/run/receipt-fold.spec.mjs`<br>`tests/contracts/skill-parser-contract.spec.mjs` |
 | method-library | `method-library/method-draft` | `tests/cockpit/lib/method-library/method-draft.spec.mjs` |
 | method-library | `method-library/method-library-commands` | `tests/cockpit/lib/method-library/method-library-commands.spec.mjs` |
 | method-library | `method-library/method-library-events` | `tests/cockpit/lib/method-library/method-library-events.spec.mjs` |
@@ -143,8 +143,8 @@
 | plan | `plan/graph-model` | `tests/cockpit/lib/plan/graph-model.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | plan | `plan/plan-diff` | `tests/cockpit/lib/plan/plan-diff.spec.mjs`<br>`tests/cockpit/lib/plan/plan-mdast.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | plan | `plan/plan-graph` | `tests/cockpit/lib/plan/plan-graph.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
-| plan | `plan/plan-index` | `tests/cockpit/lib/plan/graph-model.spec.mjs`<br>`tests/cockpit/lib/plan/plan-diff.spec.mjs`<br>`tests/cockpit/lib/plan/plan-index.spec.mjs`<br>`tests/cockpit/lib/plan/plan-mdast.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
-| review | `review/review-readiness` | `tests/contracts/markdown-mask-conformance.spec.mjs`<br>`tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/review-readiness-property.spec.mjs`<br>`tests/run/gates/review-readiness.spec.mjs`<br>`tests/run/gates/run-context.spec.mjs`<br>`tests/run/harness/run-accept-fixture.spec.mjs` |
+| plan | `plan/plan-index` | `tests/cockpit/lib/plan/graph-model.spec.mjs`<br>`tests/cockpit/lib/plan/plan-diff.spec.mjs`<br>`tests/cockpit/lib/plan/plan-index.spec.mjs`<br>`tests/cockpit/lib/plan/plan-mdast.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/skill-parser-contract.spec.mjs` |
+| review | `review/review-readiness` | `tests/contracts/markdown-mask-conformance.spec.mjs`<br>`tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/review-readiness-property.spec.mjs`<br>`tests/run/gates/review-readiness.spec.mjs`<br>`tests/run/gates/run-context.spec.mjs`<br>`tests/run/harness/run-accept-fixture.spec.mjs` |
 | run | `run/artifact-content` | `tests/cockpit/lib/run/artifact-content.spec.mjs`<br>`tests/cockpit/lib/run/run-property.spec.mjs` |
 | run | `run/artifact-read` | `tests/cockpit/lib/run/artifact-read.spec.mjs` |
 | run | `run/binding-trust` | `tests/run/gates/binding-trust.spec.mjs` |
@@ -204,6 +204,7 @@
 | research-config | `research-config/useConfigFeed` | `tests/cockpit/client/research-config/config-feed-behavior.spec.mjs`<br>`tests/cockpit/client/research-config/config-feed-session.spec.mjs` |
 | research-graph | `research-graph/DagMap` | — |
 | research-graph | `research-graph/format` | `tests/cockpit/shared/client-pure-logic.spec.mjs` |
+| research-graph | `research-graph/graph-state` | `tests/cockpit/client/research-graph/graph-state.spec.mjs`<br>`tests/cockpit/client/research-graph/state-note.spec.mjs` |
 | research-graph | `research-graph/GraphNotices` | `tests/cockpit/client/research-graph/graph-notices.spec.mjs` |
 | research-graph | `research-graph/GraphVersionRail` | — |
 | research-graph | `research-graph/NodeCard` | — |
@@ -212,6 +213,7 @@
 | research-graph | `research-graph/types` | — |
 | research-graph | `research-graph/useGraphFeed` | `tests/cockpit/client/research-graph/graph-feed-behavior.spec.mjs` |
 | research-graph | `research-graph/WorkerChips` | — |
+| research-status | `research-status/status-state` | `tests/cockpit/client/research-status/status-state.spec.mjs`<br>`tests/cockpit/lib/events/status-feed.spec.mjs` |
 | research-status | `research-status/TrackRail` | — |
 | research-status | `research-status/types` | — |
 | research-status | `research-status/useMemberActivity` | `tests/cockpit/client/research-status/status-feed-behavior.spec.mjs` |

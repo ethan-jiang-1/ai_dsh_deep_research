@@ -45,7 +45,7 @@ test('i18n 插值：缺参原样保留；缺省翻译器 = 中文正本', () => 
 })
 
 test('数据面：七步标签 / 锚点 / 业务摘要 / 活动行 / 队员行 / 版本面在英文下零 CJK', () => {
-  const steps = deriveSteps({ question: true, team: true, leads: true, evidence: 2, findings: true, review: true, final: true }, tEn)
+  const steps = deriveSteps({ question: 'present', team: 'present', leads: 'present', evidence: 2, findings: 'present', review: 'present', final: 'present' }, tEn)
   assert.deepEqual(steps.map((step) => step.label), ['Kickoff', 'Team', 'Scout', 'Dig', 'Synthesize', 'Review', 'Deliver'])
   assertNoCjk('deriveSteps', steps.map((step) => step.label))
 
@@ -53,7 +53,7 @@ test('数据面：七步标签 / 锚点 / 业务摘要 / 活动行 / 队员行 /
   assert.equal(anchors[0].label, 'Kickoff confirmed')
   assertNoCjk('deriveAnchors', anchors.map((anchor) => anchor.label))
 
-  const brief = deriveBusinessBrief({ bundleBound: false }, tEn)
+  const brief = deriveBusinessBrief({ kind: 'unbound', hitl: { kind: 'idle' }, question: { kind: 'absent' } }, tEn)
   assertNoCjk('deriveBusinessBrief', [brief.goal, brief.stageLine, brief.knownLine, brief.unknownLine, brief.actionLine])
 
   const activity = foldActivityRows([

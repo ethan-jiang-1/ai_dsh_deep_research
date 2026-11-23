@@ -156,13 +156,13 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
     // 已交付 run（在飞 bundle 只做了一部分步骤）；deriveSteps 与页签同一谓词，期望值不再
     // 隐含"六步全绿 + 回边"的已交付假设。
     const steps = deriveSteps({
-      question: names.has('question.md'),
-      team: names.has('question.md'),
-      leads: names.has('leads.md'),
+      question: names.has('question.md') ? 'present' : 'absent',
+      team: names.has('question.md') ? 'present' : 'absent',
+      leads: names.has('leads.md') ? 'present' : 'absent',
       evidence: evidenceCount,
-      findings: names.has('findings.md'),
-      review: names.has('review.md'),
-      final: names.has('final.md'),
+      findings: names.has('findings.md') ? 'present' : 'absent',
+      review: names.has('review.md') ? 'present' : 'absent',
+      final: names.has('final.md') ? 'present' : 'absent',
     })
     return { base, evidenceCount, delivered: names.has('final.md'), hasQuestion: names.has('question.md'), firstLine, questionLine, steps, reviewFail, versions }
   }

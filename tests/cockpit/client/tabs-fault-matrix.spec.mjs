@@ -72,7 +72,13 @@ const FULL_VALID_BUNDLE = {
       'v1.md': '# 终稿 v1 审计版\n\n第一版正式交付审计全文\n',
       'readable-v1.md': '# 终稿 v1 读者版\n\n三分钟看懂核心结论\n',
     },
-    'delivered.json': JSON.stringify({ slug: 'demo', path: 'drt_demo/final/v1.md', version: 1, callId: 'call-present-1' }),
+    'delivered.json': JSON.stringify({
+      version: 1,
+      slug: 'demo',
+      acceptedAt: '2026-11-23T00:00:00Z',
+      gate: { status: 'PASS' },
+      present: { path: 'drt_demo/final/v1.md', version: 1, callId: 'call-present-1' },
+    }),
   },
 }
 

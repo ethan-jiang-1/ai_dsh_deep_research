@@ -30,7 +30,7 @@ import {
 import { assertNever, readArtifact, type ArtifactState } from '../lib/run/artifact-read.ts'
 import { openRun, type RunSource } from '../lib/run/run-context.ts'
 import { latestRunVersion } from '../lib/run/run-fold.ts'
-import { readinessOfSources, reviewVerdictOf, type ReviewVerdict } from '../lib/review/review-readiness.ts'
+import { parseReadinessDeclaration, readinessOfSources, reviewVerdictOf, type ReviewVerdict } from '../lib/review/review-readiness.ts'
 import { RESEARCH_STATUS_TAB_KIND } from './keys.ts'
 
 /** 页签体注入面（index.ts 装配，绑定 remote.workspaceFiles）。 */
@@ -154,7 +154,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       readArtifact(viewIo, target.audit, { signal }),
       readArtifact(viewIo, FINAL_NAME, { signal }),
       readArtifact(viewIo, FINAL_REVIEW_NAME, { signal }),
-      readArtifact(viewIo, 'review/readiness.json', { signal }),
+      readArtifact(viewIo, 'review/readiness.json', { signal, decoder: (_raw, rawText) => parseReadinessDeclaration(rawText) }),
       target.reader === null ? Promise.resolve(null) : readArtifact(viewIo, target.reader, { signal }),
     ])
     if (signal.aborted || !aliveRef.current) return

@@ -186,7 +186,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 | 根 AGENTS 的 “Editing these instructions” 节 | 根新增 §编辑这些指令（预算 manifest / 子树归属 / 门禁把守） | 照搬 |
 | `.agents/skills/` 命名带产品前缀（`dsh-`），少数通用技能无前缀 | 开发技能一律无前缀（与 vendor 的 `agent-experience`、`record-browser-gif` 同风格）；本仓没有产品前缀面，因为技能是仓内开发技能而非随包发布的用户技能 | 不适用（本仓无随包发布用户技能面；引入条件 = 本仓开始对外发布技能集时） |
 | **一段一行**（`verify-md-wrap` 门禁） | 本仓用硬折行 ~90 列，是同一规则（控制行宽以利审阅）的不同实现；上游一条一行是为了收窄 diff 噪声，本仓折行同样收窄横向滚动。没有 `verify-md-wrap` 门禁，靠惯例 | 带证据适配（同规则不同实现：无门禁、靠惯例；引入条件 = 折行漂移成审阅负担时补 wrap 门禁） |
-| `docs/defensive-patterns/`（0.2.1 起为五卷目录：general / package-surface / client-components / conversation-and-session / remote-and-api，双语对 + i18n sidecar；高风险缺陷模式供 review 逐条扫） | 主体 = vendor 的 TypeScript 代码模式清单；本仓 TS 面（`src/client/` 观察面 + `src/lib/` 折算）不另立第二份清单——**可迁移的部分已分居**：门禁与子进程陷阱 → [checks/AGENTS.md](../checks/AGENTS.md)，事故与教训 → notes/archived/ 的事故复盘与各毕业 Note | 不适用（不另建第二份清单，避免与上述 home 漂移；**重估触发**：本仓 TS 面扩大到需独立缺陷模式清单时） |
+| `docs/defensive-patterns/`（0.2.1 起为五卷目录：general / package-surface / client-components / conversation-and-session / remote-and-api，双语对 + i18n sidecar；高风险缺陷模式供 review 逐条扫） | 主体已按职责本地化并接入机检闭环：观察面与折算层红线（One value states one fact / Honor contracts on BOTH sides / Identity & disposal / Narrow inject / Timing correctness）→ [design/40 §5.1](design/40-research-cockpit.md#defensive-redlines) + 机检守卫 [semantic-guardrails](../tests/checks/repo/semantic-guardrails.test.mjs) + [skill-parser-contract](../tests/contracts/skill-parser-contract.spec.mjs)；门禁与子进程陷阱 → [checks/AGENTS.md](../checks/AGENTS.md)；事故与教训 → notes/archived/ 的事故复盘与各毕业 Note | 带证据适配（重点 TS/契约条目内化至 design/40 并由语义门禁与双向扫描强制；Cordis host/store-spec 类纯上游骨架按适用面取舍） |
 
 vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗漏"的误读）：
 

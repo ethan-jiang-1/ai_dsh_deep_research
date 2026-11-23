@@ -142,13 +142,30 @@ export function readStateOf(outcome: { readonly ok: boolean; readonly reason?: '
   return outcome.reason === 'missing' ? 'absent' : 'unreadable'
 }
 
-/** 工件读取结果（readArtifact 唯一出口）。 */
-export interface ArtifactResult {
+/** JSON 工件受控键：调用方必须传 `decoder`，编译期与运行期双阻断未解码访问。 */
+export type JsonArtifactName = 'delivered.json' | 'review/readiness.json'
+
+/** 运行时 Schema 解码器：把 JSON 解析结果收窄为确定领域类型；非法返回 `{ ok: false }`。 */
+export type JsonDecoder<T> = (
+  raw: unknown,
+  text: string,
+) => { readonly ok: true; readonly value: T } | { readonly ok: false; readonly detail?: string }
+
+/** 纯文本工件读取结果（无 `json` 字段：编译期彻底阻断绕过 decoder 访问）。 */
+export interface TextArtifactResult {
   readonly state: ArtifactState
   /** 仅 state=ok 时有文本；empty/invalid/unreadable/absent 均为 null。 */
   readonly text: string | null
-  /** JSON 工件的解析值；非 JSON 或非 ok = null。 */
-  readonly json: unknown
+  /** 仅 underlying outcome 触及行/页上限被截断时为 true。 */
+  readonly truncated?: boolean
+}
+
+/** 带边界解码器的 JSON 工件读取结果：只有 `state === 'ok'` 时 `value` 非空且为强类型 `T`。 */
+export interface DecodedArtifactResult<T> {
+  readonly state: ArtifactState
+  readonly text: string | null
+  readonly value: T | null
+  readonly truncated?: boolean
 }
 
 /** `readArtifact` 需要的读面（`RunView` 的结构子集）。 */
@@ -156,27 +173,66 @@ export interface ArtifactView {
   read(name: string, opts?: { readonly signal?: AbortSignal }): Promise<TextOutcome>
 }
 
+export interface JsonDecoderRequiredError {
+  readonly _compileError: 'JSON artifact requires opts.decoder'
+}
+
+export function readArtifact(
+  view: ArtifactView,
+  name: JsonArtifactName,
+  opts?: { readonly signal?: AbortSignal; readonly decoder?: never },
+): Promise<JsonDecoderRequiredError>
+export function readArtifact<T>(
+  view: ArtifactView,
+  name: string,
+  opts: { readonly signal?: AbortSignal; readonly decoder: JsonDecoder<T> },
+): Promise<DecodedArtifactResult<T>>
+export function readArtifact(
+  view: ArtifactView,
+  name: string,
+  opts?: { readonly signal?: AbortSignal },
+): Promise<TextArtifactResult>
+
 /**
- * 唯一文本工件读取器：读 → 状态 → JSON 解析（若策略要求）。
- * 未登记文件名返回 `invalid`，不猜策略；消费方必须显式登记（源级守卫同时把守）。
+ * 唯一文本/JSON 工件读取器：读 → 状态 → 边界 Schema 解码（JSON 工件强制走 `opts.decoder`）。
+ * 未登记文件名返回 `invalid`，JSON 工件缺 `decoder` 运行期同样 fail-closed 返回 `invalid`。
  * @param view - run bundle 读面。
- * @param name - bundle 内相对文件名（如 question.md / final/v1.md）。
- * @param opts - 可选 AbortSignal。
+ * @param name - bundle 内相对文件名（如 question.md / delivered.json）。
+ * @param opts - 可选 AbortSignal 与 JSON Schema 解码器。
  * @returns 工件读取结果。
  */
-export async function readArtifact(view: ArtifactView, name: string, opts?: { readonly signal?: AbortSignal }): Promise<ArtifactResult> {
+export async function readArtifact<T>(
+  view: ArtifactView,
+  name: string,
+  opts?: { readonly signal?: AbortSignal; readonly decoder?: JsonDecoder<T> },
+): Promise<TextArtifactResult | DecodedArtifactResult<T> | JsonDecoderRequiredError> {
+  const decoder = opts?.decoder
   const policy = artifactPolicyOf(name)
-  if (policy === null) return { state: 'invalid', text: null, json: null }
-  const outcome = await view.read(name, opts)
-  // JSON 坏也在状态里落 invalid：先按文本态判空/读失败，再做解析。
-  const state = artifactStateOf(outcome, policy)
-  if (state !== 'ok') return { state, text: null, json: null }
-  const text = outcome.ok ? outcome.value.text : null
-  if (!policy.json) return { state: 'ok', text, json: null }
-  if (text === null) return { state: 'invalid', text: null, json: null }
-  try {
-    return { state: 'ok', text, json: JSON.parse(text) }
-  } catch {
-    return { state: 'invalid', text: null, json: null }
+  if (policy === null) {
+    return decoder === undefined ? { state: 'invalid', text: null } : { state: 'invalid', text: null, value: null }
   }
+  if (policy.json && decoder === undefined) {
+    return { state: 'invalid', text: null, value: null }
+  }
+  const outcome = await view.read(name, opts)
+  const truncated = outcome !== null && outcome.ok && outcome.value.truncated === true
+  // JSON 坏也在状态里落 invalid：先按文本态判空/读失败，再做解析与解码。
+  const state = artifactStateOf(outcome, policy)
+  if (state !== 'ok') {
+    return decoder === undefined
+      ? { state, text: null, ...(truncated ? { truncated: true } : {}) }
+      : { state, text: null, value: null, ...(truncated ? { truncated: true } : {}) }
+  }
+  const text = outcome.ok ? outcome.value.text : null
+  if (decoder === undefined) return { state: 'ok', text }
+  if (text === null) return { state: 'invalid', text: null, value: null }
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(text)
+  } catch {
+    return { state: 'invalid', text: null, value: null }
+  }
+  const decoded = decoder(parsed, text)
+  if (!decoded.ok) return { state: 'invalid', text: null, value: null }
+  return { state: 'ok', text, value: decoded.value }
 }

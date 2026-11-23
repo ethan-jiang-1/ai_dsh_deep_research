@@ -822,16 +822,22 @@ async function pass1BoundFacePhase() {
         const hitlNow = foldHitlPending(windowedEvents)
         const pendingNow = diskAnchors.find((a) => a.state === 'pending')
         const expectedBrief = deriveBusinessBrief({
-          bundleBound: true, // 本分支只在绑定会话上跑；未绑定态另有负例断言（③ 的 fail-soft 面）
-          kickoffHold: false, // boundBy=write 的会话不进立项预检窗（BUG-001 第二窗口）
-          hitlPending: hitlNow.pending,
-          pendingKind: pendingNow === undefined ? null : pendingNow.key === 'anchor-1' ? 'hitl1' : pendingNow.key === 'anchor-2' ? 'hitl2' : 'unknown',
-          pendingQuestions: pendingNow?.questions ?? 0,
-          hasQuestion: faceNow.hasQuestion,
-          questionLine: faceNow.questionLine,
+          kind: 'bound', // 本分支只在绑定会话上跑；未绑定态另有负例断言（③ 的 fail-soft 面）
+          hitl: hitlNow.pending
+            ? {
+                kind: 'pending',
+                target: pendingNow === undefined ? 'unknown' : pendingNow.key === 'anchor-1' ? 'hitl1' : pendingNow.key === 'anchor-2' ? 'hitl2' : 'unknown',
+                questions: pendingNow?.questions ?? 0,
+              }
+            : { kind: 'idle' },
+          question: faceNow.hasQuestion && faceNow.questionLine !== null
+            ? { kind: 'ok', line: faceNow.questionLine }
+            : { kind: 'absent' },
+          review: faceNow.reviewFail === true
+            ? { kind: 'fail' }
+            : faceNow.reviewFail === false ? { kind: 'pass' } : { kind: 'absent' },
           currentStage: faceNow.steps.find((s) => s.state === 'current')?.label ?? null,
           findingsPresent: faceNow.steps.find((s) => s.key === 'findings')?.state === 'done',
-          reviewFail: faceNow.reviewFail,
           // delivered = present 见证（组件同源输入 = lib/final-target 的窗口折叠），不是 final.md
           // 在场——两者在综合完成到交付之间不同，混用会在这段窗口里假红/假绿。
           delivered: diskSide.delivered,

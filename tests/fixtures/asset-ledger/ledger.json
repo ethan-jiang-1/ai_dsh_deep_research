@@ -823,6 +823,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/research-graph/graph-state.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "graph-state.spec.mjs — reduceGraphFeed 无浏览器单测。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/research-graph/state-note.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -840,6 +850,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "status-feed-behavior.spec.mjs — useStatusFeed 与 useMemberActivity 的 JSDOM/React 行为测试。",
       "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/research-status/status-state.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "status-state.spec.mjs — reduceStatusFeed 与 collectStatusNotices 无浏览器单测。",
+      "oracleType": "self-referential",
       "sunset": "随被测模块删除"
     },
     {
@@ -1300,6 +1320,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "D28 模型可见契约的 keyless 约束 — 手册/模板/RFC 与门禁解析器必须说同一件事。",
       "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/contracts/skill-parser-contract.spec.mjs",
+      "domain": "contracts",
+      "lane": "spec",
+      "class": "contract",
+      "cost": "fast-inproc",
+      "uniqueClaim": "skill-parser-contract.spec.mjs — Skill / Template ↔ Parser / Gate 双向契约扫描器。",
+      "oracleType": "external",
       "sunset": "随被测模块删除"
     },
     {

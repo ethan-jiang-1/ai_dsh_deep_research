@@ -193,3 +193,18 @@ test('BUG-328：同事实异措辞快照 → RED；事实有差异 → PASS', ()
     } finally { rmSync(d, { recursive: true, force: true }) }
   }
 })
+
+test('多节点 Wave 执行层共用 task_id = plan-only 不误触发 BUG-283 重复报错', () => {
+  const wavePlan = `${plan([
+    row('W1.1', '—'),
+    row('W2.1', 'W1.1', { owner: 'analyst', kind: 'deep-dive' }).replace('| L1 | — |', '| L1 | plan-only |'),
+    row('W2.2', 'W1.1', { owner: 'analyst', kind: 'deep-dive' }).replace('| L1 | — |', '| L1 | plan-only |'),
+  ])}\n\n## Wave 执行\n\n- W2：\`lens-fanout\` ×2；executor = analyst（spawn）\n`
+  const d = dirOf(wavePlan)
+  try {
+    const res = planGate(d)
+    assert.equal(res.status, 'PASS', res.detail)
+  } finally {
+    rmSync(d, { recursive: true, force: true })
+  }
+})

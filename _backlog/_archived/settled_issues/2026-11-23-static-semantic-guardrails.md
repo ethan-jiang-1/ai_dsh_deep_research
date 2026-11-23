@@ -25,7 +25,7 @@ opened: 2026-11-23
 
 - **已证噪音边界**：`.mjs` `checkJs` 若开 `noImplicitAny: true` 会产生 2,145 条形参/变量隐式 `any` 噪音；配置必须设为 `noImplicitAny: false` + `strictNullChecks: true` + `allowImportingTsExtensions: true`。
 - **已证性能边界**：`oxlint` 跑全 `src/`（114 文件）仅 ~35ms；不得在日常热路径引入耗时 >2s 的重工具，守住 `verify + test ≈ 15s` 纪律。
-- **关联后续卡**：[L0 客户端测试与高密度寻虫底座](2026-11-23-l0-client-and-property-testing.md)（Issue 2）、[Hook 状态机与契约/防御模式内化](../../issues/2026-11-23-state-machine-and-contract-architecture.md)（Issue 3）。
+- **关联后续卡**：[L0 客户端测试与高密度寻虫底座](2026-11-23-l0-client-and-property-testing.md)（Issue 2）、[Hook 状态机与契约/防御模式内化](2026-11-23-state-machine-and-contract-architecture.md)（Issue 3）。
 
 ## 方案与取舍
 

@@ -7,8 +7,8 @@ opened: 2026-11-23
 
 > 状态：已定性
 > 问题：11-20 预防试点落地后（11-20～11-23）为何仍靠 E2E 密集抓出 45 张缺陷（BUG-340…384）？根本上在代码实践（防御式、保守式、按契约与类型设计）和「非端到端」寻虫手段上还能补什么？
-> 消费者：[Issue 1 静态与语义防线](../../_archived/settled_issues/2026-11-23-static-semantic-guardrails.md) · [Issue 2 L0 客户端与寻虫底座](../../_archived/settled_issues/2026-11-23-l0-client-and-property-testing.md) · [Issue 3 状态机与契约架构](../../issues/2026-11-23-state-machine-and-contract-architecture.md)
-> 产出的卡：[2026-11-23-static-semantic-guardrails.md](../../_archived/settled_issues/2026-11-23-static-semantic-guardrails.md) · [2026-11-23-l0-client-and-property-testing.md](../../_archived/settled_issues/2026-11-23-l0-client-and-property-testing.md) · [2026-11-23-state-machine-and-contract-architecture.md](../../issues/2026-11-23-state-machine-and-contract-architecture.md)
+> 消费者：[Issue 1 静态与语义防线](../../_archived/settled_issues/2026-11-23-static-semantic-guardrails.md) · [Issue 2 L0 客户端与寻虫底座](../../_archived/settled_issues/2026-11-23-l0-client-and-property-testing.md) · [Issue 3 状态机与契约架构](../../_archived/settled_issues/2026-11-23-state-machine-and-contract-architecture.md)
+> 产出的卡：[2026-11-23-static-semantic-guardrails.md](../../_archived/settled_issues/2026-11-23-static-semantic-guardrails.md) · [2026-11-23-l0-client-and-property-testing.md](../../_archived/settled_issues/2026-11-23-l0-client-and-property-testing.md) · [2026-11-23-state-machine-and-contract-architecture.md](../../_archived/settled_issues/2026-11-23-state-machine-and-contract-architecture.md)
 > 结论：已通过只读实测校准并定型为三步递进的 3 张待落地 Issue（静态语义防线 → L0 Hook+故障矩阵+PBT 寻虫底座 → 状态机抽干与契约内化），详见 [实证基线与立项方案](2026-11-23-empirical-baseline-and-issue-plan.md)。
 
 ## 材料

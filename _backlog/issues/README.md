@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| [2026-11-23-state-machine-and-contract-architecture.md](2026-11-23-state-machine-and-contract-architecture.md) | 待落地 | Issue 3：Hook 纯状态机抽干、判别联合收紧、Skill↔Parser 双向扫描与防御模式内化 |
+| （空） | — | 本轮问题卡均已结项归档 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

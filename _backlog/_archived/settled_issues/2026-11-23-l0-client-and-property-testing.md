@@ -25,7 +25,7 @@ opened: 2026-11-23
 ## 已知与未决
 
 - **现有 `test:spec` 加载约束**：根脚本使用 `node --import tsx/esm --test`，部分组件若直接 import CSS 模块会触发 Node loader 报错（见 `research-config-source.spec.mjs` 头注）；`jsdom` + `@testing-library/react` 测试需验证 CSS/primitives 导入兼容方案（如按需 mock 或独立 loader hook）。
-- **前置关系**：Issue 1 与本卡可独立验收，但本卡是后续 [Issue 3（Hook 状态机重构）](../../issues/2026-11-23-state-machine-and-contract-architecture.md) 的安全前置护栏。
+- **前置关系**：Issue 1 与本卡可独立验收，但本卡是后续 [Issue 3（Hook 状态机重构）](2026-11-23-state-machine-and-contract-architecture.md) 的安全前置护栏。
 
 ## 方案与取舍
 

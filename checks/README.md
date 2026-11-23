@@ -129,7 +129,7 @@
 | lib/channel/channel-cache.mjs | run-driver、channel-cache.spec | 启动加速缓存判据：pack 源指纹（路径+size+mtime）+ 发布清单缓存（漂移门 ≈5s→≈0.7s，CLI 供 boot-run.sh 消费）+ 探针 GREEN 缓存（热复用 ≈0.5s / 冷启动命中 ≈10s；键 = pack 指纹 + runtime 构建 + 断言参数，TTL 30 分钟；命中前 HTTP 就绪检查；只存 GREEN，`--force-probe` 绕过） |
 | lib/analyze/bundle-sessions.mjs | bundle-sessions、bundle-sessions.spec | run bundle → 见证会话反查：聚合 scanWitnessLogs 的 boundSessions/presented（绑定谓词不另立——与 node-gate 门①②同源）；交付回执的 witness.sessions 亦由此面派生 |
 | lib/channel/hitl-card-driver.mjs | hitl-answer | HITL 问询卡的浏览器内驱动片段（Playwright `page.evaluate` 入参）：问卡可见性、选项结构、提交/推进按钮可用性；纯 DOM 函数、零闭包，业务判定仍在 lib/ask-drive |
-| lib/shared/frontmatter.mjs | bundle-date-sanity、evidence-audit-core、findings-core、frontmatter.spec、protocol-audit、review-contract、run-dashboard-core | `---` frontmatter 拆分**唯一正本**（两 core 共用同一实现） |
+| lib/shared/frontmatter.mjs | bundle-date-sanity、evidence-audit-core、findings-core、frontmatter.spec、protocol-audit、review-contract、run-dashboard-core、skill-parser-contract.spec | `---` frontmatter 拆分**唯一正本**（两 core 共用同一实现） |
 | lib/shared/zstd-read.mjs | bundle-sessions、evidence-audit、node-gate、run-accept、verdict-audit | zstd CLI 文本解压**唯一调用段**（多帧拼接靠 CLI；成功/失败结构化返回，**失败契约留各壳**：`''` 继续 vs `null` 跳过） |
 | lib/shared/web-harness.mjs | client-hitl.entry、client-load.entry、cockpit-truth.entry、cockpit-artifact-truth.entry、cockpit-truth-residuals.entry、cockpit-truth-substance.entry、cockpit-locale.entry、cold-start.entry、defaults-probe、discipline-probe、wave-execution-probe、entry-chain-probe、l4-lite.e2e、method-library-probe、preset.e2e、rerun-triage-probe、run-driver、session-replay、snapshot-replay.entry、team-preflight.e2e | DSH web 冒烟族**启停与通道唯一正本**：`bootWeb`（委托 `web-banner` 等启动横幅拿 token）+ `authenticate` + `makeRpc`；**参数保形**——端口/超时/尾部字符/rpcId 前缀/失败文案与收割方式全留各站点 |
 | lib/shared/web-banner.mjs | boot-timer.test、web-harness | DSH web 启动横幅等待与超时定时器结算纯函数（零 child_process/fetch，成功/早退/超时三路径均回收 timer；BUG-095） |
@@ -139,7 +139,7 @@
 | lib/analyze/provider-errors.mjs | provider-error-stats、provider-errors.spec | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
 | lib/shared/port.mjs | client-load.entry、cold-start.entry、port.spec、run-driver、snapshot-replay.entry | 端口参数唯一解析正本（1–65535 整数；tools/channel 与 checks/smoke 入口共用） |
 | lib/shared/plan-card.mjs | node-gate-session-gates、plan-card-stats、plan-card.spec | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
-| lib/gates/protocol-core.mjs | content-coverage.spec、protocol-audit、protocol-audit-core、protocol-core.spec、research-defaults.spec、strategy-core、evidence-audit-core、run-accept | Protocol **schema 半**：枚举/canonical/hash/validateProtocol/§研究方法 与 §Decisions 解析（无 IO；口径 = 核验 §6 + 表达层补篇 §4–§7） |
+| lib/gates/protocol-core.mjs | content-coverage.spec、protocol-audit、protocol-audit-core、protocol-core.spec、research-defaults.spec、skill-parser-contract.spec、strategy-core、evidence-audit-core、run-accept | Protocol **schema 半**：枚举/canonical/hash/validateProtocol/§研究方法 与 §Decisions 解析（无 IO；口径 = 核验 §6 + 表达层补篇 §4–§7） |
 | lib/gates/protocol-audit-core.mjs | protocol-audit、protocol-core.spec、run-accept.e2e | Protocol **bundle 级判据**：effort 合同/投影/策略行投影（通道/worker/预算 cap；fail-loud）/批准链/plan 引用/audit hash/版本快照 + `projectionOf`/卡文（无 IO） |
 | lib/gates/strategy-core.mjs | protocol-audit-core、strategy-core.spec | Strategy 投影（K/O/G/B）纯派生：Protocol + plan + topics → 通道/worker/角色/拓扑/门/预算；不读模型/会话 |
 | lib/analyze/stream-diagnostics-core.mjs | stream-diagnostics、stream-diagnostics.spec | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
@@ -176,9 +176,9 @@
 | lib/shared/skill-golden.mjs | record-skill-golden、skill-golden.test | skill 正文 sha256 清单与漂移判据（快照 B 只比 catalog） |
 | lib/channel/start-lock.mjs | start-channel、start-lock.test | 启动互斥：原子 mkdir + 每次取得的独有 owner 文件；release 仅删除本代文件并 rmdir，无在线 stale 接管；两个入口由 start-channel 统一持有 |
 | lib/channel/profile-guard.mjs | run-driver、profile-guard.test | run-driver 的非默认 profile 守卫：默认 profile 放行，其余 fail-loud（显式 `--allow-stale-profile` 才继续） |
-| lib/gates/findings-core.mjs | evidence-audit-core、node-gate-run-gates、review-contract、findings-contract.spec、template-contract.spec、topics-contract.spec | findings gap 四态 / lenses / lens_gaps 差集 / scope_role 闭集 |
+| lib/gates/findings-core.mjs | evidence-audit-core、node-gate-run-gates、review-contract、findings-contract.spec、template-contract.spec、topics-contract.spec、skill-parser-contract.spec | findings gap 四态 / lenses / lens_gaps 差集 / scope_role 闭集 |
 | lib/gates/review-contract.mjs | node-gate-delivery-gate、review-contract.spec | review 覆盖表（topic × lens）+ CRITICAL 与 readiness 交叉 |
-| lib/gates/plan-gate.mjs | node-gate-core、plan-gate.spec | plan 图硬结构（环/悬空/重号/自依赖）+ owner/kind/lifecycle/剩余工作/版本快照 |
+| lib/gates/plan-gate.mjs | node-gate-core、plan-gate.spec、skill-parser-contract.spec | plan 图硬结构（环/悬空/重号/自依赖）+ owner/kind/lifecycle/剩余工作/版本快照 |
 | lib/harness/role-picker.mjs | client-load.entry、role-picker.test | 角色选择器纯判据：四研究角色连续相邻 + Method Editor（D37）；逐角色 C 归场景级 |
 | lib/repo/pack-deps.mjs | pack.e2e、pack-deps.test | 发布物依赖闭包 = peers：require/动态 import()/.d.ts import 正向、死 peer 反向（host-row 显式 allowlist）、DSH-tag peer 范围 = engines.dsh |
 | lib/repo/publish-manifest.mjs | export-dist、pack.e2e、publish-manifest.test | 发布 manifest 收口：剥离 devDependencies/scripts + workspace 协议检查 |
@@ -208,7 +208,7 @@
 | lib/harness/gates-cases.mjs | gates.e2e、verify-gates.test、doc-surface-shapes.test | 门禁自测的注入案例表（纯 fs mutate；git add 由驱动壳统一执行） |
 | lib/harness/gates-cli.mjs | gates.e2e、gates-cli.spec | gates.e2e 的 flag/数值输入归一（--case/--jobs 两形状，空值/未知参数 exit 2）与有界并发（BUG-195/203） |
 | lib/repo/fix-evidence.mjs | fix-evidence.test、staged-change-pairing、backlog-liveness | bug 修复卡实证合同：改动/红证/绿证 + 可重放红证/测试资产；活跃 修复落地 与归档共用 |
-| lib/test-infra/workspace-parsers.mjs | ci-workflow、markdown-mask-conformance.spec、markdown-mask-diff.spec、note-scan.test、plan-mdast.spec、record-ci-oracle、replay-fixtures.spec、verdict-conformance.spec、workspace-parsers.test | 锁定在 `node_modules/.pnpm` 内的外部纯函数解析器加载器（`yaml@2` + `mdast-util-from-markdown@2`；防向上穿透宿主机目录） |
+| lib/test-infra/workspace-parsers.mjs | ci-workflow、markdown-mask-conformance.spec、markdown-mask-diff.spec、note-scan.test、plan-mdast.spec、record-ci-oracle、replay-fixtures.spec、skill-parser-contract.spec、verdict-conformance.spec、workspace-parsers.test | 锁定在 `node_modules/.pnpm` 内的外部纯函数解析器加载器（`yaml@2` + `mdast-util-from-markdown@2`；防向上穿透宿主机目录） |
 | lib/repo/note-scan.mjs | c-notes、note-scan.test、markdown-mask-conformance.spec | notes 门禁的 Markdown 块级扫描：复用 `src/lib/markdown-mask.ts` 单一正本，与 `mdast` 直接在测试进程内逐行对账（BUG-169/175/178/179/183/185） |
 | lib/test-infra/asset-ledger.mjs | asset-ledger.test、guard-ledger.test、record-asset-ledger | 测试资产组合账生成器：lane/class/cost/uniqueClaim/oracleType/sunset（AST 自动推导 oracleType，禁手写 OVERRIDES）；与盘上测试和守卫账双向对账 |
 | lib/test-infra/ci-workflow.mjs | ci-jobs.test、ci-workflow-oracle.test、ci-workflow.test、model-workflow.test、record-ci-oracle、smoke-registry.test | GitHub Actions 执行面与写入侧规范门：`yaml@2` 解析 `on:`/`jobs:`/`needs` + `bash -eo pipefail` 执行面 + `ciWorkflowRunProblems`（BUG-172/184/187/190） |
@@ -224,8 +224,8 @@
 | lib/gates/schema-scan-core.mjs | node-gate-contracts、node-gate-contracts.spec、node-gate-core、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、protocol-audit、run-accept、run-bundle-charter.spec、run-receipt.spec、schema-scan、schema-scan.spec、verdict-audit | 节点 I/O 契约在场级断言判据核（交付日/研究类型/条件件豁免/断代定红——从 run-gates 下沉修 lib→入口层反向依赖） |
 | lib/analyze/run-dashboard-core.mjs | evaluation-contract.test、run-dashboard、run-dashboard-html、run-dashboard.spec | M2 run 观察面解析/场景/模型纯管线（全 fail-soft；HTML 渲染 = run-dashboard-html，CLI/watch/写盘归壳） |
 | lib/analyze/run-dashboard-html.mjs | run-dashboard、run-dashboard.spec | M2 run 观察面 HTML 渲染薄壳（纯字符串拼接；矩阵/统计来自 core，不读盘） |
-| lib/gates/evidence-audit-core.mjs | evidence-audit、evidence-audit.spec、provenance.spec、template-contract.spec | 证据溯源审计判据核心（readLog 注入同上） |
-| lib/gates/verdict-audit-core.mjs | verdict-audit、verdict-audit.spec、verdict-audit-fixture.spec | claim 级裁决判据核心：claims/verdicts 形状与键集、覆盖（critical 全有结论性裁决）、raw 原文重解析（raw 带 ```json 围栏时只剥一层解析，原文比对不放宽）、逐字一致（跨轮单调）、child preset/depth/只读；`parseSessionFacts` = 真实 v4 日志线形 → 会话事实（CLI 只做定位/解压），readiness 读法复用 node-gate 同源 |
+| lib/gates/evidence-audit-core.mjs | evidence-audit、evidence-audit.spec、provenance.spec、skill-parser-contract.spec、template-contract.spec | 证据溯源审计判据核心（readLog 注入同上） |
+| lib/gates/verdict-audit-core.mjs | verdict-audit、verdict-audit.spec、verdict-audit-fixture.spec、skill-parser-contract.spec | claim 级裁决判据核心：claims/verdicts 形状与键集、覆盖（critical 全有结论性裁决）、raw 原文重解析（raw 带 ```json 围栏时只剥一层解析，原文比对不放宽）、逐字一致（跨轮单调）、child preset/depth/只读；`parseSessionFacts` = 真实 v4 日志线形 → 会话事实（CLI 只做定位/解压），readiness 读法复用 node-gate 同源 |
 | lib/gates/provenance.mjs | evidence-audit-core、provenance.spec | 离线来源证明：kind/URL/路径 + sha256 + 时间 + 通道 + 切片；local-file 哈希核对 |
 | lib/analyze/run-inventory-core.mjs | run-inventory、run-inventory.spec | 只读保留期折算（逐场文件数/字节/最老；合计；1024 进制格式化） |
 | lib/channel/runtime-clean-core.mjs | runtime-clean、runtime-clean.spec | 运行区清理纯判据：白名单容器/实验根 + 子树最新 mtime 保留期；symlink/未知名/穿越 fail-closed |

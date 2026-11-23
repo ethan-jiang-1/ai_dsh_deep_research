@@ -18,27 +18,27 @@ import { hasBodyText, questionBodyLineOf } from '../../../../packages/deep-resea
 
 const STEP_KEYS = ['question', 'team', 'leads', 'evidence', 'findings', 'review', 'final']
 const ARTIFACT_STATES = ['ok', 'absent', 'unreadable', 'empty', 'invalid']
+const STEP_SIGNAL_ARB = fc.constantFrom('unknown', 'absent', 'present')
 
 test('PBT: deriveSteps 七步定序、最多一个 current、unknown 严格不回填（无论后续步是否在场）', () => {
   fc.assert(
     fc.property(
       fc.record({
-        question: fc.boolean(),
-        team: fc.boolean(),
-        leads: fc.boolean(),
-        evidence: fc.oneof(fc.integer({ min: -5, max: 50 }), fc.constant(NaN), fc.constant(0)),
-        findings: fc.boolean(),
-        review: fc.boolean(),
-        final: fc.boolean(),
-        unknown: fc.subarray(STEP_KEYS),
+        question: STEP_SIGNAL_ARB,
+        team: STEP_SIGNAL_ARB,
+        leads: STEP_SIGNAL_ARB,
+        evidence: fc.oneof(fc.constant('unknown'), fc.integer({ min: -5, max: 50 }), fc.constant(NaN), fc.constant(0)),
+        findings: STEP_SIGNAL_ARB,
+        review: STEP_SIGNAL_ARB,
+        final: STEP_SIGNAL_ARB,
       }),
       (inputs) => {
         const steps = deriveSteps(inputs)
         assert.deepEqual(steps.map((s) => s.key), STEP_KEYS)
-        const unknownSet = new Set(inputs.unknown)
         for (const step of steps) {
-          if (unknownSet.has(step.key)) {
-            assert.equal(step.state, 'unknown', `${step.key} 在 unknown 中，绝不能被后续步抹成 ${step.state}`)
+          const isUnknown = inputs[step.key] === 'unknown'
+          if (isUnknown) {
+            assert.equal(step.state, 'unknown', `${step.key} 为 unknown，绝不能被后续步抹成 ${step.state}`)
           } else {
             assert.notEqual(step.state, 'unknown')
           }
@@ -48,7 +48,7 @@ test('PBT: deriveSteps 七步定序、最多一个 current、unknown 严格不�
         if (currentIndices.length === 1) {
           const cur = currentIndices[0]
           for (let i = 0; i < steps.length; i += 1) {
-            if (unknownSet.has(steps[i].key)) continue
+            if (inputs[steps[i].key] === 'unknown') continue
             if (i < cur) assert.equal(steps[i].state, 'done')
             else if (i === cur) assert.equal(steps[i].state, 'current')
             else assert.equal(steps[i].state, 'pending')
@@ -60,41 +60,49 @@ test('PBT: deriveSteps 七步定序、最多一个 current、unknown 严格不�
   )
 })
 
-test('PBT: deriveBusinessBrief fail-soft 永不 throw、无反证目标不伪造、HITL pending 必拉起 userActionNeeded', () => {
+test('PBT: deriveBusinessBrief 判别联合永不 throw、无反证目标不伪造、HITL pending 必拉起 userActionNeeded', () => {
+  const questionArb = fc.oneof(
+    fc.record({ kind: fc.constant('ok'), line: fc.string({ maxLength: 80 }) }),
+    fc.record({ kind: fc.constant('absent') }),
+    fc.record({ kind: fc.constant('issue'), reason: fc.constantFrom('empty', 'unreadable', 'body-empty') }),
+  )
+  const hitlArb = fc.oneof(
+    fc.record({ kind: fc.constant('idle') }),
+    fc.record({ kind: fc.constant('pending'), target: fc.constantFrom('hitl1', 'hitl2', 'unknown'), questions: fc.integer({ min: -2, max: 10 }) }),
+  )
+  const reviewArb = fc.constantFrom('absent', 'pass', 'fail', 'unconfirmed', 'conflict').map((kind) => ({ kind }))
+  const inputsArb = fc.oneof(
+    fc.record({ kind: fc.constant('unbound'), hitl: hitlArb, question: questionArb }),
+    fc.record({ kind: fc.constant('kickoff-hold'), hitl: hitlArb, question: questionArb }),
+    fc.record({ kind: fc.constant('bundle-error'), failure: fc.constantFrom('missing', 'unreadable'), hitl: hitlArb, question: questionArb }),
+    fc.record({
+      kind: fc.constant('bound'),
+      hitl: hitlArb,
+      question: questionArb,
+      review: reviewArb,
+      currentStage: fc.option(fc.string({ maxLength: 40 }), { nil: null }),
+      findingsPresent: fc.boolean(),
+      delivered: fc.boolean(),
+      versions: fc.integer({ min: -1, max: 10 }),
+      lastDecisionKind: fc.option(fc.constantFrom('approve', 'more', 'rewrite'), { nil: null }),
+      openItems: fc.array(fc.string({ maxLength: 20 }), { maxLength: 3 }),
+    }),
+  )
+
   fc.assert(
-    fc.property(
-      fc.record({
-        bundleBound: fc.option(fc.boolean(), { nil: undefined }),
-        bundleReadFailure: fc.option(fc.constantFrom('missing', 'unreadable', null), { nil: undefined }),
-        questionIssue: fc.option(fc.constantFrom('empty', 'unreadable', 'body-empty', null), { nil: undefined }),
-        reviewUnconfirmed: fc.option(fc.boolean(), { nil: undefined }),
-        reviewConflict: fc.option(fc.boolean(), { nil: undefined }),
-        kickoffHold: fc.option(fc.boolean(), { nil: undefined }),
-        hitlPending: fc.option(fc.boolean(), { nil: undefined }),
-        pendingKind: fc.option(fc.constantFrom('hitl1', 'hitl2', 'unknown', null), { nil: undefined }),
-        pendingQuestions: fc.option(fc.integer({ min: -2, max: 10 }), { nil: undefined }),
-        hasQuestion: fc.option(fc.boolean(), { nil: undefined }),
-        questionLine: fc.option(fc.string({ maxLength: 80 }), { nil: undefined }),
-        currentStage: fc.option(fc.string({ maxLength: 40 }), { nil: undefined }),
-        findingsPresent: fc.option(fc.boolean(), { nil: undefined }),
-        reviewFail: fc.option(fc.oneof(fc.boolean(), fc.constant(null)), { nil: undefined }),
-        delivered: fc.option(fc.boolean(), { nil: undefined }),
-        versions: fc.option(fc.integer({ min: -1, max: 10 }), { nil: undefined }),
-      }),
-      (inputs) => {
-        const brief = deriveBusinessBrief(inputs)
-        assert.ok(typeof brief.goal === 'string' && brief.goal.length > 0)
-        assert.ok(typeof brief.stageLine === 'string' && brief.stageLine.length > 0)
-        assert.ok(typeof brief.actionLine === 'string' && brief.actionLine.length > 0)
-        if (inputs.hitlPending === true) {
-          assert.equal(brief.userActionNeeded, true, 'HITL 挂起时 userActionNeeded 必须为 true')
-        }
-        const trimmedLine = typeof inputs.questionLine === 'string' ? inputs.questionLine.trim() : ''
-        if (inputs.hitlPending !== true && (inputs.bundleBound !== true || inputs.hasQuestion !== true || inputs.questionIssue != null || trimmedLine === '')) {
-          assert.equal(brief.goalKnown, false, '非挂起且未绑定/无有效 question 时绝不可伪造 goalKnown')
-        }
-      },
-    ),
+    fc.property(inputsArb, (inputs) => {
+      const brief = deriveBusinessBrief(inputs)
+      assert.ok(typeof brief.goal === 'string' && brief.goal.length > 0)
+      assert.ok(typeof brief.stageLine === 'string' && brief.stageLine.length > 0)
+      assert.ok(typeof brief.actionLine === 'string' && brief.actionLine.length > 0)
+      if (inputs.hitl.kind === 'pending') {
+        assert.equal(brief.userActionNeeded, true, 'HITL 挂起时 userActionNeeded 必须为 true')
+      }
+      const trimmedLine = inputs.question.kind === 'ok' ? inputs.question.line.trim() : ''
+      if (inputs.hitl.kind !== 'pending' && (inputs.kind !== 'bound' || inputs.question.kind !== 'ok' || trimmedLine === '')) {
+        assert.equal(brief.goalKnown, false, '非挂起且未绑定/无有效 question 时绝不可伪造 goalKnown')
+      }
+    }),
     { numRuns: 100 },
   )
 })

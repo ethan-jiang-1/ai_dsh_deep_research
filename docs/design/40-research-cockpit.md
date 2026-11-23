@@ -95,6 +95,8 @@
 | 项目默认面板 | `src/client/defaults/DefaultsPanel.tsx` | 研究配置页签顶部「项目默认」块（方法只读；深度/输出/来源可改；无保存） | [§2.6](#cockpit-6) |
 | 项目默认显示投影 | `src/client/defaults/labels.ts` | canonical id → 字典 key（按钮/面板共用；不翻译数据） | [§2.6](#cockpit-6) |
 | 配置页签取数 | `src/client/research-config/useConfigFeed.ts` | 库读四态 / journal 绑定 / 方法节七态（含 question 读失败/空）/ 发送回执三态（视图只消费） | [§2.6](#cockpit-6) |
+| 状态流纯状态机 | `src/client/research-status/status-state.ts` | 状态页签状态机 `reduceStatusFeed` 与数据驱动警告列表 `collectStatusNotices`（可无浏览器单测） | [§2.1](#cockpit-1) |
+| 图谱流纯状态机 | `src/client/research-graph/graph-state.ts` | 研究图谱页签状态机 `reduceGraphFeed`（绑定/plan/快照转移纯函数，可无浏览器单测） | [§2.8](#cockpit-8) |
 
 页签八区（渲染顺序，自上而下；条件区在括号里标注）：
 
@@ -343,6 +345,18 @@ composer 左侧 `conversation.input.left` 的状态按钮（有 session 才渲�
 | keyless 单测 | `pnpm test` | §2 所列折算各有测试文件 |
 
 命令与改动次序 = [guides/60 §2](../guides/60-dev-loop.md)「改驾驶舱」行；判据 = [evaluation](../evaluation.md) §L0/L1/L4。本页不复述命令表。
+
+<a id="defensive-redlines"></a>
+### 5.1 防御式与契约红线（`vendor/dsh/docs/defensive-patterns/` 本地化）
+
+对应上游 `general.md` / `client-components.md` / `remote-and-api.md` / `conversation-and-session.md`，驾驶舱与 `src/lib/` 编码与评审必须满足下表，并由静态/契约测试机检兜底（免人肉重查）：
+
+| 上游规则 | 本仓落点与具体禁止 | 机检防线 |
+|---|---|---|
+| One value states one fact | `ArtifactState` / `StepSignal` / `BriefInputs` 等强判别联合；禁止用 `null`/`undefined` 同时代指「未查询 / 缺席 / 读失败 / 非法」 | `semantic-guardrails.test.mjs`（`CLOSED_UNION_LITERALS` / `CLOSED_TAGGED_KINDS` 穷举）+ `tsc` |
+| Honor public contracts on BOTH sides | `readArtifact` 是唯一 `RunView.read` 入口且 JSON 工件强制传 `{ decoder }`（禁止裸 `json: unknown`）；Skill / 运行模板样例与门禁 parser 共享结构约束 | `semantic-guardrails.test.mjs`（`LEGACY_RUNVIEW_CALLS` 清零）+ `skill-parser-contract.spec.mjs` |
+| Identity, initial state & disposal | Hook 异步状态统一收进纯 Reducer（`status-state.ts` / `graph-state.ts`）与单次 `reset-session` 原子复位；函数内创建的 `AbortController` 必须有 `.abort()` 回收；`catch` 不允许静默吞错或只写日志（除非标注 `@silent-catch: <理由>`） | `semantic-guardrails.test.mjs` + `status-state.spec.mjs` / `graph-state.spec.mjs` + `status-feed-behavior.spec.mjs` / `graph-feed-behavior.spec.mjs` |
+| Narrow injection face / Timing correctness | 页签组件通过 `*Injected` 窄接口注入宿主能力（不传整包 Cordis context）；状态流转靠显式 action 与 `dispatch`，不依赖 `setTimeout`/微任务时序担保 | `client-keys` / `client-effect-wrap` + 组件/Hook 行为测试 |
 
 ## 6. 已知限制与延后工作
 

@@ -10,16 +10,23 @@ import ts from 'typescript'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
 const CANONICAL_RUNVIEW_READER = 'src/lib/run/artifact-read.ts'
-// G21 已知遗留：useGraphFeed.ts:136 的 1 处 view.read('plan.md')；超过 1 处或新文件出现立即红。
-const LEGACY_RUNVIEW_CALLS = new Map([['src/client/research-graph/useGraphFeed.ts', 1]])
+// G21 已清零：useGraphFeed.ts 已迁至 readArtifact，RunView.read/hasFile 逃逸预算归零。
+const LEGACY_RUNVIEW_CALLS = new Map()
 
 const CLOSED_UNION_LITERALS = {
   ArtifactState: new Set(['ok', 'absent', 'unreadable', 'empty', 'invalid']),
   SourceRead: new Set(['ok', 'absent', 'unreadable']),
   ReviewVerdict: new Set(['pass', 'fail', 'conflict', 'unconfirmed', 'absent']),
+  StepSignal: new Set(['unknown', 'absent', 'present']),
 }
 const CLOSED_TAGGED_KINDS = {
   BindingTrust: new Set(['unbound', 'suppressed', 'bound']),
+  BriefInputs: new Set(['unbound', 'kickoff-hold', 'bundle-error', 'bound']),
+  BriefQuestionState: new Set(['ok', 'absent', 'issue']),
+  BriefReviewState: new Set(['absent', 'pass', 'fail', 'unconfirmed', 'conflict']),
+  BriefHitlState: new Set(['idle', 'pending']),
+  StatusFeedAction: new Set(['reset-session', 'journal-frame', 'journal-error', 'unsettled-trust', 'scan-started', 'scan-bundle-failed', 'scan-succeeded', 'scan-threw', 'retry-requested', 'member-summaries']),
+  GraphFeedAction: new Set(['follow-start', 'bind-slug', 'follow-error', 'follow-retry', 'plan-unbound', 'plan-loading', 'plan-truncated', 'plan-missing', 'plan-error', 'plan-ready', 'plan-retry', 'set-graph-view', 'set-show-snapshot', 'snapshot-idle', 'snapshot-missing', 'snapshot-loading', 'snapshot-failed', 'snapshot-ready']),
 }
 
 function unionLiteralSet(type) {
@@ -377,4 +384,69 @@ test('semantic-guardrails 反证：四类变异注入必须各自转红（虚拟
   const v4b = scanVirtualSource('src/client/mutated.ts', 'function k() { const c = new AbortController(); return c.signal }')
   assert.equal(v4a.issues.unabortedController.length, 1, '函数内裸 AbortController().signal 必须红')
   assert.equal(v4b.issues.unabortedController.length, 1, '函数内未调用 .abort() 的 controller 必须红')
+})
+
+test('semantic-guardrails 负例：readArtifact/deriveSteps/deriveBusinessBrief 非法组合编译期即红', () => {
+  const parsedClient = ts.parseJsonConfigFileContent(
+    ts.readConfigFile(join(PACK, 'tsconfig.client.json'), ts.sys.readFile).config,
+    ts.sys,
+    PACK,
+  )
+  const opts = { ...parsedClient.options, noEmit: true, incremental: false, composite: false }
+  const virtualFile = join(PACK, 'src/client/__negative_control__.ts')
+  const cases = [
+    {
+      name: 'readArtifact(delivered.json) missing decoder',
+      code: [
+        "import type { RunView } from '@deepseek-ai/dsh-experimental-agent-team'",
+        "import { readArtifact } from '../lib/run/artifact-read.js'",
+        "export async function bad(v: RunView) { return readArtifact(v, 'delivered.json') }",
+      ].join('\n'),
+    },
+    {
+      name: 'readArtifact(plan.md) accessing removed .json property',
+      code: [
+        "import type { RunView } from '@deepseek-ai/dsh-experimental-agent-team'",
+        "import { readArtifact } from '../lib/run/artifact-read.js'",
+        "export async function bad(v: RunView) { const r = await readArtifact(v, 'plan.md'); return r.json }",
+      ].join('\n'),
+    },
+    {
+      name: 'deriveSteps invalid StepSignal literal',
+      code: [
+        "import { deriveSteps } from '../lib/run/run-fold.js'",
+        "export function bad() {",
+        "  return deriveSteps({",
+        "    brief: 'bad', hitl1Pending: false, hasPlan: 'present',",
+        "    planNodeTotal: 0, planNodesDone: 0, findingsCount: 0,",
+        "    evidenceRead: 'unknown', evidenceCount: 0, reviewState: 'absent', deliveredState: 'absent',",
+        "  })",
+        "}",
+      ].join('\n'),
+    },
+    {
+      name: 'deriveBusinessBrief bound variant missing question',
+      code: [
+        "import { deriveBusinessBrief } from '../lib/run/brief-fold.js'",
+        "export function bad() {",
+        "  return deriveBusinessBrief({ kind: 'bound', brief: null, hitl: { kind: 'idle' } })",
+        "}",
+      ].join('\n'),
+    },
+  ]
+
+  const baseHost = ts.createCompilerHost(opts)
+  for (const c of cases) {
+    const host = {
+      ...baseHost,
+      fileExists: (f) => f === virtualFile || baseHost.fileExists(f),
+      readFile: (f) => (f === virtualFile ? c.code : baseHost.readFile(f)),
+      getSourceFile: (f, lv, onErr, create) =>
+        f === virtualFile ? ts.createSourceFile(f, c.code, lv) : baseHost.getSourceFile(f, lv, onErr, create),
+    }
+    const program = ts.createProgram([...parsedClient.fileNames, virtualFile], opts, host)
+    const sf = program.getSourceFile(virtualFile)
+    const diags = ts.getPreEmitDiagnostics(program, sf)
+    assert.ok(diags.length >= 1, `${c.name}: TypeScript 编译器必须拒绝非法状态组合（实测 0 条诊断）`)
+  }
 })

@@ -9,26 +9,31 @@
  * 自行取文件内容后喂这里的折算）。
  */
 import { translateZh, type PackTranslate } from '../shared/i18n.ts'
+import { assertNever } from './artifact-read.ts'
 
-/** 一个 run 的文件在场性（步骤条输入——由调用方从文件内容/在场性构造）。
- *  步序正本 = m2-run-mechanics「运行流程总览」：立项（question+topics 一体）→ 组队 →
- *  侦察 → 挖掘 → 综合 → 审查 → 交付；组队无独立文件，在场性随立项（cursor 停靠语义，
- *  见 deriveSteps）。 */
-interface RunStepInputs {
-  readonly question: boolean
-  readonly team: boolean
-  readonly leads: boolean
-  readonly evidence: number
-  readonly findings: boolean
-  readonly review: boolean
-  readonly final: boolean
-  /** 明确读不到的步骤键（BUG-359/360）：标 unknown，不让线性推断抹成 done。 */
-  readonly unknown?: readonly string[]
+/** 步骤条闭集键名（编译期阻止未知键名进入 unknown 集合）。 */
+export type StepKey = 'question' | 'team' | 'leads' | 'evidence' | 'findings' | 'review' | 'final'
+
+/** 单步证据信号：在场 / 缺席 / 无法确认——'unknown' 与 'present' 编译期互斥。 */
+export type StepSignal = 'unknown' | 'absent' | 'present'
+
+/** 证据卡信号：'unknown'（目录/卡片读失败）或非负整数卡数（>0 视为在场）。 */
+export type EvidenceSignal = 'unknown' | number
+
+/** 一个 run 的强类型步骤输入（非法双态组合在类型层面不可构造）。 */
+export interface RunStepInputs {
+  readonly question: StepSignal
+  readonly team: StepSignal
+  readonly leads: StepSignal
+  readonly evidence: EvidenceSignal
+  readonly findings: StepSignal
+  readonly review: StepSignal
+  readonly final: StepSignal
 }
 
 /** 步骤条的一步。unknown = 读取失败/无法确认（不是 pending，也不是 done）。 */
 export interface RunStep {
-  readonly key: string
+  readonly key: StepKey
   readonly label: string
   readonly state: 'done' | 'current' | 'pending' | 'unknown'
 }
@@ -37,7 +42,7 @@ export interface RunStep {
 // 旧 import 点（useStatusFeed/ResearchFinalTab/tests）仍可从本文件取到同名符号。
 export { latestRunVersion } from './final-target.ts'
 
-const STEP_ORDER = ['question', 'team', 'leads', 'evidence', 'findings', 'review', 'final'] as const
+const STEP_ORDER: readonly StepKey[] = ['question', 'team', 'leads', 'evidence', 'findings', 'review', 'final'] as const
 const STEP_LABEL_KEYS = {
   question: 'stepQuestion',
   team: 'stepTeam',
@@ -48,31 +53,48 @@ const STEP_LABEL_KEYS = {
   final: 'stepFinal',
 } as const
 
+function resolveStepSignal(k: StepKey, inputs: RunStepInputs): StepSignal {
+  if (k === 'evidence') {
+    if (inputs.evidence === 'unknown') return 'unknown'
+    return typeof inputs.evidence === 'number' && Number.isFinite(inputs.evidence) && inputs.evidence > 0 ? 'present' : 'absent'
+  }
+  return inputs[k]
+}
+
 /**
- * 步骤条推导：在场性 → 七步三态（最后在场的步 = current，之前 done，之后 pending）。
- * 组队的输入随立项（question 在场即 team 在场）——组队无独立文件，cursor 在"立项完成 →
- * 侦察交付"的窗口内停靠在组队（该窗口即组队+侦察进行段，正本图同序）。
- * @param inputs - 文件在场性（evidence 为计数 >0 判定）。
+ * 步骤条推导：每步三态互斥信号 → 七步四态（最后在场的已知步 = current，之前已知未到或已过 = done/pending，unknown 绝不回填）。
+ * @param inputs - 各步闭合三态信号。
  * @param t - UI 翻译器（缺省 = 中文；组件必须传 `props.t`）。
  * @returns 步骤条。
  */
 export function deriveSteps(inputs: RunStepInputs, t: PackTranslate = translateZh): readonly RunStep[] {
-  const has: Record<string, boolean> = {
-    question: inputs.question,
-    team: inputs.team,
-    leads: inputs.leads,
-    evidence: inputs.evidence > 0,
-    findings: inputs.findings,
-    review: inputs.review,
-    final: inputs.final,
-  }
-  const unknown = new Set(inputs.unknown ?? [])
+  const signals = STEP_ORDER.map((k) => ({ key: k, signal: resolveStepSignal(k, inputs) }))
   let lastDone = -1
-  for (const [i, k] of STEP_ORDER.entries()) if (has[k] && !unknown.has(k)) lastDone = i
-  return STEP_ORDER.map((k, i) => ({
-    key: k,
-    label: t(STEP_LABEL_KEYS[k]),
-    // unknown 优先：读失败不参与「最后在场步」线性推断，也不被后续步的存在抹成 done。
-    state: unknown.has(k) ? 'unknown' : i < lastDone ? 'done' : i === lastDone ? 'current' : 'pending',
-  }))
+  for (const [i, item] of signals.entries()) {
+    switch (item.signal) {
+      case 'present':
+        lastDone = i
+        break
+      case 'absent':
+      case 'unknown':
+        break
+      default:
+        return assertNever(item.signal)
+    }
+  }
+  return signals.map(({ key, signal }, i) => {
+    switch (signal) {
+      case 'unknown':
+        return { key, label: t(STEP_LABEL_KEYS[key]), state: 'unknown' }
+      case 'present':
+      case 'absent':
+        return {
+          key,
+          label: t(STEP_LABEL_KEYS[key]),
+          state: i < lastDone ? 'done' : i === lastDone ? 'current' : 'pending',
+        }
+      default:
+        return assertNever(signal)
+    }
+  })
 }
