@@ -75,9 +75,10 @@
 
 ## 未证边界（留给触发）
 
-- **浏览器真机未跑**：本批只有 418 触及 client（方法编辑面板），证据是 JSDOM + RTL；观感仍在
-  `client-load.entry` 档。本环境此前的阻塞（主机负载预检 / 原生 addon 未构建）未在本批修复范围；
-  触发 = 下一次发布前收尾或换环境补跑。
+- **浏览器真机未跑（NOT-RUN ≠ pass）**：本批只有 418 触及 client（方法编辑面板），证据是
+  JSDOM + RTL；观感仍在 `client-load.entry` 档。本批复跑记录：`pnpm build` 通过后仍被主机健康
+  预检拒绝（load/cpu 2.92 > 1.5，机器负载来自本批之外）。触发 = 下一次发布前收尾或换环境补跑
+  `client-load.entry --seed tests/fixtures/client-load-home`。
 - **`linesOf` 的换行闭集 = LF/CRLF/CR**：U+2028/U+2029（行分隔符/段分隔符）不在闭集内，Markdown
   契约文本里未见过；若出现需扩 `linesOf` 并补矩阵变体，不要在 gate 里特判。
 - **`scope_role` 必填只对「topics.md 在场」生效**：旧 bundle（契约前自由体）由断代/在场级判据
