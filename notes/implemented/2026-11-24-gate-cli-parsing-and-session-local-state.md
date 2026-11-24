@@ -78,10 +78,12 @@
 
 ## 未证边界（留给触发）
 
-- **浏览器真机未跑**：本批 404/408/409/410/411 的行为证据是 JSDOM + RTL；观感与真实目录选择器
-  仍在 `client-load.entry` 档。本环境上次尝试的阻塞（主机负载预检 + `node-addon-require-builtin`
-  原生 build 缺席）属于机器前置，未在本批修复范围内；触发 = 下一次发布前收尾或在能起 dev web
-  的环境补跑 `client-load.entry --seed tests/fixtures/client-load-home`。
+- **浏览器真机未跑（NOT-RUN ≠ pass）**：本批 404/408/409/410/411 的行为证据是 JSDOM + RTL；观感与
+  真实目录选择器仍在 `client-load.entry` 档。实跑记录：先被「`lib/client.js` 旧于 src」自检拦下
+  （已重新 `pnpm build` 后重试），随后主机健康预检拒绝（load/cpu 2.65 > 1.5）；上一批还记录过
+  `node-addon-require-builtin` 原生 build 缺席。三项都是机器前置，未在本批修复范围内；
+  触发 = 下一次发布前收尾或在能起 dev web 的环境补跑
+  `client-load.entry --seed tests/fixtures/client-load-home`。
 - **`cliArgsOf` 只支持「带值选项」一种形态**：`--flag=value` 写法暂不识别（全仓 CLI 目前都用
   空格形式）；新增写法时先扩解析器并补负控，不要在壳里再写第三份过滤。
 - **工具卡的容错字段提取只取字符串字段**：数组/对象字段（如 `queries`）仍走 `parseArgsObject`；
