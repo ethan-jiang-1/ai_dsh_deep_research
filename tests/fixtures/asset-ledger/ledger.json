@@ -2619,7 +2619,7 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "tool-card 回归 — 研究语义卡标题折算（keyless；wire 权威形状 = queries 数组，录制流实证）。",
-      "oracleType": "structured",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {

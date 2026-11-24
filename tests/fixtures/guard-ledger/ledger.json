@@ -2277,6 +2277,38 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删掉三门 isPreContract 分支 → 契约前 bundle 用例红（RED 而非 PRE-CONTRACT）"
+    },
+    {
+      "id": "BUG-431",
+      "mechanism": "cardStateOf 只认不存在的 error.code 'interrupted'，vendor 崩溃恢复码（TOOL_OUTCOME_UNKNOWN/TOOL_NOT_STARTED）被判 error",
+      "guard": "tests/run/shared/tool-card.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把判据改回只认 'interrupted' → vendor 恢复码用例红；卡片 stopped 渲染删掉 → 渲染用例红"
+    },
+    {
+      "id": "BUG-432",
+      "mechanism": "门① 的 HITL1 签名只认中文字面「研究类型」，英文/结构化 id 的合规 run 判 RED",
+      "guard": "tests/run/gates/node-gate-session.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 hitlAskGate 的签名判据改回 `/研究类型/.test(args)` → 英文/结构化 id 用例红"
+    },
+    {
+      "id": "BUG-433",
+      "mechanism": "门② present 见证的路径正则不认 readable*（只收 final.md / final/vN.md），只声明读者版的交付被判缺席",
+      "guard": "tests/run/gates/node-gate-session.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 scanWitnessLogs 的路径判定改回 final(?:/vN)?.md 正则 → 读者版 present 用例红"
+    },
+    {
+      "id": "BUG-434",
+      "mechanism": "会话日志任一帧坏 = 整份不可读；崩溃尾帧让 run-state/hitl-answer/门①②③ 在崩溃现场盲掉",
+      "guard": "tests/run/shared/run-state.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 decodeSessionLog 的「尾帧失败保留前缀」分支删掉（任意帧失败即 null）→ 尾帧用例红"
     }
   ]
 }

@@ -6,6 +6,10 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [431](BUG-431-tool-card-stopped-state-unreachable.md) | 崩溃恢复码被判「失败」 | （stopped = 结果未知） | 2026-11-24 |
+| [432](BUG-432-hitl1-anchor-gate-chinese-only-signature.md) | 门① 只认中文 HITL1 签名 | （askKindOf 同源） | 2026-11-24 |
+| [433](BUG-433-present-witness-misses-readable-paths.md) | 门② 见证不认读者版 present | （pack finalPathOf 词法） | 2026-11-24 |
+| [434](BUG-434-truncated-tail-frame-makes-whole-log-unreadable.md) | 崩溃尾帧让整份日志不可读 | （三态 + truncatedTail） | 2026-11-24 |
 | [424](BUG-424-status-tab-claims-delivered-for-dangling-receipt.md) | 回执声明版本不在场仍说已交付 | （receiptDangling + 告警） | 2026-11-24 |
 | [425](BUG-425-delivery-gate-accepts-schema-invalid-receipt.md) | 交付门放行 schema 非法回执 | （复用 pack 解码器） | 2026-11-24 |
 | [426](BUG-426-english-hitl2-bypasses-delivery-guard.md) | 英文 HITL2 绕过交付代答闸 | （isDeliveryReviewCard ← askKindOf） | 2026-11-24 |

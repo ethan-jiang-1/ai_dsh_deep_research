@@ -145,7 +145,7 @@ function isRegularFile(path) {
  * @param {((childId: string) => any[] | null) | null} [params.readChildEvents]
  */
 export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false, now = Date.now(), readChildEvents = null }) {
-  const { readable, events } = readSessionEvents(logPath)
+  const { readable, events, truncatedTail } = readSessionEvents(logPath)
   const bundle = bundleStateOf(wsRoot)
   const turnOpen = readable ? turnOpenOf(events) : null
   const pending = readable ? hitlPendingOf(events) : null
@@ -176,6 +176,8 @@ export function runStateOf({ logPath, wsRoot, includeSessionIdentity = false, no
       : bundleDir === join(wsRoot, '_abandoned', activeBundle) ? 'abandoned' : 'root'
   return {
     readable,
+    // 日志尾部截断（崩溃形态，BUG-434）：前缀事件可用，但调用方必须如实标注「未读全」。
+    truncatedTail,
     events: events.length,
     ...identity,
     preset: readable && events[0]?.type === 'session' ? (events[0].agentPreset ?? null) : null,

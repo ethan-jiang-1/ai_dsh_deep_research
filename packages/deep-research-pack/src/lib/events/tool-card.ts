@@ -6,7 +6,18 @@
 import { argsObjectOf, normalizeQueries } from './journal-wire.ts'
 import { translateZh, type PackTranslate } from '../shared/i18n.ts'
 
-/** 卡片生命周期。 */
+/**
+ * vendor 崩溃恢复的合成 `tool/result` 错误码（正本 = DSH session 包的 repair 模块
+ * `openTurnClosers`；同值由 `@deepseek-ai/dsh-session` 导出）。
+ *
+ * 为什么在 pack 里写字面量而不是 import：本件住在 **client 面**（faces.json），把 host 侧
+ * session 包的值导入会进浏览器 bundle；wire 值本身是稳定契约，故本地常量 + 单测与 vendor
+ * 导出逐值对账（单测守卫）——漂移即红。
+ */
+export const TOOL_OUTCOME_UNKNOWN = 'TOOL_OUTCOME_UNKNOWN'
+export const TOOL_NOT_STARTED = 'TOOL_NOT_STARTED'
+
+/** 卡片生命周期。`stopped` = 工具调用被中断/崩溃截断，**结果未知**（不是失败）。 */
 type CardState = 'running' | 'ok' | 'error' | 'stopped'
 
 /** 卡片入参的最小形状（wire 上入参是 JSON 字符串，流式期间可能是截断前缀）。 */
@@ -22,7 +33,8 @@ interface ToolCardArgs {
 export function cardStateOf(block: object): CardState {
   if (!('kind' in block)) return 'running'
   const b = block as { kind?: unknown; error?: { code?: unknown }; isError?: boolean }
-  if (b.error?.code === 'interrupted') return 'stopped'
+  // vendor 的中断语义走 repair.ts 的两个具体码（+ 历史兼容 'interrupted'）；「未知」不得写成「失败」（BUG-431）。
+  if (b.error?.code === TOOL_OUTCOME_UNKNOWN || b.error?.code === TOOL_NOT_STARTED || b.error?.code === 'interrupted') return 'stopped'
   return b.isError ? 'error' : 'ok'
 }
 

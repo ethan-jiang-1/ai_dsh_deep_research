@@ -24,6 +24,7 @@ const STATE_COLOR: Record<string, string> = { running: '#888', ok: '#2a2', error
  */
 export function ResearchToolCard(props: ResearchToolCardProps): ReactNode {
   const state = cardStateOf(props.block)
+  const unknown = state === 'stopped'
   // rc.2：PreparingToolCall（参数未到）没有 argsRaw，只有 StartedToolCall 有 ⇒ 收窄后读；未到按空串。
   const settled = 'kind' in props.block
   const source = settled ? props.block.call : props.block
@@ -31,8 +32,10 @@ export function ResearchToolCard(props: ResearchToolCardProps): ReactNode {
   const title = cardTitleOf(props.toolName, parseArgsObject(argsRaw), argsRaw, props.t)
   return (
     <div style={{ border: '1px solid #ddd', borderRadius: 6, padding: '6px 10px', margin: '4px 0', fontSize: 13 }}>
-      <span style={{ color: STATE_COLOR[state], fontWeight: 600 }}>{state === 'running' ? '…' : state === 'ok' ? '✓' : '✗'}</span>
-      <span style={{ marginLeft: 6 }}>{title}</span>
+      <span style={{ color: STATE_COLOR[state], fontWeight: 600 }} title={unknown ? props.t('toolOutcomeUnknown') : undefined}>
+        {state === 'running' ? '…' : state === 'ok' ? '✓' : unknown ? '?' : '✗'}
+      </span>
+      <span style={{ marginLeft: 6 }}>{unknown ? props.t('toolOutcomeUnknown') : title}</span>
     </div>
   )
 }

@@ -4,7 +4,11 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { gateBundle } from '../../../checks/lib/gates/node-gate-core.mjs'
 import { headingGate } from '../../../checks/lib/gates/node-gate-run-gates.mjs'
-import { isHitl2Mention } from '../../../checks/lib/shared/node-gate-session-gates.mjs'
+import { hitlAskGate, isHitl2Mention, presentedInLogs } from '../../../checks/lib/shared/node-gate-session-gates.mjs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { toolCall } from '../../fixtures/events.mjs'
 import { bundle, sessions } from './node-gate-helpers.mjs'
 
 
@@ -118,3 +122,67 @@ test('isHitl2Mention：记录行只判在场；决策归门③ 的事件链（BU
   assert.equal(isHitl2Mention('- 2026-10-18 计划确认卡：「交付审阅」按推荐开跑'), false, '没有代理标记的普通提及不是记录行');
   assert.equal(isHitl2Mention('- 2026-10-18 用户要求修订表述'), false);
 });
+
+// ── BUG-432：门① 的 HITL1 签名必须与 askKindOf 同源（英文/结构化 id 不得误杀）──────────
+const writeSessionLog = (root, events) => {
+  const logDir = join(root, 'sessions', 'grp', 'session-1')
+  mkdirSync(logDir, { recursive: true })
+  writeFileSync(join(logDir, 'session.v4.jsonl'), events.map((e) => JSON.stringify(e)).join('\n') + '\n')
+}
+
+// 负例留证 2026-11-24：门① 只认 `JSON.stringify(args).includes('研究类型')`（BUG-432）；
+// 英文题面（Research type）或结构化 id 的合规 HITL1 卡判 RED——同文件门③ 早有英文兜底。
+// 红配方：把 hitlAskGate 的签名判据改回 `/研究类型/.test(args)` → 本例如期红。
+test('BUG-432：英文题面 / 结构化 id 的 HITL1 卡同样满足门①（判型与 askKindOf 同源）', () => {
+  for (const [label, askArgs] of [
+    ['zh 历史形态', { questions: [{ id: 'q1_type', header: '研究类型', question: '按哪类？', options: [{ label: 'A' }] }] }],
+    ['en 题面', { questions: [{ header: 'Research type', question: 'Which type?', options: [{ label: 'A' }] }] }],
+    ['结构化 id', { questions: [{ id: 'research_type', header: 'Type', options: [{ label: 'A' }] }] }],
+  ]) {
+    const root = mkdtempSync(join(tmpdir(), 'hitl1-sig-'))
+    try {
+      const bundleDir = join(root, 'ws', 'drt_demo')
+      mkdirSync(bundleDir, { recursive: true })
+      writeFileSync(join(bundleDir, 'question.md'), '# Q\n\nbody\n')
+      writeFileSync(join(bundleDir, 'run.md'), '- schema: 2\n- created: 2026-11-20\n- phase: research\n- next: x\n- delivered: none\n- parked: none\n')
+      writeSessionLog(root, [
+        { type: 'session', version: 4, id: 'session-1', createdAt: 1, cwd: '/tmp', isSeeded: false, delegationDepth: 0, agentPreset: 'lead' },
+        toolCall({ callId: 'c-w', name: 'write', arguments: { file_path: 'drt_demo/question.md', content: '# Q' } }),
+        toolCall({ callId: 'c-ask', name: 'ask_user_question', arguments: askArgs }),
+      ])
+      const gate = hitlAskGate(bundleDir, join(root, 'sessions'), '2026-11-24')
+      assert.equal(gate.status, 'PASS', `${label}: ${gate.detail}`)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  }
+})
+
+// ── BUG-433：门② 的 present 见证必须认终稿族（与 pack finalPathOf 同源）────────────────
+// 负例留证 2026-11-24：见证正则只收 `final.md` / `final/vN.md`；只 present 读者版
+// （`final/readable-v1.md`，真实日志里就是列表首项）的交付被判「present 缺席」RED。
+// 红配方：把 scanWitnessLogs 的 pathRe 改回只认 `final(?:/vN)?\.md`。
+test('BUG-433：只声明读者版的 present 同样构成见证（终稿族词法与 pack 同源）', () => {
+  for (const paths of [
+    ['drt_demo/final/v1.md'],
+    ['drt_demo/final/readable-v1.md'],
+    ['drt_demo/final/readable-v1.md', 'drt_demo/final/v1.md'],
+    ['drt_demo/final/readable.md'],
+    ['drt_demo/final.md'],
+  ]) {
+    const root = mkdtempSync(join(tmpdir(), 'present-family-'))
+    try {
+      const logDir = join(root, 'sessions', 'grp', 'session-1')
+      mkdirSync(logDir, { recursive: true })
+      writeFileSync(join(logDir, 'session.v4.jsonl'), [
+        { type: 'session', version: 4, id: 'session-1', createdAt: 1, cwd: '/tmp', isSeeded: false, delegationDepth: 0, agentPreset: 'lead' },
+        toolCall({ callId: 'c-w', name: 'write', arguments: { file_path: 'drt_demo/question.md', content: '# Q' } }),
+        { type: 'deliverables/presented', seq: 2, time: 1795224000000, data: { turn: 1, callId: 'c2', files: paths.map((path) => ({ path, description: 'd' })) } },
+      ].map((e) => JSON.stringify(e)).join('\n') + '\n')
+      const witness = presentedInLogs(join(root, 'sessions'), 'demo')
+      assert.ok((witness.events?.length ?? 0) > 0, `${paths.join(',')} 必须构成见证（status=${witness.status}：${witness.detail}）`)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  }
+})

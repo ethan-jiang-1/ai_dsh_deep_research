@@ -1,7 +1,7 @@
 // tool-card 回归 — 研究语义卡标题折算（keyless；wire 权威形状 = queries 数组，录制流实证）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cardTitleOf, parseArgsObject, cardStateOf, stringFieldOfArgsRaw } from '../../../packages/deep-research-pack/src/lib/events/tool-card.ts';
+import { cardTitleOf, parseArgsObject, cardStateOf, stringFieldOfArgsRaw, TOOL_NOT_STARTED, TOOL_OUTCOME_UNKNOWN } from '../../../packages/deep-research-pack/src/lib/events/tool-card.ts';
 
 test('web_search 卡标题：queries 数组 → 检索：词表（· 连接，60 字截断）', () => {
   const args = parseArgsObject('{"queries":["DSH harness","DeepSeek plugin"]}');
@@ -54,4 +54,26 @@ test('stringFieldOfArgsRaw：截断前缀里已到达的字段可提取，转义
   assert.equal(stringFieldOfArgsRaw('{"action":42}', 'action'), null)
   assert.equal(stringFieldOfArgsRaw('', 'action'), null)
   assert.equal(stringFieldOfArgsRaw('{"bad":"\\q"}', 'bad'), null)
+})
+
+// 负例留证 2026-11-24：BUG-431——`stopped` 不可达：判据认 `error.code === 'interrupted'`，
+// 但 vendor 的崩溃恢复码是 TOOL_OUTCOME_UNKNOWN / TOOL_NOT_STARTED（repair.ts），于是
+// 「结果未知」被渲染成「失败」。红配方：把判据改回只认 'interrupted'。
+test('BUG-431：vendor 的崩溃恢复码 → stopped（结果未知，不是失败）', async () => {
+  // 漂移锁：评审基线（vendor 钉 tag）里的常量源码就是 wire 契约；pack 的字面量必须逐字相同。
+  const { readFileSync } = await import('node:fs')
+  const { dirname, join } = await import('node:path')
+  const { fileURLToPath } = await import('node:url')
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
+  const repair = readFileSync(join(root, 'vendor', 'dsh', 'packages', 'core', 'session', 'src', 'repair.ts'), 'utf8')
+  assert.match(repair, new RegExp(`export const TOOL_OUTCOME_UNKNOWN = '${TOOL_OUTCOME_UNKNOWN}'`), 'vendor 常量漂移')
+  assert.match(repair, new RegExp(`export const TOOL_NOT_STARTED = '${TOOL_NOT_STARTED}'`), 'vendor 常量漂移')
+  assert.equal(cardStateOf({ kind: 'tool-result', isError: true, error: { code: TOOL_OUTCOME_UNKNOWN } }), 'stopped')
+  assert.equal(cardStateOf({ kind: 'tool-result', isError: true, error: { code: TOOL_NOT_STARTED } }), 'stopped')
+  // 负控：普通工具失败仍是 error；成功仍是 ok；未结算仍是 running。
+  assert.equal(cardStateOf({ kind: 'tool-result', isError: true, error: { code: 'FS_STALE_VERSION' } }), 'error')
+  assert.equal(cardStateOf({ kind: 'tool-result', isError: false }), 'ok')
+  assert.equal(cardStateOf({}), 'running')
+  // 历史兼容：旧码 'interrupted' 仍判 stopped（不因换码丢历史）。
+  assert.equal(cardStateOf({ kind: 'tool-result', isError: true, error: { code: 'interrupted' } }), 'stopped')
 })

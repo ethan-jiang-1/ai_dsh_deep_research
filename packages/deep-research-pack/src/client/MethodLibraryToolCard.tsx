@@ -42,14 +42,16 @@ export function MethodLibraryToolCard(props: MethodLibraryToolCardProps): ReactN
     : state === 'ok' ? removing ? props.t('toolRemoveDone', { name: target }) : defaulting
       ? props.t(defaultAction === 'set' ? 'toolDefaultSetDone' : 'toolDefaultClearDone', { name: nameField })
       : props.t('toolSaveDone', { name: target })
-    : removing ? props.t('toolRemoveFailed') : defaulting ? props.t('toolDefaultFailed') : props.t('toolSaveFailed')
+    : state === 'stopped'
+      ? props.t('toolOutcomeUnknown')
+      : removing ? props.t('toolRemoveFailed') : defaulting ? props.t('toolDefaultFailed') : props.t('toolSaveFailed')
   return (
     <div
       data-method-library-tool=""
       style={{ border: '1px solid var(--dsw-alias-border-l1)', borderRadius: 6, padding: '6px 10px', margin: '4px 0', fontSize: 13, background: 'var(--dsw-alias-bg-layer-1)' }}
     >
       <span style={{ color: state === 'ok' ? 'var(--dsw-alias-brand-primary)' : state === 'error' ? 'var(--dsw-alias-label-error)' : 'var(--dsw-alias-label-secondary)', fontWeight: 600 }}>
-        {state === 'running' ? '…' : state === 'ok' ? '✓' : '✗'}
+        {state === 'running' ? '…' : state === 'ok' ? '✓' : state === 'stopped' ? '?' : '✗'}
       </span>
       <span style={{ marginLeft: 6 }}>{label}</span>
     </div>

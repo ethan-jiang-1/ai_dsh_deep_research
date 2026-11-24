@@ -268,7 +268,10 @@ test('HITL 公共投影：timed pending 与元数据/agent 后续事件不关闭
     symlinkSync(join(root, 'missing-log-target'), join(dirname(linkedOld), 'session.v4.jsonl.zstd'));
     put('cancel-only', 'v4', [ask, { type: 'session/cancel' }]);
     const waiting = detectHitlWait(root);
-    assert.deepEqual(waiting.map((w) => w.session).sort(), ['cancel-o', 'v3', 'v4']);
+    // 2026-11-24（BUG-434）：尾帧坏 = 崩溃形态，读取器保留可用前缀并标 truncatedTail——
+    // broken 会话的 ask 在前缀里，必须照常投影为挂起（旧期望把它整份跳过，恰是崩溃现场盲掉）。
+    // 「不回退旧代」仍成立：日志选择只取 canonical 代，前缀来自 v4 本身，不是 v3 的旧事件。
+    assert.deepEqual(waiting.map((w) => w.session).sort(), ['broken', 'cancel-o', 'v3', 'v4']);
     assert.ok(waiting.every((w) => w.since === new Date(t).toISOString()));
     assert.deepEqual(detectHitlWait(root, { maxAgeMs: -1000 }), [], '过期日志不投影');
     assert.deepEqual(detectHitlWait(join(root, 'missing')), [], '缺席日志 fail-soft');

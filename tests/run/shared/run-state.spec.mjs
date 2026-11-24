@@ -12,7 +12,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, utimesSync } from 'node:fs';
 import { zstdCompressSync, constants } from 'node:zlib';
 import { resolveSessionLog, sessionLogsInGroup, decompressSessionLog } from '../../../checks/lib/shared/session-log.mjs';
-import { zstdFrame, writeZstdLog } from '../../fixtures/events.mjs';
+import { zstdFrame, writeZstdLog, toolCall } from '../../fixtures/events.mjs';
 import { tmpdir } from 'node:os';
 import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -32,13 +32,19 @@ test('读取器：多帧压缩日志与不可读坏尾（原生解压）', () =>
     const first = zstdFrame('{"type":"turn/start"}\n');
     const second = zstdFrame('{"type":"turn/end"}\n');
     writeZstdLog(log, [first, second]);
-    assert.deepEqual(readSessionEvents(log), { readable: true, events: [{ type: 'turn/start' }, { type: 'turn/end' }] });
+    assert.deepEqual(readSessionEvents(log), { readable: true, events: [{ type: 'turn/start' }, { type: 'turn/end' }], truncatedTail: false });
+    // 2026-11-24（BUG-434）：尾帧坏 = 崩溃形态 → **可用前缀 + truncatedTail**，不再整份不可读；
+    // 「不得把前缀当完整事实」由 truncatedTail 承担（消费方据此如实标注）。
     writeZstdLog(log, [first, second.subarray(0, 5)]);
-    assert.deepEqual(readSessionEvents(log), { readable: false, events: [] });
+    assert.deepEqual(readSessionEvents(log), { readable: true, events: [{ type: 'turn/start' }], truncatedTail: true });
     const checksummed = zstdCompressSync(Buffer.from('{"type":"turn/end"}\n'), { params: { [constants.ZSTD_c_checksumFlag]: 1 } });
     for (let i = 0; i < checksummed.length; i++) {
       writeZstdLog(log, [first, checksummed.subarray(0, i)]);
-      if (i > 0) assert.equal(readSessionEvents(log).readable, false, `截断 ${i} 字节不能成为完整日志`);
+      if (i > 0) {
+        const r = readSessionEvents(log);
+        assert.equal(r.readable, true, `截断 ${i} 字节：前缀可读`);
+        assert.equal(r.truncatedTail, true, `截断 ${i} 字节必须标 truncatedTail`);
+      }
     }
     assert.equal(decompressSessionLog(first, null), null, '解压能力缺席不启动外部命令');
     writeZstdLog(log, [first, '{bad-json}\n']);
@@ -66,7 +72,7 @@ test('日志选择：最新 canonical 代优先，缺席不猜路径', () => {
     rmSync(current);
     symlinkSync(join(tmp, 'missing-target'), current);
     assert.equal(resolveSessionLog(tmp), current, 'v4 断链目录项仍在场，不能降级到 v3');
-    assert.deepEqual(readSessionEvents(current), { readable: false, events: [] });
+    assert.deepEqual(readSessionEvents(current), { readable: false, events: [], truncatedTail: false });
   } finally { rmSync(tmp, { recursive: true, force: true }); }
 });
 
@@ -426,3 +432,56 @@ test('BUG-344：在飞子代理 → runSettled=false；子会话终局才 settle
     assert.equal(done.runSettled, true, '子会话终局后才落定');
   } finally { rmSync(tmp, { recursive: true, force: true }) }
 });
+
+// ── BUG-434：尾帧截断 ≠ 整份日志损坏（恢复工具必须在崩溃现场看得见前缀事件）──────────────
+// 负例留证 2026-11-24：任何一帧解压失败都返回 null → 崩溃留下的尾部半帧让整份日志不可读，
+// run-state/hitl-answer/门①②③ 在最需要它的时刻盲掉。红配方：把 decodeSessionLog 的
+// 「尾帧失败保留前缀」分支删掉（回到任意帧失败即整份 null）。
+test('BUG-434：尾帧截断保留前缀事件并标 truncatedTail；中间帧损坏仍不可读', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'log-tail-'));
+  try {
+    const log = join(tmp, 'session.v4.jsonl.zstd');
+    const header = zstdFrame('{"type":"session","id":"s1"}\n');
+    const ev1 = zstdFrame('{"type":"turn/start","data":{"turn":1}}\n');
+    const ev2 = zstdFrame('{"type":"turn/end","data":{"turn":1,"reason":{"kind":"completed"}}}\n');
+    // 完好：三帧全解，不标截断
+    writeZstdLog(log, [header, ev1, ev2]);
+    const okLog = readSessionEvents(log);
+    assert.equal(okLog.readable, true);
+    assert.equal(okLog.truncatedTail, false);
+    assert.equal(okLog.events.length, 3);
+    // 尾部截断 8 字节（崩溃形态）：保留前两帧事件，标 truncatedTail
+    writeZstdLog(log, [header, ev1, ev2.subarray(0, ev2.length - 8)]);
+    const tail = readSessionEvents(log);
+    assert.equal(tail.readable, true, '尾帧坏不等于整份坏')
+    assert.equal(tail.truncatedTail, true, '必须如实标记尾部截断')
+    assert.deepEqual(tail.events.map((e) => e.type), ['session', 'turn/start'])
+    // 中间帧损坏（后面还有完整帧）：真损坏 → 不可读（不得把前缀当完整事实）
+    writeZstdLog(log, [header, ev1.subarray(0, ev1.length - 8), ev2]);
+    const middle = readSessionEvents(log);
+    assert.equal(middle.readable, false, '中间坏帧必须整份不可读')
+    // 全坏：不可读
+    writeFileSync(log, 'not a zstd log at all');
+    assert.equal(readSessionEvents(log).readable, false)
+  } finally { rmSync(tmp, { recursive: true, force: true }) }
+})
+
+// BUG-434 消费方：runStateOf 在尾帧截断的日志上仍能判出挂起问询，并如实标注 truncatedTail。
+test('BUG-434 消费方：尾帧截断日志上 runStateOf 读得出 pending（并标 truncatedTail）', () => {
+  const tmp = mkdtempSync(join(tmpdir(), 'log-tail-state-'));
+  try {
+    const ws = join(tmp, 'ws');
+    mkdirSync(ws, { recursive: true });
+    const log = join(tmp, 'session.v4.jsonl.zstd');
+    const header = { type: 'session', version: 4, id: 's1', createdAt: 1, cwd: ws, isSeeded: false, delegationDepth: 0, agentPreset: 'lead' };
+    const ask = toolCall({ callId: 'c-ask', name: 'ask_user_question', arguments: { questions: [{ id: 'research_type', header: 'Research type', options: [{ label: 'A' }] }] } });
+    const f1 = zstdFrame(JSON.stringify(header) + '\n');
+    const f2 = zstdFrame(JSON.stringify(ask) + '\n');
+    const f3 = zstdFrame(JSON.stringify({ type: 'turn/end', seq: 2, data: { turn: 1, reason: { kind: 'interrupted' } } }) + '\n');
+    writeZstdLog(log, [f1, f2, f3.subarray(0, f3.length - 8)]);
+    const state = runStateOf({ logPath: log, wsRoot: ws });
+    assert.equal(state.readable, true);
+    assert.equal(state.truncatedTail, true, '必须如实标注尾部截断');
+    assert.equal(state.hitlPending, true, '前缀里的挂起问询必须可见（恢复工具不得盲掉）');
+  } finally { rmSync(tmp, { recursive: true, force: true }) }
+})

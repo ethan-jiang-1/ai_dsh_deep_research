@@ -166,6 +166,7 @@ const zhBase = {
   toolDefaultSetDone: '已设默认：{name}',
   toolDefaultClearDone: '已清除默认偏好',
   toolDefaultFailed: '默认偏好操作失败',
+  toolOutcomeUnknown: '结果未知（调用被中断，可重试）',
   toolRemoveRunning: '正在删除方法…',
   toolRemoveDone: '已删除库：{name}',
   toolRemoveFailed: '方法删除失败',

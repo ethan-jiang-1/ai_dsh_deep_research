@@ -167,6 +167,7 @@ const enBase = {
   toolDefaultSetDone: 'Default set: {name}',
   toolDefaultClearDone: 'Default preference cleared',
   toolDefaultFailed: 'Default preference operation failed',
+  toolOutcomeUnknown: 'Outcome unknown (the call was interrupted; safe to retry)',
   toolRemoveRunning: 'Deleting the method…',
   toolRemoveDone: 'Deleted from library: {name}',
   toolRemoveFailed: 'Method deletion failed',

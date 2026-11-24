@@ -8,6 +8,7 @@ import { HITL_CONTRACT_DATE, PRE_CONTRACT_NOTE, decisionsLines, isPreContract, r
 import { epochDateOf, toDateStr } from '../gates/schema-scan-core.mjs'
 import { slugInArgs } from '../../../packages/deep-research-pack/src/lib/run/bundle-bind.ts'
 import { askKindOf } from '../../../packages/deep-research-pack/src/lib/events/hitl-fold.ts'
+import { bareBundleSlugOf, bundleDirOf, finalPathOf, finalVersionOf, readableVersionOf } from '../../../packages/deep-research-pack/src/lib/run/final-target.ts'
 import { argsObjectOf } from '../../../packages/deep-research-pack/src/lib/events/journal-wire.ts'
 
 /** 纯日志 reader：.jsonl 直读；.zstd 报线索后按空语料继续（''，判据偏红方向——红必须带线索）。
@@ -177,7 +178,8 @@ export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadabl
   const out = /** @type {any} */ ({ logs: 0, boundLogs: 0, presented: [], replies: [], stalePresented: 0, staleReplies: 0, boundSessions: [], latestAsk: undefined, latestReply: null })
   const bare = String(slug ?? '').replace(/^drt_/, '')
   if (!sessionsRoot || !bare || !existsSync(sessionsRoot)) return out
-  const pathRe = new RegExp(`(?:^|/)(?:archive/|_abandoned/)?drt_${escapeRe(bare)}/(final(?:/v(\\d+))?\\.md)$`)
+  // 终稿族词法单一正本 = pack finalPathOf（含 readable.md / readable-vN.md）；门禁不得比驾驶舱更窄
+  // （BUG-433：只 present 读者版的交付曾被判「present 缺席」RED）。
   const walk = (dir) => {
     for (const ent of readdirSync(dir, { withFileTypes: true })) {
       const p = join(dir, ent.name)
@@ -211,12 +213,17 @@ export function scanWitnessLogs(sessionsRoot, slug, { readLog = emptyOnUnreadabl
           const date = eventDateOf(e)
           for (const f of Array.isArray(e.data?.files) ? e.data.files : []) {
             const path = String(f?.path ?? '').replace(/\\/g, '/')
-            const m = pathRe.exec(path)
-            if (!m) continue
+            const canonical = finalPathOf(path)
+            if (canonical === null) continue
+            const bundleDir = bundleDirOf(canonical)
+            // bundleDirOf 带尾 `/`；bareBundleSlugOf 只认 `drt_x` / `x` 形态。
+            if (bundleDir === null || bareBundleSlugOf(bundleDir.replace(/\/+$/, '')) !== bare) continue
+            const fileName = canonical.slice(canonical.lastIndexOf('/') + 1)
+            const version = finalVersionOf(fileName) ?? readableVersionOf(fileName)
             if (contract !== null && date !== null && date < contract) { out.stalePresented++; continue }
             out.presented.push({
               path,
-              version: m[2] === undefined ? null : Number(m[2]),
+              version,
               sessionId: basename(dirname(p)),
               callId: e.data?.callId,
               turn: e.data?.turn,
@@ -382,7 +389,9 @@ export function hitlAskGate(bundleDir, sessionsRoot, hitlDate, readLog = emptyOn
           if (d?.name === 'write' && args.includes(bindMark)) sessionWrites = true
           if (d?.name === 'ask_user_question') {
             sessionAsks++
-            if (/研究类型/.test(args)) sessionSigned++
+            // 判型正本 = pack askKindOf（结构化 id `research_type` 优先、语言无关）；旧实现只认
+            // 中文字面「研究类型」，英文/结构化 id 的合规 HITL1 卡判 RED（BUG-432；同文件门③早有英文兜底）。
+            if (askKindOf(argsObjectOf(args)) === 'hitl1') sessionSigned++
           }
         }
         if (!sessionWrites) continue

@@ -60,3 +60,17 @@ test('BUG-411 负控：完整入参运行态 / 结算态文案不变', () => {
   assert.match(render('method_library_set_default', JSON.stringify({ action: 'clear' }), false), /正在清除默认偏好/)
   assert.match(render('method_library_set_default', JSON.stringify({ action: 'set', name: '名称B' }), true), /已设默认：名称B/)
 })
+
+// 负例留证 2026-11-24：BUG-431——`stopped`（vendor 崩溃恢复码）在卡片上被渲染成「失败」；
+// 它表达的是「结果未知」，动作可能已生效——必须给中性文案，不能写成失败。
+// 红配方：把 stopped 分支删回 failure 文案（toolSaveFailed 等）。
+test('BUG-431 工具卡：stopped 显示「结果未知」而不是失败', () => {
+  const stoppedBlock = { kind: 'tool-result', isError: true, error: { code: 'TOOL_OUTCOME_UNKNOWN' }, call: { argsRaw: JSON.stringify({ name: '方案比较' }) } }
+  const markup = renderToStaticMarkup(createElement(MethodLibraryToolCard, {
+    toolName: 'method_library_remove',
+    t,
+    block: stoppedBlock,
+  }))
+  assert.match(markup, /结果未知/, 'stopped 必须是中性「结果未知」')
+  assert.doesNotMatch(markup, /失败/, '不得把「未知」写成「失败」')
+})
