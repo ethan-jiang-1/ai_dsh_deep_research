@@ -653,3 +653,57 @@ test('BUG-408 配置：question.md 读失败横幅的重试真正重读 question
   assert.match(container.textContent ?? '', /事实核查/, '重读成功后应显示采用态')
   assert.doesNotMatch(container.textContent ?? '', /读取失败/)
 })
+
+// 负例留证 2026-11-24：BUG-424——回执声明 `final.version: 9` 但 final/v9.md 不在场时，状态页
+// 仍宣布「报告已交付」（回执只验 schema 不验盘上在场）。红配方：把 receiptDangling 判定删回
+// 「receiptArt.state === 'ok' → delivery = deliveryFromReceipt(...)」。
+test('BUG-424 状态：回执声明的终稿版本不在场 → 不宣布已交付 + 显性告警', async () => {
+  const READINESS = JSON.stringify({ version: 2, readiness: 'PASS', conditional: false, counts: { critical: 0, major: 0, minor: 0, unverified: 0, rechecked_urls: 0 } })
+  const treeWith = (version) => ({
+    drt_alpha: {
+      'question.md': '# Topic\n\nbody\n',
+      'leads.md': '# Leads\n\n- lead\n',
+      'findings.md': '# Findings\n\n- f\n',
+      evidence: { 'e1.md': '# E1\n- claim: x\n' },
+      'review.md': '# Review\nreadiness: PASS\n',
+      review: { 'readiness.json': READINESS },
+      'final.md': '# Draft\n\nbody\n',
+      final: { 'v1.md': '# Audit v1\n\nbody\n' },
+      'delivered.json': JSON.stringify({
+        version: 1,
+        slug: 'drt_alpha',
+        acceptedAt: '2026-11-24T00:00:00Z',
+        gate: { status: 'PASS', exit: 0 },
+        final: { version, sha256: 'x' },
+        present: { path: `drt_alpha/final/v${version}.md`, version, callId: 'c1' },
+      }),
+    },
+  })
+  const renderStatus = (version) => {
+    const run = makeMaliciousRunSource({ tree: treeWith(version) })
+    return render(createElement(ResearchStatusTab, {
+      sessionId: `s-424-${version}`,
+      t: tZh,
+      useSession: () => undefined,
+      useSessions: () => undefined,
+      useSessionStatus: () => undefined,
+      openFinal: () => {},
+      openOwner: () => {},
+      revealStatusTab: () => {},
+      follow: followWithWrite('alpha'),
+      runSource: () => run.source,
+      visible: true,
+    }))
+  }
+  // 正控：版本在场 → 宣布已交付
+  const ok = renderStatus(1)
+  await flushUi(act)
+  assert.match(ok.container.textContent ?? '', new RegExp(zh.statusDelivered), '版本在场时应宣布已交付')
+  ok.unmount()
+  // 反控：声明版本缺席 → 不得宣布已交付，且要显性告警
+  const dangling = renderStatus(9)
+  await flushUi(act)
+  const text = dangling.container.textContent ?? ''
+  assert.doesNotMatch(text, new RegExp(zh.statusDelivered), '声明版本不在场时不得宣布已交付')
+  assert.match(text, /回执|交付回执/, '必须显性说明回执与盘上不符')
+})

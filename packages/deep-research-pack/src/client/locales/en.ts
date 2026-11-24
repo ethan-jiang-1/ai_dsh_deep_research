@@ -374,6 +374,7 @@ const enBase = {
   statusEvidenceFailedOnly: 'Only a failed-fetch log is present; there are no valid evidence cards.',
   statusReceiptReadFailed: 'The delivery receipt could not be read — delivery cannot be confirmed.',
   statusReceiptInvalid: 'The delivery receipt is invalid — delivery cannot be confirmed.',
+  statusReceiptDangling: 'The delivery receipt names a final version that is not on disk — delivery cannot be confirmed.',
   statusReviewConflict: 'Review is unconfirmed — the declaration conflicts with review.md; it is not a review pass.',
   statusReviewUnconfirmed: 'Review is unconfirmed — the structured readiness declaration is missing or unreadable.',
   statusReviewEmpty: 'Review has no verdict — review.md is empty.',

@@ -8,6 +8,7 @@
 // 权威边界：回执不是指令、不自证批准；它只把「验收时的事实」固定成可复算的记录。
 import { createHash } from 'node:crypto'
 import { stripBom } from '../../../packages/deep-research-pack/src/lib/shared/text-fold.ts'
+import { bareBundleSlugOf, decodeDeliveredReceipt } from '../../../packages/deep-research-pack/src/lib/run/final-target.ts'
 import { existsSync, readdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve, sep } from 'node:path'
 import { portableBundlePath } from './path-hygiene.mjs'
@@ -119,6 +120,15 @@ export function receiptProblems(bundleDir) {
     return { problems: ['delivered.json 不可解析（JSON）——回执损坏，不能作为交付见证'], receipt: null }
   }
   const problems = []
+  // 判据单一正本（BUG-425）：身份/自述裁决字段（version / slug / acceptedAt / gate.status）由
+  // pack 的 `decodeDeliveredReceipt` 说了算——门禁不得比驾驶舱更宽松，也不得自带第二份 schema。
+  const decoded = decodeDeliveredReceipt(receipt)
+  if (!decoded.ok) return { problems: [`delivered.json 不是合法回执：${decoded.detail}`], receipt }
+  const bundleSlug = bareBundleSlugOf(basename(bundleDir))
+  const receiptSlug = bareBundleSlugOf(String(decoded.value.slug))
+  if (receiptSlug === null || (bundleSlug !== null && receiptSlug !== bundleSlug)) {
+    problems.push(`delivered.json 的 slug「${String(decoded.value.slug)}」与 bundle 目录「${basename(bundleDir)}」不符（回执不属于本 bundle）`)
+  }
   const finalVersion = receipt?.final?.version
   if (Number.isSafeInteger(finalVersion) && finalVersion > 0) {
     const finalPath = join(bundleDir, 'final', `v${finalVersion}.md`)

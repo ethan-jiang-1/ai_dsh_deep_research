@@ -33,6 +33,8 @@ export interface StatusFeedState {
   readonly trust: BindingTrust
   readonly journalSeen: boolean
   readonly receiptDelivery: ReturnType<typeof deliveryFromReceipt> | null
+  /** 回执声明的终稿版本不在盘上（声称 ≠ 事实，BUG-424）——视图用显性告警替代「已交付」。 */
+  readonly receiptDangling: boolean
   readonly kickoffHold: boolean
   readonly error: string | null
   readonly reads: StatusReads
@@ -51,6 +53,7 @@ export const INITIAL_STATUS_FEED_STATE: StatusFeedState = {
   trust: { kind: 'unbound' },
   journalSeen: false,
   receiptDelivery: null,
+  receiptDangling: false,
   kickoffHold: false,
   error: null,
   reads: ABSENT_READS,
@@ -78,6 +81,7 @@ export type StatusFeedAction =
     readonly reads: StatusReads
     readonly face: BundleFace
     readonly receiptDelivery: ReturnType<typeof deliveryFromReceipt> | null
+    readonly receiptDangling?: boolean
     readonly reviewVerdict: ReviewVerdict
     readonly reviewDetail: string | null
   }
@@ -106,6 +110,7 @@ export function reduceStatusFeed(state: StatusFeedState, action: StatusFeedActio
         ...state,
         face: null,
         receiptDelivery: null,
+        receiptDangling: false,
         reads: ABSENT_READS,
         scanSettled: false,
         unbound: action.trust.kind === 'unbound' && state.journalSeen,
@@ -118,6 +123,7 @@ export function reduceStatusFeed(state: StatusFeedState, action: StatusFeedActio
         ...state,
         face: null,
         receiptDelivery: null,
+        receiptDangling: false,
         reads: action.reads,
         reviewVerdict: 'absent',
         reviewDetail: null,
@@ -128,6 +134,7 @@ export function reduceStatusFeed(state: StatusFeedState, action: StatusFeedActio
         ...state,
         face: action.face,
         receiptDelivery: action.receiptDelivery,
+        receiptDangling: action.receiptDangling === true,
         reads: action.reads,
         reviewVerdict: action.reviewVerdict,
         reviewDetail: action.reviewDetail,
@@ -138,6 +145,7 @@ export function reduceStatusFeed(state: StatusFeedState, action: StatusFeedActio
         ...state,
         face: null,
         receiptDelivery: null,
+        receiptDangling: false,
         reads: { ...ABSENT_READS, bundle: 'unreadable' },
         reviewVerdict: 'absent',
         reviewDetail: null,

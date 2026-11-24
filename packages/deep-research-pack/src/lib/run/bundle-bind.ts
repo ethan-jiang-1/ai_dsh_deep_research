@@ -7,6 +7,7 @@
  * 不扫用户消息文本——问句里顺带提到别的 bundle 不构成绑定（只有真的在 bundle 里动手才算）。
  */
 
+import { askKindOf } from '../events/hitl-fold.ts'
 import { argsObjectOf } from '../events/journal-wire.ts'
 import { RUN_SLUG } from './run-context.ts'
 
@@ -64,11 +65,10 @@ export function slugInArgs(name: string, args: unknown): string | undefined {
 
 /** 立项语义动作判定（BUG-001）：ask_user_question 调用，或 skill 调用加载 research-brief。 */
 function isKickoffCall(name: string, args: unknown): boolean {
-  // 只有 HITL1 三问（签名 = 首问「研究类型」）是新 run 开工；HITL2 交付审阅/未知 ask 不是（BUG-096）。
-  if (name === 'ask_user_question') {
-    const obj = argsObjectOf(args)
-    return obj !== null && JSON.stringify(obj).includes('研究类型') // i18n-ignore: HITL1 wire signature
-  }
+  // 只有 HITL1 三问（判型 = askKindOf：结构化 id `research_type` 优先、语言无关）是新 run 开工；
+  // HITL2 交付审阅/未知 ask 不是（BUG-096）。旧实现只认中文字面「研究类型」——结构化 id / 英文
+  // 题面（文档推荐形态）的立项窗口抑制失效，上一场 run 被当本场（BUG-427）。
+  if (name === 'ask_user_question') return askKindOf(args) === 'hitl1'
   if (name !== 'skill') return false
   const obj = argsObjectOf(args)
   return obj !== null && obj.name === 'research-brief'

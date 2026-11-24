@@ -373,6 +373,7 @@ const zhBase = {
   statusEvidenceFailedOnly: '只有检索失败登记，没有有效证据卡；挖掘尚未完成。',
   statusReceiptReadFailed: '交付回执读取失败——无法确认本场交付。',
   statusReceiptInvalid: '交付回执不合法——无法确认本场交付。',
+  statusReceiptDangling: '交付回执声明的终稿版本不在盘上——不能确认已交付（回执与盘上不符）。',
   statusReviewConflict: '审查未定——声明与 review.md 冲突，不能当作审查通过。',
   statusReviewUnconfirmed: '审查未定——结构化 readiness 声明缺失或不可读。',
   statusReviewEmpty: '审查未给结论——review.md 为空。',

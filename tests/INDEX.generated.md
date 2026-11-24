@@ -28,14 +28,14 @@
 | gates | `checks/lib/gates/acceptance-check` | `tests/run/gates/acceptance-check.spec.mjs` |
 | gates | `checks/lib/gates/bundle-date-sanity` | `tests/run/gates/bundle-date-sanity.spec.mjs` |
 | gates | `checks/lib/gates/evidence-audit-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/evidence-audit.spec.mjs`<br>`tests/run/gates/provenance.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs` |
-| gates | `checks/lib/gates/findings-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs`<br>`tests/run/gates/topics-contract.spec.mjs` |
+| gates | `checks/lib/gates/findings-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs`<br>`tests/run/gates/topics-contract.spec.mjs`<br>`tests/run/gates/topics-parsing.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-core` | `tests/run/gates/node-gate-delivery.spec.mjs`<br>`tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-delivery-gate` | `tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-reader-gate` | `tests/run/gates/node-gate-reader.spec.mjs` |
-| gates | `checks/lib/gates/node-gate-run-gates` | `tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs` |
-| gates | `checks/lib/gates/plan-gate` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/run/gates/plan-gate.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs` |
+| gates | `checks/lib/gates/node-gate-run-gates` | `tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/node-gate-contracts.spec.mjs`<br>`tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs` |
+| gates | `checks/lib/gates/plan-gate` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/run/gates/node-gate-contracts.spec.mjs`<br>`tests/run/gates/plan-gate.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs` |
 | gates | `checks/lib/gates/protocol-audit-core` | `tests/run/gates/protocol-core.spec.mjs` |
-| gates | `checks/lib/gates/protocol-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/content-coverage.spec.mjs`<br>`tests/pack/defaults/research-defaults.spec.mjs`<br>`tests/run/gates/protocol-core.spec.mjs` |
+| gates | `checks/lib/gates/protocol-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/content-coverage.spec.mjs`<br>`tests/pack/defaults/research-defaults.spec.mjs`<br>`tests/run/gates/protocol-core.spec.mjs`<br>`tests/run/gates/topics-parsing.spec.mjs` |
 | gates | `checks/lib/gates/provenance` | `tests/run/gates/provenance.spec.mjs` |
 | gates | `checks/lib/gates/review-contract` | `tests/run/gates/review-contract.spec.mjs` |
 | gates | `checks/lib/gates/run-source-node` | `tests/run/gates/run-context-node.spec.mjs` |
@@ -150,7 +150,7 @@
 | run | `run/binding-trust` | `tests/run/gates/binding-trust.spec.mjs` |
 | run | `run/brief-fold` | `tests/cockpit/lib/run/brief-fold.spec.mjs`<br>`tests/cockpit/lib/run/run-property.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | run | `run/bundle-bind` | `tests/run/gates/bundle-bind.spec.mjs` |
-| run | `run/final-target` | `tests/cockpit/lib/run/run-property.spec.mjs`<br>`tests/contracts/present-version-conformance.spec.mjs`<br>`tests/run/gates/final-target.spec.mjs` |
+| run | `run/final-target` | `tests/cockpit/lib/run/run-property.spec.mjs`<br>`tests/contracts/present-version-conformance.spec.mjs`<br>`tests/run/gates/final-target.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs` |
 | run | `run/health` | `tests/cockpit/lib/run/health.spec.mjs` |
 | run | `run/receipt-fold` | `tests/cockpit/lib/run/receipt-fold.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | run | `run/rerun-triage` | `tests/cockpit/lib/run/rerun-triage.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/rerun-triage-contract.spec.mjs` |

@@ -24,6 +24,17 @@ export const AUDIT_CONTRACT_DATE = '2026-10-08'
  *  旧场按无 run.md 豁免，quick_factual 编制豁免——与其余门同语义）。 */
 export const READABLE_CONTRACT_DATE = '2026-10-23'
 
+/** 门 F 契约日（2026-11-18 = BUG-250…266 findings gap/lens 判据接消费者，commit b0021fe0；
+ *  此前交付的 bundle 按旧形态写，不追溯）。 */
+export const FINDINGS_CONTRACT_DATE = '2026-11-18'
+
+/** 门 T 契约日（2026-11-18 = 同批 topics 图/字段判据落地，commit b0021fe0；此前不追溯）。 */
+export const TOPICS_CONTRACT_DATE = '2026-11-18'
+
+/** 门 P 契约日（2026-11-18 = plan 门首落地（BUG-260…279）并当日晚加固（BUG-280…319）；
+ *  此前交付的 plan 形态不追溯）。 */
+export const PLAN_CONTRACT_DATE = '2026-11-18'
+
 /** 断代判定（各门共用形状）：整数契约（run.md 的 `schema:`）优先——schema ≥ 当前版本 = 现行契约，
  *  与日期无关；更小的整数契约 = 旧形态。无 schema 的旧 bundle 才回退日期：asOf 注入优先，其次
  *  run.md 的 contract epoch（D28），旧场无 run.md 才回退交付日（deliveryDate = final.md mtime 族）。

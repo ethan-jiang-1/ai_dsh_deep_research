@@ -63,9 +63,13 @@ test('receiptProblems：哈希匹配 → 无问题；篡改 final/audit → 各�
   const { dir, cleanup } = makeRoot()
   try {
     const b = writeBundle(dir)
+    // 2026-11-24（BUG-425）：回执 schema 是合同的一部分（version/slug/acceptedAt/gate.status），
+    // 门禁复用 pack 解码器后，这份夹具必须给出完整回执——旧夹具缺 acceptedAt/gate 属「schema 外」。
     const delivered = {
       version: 1,
       slug: 'drt_x',
+      acceptedAt: '2026-11-24T00:00:00Z',
+      gate: { status: 'PASS', exit: 0 },
       final: { version: 2, sha256: sha256Of(join(b, 'final', 'v2.md')) },
       audit: { critical: 0, sha256: sha256Of(join(b, 'audit.md')) },
     }
@@ -404,5 +408,47 @@ test('BUG-155 人工走查的通用 ## 标题仍完整保留', () => {
   for (const title of ['检查', '清单', '回执', '读者版']) {
     const text = `## 人工走查\n\n## ${title}\n\n已核。`
     assert.equal(manualEvidenceOf(text), marked(text), title)
+  }
+})
+
+// 负例留证 2026-11-24：BUG-425——`receiptProblems` 只对哈希类字段对账，对身份/自述裁决类字段
+// （version / slug / gate.status）完全不看：一份 schema 非法的回执照样「交付件齐」。
+// 红配方：删掉 receiptProblems 里的 decodeDeliveredReceipt 调用（回到只比哈希）。
+test('BUG-425：schema 非法回执（version/slug/gate.status）→ RED，且不比驾驶舱更宽松', async () => {
+  const { decodeDeliveredReceipt, deliveryFromReceipt } = await import('../../../packages/deep-research-pack/src/lib/run/final-target.ts')
+  const { dir, cleanup } = makeRoot()
+  try {
+    const b = writeBundle(dir)
+    const base = {
+      version: 1,
+      slug: 'drt_x',
+      acceptedAt: '2026-11-24T00:00:00Z',
+      gate: { status: 'PASS', exit: 0 },
+      final: { version: 2, sha256: sha256Of(join(b, 'final', 'v2.md')) },
+      audit: { critical: 0, sha256: sha256Of(join(b, 'audit.md')) },
+    }
+    const variants = {
+      '基线合法': base,
+      'version=2': { ...base, version: 2 },
+      'gate.status=FAIL': { ...base, gate: { status: 'FAIL', exit: 1 } },
+      'slug 不符': { ...base, slug: 'drt_other' },
+      '缺 acceptedAt': { ...base, acceptedAt: undefined },
+    }
+    for (const [label, receipt] of Object.entries(variants)) {
+      writeFileSync(join(b, 'delivered.json'), JSON.stringify(receipt, null, 2))
+      const problems = receiptProblems(b).problems
+      // 驾驶舱侧：schema 由 decode 判；slug 归属由 deliveryFromReceipt(receipt, slug) 判。
+      const cockpitOk = decodeDeliveredReceipt(receipt).ok && deliveryFromReceipt(receipt, 'drt_x') !== null
+      if (label === '基线合法') {
+        assert.deepEqual(problems, [], label)
+        assert.equal(decodeDeliveredReceipt(receipt).ok, true, label)
+        continue
+      }
+      assert.ok(problems.length > 0, `${label} 必须报红（实际无问题）`)
+      // 门禁不得比驾驶舱更宽松：驾驶舱判非法 → 门禁必须也判红。
+      assert.equal(cockpitOk, false, `${label}: 驾驶舱判合法？判据分叉`)
+    }
+  } finally {
+    cleanup()
   }
 })

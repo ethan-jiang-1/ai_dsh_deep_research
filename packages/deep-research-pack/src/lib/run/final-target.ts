@@ -285,7 +285,8 @@ export function finalVersionOfPath(path: string | null | undefined): number | nu
 }
 
 /** 回执身份 = bundle 目录名（`drt_<slug>`）；驾驶舱传裸 slug。比较前只在一处剥前缀（BUG-352）。 */
-const bareBundleSlugOf = (value: unknown): string | null => {
+/** `drt_<slug>` / `<slug>` → bare slug；非法 → null（回执 slug 与 bundle 目录对账共用）。 */
+export const bareBundleSlugOf = (value: unknown): string | null => {
   if (typeof value !== 'string') return null
   const bare = value.trim().replace(/^drt_/, '')
   return bare === '' ? null : bare
@@ -319,6 +320,21 @@ export function decodeDeliveredReceipt(raw: unknown): { readonly ok: true; reado
     ok: true,
     value: record as DeliveredReceiptData,
   }
+}
+
+/**
+ * 回执**声称**的终稿版本（`present.version` 优先，其次 `final.version`）；读不出 → null。
+ * 用途：观察面必须用盘上在场事实核对这条声明，不能只凭回执自证已交付（BUG-424）。
+ * @param raw - `delivered.json` 解析值（任意形态）。
+ * @returns 正整数版本号或 null。
+ */
+export function receiptDeclaredVersionOf(raw: unknown): number | null {
+  if (typeof raw !== 'object' || raw === null) return null
+  const record = raw as { readonly present?: unknown; readonly final?: unknown }
+  const present = typeof record.present === 'object' && record.present !== null ? record.present as { readonly version?: unknown } : null
+  const final = typeof record.final === 'object' && record.final !== null ? record.final as { readonly version?: unknown } : null
+  const raw_version = typeof present?.version === 'number' ? present.version : final?.version
+  return typeof raw_version === 'number' && Number.isSafeInteger(raw_version) && raw_version > 0 ? raw_version : null
 }
 
 export function deliveryFromReceipt(receipt: unknown, slug?: string): FinalDelivery | null {

@@ -2273,6 +2273,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/run/gates/topics-parsing.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "topics 值解析回归（BUG-428 / BUG-429）：`lenses` 与 `depends_on` 的**值文法**只有一份实现。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/run/gates/verdict-audit-fixture.spec.mjs",
       "domain": "run",
       "lane": "spec",

@@ -139,7 +139,7 @@
 | lib/analyze/provider-errors.mjs | provider-error-stats、provider-errors.spec | 回合被上游流错误终结的结构化抽取（唯一语义源：只认 `turn/end` + `reason.kind=error`，不双算 `assistant/attempt`） |
 | lib/shared/port.mjs | client-load.entry、cold-start.entry、port.spec、run-driver、snapshot-replay.entry | 端口参数唯一解析正本（1–65535 整数；tools/channel 与 checks/smoke 入口共用） |
 | lib/shared/plan-card.mjs | node-gate-session-gates、plan-card-stats、plan-card.spec | 计划确认卡识别与字数口径（唯一语义源：标签「按计划开跑」+ `question` 字段全长 + 阈值 200） |
-| lib/gates/protocol-core.mjs | content-coverage.spec、protocol-audit、protocol-audit-core、protocol-core.spec、research-defaults.spec、skill-parser-contract.spec、strategy-core、evidence-audit-core、run-accept | Protocol **schema 半**：枚举/canonical/hash/validateProtocol/§研究方法 与 §Decisions 解析（无 IO；口径 = 核验 §6 + 表达层补篇 §4–§7） |
+| lib/gates/protocol-core.mjs | content-coverage.spec、protocol-audit、protocol-audit-core、protocol-core.spec、research-defaults.spec、skill-parser-contract.spec、strategy-core、evidence-audit-core、run-accept、topics-parsing.spec | Protocol **schema 半**：枚举/canonical/hash/validateProtocol/§研究方法 与 §Decisions 解析（无 IO；口径 = 核验 §6 + 表达层补篇 §4–§7） |
 | lib/gates/protocol-audit-core.mjs | protocol-audit、protocol-core.spec、run-accept.e2e | Protocol **bundle 级判据**：effort 合同/投影/策略行投影（通道/worker/预算 cap；fail-loud）/批准链/plan 引用/audit hash/版本快照 + `projectionOf`/卡文 + `methodLibraryEntryOf`（条目解析复用 pack `foldLibrary`，文件缺失=undefined / 条目缺失=null；无 IO） |
 | lib/gates/strategy-core.mjs | protocol-audit-core、strategy-core.spec | Strategy 投影（K/O/G/B）纯派生：Protocol + plan + topics → 通道/worker/角色/拓扑/门/预算；不读模型/会话 |
 | lib/analyze/stream-diagnostics-core.mjs | stream-diagnostics、stream-diagnostics.spec | 模型活动会话筛选（活动事件预筛后再按日志 mtime 取最近 N）+ 尝试时间线投影（assistant/message 计成功、assistant/attempt 计失败/无落面，终态三判 alive-or-idle/recovered/dead） |
@@ -176,9 +176,9 @@
 | lib/shared/skill-golden.mjs | record-skill-golden、skill-golden.test | skill 正文 sha256 清单与漂移判据（快照 B 只比 catalog） |
 | lib/channel/start-lock.mjs | start-channel、start-lock.test | 启动互斥：原子 mkdir + 每次取得的独有 owner 文件；release 仅删除本代文件并 rmdir，无在线 stale 接管；两个入口由 start-channel 统一持有 |
 | lib/channel/profile-guard.mjs | run-driver、profile-guard.test | run-driver 的非默认 profile 守卫：默认 profile 放行，其余 fail-loud（显式 `--allow-stale-profile` 才继续） |
-| lib/gates/findings-core.mjs | evidence-audit-core、node-gate-run-gates、review-contract、findings-contract.spec、template-contract.spec、topics-contract.spec、skill-parser-contract.spec、text-encoding-equivalence.spec | findings gap 四态 / lenses / lens_gaps 差集 / scope_role 闭集 |
+| lib/gates/findings-core.mjs | evidence-audit-core、node-gate-run-gates、protocol-core、review-contract、findings-contract.spec、template-contract.spec、topics-contract.spec、topics-parsing.spec、skill-parser-contract.spec、text-encoding-equivalence.spec | findings gap 四态 / lenses / lens_gaps 差集 / scope_role 闭集 |
 | lib/gates/review-contract.mjs | node-gate-delivery-gate、review-contract.spec | review 覆盖表（topic × lens）+ CRITICAL 与 readiness 交叉 |
-| lib/gates/plan-gate.mjs | node-gate-core、plan-gate.spec、skill-parser-contract.spec、text-encoding-equivalence.spec | plan 图硬结构（环/悬空/重号/自依赖）+ owner/kind/lifecycle/剩余工作/版本快照 |
+| lib/gates/plan-gate.mjs | node-gate-contracts.spec、node-gate-core、plan-gate.spec、skill-parser-contract.spec、text-encoding-equivalence.spec | plan 图硬结构（环/悬空/重号/自依赖）+ owner/kind/lifecycle/剩余工作/版本快照 |
 | lib/harness/role-picker.mjs | client-load.entry、role-picker.test | 角色选择器纯判据：四研究角色连续相邻 + Method Editor（D37）；逐角色 C 归场景级 |
 | lib/repo/pack-deps.mjs | pack.e2e、pack-deps.test | 发布物依赖闭包 = peers：require/动态 import()/.d.ts import 正向、死 peer 反向（host-row 显式 allowlist）、DSH-tag peer 范围 = engines.dsh |
 | lib/repo/publish-manifest.mjs | export-dist、pack.e2e、publish-manifest.test | 发布 manifest 收口：剥离 devDependencies/scripts + workspace 协议检查 |
@@ -216,9 +216,9 @@
 | lib/shared/artifact-freshness.mjs | artifact-freshness.test、lifecycle.entry、export-dist、release-check、e-workspace | `_dist` 产物 mtime 不早于 pack 源/构建（src/lib/presets/content/package）；旧 tarball → exit 2（BUG-174） |
 | lib/harness/run-accept-fixture.mjs | run-accept.e2e、run-accept-fixture.spec | claim 夹具的 review/readiness 文本（D51 同源：有声明 = declaration/PASS，缺声明 = missing/红） |
 | lib/gates/node-gate-core.mjs | node-gate、node-gate-delivery.spec、node-gate-leads.spec、node-gate-session.spec | bundle 判据聚合；唯一导出 = `gateBundle`，领域门直接 import 各自模块 |
-| lib/shared/node-gate-contracts.mjs | node-gate-contracts.spec、node-gate-delivery-gate、node-gate-delivery.spec、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、readiness-declaration.spec、review-readiness.spec、verdict-audit、verdict-audit-core、verdict-conformance.spec | 交付日期合同、readiness 与 decisions 行解析 |
+| lib/shared/node-gate-contracts.mjs | node-gate-contracts.spec、node-gate-delivery-gate、node-gate-delivery.spec、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、plan-gate、readiness-declaration.spec、review-readiness.spec、verdict-audit、verdict-audit-core、verdict-conformance.spec | 交付日期合同（含 findings/topics/plan 三门 2026-11-18 纪元）、readiness 与 decisions 行解析 |
 | lib/shared/node-gate-session-gates.mjs | ask-drive.spec、bundle-sessions、node-gate-core、node-gate-delivery-gate、node-gate-witness.spec、node-gate-delivery.spec、node-gate-session.spec、run-accept | HITL、present 与 §Decisions 会话门 |
-| lib/gates/node-gate-run-gates.mjs | node-gate-core、node-gate-leads.spec、node-gate-session.spec、findings-contract.spec、text-encoding-equivalence.spec | leads、版本与标题退化门 |
+| lib/gates/node-gate-run-gates.mjs | node-gate-contracts.spec、node-gate-core、node-gate-leads.spec、node-gate-session.spec、findings-contract.spec、text-encoding-equivalence.spec | leads、版本与标题退化门 |
 | lib/gates/node-gate-delivery-gate.mjs | node-gate-core、readiness-declaration.spec、run-receipt.spec | 门A 交付完整性判据 |
 | lib/gates/node-gate-reader-gate.mjs | node-gate-core、node-gate-reader.spec | 门C 读者版合同：同版/六节/长度/无来源路径；数字子集只 WARN；旧场/quick_factual 豁免 |
 | lib/gates/schema-scan-core.mjs | node-gate-contracts、node-gate-contracts.spec、node-gate-core、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、protocol-audit、run-accept、run-bundle-charter.spec、run-receipt.spec、schema-scan、schema-scan.spec、verdict-audit | 节点 I/O 契约在场级断言判据核（交付日/研究类型/条件件豁免/断代定红——从 run-gates 下沉修 lib→入口层反向依赖） |

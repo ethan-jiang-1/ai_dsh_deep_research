@@ -17,7 +17,7 @@ import type { MemberActivitySummary } from '../../lib/events/member-activity.ts'
 import { bindingTrust, type BindingTrust } from '../../lib/run/binding-trust.ts'
 import { openRun } from '../../lib/run/run-context.ts'
 import { streamFailureOf } from '../../lib/events/stream-failure.ts'
-import { decodeDeliveredReceipt, deliveryFromReceipt, finalVersionOfPath, latestFinalDelivery, latestPresentedFinalVersion } from '../../lib/run/final-target.ts'
+import { decodeDeliveredReceipt, deliveryFromReceipt, finalVersionOfPath, latestFinalDelivery, latestPresentedFinalVersion, receiptDeclaredVersionOf } from '../../lib/run/final-target.ts'
 import { runHealthOf } from '../../lib/run/health.ts'
 import { runVersionFaceOf, type RunVersionFace } from '../../lib/run/run-version.ts'
 import { parseReadinessDeclaration, readinessOfSources, reviewVerdictOf, type ReviewVerdict } from '../../lib/review/review-readiness.ts'
@@ -57,13 +57,15 @@ export interface StatusFeed {
   readonly anchors: ReturnType<typeof deriveAnchors>
   readonly health: ReturnType<typeof runHealthOf> | null
   readonly versionFace: RunVersionFace | null
+  /** 回执声明版本不在场（BUG-424）：视图用显性告警替代「已交付」。 */
+  readonly receiptDangling: boolean
 }
 
 export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   const { sessionId, follow, runSource, revealStatusTab, t, useSessions } = props
   const [state, dispatch] = useReducer(reduceStatusFeed, INITIAL_STATUS_FEED_STATE)
   const {
-    rows, hitl, journalEvents, face, unbound, trust, journalSeen, receiptDelivery,
+    rows, hitl, journalEvents, face, unbound, trust, journalSeen, receiptDelivery, receiptDangling,
     kickoffHold, error, reads, reviewVerdict, reviewDetail, scanSettled, memberSummaries,
   } = state
   // 时间推进面（BUG-351）：静默阈值必须能在观察期间跨过，不能把 now 冻在 memo 里。
@@ -207,7 +209,13 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         // 不冒充缺席，出「回执读取失败/不合法」提示）。
         const receiptArt = await readArtifact(view, 'delivered.json', { signal, decoder: decodeDeliveredReceipt })
         if (stopped) return
-        const nextReceiptDelivery = receiptArt.state === 'ok' ? deliveryFromReceipt(receiptArt.value, boundSlug) : null
+        // 回执的「声称」必须用盘上在场事实核对（BUG-424）：声明了 final/vN 而该版本不在场，
+        // 不得宣布已交付——回执只能自证「曾这样写」，不能自证「文件还在」。
+        const declaredVersion = receiptArt.state === 'ok' ? receiptDeclaredVersionOf(receiptArt.value) : null
+        const danglingReceipt = declaredVersion !== null && !finalFileNames.includes(`v${declaredVersion}.md`)
+        const nextReceiptDelivery = receiptArt.state === 'ok' && !danglingReceipt
+          ? deliveryFromReceipt(receiptArt.value, boundSlug)
+          : null
         const versions = latestRunVersion(finalFileNames)
         // 版本面事实：plan 头/重写记录 + plan/ 快照清单（rerun 版本轨的数据源，折算住 run-version）。
         const planArt = await readArtifact(view, 'plan.md', { signal })
@@ -267,6 +275,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         dispatch({
           kind: 'scan-succeeded',
           receiptDelivery: nextReceiptDelivery,
+          receiptDangling: danglingReceipt,
           reviewVerdict: nextReviewVerdict,
           reviewDetail: reading.detail ?? null,
           reads: {
@@ -367,6 +376,6 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
 
   return {
     rows, hitl, journalEvents, face, unbound, trust, journalSeen, kickoffHold, error, reads, reviewVerdict, reviewDetail, scanSettled, retry,
-    memberSummaries, team, members, delivery, streamFailure, anchors, health, versionFace,
+    memberSummaries, team, members, delivery, streamFailure, anchors, health, versionFace, receiptDangling,
   }
 }

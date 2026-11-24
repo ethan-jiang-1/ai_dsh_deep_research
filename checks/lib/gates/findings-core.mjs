@@ -28,6 +28,50 @@ export function listOf(raw) {
 
 const isTopField = (line) => /^\s*-\s*[A-Za-z_\u4e00-\u9fff]+\s*[:：]/.test(line)
 
+/** 列表值切分（lens / 内联 must_answer 共用）：半角/全角逗号与顿号；去反引号/强调与空项。 */
+const splitListItems = (raw) => String(raw ?? '')
+  .split(/[,，、]/)
+  .map((item) => item.replace(/`/g, '').replace(/\*\*/g, '').trim())
+  .filter(Boolean)
+
+/**
+ * `lenses` 行文法（**唯一正本**，BUG-428）：
+ *   - bullet 等价书写 `-` / `*` / `+`（CommonMark 同一语义）；
+ *   - 键大小写不敏感（`LENSES`）；
+ *   - 括号形态必须成对：`[a, b` 读不出（不猜），`[]` 是合法的零 lens；
+ *   - 无括号的 `- lenses:` 空值 = 读不出（旧 `lensScanOf` 语义）。
+ * `lensScanOf`（文件级扫描）与 `parseTopicsReport`（topic 级归属）都只调本函数。
+ * @returns {{ matched: boolean, ok: boolean, ids: string[] }} matched = 看起来是 lens 行；ok = 可解析。
+ */
+export function lensDeclarationOf(line) {
+  const match = /^\s*[-*+]\s*lenses\s*[:：]\s*(.*)$/i.exec(String(line ?? ''))
+  if (match === null) return { matched: false, ok: false, ids: [] }
+  const raw = (match[1] ?? '').trim()
+  if (raw.startsWith('[') || raw.endsWith(']')) {
+    const inner = /^\[(.*)\]$/.exec(raw)
+    if (inner === null) return { matched: true, ok: false, ids: [] }
+    return { matched: true, ok: true, ids: [...new Set(splitListItems(inner[1]))] }
+  }
+  const ids = [...new Set(splitListItems(raw))]
+  return { matched: true, ok: ids.length > 0, ids }
+}
+
+/**
+ * `depends_on` 值文法（BUG-429）：剥括注/强调后按逗号与空白切；`无`/`none`/`—` = 空依赖。
+ * 真实 run 里括注很常见（`T1（实体集合）`、`无（下游以此为准）`）——把注记当 id 会造出
+ * 「topic 不存在」的假悬空，诊断指向错误方向。
+ * @param {unknown} raw - `- depends_on:` 之后的值。
+ * @returns {string[]} topic id 列表（已去重）。
+ */
+export function dependsOnValueOf(raw) {
+  const stripped = String(raw ?? '')
+    .replace(/[（(][^）)]*[）)]/g, ' ')
+    .replace(/[`*]/g, ' ')
+  const items = stripped.split(/[,，、;；\s]+/).map((item) => item.trim()).filter(Boolean)
+  const ids = items.filter((item) => !/^(无|none|n\/a|—|–|-)$/i.test(item))
+  return [...new Set(ids)]
+}
+
 /** topics.md → { topics: Map<T#, {role,lenses,dependsOn,mustAnswer}>, duplicates, issues }。 */
 export function parseTopicsReport(text) {
   const topics = new Map()
@@ -36,6 +80,8 @@ export function parseTopicsReport(text) {
   /** @type {{ id: string, role: string, lenses: string[], dependsOn: string[], mustAnswer: string[] } | null} */
   let cur = null
   let inMustAnswer = false
+  /** lenses 行读不出（坏括号/空值）的原文行——与 lensScanOf.unparsable 同一判据。 */
+  const lensUnparsable = []
   for (const line of linesOf(text)) {
     const h = /^##\s+(T\d+)\b/.exec(line)
     if (h !== null) {
@@ -47,7 +93,7 @@ export function parseTopicsReport(text) {
     }
     if (/^##\s+/.test(line)) { cur = null; continue }
     if (cur === null) continue
-    const must = /^\s*-\s*must_answer\s*[:：]\s*(.*)$/.exec(line)
+    const must = /^\s*[-*+]\s*must_answer\s*[:：]\s*(.*)$/i.exec(line)
     if (must !== null) {
       inMustAnswer = true
       cur.mustAnswer = listOf(must[1])
@@ -58,12 +104,16 @@ export function parseTopicsReport(text) {
       cur.mustAnswer.push(scalarOf(line.replace(/^\s{2,}-\s+/, '')))
       continue
     }
-    const role = /^\s*-\s*scope_role\s*[:：]\s*(\S+)/m.exec(line)
+    const role = /^\s*[-*+]\s*scope_role\s*[:：]\s*(\S+)/i.exec(line)
     if (role !== null) cur.role = scalarOf(role[1])
-    const lenses = /^\s*-\s*lenses\s*[:：]\s*(.*)$/m.exec(line)
-    if (lenses !== null) cur.lenses = listOf(lenses[1])
-    const deps = /^\s*-\s*depends_on\s*[:：]\s*(.*)$/m.exec(line)
-    if (deps !== null) cur.dependsOn = listOf(deps[1])
+    // lenses 行文法与 lensScanOf 同源（BUG-428）：坏括号行交出来，不静默当合法。
+    const lens = lensDeclarationOf(line)
+    if (lens.matched) {
+      if (lens.ok) cur.lenses = lens.ids
+      else lensUnparsable.push(line.trim())
+    }
+    const deps = /^\s*[-*+]\s*depends_on\s*[:：]\s*(.*)$/i.exec(line)
+    if (deps !== null) cur.dependsOn = dependsOnValueOf(deps[1])
   }
   /** @type {string[]} */
   const issues = []
@@ -98,7 +148,7 @@ export function parseTopicsReport(text) {
     color.set(id, 2)
   }
   for (const id of ids) if (!color.has(id)) visit(id, [id])
-  return { topics, duplicates, issues }
+  return { topics, duplicates, issues, lensUnparsable }
 }
 
 /** 兼容包装：topics.md → Map<T#, {role,lenses,dependsOn,mustAnswer}>。 */

@@ -56,7 +56,7 @@ export type { FollowTarget, JournalFrame, ResearchStatusTabInjected, ResearchSta
 export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const {
     rows, hitl, face, unbound, trust, kickoffHold, error, reads, reviewVerdict, scanSettled, retry,
-    memberSummaries, members, delivery, streamFailure, anchors, health, versionFace,
+    memberSummaries, members, delivery, streamFailure, anchors, health, versionFace, receiptDangling,
   } = useStatusFeed(props)
 
   // 流程轨道件（锚点入轨，RFC cockpit-flow-face）：锚点段从 journal+文件折算（挂起期也在场），
@@ -116,7 +116,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     },
     [trust, kickoffHold, hitl.pending, pendingAnchor, face, steps, delivery, reads, reviewVerdict, scanSettled, props.t],
   )
-  const receiptIssue = receiptIssueKeyOf(reads.receipt)
+  const receiptIssue = receiptDangling ? 'statusReceiptDangling' : receiptIssueKeyOf(reads.receipt)
   const planIssueKey = planIssueKeyOf(reads.plan)
   const statusNotices = collectStatusNotices({ face, reads, reviewVerdict })
   const stalledBanner = stalledBannerOf(

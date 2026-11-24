@@ -6,6 +6,13 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [424](BUG-424-status-tab-claims-delivered-for-dangling-receipt.md) | 回执声明版本不在场仍说已交付 | （receiptDangling + 告警） | 2026-11-24 |
+| [425](BUG-425-delivery-gate-accepts-schema-invalid-receipt.md) | 交付门放行 schema 非法回执 | （复用 pack 解码器） | 2026-11-24 |
+| [426](BUG-426-english-hitl2-bypasses-delivery-guard.md) | 英文 HITL2 绕过交付代答闸 | （isDeliveryReviewCard ← askKindOf） | 2026-11-24 |
+| [427](BUG-427-bundle-bind-kickoff-detection-misses-structured-id-and-english.md) | 结构化/英文 HITL1 立项窗口失效 | （isKickoffCall ← askKindOf） | 2026-11-24 |
+| [428](BUG-428-topics-lenses-three-parsers-disagree.md) | lenses 三套读法/坏括号被接受 | （lensDeclarationOf 单一文法） | 2026-11-24 |
+| [429](BUG-429-depends-on-annotation-parsed-as-topic-id.md) | depends_on 括注被当 topic id | （dependsOnValueOf 剥注记） | 2026-11-24 |
+| [430](BUG-430-findings-topics-plan-gates-lack-contract-epoch.md) | findings/topics/plan 无契约纪元 | （三门接入 isPreContract） | 2026-11-24 |
 | [412](BUG-412-topics-crlf-must-answer-dropped-false-red.md) | CRLF topics 的 must_answer 全丢 | （linesOf 统一行切分） | 2026-11-24 |
 | [413](BUG-413-evidence-audit-crlf-quotes-dropped-fail-open.md) | CRLF 证据卡引文静默丢弃 | （linesOf 采集引文） | 2026-11-24 |
 | [414](BUG-414-bom-breaks-first-line-structure-across-gates.md) | BOM 让首行结构整条丢失 | （stripBom + linesOf 入口归一） | 2026-11-24 |

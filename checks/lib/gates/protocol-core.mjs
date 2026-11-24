@@ -13,6 +13,7 @@
 // - 不核 quote/claim/coverage/output 终稿语义（v2；critic 审）。
 // - 不改 plan 形状：effort 只读 plan/topics 的既有字段，不要求 cell 列。
 
+import { lensDeclarationOf } from './findings-core.mjs'
 import { createHash } from 'node:crypto'
 import { isActivePlanNode } from '../../../packages/deep-research-pack/src/lib/plan/plan-index.ts'
 
@@ -244,28 +245,19 @@ export function lensScanOf(topicsText) {
   const unparsable = []
   let cells = 0
   for (const line of text.split(/\r?\n/)) {
-    const declaration = /^\s*[-*+]\s+lenses\s*[:：]\s*(.*)$/i.exec(line)
-    if (declaration === null) {
-      if (/^\s*[-*+]\s+lenses\b/i.test(line)) unparsable.push(line.trim())
+    // 文法唯一正本 = findings-core 的 lensDeclarationOf（BUG-428）：本函数只做文件级汇总，
+    // topic 级归属由 parseTopicsReport 调同一函数。
+    const declaration = lensDeclarationOf(line)
+    if (declaration.matched) {
+      if (!declaration.ok) {
+        unparsable.push(line.trim())
+        continue
+      }
+      for (const id of declaration.ids) if (!ids.includes(id)) ids.push(id)
+      cells += declaration.ids.length
       continue
     }
-    const raw = declaration[1].trim()
-    const bracket = /^\[(.*)\]$/.exec(raw)
-    // 括号形态必须成对：`[a, b` / `[a, b]]` 读不出 → unparsable，不猜。
-    if (bracket === null && /[[\]]/.test(raw)) {
-      unparsable.push(line.trim())
-      continue
-    }
-    // 无括号是历史简写（真实场 `- lenses: official`）与逗号列表；空值才是读不出。
-    // 括号形态的 `[]` 是合法的零 lens 行（不参与计数，但不是解析失败）。
-    const payload = bracket === null ? raw : bracket[1]
-    if (payload === '' && bracket === null) {
-      unparsable.push(line.trim())
-      continue
-    }
-    const lineIds = [...new Set(payload.split(/[,，]/).map((id) => id.trim()).filter(Boolean))]
-    for (const id of lineIds) if (!ids.includes(id)) ids.push(id)
-    cells += lineIds.length
+    if (/^\s*[-*+]\s+lenses\b/i.test(line)) unparsable.push(line.trim())
   }
   return { cells, ids, unparsable }
 }

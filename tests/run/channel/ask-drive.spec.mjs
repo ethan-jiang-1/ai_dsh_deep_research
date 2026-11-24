@@ -447,7 +447,26 @@ test('自由文本关闭挂起的记账行：HITL1 卡不得被门认成 HITL2 �
 
 test('交付审阅卡识别（缺陷⑧）：选项缺"补研究/修订"族时，靠 ask 原文兜底（实测形态）', () => {
   const realCard = [{ header: '交付审阅', options: [{ label: '按现稿定稿 (Recommended)' }, { label: '继续打磨' }] }];
-  assert.equal(isDeliveryReviewCard(realCard), false, '仅按选项标签时识别不到——这正是缺陷⑧');
+  // 2026-11-24（BUG-426）：判型收敛到 askKindOf 后，这张卡**不带 askText 也认**——它的 wire 文本
+  // 含「按现稿定稿」，属判型正本的 hitl2 签名；旧断言（false）编码的是「只按选项标签」的旧实现。
+  assert.equal(isDeliveryReviewCard(realCard), true, '判型正本认得（按现稿定稿 = hitl2 签名）');
   assert.equal(isDeliveryReviewCard(realCard, JSON.stringify(realCard)), true, '原文含「交付审阅」→ 必须认（同钉）');
   assert.equal(isDeliveryReviewCard([{ header: '研究类型', options: [{ label: '探索性全景' }] }], '研究类型/深度/口径'), false, '计划卡不得误认');
 });
+
+// 负例留证 2026-11-24：BUG-426——交付卡识别只认中文字面（`定稿`/`交付审阅`），英文选项集
+// （`Finalize as is` / `More research`）判 false，交付代答闸对英文卡整体失效（fail-open）。
+// 红配方：把两处中文字面判据删回旧实现（不调 askKindOf / 不认英文 askText）。
+test('BUG-426：英文 HITL2 卡与结构化 id 都算交付审阅卡（判型与 askKindOf 同源）', () => {
+  const enCard = [{ id: 'hitl2_delivery', header: 'Delivery review', options: [{ label: 'Finalize as is' }, { label: 'More research' }] }]
+  assert.equal(isDeliveryReviewCard(enCard, ''), true, '英文交付卡必须被识别')
+  assert.equal(isDeliveryReviewCard(enCard, 'Delivery review'), true, '英文 askText 兜底')
+  // 结构化 id 优先（语言无关）：即使选项文案完全中性也必须认。
+  const neutral = [{ id: 'hitl2_delivery', header: 'Review', options: [{ label: 'A' }, { label: 'B' }] }]
+  assert.equal(isDeliveryReviewCard(neutral, ''), true, '结构化 id 必须优先于文案')
+  // 交付代答闸随判型生效：readiness FAIL + 默认档 → 自拒。
+  assert.equal(deliveryAnswerGuard({ isDeliveryCard: isDeliveryReviewCard(enCard, ''), readiness: 'FAIL', pick: 'recommended' }).allow, false)
+  // 负控：英文计划卡（HITL1）不得被认成交付卡。
+  const planCard = [{ id: 'research_type', header: 'Research type', options: [{ label: 'Exploratory' }, { label: 'Quick facts' }] }]
+  assert.equal(isDeliveryReviewCard(planCard, ''), false)
+})

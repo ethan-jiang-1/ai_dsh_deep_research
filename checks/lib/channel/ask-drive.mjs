@@ -8,6 +8,7 @@
 
 // 入参解析正本 = pack `journal-wire.ts` 的 argsObjectOf（JSON 串/对象 + 截断容错同一实现；
 // 2026-11-03 卫生审计 D2-4：scripts 四处自写 JSON.parse，wire 形态变化要改四处）。
+import { askKindOf } from '../../../packages/deep-research-pack/src/lib/events/hitl-fold.ts'
 import { argsObjectOf } from '../../../packages/deep-research-pack/src/lib/events/journal-wire.ts'
 
 /**
@@ -335,12 +336,15 @@ export function customLandedInBatch(obs) {
  * @returns 是否交付审阅卡。
  */
 export function isDeliveryReviewCard(questions, askText = '') {
+  // 判型正本 = pack `askKindOf`（结构化 id `hitl2_delivery` 优先，语言无关；文案兜底含英文）
+  // ——BUG-426：旧实现只认中文字面，英文 HITL2 卡在代答闸入口判 false（fail-open）。
+  if (askKindOf({ questions }) === 'hitl2') return true
   const labels = (Array.isArray(questions) ? questions : []).flatMap((q) => (Array.isArray(q?.options) ? q.options.map((o) => String(o?.label ?? o ?? '')) : []))
-  if (labels.some((l) => /定稿/.test(l)) && labels.some((l) => /补研究|修订/.test(l))) return true
+  if (labels.some((l) => /定稿|finalize/i.test(l)) && labels.some((l) => /补研究|修订|more research|revise/i.test(l))) return true
   // 文本级兜底（BUG-041 缺陷⑧，2026-10-19 实测）：真交付卡的选项集不一定同时含"补研究/修订"族
   // （当日那张只有「按现稿定稿」+「继续打磨」形态）→ 仅按选项标签会把交付卡误判成计划卡，记账行卡名写错。
-  // 故接受调用方传入的 ask 参数原文，命中「交付审阅/定稿」即认（与驱动器/探针判据同钉）。
-  return /交付审阅|定稿/.test(String(askText))
+  // 故接受调用方传入的 ask 参数原文，命中「交付审阅/定稿」或英文同义即认（与驱动器/探针判据同钉）。
+  return /交付审阅|定稿|delivery review|finalize|deliver as[- ]is/i.test(String(askText))
 }
 
 /**

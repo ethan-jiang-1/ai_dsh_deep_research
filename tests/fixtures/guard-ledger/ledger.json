@@ -2221,6 +2221,62 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把 remainingAfterLocal 换回 `legBudget(..., elapsed).fallback` → 预算用例红"
+    },
+    {
+      "id": "BUG-424",
+      "mechanism": "状态页把回执声明的终稿版本当已交付事实（回执只验 schema 不验盘上在场）",
+      "guard": "tests/cockpit/client/tabs-fault-matrix.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 receiptDangling 判定（回执 ok 即 delivery）→ 声明 v9 不存在的用例仍显示「已交付」"
+    },
+    {
+      "id": "BUG-425",
+      "mechanism": "交付门 receiptProblems 只验哈希，不回执 schema/slug（与驾驶舱 decodeDeliveredReceipt 判据分叉）",
+      "guard": "tests/run/gates/run-receipt.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 receiptProblems 里的 decodeDeliveredReceipt 调用 → version=2/gate=FAIL/slug 不符 全放行"
+    },
+    {
+      "id": "BUG-426",
+      "mechanism": "isDeliveryReviewCard 只认中文字面，英文/结构化 id 的 HITL2 卡判 false（交付代答闸 fail-open）",
+      "guard": "tests/run/channel/ask-drive.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 isDeliveryReviewCard 改回中文字面判据（不调 askKindOf）→ 英文卡用例红"
+    },
+    {
+      "id": "BUG-427",
+      "mechanism": "isKickoffCall 只认中文字面「研究类型」，结构化 id/英文 HITL1 的立项窗口不抑制上一场 run",
+      "guard": "tests/run/gates/bundle-bind.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "把 isKickoffCall 改回 JSON.stringify.includes('研究类型') → 结构化 id/英文题面用例红"
+    },
+    {
+      "id": "BUG-428",
+      "mechanism": "lenses 行三套读法（lensScanOf 严格 vs parseTopicsReport 宽松且只认 `-`），等价书写静默丢 lens 义务",
+      "guard": "tests/run/gates/topics-parsing.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 parseTopicsReport 的 lens 行改回 `- lenses:` 字面 + listOf → 等价书写/坏括号用例红"
+    },
+    {
+      "id": "BUG-429",
+      "mechanism": "depends_on 的括注被当成 topic id（`无（说明）`/全角逗号注记造假悬空）",
+      "guard": "tests/run/gates/topics-parsing.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 dependsOnValueOf 改回裸 listOf → 括注用例红"
+    },
+    {
+      "id": "BUG-430",
+      "mechanism": "findings/topics/plan 三门无契约纪元豁免，历史 bundle 一律 RED（同族五门都有）",
+      "guard": "tests/run/gates/node-gate-contracts.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉三门 isPreContract 分支 → 契约前 bundle 用例红（RED 而非 PRE-CONTRACT）"
     }
   ]
 }

@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url'
 import { isActivePlanNode, planIndex, planIssuesOf } from '../../../packages/deep-research-pack/src/lib/plan/plan-index.ts'
 import { presetRoles } from '../shared/roles.mjs'
 import { linesOf } from '../../../packages/deep-research-pack/src/lib/shared/text-fold.ts'
+import { PLAN_CONTRACT_DATE, PRE_CONTRACT_NOTE, isPreContract } from '../shared/node-gate-contracts.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 export const PLAN_KINDS = Object.freeze(['broad-scan', 'deep-dive', 'cross-check', 'synthesis', 'review', 'gate', 'fetch'])
@@ -28,7 +29,7 @@ const sectionOf = (text, heading) => {
 }
 
 /** 门 P（plan 结构/字段）。plan.md 缺席 = N/A（在场级归 schema-scan）。 */
-export function planGate(bundleDir) {
+export function planGate(bundleDir, planDate) {
   const p = join(bundleDir, 'plan.md')
   if (!existsSync(p)) return { status: 'N/A', detail: 'plan.md 不在场——门 P 无对象（在场级归 schema-scan）' }
   const text = readFileSync(p, 'utf8')
@@ -149,7 +150,11 @@ export function planGate(bundleDir) {
       if (node.taskId === 'plan-only') issues.push(`${node.id} 无 Wave 执行层却写 plan-only（BUG-306）`)
     }
   }
-  if (issues.length > 0) return { status: 'RED', detail: issues.slice(0, 8).join('；') }
+  if (issues.length > 0) {
+    // 断代（BUG-430）：契约前交付的 plan 形态不追溯（与同族五门同口径）。
+    const preContract = isPreContract(bundleDir, planDate, PLAN_CONTRACT_DATE)
+    return { status: preContract ? 'PRE-CONTRACT' : 'RED', detail: issues.slice(0, 8).join('；') + (preContract ? PRE_CONTRACT_NOTE : '') }
+  }
   const softNote = soft.length > 0 ? `；迁移提示：${[...new Set(soft)].join('/')}` : ''
   return { status: 'PASS', detail: `节点 ${index.nodes.length}；图无环/无悬空/无重号；字段/剩余工作/版本链齐${softNote}` }
 }

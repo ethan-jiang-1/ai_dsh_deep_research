@@ -151,3 +151,22 @@ test('BUG-135 slug 字符集：下划线/点号/大写目录也绑定', () => {
   assert.equal(sessionBundleOf([call('write', { file_path: 'drt_Mixed_Case/final.md' })]), 'Mixed_Case')
   assert.equal(sessionBundleOf([call('write', { file_path: 'drt_bad slug/final.md' })]), undefined)
 })
+
+// 负例留证 2026-11-24：BUG-427——kickoffSeen 只认中文字面「研究类型」；结构化 id
+// `research_type` 或英文题面（文档推荐形态）判 false，立项窗口把上一场 run 当本场。
+// 红配方：把 isKickoffCall 的判型改回 `JSON.stringify(obj).includes('研究类型')`。
+test('BUG-427：结构化 id / 英文 HITL1 同样触发 kickoffSeen（与 askKindOf 同源）', () => {
+  const withRead = (askArgs) => [call('read', { path: 'drt_old-run/final.md' }), call('ask_user_question', askArgs)]
+  for (const [label, askArgs] of [
+    ['结构化 id', { questions: [{ id: 'research_type', header: 'Research type' }] }],
+    ['英文题面', { questions: [{ header: 'Research type' }] }],
+    ['中文题面（回归）', { questions: [{ header: '研究类型' }] }],
+  ]) {
+    const b = sessionBindingOf(withRead(askArgs))
+    assert.equal(b.kickoffSeen, true, `${label} 必须触发 kickoffSeen`)
+    assert.equal(b.slug, 'old-run')
+    assert.equal(b.boundBy, 'read')
+  }
+  // 负控：HITL2 交付审阅卡不是立项（BUG-096），不得触发 kickoffSeen。
+  assert.equal(sessionBindingOf([call('ask_user_question', { questions: [{ id: 'hitl2_delivery', header: 'Delivery review' }] })]).kickoffSeen, false)
+})

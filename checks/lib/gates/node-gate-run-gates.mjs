@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { contractEpochOf, runSchemaOf, runType } from './schema-scan-core.mjs'
 import { finalVersionsIn } from '../shared/final-version.mjs'
-import { HEADING_CONTRACT_DATE, LEADS_CONTRACT_DATE, PRE_CONTRACT_NOTE, VERSION_CONTRACT_DATE, decisionsLines, isPreContract } from '../shared/node-gate-contracts.mjs'
+import { FINDINGS_CONTRACT_DATE, HEADING_CONTRACT_DATE, LEADS_CONTRACT_DATE, PRE_CONTRACT_NOTE, TOPICS_CONTRACT_DATE, VERSION_CONTRACT_DATE, decisionsLines, isPreContract } from '../shared/node-gate-contracts.mjs'
 import { findingsContractIssues, SCOPE_ROLES, topicsContractIssues } from './findings-core.mjs'
 import { linesOf } from '../../../packages/deep-research-pack/src/lib/shared/text-fold.ts'
 
@@ -278,17 +278,25 @@ export function headingGate(bundleDir, headingDate) {
  * 门 F（findings 契约；BUG-252/256）：gap 四态 + lens_gaps 显式且与 topics/evidence 差集一致。
  * findings.md 缺席 = N/A（在场级归 schema-scan，不越界双判）。
  */
-export function findingsGate(bundleDir) {
+export function findingsGate(bundleDir, findingsDate) {
   const issues = findingsContractIssues(bundleDir)
   if (issues === null) return { status: 'N/A', detail: 'findings.md 不在场——门 F 无对象（在场级归 schema-scan）' }
-  if (issues.length > 0) return { status: 'RED', detail: issues.slice(0, 8).join('；') }
+  // 断代（BUG-430，与 leads/version/heading/delivery/reader 同口径）：契约前交付按旧形态写，
+  // 如实报告不计红——存量由对账步处置，run bundle 是交付记录不改历史。
+  if (issues.length > 0) {
+    const preContract = isPreContract(bundleDir, findingsDate, FINDINGS_CONTRACT_DATE)
+    return { status: preContract ? 'PRE-CONTRACT' : 'RED', detail: issues.slice(0, 8).join('；') + (preContract ? PRE_CONTRACT_NOTE : '') }
+  }
   return { status: 'PASS', detail: 'gap 四态合法；lens_gaps 与 topics/evidence 差集一致' }
 }
 
 /** 门 T（topics 结构；BUG-264/265/266/277）：重复 T# / must_answer 2–5 / depends_on 图 / lens 闭集。 */
-export function topicsGate(bundleDir) {
+export function topicsGate(bundleDir, topicsDate) {
   const issues = topicsContractIssues(bundleDir)
   if (issues === null) return { status: 'N/A', detail: 'topics.md 不在场——门 T 无对象（在场级归 schema-scan）' }
-  if (issues.length > 0) return { status: 'RED', detail: issues.slice(0, 8).join('；') }
+  if (issues.length > 0) {
+    const preContract = isPreContract(bundleDir, topicsDate, TOPICS_CONTRACT_DATE)
+    return { status: preContract ? 'PRE-CONTRACT' : 'RED', detail: issues.slice(0, 8).join('；') + (preContract ? PRE_CONTRACT_NOTE : '') }
+  }
   return { status: 'PASS', detail: 'T# 唯一；must_answer 2–5；depends_on 图无环/无悬空；lens id 合法' }
 }
