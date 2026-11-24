@@ -69,8 +69,10 @@
 
 ## 未证边界（留给触发）
 
-- **浏览器真机未跑**：424 触及 client（状态页交付横幅），证据是 JSDOM + RTL；观感仍在
-  `client-load.entry` 档（本环境此前的阻塞 = 主机负载预检 / 原生 addon 未构建，非本批范围）。
+- **浏览器真机未跑（NOT-RUN ≠ pass）**：424 触及 client（状态页交付横幅），证据是 JSDOM + RTL；
+  观感仍在 `client-load.entry` 档。本批复跑记录：`pnpm build` 通过后仍被主机健康预检拒绝
+  （load/cpu 1.97 > 1.5，负载来自本批之外）。触发 = 下一次发布前收尾或换环境补跑
+  `client-load.entry --seed tests/fixtures/client-load-home`。
 - **契约日按提交日取（2026-11-18）**：若某场 run 在该日当天交付、且写的是旧形态，
   会被判 PRE-CONTRACT 豁免一次；这与同族五门的「日粒度」口径一致，未做时分精度。
 - **`lensDeclarationOf` 的括号闭集 = `[...]`**：其他括号（`【】`/`（）`）不认，按「读不出」
