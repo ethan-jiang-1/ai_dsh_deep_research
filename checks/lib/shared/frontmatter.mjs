@@ -13,7 +13,9 @@
 
 /** 拆 frontmatter → `{ fm: Record<string,string> | null, body: string }`。 */
 export function splitFrontmatter(text) {
-  const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(text)
+  // BOM 不是内容：带 BOM 的文件必须与不带同判（BUG-414；RFC 8259 §8.1 同理 allow BOM 忽略）。
+  const source = typeof text === 'string' && text.charCodeAt(0) === 0xfeff ? text.slice(1) : text
+  const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(source)
   if (!m) return { fm: null, body: text }
   const fm = {}
   for (const line of m[1].split(/\r?\n/)) {

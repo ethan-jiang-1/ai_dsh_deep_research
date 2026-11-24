@@ -5,6 +5,7 @@ import { contractEpochOf, runSchemaOf, runType } from './schema-scan-core.mjs'
 import { finalVersionsIn } from '../shared/final-version.mjs'
 import { HEADING_CONTRACT_DATE, LEADS_CONTRACT_DATE, PRE_CONTRACT_NOTE, VERSION_CONTRACT_DATE, decisionsLines, isPreContract } from '../shared/node-gate-contracts.mjs'
 import { findingsContractIssues, SCOPE_ROLES, topicsContractIssues } from './findings-core.mjs'
+import { linesOf } from '../../../packages/deep-research-pack/src/lib/shared/text-fold.ts'
 
 /**
  * 门 L（leads 交接门，可导入；keyless）。断代日期可注入（tests——夹具 mtime 不可靠）。
@@ -30,7 +31,7 @@ export function leadsGate(bundleDir, leadsDate) {
   const sections = []
   /** @type {{ heading: string, body: string[] } | null} */
   let cur = null
-  for (const line of text.split('\n')) {
+  for (const line of linesOf(text)) {
     if (/^#{2,4}\s+/.test(line)) {
       if (cur) sections.push(cur)
       cur = { heading: line.replace(/^#{2,4}\s+/, ''), body: [] }
@@ -111,7 +112,7 @@ export function leadsGate(bundleDir, leadsDate) {
     const tSections = /** @type {Array<{ heading: string, body: string[] }>} */ ([])
     /** @type {{ heading: string, body: string[] } | null} */
     let tcur = null
-    for (const line of tText.split('\n')) {
+    for (const line of linesOf(tText)) {
       if (/^##\s+/.test(line)) {
         if (tcur) tSections.push(tcur)
         tcur = { heading: line.replace(/^##\s+/, ''), body: [] }
@@ -124,6 +125,10 @@ export function leadsGate(bundleDir, leadsDate) {
       const roleM = s.body.join('\n').match(/^\s*-\s*scope_role[:：]\s*(\S+)/m)
       const rawRole = roleM ? roleM[1] : ''
       const role = rawRole.toLowerCase()
+      // 覆盖判据的前提 = topic 声明了 scope_role；缺省会让 requiredCount 变 0（空门，BUG-421）。
+      if (rawRole === '') {
+        problems.push(`topics ${idM[1]} 缺 scope_role（覆盖判据的前提；缺省不得当成「无需覆盖」）`)
+      }
       if (rawRole !== '' && !SCOPE_ROLES.includes(rawRole)) {
         problems.push(`topics ${idM[1]} 的 scope_role「${rawRole}」非法（合法 = ${SCOPE_ROLES.join('/')}；未知值不得静默当 supporting）`)
       }
@@ -196,8 +201,7 @@ export function versionGate(bundleDir, versionDate) {
     if (idxText !== null) {
       // 登记判定跳过 `>` 引用行——模板脚注（rerun 语义规则文本）本身含 "vN"，朴素 includes
       // 永远误绿（红绿纪律实测抓出）；真实登记形态 = 内容行（列表/表格/粗体，三场 v2 run 实证）。
-      const idxHit = idxText
-        .split('\n')
+      const idxHit = linesOf(idxText)
         .filter((l) => !/^\s*>/.test(l))
         .some((l) => l.includes(tag))
       if (!idxHit) {
@@ -241,7 +245,7 @@ export function headingGate(bundleDir, headingDate) {
   const text = readFileSync(finalPath, 'utf8')
   const counts = new Map()
   let total = 0
-  for (const line of text.split('\n')) {
+  for (const line of linesOf(text)) {
     const m = line.match(/^#{1,6}\s+(.*\S)?\s*$/)
     if (!m) continue
     const title = (m[1] ?? '').trim()

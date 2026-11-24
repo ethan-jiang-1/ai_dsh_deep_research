@@ -9,6 +9,7 @@
  * 本文件只负责展示与 store；建会话/发 prompt 走注入（`ensure`/`send`），门禁把 slot 注册留在
  * `index.ts`（registrations are effects）。
  */
+import { errorDetailOf } from '../../lib/shared/error-detail.ts'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
@@ -177,6 +178,8 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
         if (openState !== undefined && openState !== 'open') throw new Error(t('coachHistoryNotReady', { state: openState }))
         if (cancelled) return
         setCoach(result)
+        // 成功即清错：否则面板会同时说「就绪」与「暂不可用」（BUG-418）。
+        setError(null)
         onCoach?.(result.id)
       } catch (cause) {
         if (held !== null) {
@@ -185,7 +188,7 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
           setTimeout(() => { reference.release() }, 0)
         }
         if (!cancelled) {
-          setError(String(cause))
+          setError(errorDetailOf(cause))
           onError?.(cause)
         }
       }

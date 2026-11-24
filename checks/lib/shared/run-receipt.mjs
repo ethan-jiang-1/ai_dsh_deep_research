@@ -7,6 +7,7 @@
 //   · 校验：receiptProblems 复算 final/audit 哈希——门禁消费，回执不再只写不读。
 // 权威边界：回执不是指令、不自证批准；它只把「验收时的事实」固定成可复算的记录。
 import { createHash } from 'node:crypto'
+import { stripBom } from '../../../packages/deep-research-pack/src/lib/shared/text-fold.ts'
 import { existsSync, readdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
 import { basename, join, resolve, sep } from 'node:path'
 import { portableBundlePath } from './path-hygiene.mjs'
@@ -114,7 +115,7 @@ export function receiptProblems(bundleDir) {
   const path = join(bundleDir, 'delivered.json')
   if (!existsSync(path)) return { problems: [], receipt: null }
   let receipt
-  try { receipt = JSON.parse(readFileSync(path, 'utf8')) } catch {
+  try { receipt = JSON.parse(stripBom(readFileSync(path, 'utf8'))) } catch {
     return { problems: ['delivered.json 不可解析（JSON）——回执损坏，不能作为交付见证'], receipt: null }
   }
   const problems = []

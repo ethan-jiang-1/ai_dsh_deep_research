@@ -164,7 +164,7 @@
 | lib/analyze/unconsumed-evidence.mjs | unconsumed-evidence、unconsumed-evidence.spec | B1 机械基座：evidence/ 未进 findings.md 的差集投影（critic 差集出题的操作侧对账；CLI 壳 = probes/analyze/unconsumed-evidence） |
 | lib/gates/acceptance-check.mjs | acceptance-check、acceptance-check.spec | 收活判据机械求值：PASS/FAIL/UNVERIFIED 三态（DeerFlow acceptance_criteria keyless 移植，判不了永不静默放行；CLI 壳 = checks/run-gates/acceptance-check） |
 | lib/shared/hitl-provenance.mjs | ask-drive.spec、client-hitl.entry、hitl-answer、hitl-provenance.spec、node-gate-witness.spec、run-kickoff | 代答 provenance 写盘（BUG-014 正修——代理模拟显式记账；BUG-017 题面富集） |
-| lib/shared/local-date.mjs | export-dist、hitl-answer、local-date.spec、schema-scan-core、schema-scan.spec | 人读日期行本地口径（与 bash date 同源；BUG-017 正修——UTC slice 凌晨窗口差一天） |
+| lib/shared/local-date.mjs | export-dist、hitl-answer、local-date.spec、local-date-usage.test、run-kickoff、runtime-clean、schema-scan-core、schema-scan.spec | 人读日期行本地口径（与 bash date 同源；BUG-017 / BUG-416 正修——UTC slice 凌晨窗口差一天；守卫 = local-date-usage.test 扫 tools/checks 的 UTC 切片） |
 | lib/gates/bundle-date-sanity.mjs | bundle-date-sanity.spec、run-accept | run bundle 未来日期检查（操作侧验收前哨——r1-license 29 处未来日期事故的机械面；消费语境 = run-accept 行） |
 | lib/harness/vendor-artifacts.mjs | cdp-ask.entry、client-hitl.entry、client-load.entry、defaults-probe、discipline-probe、wave-execution-probe、entry-chain-probe、l4-lite.e2e、preset.e2e、session-replay、team-preflight.e2e、vendor-artifacts.spec | vendor 构建产物自检 |
 | lib/repo/backlog-liveness.mjs | backlog-liveness.test、f-repo、staged-change-pairing | 问题卡、缺陷、调研、方法与归档索引的结构合同；被 verify 入口与 keyless 回归消费 |
@@ -176,9 +176,9 @@
 | lib/shared/skill-golden.mjs | record-skill-golden、skill-golden.test | skill 正文 sha256 清单与漂移判据（快照 B 只比 catalog） |
 | lib/channel/start-lock.mjs | start-channel、start-lock.test | 启动互斥：原子 mkdir + 每次取得的独有 owner 文件；release 仅删除本代文件并 rmdir，无在线 stale 接管；两个入口由 start-channel 统一持有 |
 | lib/channel/profile-guard.mjs | run-driver、profile-guard.test | run-driver 的非默认 profile 守卫：默认 profile 放行，其余 fail-loud（显式 `--allow-stale-profile` 才继续） |
-| lib/gates/findings-core.mjs | evidence-audit-core、node-gate-run-gates、review-contract、findings-contract.spec、template-contract.spec、topics-contract.spec、skill-parser-contract.spec | findings gap 四态 / lenses / lens_gaps 差集 / scope_role 闭集 |
+| lib/gates/findings-core.mjs | evidence-audit-core、node-gate-run-gates、review-contract、findings-contract.spec、template-contract.spec、topics-contract.spec、skill-parser-contract.spec、text-encoding-equivalence.spec | findings gap 四态 / lenses / lens_gaps 差集 / scope_role 闭集 |
 | lib/gates/review-contract.mjs | node-gate-delivery-gate、review-contract.spec | review 覆盖表（topic × lens）+ CRITICAL 与 readiness 交叉 |
-| lib/gates/plan-gate.mjs | node-gate-core、plan-gate.spec、skill-parser-contract.spec | plan 图硬结构（环/悬空/重号/自依赖）+ owner/kind/lifecycle/剩余工作/版本快照 |
+| lib/gates/plan-gate.mjs | node-gate-core、plan-gate.spec、skill-parser-contract.spec、text-encoding-equivalence.spec | plan 图硬结构（环/悬空/重号/自依赖）+ owner/kind/lifecycle/剩余工作/版本快照 |
 | lib/harness/role-picker.mjs | client-load.entry、role-picker.test | 角色选择器纯判据：四研究角色连续相邻 + Method Editor（D37）；逐角色 C 归场景级 |
 | lib/repo/pack-deps.mjs | pack.e2e、pack-deps.test | 发布物依赖闭包 = peers：require/动态 import()/.d.ts import 正向、死 peer 反向（host-row 显式 allowlist）、DSH-tag peer 范围 = engines.dsh |
 | lib/repo/publish-manifest.mjs | export-dist、pack.e2e、publish-manifest.test | 发布 manifest 收口：剥离 devDependencies/scripts + workspace 协议检查 |
@@ -218,15 +218,15 @@
 | lib/gates/node-gate-core.mjs | node-gate、node-gate-delivery.spec、node-gate-leads.spec、node-gate-session.spec | bundle 判据聚合；唯一导出 = `gateBundle`，领域门直接 import 各自模块 |
 | lib/shared/node-gate-contracts.mjs | node-gate-contracts.spec、node-gate-delivery-gate、node-gate-delivery.spec、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、readiness-declaration.spec、review-readiness.spec、verdict-audit、verdict-audit-core、verdict-conformance.spec | 交付日期合同、readiness 与 decisions 行解析 |
 | lib/shared/node-gate-session-gates.mjs | ask-drive.spec、bundle-sessions、node-gate-core、node-gate-delivery-gate、node-gate-witness.spec、node-gate-delivery.spec、node-gate-session.spec、run-accept | HITL、present 与 §Decisions 会话门 |
-| lib/gates/node-gate-run-gates.mjs | node-gate-core、node-gate-leads.spec、node-gate-session.spec、findings-contract.spec | leads、版本与标题退化门 |
+| lib/gates/node-gate-run-gates.mjs | node-gate-core、node-gate-leads.spec、node-gate-session.spec、findings-contract.spec、text-encoding-equivalence.spec | leads、版本与标题退化门 |
 | lib/gates/node-gate-delivery-gate.mjs | node-gate-core、readiness-declaration.spec、run-receipt.spec | 门A 交付完整性判据 |
 | lib/gates/node-gate-reader-gate.mjs | node-gate-core、node-gate-reader.spec | 门C 读者版合同：同版/六节/长度/无来源路径；数字子集只 WARN；旧场/quick_factual 豁免 |
 | lib/gates/schema-scan-core.mjs | node-gate-contracts、node-gate-contracts.spec、node-gate-core、node-gate-delivery-gate、node-gate-reader-gate、node-gate-run-gates、node-gate-session-gates、protocol-audit、run-accept、run-bundle-charter.spec、run-receipt.spec、schema-scan、schema-scan.spec、verdict-audit | 节点 I/O 契约在场级断言判据核（交付日/研究类型/条件件豁免/断代定红——从 run-gates 下沉修 lib→入口层反向依赖） |
 | lib/analyze/run-dashboard-core.mjs | evaluation-contract.test、run-dashboard、run-dashboard-html、run-dashboard.spec | M2 run 观察面解析/场景/模型纯管线（全 fail-soft；HTML 渲染 = run-dashboard-html，CLI/watch/写盘归壳） |
 | lib/analyze/run-dashboard-html.mjs | run-dashboard、run-dashboard.spec | M2 run 观察面 HTML 渲染薄壳（纯字符串拼接；矩阵/统计来自 core，不读盘） |
-| lib/gates/evidence-audit-core.mjs | evidence-audit、evidence-audit.spec、provenance.spec、skill-parser-contract.spec、template-contract.spec | 证据溯源审计判据核心（readLog 注入同上） |
-| lib/gates/verdict-audit-core.mjs | verdict-audit、verdict-audit.spec、verdict-audit-fixture.spec、skill-parser-contract.spec | claim 级裁决判据核心：claims/verdicts 形状与键集、覆盖（critical 全有结论性裁决）、raw 原文重解析（raw 带 ```json 围栏时只剥一层解析，原文比对不放宽）、逐字一致（跨轮单调）、child preset/depth/只读；`parseSessionFacts` = 真实 v4 日志线形 → 会话事实（CLI 只做定位/解压），readiness 读法复用 node-gate 同源 |
+| lib/gates/evidence-audit-core.mjs | evidence-audit、evidence-audit.spec、provenance.spec、skill-parser-contract.spec、template-contract.spec、text-encoding-equivalence.spec | 证据溯源审计判据核心（readLog 注入同上） |
+| lib/gates/verdict-audit-core.mjs | verdict-audit、verdict-audit.spec、verdict-audit-fixture.spec、skill-parser-contract.spec、text-encoding-equivalence.spec | claim 级裁决判据核心：claims/verdicts 形状与键集、覆盖（critical 全有结论性裁决）、raw 原文重解析（raw 带 ```json 围栏时只剥一层解析，原文比对不放宽）、逐字一致（跨轮单调）、child preset/depth/只读；`parseSessionFacts` = 真实 v4 日志线形 → 会话事实（CLI 只做定位/解压），readiness 读法复用 node-gate 同源 |
 | lib/gates/provenance.mjs | evidence-audit-core、provenance.spec | 离线来源证明：kind/URL/路径 + sha256 + 时间 + 通道 + 切片；local-file 哈希核对 |
 | lib/analyze/run-inventory-core.mjs | run-inventory、run-inventory.spec | 只读保留期折算（逐场文件数/字节/最老；合计；1024 进制格式化） |
 | lib/channel/runtime-clean-core.mjs | runtime-clean、runtime-clean.spec | 运行区清理纯判据：白名单容器/实验根 + 子树最新 mtime 保留期；symlink/未知名/穿越 fail-closed |
-| lib/shared/run-receipt.mjs | node-gate-delivery-gate、run-accept、run-bundle-charter.spec、run-receipt.spec | 交付回执（delivered/manifest/acceptance）纯生成与校验：present 取最新版本化、语料根写可复算标签、final/audit/reader 哈希复算（门A/门C 消费） |
+| lib/shared/run-receipt.mjs | node-gate-delivery-gate、run-accept、run-bundle-charter.spec、run-receipt.spec、text-encoding-equivalence.spec | 交付回执（delivered/manifest/acceptance）纯生成与校验：present 取最新版本化、语料根写可复算标签、final/audit/reader 哈希复算（门A/门C 消费） |

@@ -27,13 +27,13 @@
 | channel | `checks/lib/channel/start-lock` | `tests/checks/channel/start-lock.test.mjs` |
 | gates | `checks/lib/gates/acceptance-check` | `tests/run/gates/acceptance-check.spec.mjs` |
 | gates | `checks/lib/gates/bundle-date-sanity` | `tests/run/gates/bundle-date-sanity.spec.mjs` |
-| gates | `checks/lib/gates/evidence-audit-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/evidence-audit.spec.mjs`<br>`tests/run/gates/provenance.spec.mjs` |
-| gates | `checks/lib/gates/findings-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/topics-contract.spec.mjs` |
+| gates | `checks/lib/gates/evidence-audit-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/evidence-audit.spec.mjs`<br>`tests/run/gates/provenance.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs` |
+| gates | `checks/lib/gates/findings-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/template-contract.spec.mjs`<br>`tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs`<br>`tests/run/gates/topics-contract.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-core` | `tests/run/gates/node-gate-delivery.spec.mjs`<br>`tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-delivery-gate` | `tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs` |
 | gates | `checks/lib/gates/node-gate-reader-gate` | `tests/run/gates/node-gate-reader.spec.mjs` |
-| gates | `checks/lib/gates/node-gate-run-gates` | `tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs` |
-| gates | `checks/lib/gates/plan-gate` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/run/gates/plan-gate.spec.mjs` |
+| gates | `checks/lib/gates/node-gate-run-gates` | `tests/run/gates/findings-contract.spec.mjs`<br>`tests/run/gates/node-gate-leads.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs` |
+| gates | `checks/lib/gates/plan-gate` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/run/gates/plan-gate.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs` |
 | gates | `checks/lib/gates/protocol-audit-core` | `tests/run/gates/protocol-core.spec.mjs` |
 | gates | `checks/lib/gates/protocol-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/content-coverage.spec.mjs`<br>`tests/pack/defaults/research-defaults.spec.mjs`<br>`tests/run/gates/protocol-core.spec.mjs` |
 | gates | `checks/lib/gates/provenance` | `tests/run/gates/provenance.spec.mjs` |
@@ -41,7 +41,7 @@
 | gates | `checks/lib/gates/run-source-node` | `tests/run/gates/run-context-node.spec.mjs` |
 | gates | `checks/lib/gates/schema-scan-core` | `tests/contracts/run-bundle-charter.spec.mjs`<br>`tests/run/gates/node-gate-contracts.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs`<br>`tests/run/gates/schema-scan.spec.mjs` |
 | gates | `checks/lib/gates/strategy-core` | `tests/run/gates/strategy-core.spec.mjs` |
-| gates | `checks/lib/gates/verdict-audit-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/run/gates/verdict-audit-fixture.spec.mjs`<br>`tests/run/gates/verdict-audit.spec.mjs` |
+| gates | `checks/lib/gates/verdict-audit-core` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs`<br>`tests/run/gates/verdict-audit-fixture.spec.mjs`<br>`tests/run/gates/verdict-audit.spec.mjs` |
 | harness | `checks/lib/harness/browser-cache` | `tests/run/harness/browser-cache.spec.mjs` |
 | harness | `checks/lib/harness/clean-room` | — |
 | harness | `checks/lib/harness/clean-room-policy` | `tests/checks/harness/clean-room-policy.test.mjs` |
@@ -87,7 +87,7 @@
 | shared | `checks/lib/shared/final-version` | `tests/run/gates/final-version.spec.mjs` |
 | shared | `checks/lib/shared/frontmatter` | `tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/run/shared/frontmatter.spec.mjs` |
 | shared | `checks/lib/shared/hitl-provenance` | `tests/run/channel/ask-drive.spec.mjs`<br>`tests/run/channel/hitl-provenance.spec.mjs`<br>`tests/run/gates/node-gate-witness.spec.mjs` |
-| shared | `checks/lib/shared/local-date` | `tests/run/gates/schema-scan.spec.mjs`<br>`tests/run/shared/local-date.spec.mjs` |
+| shared | `checks/lib/shared/local-date` | `tests/checks/shared/local-date-usage.test.mjs`<br>`tests/run/gates/schema-scan.spec.mjs`<br>`tests/run/shared/local-date.spec.mjs` |
 | shared | `checks/lib/shared/node-gate-contracts` | `tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/gates/node-gate-contracts.spec.mjs`<br>`tests/run/gates/node-gate-delivery.spec.mjs`<br>`tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/review-readiness.spec.mjs` |
 | shared | `checks/lib/shared/node-gate-session-gates` | `tests/run/channel/ask-drive.spec.mjs`<br>`tests/run/gates/node-gate-delivery.spec.mjs`<br>`tests/run/gates/node-gate-session.spec.mjs`<br>`tests/run/gates/node-gate-witness.spec.mjs` |
 | shared | `checks/lib/shared/path-hygiene` | `tests/run/gates/path-hygiene.spec.mjs` |
@@ -98,7 +98,7 @@
 | shared | `checks/lib/shared/profile-health` | `tests/run/channel/profile-health.spec.mjs` |
 | shared | `checks/lib/shared/replay-request` | `tests/run/harness/replay-request.spec.mjs` |
 | shared | `checks/lib/shared/roles` | `tests/pack/contract/role-consumer-matrix.spec.mjs`<br>`tests/pack/fetch-fallback/fetch-fallback-orchestration.spec.mjs`<br>`tests/pack/scripts/presets.spec.mjs`<br>`tests/run/gates/strategy-core.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/harness/replay-scene.spec.mjs` |
-| shared | `checks/lib/shared/run-receipt` | `tests/contracts/run-bundle-charter.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs` |
+| shared | `checks/lib/shared/run-receipt` | `tests/contracts/run-bundle-charter.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs` |
 | shared | `checks/lib/shared/run-state` | `tests/run/shared/run-state.spec.mjs` |
 | shared | `checks/lib/shared/sandbox-capability` | `tests/run/shared/sandbox-capability.spec.mjs` |
 | shared | `checks/lib/shared/secret-scan` | `tests/run/shared/secret-scan.spec.mjs` |
@@ -129,7 +129,7 @@
 | events | `events/member-activity` | `tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/shared/member-activity-fold.spec.mjs` |
 | events | `events/stream-failure` | `tests/run/shared/stream-failure.spec.mjs` |
 | events | `events/tool-card` | `tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/shared/tool-card.spec.mjs` |
-| method-library | `method-library/library-fold` | `tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/lib/method-library/library-fold.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-codec.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs`<br>`tests/cockpit/lib/method-library/method-library-write.spec.mjs`<br>`tests/cockpit/lib/run/receipt-fold.spec.mjs`<br>`tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/method-library-tool-defaults.spec.mjs` |
+| method-library | `method-library/library-fold` | `tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/lib/method-library/library-fold.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-codec.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs`<br>`tests/cockpit/lib/method-library/method-library-write.spec.mjs`<br>`tests/cockpit/lib/run/receipt-fold.spec.mjs`<br>`tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/method-library-tool-defaults.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs` |
 | method-library | `method-library/method-draft` | `tests/cockpit/lib/method-library/method-draft.spec.mjs` |
 | method-library | `method-library/method-library-commands` | `tests/cockpit/lib/method-library/method-library-commands.spec.mjs` |
 | method-library | `method-library/method-library-events` | `tests/cockpit/lib/method-library/method-library-events.spec.mjs` |
@@ -144,7 +144,7 @@
 | plan | `plan/plan-diff` | `tests/cockpit/lib/plan/plan-diff.spec.mjs`<br>`tests/cockpit/lib/plan/plan-mdast.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | plan | `plan/plan-graph` | `tests/cockpit/lib/plan/plan-graph.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | plan | `plan/plan-index` | `tests/cockpit/lib/plan/graph-model.spec.mjs`<br>`tests/cockpit/lib/plan/plan-diff.spec.mjs`<br>`tests/cockpit/lib/plan/plan-index.spec.mjs`<br>`tests/cockpit/lib/plan/plan-mdast.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/skill-parser-contract.spec.mjs` |
-| review | `review/review-readiness` | `tests/contracts/markdown-mask-conformance.spec.mjs`<br>`tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/review-readiness-property.spec.mjs`<br>`tests/run/gates/review-readiness.spec.mjs`<br>`tests/run/gates/run-context.spec.mjs`<br>`tests/run/harness/run-accept-fixture.spec.mjs` |
+| review | `review/review-readiness` | `tests/contracts/markdown-mask-conformance.spec.mjs`<br>`tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/review-readiness-property.spec.mjs`<br>`tests/run/gates/review-readiness.spec.mjs`<br>`tests/run/gates/run-context.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs`<br>`tests/run/harness/run-accept-fixture.spec.mjs` |
 | run | `run/artifact-content` | `tests/cockpit/lib/run/artifact-content.spec.mjs`<br>`tests/cockpit/lib/run/run-property.spec.mjs` |
 | run | `run/artifact-read` | `tests/cockpit/lib/run/artifact-read.spec.mjs` |
 | run | `run/binding-trust` | `tests/run/gates/binding-trust.spec.mjs` |
@@ -181,12 +181,12 @@
 | (root) | `index` | — |
 | (root) | `keys` | `tests/cockpit/client/final-tab-patterns.spec.mjs` |
 | (root) | `lead-prompt` | `tests/cockpit/shared/client-pure-logic.spec.mjs` |
-| (root) | `locales` | `tests/cockpit/client/builtin-display.spec.mjs`<br>`tests/cockpit/client/coach-sessions.spec.mjs`<br>`tests/cockpit/client/defaults/defaults-panel-confirm.spec.mjs`<br>`tests/cockpit/client/locales/client-locale.spec.mjs`<br>`tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-queue.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-tool-card.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/client/research-config-source.spec.mjs`<br>`tests/cockpit/client/research-config/config-feed-behavior.spec.mjs`<br>`tests/cockpit/client/research-config/config-feed-poll.spec.mjs`<br>`tests/cockpit/client/research-graph/graph-notices.spec.mjs`<br>`tests/cockpit/client/research-status/status-feed-behavior.spec.mjs`<br>`tests/cockpit/client/research-tabs.spec.mjs`<br>`tests/cockpit/client/start-card.spec.mjs`<br>`tests/cockpit/client/tabs-fault-matrix.spec.mjs`<br>`tests/cockpit/lib/method-library/run-source-picker.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
+| (root) | `locales` | `tests/cockpit/client/builtin-display.spec.mjs`<br>`tests/cockpit/client/coach-sessions.spec.mjs`<br>`tests/cockpit/client/defaults/defaults-panel-confirm.spec.mjs`<br>`tests/cockpit/client/locales/client-locale.spec.mjs`<br>`tests/cockpit/client/method-library/coach-panel.spec.mjs`<br>`tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-queue.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-tool-card.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/client/research-config-source.spec.mjs`<br>`tests/cockpit/client/research-config/config-feed-behavior.spec.mjs`<br>`tests/cockpit/client/research-config/config-feed-poll.spec.mjs`<br>`tests/cockpit/client/research-graph/graph-notices.spec.mjs`<br>`tests/cockpit/client/research-status/status-feed-behavior.spec.mjs`<br>`tests/cockpit/client/research-tabs.spec.mjs`<br>`tests/cockpit/client/start-card.spec.mjs`<br>`tests/cockpit/client/tabs-fault-matrix.spec.mjs`<br>`tests/cockpit/lib/method-library/run-source-picker.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | locales | `locales/en` | — |
 | locales | `locales/en-fold` | — |
 | locales | `locales/zh` | `tests/cockpit/shared/defaults-ui.spec.mjs` |
 | locales | `locales/zh-fold` | — |
-| method-library | `method-library/coach` | — |
+| method-library | `method-library/coach` | `tests/cockpit/client/method-library/coach-panel.spec.mjs` |
 | method-library | `method-library/coach-prompts` | `tests/cockpit/shared/client-pure-logic.spec.mjs` |
 | method-library | `method-library/ColumnHandle` | — |
 | method-library | `method-library/model` | `tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-model.spec.mjs` |

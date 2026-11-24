@@ -433,6 +433,16 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/shared/local-date-usage.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "人读日期口径守卫（BUG-416）：`toISOString().slice(0, 10)` 是**机器时间戳**切片，不是本地日。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/shared/note-scan.test.mjs",
       "domain": "checks",
       "lane": "checks",
@@ -729,6 +739,16 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "client-locale.spec.mjs — 驾驶舱 chrome 文案走 locale，不写死中文（2026-11-03 审计 D7-4）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/method-library/coach-panel.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "方法编辑面板的建会话重试（BUG-418）：失败一次后重试成功必须清掉错误条，且错误详情不带",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
@@ -1659,7 +1679,7 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "fetch-fallback policy — 本地抓取失败 → DeepSeek Fetch API 回退的纯判据（D31）。",
-      "oracleType": "self-referential",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {
@@ -2229,6 +2249,16 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "strategy-core.spec.mjs — Strategy 投影（K/O/G/B）的纯派生回归。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/text-encoding-equivalence.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "编码等价：同一份契约文本的 LF / CRLF / BOM 三种等价书写必须同判（BUG-412/413/414/415/417/420）。",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },

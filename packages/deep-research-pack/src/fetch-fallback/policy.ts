@@ -51,11 +51,24 @@ export function fallbackStatusMatches(status: number, configured: readonly numbe
   return configured.includes(status)
 }
 
-/** 两段预算：本地腿最多占 localTimeoutMs，剩余给 API 腿；elapsed 是本地已花时间。 */
-export function legBudget(totalMs: number, localTimeoutMs: number, elapsedMs = 0): { local: number; fallback: number } {
-  const remaining = Math.max(0, totalMs - elapsedMs)
-  const local = Math.max(1, Math.min(localTimeoutMs, remaining))
-  return { local, fallback: Math.max(0, remaining - local) }
+/**
+ * 两腿的**初始**预算切分（规划语义）：本地腿最多占 localTimeoutMs，剩余留给 API 腿。
+ * 只在本地腿开始前调用；本地腿跑过之后改用 `remainingAfterLocal`（BUG-419：把「已耗时」
+ * 塞进本函数会让 API 腿被重复扣一次 localTimeout——本地越慢，回退预算越少）。
+ */
+export function legBudget(totalMs: number, localTimeoutMs: number): { local: number; fallback: number } {
+  const local = Math.max(1, Math.min(localTimeoutMs, totalMs))
+  return { local, fallback: Math.max(0, totalMs - local) }
+}
+
+/**
+ * 本地腿结束后、API 腿可用的预算：**总预算 − 已耗时**（已消耗只扣一次）。
+ * @param totalMs - 两腿共享的总预算。
+ * @param elapsedMs - 从开始到本地腿结束的墙钟耗时。
+ * @returns 剩余预算（≥0；超支为 0）。
+ */
+export function remainingAfterLocal(totalMs: number, elapsedMs: number): number {
+  return Math.max(0, totalMs - Math.max(0, elapsedMs))
 }
 
 /**

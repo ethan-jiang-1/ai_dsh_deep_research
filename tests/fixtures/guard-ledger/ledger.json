@@ -2125,6 +2125,102 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把三态动作判定改回二元兜底（或删 stringFieldOfArgsRaw）→ 截断前缀用例红"
+    },
+    {
+      "id": "BUG-412",
+      "mechanism": "parseTopicsReport 逐行解析用 split('\\n')，CRLF 行尾 \\r 让 must_answer 子项正则全部失配（合规 topics 判 0 条 → topicsGate 误 RED）",
+      "guard": "tests/run/gates/text-encoding-equivalence.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 parseTopicsReport 的 linesOf 改回 String(text).split('\\n') → CRLF/BOM 变体用例红"
+    },
+    {
+      "id": "BUG-413",
+      "mechanism": "evidence-audit-core 的 `>` 引文逐行正则遇 CRLF 失配，摘录被丢弃→转写核对静默 fail-open",
+      "guard": "tests/run/gates/text-encoding-equivalence.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把引文节的 body.split('\\n') 改回 → CRLF 变体下引文零采集"
+    },
+    {
+      "id": "BUG-414",
+      "mechanism": "多入口不剥 UTF-8 BOM：topics 首条/leads 首方向/findings 首块/证据 frontmatter/方法库首条整条丢失",
+      "guard": "tests/run/gates/text-encoding-equivalence.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 linesOf/foldLibrary/splitFrontmatter 的 BOM 处理 → BOM 变体用例红"
+    },
+    {
+      "id": "BUG-415",
+      "mechanism": "readiness/delivered/claims/verdicts 四处 JSON 工件不剥 BOM，JSON.parse 抛错→误判声明非法/回执损坏",
+      "guard": "tests/run/gates/text-encoding-equivalence.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 parseReadinessDeclaration/parseJson/receiptProblems 的 stripBom 删掉 → BOM 变体用例红"
+    },
+    {
+      "id": "BUG-417",
+      "mechanism": "leadsGate 的错误文案把行尾 CR 一起嵌进引号（用户可见输出带控制字符）",
+      "guard": "tests/run/gates/text-encoding-equivalence.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 leads 分节改回 text.split('\\n') → detail 出现 \\r"
+    },
+    {
+      "id": "BUG-420",
+      "mechanism": "headingGate 逐行标题正则遇 BOM 让首条标题失配，退化输出（同节重复 4 次）被判 PASS",
+      "guard": "tests/run/gates/text-encoding-equivalence.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 headingGate 的 linesOf 改回 text.split('\\n') 且不剥 BOM → BOM 变体下 4 次重复判 PASS"
+    },
+    {
+      "id": "BUG-421",
+      "mechanism": "topics 缺 scope_role 时覆盖门 requiredCount=0（空门），删一个字段即可让覆盖缺口永不报警",
+      "guard": "tests/run/gates/node-gate-leads.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 leadsGate/topicsContractIssues 的 scope_role 必填判据 → 空门用例红"
+    },
+    {
+      "id": "BUG-422",
+      "mechanism": "findingsGate 不校验「gap: supported 却零支撑证据」，无证据的结论与有证据同判 PASS",
+      "guard": "tests/run/gates/findings-contract.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 findingsContractIssues 的 supported-无证据判据 → 用例红"
+    },
+    {
+      "id": "BUG-423",
+      "mechanism": "plan 表缺 deps/parent 列时依赖图静默扁平化，planGate 仍 PASS 且零诊断",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "从 planGate 的缺列判据里删掉 deps/parent → 缺列用例红"
+    },
+    {
+      "id": "BUG-416",
+      "mechanism": "run-kickoff 用 UTC ISO 切片写人读日期（本地 00:00–08:00 记成前一天），与 localDateStr 正本分叉",
+      "guard": "tests/checks/shared/local-date-usage.test.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 run-kickoff 改回 `new Date().toISOString().slice(0, 10)`（或 runtime-clean 同理）→ 守卫红"
+    },
+    {
+      "id": "BUG-418",
+      "mechanism": "MethodCoachPanel 建会话失败后重试成功不清 error（同时显示「就绪」与「暂不可用」），且详情带 `Error: ` 前缀",
+      "guard": "tests/cockpit/client/method-library/coach-panel.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉成功分支的 setError(null) / 把 errorDetailOf 换回 String(cause) → 用例红"
+    },
+    {
+      "id": "BUG-419",
+      "mechanism": "legBudget 把「本地已耗时」当「预留」重复计入，API 腿被多扣一个 localTimeout（本地越慢回退预算越少）",
+      "guard": "tests/pack/fetch-fallback/fetch-fallback.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 remainingAfterLocal 换回 `legBudget(..., elapsed).fallback` → 预算用例红"
     }
   ]
 }

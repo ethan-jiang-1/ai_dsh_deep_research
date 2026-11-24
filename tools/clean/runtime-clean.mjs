@@ -11,6 +11,7 @@
 //
 // 用法：node tools/clean/runtime-clean.mjs [--older-than <days>] [--yes]
 // 退出码：0 = 成功（含无事可做 / dry-run）；1 = 删除失败；2 = 用法/前置错。
+import { localDateStr } from '../../checks/lib/shared/local-date.mjs'
 import { existsSync, lstatSync, readdirSync, rmSync } from 'node:fs'
 import { dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -104,7 +105,8 @@ function mb(bytes) {
 
 function localDate(ms) {
   if (!Number.isFinite(ms)) return 'unknown   '
-  return new Date(ms).toISOString().slice(0, 10)
+  // 人读日期 = 本地日（BUG-416）：清理清单是给人看的，UTC 切片在本地 00:00–08:00 差一天。
+  return localDateStr(new Date(ms))
 }
 
 function insideRuntime(path) {

@@ -8,7 +8,7 @@
 
 import { errorDetailOf } from '../lib/shared/error-detail.ts'
 import {
-  errorCodeOf, fallbackForError, fallbackNotice, fallbackStatusMatches, legBudget,
+  errorCodeOf, fallbackForError, fallbackNotice, fallbackStatusMatches, legBudget, remainingAfterLocal,
 } from './policy.ts'
 
 /** Structural subset of `WebFetchResult` the orchestration needs (no vendor import). */
@@ -82,7 +82,7 @@ export async function fetchWithFallback(
     if (callerAborted()) throw localError
     const code = errorCodeOf(localError)
     if (!fallbackForError(code)) throw localError
-    const remaining = legBudget(settings.totalBudgetMs, settings.localTimeoutMs, deps.now() - startedAt).fallback
+    const remaining = remainingAfterLocal(settings.totalBudgetMs, deps.now() - startedAt)
     if (remaining <= 0) throw localError
 
     const detail = describeFailure(localError)
@@ -108,7 +108,7 @@ export async function fetchWithFallback(
 
   // A returned response exists; only configured server statuses buy one rescue.
   if (!fallbackStatusMatches(localOutcome.statusCode, settings.fallbackOnStatus)) return localOutcome
-  const remaining = legBudget(settings.totalBudgetMs, settings.localTimeoutMs, deps.now() - startedAt).fallback
+  const remaining = remainingAfterLocal(settings.totalBudgetMs, deps.now() - startedAt)
   if (remaining <= 0) return localOutcome
   try {
     const rescued = await deps.api(request, deps.deadline(signal, remaining), remaining, `HTTP ${localOutcome.statusCode}`)

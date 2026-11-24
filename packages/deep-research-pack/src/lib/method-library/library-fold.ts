@@ -4,7 +4,7 @@
  * 条目 = `## <名>（日期，来源）〔默认偏好?〕` 二级标题，正文四字段（找来源/怎么核实/报告怎么写/不承诺）；
  * 旧格式（`调查要求`/`适用说明`）兼容读入 legacyText。解析容错：空/无条目 → 空数组。
  */
-import { flattenMarkdownInline, truncateWithEllipsis } from '../shared/text-fold.ts'
+import { flattenMarkdownInline, linesOf, truncateWithEllipsis } from '../shared/text-fold.ts'
 
 /** 偏好四分区（用户语言键；skill 格式正本同名）。 */
 export interface LibrarySections {
@@ -132,8 +132,7 @@ export function foldLibrary(text: string | null): readonly LibraryEntry[] {
     entries.push({ name: current.name, provenance: current.provenance, isDefault: current.isDefault, sections: current.sections, legacyText })
     current = null
   }
-  for (const rawLine of text.split('\n')) {
-    const line = rawLine.trimEnd()
+  for (const line of linesOf(text)) {
     const heading = parseMethodHeading(line)
     if (heading !== null) {
       flush()

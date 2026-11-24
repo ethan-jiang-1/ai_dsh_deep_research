@@ -10,6 +10,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { isActivePlanNode, planIndex, planIssuesOf } from '../../../packages/deep-research-pack/src/lib/plan/plan-index.ts'
 import { presetRoles } from '../shared/roles.mjs'
+import { linesOf } from '../../../packages/deep-research-pack/src/lib/shared/text-fold.ts'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 export const PLAN_KINDS = Object.freeze(['broad-scan', 'deep-dive', 'cross-check', 'synthesis', 'review', 'gate', 'fetch'])
@@ -18,7 +19,7 @@ const LIFECYCLE = /^(?:active|retired|merged_into\s*[:：]\s*\S+|superseded_by\s
 const DEPTHS = ['L0', 'L1', 'L2', 'L3']
 
 const sectionOf = (text, heading) => {
-  const lines = String(text ?? '').split('\n')
+  const lines = linesOf(text)
   const at = lines.findIndex((line) => new RegExp('^##\\s*' + heading).test(line))
   if (at === -1) return null
   const out = []
@@ -68,6 +69,13 @@ export function planGate(bundleDir) {
     const task = node.cells.taskid.value
     if (task === undefined || task === '') issues.push(`${node.id} 缺 task_id（无映射写 —；BUG-302）`)
   }
+  // 缺列 ≠ 全空（BUG-423）：`deps`/`parent` 决定依赖图与层级，缺列会让所有节点静默变成
+  // 「无依赖/顶层」，门却继续报「图无环/无悬空」——那是在说一件没验证过的事。
+  for (const column of ['deps', 'parent']) {
+    if (index.nodes.some((node) => node.cells[column]?.state === 'missing-column')) {
+      issues.push(`plan.md 节点表缺 ${column} 列（缺列不得等价于「全空」——依赖图/层级会被静默扁平化）`)
+    }
+  }
   // 图版本（BUG-281）+ 快照内容（BUG-285 / 305）
   if (index.version === undefined) {
     issues.push('plan.md 缺图版本（图版本：vN）——重写无法追溯（BUG-281）')
@@ -100,7 +108,7 @@ export function planGate(bundleDir) {
   const remaining = sectionOf(text, '剩余工作')
   if (remaining === null) issues.push('plan.md 缺「## 剩余工作」节（nodes-contract 要求在場必有）')
   else {
-    const lines = remaining.split('\n').map((line) => line.trim()).filter((line) => line !== '')
+    const lines = linesOf(remaining).map((line) => line.trim()).filter((line) => line !== '')
     const cellsOf = (line) => line.replace(/^\||\|$/g, '').split('|').map((cell) => cell.trim())
     const headerLine = lines.find((line) => /^\|/.test(line)) ?? ''
     const headerCells = headerLine === '' ? [] : cellsOf(headerLine).map((cell) => cell.toLowerCase())
@@ -125,7 +133,7 @@ export function planGate(bundleDir) {
   }
   // Wave 执行 / task_id（BUG-283 / 304 / 306）
   if (waveText !== null) {
-    const header = waveText.split('\n').find((line) => /^\s*\|/.test(line)) ?? ''
+    const header = linesOf(waveText).find((line) => /^\s*\|/.test(line)) ?? ''
     if (/\b(engine|channel)\b/i.test(header)) issues.push('「## Wave 执行」表头不得有 engine/channel 列（plan-index 不解析）')
     if (waves.length === 0) issues.push('「## Wave 执行」在场但没有 W 层条目')
     for (const wave of waves) {

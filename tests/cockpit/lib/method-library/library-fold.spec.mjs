@@ -310,9 +310,12 @@ test('电池·CRLF+缩进：\\r 被 trimEnd 消化（分区仍匹配）；前导
 test('电池·指令族与容错：部分字段 createInstruction 只载非 null；乱输入不抛、无条目不编造', () => {
   assert.equal(createInstruction('新条目', { source: 'A', verify: null, report: 'C', limit: null }, '方案比较'),
     '新建研究偏好「新条目」——找来源：A；报告怎么写：C（基于内置「方案比较」调整）');
-  for (const weird of ['', '##', '## ', '##名无空格', '####### 深', '- 找来源: 孤行无条目', '## x\r- 找来源: y']) {
+  // 2026-11-24 编码等价批（BUG-414）：裸 CR 也是合法行分隔符——`## x\r- 找来源: y` 现在是一条
+  // 真条目（旧期望把它列进「乱输入」是因为 split('\n') 盲区，不是「不编造」）。
+  for (const weird of ['', '##', '## ', '##名无空格', '####### 深', '- 找来源: 孤行无条目']) {
     assert.deepEqual(foldLibrary(weird), [], `容错输入不编造条目：${JSON.stringify(weird)}`);
   }
+  assert.equal(foldLibrary('## x\r- 找来源: y').length, 1, 'CR 行分隔 = 合法条目（与 LF/CRLF 同判）');
   assert.equal(battery().length, 12);
 });
 

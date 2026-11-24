@@ -6,6 +6,18 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [412](BUG-412-topics-crlf-must-answer-dropped-false-red.md) | CRLF topics 的 must_answer 全丢 | （linesOf 统一行切分） | 2026-11-24 |
+| [413](BUG-413-evidence-audit-crlf-quotes-dropped-fail-open.md) | CRLF 证据卡引文静默丢弃 | （linesOf 采集引文） | 2026-11-24 |
+| [414](BUG-414-bom-breaks-first-line-structure-across-gates.md) | BOM 让首行结构整条丢失 | （stripBom + linesOf 入口归一） | 2026-11-24 |
+| [415](BUG-415-json-artifacts-do-not-strip-bom.md) | JSON 工件不剥 BOM 被误判 | （四处 stripBom） | 2026-11-24 |
+| [416](BUG-416-run-kickoff-provenance-date-uses-utc-slice.md) | kickoff 用 UTC 切片写人读日期 | （localDateStr + 守卫） | 2026-11-24 |
+| [417](BUG-417-leads-gate-detail-embeds-cr.md) | leadsGate 详情夹带 CR | （linesOf 分节） | 2026-11-24 |
+| [418](BUG-418-coach-panel-stale-error-after-successful-retry.md) | coach 重试成功不清错误 | （setError(null) + errorDetailOf） | 2026-11-24 |
+| [419](BUG-419-fallback-leg-budget-double-charged.md) | 回退 API 腿预算被重复扣 | （remainingAfterLocal） | 2026-11-24 |
+| [420](BUG-420-bom-defeats-heading-duplicate-gate.md) | BOM 骗过退化标题门 | （headingGate 走 linesOf） | 2026-11-24 |
+| [421](BUG-421-topics-scope-role-absence-empties-coverage-gate.md) | 缺 scope_role 让覆盖门变空门 | （前提为空 = RED） | 2026-11-24 |
+| [422](BUG-422-findings-supported-without-evidence-passes.md) | supported 零证据仍 PASS | （supported 必须有证据） | 2026-11-24 |
+| [423](BUG-423-plan-deps-column-absence-silently-flattens-dag.md) | 缺 deps/parent 列静默扁平化 | （缺列 = RED） | 2026-11-24 |
 | [404](BUG-404-research-final-tab-reload-resets-watcher-to-reader.md) | 终稿重读把 watcher 抢回 reader | （viewRef 跟随实时视图） | 2026-11-24 |
 | [405](BUG-405-plan-gate-budget-diff-reads-undefined-property.md) | plan-gate 读不存在的 node.budget | （node.cells.budget.value） | 2026-11-24 |
 | [406](BUG-406-gate-cli-relative-sessions-before-bundle-hijacks-target.md) | --sessions 相对值被当 bundle（假 PASS） | （共享 cliArgsOf + 缺值 exit 2） | 2026-11-24 |

@@ -8,6 +8,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { splitFrontmatter } from '../shared/frontmatter.mjs'
+import { linesOf } from '../../../packages/deep-research-pack/src/lib/shared/text-fold.ts'
 
 export const GAP_STATES = Object.freeze(['supported', 'needs_search', 'contradicted', 'insufficient'])
 export const SCOPE_ROLES = Object.freeze(['primary', 'synthesis', 'comparison', 'supporting'])
@@ -35,7 +36,7 @@ export function parseTopicsReport(text) {
   /** @type {{ id: string, role: string, lenses: string[], dependsOn: string[], mustAnswer: string[] } | null} */
   let cur = null
   let inMustAnswer = false
-  for (const line of String(text ?? '').split('\n')) {
+  for (const line of linesOf(text)) {
     const h = /^##\s+(T\d+)\b/.exec(line)
     if (h !== null) {
       cur = { id: h[1], role: '', lenses: [], dependsOn: [], mustAnswer: [] }
@@ -72,6 +73,11 @@ export function parseTopicsReport(text) {
     if (topic.mustAnswer.length < MUST_ANSWER_MIN || topic.mustAnswer.length > MUST_ANSWER_MAX) {
       issues.push(`${id} 的 must_answer 数量 ${topic.mustAnswer.length} ∉ [${MUST_ANSWER_MIN}, ${MUST_ANSWER_MAX}]`)
     }
+    // 覆盖门的前提是 role ∈ {primary, comparison}；缺 role 会让 requiredCount 变 0（空门）。
+    // 防空语料：没声明 ≠ 无需覆盖（BUG-421）。
+    if (topic.role === '') {
+      issues.push(`${id} 缺 scope_role（合法 = ${SCOPE_ROLES.join('/')}；缺省不得当成「无需覆盖」）`)
+    }
     for (const lens of topic.lenses) {
       if (!LENS_IDS.includes(lens)) issues.push(`${id} 的 lenses「${lens}」不是真实 lens id（${LENS_IDS.join('/')}）`)
     }
@@ -105,7 +111,7 @@ export function parseFindingsOf(text) {
   const findings = []
   /** @type {{ id: string, evidence: string[], lenses: string[], lensGaps: string[], lensGapsRaw: string, hasLensGapsLine: boolean, gap: string } | null} */
   let cur = null
-  for (const line of String(text ?? '').split('\n')) {
+  for (const line of linesOf(text)) {
     const h = /^##\s*F(\d+)\s*[:：]/.exec(line)
     if (h !== null) {
       cur = { id: `F${h[1]}`, evidence: [], lenses: [], lensGaps: [], lensGapsRaw: '', hasLensGapsLine: false, gap: '' }
@@ -157,6 +163,11 @@ export function findingsContractIssues(bundleDir) {
   for (const block of blocks) {
     if (!GAP_STATES.includes(block.gap)) {
       issues.push(`${block.id} 的 gap「${block.gap || '（缺）'}」∉ {${GAP_STATES.join('/')}}（未知状态不得静默当 supported）`)
+    }
+    // supported 的定义就是「有证据支持」：零指针不得判 supported（BUG-422——旧实现只查
+    // 「写了指针但文件不存在」，于是「结论无任何证据」与「有证据」同判）。
+    if (block.gap === 'supported' && block.evidence.length === 0) {
+      issues.push(`${block.id} 判 gap: supported 但没有任何支撑证据（supported 必须有 ≥1 条 \`- 支撑证据：\` 指针）`)
     }
     // 支撑证据存在性：与 lens 无关，所有 findings 都查（BUG-260）
     for (const rel of block.evidence) {

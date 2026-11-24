@@ -290,12 +290,14 @@ const COUNT_KEYS = ['critical', 'major', 'minor', 'unverified', 'rechecked_urls'
  * 门禁与驾驶舱共用本函数——同一份声明在两侧必须同判。
  */
 export function parseReadinessDeclaration(text: string): { readonly ok: true; readonly value: ReadinessDeclaration } | { readonly ok: false; readonly detail: string } {
+  // BOM 不是内容（RFC 8259 §8.1）：带 BOM 的声明与不带同判（BUG-415）。
+  const source = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text
   // 重复键 = 两种读法（JSON.parse 静默取末值）——任意层级按**解码后**的键名判重，fail-closed。
   // 键名可能写成 JSON 合法 Unicode 转义（"\u0072eadiness"），字面正则看不见 → 用轻量 key scanner（BUG-394）。
-  const duplicate = duplicateKeyOf(text)
+  const duplicate = duplicateKeyOf(source)
   if (duplicate !== null) return { ok: false, detail: `review/readiness.json 重复键 ${duplicate}（拒绝取末值）` }
   let raw: unknown
-  try { raw = JSON.parse(text) } catch { return { ok: false, detail: 'review/readiness.json 不是合法 JSON' } }
+  try { raw = JSON.parse(source) } catch { return { ok: false, detail: 'review/readiness.json 不是合法 JSON' } }
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return { ok: false, detail: 'review/readiness.json 顶层必须是对象' }
   const record = raw as Record<string, unknown>
   const problems: string[] = []

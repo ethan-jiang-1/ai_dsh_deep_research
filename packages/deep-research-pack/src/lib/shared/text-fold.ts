@@ -24,3 +24,24 @@ export function flattenMarkdownInline(text: string): string {
 export function truncateWithEllipsis(text: string, maxLength: number): string {
   return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text
 }
+
+/** UTF-8 BOM（U+FEFF）剥离：RFC 8259 §8.1 允许 JSON 消费者忽略它；文本工件同理。
+ *  BOM 不是内容，带不带必须同判——否则「同一份文件换个编辑器」就换结论（BUG-414/415 类）。 */
+export function stripBom(text: string): string {
+  return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text
+}
+
+/**
+ * 契约文本 → 行数组（**唯一正本**）：先剥 BOM，再按 `\r\n` / `\r` / `\n` 切，行内不留 `\r`。
+ *
+ * 为什么必须有它（BUG-412/413/414/417/420）：各解析器曾各自 `split('\n')`——CRLF 文件的每行
+ * 尾部留一个 `\r`，任何以 `$` 收尾的逐行正则（`^>\s*(.+)$`、`^\s{2,}-\s+(.+)$` 等）都不再匹配，
+ * 于是「同一份内容换个换行符」就让门禁换结论；首行的 BOM 还会让 `^##`/`^---` 整条失配。
+ * 新解析器一律用它，不要再写第三份切行逻辑。
+ * @param text - 原文（可为 null/undefined）。
+ * @returns 行数组；空/非字符串 → `[]`。
+ */
+export function linesOf(text: string | null | undefined): string[] {
+  if (typeof text !== 'string' || text === '') return []
+  return stripBom(text).split(/\r\n|\r|\n/)
+}

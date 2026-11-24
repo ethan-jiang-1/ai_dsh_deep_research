@@ -15,6 +15,7 @@
 // 输出：session id（stdout，一行）——后续日志核对/仪表盘观察用它定位。
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { appendDecisionsRow, closingProvenanceRow } from '../../checks/lib/shared/hitl-provenance.mjs'
+import { localDateStr } from '../../checks/lib/shared/local-date.mjs'
 import { join } from 'node:path';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -97,7 +98,8 @@ if (resumeSessionId !== null) {
   console.error(`run-kickoff: prompt 已送入已存会话 ${String(resumeSessionId).slice(0, 8)}…（续跑）`)
   if (closing !== null) {
     try {
-      const row = closingProvenanceRow({ cardKey: closing.cardKey, text: prompt, date: new Date().toISOString().slice(0, 10) })
+      // 人读日期 = 本地日（BUG-416 / BUG-017 同类）：UTC 切片在本地 00:00–08:00 会记成前一天。
+      const row = closingProvenanceRow({ cardKey: closing.cardKey, text: prompt, date: localDateStr() })
       appendDecisionsRow({ bundle: closing.bundleDir, row, journalNote: `**挂起问询由操作侧自由文本关闭（记账行已落 §Decisions）**：${closing.cardKey}` })
       console.error(`run-kickoff: 关闭挂起的记账行已落 §Decisions（${closing.cardKey} → bundle ${closing.slug}）`)
     } catch (error) {

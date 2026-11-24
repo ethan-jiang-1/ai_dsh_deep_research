@@ -12,6 +12,7 @@
 //
 // 分层同 evidence-audit-core：本文件**无 fs / 无子进程 / 无网络**——会话事实与文件文本由 CLI 壳注入，
 // tests 直调（keyless）。哈希由本层算、由门禁记；模型不填哈希（本仓 Lead 没有 bash）。
+import { stripBom } from '../../../packages/deep-research-pack/src/lib/shared/text-fold.ts'
 import { createHash } from 'node:crypto'
 import { readinessOf } from '../shared/node-gate-contracts.mjs'
 
@@ -52,7 +53,8 @@ export const isHttpUrl = (value) => {
 const parseJson = (text, code) => {
   if (typeof text !== 'string' || text.trim() === '') return { value: null, problems: [{ code, detail: '文件为空' }] }
   try {
-    return { value: JSON.parse(text), problems: [] }
+    // BOM 不是内容（RFC 8259 §8.1）——不要把它报成「JSON 不可解析」（BUG-415）。
+    return { value: JSON.parse(stripBom(text)), problems: [] }
   } catch (error) {
     return { value: null, problems: [{ code, detail: `JSON 不可解析：${String(error?.message ?? error)}` }] }
   }
@@ -230,7 +232,7 @@ export function parseSessionFacts(text) {
  */
 function parseRawVerdicts(raw) {
   const attempt = (text) => {
-    try { return { ok: true, value: JSON.parse(text) } } catch { return { ok: false, value: null } }
+    try { return { ok: true, value: JSON.parse(stripBom(text)) } } catch { return { ok: false, value: null } }
   }
   const direct = attempt(String(raw ?? ''))
   if (direct.ok) return direct

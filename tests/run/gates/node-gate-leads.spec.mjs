@@ -4,6 +4,9 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { gateBundle } from '../../../checks/lib/gates/node-gate-core.mjs'
 import { leadsGate } from '../../../checks/lib/gates/node-gate-run-gates.mjs'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { bundle } from './node-gate-helpers.mjs'
 
 const L = (name, date) => gateBundle(bundle(name), undefined, { leadsDate: date }).gates.leads
@@ -125,3 +128,43 @@ test('门L分级判据：加粗/逗号分隔的分级算已分级；真无分级
   assert.doesNotMatch(flat, /A1[^"]*无 A–D 分级|A1｜加粗分级[^"]*无 A–D 分级/, '加粗分级不得被判"未分级"');
   assert.match(flat, /A2｜真无分级[\s\S]{0,80}无 A–D 分级/, '真无分级的条目必须仍判红（红灯形态保住）');
 });
+
+// 负例留证 2026-11-24：BUG-421——覆盖判据的前提是 topic 声明 `scope_role`；删掉这一行后
+// requiredCount 变成 0，门从 RED 退化成 PASS（「覆盖 0/0」），等于一个字段就能关掉覆盖门。
+// 红配方：把 scope_role 的必填判据删掉（allow 缺省 = 免检）。
+test('BUG-421：topics 缺 scope_role → RED（判据前提不得为空）', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'leads-421-'))
+  try {
+    writeFileSync(join(dir, 'topics.md'), [
+      '## T1: 通道', '', '- must_answer:', '  - 当前版本号', '  - 上一修订', '- depends_on: 无', '',
+      '## T2: 口径', '', '- must_answer:', '  - 总量', '  - 分页', '- depends_on: T1', '',
+    ].join('\n'), 'utf8')
+    writeFileSync(join(dir, 'leads.md'), [
+      '## 方向: T1 官方定价', '', '- 状态: 建议挖深', '- 支持来源: 官方页（A）', '',
+      '## 方向: T2 第三方口径', '', '- 状态: 建议挖深', '- 支持来源: 第三方（B）', '',
+    ].join('\n'), 'utf8')
+    const gate = leadsGate(dir)
+    assert.equal(gate.status, 'RED', `缺 scope_role 必须红（实际 ${gate.status}：${gate.detail}）`)
+    assert.match(gate.detail, /scope_role/)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+// 负控：显式 `synthesis` 的 topic 不要求覆盖（合法的「无需侦察对应」），覆盖判据只对
+// primary/comparison 生效——放宽不得变成「任何 topic 都要求覆盖」。
+test('BUG-421 负控：显式 synthesis 角色不进入覆盖要求（0/0 合法但仍 PASS）', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'leads-421b-'))
+  try {
+    writeFileSync(join(dir, 'topics.md'), [
+      '## T1: 综述', '', '- must_answer:', '  - 结论一', '  - 结论二', '- scope_role: synthesis', '- depends_on: 无', '',
+    ].join('\n'), 'utf8')
+    writeFileSync(join(dir, 'leads.md'), [
+      '## 方向: 综述素材', '', '- 状态: 已排除（无需独立侦察）', '',
+    ].join('\n'), 'utf8')
+    const gate = leadsGate(dir)
+    assert.equal(gate.status, 'PASS', `synthesis 免检：${gate.detail}`)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})

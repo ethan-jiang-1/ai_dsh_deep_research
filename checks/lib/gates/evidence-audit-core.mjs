@@ -10,6 +10,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { splitFrontmatter } from '../shared/frontmatter.mjs'
+import { linesOf } from '../../../packages/deep-research-pack/src/lib/shared/text-fold.ts'
 import { provenanceOf, sha256OfFile } from './provenance.mjs'
 import { lensScanOf } from './protocol-core.mjs'
 import { parseTopicsReport } from './findings-core.mjs'
@@ -231,7 +232,7 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = skipUnreadableL
       // 且 `>` 被复用为卡片自己的注——指针/标签，那些不是摘录主张）。
       const secLines = []
       let inQuoteSec = false
-      for (const line of body.split('\n')) {
+      for (const line of linesOf(body)) {
         if (/^##\s/.test(line)) { inQuoteSec = /^##\s*原文摘录/.test(line); continue }
         if (inQuoteSec) secLines.push(line)
       }

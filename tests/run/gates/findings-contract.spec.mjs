@@ -8,6 +8,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { findingsContractIssues, parseFindingsOf, parseTopicsOf } from '../../../checks/lib/gates/findings-core.mjs'
+import { findingsGate } from '../../../checks/lib/gates/node-gate-run-gates.mjs'
 import { leadsGate } from '../../../checks/lib/gates/node-gate-run-gates.mjs'
 
 const makeBundle = () => mkdtempSync(join(tmpdir(), 'findings-contract-'))
@@ -143,4 +144,36 @@ test('BUG-341：一行式 F# 与无冒号标题 → 报错点名正确形态', (
     write(dir, 'findings.md', '# Findings\n\n## F1 版本号：19\n\n- 支撑证据: evidence/ev-a.md\n- gap: supported\n')
     assert.ok(findingsContractIssues(dir).some((i) => i.includes('缺冒号')))
   } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+// 负例留证 2026-11-24：BUG-422——`gap: supported` 的定义是「有支撑证据」，但门只查「写了指针
+// 但文件不存在」。删掉 `- 支撑证据：` 行后，无证据的 supported 与有证据完全同判 → 交付门漏洞。
+// 红配方：删掉 supported 的「必须有 ≥1 指针」判据。
+test('BUG-422：gap: supported 但没有任何支撑证据 → RED（无证据不得判 supported）', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'findings-422-'))
+  try {
+    writeFileSync(join(dir, 'findings.md'), [
+      '## F1：核心结论', '', '- gap：supported', '',
+    ].join('\n'), 'utf8')
+    const gate = findingsGate(dir)
+    assert.equal(gate.status, 'RED', `无证据的 supported 必须红（实际 ${gate.status}：${gate.detail}）`)
+    assert.match(gate.detail, /支撑证据/)
+    assert.ok(findingsContractIssues(dir)?.some((issue) => /支撑证据/.test(issue)), '契约核也要报同一条')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+// 负控：其它 gap 态（needs_search/contradicted/insufficient）本就没有证据，不得被这条误伤。
+test('BUG-422 负控：needs_search/insufficient 无证据仍合规', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'findings-422b-'))
+  try {
+    writeFileSync(join(dir, 'findings.md'), [
+      '## F1：待查', '', '- gap：needs_search', '',
+      '## F2：证据不足', '', '- gap：insufficient', '',
+    ].join('\n'), 'utf8')
+    assert.deepEqual(findingsContractIssues(dir), [])
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
 })

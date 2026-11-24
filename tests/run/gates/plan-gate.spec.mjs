@@ -224,3 +224,21 @@ test('BUG-405：只改 budget 的快照差异 → PASS（预算维度必须真�
     assert.equal(r.status, 'PASS', r.detail)
   } finally { rmSync(d, { recursive: true, force: true }) }
 })
+
+// 负例留证 2026-11-24：BUG-423——节点表少一列 `deps`/`parent` 时，所有节点变成「无依赖/顶层」，
+// planGate 仍报「图无环/无悬空」PASS、零诊断——门在说一件它没验证过的事。
+// 红配方：从必填列判据里删掉 deps/parent（缺列不再红）。
+test('BUG-423：缺 deps 列 / 缺 parent 列 → RED（缺列不得等价于「全空」）', () => {
+  const row12 = '| W1.1 | — | active | broad-scan | q | scout | — | out | ok | 1 | L1 | — |'
+  const build = (header, rowLine) => `# Plan\n\n> 图版本：v1\n\n## 节点表\n\n${header}\n|---|---|---|---|---|---|---|---|---|---|---|\n${rowLine}\n\n## 剩余工作\n\n| task_id | state |\n|---|---|\n| W1.1 | 待派发 |\n`
+  const noDeps = dirOf(build(
+    '| id | parent | lifecycle | kind | question | owner_role | output | acceptance | budget | depth | task_id |',
+    row12.replace('| — | out |', '| out |'),
+  ))
+  try { assert.match(planGate(noDeps).detail, /缺 deps 列/) } finally { rmSync(noDeps, { recursive: true, force: true }) }
+  const noParent = dirOf(build(
+    '| id | lifecycle | kind | question | owner_role | deps | output | acceptance | budget | depth | task_id |',
+    row12.replace('| W1.1 | — |', '| W1.1 |'),
+  ))
+  try { assert.match(planGate(noParent).detail, /缺 parent 列/) } finally { rmSync(noParent, { recursive: true, force: true }) }
+})
