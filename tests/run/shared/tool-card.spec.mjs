@@ -1,7 +1,7 @@
 // tool-card 回归 — 研究语义卡标题折算（keyless；wire 权威形状 = queries 数组，录制流实证）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cardTitleOf, parseArgsObject, cardStateOf } from '../../../packages/deep-research-pack/src/lib/events/tool-card.ts';
+import { cardTitleOf, parseArgsObject, cardStateOf, stringFieldOfArgsRaw } from '../../../packages/deep-research-pack/src/lib/events/tool-card.ts';
 
 test('web_search 卡标题：queries 数组 → 检索：词表（· 连接，60 字截断）', () => {
   const args = parseArgsObject('{"queries":["DSH harness","DeepSeek plugin"]}');
@@ -41,3 +41,17 @@ test('cardStateOf：settled 形状推导（ok/error/stopped/running）', () => {
   assert.equal(cardStateOf({ kind: 'x', isError: true }), 'error');
   assert.equal(cardStateOf({ kind: 'x', error: { code: 'interrupted' } }), 'stopped');
 });
+
+// 负例留证 2026-11-24：BUG-411——运行态入参是流式截断前缀（parseArgsObject 返回 null），
+// 卡片需要「已到达的字段」；把「读不到」折成某个具体语义就是说谎。
+test('stringFieldOfArgsRaw：截断前缀里已到达的字段可提取，转义按 JSON 解码', () => {
+  assert.equal(stringFieldOfArgsRaw('{"action":"set","name":"名称B"', 'action'), 'set')
+  assert.equal(stringFieldOfArgsRaw('{"action":"set","name":"名称B"', 'name'), '名称B')
+  assert.equal(stringFieldOfArgsRaw('{"name":"a\\"b\\n c"}', 'name'), 'a"b\n c')
+  // 未到达 / 值还没闭合 / 非字符串值 → null（未知，不猜）
+  assert.equal(stringFieldOfArgsRaw('{"oper', 'action'), null)
+  assert.equal(stringFieldOfArgsRaw('{"action":"se', 'action'), null)
+  assert.equal(stringFieldOfArgsRaw('{"action":42}', 'action'), null)
+  assert.equal(stringFieldOfArgsRaw('', 'action'), null)
+  assert.equal(stringFieldOfArgsRaw('{"bad":"\\q"}', 'bad'), null)
+})

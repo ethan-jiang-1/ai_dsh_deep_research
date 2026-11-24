@@ -1,5 +1,6 @@
 // useOperationQueue.ts — 方法库写操作队列：一次只允许一个显式写操作，从发送走到结算或结果未知。
 import { methodNameIssue } from '../../lib/method-library/library-fold.ts'
+import { errorDetailOf } from '../../lib/shared/error-detail.ts'
 //
 // 从 MethodLibraryView.tsx 拆出（2026-11-03 审计 P4 续拆）。同文件两半，调用顺序是硬约束：
 // - `useOperationQueueState`：队列自己的 state/refs，必须在 `useDraftState` **之前**调用——
@@ -361,7 +362,7 @@ export function useOperationQueue(deps: OperationQueueDeps) {
       clearTimeout(operation.timeout)
       pendingOperationRef.current = null
       operationUnknownRef.current = false
-      failOperation(t('operationFailed', { detail: cause instanceof Error ? cause.message : String(cause) }))
+      failOperation(t('operationFailed', { detail: errorDetailOf(cause) }))
       return
     }
     if (sent.ok) return

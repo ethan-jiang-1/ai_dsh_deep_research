@@ -87,7 +87,7 @@ export function planGate(bundleDir) {
         // BUG-328：不同文本但解码事实相同 = 快照不是旧图。事实 = 节点 id/验收/预算/lifecycle/kind。
         else if (snap !== null) {
           const factsOf = (index) => JSON.stringify(index.nodes
-            .map((node) => [node.id, node.acceptance ?? '', node.budget ?? '', node.lifecycle ?? 'active', node.kind ?? ''])
+            .map((node) => [node.id, node.acceptance ?? '', node.cells.budget.value ?? '', node.lifecycle ?? 'active', node.kind ?? ''])
             .sort((a, b) => String(a[0]).localeCompare(String(b[0]))))
           if (factsOf(snap) === factsOf(index)) issues.push(`plan/v${n - 1}.md 与当前图的节点/验收/预算无差异——快照必须是旧图（BUG-328）`)
         }

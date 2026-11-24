@@ -208,3 +208,19 @@ test('多节点 Wave 执行层共用 task_id = plan-only 不误触发 BUG-283 �
     rmSync(d, { recursive: true, force: true })
   }
 })
+
+// 负例留证 2026-11-24：BUG-405——快照事实比对读了不存在的 `node.budget`（PlanNode 上是
+// `node.cells.budget.value`），预算维度恒为空 → 只调 budget 的合法重写被判「无差异」RED。
+// 红配方：把 factsOf 的预算项改回 `node.budget`。
+test('BUG-405：只改 budget 的快照差异 → PASS（预算维度必须真的参与比对）', () => {
+  const current = plan([row('W1.1', '—')]).replace('图版本：v1', '图版本：v2').replace('| out | ok | 1 | L1 |', '| out | ok | 3 | L1 |')
+  const snapshot = plan([row('W1.1', '—')]).replace('# Plan', '# Plan（旧版）')
+  const d = dirOf(current)
+  try {
+    mkdirSync(join(d, 'plan'), { recursive: true })
+    writeFileSync(join(d, 'plan', 'v1.md'), snapshot)
+    const r = planGate(d)
+    assert.doesNotMatch(r.detail, /无差异/, '只调预算的旧图必须被承认是旧图')
+    assert.equal(r.status, 'PASS', r.detail)
+  } finally { rmSync(d, { recursive: true, force: true }) }
+})

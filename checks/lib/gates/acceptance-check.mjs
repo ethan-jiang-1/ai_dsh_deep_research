@@ -5,6 +5,7 @@
 // UNVERIFIED 是第三态，不是跳过也不是 PASS）。lead 运行时的文件核验由 team-assembly skill
 // 纪律承担（角色无 bash）；本模块供操作侧收尾核验与活体验证挂账把"收活结论"对账成机械事实。
 import { existsSync, readFileSync, statSync } from 'node:fs'
+import { splitFrontmatter } from '../shared/frontmatter.mjs'
 import { join } from 'node:path'
 
 /**
@@ -53,8 +54,9 @@ export function acceptanceCheck(bundleDir, criteria) {
         }
         const p = join(bundleDir, c.file)
         if (!existsSync(p)) return { criterion: label, status: 'FAIL', detail: `文件缺席：${c.file}` }
-        const fm = /^---\n([\s\S]*?)\n---/.exec(readFileSync(p, 'utf8'))?.[1] ?? ''
-        const missing = c.fields.filter((f) => !new RegExp(`^${f}\\s*:\\s*\\S`, 'm').test(fm))
+        // frontmatter 解析唯一正本 = splitFrontmatter（兼容 CRLF；影子正则曾只认 LF —— BUG-407）。
+        const { fm } = splitFrontmatter(readFileSync(p, 'utf8'))
+        const missing = c.fields.filter((f) => typeof fm?.[f] !== 'string' || String(fm[f]).trim() === '')
         return missing.length === 0
           ? { criterion: label, status: 'PASS', detail: `字段齐：${c.file}` }
           : { criterion: label, status: 'FAIL', detail: `缺字段：${c.file} 缺 ${missing.join(', ')}` }

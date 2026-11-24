@@ -2061,6 +2061,70 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "删掉 watchCoach .catch 里的 clearQueuedOperation()/setSending(false) → BUG-401 用例红"
+    },
+    {
+      "id": "BUG-404",
+      "mechanism": "ResearchFinalTab 的 load() 用硬编码 view:'reader' 重算 watcher 基线，审计版/工作稿视图重读一次后永久丢更新监测",
+      "guard": "tests/cockpit/client/tabs-fault-matrix.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 load 里传的 `view: viewRef.current` 改回 `'reader'` → 审计版重读后基线改盯 readable，stale 不再出现"
+    },
+    {
+      "id": "BUG-405",
+      "mechanism": "plan-gate 快照事实比对读不存在的 `node.budget`（应为 `node.cells.budget.value`），只调预算的合法重写被误判「无差异」RED",
+      "guard": "tests/run/gates/plan-gate.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "把 factsOf 的预算项改回 `node.budget` → 只改 budget 的快照差异用例红"
+    },
+    {
+      "id": "BUG-406",
+      "mechanism": "node-gate / evidence-audit 用 argv.find 找 positional：--sessions 的相对路径值被当成 bundleArg（假 PASS）；缺值抛 TypeError",
+      "guard": "tests/run/gates/gate-cli-args.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把三壳改回 `argv.find(...)`/裸 `resolve(argv[idx+1])` → cliArgsOf 与接线用例红"
+    },
+    {
+      "id": "BUG-407",
+      "mechanism": "acceptance-check 的 frontmatter_fields 自写 LF-only 正则，CRLF 证据卡被判缺全部字段（与 splitFrontmatter 分叉）",
+      "guard": "tests/run/gates/acceptance-check.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "把 splitFrontmatter 调用改回影子正则 → CRLF frontmatter 用例红"
+    },
+    {
+      "id": "BUG-408",
+      "mechanism": "ResearchConfigTab 的 question.md 读失败/空横幅「重试」错调库文件 reload()，adoption 永不重读",
+      "guard": "tests/cockpit/client/tabs-fault-matrix.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把两处 onClick 改回 `reload(sessionId)`（删 retryAdoption）→ 重试不重读 question.md 用例红"
+    },
+    {
+      "id": "BUG-409",
+      "mechanism": "StartCard 的 choosing/chooseError 不随 sessionId 复位：挂起的选择器永久禁用新会话按钮，旧错误条残留",
+      "guard": "tests/cockpit/client/start-card.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删掉 `[sessionId]` 复位效应与代次守卫 → 跨会话禁用/残留用例红"
+    },
+    {
+      "id": "BUG-410",
+      "mechanism": "StartCard 对非 Error 拒绝值读 `(error as Error).message`，失败详情退化为字面量 undefined",
+      "guard": "tests/cockpit/client/start-card.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 errorDetailOf 换回 `(error as Error).message` → 非 Error 详情用例红"
+    },
+    {
+      "id": "BUG-411",
+      "mechanism": "方法库工具卡运行态按截断前缀把 action 未知兜底成 clear，set_default 运行窗口显示「正在清除默认偏好」",
+      "guard": "tests/cockpit/client/method-library/method-library-tool-card.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把三态动作判定改回二元兜底（或删 stringFieldOfArgsRaw）→ 截断前缀用例红"
     }
   ]
 }

@@ -5,10 +5,11 @@
  * 边界：Client 渲染，不进模型请求；不写浏览器持久化/插件账本/会话事件；工作区
  * 读失败时仍显示（不阻塞 composer），有 drt_* 或用户消息后收起。
  */
-import { useEffect, useState, type CSSProperties, type ReactElement } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactElement } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { shouldShowStartCard } from '../lib/workspace/start-card.ts'
+import { errorDetailOf } from '../lib/shared/error-detail.ts'
 
 /** 注入面：会话身份、当前工作区、只读文件列表与一次性消息探测。 */
 export interface StartCardInjected {
@@ -49,6 +50,14 @@ export function StartCard({
   const [visible, setVisible] = useState<'loading' | 'show' | 'hide'>('loading')
   const [choosing, setChoosing] = useState(false)
   const [chooseError, setChooseError] = useState<string | null>(null)
+  /** 目录选择请求代次：切会话/重复点击后，旧 promise 的结算不得改写当前 UI（BUG-409）。 */
+  const chooseTokenRef = useRef(0)
+  useEffect(() => {
+    // 会话切换 = 本地瞬态的一代结束：复位进行态与错误条，并让在途请求的结果失效。
+    chooseTokenRef.current += 1
+    setChoosing(false)
+    setChooseError(null)
+  }, [sessionId])
   useEffect(() => {
     const controller = new AbortController()
     let cancelled = false
@@ -91,11 +100,17 @@ export function StartCard({
           disabled={choosing}
           onClick={() => {
             if (choosing) return
+            const token = ++chooseTokenRef.current
             setChoosing(true)
             setChooseError(null)
             void chooseWorkspace()
-              .catch((error: unknown) => setChooseError(t('startChooseWorkspaceFailed', { detail: (error as Error).message })))
-              .finally(() => setChoosing(false))
+              .catch((error: unknown) => {
+                if (chooseTokenRef.current !== token) return
+                setChooseError(t('startChooseWorkspaceFailed', { detail: errorDetailOf(error) }))
+              })
+              .finally(() => {
+                if (chooseTokenRef.current === token) setChoosing(false)
+              })
           }}
         >
           {choosing ? t('startChoosingWorkspace') : t('startChooseWorkspace')}

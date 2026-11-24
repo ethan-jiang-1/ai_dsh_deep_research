@@ -147,6 +147,9 @@ export function useConfigFeed(props: ConfigFeedInput) {
   const trust = useMemo(() => bindingTrust(events), [events])
   const boundSlug = trust.kind === 'bound' ? trust.slug : undefined
   const [adoption, setAdoption] = useState<MethodAdoption>({ kind: 'no-run', adopted: null, origin: null, requirements: null })
+  /** 「本次研究」区的重试计数：横幅里的重试只该重读 question.md，不是整库 reload（BUG-408）。 */
+  const [adoptionTick, setAdoptionTick] = useState(0)
+  const retryAdoption = useCallback(() => { setAdoptionTick((n) => n + 1) }, [])
   useEffect(() => {
     // 切会话先清「本次研究」派生面；新 journal 首帧到达后再由绑定 effect 填回（BUG-119）。
     setAdoption({ kind: 'no-run', adopted: null, origin: null, requirements: null })
@@ -177,7 +180,7 @@ export function useConfigFeed(props: ConfigFeedInput) {
       }))
     })()
     return () => { stopped = true; controller.abort() }
-  }, [sessionId, boundSlug, runSource])
+  }, [sessionId, boundSlug, runSource, adoptionTick])
 
   /** 回执文案（三态优先级 = 失败 > 已落盘 > 已回话 > 已发送）。 */
   const receipt = receiptBase === null
@@ -242,6 +245,6 @@ export function useConfigFeed(props: ConfigFeedInput) {
 
   return {
     COMPACT, entries, detail, setDetail, menuFor, setMenuFor, confirmDelete, setConfirmDelete,
-    switchOpen, setSwitchOpen, sending, receipt, send, adoption, libraryRead, reload,
+    switchOpen, setSwitchOpen, sending, receipt, send, adoption, retryAdoption, libraryRead, reload,
   }
 }

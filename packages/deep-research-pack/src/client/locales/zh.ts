@@ -162,6 +162,7 @@ const zhBase = {
   toolSaveFailed: '方法写入失败',
   toolDefaultSetRunning: '正在设定默认偏好…',
   toolDefaultClearRunning: '正在清除默认偏好…',
+  toolDefaultRunning: '正在更新默认偏好…',
   toolDefaultSetDone: '已设默认：{name}',
   toolDefaultClearDone: '已清除默认偏好',
   toolDefaultFailed: '默认偏好操作失败',

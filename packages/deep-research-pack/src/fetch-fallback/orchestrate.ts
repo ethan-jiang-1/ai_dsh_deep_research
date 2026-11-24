@@ -6,6 +6,7 @@
  * 用假腿覆盖"什么情况回退 / 什么情况绝不回退 / 两腿失败怎么报"。
  */
 
+import { errorDetailOf } from '../lib/shared/error-detail.ts'
 import {
   errorCodeOf, fallbackForError, fallbackNotice, fallbackStatusMatches, legBudget,
 } from './policy.ts'
@@ -52,7 +53,7 @@ export interface FallbackDeps {
 /** Human/model-readable detail for one local failure, bounded to a phrase. */
 export function describeFailure(error: unknown): string {
   const code = errorCodeOf(error)
-  const message = error instanceof Error ? error.message : String(error)
+  const message = errorDetailOf(error)
   const detail = message.length > 160 ? `${message.slice(0, 157)}…` : message
   return code === undefined ? detail : `${code}: ${detail}`
 }

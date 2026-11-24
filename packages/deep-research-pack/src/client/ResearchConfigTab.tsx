@@ -34,7 +34,7 @@ export type ResearchConfigTabProps = PropsRuntime<'sidebar.right.pane.tab'> & Pr
 export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
   const {
     COMPACT, entries, detail, setDetail, menuFor, setMenuFor, confirmDelete, setConfirmDelete,
-    switchOpen, setSwitchOpen, sending, receipt, send, adoption, libraryRead, reload,
+    switchOpen, setSwitchOpen, sending, receipt, send, adoption, retryAdoption, libraryRead, reload,
   } = useConfigFeed(props)
   const sessionId = props.sessionId
   const sectionLabel = (key: keyof LibrarySections): string => sectionLabelOf(props.t, key)
@@ -333,13 +333,13 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
         {adoption.kind === 'question-unreadable' && (
           <div style={{ marginTop: 2, color: '#b45309' }}>
             ⚠ {props.t('statusQuestionReadFailed')}
-            <button type="button" onClick={() => { if (sessionId !== undefined) void reload(sessionId) }} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+            <button type="button" onClick={retryAdoption} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
           </div>
         )}
         {adoption.kind === 'question-empty' && (
           <div style={{ marginTop: 2, color: '#b45309' }}>
             ⚠ {props.t('statusQuestionEmpty')}
-            <button type="button" onClick={() => { if (sessionId !== undefined) void reload(sessionId) }} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+            <button type="button" onClick={retryAdoption} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
           </div>
         )}
         {adoption.kind === 'unrecorded' && (

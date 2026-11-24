@@ -6,6 +6,14 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [404](BUG-404-research-final-tab-reload-resets-watcher-to-reader.md) | 终稿重读把 watcher 抢回 reader | （viewRef 跟随实时视图） | 2026-11-24 |
+| [405](BUG-405-plan-gate-budget-diff-reads-undefined-property.md) | plan-gate 读不存在的 node.budget | （node.cells.budget.value） | 2026-11-24 |
+| [406](BUG-406-gate-cli-relative-sessions-before-bundle-hijacks-target.md) | --sessions 相对值被当 bundle（假 PASS） | （共享 cliArgsOf + 缺值 exit 2） | 2026-11-24 |
+| [407](BUG-407-acceptance-check-frontmatter-fails-on-crlf.md) | CRLF frontmatter 被判缺字段 | （复用 splitFrontmatter） | 2026-11-24 |
+| [408](BUG-408-research-config-tab-question-retry-calls-library-reload.md) | question 重试错调库 reload | （retryAdoption） | 2026-11-24 |
+| [409](BUG-409-start-card-choosing-error-leak-across-sessions.md) | 起步卡 choosing/错误跨会话泄漏 | （sessionId 复位 + 代次） | 2026-11-24 |
+| [410](BUG-410-start-card-non-error-detail-undefined.md) | 非 Error 拒绝值详情成 undefined | （errorDetailOf） | 2026-11-24 |
+| [411](BUG-411-tool-card-running-args-truncated-wrong-default-verb.md) | 运行态截断入参把 set 说成 clear | （三态动作 + 容错字段提取） | 2026-11-24 |
 | [386](BUG-386-final-tab-swallows-unreadable-final-dir.md) | final/ 目录不可读静默回落工作稿 | （readStateOf 分流 + 失败屏） | 2026-11-24 |
 | [387](BUG-387-final-tab-reload-failure-keeps-stale-text.md) | 终稿重读失败保留陈旧正文 | （failLoad 原子清展示态） | 2026-11-24 |
 | [388](BUG-388-status-feed-partial-unreadable-evidence-silent.md) | 部分证据卡读失败被静默 | （evidenceUnreadable 通知） | 2026-11-24 |

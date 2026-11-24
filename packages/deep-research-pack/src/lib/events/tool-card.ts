@@ -34,6 +34,32 @@ export function parseArgsObject(argsRaw: string): ToolCardArgs | null {
   return obj !== null && !Array.isArray(obj) ? (obj as ToolCardArgs) : null
 }
 
+/** 转义后的 JSON 字符串字面量（`\"` / `\\` 等），用于从截断前缀里取字段。 */
+const JSON_STRING_BODY = String.raw`((?:[^"\\]|\\.)*)`
+
+/**
+ * 从**流式截断前缀**里尽力取一个字符串字段（BUG-411）。
+ *
+ * `parseArgsObject` 对截断前缀按设计返回 null（调用方回退原文）；但卡片在运行窗口里必须
+ * 陈述「正在做什么」，把「读不到」折成某个具体语义就是说谎（例如把 set 显示成 clear）。
+ * 本函数只做一件事：若 `"key": "value"` 的字面片段已经到达，就返回解码后的值；否则 null。
+ * 值里的转义按 JSON 规则解码；非法转义 → null（宁可说未知，不拼半截）。
+ * @param argsRaw - 流式入参原文（可能是任意前缀）。
+ * @param key - 字段名（ASCII 键）。
+ * @returns 字段字符串（可能为空串）或 null。
+ */
+export function stringFieldOfArgsRaw(argsRaw: string, key: string): string | null {
+  if (typeof argsRaw !== 'string' || argsRaw === '') return null
+  const pattern = new RegExp(`"${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"\\s*:\\s*"${JSON_STRING_BODY}"`)
+  const match = pattern.exec(argsRaw)
+  if (match?.[1] === undefined) return null
+  try {
+    return JSON.parse(`"${match[1]}"`) as string
+  } catch {
+    return null
+  }
+}
+
 /** 工具卡标题行（研究语义）：spawn → 成员与职责；web_search → 查询词。 */
 export function cardTitleOf(toolName: string, args: ToolCardArgs | null, argsRaw: string, t: PackTranslate = translateZh): string {
   if (args !== null) {

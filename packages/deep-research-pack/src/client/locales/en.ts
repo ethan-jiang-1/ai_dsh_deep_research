@@ -163,6 +163,7 @@ const enBase = {
   toolSaveFailed: 'Method write failed',
   toolDefaultSetRunning: 'Setting the default preference…',
   toolDefaultClearRunning: 'Clearing the default preference…',
+  toolDefaultRunning: 'Updating the default preference…',
   toolDefaultSetDone: 'Default set: {name}',
   toolDefaultClearDone: 'Default preference cleared',
   toolDefaultFailed: 'Default preference operation failed',

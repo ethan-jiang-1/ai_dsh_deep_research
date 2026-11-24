@@ -34,3 +34,29 @@ test('BUG-400 保存卡：名称仍取自 entry 标题（负控：不得改成�
   const entry = '## 领域地图（2026-11-23，用户）\n- 找来源: a\n- 怎么核实: b\n- 报告怎么写: c\n- 不承诺: d\n'
   assert.match(render('method_library_upsert', JSON.stringify({ entry }), true), /已写入库：领域地图/)
 })
+
+// 负例留证 2026-11-24：BUG-411——运行态（block 无 kind）时入参是**流式截断前缀**，
+// parseArgsObject 按设计返回 null，旧兜底 `action === 'set' ? 'set' : 'clear'` 把未知当 clear，
+// 于是「设为默认」在运行窗口显示成「正在清除默认偏好…」。
+// 红配方：把三态判定改回二元兜底（或删掉容错字段读取）。
+test('BUG-411 运行态截断前缀：按可提取的 action 显示正确动词（不把 set 说成 clear）', () => {
+  const setRunning = render('method_library_set_default', '{"action":"set","name":"名称B"', false)
+  assert.match(setRunning, /正在设定默认偏好/)
+  assert.doesNotMatch(setRunning, /清除/)
+
+  const clearRunning = render('method_library_set_default', '{"action":"clear"', false)
+  assert.match(clearRunning, /正在清除默认偏好/)
+
+  // 参数还没到（连 action 都读不到）→ 中性文案，不冒充任何方向。
+  const unknown = render('method_library_set_default', '{"operationId":"op', false)
+  assert.doesNotMatch(unknown, /清除/)
+  assert.doesNotMatch(unknown, /设定/)
+  assert.match(unknown, /默认偏好/)
+})
+
+// 负控：完整入参（运行态已知 action）与结算态都不受容错读取影响。
+test('BUG-411 负控：完整入参运行态 / 结算态文案不变', () => {
+  assert.match(render('method_library_set_default', JSON.stringify({ action: 'set', name: '名称B' }), false), /正在设定默认偏好/)
+  assert.match(render('method_library_set_default', JSON.stringify({ action: 'clear' }), false), /正在清除默认偏好/)
+  assert.match(render('method_library_set_default', JSON.stringify({ action: 'set', name: '名称B' }), true), /已设默认：名称B/)
+})

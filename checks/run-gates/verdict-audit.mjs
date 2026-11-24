@@ -25,7 +25,7 @@ import { findSessionDir, resolveSessionLog } from '../lib/shared/session-log.mjs
 import { auditClaimVerdicts, CLAIMS_CONTRACT_DATE, parseClaims, parseSessionFacts, parseVerdicts } from '../lib/gates/verdict-audit-core.mjs'
 import { readinessOfBundle } from '../lib/shared/node-gate-contracts.mjs'
 import { readZstdText } from '../lib/shared/zstd-read.mjs'
-import { isMain } from '../lib/shared/cli-entry.mjs'
+import { cliArgsOf, isMain } from '../lib/shared/cli-entry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -106,14 +106,19 @@ function renderReport({ bundle, rounds, required, epoch, type, stats, problems, 
 if (isMain(import.meta.url)) {
   const argv = process.argv.slice(2)
   const noWrite = !argv.includes('--write') || argv.includes('--no-write')
-  const sessionsIdx = argv.indexOf('--sessions')
   const KNOWN = new Set(['--sessions', '--write', '--no-write', '--require'])
   for (const a of argv) if (a.startsWith('--') && !KNOWN.has(a)) {
     console.error(`verdict-audit: 未知参数 ${a}（支持 --sessions <dir> / --write / --no-write / --require）`)
     process.exit(2)
   }
-  const positional = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--sessions')
-  const bundleArg = positional[0]
+  // 位置参数与带值选项分离（BUG-406）：共享解析，值不漏进 positional、缺值 exit 2。
+  const parsed = cliArgsOf(argv, { valueFlags: ['--sessions'] })
+  if (parsed.error !== null) {
+    console.error(`verdict-audit: ${parsed.error}——用法 node checks/run-gates/verdict-audit.mjs <run-bundle-dir> [--sessions <dir>] [--write]`)
+    process.exit(2)
+  }
+  const sessionsValue = parsed.values.get('--sessions')
+  const bundleArg = parsed.positionals[0]
   if (bundleArg === undefined) {
     console.error('verdict-audit: 用法 node checks/run-gates/verdict-audit.mjs <run-bundle-dir> [--sessions <dir>] [--write]')
     process.exit(2)
@@ -121,16 +126,16 @@ if (isMain(import.meta.url)) {
 
   const repoHome = join(ROOT, 'runtime', 'harness-home')
   const envHome = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null
-  if (sessionsIdx === -1 && envHome === null) {
+  if (sessionsValue === undefined && envHome === null) {
     console.error('verdict-audit: 未 source tools/env.sh（DSH_HOME 缺席）——先 source，或显式 --sessions <dir>')
     process.exit(2)
   }
-  if (sessionsIdx === -1 && envHome !== null && envHome !== repoHome) {
+  if (sessionsValue === undefined && envHome !== null && envHome !== repoHome) {
     console.error(`verdict-audit: DSH_HOME=${envHome} 不是本仓 dev home（${repoHome}）——先 \`source tools/env.sh\`，或显式 --sessions <dir>`)
     process.exit(2)
   }
-  const sessionsRoot = sessionsIdx !== -1
-    ? resolve(argv[sessionsIdx + 1] ?? '')
+  const sessionsRoot = sessionsValue !== undefined
+    ? resolve(sessionsValue)
     : join(repoHome, 'sessions')
   if (sessionsRoot === '' || !existsSync(sessionsRoot)) {
     console.error(`verdict-audit: 会话根不在场：${sessionsRoot}（原文一致性无法核；先跑过 run 或显式 --sessions）`)

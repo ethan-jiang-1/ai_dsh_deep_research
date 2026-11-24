@@ -96,6 +96,8 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   ioRef.current = props
   const visibleRef = useRef(false)
   visibleRef.current = tab.tab.visible
+  /** 实时视图（reader/audit/draft）：`load()` 重算 watcher 基线时必须以它为准（BUG-404）。 */
+  const viewRef = useRef<'reader' | 'audit' | 'draft'>('reader')
   const versionRef = useRef<string | null>(null)
   const aliveRef = useRef(true)
   const manualControllerRef = useRef<AbortController | null>(null)
@@ -137,6 +139,9 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     setFailure(key)
     setLoading(false)
   }, [])
+
+  // 视图是「用户正在看哪一版」的唯一事实：写入 ref，供 load() 重算 watcher 基线（BUG-404）。
+  viewRef.current = view
 
   /** 打开终稿所在 run bundle，按同一套读策略读正文/读者版/工作稿/审查/版本目录。
    *  review.md 必须读到 eof——终局判定在文末，固定行窗会读到中段旧判定（BUG-036 同族）。 */
@@ -184,7 +189,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     }
     targetNamesRef.current = { audit: target.audit, readerName: target.reader }
     const primaryName = watchTargetOf({
-      view: 'reader', body: bodyArt.state, reader: readerArt?.state ?? 'absent',
+      view: viewRef.current, body: bodyArt.state, reader: readerArt?.state ?? 'absent',
       audit: target.audit, readerName: target.reader, draft: FINAL_NAME,
     })
     targetRef.current = { dir: viewIo.dir, name: primaryName }
@@ -231,6 +236,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     setStale(false)
     setResolved(null)
     setView('reader')
+    viewRef.current = 'reader'
     targetRef.current = null
     versionRef.current = null
     void load(controller.signal)

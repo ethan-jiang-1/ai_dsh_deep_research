@@ -4,11 +4,12 @@
     "method-library-write.ts"
   ],
   "shared": [
+    "error-detail.ts",
     "library-fold.ts",
     "method-library-operation.ts",
+    "research-defaults.ts",
     "text-fold.ts",
-    "workspace-title.ts",
-    "research-defaults.ts"
+    "workspace-title.ts"
   ],
   "client": [
     "activity-fold.ts",

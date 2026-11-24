@@ -5,7 +5,7 @@
 import type { ReactNode } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client'
-import { cardStateOf, parseArgsObject } from '../lib/events/tool-card.ts'
+import { cardStateOf, parseArgsObject, stringFieldOfArgsRaw } from '../lib/events/tool-card.ts'
 import { METHOD_LIBRARY_DEFAULT, METHOD_LIBRARY_REMOVE } from './keys.ts'
 
 type MethodLibraryToolCardProps = ToolCallViewProps & PropsLocale<'deepResearchPack'>
@@ -26,17 +26,21 @@ export function MethodLibraryToolCard(props: MethodLibraryToolCardProps): ReactN
   const defaulting = props.toolName === METHOD_LIBRARY_DEFAULT
   // 名称来源按工具契约取：remove/set_default 的入参是 `{ name }`（没有 entry 正文），
   // 只有 upsert 的 entry 才带 `## 标题`——用 entry 取 remove 名会恒空退化成「方法条目」（BUG-400）。
+  // 运行态入参是流式前缀（parseArgsObject 返回 null），字段从原文尽力提取（BUG-411）。
+  const nameField = typeof args?.name === 'string' ? args.name.trim() : (stringFieldOfArgsRaw(argsRaw, 'name') ?? '')
   const name = removing
-    ? (typeof args?.name === 'string' ? args.name.trim() : '')
+    ? nameField
     : (/^##\s+(.+?)(?:（|〔|\n|$)/m.exec(entry)?.[1]?.trim() ?? '')
-  const defaultAction = args?.action === 'set' ? 'set' : 'clear'
+  // 动作三态：只有真读到 set/clear 才指方向；读不到 = 未知（中性文案），绝不冒充一个方向。
+  const rawAction = args?.action === 'set' || args?.action === 'clear' ? args.action : stringFieldOfArgsRaw(argsRaw, 'action')
+  const defaultAction: 'set' | 'clear' | null = rawAction === 'set' ? 'set' : rawAction === 'clear' ? 'clear' : null
   const target = name === '' ? props.t('methodEntries') : name
   const label = state === 'running'
     ? removing ? props.t('toolRemoveRunning') : defaulting
-      ? props.t(defaultAction === 'set' ? 'toolDefaultSetRunning' : 'toolDefaultClearRunning')
+      ? props.t(defaultAction === 'set' ? 'toolDefaultSetRunning' : defaultAction === 'clear' ? 'toolDefaultClearRunning' : 'toolDefaultRunning')
       : props.t('toolSaveRunning')
     : state === 'ok' ? removing ? props.t('toolRemoveDone', { name: target }) : defaulting
-      ? props.t(defaultAction === 'set' ? 'toolDefaultSetDone' : 'toolDefaultClearDone', { name: String(args?.name ?? '') })
+      ? props.t(defaultAction === 'set' ? 'toolDefaultSetDone' : 'toolDefaultClearDone', { name: nameField })
       : props.t('toolSaveDone', { name: target })
     : removing ? props.t('toolRemoveFailed') : defaulting ? props.t('toolDefaultFailed') : props.t('toolSaveFailed')
   return (

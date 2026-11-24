@@ -44,7 +44,7 @@ import { gateBundle } from '../lib/gates/node-gate-core.mjs'
 import { nodeRunSource } from '../lib/gates/run-source-node.mjs'
 import { workspaceRoot } from '../lib/shared/workspace-root.mjs'
 import { readZstdText } from '../lib/shared/zstd-read.mjs'
-import { isMain } from '../lib/shared/cli-entry.mjs'
+import { cliArgsOf, isMain } from '../lib/shared/cli-entry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -68,16 +68,22 @@ function readLog(p) {
 if (isMain(import.meta.url)) {
   const argv = process.argv.slice(2)
   const latest = argv.includes('--latest')
-  const sessionsIdx = argv.indexOf('--sessions')
+  // 位置参数与带值选项分离（BUG-406）：--sessions 的值不得漏进 bundleArg；缺值 exit 2。
+  const parsed = cliArgsOf(argv, { valueFlags: ['--sessions'] })
+  if (parsed.error !== null) {
+    console.error(`node-gate: ${parsed.error}——用法 node checks/run-gates/node-gate.mjs <run-bundle-dir> [--sessions <dir>] [--write]`)
+    process.exit(2)
+  }
+  const sessionsValue = parsed.values.get('--sessions')
   // 会话根解析（同 evidence-audit 纪律）：默认锚定本仓 dev home；DSH_HOME 指向别处先自拒。
   const repoHome = join(ROOT, 'runtime', 'harness-home')
   const envHome = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null
-  if (sessionsIdx === -1 && envHome !== null && envHome !== repoHome) {
+  if (sessionsValue === undefined && envHome !== null && envHome !== repoHome) {
     console.error(`node-gate: DSH_HOME=${envHome} 不是本仓 dev home（${repoHome}）——先 \`source tools/env.sh\`，或显式 --sessions <dir>`)
     process.exit(2)
   }
-  const sessionsRoot = sessionsIdx !== -1 ? resolve(argv[sessionsIdx + 1]) : join(repoHome, 'sessions')
-  const bundleArg = argv.find((a) => !a.startsWith('--') && a !== sessionsRoot)
+  const sessionsRoot = sessionsValue !== undefined ? resolve(sessionsValue) : join(repoHome, 'sessions')
+  const bundleArg = parsed.positionals[0]
   let bundleDir = null
   if (latest) {
     // 自动审计只在根 + archive 里选最新；_abandoned 是停放桶，要审请显式点名 bundle。

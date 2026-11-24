@@ -35,7 +35,7 @@ import { auditBundle } from '../lib/gates/evidence-audit-core.mjs'
 import { nodeRunSource } from '../lib/gates/run-source-node.mjs'
 import { workspaceRoot } from '../lib/shared/workspace-root.mjs'
 import { readZstdText } from '../lib/shared/zstd-read.mjs'
-import { isMain } from '../lib/shared/cli-entry.mjs'
+import { cliArgsOf, isMain } from '../lib/shared/cli-entry.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -59,7 +59,13 @@ if (isMain(import.meta.url)) {
   const argv = process.argv.slice(2)
   const latest = argv.includes('--latest')
   const noWrite = !argv.includes('--write') || argv.includes('--no-write')
-  const sessionsIdx = argv.indexOf('--sessions')
+  // 位置参数与带值选项分离（BUG-406）：--sessions 的值不得漏进 bundleArg；缺值 exit 2。
+  const parsed = cliArgsOf(argv, { valueFlags: ['--sessions'] })
+  if (parsed.error !== null) {
+    console.error(`evidence-audit: ${parsed.error}——用法 node checks/run-gates/evidence-audit.mjs <run-bundle-dir> [--sessions <dir>] [--write]`)
+    process.exit(2)
+  }
+  const sessionsValue = parsed.values.get('--sessions')
   // 会话根解析（2026-09-26 实测修复）：**不能盲信继承来的 DSH_HOME**。实测：在日用 GUI 的 shell 里
   // DSH_HOME 常已被设成 `~/.dsh`（日用 home），于是本脚本会去审计**另一个 home 的会话**——
   // 同一 bundle 两次跑出 7/88 与 85/88（1807 vs 330 个日志文件），足以把好报告判成"伪造链接"。
@@ -67,12 +73,12 @@ if (isMain(import.meta.url)) {
   // 要审别的 home 就显式 `--sessions <dir>`。
   const repoHome = join(ROOT, 'runtime', 'harness-home')
   const envHome = process.env.DSH_HOME ? resolve(process.env.DSH_HOME) : null
-  if (sessionsIdx === -1 && envHome !== null && envHome !== repoHome) {
+  if (sessionsValue === undefined && envHome !== null && envHome !== repoHome) {
     console.error(`evidence-audit: DSH_HOME=${envHome} 不是本仓 dev home（${repoHome}）——先 \`source tools/env.sh\`，或显式 --sessions <dir>；本脚本不自作主张换 home（实测会审到别的 home 的会话，结论不可比）`)
     process.exit(2)
   }
-  const sessionsRoot = sessionsIdx !== -1 ? resolve(argv[sessionsIdx + 1]) : join(repoHome, 'sessions')
-  const bundleArg = argv.find((a) => !a.startsWith('--') && a !== sessionsRoot)
+  const sessionsRoot = sessionsValue !== undefined ? resolve(sessionsValue) : join(repoHome, 'sessions')
+  const bundleArg = parsed.positionals[0]
   let bundleDir = null
   if (latest) {
     // D28：根 / archive/ / _abandoned/ 都是操作桶，--latest 三处并扫取 mtime 最新；

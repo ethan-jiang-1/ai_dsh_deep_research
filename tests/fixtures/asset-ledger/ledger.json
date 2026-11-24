@@ -933,6 +933,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/start-card.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "起步卡的会话级瞬态与失败详情（BUG-409 / BUG-410）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/tabs-fault-matrix.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -1210,6 +1220,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "tests/cockpit/lib/run/run-version.spec.mjs —— rerun 版本面的 keyless 契约。",
       "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/shared/error-detail.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "errorDetailOf 的失败详情折算（BUG-410）：任何拒绝值都要交出可读原因，不许退化成 undefined。",
+      "oracleType": "self-referential",
       "sunset": "随被测模块删除"
     },
     {
@@ -1929,7 +1949,7 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "acceptance-check 回归 — 收活判据三态求值（PASS / FAIL / UNVERIFIED，判不了永不静默放行）；",
-      "oracleType": "self-referential",
+      "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
     {
@@ -1999,6 +2019,16 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "findings-contract.spec.mjs — findings gap 四态 / lens_gaps 消费者 / scope_role 闭集（BUG-252 / 256 / 253）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/run/gates/gate-cli-args.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "gate CLI 位置参数解析（BUG-406）：带值选项（`--sessions <dir>`）的值绝不能漏进 positional",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },

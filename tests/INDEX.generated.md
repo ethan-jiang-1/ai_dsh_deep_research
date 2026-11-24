@@ -81,7 +81,7 @@
 | shared | `checks/lib/shared/artifact-freshness` | `tests/checks/shared/artifact-freshness.test.mjs` |
 | shared | `checks/lib/shared/boot-port` | `tests/run/harness/port-reclaim.spec.mjs` |
 | shared | `checks/lib/shared/cdp-driver` | — |
-| shared | `checks/lib/shared/cli-entry` | `tests/checks/shared/cli-entry.test.mjs` |
+| shared | `checks/lib/shared/cli-entry` | `tests/checks/shared/cli-entry.test.mjs`<br>`tests/run/gates/gate-cli-args.spec.mjs` |
 | shared | `checks/lib/shared/cli-exit` | `tests/checks/shared/cli-exit-contract.test.mjs` |
 | shared | `checks/lib/shared/env` | `tests/run/channel/env-credentials.spec.mjs` |
 | shared | `checks/lib/shared/final-version` | `tests/run/gates/final-version.spec.mjs` |
@@ -158,6 +158,7 @@
 | run | `run/run-fold` | `tests/cockpit/lib/run/run-property.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/gates/final-version.spec.mjs`<br>`tests/run/shared/run-fold.spec.mjs` |
 | run | `run/run-version` | `tests/cockpit/lib/run/run-version.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/present-version-conformance.spec.mjs` |
 | shared | `shared/config-tables` | `tests/cockpit/client/builtin-display.spec.mjs`<br>`tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/lib/method-library/library-fold.spec.mjs` |
+| shared | `shared/error-detail` | `tests/cockpit/lib/shared/error-detail.spec.mjs` |
 | shared | `shared/i18n` | `tests/cockpit/client/builtin-display.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | shared | `shared/markdown-mask` | `tests/cockpit/lib/shared/markdown-mask-diff.spec.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs` |
 | shared | `shared/text-fold` | `tests/cockpit/lib/shared/text-fold.spec.mjs` |
@@ -180,7 +181,7 @@
 | (root) | `index` | — |
 | (root) | `keys` | `tests/cockpit/client/final-tab-patterns.spec.mjs` |
 | (root) | `lead-prompt` | `tests/cockpit/shared/client-pure-logic.spec.mjs` |
-| (root) | `locales` | `tests/cockpit/client/builtin-display.spec.mjs`<br>`tests/cockpit/client/coach-sessions.spec.mjs`<br>`tests/cockpit/client/defaults/defaults-panel-confirm.spec.mjs`<br>`tests/cockpit/client/locales/client-locale.spec.mjs`<br>`tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-queue.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-tool-card.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/client/research-config-source.spec.mjs`<br>`tests/cockpit/client/research-config/config-feed-behavior.spec.mjs`<br>`tests/cockpit/client/research-config/config-feed-poll.spec.mjs`<br>`tests/cockpit/client/research-graph/graph-notices.spec.mjs`<br>`tests/cockpit/client/research-status/status-feed-behavior.spec.mjs`<br>`tests/cockpit/client/research-tabs.spec.mjs`<br>`tests/cockpit/client/tabs-fault-matrix.spec.mjs`<br>`tests/cockpit/lib/method-library/run-source-picker.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
+| (root) | `locales` | `tests/cockpit/client/builtin-display.spec.mjs`<br>`tests/cockpit/client/coach-sessions.spec.mjs`<br>`tests/cockpit/client/defaults/defaults-panel-confirm.spec.mjs`<br>`tests/cockpit/client/locales/client-locale.spec.mjs`<br>`tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-queue.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-tool-card.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/client/research-config-source.spec.mjs`<br>`tests/cockpit/client/research-config/config-feed-behavior.spec.mjs`<br>`tests/cockpit/client/research-config/config-feed-poll.spec.mjs`<br>`tests/cockpit/client/research-graph/graph-notices.spec.mjs`<br>`tests/cockpit/client/research-status/status-feed-behavior.spec.mjs`<br>`tests/cockpit/client/research-tabs.spec.mjs`<br>`tests/cockpit/client/start-card.spec.mjs`<br>`tests/cockpit/client/tabs-fault-matrix.spec.mjs`<br>`tests/cockpit/lib/method-library/run-source-picker.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | locales | `locales/en` | — |
 | locales | `locales/en-fold` | — |
 | locales | `locales/zh` | `tests/cockpit/shared/defaults-ui.spec.mjs` |
@@ -225,7 +226,7 @@
 | (root) | `ResearchToolCard` | — |
 | (root) | `run-source-browser` | `tests/cockpit/client/run-source-browser.spec.mjs` |
 | (root) | `session-follow` | `tests/cockpit/client/session-follow.spec.mjs` |
-| (root) | `StartCard` | — |
+| (root) | `StartCard` | `tests/cockpit/client/start-card.spec.mjs` |
 | (root) | `startup` | `tests/cockpit/client/product-startup.spec.mjs`<br>`tests/cockpit/client/workspace-boot.spec.mjs` |
 | (root) | `styles` | — |
 | (root) | `workspace-boot` | `tests/cockpit/client/workspace-boot.spec.mjs` |

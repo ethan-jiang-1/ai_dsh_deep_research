@@ -553,3 +553,103 @@ test('BUG-391 图谱：旧图快照 unreadable → 差异卡报错并可重试�
   assert.match(text, /读取失败/, '要如实说明快照读取失败')
   assert.ok([...container.querySelectorAll('button')].some((b) => b.textContent === zh.graphRetryRead), '必须给重试入口')
 })
+
+// 负例留证 2026-11-24：BUG-404——`load()` 里写死 `view: 'reader'` 计算 watcher 基线：切到审计版
+// 后重读一次，watcher 就永久改盯阅读版（审计版不再提示更新）。红配方：把 load 里传的
+// `view: viewRef.current` 改回 `'reader'`。
+test('BUG-404 终稿：审计版重读后 watcher 仍盯审计版（不被硬编码 reader 抢回）', async (t) => {
+  t.mock.timers.enable({ apis: ['setInterval'], now: Date.parse('2026-11-24T00:00:00Z') })
+  t.after(() => t.mock.timers.reset())
+  const versions = {
+    'drt_rft/final/v1.md': 'audit-1',
+    'drt_rft/final/readable-v1.md': 'reader-1',
+    'drt_rft/final.md': 'draft-1',
+  }
+  const run = makeMaliciousRunSource({
+    tree: {
+      drt_rft: {
+        'final.md': '# 工作稿\n\n审计正文 v-a1\n',
+        final: { 'v1.md': '# 审计 v1\n\n审计正文 v-a1\n', 'readable-v1.md': '# 读者版\n\n读者版正文 r1\n' },
+      },
+    },
+    versions,
+  })
+  const { container } = render(createElement(ResearchFinalTab, {
+    sessionId: 's-404',
+    t: tZh,
+    useTabInfo: () => ({ tab: { navigation: { address: 'dsh-resource://file/session/s-404/drt_rft/final.md' }, visible: true, actions: { openTab: () => {} } } }),
+    useSession: () => undefined,
+    useSessions: () => undefined,
+    useSessionStatus: () => undefined,
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  // 前置：有读者版时默认看读者版（通用地址回退到最高版读者版）。
+  assert.match(container.textContent ?? '', /读者版正文 r1/)
+  // 切到审计版（按钮文案带版本号：`看审计版 v1`）。
+  fireEvent.click([...container.querySelectorAll('button')].find((b) => (b.textContent ?? '').startsWith(zh.viewAudit)))
+  await flushUi(act)
+  assert.match(container.textContent ?? '', /审计正文 v-a1/)
+  assert.doesNotMatch(container.textContent ?? '', /读者版正文 r1/)
+
+  // 审计版文件更新 → 一次 watcher 轮询后应出现「重新读取」。
+  run.update({ versions: { ...versions, 'drt_rft/final/v1.md': 'audit-2' } })
+  await act(async () => { t.mock.timers.tick(30_000) })
+  await flushUi(act)
+  const reloadButton = [...container.querySelectorAll('button')].find((b) => b.textContent === zh.finalReload)
+  assert.ok(reloadButton !== undefined, '审计版更新后必须提示重新读取（watcher 还在盯审计版）')
+
+  // 重读：watcher 基线必须重设为审计版，而不是被硬编码的 reader 抢回。
+  run.calls.length = 0
+  fireEvent.click(reloadButton)
+  await flushUi(act)
+  const versionPaths = run.calls.filter((call) => call[0] === 'version').map((call) => call[1])
+  assert.ok(versionPaths.length > 0, '重读必须重设 watcher 基线')
+  assert.ok(versionPaths.every((path) => /final\/v1\.md$/.test(path)), `watcher 基线必须是审计版，实际：${versionPaths.join(', ')}`)
+})
+
+// 负例留证 2026-11-24：BUG-408——question.md 读失败/空横幅的「重试」错调库文件 reload()。
+// 红配方：把两处 onClick 改回 `reload(sessionId)`（adoption 不再重读）。
+test('BUG-408 配置：question.md 读失败横幅的重试真正重读 question.md', async () => {
+  const run = makeMaliciousRunSource({
+    tree: { drt_cfg: { 'question.md': '# Q\n\n## 研究方法（本次实际采用）\n- 采用：事实核查\n' } },
+    fileFaults: { 'drt_cfg/question.md': 'unreadable' },
+  })
+  const snap = {
+    phase: 'ready', value: {}, problems: [], warnings: [],
+    methodDefault: null, methodConflict: false, methodRead: 'absent', revision: 0, pending: false, outcome: null,
+  }
+  const props = {
+    sessionId: 's-408',
+    t: tZh,
+    readFile: async () => null,
+    readLibrary: async () => ({ kind: 'ok', text: '## 我的打法\n- 找来源: a\n' }),
+    runSource: () => run.source,
+    listDir: async () => [],
+    follow: followWithWrite('cfg'),
+    sendInstruction: async () => ({ ok: true, detail: 'ok' }),
+    defaults: {
+      subscribe: () => () => {}, getSnapshot: () => snap, refresh: async () => {},
+      setPatch: async () => {}, unset: async () => {}, clear: async () => {}, dispose: () => {},
+    },
+    useSession: () => undefined,
+    useSessions: () => undefined,
+    useSessionStatus: () => undefined,
+    visible: true,
+  }
+  const { container } = render(createElement(ResearchConfigTab, props))
+  await flushUi(act)
+  assert.match(container.textContent ?? '', /读取失败/, '前置：question.md 读失败横幅在路上')
+
+  // 文件恢复：点横幅里的重试
+  run.update({ fileFaults: {} })
+  run.calls.length = 0
+  const retryButtons = [...container.querySelectorAll('button')].filter((b) => b.textContent === zh.retry)
+  assert.ok(retryButtons.length > 0, '横幅必须给重试按钮')
+  fireEvent.click(retryButtons[0])
+  await flushUi(act)
+  assert.ok(run.calls.some((c) => c[0] === 'read' && c[1] === 'drt_cfg/question.md'), `重试必须重读 question.md，实际读：${JSON.stringify(run.calls.map((c) => c[1]))}`)
+  assert.match(container.textContent ?? '', /事实核查/, '重读成功后应显示采用态')
+  assert.doesNotMatch(container.textContent ?? '', /读取失败/)
+})

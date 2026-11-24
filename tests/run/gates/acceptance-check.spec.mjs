@@ -98,3 +98,25 @@ test('CLI 退出码：全 PASS=0；FAIL / UNVERIFIED / noCriteria=1（收活不�
   ])
   assert.equal(acceptanceExitCode(mixed.summary), 1, '有 PASS 也有 FAIL 仍不放行')
 })
+
+// 负例留证 2026-11-24：BUG-407——frontmatter_fields 自写正则只认 LF（`^---\n` + 逐字段 `^k:`），
+// CRLF 文件必判缺全部字段；同仓 splitFrontmatter 已兼容 `\r?\n`。
+// 红配方：把 splitFrontmatter 调用改回影子正则。
+test('BUG-407：CRLF frontmatter 与 LF 同判（复用 splitFrontmatter 唯一正本）', async () => {
+  const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = await import('node:fs')
+  const { tmpdir } = await import('node:os')
+  const dir = mkdtempSync(join(tmpdir(), 'acceptance-crlf-'))
+  try {
+    mkdirSync(join(dir, 'evidence'), { recursive: true })
+    writeFileSync(join(dir, 'evidence', 'e1.md'), '---\r\ntitle: test\r\nsource_url: https://example.com\r\n---\r\nbody\r\n', 'utf8')
+    const r = acceptanceCheck(dir, [{ type: 'frontmatter_fields', file: 'evidence/e1.md', fields: ['title', 'source_url'] }])
+    assert.equal(r.verdicts[0].status, 'PASS', r.verdicts[0].detail)
+    // 负控：真缺字段仍 FAIL（放宽不得变成永远 PASS）。
+    writeFileSync(join(dir, 'evidence', 'e2.md'), '---\r\ntitle: test\r\n---\r\nbody\r\n', 'utf8')
+    const miss = acceptanceCheck(dir, [{ type: 'frontmatter_fields', file: 'evidence/e2.md', fields: ['title', 'source_url'] }])
+    assert.equal(miss.verdicts[0].status, 'FAIL')
+    assert.match(miss.verdicts[0].detail, /source_url/)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
