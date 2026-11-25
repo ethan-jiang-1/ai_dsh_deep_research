@@ -128,7 +128,7 @@
 
 | 层 | 何时 | 跑什么 | 量级 |
 |---|---|---|---|
-| 日常 commit | 每次 commit（pre-commit hook） | `git diff --check` + `pnpm verify` + `pnpm test` | ~15s |
+| 日常 commit | 每次 commit（pre-commit hook） | `git diff --check` + `pnpm verify` + `pnpm test` | ~1min（本机实测） |
 | 日常改门禁 | 动了 `checks/verify/gates/**`、`context.mjs`、`gates-cases.mjs` | `node checks/smoke/gates.e2e.mjs --gate=<改的门禁>`（只跑该门禁的案例；`--case` 可再收窄） | 十几秒 |
 | 发布 / nightly | 发布候选、nightly CI | 全量门禁自测 + 干净室入口（pack.e2e / cold-start / lifecycle / release）+ `release-check` | 分钟级，可接受 |
 

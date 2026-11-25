@@ -44,6 +44,10 @@ A/B 层（A 回放通路 + B 组装请求 diff）进 CI job `snapshot-replay`：
 - 模型可见输入（persona、工具 schema、工作区手册、skill 目录）有意变更后，重录该场景（真模型档）并更新 `source` 身份；比对会先红，这是预期信号；
 - 工具 schema 按**全等**比对（`request/header` 逐字），不保留"工具退役后旧场景照跑"的容忍——退役工具必须随重录基线更新，旧容忍已由此严格比对取代；
 - 录制器不代写场景声明：新角色或重录后由人登记 case 与录制身份，漏登记即 fail-loud；
+- **新鲜度 owner = 本页**：模型可见面（persona / 工具 schema / 手册）或工具行改动后，旧场景按
+  「`snapshot.json` 的 `source` 身份不覆盖当前 pack」判 stale——要么同 diff 重录，要么在
+  `snapshot.json` 写明 `staleWhy` 并挂 `_backlog/triggers.md` 的重议条件；`ui.expected` 重写必须
+  带 `why`（`staged-change-pairing` 对账）。没有 owner 的旧场景会静默老化为假绿；
 - 新分类只在出现持久消费者时建立（探针证据、浏览器视觉证据同此律），不为未来的可能性预建空目录。
 
 ## 场景世界树（设计稿，未实施）

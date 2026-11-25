@@ -89,15 +89,14 @@ export function runB() {
     else if (!satisfiesVersion(VENDOR_TAG.replace(/^dsh-v/, ''), engine))
       fail(gate, `engines.dsh ${engine} 不覆盖当前 vendor tag ${VENDOR_TAG}——范围写窄或写错`);
     else {
-      // 同一版本事实有 5 处人类副本（根 README / 包 README / design/40 / 手册源 / 生成手册）。
-      // 当前一致，但没有任何机械对账；2026-11-10 接手复查把它们钉住：精确副本必须含完整范围，
-      // 根 README 至少含两端点。范围一改，本门禁点名所有未同步副本。
+      // 同一版本事实的人类副本：根 README / 包 README en+zh / design/40 / 手册源 / 生成手册（中文版 2026-11-25 补入）。
       const range = engine.trim();
       const endpoints = range.match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/g) ?? [];
       if (endpoints.length < 2) fail(gate, `engines.dsh ${range} 解析不出两个端点——无法对账人类副本`);
       /** @type {Array<[string, boolean]>} */
       const copies = [
         ['packages/deep-research-pack/README.md', true],
+        ['packages/deep-research-pack/README.zh.md', true],
         ['docs/design/40-research-cockpit.md', true],
         ['_dist/安装手册.md', true],
         ['README.md', false],
@@ -169,6 +168,8 @@ export function runB() {
   const files = (r.stdout || '').split('\n').filter((f) => /\.(yml|md)$/.test(f));
   if (files.length === 0) fail(gate, 'packages/deep-research-pack 下无 tracked yml/md（ls-files 空）');
   for (const f of files) {
+    // 索引有、工作树无（未暂存的删除/改名）：点名一条，别让 readFileSync 抛 ENOENT 崩掉 verify。
+    if (!existsSync(join(ROOT, f))) { fail(gate, `${f} 在 git 索引但不在工作树——删除/改名请同 diff 更新索引（git add -A）后再判`); continue }
     const text = readFileSync(join(ROOT, f), 'utf8');
     const m = text.match(/runs\//g);
     if (m) fail(gate, `${f}: 携带已废目录契约 runs/（×${m.length}）——D17 后 run bundle = drt_<slug>/`);

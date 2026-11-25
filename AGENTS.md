@@ -21,14 +21,14 @@ DSH Deep Research 插件：一个包（`packages/deep-research-pack`）提供四
 ## 工作流：从 `_backlog` 到交付（一条线）
 
 `_backlog` 卡/研究题（研究）→ 定性（`待落地`/`修复就绪`/`已定性`）→ 落地（授权后 guides/60；研究题 =
-结论转卡/Note）→ 审查/验收（按重要性；机械不跳）→ 归档（卡与去向载体同变更）。直接授权的工作不建卡
+结论转卡/Note）→ 审查/验收（按重要性）→ 归档（卡与去向载体同变更）。直接授权的工作不建卡
 也按此走，不因 backlog 停等。
 
 - `status` = 阶段唯一家；状态/守卫 = [_backlog/AGENTS.md](_backlog/AGENTS.md)：`待落地` 不是授权；
   `修复就绪` = P1/P2 修复授权（P0/触面 → `等人拍板`）。
 - `待落地` 只选去向（`proposed` RFC / `implemented` Note），不写 implemented Note；收件/写入时机 =
   [notes/AGENTS.md](notes/AGENTS.md)；落地 = [guides/60](docs/guides/60-dev-loop.md)。
-- 审查/验收：机械不跳；**日常 commit 链 = verify + tests（≈15s），不跑 gates.e2e / 干净室入口 / 发布档，也不等 CI；改门禁只跑该门禁的案例，全量只在发布/nightly**（分层 = [guides/60](docs/guides/60-dev-loop.md) §门禁分层）；语义自审按风险；用户按重要性出场；`审查：跳过` 不写成 verified。
+- 审查/验收：机械不跳；**日常 commit 链 = verify + tests（本机 ~1min），不跑 gates.e2e / 干净室入口 / 发布档，也不等 CI；改门禁只跑该门禁的案例，全量只在发布/nightly**（分层 = [guides/60](docs/guides/60-dev-loop.md) §门禁分层）；语义自审按风险；用户按重要性出场；`审查：跳过` 不写成 verified。
 - 归档：卡与去向载体同变更（Note / RFC / triggers / none）；延后项落 [triggers](_backlog/triggers.md)。
 - **修复证据**：bug 翻 `修复落地/已修` 必须写 `json fix-evidence` 块（changes/red/green/guard，`exit` 为 oracle；旧卡 < 2026-11-15 grandfather）并与代码/测试同变更；只改状态/移动卡 = 假修（机械面 = `staged-change-pairing`；规则 = [_backlog/AGENTS.md](_backlog/AGENTS.md)）。
 
@@ -120,9 +120,7 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 > 完成定义 = 真检查 · no-key 证管道 / with-key 证 agent · verify the world · 真入口路径 ·
 > 新门禁带反证 · docs = 当前合同 · 同 diff 带 Note · 窄证据切片 · 卫生铁律 · 工具态重定向。
 >
-> **证据匹配面**：改动的面 → 证据类型，执行正本 = [guides/60 §2 任务型路由表](docs/guides/60-dev-loop.md)；新契约测试与门禁同 diff 带反证（先看红再交付绿）。单点机制/行为（含模型不按纪律）可疑 → 先看 [probes/](probes/README.md)（指南 = guides/66），别先跑整链。
-> **命名即车道**（[D53](docs/decisions.md#d53)）：测试文件名 = 证据车道——`.spec.mjs` 进程内 / `.e2e.mjs` 真进程 / `.entry.mjs` 真入口 / `tests/checks/*/*.test.mjs` 门禁；错后缀或错 lane = 红。规则 = [tests/AGENTS](tests/AGENTS.md)。
->
+> **证据匹配面**：改动的面 → 证据类型，执行正本 = [guides/60 §2 任务型路由表](docs/guides/60-dev-loop.md)；新契约测试与门禁同 diff 带反证（先看红再交付绿）。单点机制/行为（含模型不按纪律）可疑 → 先看 [probes/](probes/README.md)（指南 = guides/66），别先跑整链。**命名即车道**（[D53](docs/decisions.md#d53)）：测试文件名 = 证据车道，错后缀或错 lane = 红；映射与规则正本 = [tests/AGENTS](tests/AGENTS.md)。
 > **研发宪章**（2026-09-27 用户定调）= [CONTRIBUTING §Development charter](CONTRIBUTING.md#development-charter)：循 DSH 而不发明 · 自主优先并借鉴成熟 DSH 插件（采纳度为信号）· **审阅分层**——机械门禁/审计/判据探针/对抗自审自主做，只在阶段边界请人（REVIEW 是最后手段，不是例行步骤）。
 
 ## 编辑这些指令
@@ -130,8 +128,8 @@ not loop changes）= vendor 树根 AGENTS.md Conventions 节。
 `CLAUDE.md` symlink `AGENTS.md`（编辑真文件）。根 AGENTS.md 只放**每轮都要在场的常驻指令**
 （每条 1–3 行 + 链到 home）；子树专属指令放该子树的 `AGENTS.md`（`docs/` · `checks/` ·
 `notes/` · `packages/deep-research-pack/` · `tests/` · `_backlog`）。入口链成员与行数上限分别由 `entry-chain` 与
-`doc-budgets` 门禁把守；上限在 [checks/doc-budgets.json](checks/doc-budgets.json)，
-超限处置序 = 下放 > 压缩 > 升顶（升顶须同变更登记理由——上限过低是预算 bug）。
+`doc-budgets` 门禁把守；上限与超限处置序的机读正本 = [checks/doc-budgets.json](checks/doc-budgets.json)
+（处置纪律 = [docs/AGENTS](docs/AGENTS.md) §预算与处置序；升顶须同变更登记理由——上限过低是预算 bug）。
 
 ## 术语速查
 

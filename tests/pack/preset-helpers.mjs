@@ -94,3 +94,23 @@ export function skillsOf(role) {
     .map((entry) => entry.name)
     .sort();
 }
+
+/** bundle 层 patch（顶层行：replace 行 + insert 行）。 */
+export const BUNDLE_PATCH = join(PACK, 'cordis.patch.yml');
+
+/**
+ * 读任意 patch 文件并摊平所有带 `id` 的行（bundle 的顶层行与 `insert:` 子行）。
+ * `config` 子树不进入（那里是插件参数，不是行）。
+ */
+export function loadPatchRows(file) {
+  const doc = yaml.load(readFileSync(file, 'utf8'), { schema: SCHEMA });
+  const rows = [];
+  const walk = (node, insideConfig = false) => {
+    if (Array.isArray(node)) { for (const item of node) walk(item, insideConfig); return; }
+    if (node === null || typeof node !== 'object') return;
+    if (!insideConfig && typeof node.id === 'string') rows.push(node);
+    for (const [key, value] of Object.entries(node)) walk(value, insideConfig || key === 'config');
+  };
+  walk(doc);
+  return rows;
+}

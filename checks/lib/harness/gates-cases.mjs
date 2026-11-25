@@ -763,12 +763,20 @@ export const CASES = [
     delete j.engines.dsh;
     writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
   } },
-  // 同一版本范围的 5 处人类副本必须同步；只改包 README 不改 package.json → 点名包 README。
+  // 同一版本范围的 6 处人类副本必须同步；只改包 README 不改 package.json → 点名包 README。
   { id: 'pack-bundle-compat-engines-copy-drift', gate: 'pack-bundle-compat', mutate: (dir) => {
     const p = join(dir, 'packages', 'deep-research-pack', 'README.md');
     const text = readFileSync(p, 'utf8');
     if (!text.includes('>=0.2.1-rc.2 <=0.2.1-rc.5')) throw new Error('夹具包 README 无 engines 范围——案例失效');
     writeFileSync(p, text.replace('>=0.2.1-rc.2 <=0.2.1-rc.5', '>=0.2.1-rc.2 <=0.2.1-rc.4'));
+  } },
+  // 中文包 README 是同一版本范围的第六份人类副本（2026-11-25 接手诊断：它停在 rc.3 + 假称
+  // rc.5 首屏失败，而门禁副本表漏了它 → 漂移可长期存活）。改 zh 不改 package.json → 点名 zh。
+  { id: 'pack-bundle-compat-engines-zh-drift', gate: 'pack-bundle-compat', mutate: (dir) => {
+    const p = join(dir, 'packages', 'deep-research-pack', 'README.zh.md');
+    const text = readFileSync(p, 'utf8');
+    if (!text.includes('>=0.2.1-rc.2 <=0.2.1-rc.5')) throw new Error('夹具中文 README 无 engines 范围——案例失效');
+    writeFileSync(p, text.replace('>=0.2.1-rc.2 <=0.2.1-rc.5', '>=0.2.1-rc.2 <=0.2.1-rc.3'));
   } },
   // guard-red-record（tests 面反证义务机械化）：标题声明无留证 / 悬空编号双形态。
   { id: 'guard-red-record-no-record', gate: 'guard-red-record', mutate: (dir) => {

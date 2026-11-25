@@ -141,6 +141,7 @@ the main surface gains the method-library tab.
 - **Credentials** come from DSH (Models page, credentials service, environment, or
   `$DSH_HOME/.credentials.yaml`); the package never bundles one. Search uses `DEEPSEEK_API_KEY`;
   the fetch fallback resolves the same ref and reports `fallback unavailable` when missing.
+- **Host-level rows this bundle also touches**: it disables the base `ui-trajectory` and `ui-sidebar-terminal` tabs, defaults the profile locale to `zh` (`locale`), makes `lead` the registry default preset (`agent-preset-registry`), adds `MALFORMED_RESPONSE` to `llm-deepseek`'s bounded retry, points `web` search/fetch at `deepseek-search-api` / `deepseek-fallback-fetch`, and keeps `session-query-sqlite` on `:memory:` with first-search activation — all profile-wide, not scoped to this package's sessions.
 
 ### Upgrade and rollback
 
@@ -188,6 +189,7 @@ them into one label.
 | `deep-research` profile composition + team layer | User / DSH | Profile manifest | Profile init + plugin add | `$DSH_HOME/profiles/deep-research/` | Profile | DSH, user | DSH, plugin commands | Recreate profile | User deletes; package removal keeps it |
 | Deep Research settings (workspace, last session) | Package / user | File | Startup row, user | `$DSH_HOME/deep-research/settings.json` | Home | Startup row, doctor, user | Startup row, user | Re-select workspace | Delete directory; package removal keeps it |
 | Browser workspace hint | Browser | DSH Workspace registry | Client | `localStorage['dsh.deep-research.workspaceId.v1']` | Device/origin | Client | Client | Re-select workspace | Clear site data |
+| Diagnostic residue (settings backup + method-library lock) | Package / user | File | Startup row, Method Editor tools | `$DSH_HOME/deep-research/settings.json.corrupt`, `<workspace>/.method-library.lock` | Home / workspace | Doctor, tools | Startup row, tools | Re-created | Delete with the data it guards |
 | Method library | User | File | User, Lead, Method Editor | `<workspace>/method-library.md` | Workspace | User, model | User, Lead, Method Editor tools | No (user data) | User deletes; package removal keeps it |
 | Project research defaults | User | File | User, panel | `<workspace>/research-defaults.json` | Workspace | Model (injected), panel | Panel via `/research-defaults` host command | No (user data) | Delete file; package removal keeps it |
 | Run bundle | User | Files + journal | Roles | `<workspace>/drt_<slug>/`, `archive/`, `_abandoned/` | Workspace + slug | Model, user | Roles, ops | No | User deletes; no automatic GC |
@@ -268,12 +270,10 @@ Persona, manual, skill descriptions, and tool schemas are stable per version (KV
 
 ## Known Limitations and Deferred Work
 
-- **First-screen workspace**: the default is the shared `$DSH_HOME`; a browser with a saved session
-  may open the previous workspace. The client uses `dsh.sessions.current` and the workspace hint key
-  to switch back; deterministic selection is deferred.
-- **Workspace chooser**: the first-screen “choose project directory” uses the native chooser;
-  browse-only deployments have no dedicated directory browser and report the error rather than
-  pretending success.
+- **First screen**: the workspace default is the shared `$DSH_HOME`; a browser with a saved session
+  may open the previous workspace, and the client switches back via `dsh.sessions.current` plus the
+  workspace hint key (deterministic selection is deferred). The “choose project directory” control
+  uses the native chooser; browse-only deployments report the error instead of pretending success.
 - **Host session creation is best-effort**: the webserver listens before a readiness gate exists;
   the client falls back to a blank session or onboarding.
 - **Method library scope**: it is workspace-local user data; it does not follow a different

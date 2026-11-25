@@ -5,7 +5,7 @@
 // 前置：无（Node 标准库）；不联网、不起 dsh。
 // 用法：node checks/smoke/doctor.e2e.mjs
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { scrubbedEnv } from '../lib/shared/env.mjs'
 import { presetRoles } from '../lib/shared/roles.mjs'
@@ -67,10 +67,20 @@ function writeProfile(profile, { withPack = true } = {}) {
   }))
 }
 
-function runDoctor({ home, anchor, ws, extra = [] }) {
+function runDoctor({ home, anchor, ws, extra = [], path = null }) {
   return spawnSync(process.execPath, [DOCTOR, '--profile', 'deep-research', '--home', home,
     '--install-anchor', join(anchor, 'package.json'), '--workspace', ws, '--install-only', ...extra],
-  { encoding: 'utf8', env: scrubbedEnv({ DSH_HOME: home, DEEP_RESEARCH_WORKSPACE: '' }) })
+  { encoding: 'utf8', env: scrubbedEnv({ DSH_HOME: home, DEEP_RESEARCH_WORKSPACE: '', ...(path === null ? {} : { PATH: path }) }) })
+}
+
+/** 假 dsh：只回 `--dump-config` 的行名（不起服务、不联网），用于挂载行探针的正/负判据。 */
+function installFakeDsh(binDir, names) {
+  mkdirSync(binDir, { recursive: true })
+  const script = join(binDir, 'dump.mjs')
+  writeFileSync(script, `const names = ${JSON.stringify(names)}\nfor (const name of names) console.log('  name: ' + name)\n`)
+  const bin = join(binDir, 'dsh')
+  writeFileSync(bin, `#!/bin/sh\nexec "${process.execPath}" "${script}" "$@"\n`)
+  chmodSync(bin, 0o755)
 }
 
 const box = sandbox()
@@ -103,6 +113,23 @@ try {
   const corrupt = runDoctor(box)
   check('坏设置：warn 不红', corrupt.status === 0 && /deep-research 设置文件/.test(corrupt.stdout), `${corrupt.status}\n${corrupt.stdout}`)
   check('doctor 不写 profile', readFileSync(join(box.profile, 'package.json'), 'utf8').includes('dsh-deep-research-pack'))
+
+  // 挂载行探针（2026-11-25 接手诊断 D10）：真 profile 形态（含 cordis.yml）+ 假 dsh 回 dump。
+  // 正判据 = 行全在 → 通过；负判据 = 少一行 → exit 1 且点名该行。
+  const packNames = [...readFileSync(join(PACK, 'cordis.patch.yml'), 'utf8')
+    .matchAll(/name:\s*'?(dsh-deep-research-pack[^'\s]*)'?/g)].map((match) => match[1])
+  writeFileSync(join(box.profile, 'cordis.yml'), '# doctor.e2e probe\n')
+  const mountedBin = join(TEMP, 'bin-mounted')
+  installFakeDsh(mountedBin, packNames)
+  const mounted = runDoctor({ ...box, path: `${mountedBin}:${process.env.PATH ?? ''}` })
+  check('挂载行：本包行全在 effective config → 通过',
+    mounted.status === 0 && new RegExp(`挂载行 — ${packNames.length} 个本包行`).test(mounted.stdout), `${mounted.status}\n${mounted.stdout}`)
+  const missingBin = join(TEMP, 'bin-missing')
+  installFakeDsh(missingBin, packNames.filter((name) => name !== 'dsh-deep-research-pack/startup'))
+  const missingRow = runDoctor({ ...box, path: `${missingBin}:${process.env.PATH ?? ''}` })
+  check('挂载行：缺 startup 行 → exit 1 且点名',
+    missingRow.status === 1 && /effective config 缺 .*startup/.test(missingRow.stdout), `${missingRow.status}\n${missingRow.stdout}`)
+  rmSync(join(box.profile, 'cordis.yml'))
 } finally {
   rmSync(TEMP, { recursive: true, force: true })
 }

@@ -60,10 +60,14 @@ first block is setup, the second creates the profile and starts the Web surface:
 ```sh
 git clone --recurse-submodules https://github.com/ethan-jiang-1/ai_dsh_deep_research.git
 cd ai_dsh_deep_research
+source tools/env.sh                       # isolated DSH_HOME + pre-commit hook (idempotent)
 pnpm install
 bash tools/build/vendor-build.sh          # pack's tsc reads vendor lib/types
 node tools/release/export-dist.mjs # writes _dist/tarball + manual + market
 ```
+
+Run `source tools/env.sh` before the first `pnpm verify`: the `hooks-active` gate fails on a clone
+whose pre-commit hook is not activated. That red names its own fix and is expected, not a broken tree.
 
 ```sh
 dsh --profile deep-research --from-default-profile web --dump-default-config
@@ -122,6 +126,12 @@ node checks/smoke/product-boot.entry.mjs
 
 They need pnpm, the team-layer registry/cache, and Playwright chromium (the repo's `.pnpm` store);
 missing prerequisites exit 2, not green.
+
+`product-boot.entry` and the display-meta item of `lifecycle.entry` additionally need the
+`node-addon-require-builtin` native build (this repo's `allowBuilds` disables that compile). Without
+it those items fail with `MODULE_NOT_FOUND … require_builtin.node`; the boot/roster/remove items in
+the same entries still judge. Recorded as a machine prerequisite in
+[the 2026-11-24 Note](notes/implemented/2026-11-24-gate-cli-parsing-and-session-local-state.md).
 
 `pnpm verify` is the structural gate suite; `pnpm test` is the keyless regression
 suite. When you change a gate, also run:

@@ -2,20 +2,23 @@
 /**
  * dsh-deep-research-doctor — 只读诊断（D40）。
  *
- * 检查：pack engines / custom profile roster / 安装副本版本 / 团队层 / 设置文件与工作区 /
- * 模型凭据。**不安装、不启动、不写 profile、不写设置**；修复动作只打印建议。
+ * 检查：pack engines / custom profile roster / 安装副本版本 / **挂载行（--dump-config）** /
+ * 团队层 / 设置文件与工作区 / 模型凭据。**不安装、不启动、不写 profile、不写设置**；
+ * 修复动作只打印建议。
  *
  * 退出码：0 = 无硬失败（可有 warning）；1 = 硬失败；2 = 用法/前置缺失。
  *
  * 用法：
  *   dsh-deep-research-doctor [--profile <name>] [--home <dir>] [--workspace <dir>] [--install-only]
+ *                            [--install-anchor <dir|package.json>]
  */
+import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { resolveDshHome, resolvePathInput } from './lib/dsh-home.mjs'
-import { inferInstallAnchor } from './lib/install-anchor.mjs'
+import { findDshExecutable, inferInstallAnchor } from './lib/install-anchor.mjs'
 import { credentialStatus } from './lib/credentials-status.mjs'
 import {
   PACK_NAME, WEB_APP_BUNDLE, checkEngines, installedPackVersion, packManifest,
@@ -39,7 +42,7 @@ const argValue = (name) => {
   return value
 }
 if (argv.includes('--help') || argv.includes('-h')) {
-  console.log('用法：dsh-deep-research-doctor [--profile <name>] [--home <dir>] [--workspace <dir>] [--install-only]')
+  console.log('用法：dsh-deep-research-doctor [--profile <name>] [--home <dir>] [--workspace <dir>] [--install-only] [--install-anchor <dir|package.json>]')
   process.exit(0)
 }
 
@@ -68,8 +71,13 @@ try {
 } catch (error) {
   warn('安装锚', `${error instanceof Error ? error.message : String(error)}`)
 }
-if (anchor === null) warn('安装锚', '找不到运行中的 DSH；版本门未验证（用 --install-anchor 指定）')
-else {
+if (anchor === null) {
+  // 有安装面（profile 存在）时，解析不到运行中的 DSH 是硬失败：版本门是装得上/跑得动的判据，
+  // 「未验证」不能打印成「通过」（2026-11-25 接手诊断 D10）。
+  if (existsSync(join(profileDir, 'package.json'))) {
+    record(false, '安装锚', '找不到运行中的 DSH——版本门未验证（用 --install-anchor 指定安装目录或 package.json）')
+  } else warn('安装锚', '找不到运行中的 DSH；版本门未验证（用 --install-anchor 指定）')
+} else {
   const engines = checkEngines({ packVersion: pack.version, enginesDsh: pack.enginesDsh, dshVersion: anchor.version })
   record(engines.ok, 'engines.dsh', engines.error ?? `DSH ${anchor.version} 满足 ${pack.enginesDsh}`)
 }
@@ -101,6 +109,37 @@ if (manifest === null) {
     ]
     const missing = required.filter((p) => !existsSync(join(installedRoot, p)))
     record(missing.length === 0, '安装副本完整性', missing.length === 0 ? `${required.length} 件在场` : `缺 ${missing.join(', ')}；重装本包`)
+  }
+}
+
+// 2b) 挂载行对账（--dump-config，只读；2026-11-25 接手诊断 D10 缺口）
+// roster 认了本包 ≠ 行真挂载：`patch: entry "…" not found` 与行整块丢失只有 effective config
+// 看得见。这里只断言**行在场**，不冒充真挂载（Loader ACTIVE 仍归 L1/L2 真会话断言）。
+if (manifest !== null && existsSync(join(profileDir, 'cordis.yml'))) {
+  const bin = findDshExecutable()
+  if (bin === null) {
+    warn('挂载行', 'PATH 上找不到 dsh 可执行文件——跳过 --dump-config 对账（未验证 ≠ 通过）')
+  } else {
+    const patchText = readFileSync(join(PACK, 'cordis.patch.yml'), 'utf8')
+    const expected = [...patchText.matchAll(/name:\s*'?(dsh-deep-research-pack[^'\s]*)'?/g)].map((m) => m[1])
+    const child = spawnSync(bin, ['--profile', profile, '--dump-config'], {
+      encoding: 'utf8',
+      timeout: 30_000,
+      env: { PATH: process.env.PATH ?? '', HOME: process.env.HOME ?? '', DSH_HOME: home, LANG: process.env.LANG ?? 'en_US.UTF-8' },
+    })
+    const out = child.stdout ?? ''
+    const err = child.stderr ?? ''
+    if (child.error !== undefined) {
+      warn('挂载行', `--dump-config 未跑成（${child.error.message}）——未验证 ≠ 通过`)
+    } else if (child.status !== 0) {
+      record(false, '挂载行', `dsh --dump-config 退出 ${String(child.status)}：${(err || out).trim().split('\n').slice(-2).join(' / ')}`)
+    } else {
+      const missing = expected.filter((name) => !new RegExp(`^\\s*name:\\s*'?${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'?\\s*$`, 'm').test(out))
+      const patchError = /patch: entry .* not found|did not activate/.test(err)
+      if (patchError) record(false, '挂载行', `dump 报 patch/激活错误：${err.trim().split('\n').slice(-2).join(' / ')}——按 id 查 profile patch 层`)
+      else if (expected.length === 0) record(false, '挂载行', 'pack 的 cordis.patch.yml 解析不出任何本包行名——判据失去语料（防空）')
+      else record(missing.length === 0, '挂载行', missing.length === 0 ? `${expected.length} 个本包行在 effective config` : `effective config 缺 ${missing.join(', ')}——安装副本与 profile patch 不匹配，重装本包`)
+    }
   }
 }
 

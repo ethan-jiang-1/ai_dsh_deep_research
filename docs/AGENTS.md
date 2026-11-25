@@ -45,6 +45,8 @@
 
 预算只防常驻入口膨胀；`docs/` 正文档与 guides 是生长面，不设顶。
 
+**产品模型可见面是另一本账**：`content/manual.md` 与 persona 的常驻成本由 [`checks/lib/repo/content-budget.mjs`](../checks/lib/repo/content-budget.mjs) 拥有（字符/字节/固定密度 token），`content-disclosure` + `content-shape` 把守；两本账不互抵。
+
 ## slop 清单（写或审任何文档时逐条扫）
 
 - 同一条规则出现在两个 home（grep 一个特征短语，保留一个，其余改链接）；

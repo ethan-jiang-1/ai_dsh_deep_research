@@ -8,6 +8,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { filesAllowlistIssues } from '../../../checks/lib/repo/shipped-surface.mjs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { BUNDLE_PATCH, loadPatchRows } from '../preset-helpers.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
@@ -80,4 +81,39 @@ test('T8 数据边界：包内不出现凭据/环境文件（模板空种子除�
   assert.ok(existsSync(join(PACK, 'content', 'manual.md')), '研究手册缺席（content/manual.md）')
   assert.ok(existsSync(join(PACK, 'content', 'templates', 'run', 'run.md')), 'run 模板缺席（content/templates/run/）')
   assert.equal(existsSync(join(PACK, 'workspace')), false, 'workspace/ 种子已退役（D40）')
+})
+
+test('T8 行契约：bundle 的 replace 行不得丢掉 base 行的 config 键', () => {
+  // 起因（2026-11-25 接手诊断 D3）：Loader 的 replace 行**整块替换** config、不深合并；当前
+  // `web` 恰为 base 同两键、`llm-deepseek` base 无 config，所以今天无损——但下个 pin 若 base 给
+  // 这些行加键，本包会静默吞掉（行为变化无任何信号）。判据 = 每个无 name 的 replace 行，其
+  // config 键必须覆盖**该 profile 模板实际组合的两个 bundle**（`--from-default-profile web`
+  // = base + web-app；本包只支持 Web 面，sdk/headless 的同行行不参与对账）在同 id 行上出现过的键。
+  const vendorBundles = join(ROOT, 'vendor', 'dsh', 'packages', 'bundle')
+  assert.ok(existsSync(vendorBundles), 'vendor bundle 缺席（submodule 未初始化）——override 行无法对账')
+  const baseKeys = new Map()
+  for (const name of ['base', 'web-app']) {
+    const file = join(vendorBundles, name, 'cordis.patch.yml')
+    assert.ok(existsSync(file), `vendor bundle 缺席：${name}——web profile 模板无法对账`)
+    for (const row of loadPatchRows(file)) {
+      if (row.config === undefined || row.config === null || typeof row.config !== 'object') continue
+      const keys = baseKeys.get(row.id) ?? new Set()
+      for (const key of Object.keys(row.config)) keys.add(key)
+      baseKeys.set(row.id, keys)
+    }
+  }
+  const droppedKeys = (config, keys) => [...keys].filter((key) => !Object.hasOwn(config, key))
+  // 变异控制：判据必须能咬住一个被吞掉的键（否则本测试只是形状检查）。
+  assert.deepEqual(droppedKeys({ searchProvider: 'x' }, new Set(['searchProvider', 'fetchProvider'])), ['fetchProvider'])
+
+  const overrides = loadPatchRows(BUNDLE_PATCH).filter((row) => row.name === undefined)
+  assert.ok(overrides.length >= 5, `防空语料：bundle patch 只解析出 ${overrides.length} 个 replace 行`)
+  const problems = []
+  for (const row of overrides) {
+    const keys = baseKeys.get(row.id)
+    if (keys === undefined || row.config === undefined) continue
+    const missing = droppedKeys(row.config, keys)
+    if (missing.length > 0) problems.push(`${row.id}: 未重述 ${missing.join(', ')}`)
+  }
+  assert.deepEqual(problems, [], `replace 行整块换 config；base 新增键必须同 diff 重述：\n${problems.join('\n')}`)
 })

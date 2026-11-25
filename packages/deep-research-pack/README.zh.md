@@ -130,6 +130,7 @@ dsh --profile deep-research --no-open --port 0
 - **凭据**来自 DSH：Models 页、凭据服务、环境变量，或 `$DSH_HOME/.credentials.yaml`。本包从不打包
   或转发 key。搜索使用 `DEEPSEEK_API_KEY`；抓取回退解析同一个 ref，缺失时报告
   `fallback unavailable`。
+- **本 bundle 还会动到的 host 级行**：关闭 base 的 `ui-trajectory` 与 `ui-sidebar-terminal`、把 profile 缺省语言钉到 `zh`（`locale`）、把 `lead` 设为预设默认（`agent-preset-registry`）、给 `llm-deepseek` 的有界重试并入 `MALFORMED_RESPONSE`、把 `web` 的搜索/抓取钉到 `deepseek-search-api` / `deepseek-fallback-fetch`，并让 `session-query-sqlite` 走 `:memory:` + 首次搜索开索引；这些对**整个 profile** 生效，不只本包的会话。
 
 ### 升级与回退
 
@@ -153,8 +154,8 @@ dsh plugin --profile deep-research remove @deepseek-ai/dsh-experimental-agent-te
 
 | 项 | 值 |
 |---|---|
-| `engines.dsh` | `>=0.2.1-rc.2 <=0.2.1-rc.3`（host 权威；只声明有证据的版本带） |
-| 已测基线 | `0.2.1-rc.2`（开发 pin，data plane + client）+ `0.2.1-rc.3`（安装形状 + client 挂载）。`0.2.1-rc.5` 首屏冒烟失败，刻意排除在范围外，等换 pin 拿到证据再放行。 |
+| `engines.dsh` | `>=0.2.1-rc.2 <=0.2.1-rc.5`（host 权威；只声明有证据的版本带） |
+| 已测基线 | `0.2.1-rc.2`（开发 pin，data plane + client）+ `0.2.1-rc.3`（安装形状 + client 挂载）+ `0.2.1-rc.5`（安装 + 首屏 + client 挂载）。`0.2.1-rc.4` 在区间内但未单独取证。 |
 | Node | `^22.19.0 || >=24.0.0` |
 | Surface | Web；Desktop 仅互操作；headless/SDK/ACP 不受本包支持 |
 
@@ -173,6 +174,7 @@ dsh plugin --profile deep-research remove @deepseek-ai/dsh-experimental-agent-te
 | `deep-research` profile 组合 + 团队层 | 用户 / DSH | profile manifest | profile 初始化 + plugin add | `$DSH_HOME/profiles/deep-research/` | profile | DSH、用户 | DSH、插件命令 | 重建 profile | 用户删除；卸载本包会保留 |
 | Deep Research 设置（工作区、上次会话） | 本包 / 用户 | 文件 | 启动行、用户 | `$DSH_HOME/deep-research/settings.json` | home | 启动行、doctor、用户 | 启动行、用户 | 重选工作区 | 删除目录；卸载本包会保留 |
 | 浏览器工作区提示 | 浏览器 | DSH Workspace registry | client | `localStorage['dsh.deep-research.workspaceId.v1']` | 设备/源 | client | client | 重选工作区 | 清除站点数据 |
+| 诊断残迹（设置备份 + 方法库锁） | 本包 / 用户 | 文件 | 启动行、Method Editor 工具 | `$DSH_HOME/deep-research/settings.json.corrupt`、`<workspace>/.method-library.lock` | home / 工作区 | doctor、工具 | 启动行、工具 | 重建 / 每次写重建 | 随被保护的数据一起删 |
 | 方法库 | 用户 | 文件 | 用户、Lead、Method Editor | `<workspace>/method-library.md` | 工作区 | 用户、模型 | 用户、Lead、Method Editor 工具 | 否（用户数据） | 用户删除；卸载本包会保留 |
 | 项目研究默认 | 用户 | 文件 | 用户、面板 | `<workspace>/research-defaults.json` | 工作区 | 模型（注入）、面板 | 面板经 `/research-defaults` host command | 否（用户数据） | 删文件即恢复自动；卸载本包会保留 |
 | run bundle | 用户 | 文件 + journal | 角色 | `<workspace>/drt_<slug>/`, `archive/`, `_abandoned/` | 工作区 + slug | 模型、用户 | 角色、ops | 否 | 用户删除；无自动 GC |

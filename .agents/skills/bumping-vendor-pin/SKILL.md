@@ -17,8 +17,10 @@ description: Use when upgrading the vendored DSH pin (vendor/dsh submodule tag/c
 新 tag/commit 落四处，缺一即漂移：`.gitmodules` 正源（submodule checkout 到新 commit）→
 [AGENTS §DSH 源码表](../../../AGENTS.md)（tag @ short-sha 复述）→
 [evaluation §L0 vendor-pin 行](../../../docs/evaluation.md)（钉 commit 字面量——门禁对账对象）→
-pack 兼容矩阵 `dsh.compatibility.dshReleases`。改完 `pnpm verify`：`vendor-pin` / `pin-agreement`
-应绿（它们机械咬四处不一致——红 = 先修复述再继续）。
+pack `engines.dsh` 范围（`packages/deep-research-pack/package.json`）。**版本合同只有
+`engines.dsh`**：已删除的 `dsh.compatibility.*` 不要再写回（`pack-manifest` 判自造键）。
+改完 `pnpm verify`：`vendor-pin` / `pin-agreement` / `pack-bundle-compat` 应绿——最后一个会把
+根 README、包 README（中英）、design/40、手册源、生成手册里的人类副本一起点名。
 
 ## 2. 干净构建
 
@@ -33,6 +35,16 @@ build-time externals 会把新 host 半的改动静默稀释（020rc2 轮实证�
 源（根/子树 AGENTS、testing、architecture、notes 约定、skills 约定……），三态结论有变的
 更新 discipline-map 对应行。外部材料登记同步对账：钉版语料/参考仓若自钉旧 DSH 版本，
 其结论标记"待复核"（00-index §外部研究材料的钉版纪律）。
+
+**破坏面清单（升 pin 的交付物，不是可选项）**：新版本可能让本包的既有写法失效，而 L0 只证结构。
+逐条判定并写进毕业 Note：
+
+- `engines.dsh` 必须覆盖新 tag（`pack-bundle-compat` 会红；上界 = 当前 pin 意味着每次升 pin 都必须同 diff 放宽）；
+- 被本包 `replace` 的 base 行（`web` / `llm-deepseek` / `session-query-sqlite` / `locale` /
+  `agent-preset-registry` / 两个 UI 行）若新增 config 键，必须同 diff 重述——
+  `tests/pack/contract/package-contract.spec.mjs` 的「replace 行不得丢键」会红；
+- client build-time externals / 模块表变化：跑 `client-load.entry`（020rc2 的漏网就是只跑 L0/L1）；
+- 被删除/改名的 vendor API 或 package：`discipline-map` 三态结论与 `row-deps` 会现形。
 
 ## 4. 全档证据（漏一档 = 有实证的漏网形态）
 

@@ -9,6 +9,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { BUNDLE_PATCH, loadPatchRows } from '../preset-helpers.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const PACK = join(ROOT, 'packages', 'deep-research-pack');
@@ -60,4 +61,16 @@ test('双语 README 都写 Installed plugins 与市场入口时序', () => {
   }
   assert.match(en, /market entry/i, 'README.md 缺 market entry');
   assert.match(zh, /市场入口/, 'README.zh.md 缺 市场入口');
+});
+
+test('双语 README 披露 bundle 会改到的 host 级 replace 行', () => {
+  // 2026-11-25 接手诊断 D1：研究 bundle 的 patch 会关出厂页签、钉全局语言、改重试/provider
+  // 语义——对整个 profile 生效。新增一条 replace 行而不写进 README = 用户装完才发现副作用；
+  // 本测试把「replace 行集合」与「README 披露清单」钉在一起。
+  const overrides = loadPatchRows(BUNDLE_PATCH).filter((row) => row.name === undefined);
+  assert.ok(overrides.length >= 5, `防空语料：bundle patch 只解析出 ${overrides.length} 个 replace 行`);
+  for (const [name, text] of [['README.md', en], ['README.zh.md', zh]]) {
+    const missing = overrides.map((row) => row.id).filter((id) => !text.includes(id));
+    assert.deepEqual(missing, [], `${name} 未披露这些 host 级行：${missing.join(', ')}——它们对整个 profile 生效`);
+  }
 });

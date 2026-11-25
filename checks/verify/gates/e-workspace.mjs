@@ -167,12 +167,19 @@ export function runE() {
         fail(gate, `tarball 内 package.json version = ${String(packedVersion)} ≠ pack ${pack.version}——重导出`);
       }
       const targets = (pack.dsh?.bundle?.patch ?? []).map((p) => `package/${String(p).replace(/^\.\//, '')}`);
+      // ⑤ exports 的 lib 入口逐件在制品内（2026-11-25 接手诊断：files 含 lib/*.js，但没有人断言
+      //    宿主真正 import 的那几个入口都进了包；缺一个 = 装上的包在启动时 ERR_MODULE_NOT_FOUND）。
+      const libEntries = Object.values(pack.exports ?? {})
+        .map((value) => (typeof value === 'object' && value !== null ? value.default : value))
+        .filter((value) => typeof value === 'string' && value.startsWith('./lib/'))
+        .map((value) => `package/${value.slice(2)}`);
+      if (libEntries.length === 0) fail(gate, 'exports 解析不出任何 ./lib/ 入口——制品入口检查失去语料（防空）');
       const templatesDir = join(PACK, 'content', 'templates', 'run');
       const templates = existsSync(templatesDir)
         ? readdirSync(templatesDir, { withFileTypes: true }).filter((e) => e.isFile()).map((e) => `package/content/templates/run/${e.name}`)
         : [];
       if (templates.length === 0) fail(gate, '源 content/templates/run/ 为空——制品内容检查失去语料（防空）');
-      const missing = [...targets, ...templates].filter((p) => !entries.has(p));
+      const missing = [...targets, ...libEntries, ...templates].filter((p) => !entries.has(p));
       if (missing.length > 0) fail(gate, `tarball 缺源包条目：${missing.slice(0, 6).join('、')}${missing.length > 6 ? '…' : ''}——重导出（制品与 HEAD 源漂移）`);
     }
   }
