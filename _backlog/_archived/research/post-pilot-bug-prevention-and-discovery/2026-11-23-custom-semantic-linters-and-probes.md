@@ -5,14 +5,14 @@ intent: 针对本仓“TS 客户端/宿主 + .mjs 门禁脚本 + Markdown/YAML �
 
 # 自研项目专属语义 Linter 与领域巡检器
 
-> 核心判断：通用 Linter（`oxlint`/`ESLint`）只认识语言语法，不认识本仓的业务边界。本仓已有用字符串正则写的守卫（如 `final-tab-patterns.spec.mjs` 查 `viewIo.read(`、`status-feed.spec.mjs` 查 `view.read(`），但**字符串正则挡不住改名或等价原语绕过**——实证：[useStatusFeed.ts](../../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts) 第 337/347/354 行仍在调用 `view.hasFile('final.md')`，正则守卫照样全绿。依托本仓 `package.json` 已经依赖的 **TypeScript Compiler API**（见 [smoke-identifiers.test.mjs](../../../tests/checks/repo/smoke-identifiers.test.mjs) 与 [no-unused-code.test.mjs](../../../tests/checks/repo/no-unused-code.test.mjs) 范例），可以低成本做出以下 5 类专用武器。
+> 核心判断：通用 Linter（`oxlint`/`ESLint`）只认识语言语法，不认识本仓的业务边界。本仓已有用字符串正则写的守卫（如 `final-tab-patterns.spec.mjs` 查 `viewIo.read(`、`status-feed.spec.mjs` 查 `view.read(`），但**字符串正则挡不住改名或等价原语绕过**——实证：[useStatusFeed.ts](../../../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts) 第 337/347/354 行仍在调用 `view.hasFile('final.md')`，正则守卫照样全绿。依托本仓 `package.json` 已经依赖的 **TypeScript Compiler API**（见 [smoke-identifiers.test.mjs](../../../../tests/checks/repo/smoke-identifiers.test.mjs) 与 [no-unused-code.test.mjs](../../../../tests/checks/repo/no-unused-code.test.mjs) 范例），可以低成本做出以下 5 类专用武器。
 
 ---
 
 ## 一、基于 TS `TypeChecker` 的「禁忌能力 / 安全绕过」Linter（取代脆弱正则）
 
 - **做法**：用 `ts.createProgram` + `program.getTypeChecker()` 识别表达式的**真实静态类型**，而不是匹配变量名字符串：
-  1. **封死 `RunView` 裸读与存在性假判**：在 `src/client/`（[artifact-read.ts](../../../packages/deep-research-pack/src/lib/run/artifact-read.ts) 白名单除外）中，任何类型为 `RunView` 的表达式调用 `.read()` 或 `.hasFile()`——无论变量叫 `view`、`viewIo`、`opened.value` 还是别名——一律静态报红；
+  1. **封死 `RunView` 裸读与存在性假判**：在 `src/client/`（[artifact-read.ts](../../../../packages/deep-research-pack/src/lib/run/artifact-read.ts) 白名单除外）中，任何类型为 `RunView` 的表达式调用 `.read()` 或 `.hasFile()`——无论变量叫 `view`、`viewIo`、`opened.value` 还是别名——一律静态报红；
   2. **封死无校验的 `JSON.parse()` 消费**：检查 `JSON.parse(...)` 结果是否流入显式 decoder 函数，禁止直接做属性访问或 `as T` 强转；
   3. **封死不完整的 `AbortController` 生命周期**：在同一函数/effect 作用域内创建 `new AbortController()`，必须同时观测到 `.signal` 传入异步调用 **且** cleanup/`finally` 路径调用 `.abort()`（直接抓出 `useStatusFeed.ts:211` 只建不 abort 问题）；
   4. **封死静默吞错的 `catch`**：除白名单清理点（如 `closeSync`）外，非白名单 `catch` 块若为空或仅有 `console.*` 且未设置错误态/未返回失败值/未 `throw`，一律报红（实证扫描当前 `src/` 共有 **9 处空 `catch` + 6 处仅 `console` 的 `catch`**）。
@@ -27,7 +27,7 @@ intent: 针对本仓“TS 客户端/宿主 + .mjs 门禁脚本 + Markdown/YAML �
 
 - **背景**：BUG-356…384 多次出现「某字段读了但页签没展示错误」或「状态页与终稿页各自派生同一份 `review.md`」。
 - **做法**：利用 TS `LanguageService` 引用图做跨文件静态审计：
-  1. **Policy ↔ UI 覆盖闭合**：读取 [artifact-read.ts](../../../packages/deep-research-pack/src/lib/run/artifact-read.ts) 的 `ARTIFACT_POLICY` / `StatusReads` 键集合，追踪各键在 `ResearchStatusTab`、`ResearchFinalTab`、`ResearchGraphTab`、`ResearchConfigTab` 中的流向，列出「已采集但某消费页签未渲染对应失败态」的悬空轴；
+  1. **Policy ↔ UI 覆盖闭合**：读取 [artifact-read.ts](../../../../packages/deep-research-pack/src/lib/run/artifact-read.ts) 的 `ARTIFACT_POLICY` / `StatusReads` 键集合，追踪各键在 `ResearchStatusTab`、`ResearchFinalTab`、`ResearchGraphTab`、`ResearchConfigTab` 中的流向，列出「已采集但某消费页签未渲染对应失败态」的悬空轴；
   2. **防双派冲突**：检查同名工件字符串（`'review.md'`、`'question.md'`、`'plan.md'`、`'delivered.json'`）在 `src/client/` 与 `checks/` 里被哪些解析入口消费，同一工件出现两套独立解析器即告警。
 
 ## 四、自研「通用恶意 `RunSource` + Hook 无头巡检器」（最省 E2E 的领域武器）

@@ -182,9 +182,7 @@ status——材料的状态就是题的状态。
 
 ## 索引
 
-| 名头 | 问题 | 消费者 | 材料 |
-|---|---|---|---|
-| [post-pilot-bug-prevention-and-discovery/](post-pilot-bug-prevention-and-discovery/README.md) | 11-20 预防试点后为何仍靠 E2E 找出 45 张 bug？代码实践、非 E2E 寻虫与自研 Linter 怎么立项？ | —（用户 2026-11-23 直派调研） | [解剖](post-pilot-bug-prevention-and-discovery/2026-11-23-post-pilot-bug-anatomy.md) · [代码实践](post-pilot-bug-prevention-and-discovery/2026-11-23-defensive-and-contract-coding-practices.md) · [非 E2E 寻虫](post-pilot-bug-prevention-and-discovery/2026-11-23-non-e2e-bug-discovery-methods.md) · [自研 Linter](post-pilot-bug-prevention-and-discovery/2026-11-23-custom-semantic-linters-and-probes.md) · [实证与三卡计划](post-pilot-bug-prevention-and-discovery/2026-11-23-empirical-baseline-and-issue-plan.md) |
+（当前无活跃研究题。最近归档 = [预防试点后缺陷复盘与根治调研](../_archived/research/post-pilot-bug-prevention-and-discovery/README.md)，2026-11-25。）
 
 归档题名见 [_archived/research/README.md](../_archived/research/README.md)；本页只列活跃题名，不重复逐文件清单，也不抄状态（状态正本 = 题名页）。
 

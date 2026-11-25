@@ -14,6 +14,7 @@
 
 | 名头 | 材料 | 历史消费者 | 产出的卡 | 归档 |
 |---|---|---|---|---|
+| [post-pilot-bug-prevention-and-discovery/](post-pilot-bug-prevention-and-discovery/README.md) · 预防试点后缺陷复盘与根治：代码实践与非 E2E 寻虫 | 5 份 | [静态与语义防线](../settled_issues/2026-11-23-static-semantic-guardrails.md)、[L0 客户端与寻虫底座](../settled_issues/2026-11-23-l0-client-and-property-testing.md)、[状态机与契约架构](../settled_issues/2026-11-23-state-machine-and-contract-architecture.md) | 同左三卡（均已结） | 2026-11-25 |
 | [preventive-quality/](preventive-quality/README.md) · 预防性质量：探索补洞 → 设计约束与测试资产 | 10 份 | [预防性质量落地](../settled_issues/2026-11-20-preventive-quality-pilot.md)、[Pack 生产源头预防](../settled_issues/2026-11-20-pack-production-prevention.md) | [首批卡](../settled_issues/2026-11-20-preventive-quality-pilot.md)（已结，A4 失败留档）、[D 卡](../settled_issues/2026-11-20-pack-production-prevention.md)（已结，P 转 triggers）、[Note](../../../notes/implemented/2026-11-20-preventive-quality-pilot.md) | 2026-11-22 |
 | [pack-src-test-mirror/](pack-src-test-mirror/README.md) · pack src ↔ 测试：按 domain 同名 | 1 份 | [issue](../settled_issues/2026-11-15-pack-src-test-mirror.md) | [卡](../settled_issues/2026-11-15-pack-src-test-mirror.md)、[Note](../../../notes/implemented/2026-11-15-pack-src-test-mirror.md) | 2026-11-15 |
 | [test-source-mirror/](test-source-mirror/README.md) · 测试子目录 ↔ 源码位置：按消费者接口分层 | 1 份 | [issue](../settled_issues/2026-11-15-test-source-mirror.md) | [卡](../settled_issues/2026-11-15-test-source-mirror.md)、[Note](../../../notes/implemented/2026-11-15-test-source-mirror.md) | 2026-11-15 |

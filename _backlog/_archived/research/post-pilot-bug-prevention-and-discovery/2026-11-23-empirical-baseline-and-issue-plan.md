@@ -14,8 +14,8 @@ intent: 基于在当前代码树上的只读实测数据（checkJs、oxlint、te
 ### 1. `tsc --checkJs --strictNullChecks` 干跑 `checks/` + `tools/`（179 个 `.mjs`）
 
 - **真实命中（当场抓出 1 个未发现的实时崩溃 bug + 多处高危隐患）**：
-  - `TS2304`（未声明标识符）4 处，其中 **[protocol-audit.mjs](../../../checks/run-gates/protocol-audit.mjs) 第 210 行调用 `finalVersionsIn(dir)` 但顶部未 `import`**——只要在无根 `final.md` 且存在 `final/` 目录的 bundle 上运行 `protocol-audit.mjs`，当场 `ReferenceError` 崩溃（与已归档的 BUG-340 出在同一文件、同一种缺口，因 [smoke-identifiers.test.mjs](../../../tests/checks/repo/smoke-identifiers.test.mjs) 只扫 `checks/smoke/*.mjs` 而逃逸）；
-  - `TS2339`（属性不存在）：337 处；`TS18048`（可能为 `undefined`）：46 处（如 `verdict-audit-core.mjs:463`）；`TS18047`（可能为 `null`）：39 处（如 `node-gate-run-gates.mjs:92`）；`TS2532`（对象可能为 `undefined`）：6 处；`TS2365`（`never` 与 `string` 比较）：4 处（如 [protocol-audit-core.mjs](../../../checks/lib/gates/protocol-audit-core.mjs) 第 55 行、[node-gate-session-gates.mjs](../../../checks/lib/shared/node-gate-session-gates.mjs) 第 210 行）；
+  - `TS2304`（未声明标识符）4 处，其中 **[protocol-audit.mjs](../../../../checks/run-gates/protocol-audit.mjs) 第 210 行调用 `finalVersionsIn(dir)` 但顶部未 `import`**——只要在无根 `final.md` 且存在 `final/` 目录的 bundle 上运行 `protocol-audit.mjs`，当场 `ReferenceError` 崩溃（与已归档的 BUG-340 出在同一文件、同一种缺口，因 [smoke-identifiers.test.mjs](../../../../tests/checks/repo/smoke-identifiers.test.mjs) 只扫 `checks/smoke/*.mjs` 而逃逸）；
+  - `TS2339`（属性不存在）：337 处；`TS18048`（可能为 `undefined`）：46 处（如 `verdict-audit-core.mjs:463`）；`TS18047`（可能为 `null`）：39 处（如 `node-gate-run-gates.mjs:92`）；`TS2532`（对象可能为 `undefined`）：6 处；`TS2365`（`never` 与 `string` 比较）：4 处（如 [protocol-audit-core.mjs](../../../../checks/lib/gates/protocol-audit-core.mjs) 第 55 行、[node-gate-session-gates.mjs](../../../../checks/lib/shared/node-gate-session-gates.mjs) 第 210 行）；
 - **实测噪音与配置约束（关键发现）**：
   - 若开启 `noImplicitAny: true`，会一次性报出 **2,145 条隐式 `any` 形参/变量噪音**（`TS7006`: 1695、`TS7005`: 287、`TS7031`: 163、`TS7034`: 95），另加 `TS5097`（56 处 `.ts` 扩展名导入）；
   - **结论**：`.mjs` 纳管配置**必须设 `noImplicitAny: false`、`strictNullChecks: true`、`allowImportingTsExtensions: true`**（或先按高信号错误码门控），才能做到零 JSDoc 改造噪音、100% 抓真实错误。
@@ -24,7 +24,7 @@ intent: 基于在当前代码树上的只读实测数据（checkJs、oxlint、te
 
 - **速度**：复用 `vendor/dsh/node_modules/.bin/oxlint`，全量 114 个文件仅 **22–35ms**；
 - **真实命中（当场抓出 1 个隐蔽 React 运行时 bug）**：
-  - 启用 `--react-plugin` 后，当场抓出 **[useStatusFeed.ts](../../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts) 第 386–388 行 `anchors` 的 `useMemo` 依赖数组漏掉 `delivery`**——当 `receiptDelivery` 异步更新时 `anchors` 不会重算；
+  - 启用 `--react-plugin` 后，当场抓出 **[useStatusFeed.ts](../../../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts) 第 386–388 行 `anchors` 的 `useMemo` 依赖数组漏掉 `delivery`**——当 `receiptDelivery` 异步更新时 `anchors` 不会重算；
   - 还抓出 `client/index.ts:227` 变量遮蔽（`no-shadow`）、`useConfigFeed.ts:112` cleanup 中直接读取可变 ref `.current` 等问题；
 - **环境边界**：根 `node_modules` 未安装 `oxlint-tsgolint`，所以 `vendor/dsh/.oxlintrc.json` 的 type-aware 规则（如 `no-floating-promises`）在根工作树未直接跑通，立项时须补 devDependency 或按无 tsgolint / 有 tsgolint 两档决定。
 
@@ -32,14 +32,14 @@ intent: 基于在当前代码树上的只读实测数据（checkJs、oxlint、te
 
 - **高覆盖区**：`src/lib/`、`src/defaults/`、`src/fetch-fallback/` 纯函数普遍 **95–100%** 行覆盖、**80–100%** 分支覆盖；
 - **最大盲区集中在 `src/client/`（与 BUG-351…384 高度重合）**：
-  - [ResearchStatusTab.tsx](../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx)：分支覆盖仅 **8.00%**（函数 **41.67%**）；
-  - [ResearchGraphTab.tsx](../../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx)：分支覆盖仅 **10.34%**（函数 **9.52%**）；
-  - [DefaultsPanel.tsx](../../../packages/deep-research-pack/src/client/defaults/DefaultsPanel.tsx)：函数覆盖 **29.63%**；
+  - [ResearchStatusTab.tsx](../../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx)：分支覆盖仅 **8.00%**（函数 **41.67%**）；
+  - [ResearchGraphTab.tsx](../../../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx)：分支覆盖仅 **10.34%**（函数 **9.52%**）；
+  - [DefaultsPanel.tsx](../../../../packages/deep-research-pack/src/client/defaults/DefaultsPanel.tsx)：函数覆盖 **29.63%**；
   - `method-library/views.tsx`：分支覆盖 **38.46%**；
-  - [useStatusFeed.ts](../../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts)：行 **56.28%**（第 86–228 行扫描主体零覆盖）；
-  - [useGraphFeed.ts](../../../packages/deep-research-pack/src/client/research-graph/useGraphFeed.ts)：行 **63.18%**、函数 **33.33%**；
-  - [useConfigFeed.ts](../../../packages/deep-research-pack/src/client/research-config/useConfigFeed.ts)：行 **58.04%**；
-  - `ResearchFinalTab.tsx`、`ResearchConfigTab.tsx`：在 [tests/INDEX.generated.md](../../../tests/INDEX.generated.md)（第 219–220 行）的测试覆盖列均为空（`—`），L0 零运行时测试。
+  - [useStatusFeed.ts](../../../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts)：行 **56.28%**（第 86–228 行扫描主体零覆盖）；
+  - [useGraphFeed.ts](../../../../packages/deep-research-pack/src/client/research-graph/useGraphFeed.ts)：行 **63.18%**、函数 **33.33%**；
+  - [useConfigFeed.ts](../../../../packages/deep-research-pack/src/client/research-config/useConfigFeed.ts)：行 **58.04%**；
+  - `ResearchFinalTab.tsx`、`ResearchConfigTab.tsx`：在 [tests/INDEX.generated.md](../../../../tests/INDEX.generated.md)（第 219–220 行）的测试覆盖列均为空（`—`），L0 零运行时测试。
 
 ### 4. AST 扫描 `packages/deep-research-pack/src/` 潜伏坏味道
 
@@ -87,7 +87,7 @@ intent: 基于在当前代码树上的只读实测数据（checkJs、oxlint、te
 
 ### Issue 3：`state-machine-and-contract-architecture` — Hook 状态机抽干、判别联合收紧与防御模式内化
 
-- **解决什么**：在 Issue 1/2 护栏到位后，从根本数据结构上消除“非法状态可表示”和“异步多 `useState` 撕裂”：`useStatusFeed`/`useGraphFeed`/`useConfigFeed` 抽为纯 Reducer 状态机 + 薄 React 绑定；`BriefInputs`/`deriveSteps` 改为判别联合；`readArtifact` 接入 Schema 解码器；落地 Skill/模板↔Parser 双向扫描；按 [discipline-map.md](../../../docs/discipline-map.md) 第 189 行触发将 `vendor/dsh` 防御模式关键条款本地化。
+- **解决什么**：在 Issue 1/2 护栏到位后，从根本数据结构上消除“非法状态可表示”和“异步多 `useState` 撕裂”：`useStatusFeed`/`useGraphFeed`/`useConfigFeed` 抽为纯 Reducer 状态机 + 薄 React 绑定；`BriefInputs`/`deriveSteps` 改为判别联合；`readArtifact` 接入 Schema 解码器；落地 Skill/模板↔Parser 双向扫描；按 [discipline-map.md](../../../../docs/discipline-map.md) 第 189 行触发将 `vendor/dsh` 防御模式关键条款本地化。
 - **验收**：原 Issue 1/2 全部测试与浏览器真入口回归零退化；`useStatusFeed` 等 Hook 行数与状态分支复杂度显著下降；新增状态轴漏接线由编译器或闭合审计直接报错。
 
 ---
@@ -96,4 +96,4 @@ intent: 基于在当前代码树上的只读实测数据（checkJs、oxlint、te
 
 1. 若 Issue 1 干跑清理 `strictNullChecks` 真实错误时发现超过半数 `TS2339`/`TS18048` 来自测试辅助脚本的刻意宽松用法，则只把 `checkJs` 强约束限定在 `checks/lib/`、`checks/run-gates/`、`checks/verify/` 与 `tools/channel/`（产品执行面），不强卡一次性脚本。
 2. 若 Issue 2 的 Hook+jsdom 测试与恶意 `RunSource` 矩阵就已经暴露出 `useStatusFeed`/`useGraphFeed` 大量不可控的竞态耦合，则 Issue 3 的纯 Reducer 抽干提前升格为高优先级；反之若 Issue 1+2 后连续真实研究 run 的观察面缺陷已收敛，Issue 3 可拆窄为仅做 `BriefInputs` 类型收紧与防御清单本地化。
-3. 若后续在模型真实 run 中再次爆发类似 BUG-341…343/350 的格式漂移，需单独重议 [pack-production-prevention](../../_archived/settled_issues/2026-11-20-pack-production-prevention.md) 延后的 **P（生产写入强制）** 分支，不再指望后验门补洞。
+3. 若后续在模型真实 run 中再次爆发类似 BUG-341…343/350 的格式漂移，需单独重议 [pack-production-prevention](../../../_archived/settled_issues/2026-11-20-pack-production-prevention.md) 延后的 **P（生产写入强制）** 分支，不再指望后验门补洞。

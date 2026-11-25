@@ -13,8 +13,8 @@ intent: 回答“根本上在代码实践里还能做什么提早预防 bug”�
 
 ### 1. 消除「松散布尔袋子」输入接口
 
-- **现状反例**：[brief-fold.ts](../../../packages/deep-research-pack/src/lib/run/brief-fold.ts) 的 `BriefInputs` 有 17 个互相独立的可选字段（`bundleBound?`, `bundleReadFailure?`, `questionIssue?`, `reviewUnconfirmed?`, `reviewConflict?`, `hasQuestion?`, `questionLine?`, `reviewFail?`, `delivered?`）。调用方 [ResearchStatusTab.tsx](../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) 必须手动把强状态（`reads`、`reviewVerdict`）拆平塞进去——一旦漏传一个字段或把 `reviewVerdict='conflict'` 与 `reviewFail=false` 同时传进去，类型系统完全不报错。
-- **反例二**：[run-fold.ts](../../../packages/deep-research-pack/src/lib/run/run-fold.ts) 的 `deriveSteps(inputs)` 把「某步完成」(`question: boolean, leads: boolean, ...`) 与「某步未知」(`unknown?: readonly string[]`) 拆成两个正交字段。调用方稍有疏忽（例如 BUG-381/382 把 `leads: false` 但忘了把 `'leads'` 放进 `unknown`），线性推断就会静默把早步涂成 `done`。
+- **现状反例**：[brief-fold.ts](../../../../packages/deep-research-pack/src/lib/run/brief-fold.ts) 的 `BriefInputs` 有 17 个互相独立的可选字段（`bundleBound?`, `bundleReadFailure?`, `questionIssue?`, `reviewUnconfirmed?`, `reviewConflict?`, `hasQuestion?`, `questionLine?`, `reviewFail?`, `delivered?`）。调用方 [ResearchStatusTab.tsx](../../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) 必须手动把强状态（`reads`、`reviewVerdict`）拆平塞进去——一旦漏传一个字段或把 `reviewVerdict='conflict'` 与 `reviewFail=false` 同时传进去，类型系统完全不报错。
+- **反例二**：[run-fold.ts](../../../../packages/deep-research-pack/src/lib/run/run-fold.ts) 的 `deriveSteps(inputs)` 把「某步完成」(`question: boolean, leads: boolean, ...`) 与「某步未知」(`unknown?: readonly string[]`) 拆成两个正交字段。调用方稍有疏忽（例如 BUG-381/382 把 `leads: false` 但忘了把 `'leads'` 放进 `unknown`），线性推断就会静默把早步涂成 `done`。
 - **改进实践**：
   1. 用**判别联合（Discriminated Union）**直接建模互斥事实：`StepInput = { kind: 'done' } | { kind: 'pending' } | { kind: 'unknown'; reason: ... }`，从类型上禁止「既是 pending 又算 unknown」或「字符串键拼错」；
   2. `deriveBusinessBrief` 直接吃结构化领域状态（`BundleReadState` × `QuestionState` × `ReviewVerdict` × `DeliveryState`），而不是由 UI 组件拆平后的 17 个散字段；
@@ -22,7 +22,7 @@ intent: 回答“根本上在代码实践里还能做什么提早预防 bug”�
 
 ### 2. 强制穷举检查（Exhaustiveness Checking via `assertNever`）
 
-- **现状反例**：[useStatusFeed.ts](../../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts) 第 299–302 行用嵌套三元表达式处理 `ArtifactState`，结果对 `'invalid'` 静默滑落成 `null`；[ResearchStatusTab.tsx](../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) 第 94–123 行用 7 组嵌套三元表达式映射错误文案。
+- **现状反例**：[useStatusFeed.ts](../../../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts) 第 299–302 行用嵌套三元表达式处理 `ArtifactState`，结果对 `'invalid'` 静默滑落成 `null`；[ResearchStatusTab.tsx](../../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) 第 94–123 行用 7 组嵌套三元表达式映射错误文案。
 - **改进实践**：
   - 引入全局唯一 `assertNever(value: never, msg?: string): never` 助手，配合 `switch (state)` 处理所有封闭枚举（`ArtifactState`、`ReviewVerdict`、`SourceRead`、`BindingTrust`）。
   - 以后只要给 `ArtifactState` 新增第 6 个状态（如 `'corrupted'`），**全仓所有未处理的 `switch` 会在 `tsc` 编译期直接报红**，不需要等到 E2E 才发现某页签把新状态折成了 `null`。
@@ -32,8 +32,8 @@ intent: 回答“根本上在代码实践里还能做什么提早预防 bug”�
 BUG-341..343、350、362、376 等反复说明：把 `unknown` / `string` / `Record<string, unknown>` 往深处传递，然后靠下游各处写 `typeof x === 'string'` 或 `?. ?? fallback` 兜底，是 bug 的温床。
 
 - **边界即解码器**：
-  - **JSON 工件边界**（`review/readiness.json`、`delivered.json`、`claims.json`、`research-defaults.json`）：不要在 `readArtifact` 里只做 `JSON.parse` 然后返回 `json: unknown`（现状 [artifact-read.ts](../../../packages/deep-research-pack/src/lib/run/artifact-read.ts) 第 140 行），让每个消费方自己猜字段。应当让 `readArtifact` 支持**传入 Schema 解码器**（或分类型解码器 `readTypedArtifact(view, 'delivered.json', decodeReceipt)`），在边界一次性返回 `{ state: 'ok', value: DeliveredReceipt }` 或 `{ state: 'invalid', issues }`。
-  - **CLI 与环境边界**（`checks/` 与 `tools/` 共 180 个 `.mjs` 文件）：效仿 BUG-333..336 后收口的 [port.mjs](../../../checks/lib/shared/port.mjs) `parsePort`，所有 CLI 参数、环境变量、JSON 配置文件在入口前 20 行完成严格解析与值域校验；解析失败直接 `exit 2` 并点名参数（Fail-Loud），下游函数不再接收未校验原始字符串。
+  - **JSON 工件边界**（`review/readiness.json`、`delivered.json`、`claims.json`、`research-defaults.json`）：不要在 `readArtifact` 里只做 `JSON.parse` 然后返回 `json: unknown`（现状 [artifact-read.ts](../../../../packages/deep-research-pack/src/lib/run/artifact-read.ts) 第 140 行），让每个消费方自己猜字段。应当让 `readArtifact` 支持**传入 Schema 解码器**（或分类型解码器 `readTypedArtifact(view, 'delivered.json', decodeReceipt)`），在边界一次性返回 `{ state: 'ok', value: DeliveredReceipt }` 或 `{ state: 'invalid', issues }`。
+  - **CLI 与环境边界**（`checks/` 与 `tools/` 共 180 个 `.mjs` 文件）：效仿 BUG-333..336 后收口的 [port.mjs](../../../../checks/lib/shared/port.mjs) `parsePort`，所有 CLI 参数、环境变量、JSON 配置文件在入口前 20 行完成严格解析与值域校验；解析失败直接 `exit 2` 并点名参数（Fail-Loud），下游函数不再接收未校验原始字符串。
   - **文档/Markdown 边界**：减少手写行正则（如多处手写 `split('\n')`、加粗剥离、frontmatter 切割），对复杂 Markdown 块统一使用标准 AST 解析器（`vendor/dsh` 已引入 `mdast-util-from-markdown`）或在单一权威 codec 中解码成强类型结构。
 
 ## 三、把「保守式 / Fail-Closed」写进语言原语和默认分支
@@ -42,7 +42,7 @@ BUG-341..343、350、362、376 等反复说明：把 `unknown` / `string` / `Rec
 
 ### 1. 默认拒绝（Fail-Closed）五条编码铁律
 
-1. **禁止「在场性代替有效性」**：对所有业务判断面**禁用 `view.hasFile()`**。在状态页和配置页，只存在「已读到且通过内容谓词」「为空/无正文」「读失败」「真正缺席」四者之一；[useStatusFeed.ts](../../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts) 残留的 3 处 `view.hasFile('final.md')` 与 [useConfigFeed.ts](../../../packages/deep-research-pack/src/client/research-config/useConfigFeed.ts) 的 `view.hasFile('question.md')` 应彻底迁走，并加静态规则禁用。
+1. **禁止「在场性代替有效性」**：对所有业务判断面**禁用 `view.hasFile()`**。在状态页和配置页，只存在「已读到且通过内容谓词」「为空/无正文」「读失败」「真正缺席」四者之一；[useStatusFeed.ts](../../../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts) 残留的 3 处 `view.hasFile('final.md')` 与 [useConfigFeed.ts](../../../../packages/deep-research-pack/src/client/research-config/useConfigFeed.ts) 的 `view.hasFile('question.md')` 应彻底迁走，并加静态规则禁用。
 2. **禁止吞错的 `try / catch`**：目前 `packages/deep-research-pack/src/` 存在大量仅 `console.error` 或 `catch { /* non-fatal */ }` 甚至静默返回 `[]`/`null` 的 `catch` 块。保守式写法要求：每一个 `catch` 必须把异常**显式转为失败状态值**（如 `{ ok: false, reason: 'unreadable', detail }`）或向上抛出；只有明确批准的清理（如 `closeSync`）允许忽略且须附注释。
 3. **禁止用 `null` / `undefined` 兼任多种语义**：这正是 `vendor/dsh` `vendor/dsh/docs/defensive-patterns/general.md` 的铁律 *「One value states one fact」*。例如 `reviewFail: boolean | null` 把「未审查」「读取失败」「冲突未定」全塞进 `null`，必然导致下游误判。
 4. **对未知与歧义一律取保守分支**：遇到冲突（`mismatch`）、截断（`truncated`）、未知枚举值、无法解析的非空内容，默认状态必须是 `'unconfirmed' | 'conflict' | 'invalid' | 'unknown'`，绝不能回落到 `'absent'` 或 `'ok'`。
@@ -50,7 +50,7 @@ BUG-341..343、350、362、376 等反复说明：把 `unknown` / `string` / `Rec
 
 ## 四、吸收并本地化 `vendor/dsh/docs/defensive-patterns/`
 
-[纪律全量表](../../../docs/discipline-map.md)第 189 行曾以「TS 面较小」暂缓引入 `vendor/dsh` 的五卷《防御性编码模式》，并明确写下重估触发：*「本仓 TS 面扩大到需独立缺陷模式清单时」*。
+[纪律全量表](../../../../docs/discipline-map.md)第 189 行曾以「TS 面较小」暂缓引入 `vendor/dsh` 的五卷《防御性编码模式》，并明确写下重估触发：*「本仓 TS 面扩大到需独立缺陷模式清单时」*。
 
 现在 `packages/deep-research-pack/src/` 已经膨胀到 **114 个 `.ts/.tsx` 文件**，而 11-22～23 连续四批 bug 几乎一字不差地命中了 vendor 已经总结好的防御模式：
 
@@ -80,9 +80,9 @@ BUG-341..343、350、362、376 等反复说明：把 `unknown` / `string` / `Rec
 
 ## 六、把 `.mjs` 运维/门禁脚本也纳入类型与严格编译防线
 
-- **现状缺口**：[package.json](../../../package.json) 的 `typecheck` 只检查 `packages/deep-research-pack`（114 个 `.ts/.tsx` 文件），而 `checks/` 与 `tools/` 下 **180 个 `.mjs` 脚本**几乎裸奔：
+- **现状缺口**：[package.json](../../../../package.json) 的 `typecheck` 只检查 `packages/deep-research-pack`（114 个 `.ts/.tsx` 文件），而 `checks/` 与 `tools/` 下 **180 个 `.mjs` 脚本**几乎裸奔：
   - `checks/run-gates/protocol-audit.mjs`（BUG-340）因为漏了 `import` 和 `null` 检查在真实 run 崩溃；
-  - [smoke-identifiers.test.mjs](../../../tests/checks/repo/smoke-identifiers.test.mjs) 只对 `checks/smoke/*.mjs` 跑 `TS2304/TS2552`，既不管 `checks/run-gates/` / `checks/lib/` / `tools/`，也不管空值解引用、参数类型错误、错误返回形状。
+  - [smoke-identifiers.test.mjs](../../../../tests/checks/repo/smoke-identifiers.test.mjs) 只对 `checks/smoke/*.mjs` 跑 `TS2304/TS2552`，既不管 `checks/run-gates/` / `checks/lib/` / `tools/`，也不管空值解引用、参数类型错误、错误返回形状。
 - **改进实践**：
   1. 新增 `tsconfig.scripts.json`（`allowJs: true, checkJs: true, strictNullChecks: true, noEmit: true`）覆盖 `checks/**/*.mjs` 和 `tools/**/*.mjs` 并并入 `pnpm typecheck`（对高价值纯核也可逐步迁移为 `.ts` 或补 JSDoc 类型标注）；
   2. 在 `packages/deep-research-pack/src/` 清理现有 **14 处** `as never` / `as unknown as` 类型逃逸——每一处类型逃逸都是关闭编译器眼睛的缝隙（例如 `plan-index.ts:207` 的 `as unknown as Readonly<Record<PlanColumn, PlanCell>>` 如果漏填列编译器无法感知）；

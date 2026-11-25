@@ -15,17 +15,17 @@ intent: 回答“除了靠端到端，还有没有更好的手段再找代码里
 
 ### 1. 启用 Type-Aware Lint：`oxlint` + `oxlint-tsgolint`（以及 `sonarjs` 规则）
 
-- **现状**：[discipline-map.md](../../../docs/discipline-map.md) 第 202 行显式记为「未引入」，而上游 `vendor/dsh/` 已有一整套实战检验过的 `vendor/dsh/.oxlintrc.json`（Rust 实现，全仓扫描秒级完成，并带 `oxlint-tsgolint` 类型感知规则）。
+- **现状**：[discipline-map.md](../../../../docs/discipline-map.md) 第 202 行显式记为「未引入」，而上游 `vendor/dsh/` 已有一整套实战检验过的 `vendor/dsh/.oxlintrc.json`（Rust 实现，全仓扫描秒级完成，并带 `oxlint-tsgolint` 类型感知规则）。
 - **直接能抓到的本仓真实 bug 类型**：
   - `typescript/no-floating-promises` & `no-misused-promises`：抓出异步扫描/重命名/刷新中忘记 `await` 或吞掉拒绝的 Promise；
   - `typescript/no-unsafe-assignment` / `no-unsafe-member-access` / `no-explicit-any`：逼出 `JSON.parse` 后的未校验访问以及 `as never` / `as unknown as` 掩盖的类型漏洞（本仓 `src/` 目前有 14 处此类逃逸）；
   - `typescript/use-unknown-in-catch-callback-variable` & `no-base-to-string`：杜绝 `catch (e)` 里盲目读 `e.message` 或 `String(obj)` 打出 `[object Object]`；
-  - React Hooks `exhaustive-deps`：立刻抓出 [useStatusFeed.ts](../../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts) 第 176 行（`revealStatusTab` 未入依赖）等闭包陈旧问题；
+  - React Hooks `exhaustive-deps`：立刻抓出 [useStatusFeed.ts](../../../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts) 第 176 行（`revealStatusTab` 未入依赖）等闭包陈旧问题；
   - 代码异味 / 认知复杂度与死分支（`eslint-plugin-sonarjs`）：抓出重复行（如 `useStatusFeed.ts:219-221` 连续三行 `setReviewDetail(null)`）、恒真/恒假条件、冗长 `if` 嵌套。
 
 ### 2. 把 `tsc --checkJs` 覆盖到全部 180 个 `.mjs` 脚本
 
-- **现状**：[smoke-identifiers.test.mjs](../../../tests/checks/repo/smoke-identifiers.test.mjs) 仅用 `tsc` 扫 `checks/smoke/*.mjs` 的 `TS2304/TS2552`（未声明标识符）。`checks/run-gates/`、`checks/lib/`、`checks/verify/`、`tools/` 共约 180 个 `.mjs` 文件处于**类型无检查状态**——这正是 BUG-340（`protocol-audit.mjs` 漏 import `readdirSync`/`splitFrontmatter` 且解引用 `null`）能活到端到端的原因。
+- **现状**：[smoke-identifiers.test.mjs](../../../../tests/checks/repo/smoke-identifiers.test.mjs) 仅用 `tsc` 扫 `checks/smoke/*.mjs` 的 `TS2304/TS2552`（未声明标识符）。`checks/run-gates/`、`checks/lib/`、`checks/verify/`、`tools/` 共约 180 个 `.mjs` 文件处于**类型无检查状态**——这正是 BUG-340（`protocol-audit.mjs` 漏 import `readdirSync`/`splitFrontmatter` 且解引用 `null`）能活到端到端的原因。
 - **怎么做**：用一份只用于静态诊断的 `tsconfig.scripts.json`（`allowJs: true, checkJs: true, strictNullChecks: true, noEmit: true`）跑 `checks/**/*.mjs` 与 `tools/**/*.mjs`。即使不改写为 `.ts`，`checkJs + strictNullChecks` 也能直接找出：
   - 缺失/拼错的 import 与函数名；
   - 可能是 `null`/`undefined` 却直接解引用的路径（如 `protocol === null`）；
@@ -33,7 +33,7 @@ intent: 回答“除了靠端到端，还有没有更好的手段再找代码里
 
 ### 3. 定制领域 AST 不变量扫描（升级版静态门禁）
 
-本仓已经用 TypeScript Compiler API 写了 [no-unused-code.test.mjs](../../../tests/checks/repo/no-unused-code.test.mjs) 和 `artifact-sites` 等局部扫面，非常适合把**代码级坏味道直接升级成 AST 规则**：
+本仓已经用 TypeScript Compiler API 写了 [no-unused-code.test.mjs](../../../../tests/checks/repo/no-unused-code.test.mjs) 和 `artifact-sites` 等局部扫面，非常适合把**代码级坏味道直接升级成 AST 规则**：
 
 | 候选 AST 扫描规则 | 直接拦截的 bug 类 |
 |---|---|
@@ -46,7 +46,7 @@ intent: 回答“除了靠端到端，还有没有更好的手段再找代码里
 ### 4. 重复代码检测（`jscpd`）与「未消费导出 / 死状态字段」扫描（`knip` / TS `findReferences`）
 
 - **`jscpd`（`vendor/dsh` 已引入）**：过去已经证实过 `checks/verify/context.mjs` 等处存在 ~3% 重复代码，而诸如 BUG-333..336（四个入口各写一遍有缺陷的端口解析）、BUG-369/374（status 与 final 各写一遍 review 判定）、`ResearchStatusTab.tsx:172-219`（七段重复告警渲染）全源于逻辑复制。定期或按增量跑 `jscpd` 能直接找出「只修了一处、另一份拷贝还在出 bug」的孪生缺陷。
-- **未消费导出与孤立状态字段扫描**：[no-unused-code.test.mjs](../../../tests/checks/repo/no-unused-code.test.mjs) 显式跳过了 `export` 声明；引入 `knip` 或基于 TS `LanguageService` 扫描「写进了状态对象但从未被组件读取的字段」「导出却只被测试调用而生产零调用的 dead helper」「定义了配置键/protocol 字段但零消费者」（直接针对 BUG-250, 265, 271, 273 一整类“有声明无消费”缺陷）。
+- **未消费导出与孤立状态字段扫描**：[no-unused-code.test.mjs](../../../../tests/checks/repo/no-unused-code.test.mjs) 显式跳过了 `export` 声明；引入 `knip` 或基于 TS `LanguageService` 扫描「写进了状态对象但从未被组件读取的字段」「导出却只被测试调用而生产零调用的 dead helper」「定义了配置键/protocol 字段但零消费者」（直接针对 BUG-250, 265, 271, 273 一整类“有声明无消费”缺陷）。
 
 ### 5. 包导出与声明完整性扫描（`publint`）
 
@@ -123,7 +123,7 @@ intent: 回答“除了靠端到端，还有没有更好的手段再找代码里
 
 ### 13. 分支覆盖率盲区热力图（`node --experimental-test-coverage` 聚焦未覆盖分支）
 
-- **现状**：[package.json](../../../package.json) 已有 `test:coverage` 脚本，但仅作为一个可选命令行存在，未进入日常巡检或分支审计。
+- **现状**：[package.json](../../../../package.json) 已有 `test:coverage` 脚本，但仅作为一个可选命令行存在，未进入日常巡检或分支审计。
 - **怎么用来找 bug**：
   - 跑一遍 `pnpm test:coverage`，**按文件与未覆盖分支排序**（不追表面 100% 数字，只看「0% 或低覆盖的逻辑文件」与「从未命中的 `catch`/`else` 分支」）：
     - 目前 `src/client/research-status/useStatusFeed.ts`、`useGraphFeed.ts`、`useConfigFeed.ts`、`ResearchFinalTab.tsx`、`checks/run-gates/*.mjs` 的大量异常/边界分支在 L0 中覆盖率接近 0%——**低覆盖热点几乎精准重合于 BUG-340..384 的高发区**；

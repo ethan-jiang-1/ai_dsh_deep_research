@@ -2,6 +2,31 @@
   "comment": "搬家路径重定向登记簿（2026-11-15 test-source-mirror）。md-links 对缺失目标先查本簿；条目必须 from 已不在盘上、to 在盘上且被 git 跟踪，否则门禁红。冻结层不改写：旧链接靠本簿解析。",
   "redirects": [
     {
+      "from": "_backlog/research/post-pilot-bug-prevention-and-discovery/README.md",
+      "to": "_backlog/_archived/research/post-pilot-bug-prevention-and-discovery/README.md",
+      "reason": "2026-11-25 研究题归档（消费者卡已结）"
+    },
+    {
+      "from": "_backlog/research/post-pilot-bug-prevention-and-discovery/2026-11-23-empirical-baseline-and-issue-plan.md",
+      "to": "_backlog/_archived/research/post-pilot-bug-prevention-and-discovery/2026-11-23-empirical-baseline-and-issue-plan.md",
+      "reason": "2026-11-25 研究题归档（消费者卡已结）"
+    },
+    {
+      "from": "_backlog/research/post-pilot-bug-prevention-and-discovery/2026-11-23-defensive-and-contract-coding-practices.md",
+      "to": "_backlog/_archived/research/post-pilot-bug-prevention-and-discovery/2026-11-23-defensive-and-contract-coding-practices.md",
+      "reason": "2026-11-25 研究题归档（消费者卡已结）"
+    },
+    {
+      "from": "_backlog/research/post-pilot-bug-prevention-and-discovery/2026-11-23-custom-semantic-linters-and-probes.md",
+      "to": "_backlog/_archived/research/post-pilot-bug-prevention-and-discovery/2026-11-23-custom-semantic-linters-and-probes.md",
+      "reason": "2026-11-25 研究题归档（消费者卡已结）"
+    },
+    {
+      "from": "_backlog/research/post-pilot-bug-prevention-and-discovery/2026-11-23-non-e2e-bug-discovery-methods.md",
+      "to": "_backlog/_archived/research/post-pilot-bug-prevention-and-discovery/2026-11-23-non-e2e-bug-discovery-methods.md",
+      "reason": "2026-11-25 研究题归档（消费者卡已结）"
+    },
+    {
       "from": "packages/deep-research-pack/src/lib/activity-fold.ts",
       "to": "packages/deep-research-pack/src/lib/events/activity-fold.ts",
       "reason": "2026-11-15 pack src domain 分层"
