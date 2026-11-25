@@ -29,6 +29,9 @@
   replace 行键 diff、client externals、被删 API）。
 - **常驻文档去重换余量**：根 AGENTS 去掉重复的「机械不跳」与车道映射复述，预算处置序改为指向
   `checks/doc-budgets.json`（机读正本）——同一条规则只留一个家。
+- **发布锚恢复**：版本升到 `0.3.7`（root + pack 同步；各人类副本由 `release-copies` 与
+  `pack-bundle-compat` 点名），重导出 `_dist` 三件并打 annotated tag。旧的 `0.3.6` tag 留在原位：
+  它已不是当前源，同名版本两份内容的机械风险由此拆开；`release-check --handoff/--receiver` 转绿。
 - **快照新鲜度有主**：`snapshots/README.md` 指定 owner 与 stale 判据（`source` 身份不覆盖当前 pack
   → 重录或登记 `staleWhy` + 触发条件；`ui.expected` 重写必须带 `why`）。
 
@@ -45,9 +48,9 @@
 - **只写文档提醒 zh 漂移**：上一次正是靠人记才漂的；不入户禁的提醒不是机制。
 - **清理 `checks/test-path-redirects.json` 的冻结层重定向**：旧链接靠它解析（`md-links` 的
   登记簿），删了会让历史层大面积变红；它已有 stale/dangling 反向门禁，不需要动。
-- **本轮提升版本号或重打 tag**：版本语义是发布决策（`engines.dsh` 上界 = 当前 pin、`_dist` 是
-  HEAD 制品而 tag `0.3.6` 指向更早的 commit）；留给人拍板，`release-check --handoff/--receiver`
-  继续如实报红。
+- **把 `0.3.6` 的 tag 移到 HEAD**：已打的 tag 是发布锚、不移动；HEAD 比它多出一批修复，正确收口
+  是新 patch 版本（`0.3.7`），`0.3.6` 留在原位。版本号本身是发布语义，但「同名版本两份内容」是
+  机械风险，拆开它不需要等发布——npm publish 仍未执行。
 
 ## 实际跑过的验证
 

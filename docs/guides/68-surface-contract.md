@@ -104,7 +104,7 @@ operate 的两种模式：
 - **旧根名只活在 redirect 账本**：`scripts/`、`dev/`、`probes/run/` 已退役；冻结层旧链接经
   `checks/test-path-redirects.json` 解析（链式，append-only）。老 clone 的 `core.hooksPath` 需重 source
   `tools/env.sh` 幂等恢复（hooks-active 门禁会点名未激活态）。
-- **pack 源码一条注释仍指 `checks/lib/ops/…`**：改它会让已发布 0.3.6 的 tarball 变 sha（同版本不同工件），
+- **pack 源码一条注释仍指 `checks/lib/ops/…`**：改它会让已交付 tarball 的 sha 变（同版本不同工件），
   随下一次 pack 版本变更同 diff 修；残余风险 = [维护层对齐 Note](../../notes/implemented/2026-11-17-maintenance-layer-alignment.md)。
 - **合同桶不改名**：`tests/pack/contract/` 与 `tests/contracts/` 的二分规则见 [tests/AGENTS](../../tests/AGENTS.md)；
   改名会改包内文档并迫使 repack，延后到下一次 pack 版本变更（[triggers](../../_backlog/triggers.md)）。
