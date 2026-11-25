@@ -12,12 +12,12 @@
 
 | 子组 | 模式 | 装什么 |
 |---|---|---|
-| `channel/` | run（+ 会话驱动 act） | 起/复用 run 通道、验面呈交、建会话发 kickoff、HITL 代答、socket 隔离预载 |
-| `build/` | act | 独立环境冷启动、vendor 树构建与其配置/产物生成 |
-| `record/` | act | fixture/oracle/资产账录制，overlay 与测试索引生成 |
-| `release/` | act | tarball/手册/市场索引导出、源码移交包 |
-| `clean/` | act | 运行区保留期清理（默认 dry-run） |
-| `hooks/` | judge（例外） | pre-commit 红灯拦 commit |
+| [`channel/`](channel/README.md) | run（+ 会话驱动 act） | 起/复用 run 通道、验面呈交、建会话发 kickoff、HITL 代答、socket 隔离预载 |
+| [`build/`](build/README.md) | act | 独立环境冷启动、vendor 树构建与其配置/产物生成 |
+| [`record/`](record/README.md) | act | fixture/oracle/资产账录制，overlay 与测试索引生成 |
+| [`release/`](release/README.md) | act | tarball/手册/市场索引导出、源码移交包 |
+| [`clean/`](clean/README.md) | act | 运行区保留期清理（默认 dry-run） |
+| [`hooks/`](hooks/README.md) | judge（例外） | pre-commit 红灯拦 commit |
 | 根级 | 非面 | `env.sh` 配置入口（sourced） |
 
 ## channel/（run 通道与驱动）
