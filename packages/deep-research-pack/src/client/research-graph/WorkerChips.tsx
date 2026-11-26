@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { UseSessions, UseSessionStatus } from '@deepseek-ai/dsh-client-ui-session/client'
 import { workerChipsOf, type WorkerChip } from '../../lib/plan/plan-graph.ts'
+import styles from './graph.module.css'
 
 /** worker chips 子组件的 props（hooks 从父级透传；每个成员实例化一次，hooks 数量恒定）。 */
 interface WorkerChipsProps {
@@ -29,7 +30,7 @@ export function WorkerChips({ memberId, useSessions, useSessionStatus }: WorkerC
   const shown = chips.slice(0, 3)
   const suffix = chips.length > shown.length ? ` +${String(chips.length - shown.length)}` : ''
   return (
-    <span style={{ fontSize: 11, opacity: 0.7 }}>
+    <span className={styles.workerChips}>
       worker：{shown.map((chip) => `${chip.label}${chip.status === 'running' ? '●' : chip.status === 'inactive' ? '○' : '·'}`).join(' · ')}{suffix}
     </span>
   )

@@ -5,6 +5,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { clientHistoryWindow, readSessionEvents, resolveSessionLog } from '../lib/shared/session-log.mjs'
+import { isEvidenceCardName } from '../../packages/deep-research-pack/src/lib/run/artifact-content.ts'
 import { sessionBundleOf } from '../../packages/deep-research-pack/src/lib/run/bundle-bind.ts'
 import { deriveSteps, latestRunVersion } from '../../packages/deep-research-pack/src/lib/run/run-fold.ts'
 import { foldHitlPending } from '../../packages/deep-research-pack/src/lib/events/hitl-fold.ts'
@@ -130,7 +131,7 @@ export function prepareClientLoadReference({ root, sessionsRoot, sessionGroup })
     const base = bundleBaseOf(slug)
     if (base === null) return null
     const names = new Set(readdirSync(base))
-    const evidenceCount = existsSync(join(base, 'evidence')) ? readdirSync(join(base, 'evidence')).filter((f) => f.endsWith('.md')).length : 0
+    const evidenceCount = existsSync(join(base, 'evidence')) ? readdirSync(join(base, 'evidence')).filter((f) => isEvidenceCardName(f)).length : 0
     const questionText = names.has('question.md') ? readFileSync(join(base, 'question.md'), 'utf8') : null
     // G3（RFC cockpit-flow-face）：与页签同口径——剥 markdown 强调符再截断（72 字 + 省略号）。
     const rawLine = questionText?.split('\n').find((l) => l.trim() !== '' && !l.startsWith('#')) ?? null

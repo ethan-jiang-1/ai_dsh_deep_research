@@ -2,36 +2,12 @@
 //
 // 只放 CSS 模块 stub loader、JSDOM 环境初始化、RTL 重导出、translator 工厂与恶意 RunSource
 // 夹具，不放断言（遵守 tests/AGENTS.md 放置规则）。
-import { register } from 'node:module'
 import { JSDOM } from 'jsdom'
+import { installCssModuleHook } from './css-module-helpers.mjs'
 
-const CSS_HOOK_KEY = Symbol.for('drp.test.cssHookRegistered')
+export { installCssModuleHook }
+
 const DOM_INSTANCE_KEY = Symbol.for('drp.test.jsdomInstance')
-
-const CSS_LOADER_SOURCE = `
-export async function load(url, context, nextLoad) {
-  let isCss = false
-  try {
-    isCss = new URL(url).pathname.endsWith('.css')
-  } catch {
-    isCss = url.endsWith('.css')
-  }
-  if (isCss) {
-    return {
-      format: 'module',
-      shortCircuit: true,
-      source: 'export default new Proxy({}, { get: (_t, prop) => typeof prop === "string" ? prop : "" });',
-    }
-  }
-  return nextLoad(url, context)
-}
-`
-
-export function installCssModuleHook() {
-  if (globalThis[CSS_HOOK_KEY]) return
-  globalThis[CSS_HOOK_KEY] = true
-  register(`data:text/javascript;base64,${Buffer.from(CSS_LOADER_SOURCE, 'utf8').toString('base64')}`)
-}
 
 export function installClientDom() {
   installCssModuleHook()
@@ -68,6 +44,12 @@ export function installClientDom() {
     DOMParser: win.DOMParser,
     navigator: win.navigator,
     getComputedStyle: win.getComputedStyle.bind(win),
+    requestAnimationFrame: typeof win.requestAnimationFrame === 'function'
+      ? win.requestAnimationFrame.bind(win)
+      : (cb) => setTimeout(() => { cb(Date.now()) }, 0),
+    cancelAnimationFrame: typeof win.cancelAnimationFrame === 'function'
+      ? win.cancelAnimationFrame.bind(win)
+      : (id) => { clearTimeout(id) },
   }
   for (const [key, value] of Object.entries(bindings)) {
     Object.defineProperty(globalThis, key, {

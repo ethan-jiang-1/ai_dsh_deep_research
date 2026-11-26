@@ -8,6 +8,7 @@ import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { wavesOf } from '../../lib/plan/plan-graph.ts'
 import type { GraphNodeView } from './types.ts'
 import { shortLabel } from './format.ts'
+import styles from './graph.module.css'
 
 /** DAG 小图的固定几何（SVG 坐标；side panel 窄，节点只放 id + 短标签）。 */
 const NODE_W = 108
@@ -28,10 +29,10 @@ interface DagMapProps {
 
 /** 节点填充/描边（状态色只做左侧条 + 小圆点；卡片背景保持中性，避免整屏花）。 */
 function fillOf(node: GraphNodeView): string {
-  if (node.status === 'completed') return '#f0fdf4'
-  if (node.status === 'in_progress') return '#eff6ff'
-  if (node.status === 'unplanned') return '#f8fafc'
-  return '#f8fafc'
+  if (node.status === 'completed') return 'var(--dsw-alias-state-success-tertiary)'
+  if (node.status === 'in_progress') return 'var(--dsw-alias-state-business-tertiary)'
+  if (node.status === 'unplanned') return 'var(--dsw-alias-bg-layer-1)'
+  return 'var(--dsw-alias-bg-layer-1)'
 }
 
 /**
@@ -56,21 +57,21 @@ export function DagMap({ nodes, selectedId, childCounts, onSelect, t }: DagMapPr
   const height = MAP_PAD * 2 + waves.length * NODE_H + Math.max(0, waves.length - 1) * LEVEL_GAP_Y
   const known = new Set(nodes.map((node) => node.id))
   return (
-    <div style={{
-      overflowX: 'auto', marginBottom: 6, border: '1px solid #00000012', borderRadius: 8,
-      padding: '6px 8px', background: '#fafbfc',
-    }}>
+    <div className={styles.dagWrap}>
       <svg
         width={Math.max(300, width)}
         height={height}
         viewBox={`0 0 ${String(width)} ${String(height)}`}
         role="img"
         aria-label={t('graphDagAria')}
-        style={{ display: 'block', margin: '0 auto' }}
+        className={styles.dagSvg}
       >
         <defs>
           <marker id="research-graph-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-            <path d="M0,0 L7,3.5 L0,7 Z" fill="#94a3b8" />
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="var(--dsw-alias-label-tertiary)" />
+          </marker>
+          <marker id="research-graph-arrow-active" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="var(--dsw-alias-brand-primary)" />
           </marker>
         </defs>
         {nodes.flatMap((node) => node.blockedBy
@@ -79,6 +80,8 @@ export function DagMap({ nodes, selectedId, childCounts, onSelect, t }: DagMapPr
             const from = pos.get(dep)
             const to = pos.get(node.id)
             if (from === undefined || to === undefined) return null
+            const adjacent = selectedId !== null && (dep === selectedId || node.id === selectedId)
+            const dimmed = selectedId !== null && !adjacent
             const x1 = from.x + NODE_W / 2
             const y1 = from.y + NODE_H
             const x2 = to.x + NODE_W / 2
@@ -89,9 +92,10 @@ export function DagMap({ nodes, selectedId, childCounts, onSelect, t }: DagMapPr
                 key={`${dep}->${node.id}`}
                 d={`M ${String(x1)} ${String(y1)} C ${String(x1)} ${String(mid)}, ${String(x2)} ${String(mid)}, ${String(x2)} ${String(y2)}`}
                 fill="none"
-                stroke="#94a3b8"
-                strokeWidth={1.2}
-                markerEnd="url(#research-graph-arrow)"
+                stroke={adjacent ? 'var(--dsw-alias-brand-primary)' : 'var(--dsw-alias-label-tertiary)'}
+                strokeWidth={adjacent ? 2 : 1.2}
+                opacity={dimmed ? 0.28 : 1}
+                markerEnd={adjacent ? 'url(#research-graph-arrow-active)' : 'url(#research-graph-arrow)'}
               />
             )
           }))}
@@ -106,7 +110,7 @@ export function DagMap({ nodes, selectedId, childCounts, onSelect, t }: DagMapPr
               role="button"
               tabIndex={0}
               aria-label={`${node.id} ${node.label} ${node.state.text}`}
-              style={{ cursor: 'pointer' }}
+              className={styles.dagNode}
               onClick={() => { onSelect(node.id) }}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
@@ -121,15 +125,15 @@ export function DagMap({ nodes, selectedId, childCounts, onSelect, t }: DagMapPr
                 height={NODE_H}
                 rx={6}
                 fill={fillOf(node)}
-                stroke={selected ? '#6366f1' : '#cbd5e1'}
+                stroke={selected ? 'var(--dsw-alias-brand-primary)' : 'var(--dsw-alias-border-l2)'}
                 strokeWidth={selected ? 2 : 1}
                 opacity={node.status === 'unplanned' ? 0.75 : 1}
               />
-              <text x={8} y={13} fontSize={10} fontWeight={600} fill="#0f172a">{node.id}</text>
-              <text x={8} y={25} fontSize={9} fill="#475569">{shortLabel(node.label)}</text>
+              <text x={8} y={13} fontSize={10} fontWeight={600} fill="var(--dsw-alias-label-primary)">{node.id}</text>
+              <text x={8} y={25} fontSize={9} fill="var(--dsw-alias-label-secondary)">{shortLabel(node.label)}</text>
               <circle cx={NODE_W - 10} cy={10} r={3} fill={node.state.color} />
               {(childCounts.get(node.id) ?? 0) > 0 && (
-                <text x={NODE_W - 8} y={28} textAnchor="end" fontSize={8} fill="#6366f1">
+                <text x={NODE_W - 8} y={28} textAnchor="end" fontSize={8} fill="var(--dsw-alias-brand-primary)">
                   +{String(childCounts.get(node.id))}
                 </text>
               )}

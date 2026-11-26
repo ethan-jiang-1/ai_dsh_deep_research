@@ -723,6 +723,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/final-evidence.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "final-evidence.spec.mjs — 终稿三视图（核查清单/分屏打开证据卡/prefill）与 ResearchEvidenceTab 组件行为回归。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/final-tab-patterns.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -903,6 +913,26 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/research-hub-panel.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "research-hub-panel.spec.mjs — ResearchHubPanel / RunsView / LensesView 全局 main 面板回归。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/research-status/protocol-radar.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "protocol-radar.spec.mjs — 状态契约卡（ProtocolCard）与证据质量雷达（QualityRadar）静态渲染回归。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/research-status/status-feed-behavior.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -933,6 +963,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/research-turn.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "research-turn.spec.mjs — Turn 级里程碑 fold 与 ResearchMilestoneCard 组件回归。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/run-source-browser.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -949,6 +989,16 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "session-follow.spec.mjs — journal 流装配的纯函数契约（2026-11-03 P4 拆分）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/session-stream-store.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "session-stream-store.spec.mjs — 按 sessionId 共享 follow 流的引用计数合流回归。",
       "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
@@ -1193,6 +1243,46 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/lib/run/citation-linkify.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "citation-linkify 回归 — 内存中转写 [来源: evidence/xx.md] 为可点链接且跳过代码块与行内代码。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/run/claims-verdicts.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "claims-verdicts 回归 — claims.json + verdicts.json 解码与 UNVERIFIED 语义（ok/absent/unreadable/empty/invalid）。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/run/evidence-card.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "evidence-card 回归 — 证据卡地址认领谓词、URL 清洗与正文/Question List 解析。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/run/evidence-matrix.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "evidence-matrix 回归 — topics.md × evidence/*.md 解析、矩阵统计与五态降级。",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/lib/run/health.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -1200,6 +1290,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "health.spec.mjs — run 停摆派生判据（BUG-348）：静默 + 最后回合错误才告警。",
       "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/run/protocol-fold.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "protocol-fold 回归 — protocol.json 解码与五态读取（ok/absent/unreadable/empty/invalid）。",
+      "oracleType": "structured",
       "sunset": "随被测模块删除"
     },
     {
@@ -1290,6 +1390,16 @@
       "cost": "fast-inproc",
       "uniqueClaim": "research-defaults-property.spec.mjs — research-defaults parseDefaults 的 fast-check 属性测试。",
       "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/workspace/runs-catalog.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "runs-catalog.spec.mjs — Research Hub 工作区 run 三位置扫描 + 内置 8 透镜目录测试。",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {

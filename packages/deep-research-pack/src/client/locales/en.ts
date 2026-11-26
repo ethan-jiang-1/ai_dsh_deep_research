@@ -1,6 +1,7 @@
 /** English UI dictionary; keys are constrained by the zh owner. Fold-layer copy lives in `en-fold.ts`. */
 import type { DeepResearchPackLocaleKey } from './zh.ts'
 import { enFold } from './en-fold.ts'
+import { enCockpit } from './en-cockpit.ts'
 
 const enBase = {
   brandName: 'Orca Deep Research',
@@ -481,4 +482,4 @@ const enBase = {
   builtinDemoLimit: 'Not investment advice; no target prices or ratings; does not replace due-diligence procedures (confirmations, interviews, site visits); publicly filed business-registration information is not an audited financial working paper.',
 } as const
 
-export const en = { ...enBase, ...enFold } satisfies Record<DeepResearchPackLocaleKey, string>
+export const en = { ...enBase, ...enFold, ...enCockpit } satisfies Record<DeepResearchPackLocaleKey, string>

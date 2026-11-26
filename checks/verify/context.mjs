@@ -39,7 +39,7 @@ export const PRESETS = join(PACK, 'presets');
 // 新增门禁两处同步）。数组与文件块同按域分组（A–F）排序，域横幅见各节。
 export const gates = [
   'md-utf8-newline', 'md-links', 'md-anchors', 'doc-paths', 'doc-drefs', 'archived-note-pointer', 'count-free', 'doc-now-only', 'doc-budgets', 'surface-claims',
-  'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'pack-lint', 'cockpit-doc-registry', 'run-context-single-source',
+  'preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'pack-lint', 'client-tokens', 'cockpit-doc-registry', 'run-context-single-source',
   'pack-manifest', 'market-index', 'readme-shape', 'release-vocab',
   'note-tree', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live',
   'vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'discipline-state-vocab', 'repo-conventions', 'vendor-links',

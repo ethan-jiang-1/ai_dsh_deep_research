@@ -27,6 +27,10 @@ interface ToolCardArgs {
   readonly prompt?: unknown
   /** web_search 的入参是 queries 数组（vendor tool-web search schema 权威形状——非 query 单串）。 */
   readonly queries?: unknown
+  /** web_fetch 的入参是 url 字符串（vendor tool-web fetch schema 权威形状）。 */
+  readonly url?: unknown
+  /** subagent 可选角色名。 */
+  readonly subagent_type?: unknown
 }  // 协调类工具（team_task_*/wait_agent/list_agents/send_message）不进对话流——无卡片需求（2026-09-27 实测）
 
 /** 从 call/result 切片推导卡片状态（settled 前 running；interrupted → stopped）。 */
@@ -85,6 +89,26 @@ export function cardTitleOf(toolName: string, args: ToolCardArgs | null, argsRaw
     if (toolName === 'web_search') {
       const q = normalizeQueries(args.queries).join(' · ')
       return q === '' ? t('toolCardSearch') : t('toolCardSearchQueries', { queries: q.slice(0, 60) })
+    }
+    if (toolName === 'web_fetch') {
+      const rawUrl = typeof args.url === 'string' ? args.url.trim() : ''
+      if (rawUrl === '') return t('toolCardFetch')
+      const compact = rawUrl.replace(/^https?:\/\//i, '').slice(0, 60)
+      return t('toolCardFetchUrl', { url: compact })
+    }
+    if (toolName === 'subagent') {
+      const role = typeof args.subagent_type === 'string' && args.subagent_type.trim() !== ''
+        ? args.subagent_type.trim()
+        : (typeof args.name === 'string' ? args.name.trim() : '')
+      const desc = typeof args.description === 'string'
+        ? args.description.trim()
+        : typeof args.prompt === 'string'
+          ? args.prompt.trim().slice(0, 40)
+          : ''
+      const summary = [role, desc].filter(Boolean).join(' — ')
+      return summary === ''
+        ? t('toolCardSubagent')
+        : t('toolCardSubagentDetail', { detail: summary.slice(0, 60) })
     }
 
   }

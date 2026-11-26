@@ -8,6 +8,7 @@ import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { AttentionItem } from '../../lib/plan/plan-graph.ts'
 import { ATTENTION_ROW_STYLE, BANNER_STYLE, MUTED_STYLE } from './styles.ts'
 import { severityIcon } from './format.ts'
+import styles from './graph.module.css'
 
 export function GraphNotices(props: {
   readonly planIssues: readonly PlanIssue[]
@@ -19,10 +20,10 @@ export function GraphNotices(props: {
   return (
     <>
       {planIssues.length > 0 && (
-        <div style={{ ...BANNER_STYLE, background: '#dc262610', borderColor: '#dc262640' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2, color: '#b91c1c' }}>{t('graphPlanIssues')}</div>
+        <div className={styles.errorBanner} style={BANNER_STYLE}>
+          <div className={`${styles.bannerTitle} ${styles.errorText}`}>{t('graphPlanIssues')}</div>
           {planIssues.slice(0, 6).map((issue) => (
-            <div key={`${issue.kind}:${issue.nodeId}:${issue.message}`} style={{ ...MUTED_STYLE, color: '#b91c1c' }}>{issue.message}</div>
+            <div key={`${issue.kind}:${issue.nodeId}:${issue.message}`} className={styles.errorText} style={MUTED_STYLE}>{issue.message}</div>
           ))}
           {planIssues.length > 6 && <div style={MUTED_STYLE}>{t('graphMoreIssues', { count: String(planIssues.length - 6) })}</div>}
         </div>
@@ -30,8 +31,8 @@ export function GraphNotices(props: {
 
 
       {attention.length > 0 && (
-        <div style={{ marginBottom: 10, padding: '6px 10px', borderRadius: 6, background: '#f59e0b14', border: '1px solid #f59e0b40' }}>
-          <div style={{ fontWeight: 600, fontSize: 12, marginBottom: 2 }}>{t('graphAttention')}</div>
+        <div className={styles.attentionBanner}>
+          <div className={styles.bannerTitle}>{t('graphAttention')}</div>
           {attention.slice(0, 8).map((item) => (
             <button
               key={`${item.taskId}:${item.reason}`}

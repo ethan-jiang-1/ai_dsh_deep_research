@@ -6,7 +6,6 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| （空） | — | 本轮问题卡均已结项归档 |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

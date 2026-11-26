@@ -118,6 +118,8 @@ test('数据面：rerun 三改法 / 工具卡 / 回执 / 配置执行面与标�
   assertNoCjk('cardTitleOf', [
     cardTitleOf('spawn_teammate', { name: 'scout-a', description: 'map the field' }, '', tEn),
     cardTitleOf('web_search', { queries: ['q1', 'q2'] }, '', tEn),
+    cardTitleOf('web_fetch', { url: 'https://example.com/docs' }, '', tEn),
+    cardTitleOf('subagent', { subagent_type: 'Scout', description: 'check primary sources' }, '', tEn),
   ])
 
   const entry = { name: 'Fact check', provenance: null, isDefault: false, legacyText: null, sections: { source: 'a', verify: null, report: null, limit: null } }

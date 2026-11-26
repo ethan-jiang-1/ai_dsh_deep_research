@@ -110,7 +110,7 @@ test('③ import 图：tests 禁 import 驱动面 + 本地闭包零禁物（传�
 test('④ test 命令钉：spec/checks 两条发现面 + aggregate 形状，改宽/改坏即红', () => {
   const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
   const prefix = 'TSX_TSCONFIG_PATH="$(pwd -P)/packages/deep-research-pack/tsconfig.client.json" node --import tsx/esm';
-  const spec = `${prefix} --test --test-reporter=spec 'tests/run/**/*.spec.mjs' 'tests/cockpit/**/*.spec.mjs' 'tests/pack/**/*.spec.mjs' 'tests/contracts/**/*.spec.mjs'`;
+  const spec = `${prefix} --import ./tests/cockpit/css-module-helpers.mjs --test --test-reporter=spec 'tests/run/**/*.spec.mjs' 'tests/cockpit/**/*.spec.mjs' 'tests/pack/**/*.spec.mjs' 'tests/contracts/**/*.spec.mjs'`;
   const checks = `${prefix} --test --test-reporter=spec 'tests/checks/*/*.test.mjs'`;
   assert.equal(pkg.scripts?.test, 'pnpm test:spec && pnpm test:checks', 'pnpm test 必须聚合 spec + checks——慢车道不进默认回归');
   assert.equal(pkg.scripts?.['test:spec'], spec, 'pnpm test:spec 的发现面被改动——`.spec.mjs` 只收 run/cockpit/pack/contracts；vendor 走 test:vendor；checks 走 test:checks');

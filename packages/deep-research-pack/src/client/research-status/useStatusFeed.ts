@@ -11,6 +11,8 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type Set
 import { deriveAnchors, foldHitlPending, type HitlState } from '../../lib/events/hitl-fold.ts'
 import { deriveSteps, latestRunVersion } from '../../lib/run/run-fold.ts'
 import { assertNever, artifactBodyIssueOf, readArtifact, readStateOf, type StatusReads } from '../../lib/run/artifact-read.ts'
+import { foldEvidenceMatrix, type EvidenceCardSample } from '../../lib/run/evidence-matrix.ts'
+import { readProtocolContract } from '../../lib/run/protocol-fold.ts'
 import { hasBodyText, isEvidenceCard, isEvidenceCardName, questionBodyLineOf } from '../../lib/run/artifact-content.ts'
 import { foldActivityRows, type ActivityRow } from '../../lib/events/activity-fold.ts'
 import type { MemberActivitySummary } from '../../lib/events/member-activity.ts'
@@ -188,13 +190,27 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         let evidenceCount = 0
         let evidenceEmptyCount = 0
         let evidenceUnreadableCount = 0
+        const evidenceSamples: EvidenceCardSample[] = []
         for (const entry of evidenceEntries.filter((item) => isEvidenceCardName(item.name))) {
           const card = await readArtifact(view, `evidence/${entry.name}`, { signal })
           if (stopped) return
+          evidenceSamples.push({ name: entry.name, state: card.state, text: card.text })
           if (card.state === 'ok' && card.text !== null && isEvidenceCard(card.text)) evidenceCount += 1
           else if (card.state === 'unreadable' || card.state === 'invalid') evidenceUnreadableCount += 1
           else evidenceEmptyCount += 1
         }
+        const topicsArt = names.has('topics.md') ? await readArtifact(view, 'topics.md', { signal }) : { state: 'absent' as const, text: null }
+        if (stopped) return
+        const protocolArt = names.has('protocol.json')
+          ? await readProtocolContract(view, signal)
+          : { state: 'absent' as const, text: null, value: null }
+        if (stopped) return
+        const evidenceMatrix = foldEvidenceMatrix({
+          topicsState: topicsArt.state,
+          topicsText: topicsArt.text,
+          evidenceState,
+          cards: evidenceSamples,
+        })
         const finalDir = names.has('final') ? await view.list('final', { signal }) : null
         if (stopped) return
         const finalState = readStateOf(finalDir)
@@ -322,6 +338,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
             questionText,
             finalFileNames,
             hasFinal: finalBody,
+            protocol: { state: protocolArt.state, contract: protocolArt.value },
+            evidenceMatrix,
           },
         })
       } catch (cause) {

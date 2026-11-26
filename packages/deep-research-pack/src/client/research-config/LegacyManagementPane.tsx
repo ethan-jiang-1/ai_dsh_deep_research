@@ -13,6 +13,7 @@ import { BUILTIN_PREFERENCES, DISTILL_INSTRUCTION, DRAFT_INSTRUCTION, PATTERN_ME
 import { displayDemoOf, displayNameOf } from '../builtin-display.ts'
 import { summaryOfEntry, type LibraryEntry, type LibrarySections } from '../../lib/method-library/library-fold.ts'
 import { sectionLabelOf } from './section-labels.ts'
+import css from './config.module.css'
 
 export interface LegacyManagementPaneProps {
   /** 当前 UI 翻译器（四区回滚面同样要双语，BUG-055）。 */
@@ -48,66 +49,61 @@ export function LegacyManagementPane(props: LegacyManagementPaneProps): ReactNod
     <>
 
       {/* ② 内置研究偏好（只读）＋ 推荐规则说明位（①-4 呈现位，始终在场）。 */}
-      <div style={{ fontWeight: 700, margin: '4px 0 2px' }}>{t('legacyBuiltinTitle')}</div>
-      <div style={{ opacity: 0.6, marginBottom: 6, fontSize: 11 }}>
+      <div className={css.legacyHeadingFirst}>{t('legacyBuiltinTitle')}</div>
+      <div className={css.legacyHint}>
         {t('legacyBuiltinHint', { rules })}
       </div>
       {BUILTIN_PREFERENCES.map((b) => card(b.name, b.summary, false, { isBuiltin: true }, () => onOpenDetail({ mode: 'read', kind: 'builtin', name: b.name, sections: b.sections, provenance: null, isDefault: false, legacyText: null })))}
 
       {/* ③ 我的偏好库（本工作区数据）。 */}
-      <div style={{ fontWeight: 700, margin: '10px 0 2px' }}>{t('legacyMineTitle')}</div>
-      <div style={{ opacity: 0.6, marginBottom: 6, fontSize: 11 }}>{t('legacyMineHint')}</div>
-      {libraryRead === 'loading' && entries === null && <div style={{ opacity: 0.5 }}>{t('legacyLoading')}</div>}
+      <div className={css.legacyHeading}>{t('legacyMineTitle')}</div>
+      <div className={css.legacyHint}>{t('legacyMineHint')}</div>
+      {libraryRead === 'loading' && entries === null && <div className={css.legacyStatusText}>{t('legacyLoading')}</div>}
       {libraryRead === 'unreadable' && (
-        <div style={{ opacity: 0.7, marginBottom: 6 }}>
+        <div className={css.legacyStatusText}>
           {t('legacyUnreadable')}
         </div>
       )}
       {libraryRead === 'absent' && (
-        <div style={{ opacity: 0.55, marginBottom: 6 }}>{t('legacyAbsent')}</div>
+        <div className={css.legacyStatusText}>{t('legacyAbsent')}</div>
       )}
       {libraryRead === 'ok' && entries !== null && entries.length === 0 && (
-        <div style={{ opacity: 0.55, marginBottom: 6 }}>{t('legacyEmpty')}</div>
+        <div className={css.legacyStatusText}>{t('legacyEmpty')}</div>
       )}
       {entries !== null && entries.map((e) => card(e.name, summaryOfEntry(e), e.isDefault, { isBuiltin: false }, () => onOpenDetail({ mode: 'read', kind: 'library', name: e.name, sections: { ...e.sections }, provenance: e.provenance, isDefault: e.isDefault, legacyText: e.legacyText })))}
 
       {/* 领域示范（只读）：厚条目体例——抄体例不抄内容（发现 6：内置四字段是口号级，要有可对照的深度）。 */}
-      <div style={{ fontWeight: 700, margin: '10px 0 2px' }}>{t('legacyDemoTitle')}</div>
-      <div style={{ opacity: 0.6, marginBottom: 6, fontSize: 11 }}>
+      <div className={css.legacyHeading}>{t('legacyDemoTitle')}</div>
+      <div className={css.legacyHint}>
         {t('legacyDemoHint')}
       </div>
-      <div style={{ padding: '7px 10px', borderRadius: 6, background: '#00000008' }}>
-        <div style={{ fontWeight: 600, fontSize: 13 }}>{demo.name}</div>
+      <div className={css.legacyDemoBox}>
+        <div className={css.legacyDemoTitle}>{demo.name}</div>
         {SECTIONS.map(({ key }) => (
-          <div key={key} style={{ marginTop: 4, fontSize: 12, lineHeight: 1.6 }}>
-            <span style={{ fontWeight: 600, opacity: 0.75 }}>{sectionLabelOf(t, key)}{t('labelSeparator')}</span>
-            <span style={{ opacity: 0.85 }}>{demo.sections[key]}</span>
+          <div key={key} className={css.legacyDemoLine}>
+            <span className={css.legacyDemoKey}>{sectionLabelOf(t, key)}{t('labelSeparator')}</span>
+            <span className={css.legacyDemoVal}>{demo.sections[key]}</span>
           </div>
         ))}
       </div>
 
       {/* 回执：三态（已发送／Lead 已回话／已落盘）——发送成功只说明话传出去了。
           空闲态也在场（告诉用户改动回执会长在哪；keyless 冒烟就靠这一行证回执区在场）。 */}
-      <div style={{
-        marginTop: 8, padding: '6px 10px', borderRadius: 6, fontSize: 12,
-        background: receipt === null ? '#00000008' : receipt.state === 'failed' ? '#ef444414' : receipt.state === 'landed' ? '#22c55e1f' : '#22c55e14',
-        color: receipt === null ? 'inherit' : receipt.state === 'failed' ? '#b91c1c' : '#166534',
-        opacity: receipt === null ? 0.6 : 1,
-      }}>
+      <div className={`${css.legacyReceipt} ${receipt === null ? css.legacyReceiptIdle : receipt.state === 'failed' ? css.legacyReceiptFailed : receipt.state === 'landed' ? css.legacyReceiptLanded : css.legacyReceiptSent}`}>
         {receipt === null
           ? t('legacyReceiptIdle')
           : receipt.text}
       </div>
 
       {/* ④ 底线条：六条共同底线 ＋ 两个定制入口 ＋ 刷新（始终在场，含空库与失败态）。 */}
-      <div style={{ marginTop: 10, borderTop: '1px solid #00000018', paddingTop: 8, fontSize: 12 }}>
-        <div style={{ opacity: 0.75 }}>{t('legacyBaselinePrefix')}{t('baselineDisciplines')}</div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 6, flexWrap: 'wrap' }}>
+      <div className={css.legacyFooter}>
+        <div className={css.legacyStatusText}>{t('legacyBaselinePrefix')}{t('baselineDisciplines')}</div>
+        <div className={css.legacyFooterActions}>
           <Button variant="outline" size="sm" disabled={sending || sessionId === undefined} onClick={() => { void send(DRAFT_INSTRUCTION, { target: null, expectsChange: false }) }}>{t('legacyDraftAction')}</Button>
           <Button variant="outline" size="sm" disabled={sending || sessionId === undefined} onClick={() => { void send(DISTILL_INSTRUCTION, { target: null, expectsChange: false }) }}>{t('legacyDistillAction')}</Button>
           {sessionId !== undefined && <Button variant="ghost" size="sm" onClick={() => { onRefresh() }}>{t('legacyRefreshAction')}</Button>}
         </div>
-        <div style={{ fontSize: 11, opacity: 0.55, marginTop: 4 }}>
+        <div className={css.legacyFooterSmall}>
           {t('legacyFooter1')}
           <br />{t('legacyFooter2')}
         </div>

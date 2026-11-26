@@ -1,0 +1,35 @@
+# 研究驾驶舱基于 DSH 原生能力的 UX/UI 全面升级（M1–M7）
+
+> 状态：implemented
+>
+> 前序基线：[observability-gui](./2026-09-24-observability-gui.md)（D18 观察面 client 套件初代成立；现行构成见 [40-research-cockpit](../../docs/design/40-research-cockpit.md)）
+> 需求来源：[2026-11-26-cockpit-ux-ui-native-upgrade](../../_backlog/_archived/settled_issues/2026-11-26-cockpit-ux-ui-native-upgrade.md)（调研：[cockpit-ux-ui](../../_backlog/_archived/research/cockpit-ux-ui/README.md)）
+
+## 决定
+
+在不修改 `vendor/dsh/` 任何文件、不破坏 DSH 原生壳与 D18 只读边界的前提下，严格按 issue 卡 **M1–M7** 里程碑完成驾驶舱体验与 UI 升级，全部走 DSH 原生公开槽位、`ui-primitives`、`ui-theme` 令牌与标准 props 契约：
+
+1. **M1 · 样式管线 + Token 清洗 + `client-tokens` 静态门禁**：废弃幽灵 `--dsh-*` / `--dsw-alias-label-error` 与未豁免硬编码颜色，迁移至 CSS Modules（`*.module.css` + `css-modules.d.ts`，含 Research Graph 与 Method Library 静态布局清理）+ `lightningcss` 编译期展开 + DSH `--dsw-*` 语义令牌；[tsdown.config.ts](../../packages/deep-research-pack/tsdown.config.ts) 用 `virtualToFile` 映射内联 CSS（防止构建产物夹带本机路径）；[css-module-helpers.mjs](../../tests/cockpit/css-module-helpers.mjs) 通过 Node `module.registerHooks` 支持 `node --test` 直接加载 `.module.css`；新增 [b-pack-tokens.mjs](../../checks/verify/gates/b-pack-tokens.mjs) `client-tokens` 门禁并在 [gates-cases.mjs](../../checks/lib/harness/gates-cases.mjs) 固化 `client-tokens-raw-hex` 与 `client-tokens-phantom-dsh-var` 反证用例。
+2. **M2 · `ui-primitives` 统一 + 首屏与基础控件升级**：在 `conversation.hero.brand.mark` 注册虎鲸 `OrcaMark`；[StartCard.tsx](../../packages/deep-research-pack/src/client/StartCard.tsx) 提供 4 个研究题型快捷模板按钮经 `inputActions.insertText` 预填；[DefaultsButton.tsx](../../packages/deep-research-pack/src/client/defaults/DefaultsButton.tsx) 与 [DefaultsPanel.tsx](../../packages/deep-research-pack/src/client/defaults/DefaultsPanel.tsx) 升级为 `Tooltip` / `Pill` / `Input` / `Tag` / `Button` 与基于 `Menu` 的 [SelectMenu.tsx](../../packages/deep-research-pack/src/client/defaults/SelectMenu.tsx)；[ResearchToolCard.tsx](../../packages/deep-research-pack/src/client/ResearchToolCard.tsx) 与 [MethodLibraryToolCard.tsx](../../packages/deep-research-pack/src/client/MethodLibraryToolCard.tsx) 接入 `DisclosureRow` + `StateDot` 并把 `RESEARCH_TOOL_KEYS` 扩至 `spawn_teammate`、`web_search`、`web_fetch`、`subagent`。
+3. **M3 · 状态页签与研究图谱重构 + 质量雷达 + HITL1 契约卡**：[TrackRail.tsx](../../packages/deep-research-pack/src/client/research-status/TrackRail.tsx) 改用 `StateDot(appearance="step")`、`Tag`、CSS Modules 与语义 `data-step-*`；新增 [protocol-fold.ts](../../packages/deep-research-pack/src/lib/run/protocol-fold.ts) + [ProtocolCard.tsx](../../packages/deep-research-pack/src/client/research-status/ProtocolCard.tsx) 与 [evidence-matrix.ts](../../packages/deep-research-pack/src/lib/run/evidence-matrix.ts) + [QualityRadar.tsx](../../packages/deep-research-pack/src/client/research-status/QualityRadar.tsx)（旧无头卡且无缺口时隐身）；[DagMap.tsx](../../packages/deep-research-pack/src/client/research-graph/DagMap.tsx) 完成令牌化与选中节点上下游边高亮，[ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) 在有边时把全量节点列表收进「查看全部节点」折叠块并仅在选中后聚焦展开详情。
+4. **M4 · 终稿核查视图 + 证据卡阅读器 + 双格分屏溯源 + 续研预填**：[ResearchFinalTab.tsx](../../packages/deep-research-pack/src/client/ResearchFinalTab.tsx) 使用 `SegmentedControl` 提供读者版 / 审计版 / 核查清单三视图，配备 [FinalToc.tsx](../../packages/deep-research-pack/src/client/research-final/FinalToc.tsx)、[claims-verdicts.ts](../../packages/deep-research-pack/src/lib/run/claims-verdicts.ts) + [ClaimsAuditView.tsx](../../packages/deep-research-pack/src/client/research-final/ClaimsAuditView.tsx)、内存预转 [citation-linkify.ts](../../packages/deep-research-pack/src/lib/run/citation-linkify.ts)、[evidence-card.ts](../../packages/deep-research-pack/src/lib/run/evidence-card.ts) + [ResearchEvidenceTab.tsx](../../packages/deep-research-pack/src/client/ResearchEvidenceTab.tsx)（点击 `[来源: evidence/xx.md]` 经 `MarkdownDelegateProvider.openFile` → `openResource(..., { preferNewPane: true })` 分屏打开证据卡），以及 `extractNextVersionPriorities` + [FinalFollowupFooter.tsx](../../packages/deep-research-pack/src/client/research-final/FinalFollowupFooter.tsx) 将 `## 下一版优先项` 转为点击预填按钮。
+5. **M5 · 共享会话流合流 + 顶栏进度胶囊 + 回合里程碑卡**：新增 [session-stream-store.ts](../../packages/deep-research-pack/src/client/session-stream-store.ts) 按 `sessionId` refcount 复用单条 `remote.session.follow` 流；在 `conversation.session.header.actions` 注册 [ResearchHeaderPill.tsx](../../packages/deep-research-pack/src/client/ResearchHeaderPill.tsx)（含 `HoverCard` 摘要与 `delivered.json` 终态判定），在 `conversation.chat.turnTail` 注册 [ResearchMilestoneCard.tsx](../../packages/deep-research-pack/src/client/ResearchMilestoneCard.tsx)（消费 [research-turn.ts](../../packages/deep-research-pack/src/client/research-turn.ts)）。
+6. **M6 · 全局「研究工作台」+ 原生页签菜单命令 + 方法库持久修复**：在 `sidebar.panellist` + `main` 注册 [ResearchHubPanel.tsx](../../packages/deep-research-pack/src/client/ResearchHubPanel.tsx)（`SegmentedTabs` 切换 Runs 三位置档案 / 方法库 / 8 条内置研究透镜与 `DefaultsPanel` 项目默认），经 `sidebar.right.tab.menu.item`（[ResearchTabMenuItem.tsx](../../packages/deep-research-pack/src/client/ResearchTabMenuItem.tsx)）与 5 个研究页签 `tab.actions.bindCommands({ refresh })` 接入 DSH 原生页签命令栏；保留 `conversation.view` 方法库快捷入口与最小 `installCoachComposerStyles`；修复 [useLibraryData.ts](../../packages/deep-research-pack/src/client/method-library/useLibraryData.ts) 切到「内置参考」时清空 `selectedName` 的缺陷。
+7. **M7 · 文档、门禁与常驻冒烟对齐**：同步更新 [40-research-cockpit.md](../../docs/design/40-research-cockpit.md)、[README.md](../../packages/deep-research-pack/README.md) / [README.zh.md](../../packages/deep-research-pack/README.zh.md)、[research.overlay.yml](../../tools/record/research.overlay.yml) 与资产/测试索引；将 `isEvidenceCardName` 对齐与「顶栏胶囊 / 终稿引用分屏打开证据卡 / 全局研究工作台」常驻断言合入 [client-load.entry.mjs](../../checks/smoke/client-load.entry.mjs) 与 [client-load-final.support.mjs](../../checks/smoke/client-load-final.support.mjs)。
+
+## 输掉的方案
+
+- **修改 `vendor/dsh/` 或写外层壳 DOM 样式覆盖**：违背 `vendor-clean` 只读约束与未来升级可继承原则，否决。
+- **在 `sidebar.session.row.leading` 按行订阅 `session.follow`**：缺 Host 级聚合投影时会造成 N+1 订阅风暴，延后至 Host 提供统一摘要索引后再接。
+- **直接删掉 `conversation.view` 方法库入口**：会打破既有用量习惯与现有冒烟覆盖；按 M6-3 保留入口及最小 `installCoachComposerStyles`，仅用全局 Hub 补充无历史/空白首屏入口。
+- **在观察面提供一键发送 / 自动 rerun**：违背 D18 只读边界，坚持 `inputActions.insertText` 预填草稿。
+
+## 实际跑过的验证
+
+- **L0 构建与静态/单元门禁**：`pnpm build`、`node tools/release/export-dist.mjs`、`pnpm typecheck`、`pnpm lint`、`pnpm verify`、`pnpm test` 全部退出码 `0`。
+- **门禁反证回归**：`node checks/smoke/gates.e2e.mjs --gate=client-tokens` 验证 `client-tokens-raw-hex` 与 `client-tokens-phantom-dsh-var` 注射必红、对照组全绿。
+- **包挂载与产物验证**：`source tools/env.sh && node checks/smoke/pack.e2e.mjs`（ALL PASS，86 个 tarball 条目，`lib/client.js` 零本机路径泄漏）与 `node checks/smoke/preset.e2e.mjs`（`DSH_SMOKE_REAL=1` 预检绿）。
+- **真浏览器端到端**：
+  - `source tools/env.sh && DSH_CLIENT_LOAD_ALLOW_UNHEALTHY=1 node checks/smoke/client-load.entry.mjs --seed tests/fixtures/client-load-home` → ALL PASS（因测试机桌面负载 `load/cpu > 1.5` 使用 `DSH_CLIENT_LOAD_ALLOW_UNHEALTHY=1`，覆盖顶栏胶囊、TrackRail 步态/重入、证据 9/9、图谱折叠列表、终稿引用点击分屏打开「证据卡」、方法库与全局「研究工作台」）。
+  - `source tools/env.sh && node --import tsx/esm checks/smoke/cockpit-locale.entry.mjs` → `3/3 PASS`。
+- **多视口明暗双主题与实机通道**：`1440×900` / `1280×800` / `768×900` 明暗主题截图 `overflow=0`、`pageErrors=[]`；并执行 `node tools/channel/run-driver.mjs up` 启动实机观察入口。

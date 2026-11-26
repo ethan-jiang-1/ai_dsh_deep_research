@@ -64,7 +64,7 @@ test('已映射节点沿用 Team 任务状态；无 task 的节点不伪造任�
   const tasks = [task('task-1', 'completed')];
   const index = planMappingOf(plan, tasks);
   const done = planNodeStateOf(index.mapping.get('W1.1'));
-  assert.deepEqual(done, { text: '完成', icon: '✓', color: '#16a34a' });
+  assert.deepEqual(done, { text: '完成', icon: '✓', color: 'var(--dsw-alias-state-success-primary)' });
 
   const waiting = nodeStateOf(task('task-2', 'pending', { blockedBy: ['task-1'] }), undefined, undefined);
   assert.equal(waiting.text, '等 task-1');

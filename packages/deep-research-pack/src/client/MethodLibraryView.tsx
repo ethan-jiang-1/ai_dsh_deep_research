@@ -28,7 +28,6 @@ import {
 import { BUILTIN_PREFERENCES } from '../lib/shared/config-tables.ts'
 import { displayNameOf, displaySummaryOf } from './builtin-display.ts'
 import { coachPatchAppliesToDraft, mergeCoachDraft, parseMethodDraft } from '../lib/method-library/method-draft.ts'
-import { BUTTON_STYLE, HEADER_STYLE, INPUT_STYLE, MUTED_STYLE, PRIMARY_STYLE } from './method-library/styles.ts'
 import { BuiltinView, EditorView, LibraryRow, MethodSummaryView, ReadMineView, SourceSelectionView } from './method-library/views.tsx'
 import { MethodCoachPanel } from './method-library/coach.tsx'
 import { coachContextOf, coachStartAction, manualEditPrompt } from './method-library/coach-prompts.ts'
@@ -41,6 +40,7 @@ import {
   LIBRARY_PATH, builtinLibraryEntry,
   type MethodLibraryOperationRequest,
 } from './method-library/model.ts'
+import css from './method-library/library.module.css'
 
 export interface MethodLibraryInjected {
   readonly readLibrary: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<MethodLibraryReadResult>
@@ -346,57 +346,54 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
       data-method-library=""
       data-method-library-edit={mode !== 'read' ? '' : undefined}
       data-method-draft-revision={draftRevision}
-      style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, height: '100%', overflow: 'hidden' }}
+      className={css.root}
     >
-      <div style={HEADER_STYLE}>
-        <strong style={{ fontSize: 15 }}>{props.t('methodLibrary')}</strong>
-        <span style={MUTED_STYLE}>{props.t('librarySharedHint')}</span>
-        <span style={{ flex: 1 }} />
+      <div className={css.header}>
+        <strong className={css.headerTitle}>{props.t('methodLibrary')}</strong>
+        <span className={css.muted}>{props.t('librarySharedHint')}</span>
+        <span className={css.spacer} />
         {narrowPane && (
           <button
             type="button"
             data-method-library-toggle=""
             aria-expanded={libraryOpen}
             aria-controls="method-library-library-pane"
-            style={BUTTON_STYLE}
+            className={css.button}
             onClick={() => { setLibraryOpen((open) => !open) }}
           >{libraryOpen ? props.t('workbenchPane') : props.t('libraryPane')}</button>
         )}
-        <button type="button" style={BUTTON_STYLE} onClick={refresh}>{props.t('refresh')}</button>
-        <button type="button" data-method-new="" style={PRIMARY_STYLE} disabled={sending || operationUnknown} onClick={beginNew}>{props.t('newAction')}</button>
+        <button type="button" className={css.button} onClick={refresh}>{props.t('refresh')}</button>
+        <button type="button" data-method-new="" className={css.primaryButton} disabled={sending || operationUnknown} onClick={beginNew}>{props.t('newAction')}</button>
       </div>
       {receipt !== null && (
-        <div role="status" aria-live="polite" style={{
-          padding: '6px 14px', fontSize: 12,
-          background: receipt.ok ? 'color-mix(in srgb, var(--dsw-alias-brand-primary) 10%, transparent)' : 'color-mix(in srgb, var(--dsw-alias-label-error) 10%, transparent)',
-          borderBottom: `1px solid ${receipt.ok ? 'var(--dsw-alias-border-l2)' : 'var(--dsw-alias-label-error)'}`,
-          color: receipt.ok ? 'var(--dsw-alias-label-secondary)' : 'var(--dsw-alias-label-error)',
-        }}>{receipt.ok ? '✓' : '✕'} {receipt.detail}</div>
+        <div role="status" aria-live="polite" className={receipt.ok ? css.receiptOk : css.receiptError}>
+          {receipt.ok ? '✓' : '✕'} {receipt.detail}
+        </div>
       )}
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, minWidth: 0, overflow: 'hidden' }}>
+      <div className={css.body}>
         <aside
           id="method-library-library-pane"
           data-method-library-pane="library"
+          className={css.libraryAside}
           style={{
             display: !narrowPane || libraryOpen ? 'block' : 'none',
             flex: narrowPane ? '1 1 auto' : `0 0 min(${leftWidth}px, 38vw)`,
             width: narrowPane ? '100%' : undefined,
             minWidth: narrowPane ? 0 : 120,
             borderRight: narrowPane ? 'none' : '1px solid var(--dsw-alias-border-l1)',
-            padding: 10, overflowY: 'auto', boxSizing: 'border-box', position: 'relative', zIndex: 1,
           }}
         >
-          <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
-            <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'mine' ? { borderColor: 'var(--dsw-alias-brand-primary)', color: 'var(--dsw-alias-brand-primary)' } : {}) }} onClick={() => { switchSegment('mine') }}>{props.t('segmentMine')}</button>
-            <button type="button" style={{ ...BUTTON_STYLE, ...(segment === 'builtin' ? { borderColor: 'var(--dsw-alias-brand-primary)', color: 'var(--dsw-alias-brand-primary)' } : {}) }} onClick={() => { switchSegment('builtin') }}>{props.t('segmentBuiltin')}</button>
+          <div className={css.segmentBar}>
+            <button type="button" className={`${css.button}${segment === 'mine' ? ` ${css.buttonActive}` : ''}`} onClick={() => { switchSegment('mine') }}>{props.t('segmentMine')}</button>
+            <button type="button" className={`${css.button}${segment === 'builtin' ? ` ${css.buttonActive}` : ''}`} onClick={() => { switchSegment('builtin') }}>{props.t('segmentBuiltin')}</button>
           </div>
           {segment === 'mine' && (
             <>
-              <input style={{ ...INPUT_STYLE, marginBottom: 8 }} aria-label={props.t('searchMethods')} placeholder={props.t('searchMethods')} value={query} onChange={(event) => { setQuery(event.target.value) }} />
-              {loadState === 'loading' && <div style={MUTED_STYLE}>{props.t('reading')}</div>}
-              {loadState === 'error' && <div style={{ ...MUTED_STYLE, color: 'var(--dsw-alias-label-error)' }}>{props.t('loadError', { path: LIBRARY_PATH, detail: loadError })}</div>}
-              {loadState === 'absent' && <div style={MUTED_STYLE}>{props.t('libraryAbsent', { path: LIBRARY_PATH })}</div>}
-              {loadState === 'ok' && filtered.length === 0 && <div style={MUTED_STYLE}>{entries.length === 0 ? props.t('emptyLibrary') : props.t('noMatchingMethods')}</div>}
+              <input className={css.searchInput} aria-label={props.t('searchMethods')} placeholder={props.t('searchMethods')} value={query} onChange={(event) => { setQuery(event.target.value) }} />
+              {loadState === 'loading' && <div className={css.muted}>{props.t('reading')}</div>}
+              {loadState === 'error' && <div className={css.mutedError}>{props.t('loadError', { path: LIBRARY_PATH, detail: loadError })}</div>}
+              {loadState === 'absent' && <div className={css.muted}>{props.t('libraryAbsent', { path: LIBRARY_PATH })}</div>}
+              {loadState === 'ok' && filtered.length === 0 && <div className={css.muted}>{entries.length === 0 ? props.t('emptyLibrary') : props.t('noMatchingMethods')}</div>}
               {filtered.map((entry) => (
                 <LibraryRow
                   key={entry.name}
@@ -429,20 +426,20 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
         <main
           id="method-library-workbench-pane"
           data-method-library-pane="workbench"
+          className={css.workbenchMain}
           style={{
-            flex: '1 1 420px', minWidth: 0, minHeight: 0, display: narrowPane && libraryOpen ? 'none' : 'flex',
-            flexDirection: 'column', overflow: 'hidden', boxSizing: 'border-box',
+            display: narrowPane && libraryOpen ? 'none' : 'flex',
             paddingRight: narrowPane ? 0 : 12,
           }}
         >
           {(mode === 'edit' || mode === 'new') && workbenchStage !== 'source' && draft !== null && (
             <MethodSummaryView draft={draft} stage={workbenchStage} manualFields={manual} coachFields={coachFields} sourceFields={sourceFields} onStageChange={setWorkbenchStage} onFocusField={(field) => { setActiveField(field); setWorkbenchStage('form-check') }} onRestartSource={restartSource} canSave={canSaveDraft} sending={sending || operationUnknown} onSave={(asDefault) => { void save(asDefault) }} t={props.t} />
           )}
-          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0, padding: 14, overflowY: mode === 'read' || workbenchStage !== 'interview' ? 'auto' : 'hidden', boxSizing: 'border-box' }}>
+          <div className={css.workbenchInner} style={{ overflowY: mode === 'read' || workbenchStage !== 'interview' ? 'auto' : 'hidden' }}>
             {mode === 'read' && segment === 'builtin' && builtin !== null && <BuiltinView entry={builtin} onUse={() => { applyBuiltinReference(builtin) }} useLabel={props.t('useBuiltin')} t={props.t} />}
             {mode === 'read' && segment === 'mine' && selected !== null && <ReadMineView entry={selected} pendingDelete={pendingDelete} sending={sending || operationUnknown} onEdit={beginEdit} onPendingDelete={setPendingDelete} onRemove={(entry) => { void remove(entry) }} onSetDefault={(entry) => { void setDefault(entry) }} onClearDefault={() => { void clearDefault() }} t={props.t} />}
             {mode === 'read' && segment === 'mine' && selected === null && (
-              <div style={{ ...MUTED_STYLE, paddingTop: 20 }}>
+              <div className={css.mutedPadTop}>
                 {loadState === 'absent'
                   ? props.t('noMethodsHint')
                   : query.trim() !== '' ? props.t('noMatchingMethods') : props.t('pickMethodFromLeft')}

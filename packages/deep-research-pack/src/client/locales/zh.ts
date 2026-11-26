@@ -1,5 +1,6 @@
 /** 中文 UI 字典（唯一正本；en 由它约束键集）。数据面（fold 层）文案住 `zh-fold.ts`。 */
 import { zhFold } from './zh-fold.ts'
+import { zhCockpit } from './zh-cockpit.ts'
 
 const zhBase = {
   brandName: 'Orca 深度搜索',
@@ -481,6 +482,6 @@ const zhBase = {
   builtinDemoLimit: '不构成投资建议；不给目标价与评级；不替代尽调程序（函证、访谈、现场核查）；工商公示信息不等于经审计的财务底稿。',
 } as const
 
-export const zh = { ...zhBase, ...zhFold } as const
+export const zh = { ...zhBase, ...zhFold, ...zhCockpit } as const
 
 export type DeepResearchPackLocaleKey = keyof typeof zh

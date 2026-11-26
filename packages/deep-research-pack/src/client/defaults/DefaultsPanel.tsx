@@ -4,7 +4,8 @@
  * 方法行只读（默认住方法库）；深度/输出/来源可改；无保存按钮：select 变更即发 host command，
  * 文本框 blur/Enter 发送；按钮与面板共用 `DefaultsStore`。自动 = 字段省略 = Lead 判断。
  */
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { Button, Input, Pill, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
   AUTHORITIES, OUTPUT_SHAPES, RECENCIES, SOURCE_FAMILIES,
@@ -14,40 +15,14 @@ import {
 import type { PackTranslate } from '../../lib/shared/i18n.ts'
 import { useDefaults, type DefaultsSnapshot, type DefaultsStore } from './store.ts'
 import { AUTHORITY_LABEL, FAMILY_LABEL, RECENCY_LABEL, SHAPE_LABEL } from './labels.ts'
+import { SelectMenu } from './SelectMenu.tsx'
+import css from './defaults.module.css'
 
 /** 面板 props：由 ResearchConfigTab 注入。 */
 export interface DefaultsPanelProps {
   readonly sessionId: SessionId
   readonly store: DefaultsStore
   readonly t: PackTranslate
-}
-
-const label: CSSProperties = { fontSize: 11.5, color: 'var(--dsh-text-secondary, #6b7280)' }
-const control: CSSProperties = {
-  height: 30,
-  borderRadius: 6,
-  border: '1px solid var(--dsh-border, #d1d5db)',
-  background: 'var(--dsh-surface, #ffffff)',
-  color: 'var(--dsh-text, #111827)',
-  fontSize: 12.5,
-  padding: '0 6px',
-  minWidth: 0,
-}
-const row: CSSProperties = { display: 'grid', gridTemplateColumns: '52px 1fr', gap: 8, alignItems: 'center' }
-const hint: CSSProperties = { fontSize: 10.5, color: 'var(--dsh-text-tertiary, #9ca3af)', marginTop: 2 }
-
-function chipStyle(selected: boolean, disabled: boolean): CSSProperties {
-  return {
-    height: 26,
-    padding: '0 9px',
-    borderRadius: 13,
-    border: `1px solid ${selected ? 'var(--dsh-accent, #93c5fd)' : 'var(--dsh-border, #d1d5db)'}`,
-    background: selected ? 'color-mix(in srgb, var(--dsh-accent, #2563eb) 10%, transparent)' : 'transparent',
-    color: selected ? 'var(--dsh-accent, #1d4ed8)' : 'var(--dsh-text-secondary, #4b5563)',
-    fontSize: 11.5,
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    opacity: disabled ? 0.6 : 1,
-  }
 }
 
 function sourcePatch(
@@ -132,66 +107,69 @@ export function DefaultsPanel({ sessionId, store, t }: DefaultsPanelProps): Reac
         : t('defaultsMethodFollow', { name: state.methodDefault })
 
   return (
-    <section data-testid="defaults-panel" data-defaults-revision={state.revision} data-defaults-pending={busy} style={{ display: 'grid', gap: 9, padding: '10px 0 12px', borderBottom: '1px solid var(--dsh-border, #eef0f3)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <strong style={{ fontSize: 13 }}>{t('defaultsTitle')}</strong>
-        <span style={{ fontSize: 10.5, padding: '1px 7px', borderRadius: 9, background: 'color-mix(in srgb, var(--dsh-accent, #2563eb) 10%, transparent)', color: 'var(--dsh-accent, #1d4ed8)' }}>{t('defaultsBadge')}</span>
-        <span style={{ marginLeft: 'auto', fontSize: 10.5, color: 'var(--dsh-text-tertiary, #9ca3af)' }}>v{state.revision}</span>
+    <section data-testid="defaults-panel" data-defaults-revision={state.revision} data-defaults-pending={busy} className={css.panel}>
+      <div className={css.headerRow}>
+        <strong className={css.title}>{t('defaultsTitle')}</strong>
+        <Tag tone="info">{t('defaultsBadge')}</Tag>
+        <span className={css.revision}>v{state.revision}</span>
       </div>
-      <div style={{ fontSize: 10.5, color: 'var(--dsh-text-tertiary, #9ca3af)' }}>{t('defaultsSubtitle')}</div>
+      <div className={css.subtitle}>{t('defaultsSubtitle')}</div>
 
       {problems.length > 0 ? (
-        <div role="alert" style={{ fontSize: 11, padding: '5px 8px', borderRadius: 6, background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c' }}>
+        <div role="alert" className={css.bannerError}>
           {t('defaultsInvalidBanner', { detail: problems.map((item) => `${item.field}:${item.code}`).join('; ') })}
         </div>
       ) : null}
       {warnings.length > 0 ? (
-        <div role="status" data-testid="defaults-warnings" style={{ fontSize: 11, padding: '5px 8px', borderRadius: 6, background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e' }}>
+        <div role="status" data-testid="defaults-warnings" className={css.bannerWarn}>
           {t('defaultsWarnings', { detail: warnings.map((item) => `${item.field}:${item.code}`).join('; ') })}
         </div>
       ) : null}
 
-      <div style={row}>
-        <span style={label}>{t('defaultsMethod')}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-          <span data-testid="defaults-method" style={{ fontSize: 12.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{methodText}</span>
-          <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--dsh-accent, #2563eb)', whiteSpace: 'nowrap' }} title={t('defaultsMethodHint')}>{t('defaultsMethodLibraryLink')}</span>
+      <div className={css.row}>
+        <span className={css.label}>{t('defaultsMethod')}</span>
+        <div className={css.rowFlex}>
+          <span data-testid="defaults-method" className={css.methodText}>{methodText}</span>
+          <span className={css.methodLink} title={t('defaultsMethodHint')}>{t('defaultsMethodLibraryLink')}</span>
         </div>
-        <span /><span style={hint}>{t('defaultsMethodHint')}</span>
+        <span /><span className={css.hint}>{t('defaultsMethodHint')}</span>
       </div>
 
-      <div style={row}>
-        <span style={label}>{t('defaultsDepth')}</span>
-        <select
-          data-testid="defaults-depth"
-          aria-label={t('defaultsDepth')}
+      <div className={css.row}>
+        <span className={css.label}>{t('defaultsDepth')}</span>
+        <SelectMenu
+          testId="defaults-depth"
+          ariaLabel={t('defaultsDepth')}
           value={state.value.effort ?? 'auto'}
           disabled={busy}
-          onChange={(event) => {
-            const value = event.currentTarget.value
+          options={[
+            { value: 'auto', label: t('defaultsDepthAuto') },
+            { value: 'quick', label: t('defaultsDepthQuick') },
+            { value: 'standard', label: t('defaultsDepthStandard') },
+            { value: 'deep', label: t('defaultsDepthDeep') },
+          ]}
+          onChange={(value) => {
             if (value === 'auto') unset(['effort'])
             else apply({ effort: value as EffortBand })
           }}
-          style={control}
-        >
-          <option value="auto">{t('defaultsDepthAuto')}</option>
-          <option value="quick">{t('defaultsDepthQuick')}</option>
-          <option value="standard">{t('defaultsDepthStandard')}</option>
-          <option value="deep">{t('defaultsDepthDeep')}</option>
-        </select>
-        <span /><span style={hint}>{t('defaultsDepthHint')}</span>
+        />
+        <span /><span className={css.hint}>{t('defaultsDepthHint')}</span>
       </div>
 
-      <div style={row}>
-        <span style={label}>{t('defaultsOutput')}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-          <select
-            data-testid="defaults-output-shape"
-            aria-label={t('defaultsOutput')}
+      <div className={css.row}>
+        <span className={css.label}>{t('defaultsOutput')}</span>
+        <div className={css.rowFlex}>
+          <SelectMenu
+            testId="defaults-output-shape"
+            ariaLabel={t('defaultsOutput')}
             value={shape ?? 'auto'}
             disabled={busy}
-            onChange={(event) => {
-              const value = event.currentTarget.value
+            className={css.controlFixed}
+            options={[
+              { value: 'auto', label: t('defaultsShapeAuto') },
+              ...OUTPUT_SHAPES.map((item) => ({ value: item, label: t(SHAPE_LABEL[item]) })),
+            ]}
+            onChange={(value) => {
               if (value === 'auto') {
                 if (output?.audience === undefined) unset(['output'])
                 else apply({ output: { audience: output.audience } })
@@ -199,13 +177,9 @@ export function DefaultsPanel({ sessionId, store, t }: DefaultsPanelProps): Reac
               }
               apply({ output: { shape: value as OutputShape, ...output?.audience === undefined ? {} : { audience: output.audience } } })
             }}
-            style={{ ...control, flex: '0 0 150px' }}
-          >
-            <option value="auto">{t('defaultsShapeAuto')}</option>
-            {OUTPUT_SHAPES.map((item) => <option key={item} value={item}>{t(SHAPE_LABEL[item])}</option>)}
-          </select>
-          <span style={{ ...label, whiteSpace: 'nowrap' }}>{t('defaultsAudience')}</span>
-          <input
+          />
+          <span className={css.labelNowrap}>{t('defaultsAudience')}</span>
+          <Input
             data-testid="defaults-audience"
             aria-label={t('defaultsAudience')}
             placeholder={t('defaultsAudiencePlaceholder')}
@@ -219,93 +193,89 @@ export function DefaultsPanel({ sessionId, store, t }: DefaultsPanelProps): Reac
               event.preventDefault()
               event.currentTarget.blur()
             }}
-            style={{ ...control, flex: '1 1 auto', minWidth: 0 }}
+            className={css.controlGrow ?? ''}
           />
         </div>
       </div>
 
-      <div style={row}>
-        <span style={label}>{t('defaultsSource')}</span>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center' }}>
-          {SOURCE_FAMILIES.map((family) => (
-            <button
-              key={family}
-              type="button"
-              data-testid={`defaults-source-${family}`}
-              aria-pressed={families.includes(family)}
-              aria-label={t(FAMILY_LABEL[family])}
-              disabled={busy}
-              onClick={() => changeFamilies(family)}
-              style={chipStyle(families.includes(family), busy)}
-            >
-              {t(FAMILY_LABEL[family])}
-            </button>
-          ))}
-          <button
-            type="button"
+      <div className={css.row}>
+        <span className={css.label}>{t('defaultsSource')}</span>
+        <div className={css.rowWrap}>
+          {SOURCE_FAMILIES.map((family) => {
+            const selected = families.includes(family)
+            return (
+              <Pill
+                key={family}
+                active={selected}
+                data-testid={`defaults-source-${family}`}
+                aria-pressed={selected}
+                aria-label={t(FAMILY_LABEL[family])}
+                disabled={busy}
+                onClick={() => changeFamilies(family)}
+              >
+                {t(FAMILY_LABEL[family])}
+              </Pill>
+            )
+          })}
+          <Button
+            variant="ghost"
+            size="sm"
             data-testid="defaults-source-auto"
             disabled={busy}
             onClick={() => unset(['source'])}
-            style={{ border: 'none', background: 'transparent', color: 'var(--dsh-text-tertiary, #9ca3af)', fontSize: 10.5, cursor: busy ? 'not-allowed' : 'pointer', padding: '0 2px' }}
           >
             {t('defaultsSourceAuto')}
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center', paddingLeft: 60 }}>
-        <span style={label}>{t('defaultsAuthority')}</span>
-        <select
-          data-testid="defaults-authority"
-          aria-label={t('defaultsAuthority')}
+      <div className={css.subRow}>
+        <span className={css.label}>{t('defaultsAuthority')}</span>
+        <SelectMenu
+          testId="defaults-authority"
+          ariaLabel={t('defaultsAuthority')}
           value={authority ?? 'auto'}
           disabled={busy}
-          onChange={(event) => {
-            const value = event.currentTarget.value
+          className={css.controlAuthority}
+          options={[
+            { value: 'auto', label: t('defaultsAuthorityAuto') },
+            ...AUTHORITIES.map((item) => ({ value: item, label: t(AUTHORITY_LABEL[item]) })),
+          ]}
+          onChange={(value) => {
             applySource(families.length === 0 ? undefined : families, value === 'auto' ? undefined : value as Authority, recency)
           }}
-          style={{ ...control, flex: '0 0 128px' }}
-        >
-          <option value="auto">{t('defaultsAuthorityAuto')}</option>
-          {AUTHORITIES.map((item) => <option key={item} value={item}>{t(AUTHORITY_LABEL[item])}</option>)}
-        </select>
-        <span style={{ ...label, marginLeft: 4 }}>{t('defaultsRecency')}</span>
-        <select
-          data-testid="defaults-recency"
-          aria-label={t('defaultsRecency')}
+        />
+        <span className={css.labelSpaced}>{t('defaultsRecency')}</span>
+        <SelectMenu
+          testId="defaults-recency"
+          ariaLabel={t('defaultsRecency')}
           value={recency ?? 'auto'}
           disabled={busy}
-          onChange={(event) => {
-            const value = event.currentTarget.value
+          className={css.controlGrow}
+          options={[
+            { value: 'auto', label: t('defaultsRecencyAuto') },
+            ...RECENCIES.map((item) => ({ value: item, label: t(RECENCY_LABEL[item]) })),
+          ]}
+          onChange={(value) => {
             applySource(families.length === 0 ? undefined : families, authority, value === 'auto' ? undefined : value as Recency)
           }}
-          style={{ ...control, flex: '1 1 auto', minWidth: 0 }}
-        >
-          <option value="auto">{t('defaultsRecencyAuto')}</option>
-          {RECENCIES.map((item) => <option key={item} value={item}>{t(RECENCY_LABEL[item])}</option>)}
-        </select>
+        />
       </div>
 
       {receipt !== null ? (
         <div
           role="status"
           data-testid="defaults-receipt"
-          style={{
-            fontSize: 11,
-            padding: '5px 8px',
-            borderRadius: 6,
-            background: receipt.tone === 'ok' ? '#ecfdf5' : receipt.tone === 'warn' ? '#fffbeb' : '#fef2f2',
-            border: `1px solid ${receipt.tone === 'ok' ? '#bbf7d0' : receipt.tone === 'warn' ? '#fde68a' : '#fecaca'}`,
-            color: receipt.tone === 'ok' ? '#15803d' : receipt.tone === 'warn' ? '#b45309' : '#b91c1c',
-          }}
+          className={receipt.tone === 'ok' ? css.bannerOk : receipt.tone === 'warn' ? css.bannerWarn : css.bannerError}
         >
           {receipt.text}
         </div>
       ) : null}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <button
-          type="button"
+      <div className={css.footerActions}>
+        <Button
+          variant={confirmClear ? 'primary' : 'outline'}
+          size="sm"
           data-testid="defaults-clear"
           disabled={busy}
           onClick={() => {
@@ -313,13 +283,13 @@ export function DefaultsPanel({ sessionId, store, t }: DefaultsPanelProps): Reac
             setConfirmClear(false)
             void store.clear(sessionId)
           }}
-          style={{ border: 'none', background: 'transparent', color: '#b91c1c', fontSize: 11, cursor: busy ? 'not-allowed' : 'pointer', padding: 0 }}
+          className={confirmClear ? undefined : css.clearButton}
         >
           {t(confirmClear ? 'defaultsClearConfirm' : 'defaultsClear')}
-        </button>
-        <span style={{ marginLeft: 'auto', fontSize: 10.5, color: 'var(--dsh-text-tertiary, #9ca3af)' }}>{t('defaultsFooterSave')}</span>
+        </Button>
+        <span className={css.footerSave}>{t('defaultsFooterSave')}</span>
       </div>
-      <div style={{ display: 'grid', gap: 1, fontSize: 10.5, color: 'var(--dsh-text-tertiary, #9ca3af)', paddingTop: 2 }}>
+      <div className={css.footerNotes}>
         <span>{t('defaultsFooterAuto')}</span>
         <span>{t('defaultsFooterScope')}</span>
       </div>

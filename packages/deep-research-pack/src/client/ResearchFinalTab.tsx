@@ -18,11 +18,12 @@
  * 更新语义：文件被改写时，正在看（`tab.visible`）→ 顶部提示条"重新读取"，不换掉你正在读的
  * 字；没在看 → 静默重读。轮询节奏与驾驶舱其余面同款（30s）。
  */
-import { rerunTriageRowsOf } from '../lib/run/rerun-triage.ts'
+import { extractNextVersionPriorities, rerunTriageRowsOf } from '../lib/run/rerun-triage.ts'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { MarkdownText } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, MarkdownDelegateProvider, MarkdownText, SegmentedControl } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import type { InputActions } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
   FINAL_LEDGER_DIR, FINAL_NAME, FINAL_REVIEW_NAME, finalReadPlan, finalTargetOf, finalViewOf, sessionFileOf, watchTargetOf,
@@ -31,7 +32,14 @@ import { assertNever, readArtifact, readStateOf, type ArtifactState } from '../l
 import { openRun, type RunSource } from '../lib/run/run-context.ts'
 import { latestRunVersion } from '../lib/run/run-fold.ts'
 import { parseReadinessDeclaration, readinessOfSources, reviewVerdictOf, type ReviewVerdict } from '../lib/review/review-readiness.ts'
+import { joinClaimsVerdicts, readClaimsAndVerdicts, type ClaimsAuditSummary } from '../lib/run/claims-verdicts.ts'
+import { evidenceAddressOf, isEvidenceAddress } from '../lib/run/evidence-card.ts'
+import { linkifyEvidenceCitations } from '../lib/run/citation-linkify.ts'
+import { ClaimsAuditView } from './research-final/ClaimsAuditView.tsx'
+import { FinalFollowupFooter } from './research-final/FinalFollowupFooter.tsx'
+import { FinalToc } from './research-final/FinalToc.tsx'
 import { RESEARCH_STATUS_TAB_KIND } from './keys.ts'
+import css from './ResearchFinalTab.module.css'
 
 /** 页签体注入面（index.ts 装配，绑定 remote.workspaceFiles）。 */
 export interface ResearchFinalTabInjected {
@@ -45,8 +53,8 @@ export type ResearchFinalTabProps = PropsRuntime<'sidebar.right.pane.tab'> & Pro
 /** 文件改写的巡检节奏（与驾驶舱其余面一致）。 */
 const REFRESH_MS = 30_000
 
-/** 三种视图：读者版 / 审计版（vN 或 final.md）/ 当前工作稿（仅无 reader 的旧形态）。 */
-type FinalView = 'reader' | 'audit' | 'draft'
+/** 四种内部视图：读者版 / 审计版 / 当前工作稿 / Claim 核查清单。 */
+type FinalView = 'reader' | 'audit' | 'draft' | 'claims'
 
 /** Markdown 词表（随语言构建；`MarkdownText` 按引用比较，故用 useMemo 钉住同一语言下的引用）。 */
 function markdownLabels(t: ResearchFinalTabProps['t']): {
@@ -61,20 +69,6 @@ function markdownLabels(t: ResearchFinalTabProps['t']): {
     },
     footnotes: t('footnotes'),
   }
-}
-
-const MESSAGE: React.CSSProperties = { padding: '12px', fontSize: 12.5, opacity: 0.6, lineHeight: 1.6 }
-const STRIP: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 8, padding: '3px 2px 7px',
-  marginBottom: 8, fontSize: 11, opacity: 0.75, borderBottom: '1px solid #00000014',
-}
-const LINK_BUTTON: React.CSSProperties = {
-  background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-  color: 'inherit', fontSize: 'inherit', textDecoration: 'underline',
-}
-const BAR: React.CSSProperties = {
-  marginBottom: 8, padding: '5px 8px', borderRadius: 6, fontSize: 11.5,
-  background: '#b4530914', color: '#b45309', display: 'flex', alignItems: 'center', gap: 8,
 }
 
 /**
@@ -96,8 +90,8 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   ioRef.current = props
   const visibleRef = useRef(false)
   visibleRef.current = tab.tab.visible
-  /** 实时视图（reader/audit/draft）：`load()` 重算 watcher 基线时必须以它为准（BUG-404）。 */
-  const viewRef = useRef<'reader' | 'audit' | 'draft'>('reader')
+  /** 实时视图（reader/audit/draft/claims）：`load()` 重算 watcher 基线时必须以它为准（BUG-404）。 */
+  const viewRef = useRef<FinalView>('reader')
   const versionRef = useRef<string | null>(null)
   const aliveRef = useRef(true)
   const manualControllerRef = useRef<AbortController | null>(null)
@@ -119,6 +113,8 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const [readerName, setReaderName] = useState<string | null>(null)
   const [reviewVerdict, setReviewVerdict] = useState<ReviewVerdict>('absent')
   const [reviewDetail, setReviewDetail] = useState<string | null>(null)
+  const [claimsSummary, setClaimsSummary] = useState<ClaimsAuditSummary | null>(null)
+  const [prefilledCopy, setPrefilledCopy] = useState<string | null>(null)
   const [stale, setStale] = useState(false)
   const [resolved, setResolved] = useState<string | null>(null)
   const [view, setView] = useState<FinalView>('reader')
@@ -135,6 +131,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     setDraftText(null)
     setReaderName(null)
     setShownVersion(null)
+    setClaimsSummary(null)
     setStale(false)
     setFailure(key)
     setLoading(false)
@@ -174,12 +171,13 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       failLoad('finalUnreadable')
       return
     }
-    const [bodyArt, draftArt, reviewArt, readinessArt, readerArt] = await Promise.all([
+    const [bodyArt, draftArt, reviewArt, readinessArt, readerArt, claimsTuple] = await Promise.all([
       readArtifact(viewIo, target.audit, { signal }),
       readArtifact(viewIo, FINAL_NAME, { signal }),
       readArtifact(viewIo, FINAL_REVIEW_NAME, { signal }),
       readArtifact(viewIo, 'review/readiness.json', { signal, decoder: (_raw, rawText) => parseReadinessDeclaration(rawText) }),
       target.reader === null ? Promise.resolve(null) : readArtifact(viewIo, target.reader, { signal }),
+      readClaimsAndVerdicts(viewIo, signal),
     ])
     if (signal.aborted || !aliveRef.current) return
     const initial = finalViewOf({ body: bodyArt.state, reader: readerArt?.state ?? 'absent', requested: 'reader' })
@@ -188,8 +186,9 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       return
     }
     targetNamesRef.current = { audit: target.audit, readerName: target.reader }
+    const effectiveView = viewRef.current === 'claims' ? 'audit' : viewRef.current
     const primaryName = watchTargetOf({
-      view: viewRef.current, body: bodyArt.state, reader: readerArt?.state ?? 'absent',
+      view: effectiveView, body: bodyArt.state, reader: readerArt?.state ?? 'absent',
       audit: target.audit, readerName: target.reader, draft: FINAL_NAME,
     })
     targetRef.current = { dir: viewIo.dir, name: primaryName }
@@ -199,6 +198,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     setText(bodyArt.state === 'ok' ? bodyArt.text : null)
     setDraftText(draftArt.state === 'ok' ? draftArt.text : null)
     setReaderText(readerArt?.state === 'ok' ? readerArt.text : null)
+    setClaimsSummary(joinClaimsVerdicts(claimsTuple.claims, claimsTuple.verdicts))
     setReaderName(target.reader)
     setShownVersion(target.version)
     setFallback(target.fallback)
@@ -247,8 +247,9 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   useEffect(() => {
     const names = targetNamesRef.current
     if (targetRef.current === null || names.audit === '' || sessionId === undefined) return
+    const effectiveView = view === 'claims' ? 'audit' : view
     const name = watchTargetOf({
-      view, body: bodyState, reader: readerState,
+      view: effectiveView, body: bodyState, reader: readerState,
       audit: names.audit, readerName: names.readerName, draft: FINAL_NAME,
     })
     if (name === targetRef.current.name) return
@@ -283,33 +284,66 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     return () => { clearInterval(timer); controller.abort() }
   }, [sessionId, load])
 
-  const reloadManually = (): void => {
+  const reloadManually = useCallback((): void => {
     manualControllerRef.current?.abort()
     const next = new AbortController()
     manualControllerRef.current = next
     void load(next.signal)
+  }, [load])
+
+  useEffect(() => {
+    const bind = (tab.tab.actions as { bindCommands?: (cmds: { refresh: () => void }) => () => void }).bindCommands
+    if (typeof bind !== 'function') return
+    return bind({ refresh: reloadManually })
+  }, [tab.tab.actions, reloadManually])
+
+  const openEvidence = useCallback((rawPath: string): void => {
+    if (sessionId === undefined || plan === null) return
+    const cleaned = rawPath.trim().replace(/^\.\//, '')
+    const bundleDir = targetRef.current?.dir ?? plan.dir
+    const targetAddr = isEvidenceAddress(rawPath)
+      ? rawPath
+      : evidenceAddressOf(sessionId, bundleDir, cleaned)
+    if (!isEvidenceAddress(targetAddr)) return
+    const openResource = (tab.tab.actions as { openResource?: (addr: string, opts?: { preferNewPane?: boolean }) => void }).openResource
+    if (typeof openResource === 'function') openResource(targetAddr, { preferNewPane: true })
+  }, [sessionId, plan, tab.tab.actions])
+
+  const inputActions = (props as { inputActions?: InputActions }).inputActions
+  const prefillDraft = (copyText: string): void => {
+    if (inputActions === undefined) return
+    const span = inputActions.captureInsertion()
+    if (!inputActions.insertText(copyText, span)) inputActions.setDraft(copyText)
+    setPrefilledCopy(copyText)
   }
 
-  if (file === null || plan === null) return <div style={MESSAGE}>{props.t('notFinalFile')}</div>
-  if (loading && text === null) return <div style={MESSAGE}>{props.t('finalLoading')}</div>
-  if (failure !== null && text === null) {
-    return (
-      <div style={MESSAGE}>
-        {props.t(failure)}
-        <div style={{ marginTop: 6 }}>
-          <button type="button" style={LINK_BUTTON} onClick={reloadManually}>{props.t('retry')}</button>
-        </div>
-      </div>
-    )
-  }
-  const requested = view === 'draft' ? 'audit' : view
+  const requested = view === 'draft' || view === 'claims' ? 'audit' : view
   const decision = finalViewOf({ body: bodyState, reader: readerState, requested })
   const hasReader = readerState === 'ok' && readerText !== null
   const hasAudit = bodyState === 'ok' && text !== null
   const showingDraft = view === 'draft' && draftText !== null
-  const showingReader = !showingDraft && decision.view === 'reader' && hasReader
+  const showingReader = view !== 'claims' && !showingDraft && decision.view === 'reader' && hasReader
   const displayed = showingDraft ? draftText : showingReader ? readerText : text
-  if (displayed === null) return <div style={MESSAGE}>{props.t('finalUnread')}</div>
+  const linkifiedMarkdown = useMemo(() => linkifyEvidenceCitations(displayed ?? ''), [displayed])
+  const triageRows = useMemo(() => rerunTriageRowsOf(props.t), [props.t])
+  const nextPriorities = useMemo(() => {
+    const primary = extractNextVersionPriorities(displayed)
+    return primary.length > 0 ? primary : extractNextVersionPriorities(text)
+  }, [displayed, text])
+
+  if (file === null || plan === null) return <div className={css.message}>{props.t('notFinalFile')}</div>
+  if (loading && text === null) return <div className={css.message}>{props.t('finalLoading')}</div>
+  if (failure !== null && text === null) {
+    return (
+      <div className={css.message}>
+        {props.t(failure)}
+        <div className={css.retryBox}>
+          <button type="button" className={css.linkButton} onClick={reloadManually}>{props.t('retry')}</button>
+        </div>
+      </div>
+    )
+  }
+  if (displayed === null && view !== 'claims') return <div className={css.message}>{props.t('finalUnread')}</div>
   const displayedTruncated = false
   const displayedPath = showingReader && readerName !== null
     ? readerName
@@ -340,9 +374,6 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     : shownVersion !== null && shownVersion >= 1
       ? (showingDraft ? props.t('workingDraft') : props.t('auditEdition', { version: String(shownVersion) }))
       : props.t('currentVersion'))
-  const stateStyle = reviewStateCopy !== null
-    ? { color: '#b45309', fontWeight: 600 }
-    : undefined
   const reviewNoticeKey = (() => {
     switch (reviewVerdict) {
       case 'conflict': return 'finalReviewConflict'
@@ -367,32 +398,32 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   // ResearchStatusTab 根容器（2026-10-12 同一类 BUG 的修法）——根吃满高度，正文区自滚，
   // 静音条固定不随文滚动。
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+    <div className={css.root}>
       {stale && (
-        <div style={{ ...BAR, margin: '8px 12px 0', flexShrink: 0 }}>
-          <span style={{ flex: 1 }}>{props.t('finalUpdated')}</span>
-          <button type="button" style={LINK_BUTTON} onClick={reloadManually}>{props.t('finalReload')}</button>
+        <div className={css.bar}>
+          <span className={css.barText}>{props.t('finalUpdated')}</span>
+          <button type="button" className={css.linkButton} onClick={reloadManually}>{props.t('finalReload')}</button>
         </div>
       )}
       {noticeKey !== null && (
-        <div style={{ ...BAR, margin: '8px 12px 0', flexShrink: 0 }}>
-          <span style={{ flex: 1 }}>{props.t(noticeKey)}</span>
-          <button type="button" style={LINK_BUTTON} onClick={reloadManually}>{props.t('retry')}</button>
+        <div className={css.bar}>
+          <span className={css.barText}>{props.t(noticeKey)}</span>
+          <button type="button" className={css.linkButton} onClick={reloadManually}>{props.t('retry')}</button>
         </div>
       )}
       {reviewNoticeKey !== null && (
-        <div style={{ ...BAR, margin: '8px 12px 0', flexShrink: 0 }} title={reviewDetail ?? undefined}>
-          <span style={{ flex: 1 }}>{props.t(reviewNoticeKey)}</span>
-          <button type="button" style={LINK_BUTTON} onClick={reloadManually}>{props.t('retry')}</button>
+        <div className={css.bar} title={reviewDetail ?? undefined}>
+          <span className={css.barText}>{props.t(reviewNoticeKey)}</span>
+          <button type="button" className={css.linkButton} onClick={reloadManually}>{props.t('retry')}</button>
         </div>
       )}
-      <div style={{ ...STRIP, padding: '3px 12px 7px', flexShrink: 0 }} title={displayedPath}>
-        <span style={stateStyle}>{state}</span>
-        <span style={{ flex: 1 }} />
+      <div className={css.strip} title={displayedPath}>
+        <span className={reviewStateCopy !== null ? css.stateWarn : undefined}>{state}</span>
+        <span className={css.stripSpacer} />
         {toggleLabel !== null && (
           <button
             type="button"
-            style={LINK_BUTTON}
+            className={css.linkButton}
             title={hasReader && hasAudit
               ? (view === 'reader' ? props.t('auditCanonicalNote') : props.t('readerNote'))
               : props.t('ledgerNote')}
@@ -403,29 +434,59 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
             }}
           >{toggleLabel}</button>
         )}
-        <button type="button" style={LINK_BUTTON} onClick={() => { tab.tab.actions.openTab(RESEARCH_STATUS_TAB_KIND) }}>{props.t('finalProcess')}</button>
+        <button type="button" className={css.linkButton} onClick={() => { tab.tab.actions.openTab(RESEARCH_STATUS_TAB_KIND) }}>{props.t('finalProcess')}</button>
       </div>
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', padding: '0 12px 40px', fontSize: 13.5, lineHeight: 1.75, overflowWrap: 'anywhere' }}>
-        <MarkdownText text={displayed ?? ''} labels={markdownLabelsMemo} />
+      <div className={css.controlsBar}>
+        <div className={css.segmentedWrap}>
+          <SegmentedControl<'reader' | 'audit' | 'claims'>
+            id="research-final-view"
+            label={props.t('tabFinal')}
+            value={view === 'claims' ? 'claims' : showingReader ? 'reader' : 'audit'}
+            options={[
+              { value: 'reader', label: props.t('finalTabReader'), disabled: !hasReader },
+              { value: 'audit', label: props.t('finalTabAudit'), disabled: !hasAudit },
+              { value: 'claims', label: props.t('finalTabClaims', { count: String(claimsSummary?.counts.total ?? 0) }) },
+            ]}
+            onChange={(next) => { setView(next) }}
+          />
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => { tab.tab.actions.openTab(RESEARCH_STATUS_TAB_KIND, { preferNewPane: true }) }}
+        >
+          {props.t('finalSplitReview')}
+        </Button>
+      </div>
+      <div className={css.body}>
+        {view === 'claims' ? (
+          <ClaimsAuditView
+            summary={claimsSummary}
+            onOpenEvidence={openEvidence}
+            onRetry={reloadManually}
+            t={props.t}
+          />
+        ) : (
+          <MarkdownDelegateProvider openFile={(path) => { openEvidence(path) }}>
+            <FinalToc markdown={linkifiedMarkdown} t={props.t} />
+            <MarkdownText text={linkifiedMarkdown} labels={markdownLabelsMemo} />
+          </MarkdownDelegateProvider>
+        )}
         {displayedTruncated && (
-          <div style={{ marginTop: 12, fontSize: 11.5, opacity: 0.6 }}>
+          <div className={css.truncated}>
             {props.t('finalTruncated', { count: String((displayed ?? '').split('\n').length) })}
           </div>
         )}
-        {failure !== null && <div style={{ marginTop: 12, fontSize: 11.5, color: '#b00' }}>{props.t(failure)}</div>}
-        {/* 交付后只读出口（同状态页 ⑤，共用 纯函数层 文案；D18 只读） */}
-        <details style={{ marginTop: 18, fontSize: 12, opacity: 0.9 }}>
-          <summary style={{ cursor: 'pointer' }}>{props.t('triageTitle')}</summary>
-          <div style={{ marginTop: 6, lineHeight: 1.6 }}>
-            {rerunTriageRowsOf(props.t).map((row) => (
-              <div key={row.label} style={{ marginBottom: 4 }}>
-                <strong>{row.label}</strong>{props.t('triageConsequenceSuffix', { consequence: row.consequence })}
-                <div style={{ opacity: 0.75 }}>{props.t('triageCopyLine', { copy: row.copy })}</div>
-              </div>
-            ))}
-            <div style={{ opacity: 0.6 }}>{props.t('triageHint')}</div>
-          </div>
-        </details>
+        {failure !== null && <div className={css.errorNote}>{props.t(failure)}</div>}
+        {/* 交付后只读出口（下一版优先项预填 + 同源三种改法折叠块；D18 只读） */}
+        <FinalFollowupFooter
+          priorities={nextPriorities}
+          triageRows={triageRows}
+          canPrefill={inputActions !== undefined}
+          prefilledCopy={prefilledCopy}
+          onPrefill={prefillDraft}
+          t={props.t}
+        />
       </div>
     </div>
   )

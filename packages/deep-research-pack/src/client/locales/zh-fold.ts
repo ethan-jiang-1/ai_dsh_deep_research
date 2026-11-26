@@ -249,6 +249,10 @@ export const zhFold = {
   toolCardSpawnDetail: '组队：{name} — {detail}',
   toolCardSearch: '检索',
   toolCardSearchQueries: '检索：{queries}',
+  toolCardFetch: '抓取网页',
+  toolCardFetchUrl: '抓取：{url}',
+  toolCardSubagent: '委派子调研',
+  toolCardSubagentDetail: '子调研：{detail}',
 
   triageTitle: '还不满意？三种改法',
   triageHint: '照抄一句发给我即可；三种改法的代价写在每行后面。',

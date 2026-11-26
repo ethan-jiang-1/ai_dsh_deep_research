@@ -31,10 +31,15 @@ import {
   RESEARCH_GRAPH_TAB_KEY, RESEARCH_GRAPH_TAB_KIND,
   RESEARCH_FINAL_TAB_KEY, RESEARCH_FINAL_KIND, RESEARCH_FINAL_PATTERN,
   RESEARCH_FINAL_PATTERN_LEDGER, RESEARCH_FINAL_PATTERN_READER,
+  RESEARCH_EVIDENCE_TAB_KEY, RESEARCH_EVIDENCE_KIND, RESEARCH_EVIDENCE_PATTERN,
   RESEARCH_PANE_SLOT, RESEARCH_TITLE_SLOT, RESEARCH_TOOLVIEW_SLOT, RESEARCH_TOOL_KEYS, METHOD_LIBRARY_TOOL, METHOD_LIBRARY_REMOVE, METHOD_LIBRARY_DEFAULT,
-  RESEARCH_BRAND_MARK_SLOT, RESEARCH_BRAND_NAME_SLOT, RESEARCH_START_DOCK_SLOT, METHOD_LIBRARY_VIEW,
+  RESEARCH_BRAND_MARK_SLOT, RESEARCH_BRAND_NAME_SLOT, RESEARCH_HERO_BRAND_MARK_SLOT, RESEARCH_START_DOCK_SLOT, METHOD_LIBRARY_VIEW,
   METHOD_COACH_PORTAL, METHOD_COACH_PORTAL_ID, METHOD_COACH_CHAT,
   RESEARCH_DEFAULTS_SLOT, RESEARCH_DEFAULTS_BUTTON_ID,
+  RESEARCH_HEADER_PILL_SLOT, RESEARCH_HEADER_PILL_ID,
+  RESEARCH_TURN_TAIL_SLOT, RESEARCH_TURN_TAIL_ID,
+  RESEARCH_HUB_MAIN_SLOT, RESEARCH_HUB_PANEL_SLOT, RESEARCH_HUB_PANEL_ID,
+  RESEARCH_TAB_MENU_ITEM_SLOT, RESEARCH_TAB_MENU_HUB_ID,
 } from './keys.ts'
 import { IconBranchOutlineRegular, IconGaugeOutlineRegular, IconSettingsOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import { ResearchToolCard } from './ResearchToolCard.tsx'
@@ -45,9 +50,15 @@ import { MethodLibraryView } from './MethodLibraryView.tsx'
 import { MethodCoachPortal, CoachChat } from './method-library/coach.tsx'
 import { ResearchGraphTab } from './ResearchGraphTab.tsx'
 import { ResearchFinalTab } from './ResearchFinalTab.tsx'
+import { ResearchEvidenceTab } from './ResearchEvidenceTab.tsx'
+import { ResearchTabMenuItem } from './ResearchTabMenuItem.tsx'
 import { browserRunSource } from './run-source-browser.ts'
 import { OrcaMark, OrcaName } from './BrandMark.tsx'
 import { createFollow, hasUserMessage, watchCoach } from './session-follow.ts'
+import { createSessionStreamStore } from './session-stream-store.ts'
+import { ResearchHeaderPill } from './ResearchHeaderPill.tsx'
+import { researchTurnDefinition } from './research-turn.ts'
+import { ResearchMilestoneCard } from './ResearchMilestoneCard.tsx'
 import { createWorkspaceBoot, type SessionsLike, type UiWorkspaceLike, type WorkspacesLike } from './workspace-boot.ts'
 import { installCoachComposerStyles, installMethodLibrarySelectionStyles, installQuestionCardNarrowFix } from './styles.ts'
 import { createWorkspaceFiles } from './workspace-files.ts'
@@ -57,7 +68,10 @@ import { createLeadPrompt } from './lead-prompt.ts'
 import { StartCard, type StartCardInjected } from './StartCard.tsx'
 import { DefaultsButton, type DefaultsButtonInjected } from './defaults/DefaultsButton.tsx'
 import { createDefaultsStore } from './defaults/store.ts'
+import { ResearchHubIcon, ResearchHubPanel } from './ResearchHubPanel.tsx'
+import { CURRENT_SESSION_KEY, PRODUCT_WORKSPACE_KEY, pickProductWorkspace, readCurrentSessionId } from './startup.ts'
 import { finalAddressOf, isFinalAddress } from '../lib/run/final-target.ts'
+import { isEvidenceAddress } from '../lib/run/evidence-card.ts'
 
 /** Required services：槽注册表（renderer）+ 右栏页签注册器 + 右栏导航面（openTab——挂起显性化）+ remote 命名空间与 remote.session 子服务（journal 流；0.1.7 实测**两级都要声明**——只声明
  *  父级则取 .session 炸 "without injecting it"，只声明子级则取父属性炸 "without inject"）。 */
@@ -67,7 +81,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
   }
 }
 
-export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'remote.commands', 'sessions', 'workspaces', 'uiWorkspace', 'locale']
+export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'remote.commands', 'sessions', 'workspaces', 'uiWorkspace', 'uiConversation', 'locale']
 
 /**
  * Client plugin body：登记「研究状态」页签（类型 + keyed 槽体共享同一 key——拼错任一处
@@ -75,7 +89,7 @@ export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'r
  * @param ctx - client root context。
  */
 export function apply(ctx: ClientContext): void {
-  ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'remote.commands', 'sessions', 'workspaces', 'uiWorkspace', 'locale'], (scoped) => {
+  ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'remote.commands', 'sessions', 'workspaces', 'uiWorkspace', 'uiConversation', 'locale'], (scoped) => {
     // 字典必须**同步**注册后再 bind：effect 回调可能延迟到 inject 回调返回后才跑，
     // 而页签/guide 的 title 在注册期就会被求值（2026-11-03 实测：包成 effect 后标题取不到值）。
     // 注册是 effect 语义 —— 同步取得 disposer，再交给 scoped.effect 管回收。
@@ -85,7 +99,10 @@ export function apply(ctx: ClientContext): void {
     // 服务句柄在**注入回调内**取好再闭包：Cordis 在属性访问时校验当前 fiber 的 inject；
     // follow 会在页签渲染 fiber 里被调用，届时再取 `remote.session` 会 `without inject`（实测）。
     const remoteSession = scoped.remote.session
-    const follow = createFollow({ session: { follow: (input, signal) => remoteSession.follow({ address: input.address as never }, signal) } })
+    const rawFollow = createFollow({ session: { follow: (input, signal) => remoteSession.follow({ address: input.address as never }, signal) } })
+    const streamStore = createSessionStreamStore(rawFollow)
+    const follow = streamStore.follow
+    scoped.effect(() => () => streamStore.dispose(), 'deep-research-pack: session stream store')
     // 首屏起步卡探测 / 方法编辑会话流：纯装配住 session-follow.ts（2026-11-03 P4 拆分）。
     const boot = createWorkspaceBoot({
       workspaces: scoped.workspaces as unknown as WorkspacesLike,
@@ -153,6 +170,10 @@ export function apply(ctx: ClientContext): void {
       scoped.slots.register({ name: RESEARCH_BRAND_NAME_SLOT, priority: -1, locale: 'deepResearchPack' }, OrcaName),
     ]), 'deep-research-pack: orca brand name')
 
+    scoped.effect(() => scoped.slots.inject(RESEARCH_HERO_BRAND_MARK_SLOT, () => [
+      scoped.slots.register({ name: RESEARCH_HERO_BRAND_MARK_SLOT, priority: -1 }, OrcaMark),
+    ]), 'deep-research-pack: orca hero brand mark')
+
     // 项目研究默认按钮（D50）：composer 左侧状态按钮；点击打开现有「研究配置」页签。
     scoped.effect(() => scoped.slots.inject(RESEARCH_DEFAULTS_SLOT, () => scoped.slots.register({
       name: RESEARCH_DEFAULTS_SLOT,
@@ -201,6 +222,15 @@ export function apply(ctx: ClientContext): void {
       canOpen: isFinalAddress,
       title: () => t('tabFinal'),
     }), 'deep-research-pack: research-final tab type')
+
+    scoped.effect(() => scoped.sidebarRightTabs.register({
+      id: RESEARCH_EVIDENCE_TAB_KEY,
+      kind: RESEARCH_EVIDENCE_KIND,
+      patterns: [RESEARCH_EVIDENCE_PATTERN],
+      priority: 'extension',
+      canOpen: isEvidenceAddress,
+      title: () => t('tabEvidence'),
+    }), 'deep-research-pack: research-evidence tab type')
 
     // 管理指令发送闭包（D25 期 1）：session/prompt——默认 steer（在飞 run 即时消费），
     // 失败降级 queue（空闲会话排程）；两态结果回执给面板，不静默。requestId 铸造 =
@@ -263,7 +293,21 @@ export function apply(ctx: ClientContext): void {
         { name: RESEARCH_PANE_SLOT, key: RESEARCH_FINAL_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ runSource }) },
         ResearchFinalTab,
       ),
+      scoped.slots.register(
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_EVIDENCE_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ runSource }) },
+        ResearchEvidenceTab,
+      ),
     ]), 'deep-research-pack: research-pane tabs')
+
+    const methodLibrary = {
+      readLibrary,
+      ensureCoach: ensureCoachSession,
+      sendCoach,
+      watchCoach: (sessionId: SessionId, signal: AbortSignal, onEvent: Parameters<typeof watchCoach>[3], onReady: () => void) =>
+        watchCoach(follow, sessionId, signal, onEvent, onReady),
+      listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => listDir(sessionId, path, signal),
+      readPreview: (sessionId: SessionId, path: string, signal: AbortSignal) => readPreview(sessionId, path, signal),
+    }
 
     // 主界面「方法库」tab（2026-10-21 管理迁移）：Chat/Trajectory 同排，workspace 级库管理。
     // 只读 workspaceFiles + W1 session/prompt（Lead 写文件）；不新增写权限、不直改 Team/文件。
@@ -273,15 +317,65 @@ export function apply(ctx: ClientContext): void {
       order: 20,
       label: () => t('methodLibraryTab'),
       locale: 'deepResearchPack',
-      inject: () => ({
-        readLibrary,
-        ensureCoach: ensureCoachSession,
-        sendCoach,
-        watchCoach: (sessionId: SessionId, signal: AbortSignal, onEvent, onReady) => watchCoach(follow, sessionId, signal, onEvent, onReady),
-        listDir: (sessionId: SessionId, path: string, signal: AbortSignal) => listDir(sessionId, path, signal),
-        readPreview: (sessionId: SessionId, path: string, signal: AbortSignal) => readPreview(sessionId, path, signal),
-      }),
+      inject: () => methodLibrary,
     }, MethodLibraryView)), 'deep-research-pack: method-library conversation view')
+
+    const backToChat = () => {
+      const layout = (scoped as unknown as { get(name: string): { selectPanel?(id: null): void } | undefined }).get('layout')
+      layout?.selectPanel?.(null)
+    }
+
+    const startResearch = (prompt?: string) => {
+      const uiWs = (scoped as unknown as {
+        uiWorkspace: UiWorkspaceLike & {
+          startSession(workspaceId?: string, options?: { agentPreset?: string; initialPrompt?: string; whenDraftExists?: string }): void
+        }
+      }).uiWorkspace
+      const snap = (scoped.workspaces as unknown as WorkspacesLike).list.getSnapshot()
+      const savedId = typeof localStorage !== 'undefined' ? localStorage.getItem(PRODUCT_WORKSPACE_KEY) : null
+      const picked = pickProductWorkspace(snap.items, savedId)
+      backToChat()
+      uiWs.startSession(
+        picked?.workspaceId,
+        prompt === undefined ? undefined : { initialPrompt: prompt, whenDraftExists: 'keep' },
+      )
+    }
+
+    scoped.effect(() => scoped.slots.inject(RESEARCH_HUB_PANEL_SLOT, () => scoped.slots.register({
+      name: RESEARCH_HUB_PANEL_SLOT,
+      id: RESEARCH_HUB_PANEL_ID,
+      order: 15,
+      locale: 'deepResearchPack',
+      label: () => t('hubPanelLabel'),
+    }, ResearchHubIcon)), 'deep-research-pack: research hub sidebar entry')
+
+    scoped.effect(() => scoped.slots.inject(RESEARCH_HUB_MAIN_SLOT, () => scoped.slots.register({
+      name: RESEARCH_HUB_MAIN_SLOT,
+      key: RESEARCH_HUB_PANEL_ID,
+      locale: 'deepResearchPack',
+      inject: () => ({
+        runSource,
+        methodLibrary,
+        defaultsStore,
+        openFinal,
+        backToChat,
+        startResearch,
+        readStoredSessionId: () => readCurrentSessionId(localStorage.getItem(CURRENT_SESSION_KEY)),
+      }),
+    }, ResearchHubPanel)), 'deep-research-pack: research hub main panel')
+
+    scoped.effect(() => scoped.slots.inject(RESEARCH_TAB_MENU_ITEM_SLOT, () => scoped.slots.register({
+      name: RESEARCH_TAB_MENU_ITEM_SLOT,
+      id: RESEARCH_TAB_MENU_HUB_ID,
+      order: 20,
+      locale: 'deepResearchPack',
+      inject: () => ({
+        openHub: () => {
+          const layout = (scoped as unknown as { get(name: string): { selectPanel?(id: string | null): void } | undefined }).get('layout')
+          layout?.selectPanel?.(RESEARCH_HUB_PANEL_ID)
+        },
+      }),
+    }, ResearchTabMenuItem)), 'deep-research-pack: right-tab menu open-hub item')
 
     // 方法库写库工具卡：对话流里只显示「已写入库：name」，不暴露工具参数。
     scoped.effect(() => scoped.slots.inject(RESEARCH_TOOLVIEW_SLOT, () =>
@@ -330,6 +424,24 @@ export function apply(ctx: ClientContext): void {
         ResearchStatusTitle,
       ),
     ]), 'deep-research-pack: research-status live title')
+
+    scoped.effect(() => scoped.slots.inject(RESEARCH_HEADER_PILL_SLOT, () => scoped.slots.register({
+      name: RESEARCH_HEADER_PILL_SLOT,
+      id: RESEARCH_HEADER_PILL_ID,
+      order: 15,
+      locale: 'deepResearchPack',
+      inject: () => ({ follow, openStatus: revealStatusTab, openFinal, runSource }),
+    }, ResearchHeaderPill)), 'deep-research-pack: research header pill')
+
+    scoped.effect(() => scoped.uiConversation.events.register(researchTurnDefinition), 'deep-research-pack: milestone turn definition')
+
+    scoped.effect(() => scoped.slots.inject(RESEARCH_TURN_TAIL_SLOT, () => scoped.slots.register({
+      name: RESEARCH_TURN_TAIL_SLOT,
+      id: RESEARCH_TURN_TAIL_ID,
+      order: 20,
+      locale: 'deepResearchPack',
+      inject: () => ({ openStatus: revealStatusTab, openFinal }),
+    }, ResearchMilestoneCard)), 'deep-research-pack: turn tail milestone card')
 
     // ── 交付监听（本卡的"时刻"）：present 指向终稿 → 打开终稿页签 ─────────────────────
     // 规则（issue 2026-10-19 §时机）：

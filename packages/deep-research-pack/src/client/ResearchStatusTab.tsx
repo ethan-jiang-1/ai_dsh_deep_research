@@ -31,6 +31,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import { DisclosureRow, StateDot, TextShimmer } from '@deepseek-ai/dsh-client-ui-primitives'
 import { deriveSteps } from '../lib/run/run-fold.ts'
 import { assertNever } from '../lib/run/artifact-read.ts'
 import { foldHitlPending, type HitlState } from '../lib/events/hitl-fold.ts'
@@ -41,8 +42,11 @@ import { statusFaceMarker } from '../lib/run/binding-trust.ts'
 import { stalledBannerOf } from '../lib/run/health.ts'
 import type { ResearchStatusTabProps, ResearchStatusTitleInjected } from './research-status/types.ts'
 import { TrackRail } from './research-status/TrackRail.tsx'
+import { ProtocolCard } from './research-status/ProtocolCard.tsx'
+import { QualityRadar } from './research-status/QualityRadar.tsx'
 import { collectStatusNotices, planIssueKeyOf, receiptIssueKeyOf } from './research-status/status-state.ts'
 import { useStatusFeed } from './research-status/useStatusFeed.ts'
+import css from './research-status/status.module.css'
 export type { FollowTarget, JournalFrame, ResearchStatusTabInjected, ResearchStatusTabProps, ResearchStatusTitleInjected } from './research-status/types.ts'
 
 
@@ -54,10 +58,18 @@ export type { FollowTarget, JournalFrame, ResearchStatusTabInjected, ResearchSta
  */
 
 export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
+  const tabInfo = typeof (props as { useTabInfo?: () => { tab?: { actions?: { bindCommands?: (c: { refresh: () => void }) => () => void } } } }).useTabInfo === 'function'
+    ? (props as { useTabInfo: () => { tab?: { actions?: { bindCommands?: (c: { refresh: () => void }) => () => void } } } }).useTabInfo()
+    : undefined
   const {
     rows, hitl, face, unbound, trust, kickoffHold, error, reads, reviewVerdict, scanSettled, retry,
     memberSummaries, members, delivery, streamFailure, anchors, health, versionFace, receiptDangling,
   } = useStatusFeed(props)
+  useEffect(() => {
+    const bind = tabInfo?.tab?.actions?.bindCommands
+    if (typeof bind !== 'function') return undefined
+    return bind({ refresh: retry })
+  }, [tabInfo, retry])
 
   // 流程轨道件（锚点入轨，RFC cockpit-flow-face）：锚点段从 journal+文件折算（挂起期也在场），
   // 步骤段从文件在场性折算——face 缺席时以占位态渲染（不冒充进度）。
@@ -118,6 +130,8 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   )
   const receiptIssue = receiptDangling ? 'statusReceiptDangling' : receiptIssueKeyOf(reads.receipt)
   const planIssueKey = planIssueKeyOf(reads.plan)
+  const [activityOpen, setActivityOpen] = useState(true)
+  const [openMembers, setOpenMembers] = useState<Readonly<Record<string, boolean>>>({})
   const statusNotices = collectStatusNotices({ face, reads, reviewVerdict })
   const stalledBanner = stalledBannerOf(
     { health, bound: trust.kind === 'bound', delivered: delivery !== null, hitlPending: hitl.pending },
@@ -128,10 +142,10 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
     // 用户报告：活动流超长即被裁且不可滚）：根容器 flex:1 + minHeight:0 吃满宿主高，
     // 双轴 auto 自滚。
     // data-research-face = 机器可读数据面（cdp-probe 读它，不再靠“没写未绑定”反推）。
-    <div data-research-face={statusFaceMarker({ trust, unbound, kickoffHold, hasError: error !== null || (scanSettled && trust.kind === 'bound' && reads.bundle !== 'ok'), hasFace: face !== null })} style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'auto' }}>
+    <div data-research-face={statusFaceMarker({ trust, unbound, kickoffHold, hasError: error !== null || (scanSettled && trust.kind === 'bound' && reads.bundle !== 'ok'), hasFace: face !== null })} className={css.root}>
       {/* ① HITL 挂起横幅（最醒目位置；点名锚点 + 参与指引——"怎么参与"在需要那一刻说清） */}
       {hitl.pending && (
-        <div style={{ fontWeight: 700, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#f59e0b33', border: '1px solid #f59e0b66' }}>
+        <div className={css.bannerWarn}>
           {props.t('hitlBanner', {
             label: pendingAnchor?.label ?? props.t('decideLabel'),
             count: pendingAnchor !== undefined && pendingAnchor.questions > 0 ? countText(props.t, pendingAnchor.questions, 'questionCountOne', 'questionCountOther') : '',
@@ -141,153 +155,180 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       {/* 流畸形死亡恢复指引（BUG-023 修复①）：末位回合死于上游流失败且无新回合接手时，
           给人话恢复路径——不虚构"研究失败"，档案都在 bundle。折算 = stream-failure.ts。 */}
       {streamFailure.dead && !hitl.pending && (
-        <div style={{ fontWeight: 600, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#ef444418', border: '1px solid #ef444440' }}>
+        <div className={css.bannerError}>
           {props.t('streamFailureBanner')}
         </div>
       )}
       {/* 停摆横幅（BUG-348/353/354）：静默 ≥30min + 最后回合错误，且**已绑定、未交付、未挂起**才给恢复指引。 */}
       {stalledBanner !== null && (
-        <div style={{ fontWeight: 600, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#ef444418', border: '1px solid #ef444440' }}>
+        <div className={css.bannerError}>
           {stalledBanner}
         </div>
       )}
       {/* 绑定 bundle 读取失败（BUG-358）：读不到不是「研究推进中」；失败态 + 重试，不拿 journal 锚点冒充进度。 */}
       {scanSettled && trust.kind === 'bound' && reads.bundle !== 'ok' && (
-        <div style={{ fontWeight: 600, padding: '8px 12px', marginBottom: 10, borderRadius: 6, background: '#ef444418', border: '1px solid #ef444440', color: '#b91c1c' }}>
+        <div className={`${css.bannerError} ${css.bannerErrorText}`}>
           {props.t('statusReadFailed')}
-          <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+          <button type="button" onClick={retry} className={css.retryLink}>{props.t('retry')}</button>
         </div>
       )}
       {/* ⓪ 业务摘要层（issue 2026-10-11-executive-research-ux-delivery）：五问业务语言——
           研究什么 / 已确认什么 / 未知什么 / 我是否要操作；折算住 brief-fold（计数不进本层），
           组件薄渲染。 */}
-      <div style={{ marginBottom: 10, padding: '8px 12px', borderRadius: 6, background: '#22c55e14', border: '1px solid #22c55e33', fontSize: 13, lineHeight: 1.7 }}>
-        <div style={{ fontWeight: 700 }}>{props.t('statusGoalPrefix', { goal: brief.goal })}</div>
+      <div className={css.briefCard}>
+        <div className={css.briefGoal}>{props.t('statusGoalPrefix', { goal: brief.goal })}</div>
         <div>{brief.stageLine}</div>
-        <div style={{ opacity: 0.85 }}>{brief.knownLine}</div>
-        {brief.unknownLine !== null && <div style={{ color: '#b45309' }}>⚠ {brief.unknownLine}</div>}
-        <div style={{ fontWeight: brief.userActionNeeded ? 700 : 400, color: brief.userActionNeeded ? '#b45309' : undefined }}>{brief.actionLine}</div>
+        <div className={css.briefKnown}>{brief.knownLine}</div>
+        {brief.unknownLine !== null && <div className={css.warnText}>⚠ {brief.unknownLine}</div>}
+        <div className={brief.userActionNeeded ? css.briefActionUrgent : css.briefAction}>{brief.actionLine}</div>
         {statusNotices.map((notice) => (
-          <div key={notice.id} style={{ color: '#b45309' }}>
+          <div key={notice.id} className={css.warnText}>
             ⚠ {props.t(notice.key)}
-            <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+            <button type="button" onClick={retry} className={css.retryLink}>{props.t('retry')}</button>
           </div>
         ))}
       </div>
       {/* ② 流程轨道：◆立项确认 + 主轨 + ◆交付审阅 + 交付；↻ 回边 = 拍板的分支后果画进流程 */}
       <TrackRail anchors={anchors} steps={steps} faceVersions={face?.versions ?? null} hitlPending={hitl.pending} t={props.t} />
+      {/* HITL1 结构化研究契约卡（protocol.json） */}
+      {face?.protocol !== undefined && (
+        <ProtocolCard protocol={face.protocol} hitlPending={pendingAnchor?.key === 'anchor-1'} onRetry={retry} t={props.t} />
+      )}
       {/* ⑥ 决策诚实线（指路不复制——谁答的家在 question.md §Decisions） */}
       {passedCount > 0 && (
-        <div style={{ marginBottom: 8, fontSize: 12, opacity: 0.55 }}>
+        <div className={css.decisionsLine}>
           {countText(props.t, passedCount, 'statusDecisionStopsOne', 'statusDecisionStopsOther')}
         </div>
-      )}
-      {/* ③ 研究问题行 */}
-      {face?.questionLine !== null && face?.questionLine !== undefined && (
-        <div style={{ fontWeight: 600, marginBottom: 6, lineHeight: 1.4 }}>{face.questionLine}</div>
       )}
       {/* ⑤ 证据概览 + 交付状态 + 版本（final/ 记账 ≥v2 = 发生过证据扩张 rerun）
          交付态 = `present` 见证（门②），不是 `final.md` 在场——后者在综合步就有，是"可审"不是"已交"。
           已交付 → 门（读终稿）；未交付 → 承诺（终稿将在交付后自动出现在右栏，许在用户已经在看的地方）。 */}
       {face !== null && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10, fontSize: 13, opacity: 0.85 }}>
+        <div className={css.evidenceBar}>
           {reads.evidence === 'unreadable' ? (
-            <span style={{ color: '#b45309' }}>
+            <span className={css.warnText}>
               {props.t('statusEvidenceReadFailed')}
-              <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+              <button type="button" onClick={retry} className={css.retryLink}>{props.t('retry')}</button>
             </span>
           ) : (
             <span>{countText(props.t, face.evidenceCount, 'statusEvidenceCountOne', 'statusEvidenceCountOther')}</span>
           )}
           {receiptIssue !== null && (
-            <span style={{ color: '#b45309' }}>
+            <span className={css.warnText}>
               {props.t(receiptIssue)}
-              <button type="button" onClick={retry} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+              <button type="button" onClick={retry} className={css.retryLink}>{props.t('retry')}</button>
             </span>
           )}
-          {delivery !== null && <span style={{ color: '#16a34a', fontWeight: 600 }}>{props.t('statusDelivered')}</span>}
+          {delivery !== null && <span className={css.delivered}>{props.t('statusDelivered')}</span>}
           {delivery !== null && props.sessionId !== undefined && (
             <button
               type="button"
               onClick={() => { props.openFinal(props.sessionId as NonNullable<typeof props.sessionId>, delivery.path) }}
-              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}
+              className={css.openFinalLink}
             >{props.t('statusOpenFinal')}</button>
           )}
-          {delivery === null && receiptIssue === null && <span style={{ opacity: 0.6 }}>{props.t('statusFinalAfterDelivery')}</span>}
+          {delivery === null && receiptIssue === null && <span className={css.mutedInline}>{props.t('statusFinalAfterDelivery')}</span>}
           {versionFace !== null && receiptIssue === null && reads.final !== 'unreadable' && planIssueKey === null && (face.hasFinal || versionFace.ledgerFinalVersion >= 1) && (
-            <span style={{ fontSize: 12, opacity: 0.8 }} title={props.t('versionReadonlyNote')}>
+            <span className={css.versionTag} title={props.t('versionReadonlyNote')}>
               {versionFace.label}
             </span>
           )}
           {planIssueKey !== null && (
-            <span style={{ fontSize: 12, color: '#b45309' }}>{props.t('statusPlanVersionUnknown')}</span>
+            <span className={css.planUnknown}>{props.t('statusPlanVersionUnknown')}</span>
           )}
         </div>
       )}
+      {/* ⑤b 质量雷达（topics.md × evidence/*.md Topic×Lens 矩阵 + 信源分布） */}
+      {face?.evidenceMatrix !== undefined && (
+        <QualityRadar matrix={face.evidenceMatrix} onRetry={retry} t={props.t} />
+      )}
       {/* 交付后只读出口（rerun 不满转接：三种改法 + 可复制话术；D18 只读——不按钮化 rerun） */}
       {face !== null && delivery !== null && (
-        <details style={{ marginBottom: 10, fontSize: 12, opacity: 0.9 }}>
-          <summary style={{ cursor: 'pointer' }}>{props.t('triageTitle')}</summary>
-          <div style={{ marginTop: 6, lineHeight: 1.6 }}>
+        <details className={css.triageDetails}>
+          <summary className={css.triageSummary}>{props.t('triageTitle')}</summary>
+          <div className={css.triageBody}>
             {rerunTriageRowsOf(props.t).map((row) => (
-              <div key={row.label} style={{ marginBottom: 4 }}>
+              <div key={row.label} className={css.triageRow}>
                 <strong>{row.label}</strong>{props.t('triageConsequenceSuffix', { consequence: row.consequence })}
-                <div style={{ opacity: 0.75 }}>{props.t('triageCopyLine', { copy: row.copy })}</div>
+                <div className={css.triageCopy}>{props.t('triageCopyLine', { copy: row.copy })}</div>
               </div>
             ))}
-            <div style={{ opacity: 0.6 }}>{props.t('triageHint')}</div>
+            <div className={css.triageHint}>{props.t('triageHint')}</div>
           </div>
         </details>
       )}
       {/* 未绑定 / 绑定待确认提示（RFC right-pane-ux-debt + cockpit-flow-face G4） */}
       {unbound && (
-        <div style={{ marginBottom: 10, fontSize: 12, opacity: 0.55 }}>
+        <div className={css.unboundHint}>
           {props.t('statusUnbound')}
         </div>
       )}
       {kickoffHold && (
-        <div style={{ marginBottom: 10, fontSize: 12, padding: '6px 10px', borderRadius: 6, background: '#0000000d' }}>
+        <div className={css.kickoffHold}>
           {props.t('statusKickoffHold', { slug: trust.kind === 'suppressed' ? trust.slug : '' })}
         </div>
       )}
       {!unbound && !kickoffHold && face === null && trust.kind === 'suppressed' && trust.reason === 'pending' && (
-        <div style={{ marginBottom: 10, fontSize: 12, opacity: 0.55 }}>
+        <div className={css.unboundHint}>
           {props.t('statusPendingBinding')}
         </div>
       )}
-      {error !== null && <div style={{ color: '#b00', marginBottom: 6, fontSize: 12 }}>{error}</div>}
+      {error !== null && <div className={css.errorText}>{error}</div>}
       {/* ④ 团队动态（人性化活动行——原始事件类型名不出正文） */}
-      <div style={{ fontSize: 13, lineHeight: 1.7 }}>
-        {rows.length === 0 && props.sessionId !== undefined && <span style={{ opacity: 0.5 }}>{props.t('statusNoActivity')}</span>}
-        {rows.map((r, i) => (
-          <div key={i} style={{ display: 'flex', gap: 6 }}>
-            <span>{r.icon}</span>
-            <span style={{ flex: 1 }}>{r.text}</span>
-          </div>
-        ))}
+      <div className={css.activityList}>
+        {rows.length === 0 && props.sessionId !== undefined && <span className={css.activityEmpty}>{props.t('statusNoActivity')}</span>}
+        {rows.length > 0 && (
+          <DisclosureRow
+            icon={<StateDot state={delivery !== null ? 'done' : hitl.pending ? 'warning' : 'ongoing'} />}
+            title={props.t('statusActivityStream', { count: String(rows.length) })}
+            open={activityOpen}
+            expandable
+            running={delivery === null && !hitl.pending && rows.length > 0}
+            expandOnRowClick
+            onToggle={() => setActivityOpen((current) => !current)}
+          >
+            {rows.map((r, i) => (
+              <div key={i} className={css.activityRow}>
+                <span>{r.icon}</span>
+                <span className={css.activityText}>{r.text}</span>
+              </div>
+            ))}
+          </DisclosureRow>
+        )}
       </div>
       {/* ⑦ 队员动态折叠区（每人一节，默认折叠；动作粒度 = 检索/抓取/出错——任务粒度归 ui-agent-team 任务板，不双 home） */}
       {members.length > 0 && (
-        <div style={{ marginTop: 10, fontSize: 12 }}>
-          <div style={{ opacity: 0.55, marginBottom: 4 }}>{props.t('statusMembersTitle')}</div>
+        <div className={css.membersSection}>
+          <div className={css.membersTitle}>{props.t('statusMembersTitle')}</div>
           {members.map((m) => {
             const summary = memberSummaries[m.id]
+            const isOpen = openMembers[m.id] === true
+            const running = m.phase === 'active'
+            const dotState = m.phase === 'active' ? 'ongoing' : m.phase === 'failed' ? 'error' : 'idle'
+            const countSummary = `🔍${summary?.searchCount ?? 0} · 🌐${summary?.fetchCount ?? 0}${(summary?.errorCount ?? 0) > 0 ? ` · ⚠️${summary?.errorCount}` : ''}`
             return (
-              <details key={m.id} style={{ marginBottom: 4 }}>
-                <summary style={{ cursor: 'pointer' }}>
-                  <span style={{ fontWeight: 600 }}>{m.phase === 'active' ? '● ' : m.phase === 'failed' ? '✕ ' : '○ '}{m.name}</span>
-                  <span style={{ opacity: 0.6 }}>　🔍{summary?.searchCount ?? 0} · 🌐{summary?.fetchCount ?? 0}{(summary?.errorCount ?? 0) > 0 ? ` · ⚠️${summary?.errorCount}` : ''}</span>
-                </summary>
-                <div style={{ paddingLeft: 14, lineHeight: 1.7 }}>
+              <DisclosureRow
+                key={m.id}
+                icon={<StateDot state={dotState} />}
+                title={m.name}
+                collapsedContent={<TextShimmer active={running}>{countSummary}</TextShimmer>}
+                keepContentWhenOpen
+                open={isOpen}
+                expandable
+                running={running}
+                expandOnRowClick
+                onToggle={() => setOpenMembers((prev) => ({ ...prev, [m.id]: !isOpen }))}
+              >
+                <div className={css.memberRows}>
                   {(summary?.rows ?? []).map((r, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 6 }}>
+                    <div key={i} className={css.activityRow}>
                       <span>{r.icon}</span>
-                      <span style={{ flex: 1 }}>{r.text}</span>
+                      <span className={css.activityText}>{r.text}</span>
                     </div>
                   ))}
-                  {(summary?.rows ?? []).length === 0 && <span style={{ opacity: 0.5 }}>{props.t('statusNoMemberActivity')}</span>}
+                  {(summary?.rows ?? []).length === 0 && <span className={css.activityEmpty}>{props.t('statusNoMemberActivity')}</span>}
                 </div>
-              </details>
+              </DisclosureRow>
             )
           })}
         </div>

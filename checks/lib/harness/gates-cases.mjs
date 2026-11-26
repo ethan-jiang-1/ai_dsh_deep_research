@@ -1123,6 +1123,15 @@ export const CASES = [
     if (!existsSync(p)) throw new Error('夹具缺 .oxlintrc.json——案例失效');
     rmSync(p);
   } },
+  // client-tokens：注入裸 hex 或幽灵 --dsh-* 变量 → 门禁必须报红。
+  { id: 'client-tokens-raw-hex', gate: 'client-tokens', mutate: (dir) => {
+    const p = join(dir, 'packages/deep-research-pack/src/client/StartCard.module.css');
+    writeFileSync(p, `${readFileSync(p, 'utf8')}\n.badHex { color: #123456; }\n`);
+  } },
+  { id: 'client-tokens-phantom-dsh-var', gate: 'client-tokens', mutate: (dir) => {
+    const p = join(dir, 'packages/deep-research-pack/src/client/StartCard.module.css');
+    writeFileSync(p, `${readFileSync(p, 'utf8')}\n.badVar { border-color: var(--dsh-border); }\n`);
+  } },
 
 ];
 

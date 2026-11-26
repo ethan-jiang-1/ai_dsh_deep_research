@@ -9,9 +9,9 @@ import type { ReactNode } from 'react'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 
 /** 虎鲸标的几何（viewBox 24；供 size 缩放；面朝右）。 */
-export function OrcaMark({ size = 24 }: { readonly size?: number }): ReactNode {
+export function OrcaMark({ size = 24, className }: { readonly size?: number | undefined; readonly className?: string | undefined }): ReactNode {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" className={className}>
       {/* 背鳍：虎鲸的招牌——高耸而略后弯 */}
       <path d="M15.2 10.4 C14.3 7.4 13.6 4.6 12.2 2.4 C11.9 5.4 10.9 8.4 9.6 11.0 Z" />
       {/* 身：钝头流线体 */}

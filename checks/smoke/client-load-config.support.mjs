@@ -118,8 +118,14 @@ export async function pass3dDefaultsPhase(env) {
   if (!seeded) return
   const file = join(workspacePath, 'research-defaults.json')
   step(!existsSync(file), '项目默认：种子初始无文件（全自动，不物化默认）')
+  const pickMenuOption = async (trigger, labelPattern) => {
+    await trigger.click({ timeout: 5_000 }).catch(() => {})
+    const item = page.getByRole('menuitem', { name: labelPattern }).first()
+    await item.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {})
+    await item.click({ timeout: 5_000 }).catch(() => {})
+  }
   const depth = page.getByTestId('defaults-depth').first()
-  await depth.selectOption('deep').catch(() => {})
+  await pickMenuOption(depth, /^深度档$|^Deep$/)
   const saved = await waitForDefaults(file, (value) => value.effort === 'deep' && value.revision === 1)
   const afterText = (await panel.innerText().catch(() => '')) || ''
   step(saved !== null, '项目默认：改深度 → 文件 effort=deep / revision=1', saved === null ? `未落盘；面板=${afterText.slice(-220).replace(/\s+/g, ' ')}` : `revision=${saved.revision}`)
@@ -127,7 +133,7 @@ export async function pass3dDefaultsPhase(env) {
   const labelAfter = (await button.innerText().catch(() => '')) || ''
   step(/已设 1 项|1 set/.test(labelAfter), '项目默认：按钮文案随写入变化', labelAfter)
 
-  await depth.selectOption('auto').catch(() => {})
+  await pickMenuOption(depth, /^自动|^Auto/)
   const cleared = await waitForDefaults(file, (value) => value.effort === undefined && value.revision === 2)
   step(cleared !== null, '项目默认：unset 恢复自动（无残留 effort）', cleared === null ? '未清除' : `revision=${cleared.revision}`)
   if (cleared !== null) {
@@ -136,7 +142,7 @@ export async function pass3dDefaultsPhase(env) {
 
   // 输出：形态 + 读者；来源：family chip。三条真实 UI 变换各写一次盘。
   const shape = page.getByTestId('defaults-output-shape').first()
-  await shape.selectOption('full_report').catch(() => {})
+  await pickMenuOption(shape, /完整报告|Full report/)
   const shaped = await waitForDefaults(file, (value) => value.output?.shape === 'full_report' && value.revision === 3)
   step(shaped !== null, '项目默认：改输出形态 → output.shape=full_report / revision=3', shaped === null ? '未落盘' : `revision=${shaped.revision}`)
 

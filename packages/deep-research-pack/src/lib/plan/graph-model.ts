@@ -217,12 +217,19 @@ export function coverageWarningOf(coverage: GraphCoverage, t: PackTranslate = tr
   return t('graphCoverageWarning', { count: String(gap), detail })
 }
 
+const COLOR_MUTED = 'var(--dsw-alias-label-caption)'
+const COLOR_SECONDARY = 'var(--dsw-alias-label-secondary)'
+const COLOR_SUCCESS = 'var(--dsw-alias-state-success-primary)'
+const COLOR_ERROR = 'var(--dsw-alias-state-error-primary)'
+const COLOR_WARN = 'var(--dsw-alias-state-warn-label)'
+const COLOR_ACTIVE = 'var(--dsw-alias-state-business-primary)'
+
 /** Team 投影尚未就绪时的节点状态（不把“还没收到数据”说成映射缺口）。 */
-export const PROJECTION_PENDING_STATE: GraphNodeState = { text: translateZh('graphWaitingTeam'), icon: '…', color: '#9ca3af' }
+export const PROJECTION_PENDING_STATE: GraphNodeState = { text: translateZh('graphWaitingTeam'), icon: '…', color: COLOR_MUTED }
 
 /** 投影未就绪状态的本地化形态（组件用；常量 `PROJECTION_PENDING_STATE` 保留给非 UI 面）。 */
 export function projectionPendingState(t: PackTranslate = translateZh): GraphNodeState {
-  return { text: t('graphWaitingTeam'), icon: '…', color: '#9ca3af' }
+  return { text: t('graphWaitingTeam'), icon: '…', color: COLOR_MUTED }
 }
 
 /**
@@ -240,17 +247,17 @@ export function nodeStateOf(
   attention: AttentionLike | undefined,
   t: PackTranslate = translateZh,
 ): GraphNodeState {
-  if (task.status === 'completed') return { text: t('graphStateDone'), icon: '✓', color: '#16a34a' }
-  if (task.status === 'deleted') return { text: t('graphStateDeleted'), icon: '·', color: '#9ca3af' }
-  if (attention?.reason === 'owner-failed') return { text: t('graphStateOwnerFailed'), icon: '✕', color: '#dc2626' }
+  if (task.status === 'completed') return { text: t('graphStateDone'), icon: '✓', color: COLOR_SUCCESS }
+  if (task.status === 'deleted') return { text: t('graphStateDeleted'), icon: '·', color: COLOR_MUTED }
+  if (attention?.reason === 'owner-failed') return { text: t('graphStateOwnerFailed'), icon: '✕', color: COLOR_ERROR }
   if (task.status === 'in_progress') {
-    if (attention?.reason === 'stalled') return { text: t('graphStateStalled'), icon: '⚠', color: '#b45309' }
-    return { text: running === true ? t('graphStateRunning') : t('graphStateRunningUnknown'), icon: '●', color: '#2563eb' }
+    if (attention?.reason === 'stalled') return { text: t('graphStateStalled'), icon: '⚠', color: COLOR_WARN }
+    return { text: running === true ? t('graphStateRunning') : t('graphStateRunningUnknown'), icon: '●', color: COLOR_ACTIVE }
   }
-  if (attention?.reason === 'unassigned') return { text: t('graphStateUnassigned'), icon: '⚠', color: '#b45309' }
-  if (attention?.reason === 'blocked-too-long') return { text: t('graphStateBlockedLong'), icon: '⏳', color: '#b45309' }
-  if (task.ready === true) return { text: t('graphStateReady'), icon: '○', color: '#6b7280' }
-  return { text: t('graphStateBlocked', { deps: task.blockedBy.join(', ') }), icon: '○', color: '#6b7280' }
+  if (attention?.reason === 'unassigned') return { text: t('graphStateUnassigned'), icon: '⚠', color: COLOR_WARN }
+  if (attention?.reason === 'blocked-too-long') return { text: t('graphStateBlockedLong'), icon: '⏳', color: COLOR_WARN }
+  if (task.ready === true) return { text: t('graphStateReady'), icon: '○', color: COLOR_SECONDARY }
+  return { text: t('graphStateBlocked', { deps: task.blockedBy.join(', ') }), icon: '○', color: COLOR_SECONDARY }
 }
 
 /**
@@ -268,21 +275,21 @@ export function planNodeStateOf<T extends TaskStateLike>(
   t: PackTranslate = translateZh,
 ): GraphNodeState {
   if (mapping === null || mapping === undefined) {
-    return { text: t('graphStateUnknownPlanIndex'), icon: '?', color: '#b45309' }
+    return { text: t('graphStateUnknownPlanIndex'), icon: '?', color: COLOR_WARN }
   }
   if (mapping.state === 'mapped') {
     return mapping.task !== undefined
       ? nodeStateOf(mapping.task, running, attention, t)
-      : { text: t('graphStateUnknownMapping'), icon: '?', color: '#b45309' }
+      : { text: t('graphStateUnknownMapping'), icon: '?', color: COLOR_WARN }
   }
   if (mapping.state === 'stale') {
-    return { text: t('graphStateUnknownStale', { id: mapping.declaredTaskId ?? '?' }), icon: '?', color: '#b45309' }
+    return { text: t('graphStateUnknownStale', { id: mapping.declaredTaskId ?? '?' }), icon: '?', color: COLOR_WARN }
   }
   if (mapping.state === 'duplicate') {
-    return { text: t('graphStateUnknownDuplicate', { id: mapping.declaredTaskId ?? '?' }), icon: '?', color: '#b45309' }
+    return { text: t('graphStateUnknownDuplicate', { id: mapping.declaredTaskId ?? '?' }), icon: '?', color: COLOR_WARN }
   }
   if (mapping.state === 'plan-only') {
-    return { text: t('graphStatePlanOnly'), icon: '·', color: '#9ca3af' }
+    return { text: t('graphStatePlanOnly'), icon: '·', color: COLOR_MUTED }
   }
-  return { text: t('graphStateUnknownUnmapped'), icon: '?', color: '#b45309' }
+  return { text: t('graphStateUnknownUnmapped'), icon: '?', color: COLOR_WARN }
 }

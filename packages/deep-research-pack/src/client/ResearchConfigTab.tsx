@@ -6,7 +6,7 @@
  * `conversation.view` 的「方法库」tab。旧管理块保留在 COMPACT=false 分支（回滚/对照），默认不渲染。
  * 指令仍经 `session/prompt` 交 Lead（面板不直写文件）；折算住 `纯函数层`（纯函数，keyless 单测）。
  */
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button, Input, Menu, MenuItemButton, Modal, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
 import {
@@ -20,6 +20,7 @@ import { fieldExecutionRowsOf, specimenSkeletonsOf } from './research-config/con
 import { sectionLabelOf } from './research-config/section-labels.ts'
 import { useConfigFeed, type ResearchConfigTabInjected } from './research-config/useConfigFeed.ts'
 import { DefaultsPanel } from './defaults/DefaultsPanel.tsx'
+import css from './research-config/config.module.css'
 
 export type { ResearchConfigTabInjected }
 export type ResearchConfigTabProps = PropsRuntime<'sidebar.right.pane.tab'> & PropsLocale<'deepResearchPack'> & ResearchConfigTabInjected
@@ -32,11 +33,19 @@ export type ResearchConfigTabProps = PropsRuntime<'sidebar.right.pane.tab'> & Pr
  * @returns 研究配置面板。
  */
 export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
+  const tabInfo = typeof (props as { useTabInfo?: () => { tab?: { actions?: { bindCommands?: (c: { refresh: () => void }) => () => void } } } }).useTabInfo === 'function'
+    ? (props as { useTabInfo: () => { tab?: { actions?: { bindCommands?: (c: { refresh: () => void }) => () => void } } } }).useTabInfo()
+    : undefined
   const {
     COMPACT, entries, detail, setDetail, menuFor, setMenuFor, confirmDelete, setConfirmDelete,
     switchOpen, setSwitchOpen, sending, receipt, send, adoption, retryAdoption, libraryRead, reload,
   } = useConfigFeed(props)
   const sessionId = props.sessionId
+  useEffect(() => {
+    const bind = tabInfo?.tab?.actions?.bindCommands
+    if (typeof bind !== 'function') return undefined
+    return bind({ refresh: () => { if (sessionId !== undefined) void reload(sessionId) } })
+  }, [tabInfo, sessionId, reload])
   const sectionLabel = (key: keyof LibrarySections): string => sectionLabelOf(props.t, key)
   const executionRows = fieldExecutionRowsOf(props.t)
   const specimenSkeletons = specimenSkeletonsOf(props.t)
@@ -100,27 +109,27 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
     const shownName = opts.isBuiltin ? displayNameOf(name, props.t) : name
     const shownSummary = opts.isBuiltin ? (displaySummaryOf(name, props.t) || summary) : summary
     return (
-    <div key={`${opts.isBuiltin ? 'b' : 'l'}-${name}`} style={{ padding: '7px 10px', marginBottom: 6, borderRadius: 6, background: opts.isBuiltin ? '#00000008' : '#22c55e14', border: opts.isBuiltin ? 'none' : '1px solid #22c55e33' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <button type="button" onClick={onOpen} style={{ flex: 1, textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontWeight: 600, fontSize: 13, color: 'inherit' }}>
+    <div key={`${opts.isBuiltin ? 'b' : 'l'}-${name}`} className={`${css.card} ${opts.isBuiltin ? css.cardBuiltin : css.cardLibrary}`}>
+      <div className={css.cardTop}>
+        <button type="button" onClick={onOpen} className={css.cardOpen}>
           {shownName} ›
         </button>
         {isDefault && <Tag tone="success">{props.t('defaultPreference')}</Tag>}
         {cardMenu(name, { isBuiltin: opts.isBuiltin, isDefault })}
       </div>
-      {shownSummary !== null && shownSummary !== '' && <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>{shownSummary}</div>}
+      {shownSummary !== null && shownSummary !== '' && <div className={css.cardSummary}>{shownSummary}</div>}
       {opts.isBuiltin && (
-        <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>{props.t('whenToUse', { patterns: patternsFor(name) })}</div>
+        <div className={css.cardPatterns}>{props.t('whenToUse', { patterns: patternsFor(name) })}</div>
       )}
-      <div style={{ fontSize: 11, opacity: 0.45, marginTop: 1 }}>{specimenLine(name, opts.isBuiltin)}</div>
+      <div className={css.cardSpecimen}>{specimenLine(name, opts.isBuiltin)}</div>
     </div>
     )
   }
 
   const sectionBlock = (label: string, value: string | null) => (
-    <div key={label} style={{ marginBottom: 8 }}>
-      <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.7 }}>{label}</div>
-      <div style={{ fontSize: 13, lineHeight: 1.6 }}>{value ?? props.t('unset')}</div>
+    <div key={label} className={css.fieldBlock}>
+      <div className={css.fieldLabel}>{label}</div>
+      <div className={css.fieldValue}>{value ?? props.t('unset')}</div>
     </div>
   )
 
@@ -128,11 +137,11 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
 
   /** 旧格式正文呈现块：纯旧格式条目 = 单块「自定义要求」（无 4×未设置噪音）；混居条目 = 四分区之外追加「自定义要求（旧）」，内容零丢失。 */
   const legacyBlock = (label: string, lines: readonly string[]) => (
-    <div key={label} style={{ marginBottom: 8 }}>
-      <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.7 }}>{label}</div>
+    <div key={label} className={css.fieldBlock}>
+      <div className={css.fieldLabel}>{label}</div>
       {lines.length === 0
-        ? <div style={{ fontSize: 13, lineHeight: 1.6 }}>{props.t('unset')}</div>
-        : lines.map((l, i) => <div key={i} style={{ fontSize: 13, lineHeight: 1.6 }}>{l}</div>)}
+        ? <div className={css.fieldValue}>{props.t('unset')}</div>
+        : lines.map((l, i) => <div key={i} className={css.fieldValue}>{l}</div>)}
     </div>
   )
 
@@ -181,15 +190,15 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
         title={detail.mode === 'create' ? props.t('newPreference') : detail.mode === 'read' && detail.kind === 'builtin' ? displayNameOf(detail.name, props.t) : detail.name}
         closeLabel={props.t('closeDetail')}
         description={detail.mode === 'read' && detail.provenance !== null ? props.t('provenancePrefix', { provenance: detail.provenance }) : detail.mode === 'edit' ? props.t('configDetailEditDesc') : props.t('configDetailCreateDesc')}
-        footer={<div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>{readFooter ?? editingFooter}</div>}
+        footer={<div className={css.modalFooter}>{readFooter ?? editingFooter}</div>}
       >
         {/* 正文内滚（2026-10-18 实测缺陷修复）：显式化块让详情变高——不设上限时弹窗高过视口，
             头部关闭钮被顶到视口外点不到（client-load.entry 实测 1129px 弹窗 / 720px 视口）。
             maxHeight 用 vh，短窗口同样成立。 */}
-        <div style={{ maxHeight: '52vh', overflowY: 'auto', paddingRight: 4 }}>
+        <div className={css.modalBody}>
         {detail.mode === 'create' && (
-          <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.7 }}>{props.t('preferenceName')}</div>
+          <div className={css.nameFieldWrap}>
+            <div className={css.fieldLabel}>{props.t('preferenceName')}</div>
             <Input value={detail.drafts.name} onChange={(ev) => setDetail({ ...detail, drafts: { ...detail.drafts, name: ev.target.value } })} placeholder={props.t('preferenceNamePlaceholder')} />
           </div>
         )}
@@ -204,63 +213,63 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
                 </>
                 ))
           : SECTIONS.map(({ key }) => (
-            <div key={key} style={{ marginBottom: 8 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.7 }}>{sectionLabel(key)}</div>
+            <div key={key} className={css.fieldBlock}>
+              <div className={css.fieldLabel}>{sectionLabel(key)}</div>
               <textarea
                 value={drafts?.[key] ?? ''}
                 onChange={(ev) => setDraft(key, ev.target.value)}
-                style={{ width: '100%', boxSizing: 'border-box', fontSize: 13, lineHeight: 1.5, padding: 6, borderRadius: 4, border: '1px solid #00000033', minHeight: 52 }}
+                className={css.textarea}
               />
             </div>
           ))}
         {detail.mode === 'edit' && detail.legacy !== null && (
-          <div style={{ marginBottom: 8 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.7 }}>{props.t('legacyBodyTitle')}</div>
+          <div className={css.fieldBlock}>
+            <div className={css.fieldLabel}>{props.t('legacyBodyTitle')}</div>
             <textarea
               value={detail.legacy}
               onChange={(ev) => setDetail({ ...detail, legacy: ev.target.value })}
-              style={{ width: '100%', boxSizing: 'border-box', fontSize: 13, lineHeight: 1.5, padding: 6, borderRadius: 4, border: '1px solid #00000033', minHeight: 52 }}
+              className={css.textarea}
             />
-            <div style={{ fontSize: 11, opacity: 0.55, marginTop: 2 }}>{props.t('legacyBodyHint')}</div>
+            <div className={css.fieldSubHint}>{props.t('legacyBodyHint')}</div>
           </div>
         )}
         {detail.mode === 'read' && detail.kind === 'library' && (
-          <div style={{ fontSize: 12, opacity: 0.55 }}>
+          <div className={css.deriveHint}>
             {props.t('libraryDeriveHint')}
           </div>
         )}
         {detail.mode === 'read' && (
-          <div style={{ marginTop: 10, borderTop: '1px solid #00000018', paddingTop: 8 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.7, marginBottom: 4 }}>{props.t('executionTitle')}</div>
+          <div className={css.executionSection}>
+            <div className={css.fieldLabel}>{props.t('executionTitle')}</div>
             {executionRows.map((row) => (
-              <div key={row.key} style={{ marginBottom: 6, fontSize: 12 }}>
-                <div style={{ fontWeight: 600 }}>{sectionLabel(row.key)}</div>
-                <div style={{ opacity: 0.8 }}>{props.t('executionWho', { value: row.who })}</div>
-                <div style={{ opacity: 0.8 }}>{props.t('executionWhere', { value: row.where })}</div>
-                <div style={{ opacity: 0.7 }}>{props.t('executionCannot', { value: row.cannot })}</div>
+              <div key={row.key} className={css.executionRow}>
+                <div className={css.executionRowTitle}>{sectionLabel(row.key)}</div>
+                <div className={css.executionLine}>{props.t('executionWho', { value: row.who })}</div>
+                <div className={css.executionLine}>{props.t('executionWhere', { value: row.where })}</div>
+                <div className={css.executionCannot}>{props.t('executionCannot', { value: row.cannot })}</div>
               </div>
             ))}
-            <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.7, margin: '8px 0 4px' }}>{props.t('baselineTitle')}</div>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>{props.t('baselineDisciplines')}</div>
-            <div style={{ fontSize: 11, opacity: 0.55, marginTop: 2 }}>
+            <div className={css.sectionHeading}>{props.t('baselineTitle')}</div>
+            <div className={css.executionLine}>{props.t('baselineDisciplines')}</div>
+            <div className={css.fieldSubHint}>
               {props.t('baselineHint')}
             </div>
-            <div style={{ fontSize: 11, opacity: 0.55, marginTop: 2 }}>
+            <div className={css.fieldSubHint}>
               {props.t('sourceChainVsSource')}
               {props.t('baselineReadiness')}
             </div>
-            <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.7, margin: '8px 0 4px' }}>{props.t('specimenTitle')}</div>
+            <div className={css.sectionHeading}>{props.t('specimenTitle')}</div>
             {(specimenSkeletons[detail.name] ?? props.t('specimenFallback').split('\n')).map((line, i) => (
-              <div key={i} style={{ fontSize: 12, opacity: 0.8 }}>{i + 1}. {line}</div>
+              <div key={i} className={css.executionLine}>{i + 1}. {line}</div>
             ))}
-            <div style={{ fontSize: 11, opacity: 0.45, marginTop: 2 }}>{specimenLine(detail.name, detail.kind === 'builtin')}</div>
-            <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.7, margin: '8px 0 4px' }}>{props.t('recommendTitle')}</div>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>
+            <div className={css.fieldSubHint}>{specimenLine(detail.name, detail.kind === 'builtin')}</div>
+            <div className={css.sectionHeading}>{props.t('recommendTitle')}</div>
+            <div className={css.executionLine}>
               {detail.kind === 'builtin'
                 ? patternsFor(detail.name)
                 : props.t('builtinNotAutoRecommended')}
             </div>
-            <div style={{ fontSize: 11, opacity: 0.45, marginTop: 2 }}>{props.t('recommendRuleHint')}</div>
+            <div className={css.fieldSubHint}>{props.t('recommendRuleHint')}</div>
           </div>
         )}
         </div>
@@ -276,7 +285,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
       closeLabel={props.t('cancelDelete')}
       description={props.t('deletePreferenceDesc')}
       footer={(
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+        <div className={css.modalFooter}>
           <Button variant="ghost" onClick={() => setConfirmDelete(null)}>{props.t('cancel')}</Button>
           <Button variant="primary" disabled={sending} onClick={() => { const n = confirmDelete; setConfirmDelete(null); void send(instructionOf('remove', n), { target: n, expectsChange: true }) }}>{props.t('confirmDeleteAction')}</Button>
         </div>
@@ -301,68 +310,68 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
   )
 
   return (
-    <div style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto', fontSize: 13, lineHeight: 1.7 }}>
-      <div style={{ fontWeight: 700, marginBottom: 2 }}>{props.t('configHeader')}</div>
+    <div className={css.root}>
+      <div className={css.header}>{props.t('configHeader')}</div>
       {sessionId === undefined ? null : <DefaultsPanel sessionId={sessionId} store={props.defaults} t={props.t} />}
-      <div style={{ opacity: 0.65, marginBottom: 8, fontSize: 11, lineHeight: 1.6 }}>
+      <div className={css.hint}>
         {COMPACT
           ? props.t('configMethodHint')
           : props.t('configPreferenceHint')}
       </div>
 
       {/* ① 本次研究（置顶）：本次采用 ＋ 来源 ＋ 换一条；五态如实，判不了就说判不了。 */}
-      <div style={{ padding: '7px 10px', marginBottom: 8, borderRadius: 6, background: '#3b82f60f', border: '1px solid #3b82f633' }}>
-        <div style={{ fontWeight: 700, fontSize: 12, opacity: 0.75 }}>{props.t('configThisRun')}</div>
+      <div className={css.thisRunBox}>
+        <div className={css.sectionTitle}>{props.t('configThisRun')}</div>
         {adoption.kind === 'recorded' && (
-          <div style={{ marginTop: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+          <div className={css.thisRunRow}>
             <span>{props.t('configThisRunAdopted', { name: adoption.adopted === null ? '' : displayNameOf(adoption.adopted, props.t) })}</span>
-            {adoption.origin !== null && <span style={{ opacity: 0.7 }}>{props.t('configSourceInline', { origin: adoption.origin })}</span>}
-            <span style={{ opacity: 0.4 }}>·</span>
+            {adoption.origin !== null && <span className={css.inlineMuted}>{props.t('configSourceInline', { origin: adoption.origin })}</span>}
+            <span className={css.dotMuted}>·</span>
             {methodPicker(props.t('switchMethod'))}
           </div>
         )}
         {adoption.kind === 'no-run' && (
-          <div style={{ marginTop: 2, opacity: 0.75, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+          <div className={css.thisRunMuted}>
             {props.t('configNoRun')}
             {methodPicker(props.t('pickMethodForLead'))}
           </div>
         )}
         {adoption.kind === 'missing' && (
-          <div style={{ marginTop: 2, opacity: 0.75 }}>{props.t('configMissingQuestion')}</div>
+          <div className={css.thisRunMuted}>{props.t('configMissingQuestion')}</div>
         )}
         {adoption.kind === 'question-unreadable' && (
-          <div style={{ marginTop: 2, color: '#b45309' }}>
+          <div className={css.warnRow}>
             ⚠ {props.t('statusQuestionReadFailed')}
-            <button type="button" onClick={retryAdoption} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+            <button type="button" onClick={retryAdoption} className={css.retryLink}>{props.t('retry')}</button>
           </div>
         )}
         {adoption.kind === 'question-empty' && (
-          <div style={{ marginTop: 2, color: '#b45309' }}>
+          <div className={css.warnRow}>
             ⚠ {props.t('statusQuestionEmpty')}
-            <button type="button" onClick={retryAdoption} style={{ marginLeft: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#2563eb', fontSize: 13, textDecoration: 'underline' }}>{props.t('retry')}</button>
+            <button type="button" onClick={retryAdoption} className={css.retryLink}>{props.t('retry')}</button>
           </div>
         )}
         {adoption.kind === 'unrecorded' && (
-          <div style={{ marginTop: 2, opacity: 0.75 }}>{props.t('configUnrecorded')}</div>
+          <div className={css.thisRunMuted}>{props.t('configUnrecorded')}</div>
         )}
         {adoption.kind === 'unparsable' && (
-          <div style={{ marginTop: 2, opacity: 0.75 }}>{props.t('configUnparsable')}</div>
+          <div className={css.thisRunMuted}>{props.t('configUnparsable')}</div>
         )}
         {adoption.kind === 'recorded' && adoption.requirements !== null && (
-          <div style={{ marginTop: 2, fontSize: 11, opacity: 0.6 }}>{props.t('configRequirements', { text: adoption.requirements })}</div>
+          <div className={css.reqLine}>{props.t('configRequirements', { text: adoption.requirements })}</div>
         )}
       </div>
 
       {COMPACT && (
-        <div style={{ padding: '7px 10px', marginBottom: 8, borderRadius: 6, background: '#00000005', border: '1px solid #00000012' }}>
-          <div style={{ fontWeight: 700, fontSize: 12 }}>{props.t('configLibrarySection')}</div>
-          <div style={{ opacity: 0.7, fontSize: 12, marginTop: 2 }}>
+        <div className={css.libraryEntryBox}>
+          <div className={css.libraryEntryTitle}>{props.t('configLibrarySection')}</div>
+          <div className={css.libraryEntryHint}>
             {props.t('configLibraryHint')}
           </div>
         </div>
       )}
       {COMPACT && receipt !== null && (
-        <div style={{ marginBottom: 8, padding: '6px 10px', borderRadius: 6, fontSize: 12, background: receipt.state === 'failed' ? '#ef444414' : '#22c55e14', color: receipt.state === 'failed' ? '#b91c1c' : '#166534' }}>
+        <div className={receipt.state === 'failed' ? css.receiptFailed : css.receiptOk}>
           {receipt.text}
         </div>
       )}

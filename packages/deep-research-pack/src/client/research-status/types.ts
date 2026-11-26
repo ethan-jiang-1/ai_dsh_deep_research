@@ -4,8 +4,11 @@
 // 实测），改形状须连 follow 调用方与 vendor sessionAddress() 语义一起重校。
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { RESEARCH_TOOL_KEYS } from '../keys.ts'
 import type { RunSource } from '../../lib/run/run-context.ts'
 import type { RunStep } from '../../lib/run/run-fold.ts'
+import type { ProtocolFace } from '../../lib/run/protocol-fold.ts'
+import type { EvidenceMatrix } from '../../lib/run/evidence-matrix.ts'
 
 /** journal 帧的最小投影（wire 形状 → 领域形状）。 */
 export type JournalFrame =
@@ -20,7 +23,7 @@ export type JournalFrame =
  *  vendor SessionAddress。 */
 export type FollowTarget =
   | SessionId
-  | { readonly kind: 'subagent'; readonly parentSessionId: SessionId; readonly childSessionId: SessionId; readonly mode: 'unknown' }
+  | { readonly kind: (typeof RESEARCH_TOOL_KEYS)[3]; readonly parentSessionId: SessionId; readonly childSessionId: SessionId; readonly mode: 'unknown' }
 
 /** 页签体注入面：journal 流 + 文件读取闭包（绑定 remote.workspaceFiles）+ 挂起显性化入口。 */
 export interface ResearchStatusTabInjected {
@@ -70,4 +73,6 @@ export interface BundleFace {
   readonly questionText: string | null
   readonly finalFileNames: readonly string[]
   readonly hasFinal: boolean
+  readonly protocol?: ProtocolFace
+  readonly evidenceMatrix?: EvidenceMatrix
 }

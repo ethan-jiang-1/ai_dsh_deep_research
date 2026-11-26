@@ -1,0 +1,356 @@
+.root {
+  padding: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--dsw-alias-label-primary);
+}
+
+.header {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.hint {
+  color: var(--dsw-alias-label-tertiary);
+  margin-bottom: 8px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.thisRunBox {
+  padding: 7px 10px;
+  margin-bottom: 8px;
+  border-radius: var(--dsw-radius-sm);
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 7%, transparent);
+  border: 0.5px solid color-mix(in srgb, var(--dsw-alias-state-business-primary) 26%, transparent);
+}
+
+.sectionTitle {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.thisRunRow {
+  margin-top: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.thisRunMuted {
+  margin-top: 2px;
+  color: var(--dsw-alias-label-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.inlineMuted {
+  color: var(--dsw-alias-label-secondary);
+}
+
+.dotMuted {
+  color: var(--dsw-alias-label-caption);
+}
+
+.warnRow {
+  margin-top: 2px;
+  color: var(--dsw-alias-state-warn-label);
+}
+
+.retryLink {
+  margin-left: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--dsw-alias-link);
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+.reqLine {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.libraryEntryBox {
+  padding: 7px 10px;
+  margin-bottom: 8px;
+  border-radius: var(--dsw-radius-sm);
+  background: var(--dsw-alias-bg-layer-2);
+  border: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.libraryEntryTitle {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.libraryEntryHint {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.receiptOk {
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: var(--dsw-radius-sm);
+  font-size: 12px;
+  background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 10%, transparent);
+  color: var(--dsw-alias-state-success-primary);
+}
+
+.receiptFailed {
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: var(--dsw-radius-sm);
+  font-size: 12px;
+  background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 10%, transparent);
+  color: var(--dsw-alias-state-error-primary);
+}
+
+/* ── card / modal / legacy ── */
+
+.card {
+  padding: 7px 10px;
+  margin-bottom: 6px;
+  border-radius: var(--dsw-radius-sm);
+  border: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.cardBuiltin {
+  background: var(--dsw-alias-bg-layer-2);
+}
+
+.cardLibrary {
+  background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 9%, transparent);
+  border-color: color-mix(in srgb, var(--dsw-alias-state-success-primary) 26%, transparent);
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cardOpen {
+  flex: 1;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  color: inherit;
+}
+
+.cardSummary {
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+  margin-top: 2px;
+}
+
+.cardPatterns {
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+  margin-top: 2px;
+}
+
+.cardSpecimen {
+  font-size: 11px;
+  color: var(--dsw-alias-label-caption);
+  margin-top: 1px;
+}
+
+.fieldBlock {
+  margin-bottom: 8px;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.fieldValue {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.modalFooter {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.modalBody {
+  max-height: 52vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.nameFieldWrap {
+  margin-bottom: 10px;
+}
+
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 6px;
+  border-radius: var(--dsw-radius-xs);
+  border: 0.5px solid var(--dsw-alias-border-l3);
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  min-height: 52px;
+}
+
+.fieldSubHint {
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+  margin-top: 2px;
+}
+
+.deriveHint {
+  font-size: 12px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.executionSection {
+  margin-top: 10px;
+  border-top: 0.5px solid var(--dsw-alias-border-l2);
+  padding-top: 8px;
+}
+
+.executionRow {
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.executionRowTitle {
+  font-weight: 600;
+}
+
+.executionLine {
+  color: var(--dsw-alias-label-secondary);
+}
+
+.executionCannot {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.sectionHeading {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dsw-alias-label-secondary);
+  margin: 8px 0 4px;
+}
+
+/* ── LegacyManagementPane ── */
+
+.legacyHeading {
+  font-weight: 700;
+  margin: 10px 0 2px;
+}
+
+.legacyHeadingFirst {
+  font-weight: 700;
+  margin: 4px 0 2px;
+}
+
+.legacyHint {
+  color: var(--dsw-alias-label-tertiary);
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+
+.legacyStatusText {
+  color: var(--dsw-alias-label-secondary);
+  margin-bottom: 6px;
+}
+
+.legacyDemoBox {
+  padding: 7px 10px;
+  border-radius: var(--dsw-radius-sm);
+  background: var(--dsw-alias-bg-layer-2);
+  border: 0.5px solid var(--dsw-alias-border-l1);
+}
+
+.legacyDemoTitle {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.legacyDemoLine {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.legacyDemoKey {
+  font-weight: 600;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.legacyDemoVal {
+  color: var(--dsw-alias-label-primary);
+}
+
+.legacyReceipt {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: var(--dsw-radius-sm);
+  font-size: 12px;
+}
+
+.legacyReceiptIdle {
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.legacyReceiptFailed {
+  background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 10%, transparent);
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.legacyReceiptSent {
+  background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 9%, transparent);
+  color: var(--dsw-alias-state-success-primary);
+}
+
+.legacyReceiptLanded {
+  background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 14%, transparent);
+  color: var(--dsw-alias-state-success-primary);
+}
+
+.legacyFooter {
+  margin-top: 10px;
+  border-top: 0.5px solid var(--dsw-alias-border-l2);
+  padding-top: 8px;
+  font-size: 12px;
+}
+
+.legacyFooterActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.legacyFooterSmall {
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+  margin-top: 4px;
+}

@@ -459,14 +459,14 @@ async function awaitAppReady(page, settleMs) {
 // bound=seed"的那个未决点）。dev home 有凭据 → 该模态不出现，故本函数只在 seed 分支调用。
 // 关不掉 = 后续点击必被挡（不静默：打一行错误，断言会红在具体步骤上）。
 let seedOnboardingNoted = false
-async function dismissCredentialOnboarding(page, { appearMs = seedOnboardingNoted ? 2_000 : 10_000 } = {}) {
+async function dismissCredentialOnboarding(page, { appearMs = seedOnboardingNoted ? 4_000 : 15_000 } = {}) {
   const findDialog = async () => {
     const dialogs = page.locator('[role="dialog"]')
     const count = await dialogs.count().catch(() => 0)
     for (let i = 0; i < count; i++) {
       const dialog = dialogs.nth(i)
       const text = (await dialog.textContent().catch(() => '')) ?? ''
-      if (/Get started|Add API Key|Sign in to your DeepSeek account|开始设置|添加 API Key|登录 DeepSeek/.test(text)) return dialog
+      if (/Get started|Add API Key|Sign in to your DeepSeek account|开始使用|开始设置|添加 API Key|登录 DeepSeek/.test(text)) return dialog
     }
     return null
   }
@@ -480,7 +480,7 @@ async function dismissCredentialOnboarding(page, { appearMs = seedOnboardingNote
   for (const name of ['Close', '关闭']) {
     const close = dialog.getByRole('button', { name }).first()
     if (await close.isVisible().catch(() => false)) {
-      await close.click({ timeout: 5_000 }).catch(() => {})
+      await close.click({ force: true, timeout: 5_000 }).catch(() => {})
       break
     }
   }
@@ -755,18 +755,34 @@ async function pass1BoundFacePhase() {
         }
         const stepsOk = ['立项', '组队', '侦察', '挖掘', '综合', '审查', '交付'].every((x) => seg.includes(x))
         step(stepsOk, '步骤条真数据（流程轨道七步 = 定义流程——本会话绑定的 bundle）')
-        // 步态语法回归（2026-09-28 trial 实测反馈：done 与 pending 都读成"没走过" + ▲ 粘连
-        // 造成双琥珀歧义误读）——✓/●/○ 与仪表盘同语法；current 唯一；done 绿字；重入点描边。
+        // 顶栏研究进度胶囊（M5：`conversation.session.header.actions`）在场且非空
+        const headerPill = page.locator('[data-testid="research-header-pill"]').first()
+        const headerPillVisible = await headerPill.isVisible().catch(() => false)
+        const headerPillText = headerPillVisible ? (await headerPill.innerText().catch(() => '')).replace(/\s+/g, ' ').trim() : ''
+        step(headerPillVisible && headerPillText !== '', '顶栏研究进度胶囊在场（session.header.actions）', headerPillText || '缺席')
+        // 步态语法回归（2026-09-28 trial 实测反馈；M3 改为 StateDot + CSS Modules + 语义属性）：
+        // StateDot 与语义 data-step-* 属性同态；current 唯一；done 颜色与 pending 可分；重入点虚线描边。
         const rail = await page.evaluate((lbls) => {
-          const spans = [...document.querySelectorAll('span')]
-          // current 计数收窄到七步名（2026-10-11 首验红：⑦ 区队员 phase 圆点同用 "● " 前缀
-          // ——● scout-security 等——裸 startsWith 会把队员行算成 current，● ×5 假红）。
-          const cur = spans.filter((n) => /^● (立项|组队|侦察|挖掘|综合|审查|交付)$/.test((n.textContent ?? '').trim()))
-          const greenDone = (lbl) => spans.some((n) => (n.textContent ?? '').trim() === `✓ ${lbl}` && getComputedStyle(n).color === 'rgb(22, 163, 74)')
-          const ev = spans.find((n) => (n.textContent ?? '').trim() === '✓ 挖掘')
-          return { cur: cur.length, greens: lbls.filter(greenDone), reentry: ev === undefined ? null : getComputedStyle(ev).outlineStyle }
+          const pills = [...document.querySelectorAll('[data-step-key]')]
+          const cur = pills.filter((n) => n.getAttribute('data-step-state') === 'current')
+          const pendingPill = pills.find((n) => n.getAttribute('data-step-state') === 'pending')
+          const pendingColor = pendingPill === undefined ? null : getComputedStyle(pendingPill).color
+          const doneDotAndColor = (lbl) => pills.some((n) => {
+            if (n.getAttribute('data-step-state') !== 'done') return false
+            const text = (n.textContent ?? '').replace(/\s+/g, ' ').trim()
+            if (text !== lbl) return false
+            const hasDot = n.querySelector('svg') !== null || n.querySelector('[data-state]') !== null
+            const color = getComputedStyle(n).color
+            return hasDot && (pendingColor === null || color !== pendingColor)
+          })
+          const ev = pills.find((n) => n.getAttribute('data-step-key') === 'evidence')
+          return {
+            cur: cur.length,
+            greens: lbls.filter(doneDotAndColor),
+            reentry: ev === undefined ? null : getComputedStyle(ev).outlineStyle,
+          }
         }, ['立项', '组队', '侦察', '挖掘', '综合', '审查'])
-        step(rail.cur === 1, '轨道 current 唯一（● 恰一枚——双高亮歧义回归红）', `● ×${rail.cur}`)
+        step(rail.cur === 1, '轨道 current 唯一（StateDot + data-step-state="current" 恰一枚）', `current ×${rail.cur}`)
         // done 期望 = 盘侧 deriveSteps 真值（BUG-001 轮修正：绑到的会话不一定是已交付 run，
         // 在飞 bundle 只做了一部分步骤——期望随磁盘走，不再隐含"六步全绿"）
         const expectedDone = faceNow.steps.filter((s) => s.state === 'done').length
@@ -1090,6 +1106,7 @@ async function pass3bGraphTabPhase() {
     || seg.includes('任务板还没有任务')
     || seg.includes('任务快照')
     || /WAVE\s*\d/i.test(seg)
+    || seg.includes('查看全部节点')
     || seg.includes('需要你注意')
     || seg.includes('绑定状态读取失败') // 流断连的诚实态（BUG-045）：也是"不炸"，但会在覆盖率断言里被点名
   step(body, '研究图谱页签体渲染（空态/团队态如实，不炸）', body ? 'body=ok' : seg.slice(0, 160).replace(/\s+/g, ' '))
@@ -1339,6 +1356,33 @@ try {
   await pass5FinalDeliveryPhase({
     page, step, wait, skipped, paneTextOf, boundSession, deliveredSessions, fileFaceOf,
   })
+  // pass-6 全局「研究工作台」（M6：`sidebar.panellist` + `main` Runs / 方法库 / 研究透镜与项目默认）
+  const hubBtn = page.getByRole('button', { name: /研究工作台|Research Hub/ }).first()
+  const hubEntryVisible = await hubBtn.isVisible().catch(() => false)
+  step(hubEntryVisible, '左栏全局「研究工作台」入口按钮在场（sidebar.panellist）')
+  if (hubEntryVisible) {
+    await hubBtn.click({ timeout: 5_000 }).catch(() => {})
+    const hubPanel = page.locator('[data-testid="deep-research-hub"]').first()
+    let hubVisible = false
+    for (let i = 0; i < 10 && !hubVisible; i++) {
+      hubVisible = await hubPanel.isVisible().catch(() => false)
+      if (!hubVisible) await wait(300)
+    }
+    step(hubVisible, '全局「研究工作台」主面板打开（main keyed panel）')
+    if (hubVisible) {
+      await page.getByRole('tab', { name: /研究透镜|Lenses/ }).first().click({ timeout: 5_000 }).catch(() => {})
+      await wait(400)
+      const hubTextLenses = await hubPanel.innerText().catch(() => '')
+      const defaultsVisible = await page.locator('[data-testid="hub-lenses-defaults"]').first().isVisible().catch(() => false)
+      step(hubTextLenses.length > 0 && defaultsVisible, '工作台透镜页展示内置视角与工作区项目默认', `defaults=${defaultsVisible}`)
+      await page.getByRole('tab', { name: /方法库|Methods/ }).first().click({ timeout: 5_000 }).catch(() => {})
+      await wait(400)
+      const builtinInHub = await page.getByRole('button', { name: /^(内置参考|Built-in references)$/ }).first().isVisible().catch(() => false)
+      step(builtinInHub, '工作台方法库页可访问并渲染内置参考')
+      await page.getByRole('button', { name: /返回对话|Back to chat/ }).first().click({ timeout: 5_000 }).catch(() => {})
+      await wait(400)
+    }
+  }
 } catch (error) {
   failures.push(`浏览器断言异常: ${error.message}`)
   console.error(`  FAIL 浏览器断言异常: ${error.message}`)
@@ -1347,7 +1391,19 @@ try {
   if (failures.length > 0) await saveArtifacts('assertions')
   if (browser !== null) await browser.close().catch(() => {})
   child.kill('SIGTERM')
-  await sleep(300)
+  if (child.exitCode === null && child.signalCode === null) {
+    await Promise.race([
+      new Promise((resolve) => child.once('exit', resolve)),
+      sleep(3_000),
+    ])
+    if (child.exitCode === null && child.signalCode === null) {
+      child.kill('SIGKILL')
+      await Promise.race([
+        new Promise((resolve) => child.once('exit', resolve)),
+        sleep(500),
+      ])
+    }
+  }
   // 收尾判据 = 端口真的静默（不是"发了 SIGTERM"）：非组长模式的孙进程可能活过 child.kill，
   // 遗留监听会让下一次跑直接 EADDRINUSE——把释放验证做成失败项，而不是留给下一次现场。
   const leak = await reclaimPort(PORT)

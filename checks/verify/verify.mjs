@@ -18,6 +18,7 @@
 import { gates, configureOnly, activeOnly, failures, notes } from './context.mjs';
 import { runA } from './gates/a-docs.mjs';
 import { runB } from './gates/b-pack.mjs';
+import { runClientTokens } from './gates/b-pack-tokens.mjs';
 import { runC } from './gates/c-notes.mjs';
 import { runD } from './gates/d-vendor.mjs';
 import { runE } from './gates/e-workspace.mjs';
@@ -42,6 +43,7 @@ if (only !== null) {
 
 runA();
 runB();
+runClientTokens();
 runC();
 runD();
 runE();

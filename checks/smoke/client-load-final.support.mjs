@@ -8,6 +8,7 @@
 // 环境的注入面 = 主件文件级 helper 与调用时刻的快照（boundSession / deliveredSessions）。
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { finalReadPlan, finalTargetOf } from '../../packages/deep-research-pack/src/lib/run/final-target.ts'
 import { latestRunVersion } from '../../packages/deep-research-pack/src/lib/run/run-fold.ts'
 import { openSessionById, TAB_TEXT } from '../lib/shared/web-ui-nav.mjs'
 
@@ -114,14 +115,22 @@ export async function pass5FinalDeliveryPhase(env) {
       return btn === undefined ? '' : (btn.parentElement?.innerText ?? '').replace(/\s+/g, ' ').trim()
     })
     const stripState = /审查未过|当前版|读者版|审计版|\bv\d+\b/.test(stripText)
+    const finalPlan = typeof deliveredTarget.path === 'string' ? finalReadPlan(deliveredTarget.path) : null
+    const targetFallback = finalPlan !== null ? (finalTargetOf(finalPlan, ledgerNames)?.fallback ?? false) : false
     if (readerName !== null) {
-      const toggle = page.getByRole('button', { name: /看审计版|看读者版|View audit edition|View reader edition/ }).first()
-      const toggleVisible = await toggle.isVisible().catch(() => false)
+      const stripToggle = page.getByRole('button', { name: /看审计版|看读者版|View audit edition|View reader edition/ }).first()
+      const segTab = page.getByRole('tab', { name: /读者版|审计版|Reader|Audit/ }).first()
+      const toggleVisible = (await stripToggle.isVisible().catch(() => false)) || (await segTab.isVisible().catch(() => false))
       step(toggleVisible, '终稿页签读者版/审计版切换在场', readerName)
-    } else if (ledgerLatest >= 1) {
+    } else if (ledgerLatest >= 1 && targetFallback) {
       const toggle = page.getByRole('button', { name: /看当前工作稿|看 v\d+（版本账）|View current draft|View v\d+ \(ledger\)/ }).first()
       const toggleVisible = await toggle.isVisible().catch(() => false)
       step(toggleVisible, '终稿页签版本切换在场（版本账 / 当前工作稿）', toggleVisible ? `v${ledgerLatest}` : '缺切换按钮')
+    } else if (ledgerLatest >= 1) {
+      const auditTab = page.getByRole('tab', { name: /审计版|Audit/ }).first()
+      const claimsTab = page.getByRole('tab', { name: /核查清单|Claims/ }).first()
+      const segVisible = (await auditTab.isVisible().catch(() => false)) && (await claimsTab.isVisible().catch(() => false))
+      step(segVisible, '终稿页签分段控制器在场（点名版本账 vN + 审计/核查视图）', segVisible ? `v${ledgerLatest}` : '缺分段控制器')
     }
     step(stripState, '终稿静音条三态之一在场（盘上事实，不编造）',
       stripState ? stripText.slice(0, 40) : `静音条=${JSON.stringify(stripText)}`)
@@ -139,6 +148,20 @@ export async function pass5FinalDeliveryPhase(env) {
       return { ok: overflows && scroller.scrollTop > 0, why: `sh=${scroller.scrollHeight} ch=${scroller.clientHeight} top=${scroller.scrollTop}` }
     })
     step(scrollProbe.ok, '终稿页签自带滚动口（长正文可滚、不被裁）', scrollProbe.why)
+    // 证据引用点开分屏（M4）：点击终稿正文的 [来源: evidence/...] → 右栏打开「证据卡」分屏页签
+    const evBtn = page.locator('button[title*="evidence/"]').first()
+    if (await evBtn.isVisible().catch(() => false)) {
+      await evBtn.click({ timeout: 5_000 }).catch(() => {})
+      let evTabOk = false
+      for (let i = 0; i < 10 && !evTabOk; i++) {
+        const tabsNow = await page.evaluate(() => [...document.querySelectorAll('[role="tab"]')].map((n) => (n.textContent ?? '').trim()))
+        evTabOk = tabsNow.some((t) => /^(证据卡|Evidence Card)$/.test(t))
+        if (!evTabOk) await wait(500)
+      }
+      step(evTabOk, '终稿引用点击 → 右栏分屏打开「证据卡」页签')
+    } else {
+      skipped.push('终稿引用分屏：当前终稿无 evidence/ 引用按钮')
+    }
     // 状态页 ⑤ 同款折叠块（同一交付目标会话；与终稿页脚共用 src/lib/rerun-triage 文案）
     const statusChip = page.getByRole('tab', { name: TAB_TEXT.status }).first()
     if (await statusChip.isVisible().catch(() => false)) {

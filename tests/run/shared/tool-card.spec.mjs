@@ -35,6 +35,13 @@ test('其他工具 → 工具名 + 原文前缀回退', () => {
   assert.equal(cardTitleOf('web_fetch', null, 'https://api-docs'), 'web_fetch https://api-docs');
 });
 
+test('web_fetch / subagent 工具卡标题：URL / 子调研语义格式化', () => {
+  assert.equal(cardTitleOf('web_fetch', parseArgsObject('{"url":"https://docs.example.com/spec"}'), ''), '抓取：docs.example.com/spec');
+  assert.equal(cardTitleOf('web_fetch', parseArgsObject('{}'), ''), '抓取网页');
+  assert.equal(cardTitleOf('subagent', parseArgsObject('{"subagent_type":"Scout","description":"检索公开年报"}'), ''), '子调研：Scout — 检索公开年报');
+  assert.equal(cardTitleOf('subagent', parseArgsObject('{}'), ''), '委派子调研');
+});
+
 test('cardStateOf：settled 形状推导（ok/error/stopped/running）', () => {
   assert.equal(cardStateOf({}), 'running');
   assert.equal(cardStateOf({ kind: 'x', isError: false }), 'ok');

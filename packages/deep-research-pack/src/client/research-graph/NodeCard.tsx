@@ -10,25 +10,25 @@ import type { PlanNode } from '../../lib/plan/plan-index.ts'
 import type { GraphNodeState } from '../../lib/plan/graph-model.ts'
 import type { GraphNodeView } from './types.ts'
 import { WorkerChips } from './WorkerChips.tsx'
-import { BUTTON_STYLE, CARD_STYLE, MUTED_STYLE } from './styles.ts'
 import { shortLabel, severityIcon } from './format.ts'
+import styles from './graph.module.css'
 
 
 /** plan.md 节点在 detail 里的只读摘要（只显示真实读到的列）。 */
 function planLines(node: PlanNode): ReactNode {
   return (
     <>
-      <div style={{ opacity: 0.8 }}>
+      <div className={styles.nodeDetailLine}>
         plan：{node.id}
         {node.kind !== undefined ? ` · ${node.kind}` : ''}
         {node.stage !== undefined ? ` · stage ${node.stage}` : ''}
         {node.depth !== undefined ? ` · depth ${node.depth}` : ''}
         {node.ownerRole !== undefined ? ` · plan owner ${node.ownerRole}` : ''}
       </div>
-      {node.question !== undefined && <div style={{ opacity: 0.8 }}>question：{node.question}</div>}
-      {node.deps.length > 0 && <div style={{ opacity: 0.8 }}>plan deps：{node.deps.join(', ')}</div>}
-      {node.output !== undefined && <div style={{ opacity: 0.8 }}>output：{node.output}</div>}
-      {node.acceptance !== undefined && <div style={{ opacity: 0.8 }}>acceptance：{node.acceptance}</div>}
+      {node.question !== undefined && <div className={styles.nodeDetailLine}>question：{node.question}</div>}
+      {node.deps.length > 0 && <div className={styles.nodeDetailLine}>plan deps：{node.deps.join(', ')}</div>}
+      {node.output !== undefined && <div className={styles.nodeDetailLine}>output：{node.output}</div>}
+      {node.acceptance !== undefined && <div className={styles.nodeDetailLine}>acceptance：{node.acceptance}</div>}
     </>
   )
 }
@@ -53,22 +53,22 @@ export function NodeCard(props: {
     const planNode = node.planNode
     const member = node.member
     return (
-      <article key={node.id} id={`research-graph-${node.id}`} style={{ ...CARD_STYLE, borderLeft: `3px solid ${node.state.color}` }}>
+      <article key={node.id} id={`research-graph-${node.id}`} className={styles.cardBox} style={{ borderLeft: `3px solid ${node.state.color}` }}>
         <button
           type="button"
           aria-expanded={expanded}
           onClick={onToggle}
-          style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'inherit', font: 'inherit' }}
+          className={styles.nodeCardBtn}
         >
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-            <strong style={{ fontSize: 13 }}>{node.id}</strong>
-            {planNode?.kind !== undefined && <span style={{ fontSize: 11, opacity: 0.65 }}>{planNode.kind}</span>}
-            {planNode?.stage !== undefined && <span style={{ fontSize: 10, opacity: 0.55 }}>stage {planNode.stage}</span>}
-            {childNodes.length > 0 && <span style={{ fontSize: 10, color: '#6366f1' }}>{t('graphInternalCount', { count: String(childNodes.length) })}</span>}
-            <span style={{ fontSize: 12, flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>{shortLabel(node.subject, 72)}</span>
-            <span style={{ fontSize: 11, color: node.state.color, whiteSpace: 'nowrap' }}>{node.state.icon} {node.state.text}</span>
+          <div className={styles.nodeCardHead}>
+            <strong className={styles.nodeId}>{node.id}</strong>
+            {planNode?.kind !== undefined && <span className={styles.nodeKind}>{planNode.kind}</span>}
+            {planNode?.stage !== undefined && <span className={styles.nodeStage}>stage {planNode.stage}</span>}
+            {childNodes.length > 0 && <span className={styles.internalCount}>{t('graphInternalCount', { count: String(childNodes.length) })}</span>}
+            <span className={styles.nodeSubject}>{shortLabel(node.subject, 72)}</span>
+            <span className={styles.nodeStateLabel} style={{ color: node.state.color }}>{node.state.icon} {node.state.text}</span>
           </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 11, opacity: 0.65, marginTop: 2 }}>
+          <div className={styles.nodeMetaRow}>
             <span>{t('graphOwner', { name: node.ownerName ?? t('graphUnassignedOwner') })}</span>
             {node.blockedBy.length > 0 && <span>deps：{node.blockedBy.join(', ')}</span>}
             {planNode?.depth !== undefined && <span>depth：{planNode.depth}</span>}
@@ -79,24 +79,24 @@ export function NodeCard(props: {
           </div>
         </button>
         {expanded && (
-          <div style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid #00000010', fontSize: 12, lineHeight: 1.6 }}>
+          <div className={styles.planBody}>
             {task?.description !== undefined && task.description !== '' && (
-              <div style={{ whiteSpace: 'pre-wrap', opacity: 0.85, maxHeight: 120, overflowY: 'auto', paddingRight: 4 }}>{task.description}</div>
+              <div className={styles.nodeDesc}>{task.description}</div>
             )}
-            <div style={{ opacity: 0.8 }}>{t('graphOwner', { name: node.ownerName ?? t('graphUnassignedOwner') })}{member !== undefined ? ` (${member.phase})` : ''}</div>
-            {node.blockedBy.length > 0 && <div style={{ opacity: 0.8 }}>{t('graphDependency', { ids: node.blockedBy.join(', ') })}</div>}
-            {task !== undefined && <div style={{ opacity: 0.8 }}>revision：{task.revision}{task.ready ? ' · ready' : ''}</div>}
+            <div className={styles.nodeDetailLine}>{t('graphOwner', { name: node.ownerName ?? t('graphUnassignedOwner') })}{member !== undefined ? ` (${member.phase})` : ''}</div>
+            {node.blockedBy.length > 0 && <div className={styles.nodeDetailLine}>{t('graphDependency', { ids: node.blockedBy.join(', ') })}</div>}
+            {task !== undefined && <div className={styles.nodeDetailLine}>revision：{task.revision}{task.ready ? ' · ready' : ''}</div>}
             {planNode !== undefined
               ? planLines(planNode)
-              : <div style={{ opacity: 0.5 }}>{t('graphNodeNotInPlan')}</div>}
+              : <div className={styles.mutedSlug}>{t('graphNodeNotInPlan')}</div>}
             {childNodes.length > 0 && (
-              <div style={{ marginTop: 4, padding: '4px 6px', border: '1px solid #6366f126', borderRadius: 4, background: '#6366f108' }}>
-                <div style={{ fontSize: 11, color: '#6366f1', marginBottom: 2 }}>{t('graphInternalNodes')}</div>
+              <div className={styles.internalBox}>
+                <div className={styles.internalLabel}>{t('graphInternalNodes')}</div>
                 {childNodes.map((child) => {
                   // 子节点同样走四态词表：没有映射 = 状态未知，不是未执行。
                   const childState = childStateOf(child.id)
                   return (
-                    <div key={child.id} style={{ fontSize: 11, opacity: 0.85 }}>
+                    <div key={child.id} className={styles.nodeChildRow}>
                       <strong>{child.id}</strong>
                       {child.kind !== undefined ? ` · ${child.kind}` : ''}
                       {` · ${childState.icon} ${childState.text}`}
@@ -107,19 +107,19 @@ export function NodeCard(props: {
                 })}
               </div>
             )}
-            {node.attention !== undefined && <div style={{ color: '#b45309', marginTop: 2 }}>{severityIcon(node.attention.severity)} {node.attention.message}</div>}
-            <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+            {node.attention !== undefined && <div className={`${styles.warnText} ${styles.nodeAttentionGap}`}>{severityIcon(node.attention.severity)} {node.attention.message}</div>}
+            <div className={styles.nodeActionsRow}>
               {onOpenOwner !== undefined && member !== undefined && member.id !== leadSessionId
                 && member.phase !== 'failed' && member.phase !== 'provisioning' && (
-                <button type="button" style={BUTTON_STYLE} onClick={() => { onOpenOwner?.() }}>{t('graphOpenOwner')}</button>
+                <button type="button" className={styles.actionButton} onClick={() => { onOpenOwner?.() }}>{t('graphOpenOwner')}</button>
               )}
               <button
                 type="button"
-                style={BUTTON_STYLE}
+                className={styles.actionButton}
                 title={boundSlug !== null ? t('graphCopyRefTitle', { slug: boundSlug, id: node.id }) : t('graphCopyRefTitleBare', { id: node.id })}
                 onClick={onCopy}
               >{copied ? t('graphCopied') : t('graphCopyRef')}</button>
-              <span style={MUTED_STYLE}>{t('graphReadOnlyHint')}</span>
+              <span className={styles.mutedLine}>{t('graphReadOnlyHint')}</span>
             </div>
           </div>
         )}

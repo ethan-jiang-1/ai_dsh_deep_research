@@ -74,8 +74,9 @@ export function useLibraryData({ sessionId, readLibrary }: LibraryDataDeps) {
     setSelectedName(null)
   }, [])
 
-  // 文本到位后保证有一个合法选中（条目消失时重新落到第一条）。
+  // 文本到位后保证有一个合法选中（仅在「我的库」视图生效，避免切换至「内置参考」时覆盖 selectedName）。
   useEffect(() => {
+    if (segment !== 'mine') return
     if (entries.length === 0) {
       setSelectedName(null)
       return
@@ -83,7 +84,7 @@ export function useLibraryData({ sessionId, readLibrary }: LibraryDataDeps) {
     if (selectedName === null || !entries.some((entry) => entry.name === selectedName)) {
       setSelectedName(entries[0]?.name ?? null)
     }
-  }, [entries, selectedName])
+  }, [entries, selectedName, segment])
 
   return {
     text, setText, loadState, setLoadState, loadError, setLoadError,

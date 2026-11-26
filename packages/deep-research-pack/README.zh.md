@@ -111,7 +111,8 @@ dsh --profile deep-research --no-open --port 0
 `--dump-config` 必须显示上面列出的行 id，且 stderr 不得含有
 `patch: entry "…" not found`。真实启动必须打印一个 `dsh web:` token URL，且不含
 `did not activate` 或 `ERR_MODULE_NOT_FOUND`。在 UI 中，本包以“深度研究”出现并带图标；
-右侧栏新增研究状态、配置、图谱与终局报告页签；主界面新增方法库页签。
+顶栏新增状态胶囊，右侧栏提供研究状态（流程轨、契约卡与质量雷达）、配置、图谱（交互式 DAG）、终稿
+（读者/审计/核查清单与引用分屏溯源）和证据卡阅读页签；全局研究工作台提供档案、方法库与研究透镜。
 
 ### 配置
 

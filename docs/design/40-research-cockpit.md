@@ -70,10 +70,13 @@
 | 会话流装配 | `src/client/session-follow.ts` | journal 帧 → 领域帧（follow / 首帧探测 / coach 流） | [§2.1](#cockpit-1) |
 | 启动期工作区动作 | `src/client/workspace-boot.ts` | 选目录 / 恢复记忆 / workspaceOf | [§2.18](#cockpit-18) |
 | 页面级样式 | `src/client/styles.ts` | 问卡窄列 + 教练 composer 抑制 | [§2.1](#cockpit-1) |
+| CSS Modules 类型声明 | `src/client/css-modules.d.ts` | `*.module.css` 模块类型声明 | [§2.1](#cockpit-1) |
 | UI 字典（中文） | `src/client/locales/zh.ts` | 中文文案与键集正本（`t()` 的 zh 侧） | [§2.1](#cockpit-1) |
 | UI 字典（英文） | `src/client/locales/en.ts` | 英文文案（键集与占位符由 zh 侧约束） | [§2.1](#cockpit-1) |
 | UI 字典（折层中文） | `src/client/locales/zh-fold.ts` | 七步/摘要/图谱等数据面文案（zh） | [§2.1](#cockpit-1) |
 | UI 字典（折层英文） | `src/client/locales/en-fold.ts` | 数据面文案（en） | [§2.1](#cockpit-1) |
+| UI 字典（驾驶舱扩展中文） | `src/client/locales/zh-cockpit.ts` | 起步模板、契约雷达、证据卡与工作台文案（zh） | [§2.1](#cockpit-1) |
+| UI 字典（驾驶舱扩展英文） | `src/client/locales/en-cockpit.ts` | 驾驶舱扩展文案（en） | [§2.1](#cockpit-1) |
 | 折层翻译桥 | `src/lib/shared/i18n.ts` | 纯折算函数接受 `t` 的类型与缺省插值 | [§2.1](#cockpit-1) |
 | 方法编辑模型指令 | `src/client/method-library/coach-prompts.ts` | 发给 Method Editor 的内部 prompt（非 UI） | [§2.7](#cockpit-7) |
 | 方法编辑工具指令 | `src/client/method-library/operation-prompts.ts` | 写库操作的内部指令（非 UI） | [§2.7](#cockpit-7) |
@@ -92,10 +95,26 @@
 | 配置页签模型 | `src/client/research-config/config-model.ts` | 四字段执行面表 / 标本骨架 / 详情三态 | [§2.6](#cockpit-6) |
 | 项目默认状态机 | `src/client/defaults/store.ts` | 按 session 读 `research-defaults.json` + 方法库、经 host command 写、按钮与面板共用快照 | [§2.6](#cockpit-6) |
 | 项目默认按钮 | `src/client/defaults/DefaultsButton.tsx` | composer 左侧状态按钮（自动 / 方法 X / 已设 N 项 / 需检查） | [§2.6](#cockpit-6) |
-| 项目默认面板 | `src/client/defaults/DefaultsPanel.tsx` | 研究配置页签顶部「项目默认」块（方法只读；深度/输出/来源可改；无保存） | [§2.6](#cockpit-6) |
+| 项目默认面板 | `src/client/defaults/DefaultsPanel.tsx` | 研究配置页签顶部「项目默认」块（方法只读；深度/输出/来源用 DSH `Menu` 选单；无保存） | [§2.6](#cockpit-6) |
+| 项目默认菜单控件 | `src/client/defaults/SelectMenu.tsx` | 基于 `ui-primitives` `Menu` 的弹出单选按钮 | [§2.6](#cockpit-6) |
 | 项目默认显示投影 | `src/client/defaults/labels.ts` | canonical id → 字典 key（按钮/面板共用；不翻译数据） | [§2.6](#cockpit-6) |
 | 配置页签取数 | `src/client/research-config/useConfigFeed.ts` | 库读四态 / journal 绑定 / 方法节七态（含 question 读失败/空）/ 发送回执三态（视图只消费） | [§2.6](#cockpit-6) |
 | 状态流纯状态机 | `src/client/research-status/status-state.ts` | 状态页签状态机 `reduceStatusFeed` 与数据驱动警告列表 `collectStatusNotices`（可无浏览器单测） | [§2.1](#cockpit-1) |
+| 研究契约卡 | `src/client/research-status/ProtocolCard.tsx` | HITL1 结构化契约（protocol.json）只读摘要与降级提示 | [§2.1](#cockpit-1) |
+| 证据质量雷达 | `src/client/research-status/QualityRadar.tsx` | Topic×Lens 覆盖矩阵与信源分层/质量分级统计 | [§2.1](#cockpit-1) |
+| 证据卡阅读页签 | `src/client/ResearchEvidenceTab.tsx` | 认领 `evidence/*.md`，展示 8 字段与 Question List | [§2.9](#cockpit-9) |
+| 终稿核查清单视图 | `src/client/research-final/ClaimsAuditView.tsx` | claims×verdicts 逐条核查视图与证据卡分屏入口 | [§2.9](#cockpit-9) |
+| 终稿续研页脚 | `src/client/research-final/FinalFollowupFooter.tsx` | 解析「下一版优先项」预填按钮与「三种改法」折叠引导 | [§2.9](#cockpit-9) |
+| 终稿章节目录 | `src/client/research-final/FinalToc.tsx` | 终稿 H1–H3 折叠目录 | [§2.9](#cockpit-9) |
+| 右栏页签上下文菜单项 | `src/client/ResearchTabMenuItem.tsx` | `sidebar.right.tab.menu.item` 上下文动作：仅研究类页签注入「打开研究工作台」 | [§2.7](#cockpit-7) |
+| 共享会话流合流 | `src/client/session-stream-store.ts` | 按 `sessionId` refcount 复用单条 `follow` 流 | [§2.1](#cockpit-1) |
+| 顶栏进度胶囊 | `src/client/ResearchHeaderPill.tsx` | `session.header.actions` 进度胶囊 + HoverCard 摘要 | [§2.1](#cockpit-1) |
+| 回合里程碑折叠 | `src/client/research-turn.ts` | Turn 级关键节点累积 Definition（`uiConversation`） | [§2.1](#cockpit-1) |
+| 回合里程碑卡 | `src/client/ResearchMilestoneCard.tsx` | `chat.turnTail` 结构化里程碑卡 + 直达入口 | [§2.1](#cockpit-1) |
+| 研究档案与透镜折算 | `src/lib/workspace/runs-catalog.ts` | 三位置 `drt_*` 扫描与 8 透镜目录 | [§2.7](#cockpit-7) |
+| 全局研究工作台面板 | `src/client/ResearchHubPanel.tsx` | `sidebar.panellist` + `main` 全局 Hub（Runs / 方法库 / 透镜） | [§2.7](#cockpit-7) |
+| 工作台 Runs 视图 | `src/client/research-hub/RunsView.tsx` | 三位置研究档案卡片与跳转 | [§2.7](#cockpit-7) |
+| 工作台透镜视图 | `src/client/research-hub/LensesView.tsx` | 8 条研究透镜与起草预填 | [§2.7](#cockpit-7) |
 | 图谱流纯状态机 | `src/client/research-graph/graph-state.ts` | 研究图谱页签状态机 `reduceGraphFeed`（绑定/plan/快照转移纯函数，可无浏览器单测） | [§2.8](#cockpit-8) |
 
 页签八区（渲染顺序，自上而下；条件区在括号里标注）：
@@ -145,15 +164,20 @@
 | [method-of-question](../../packages/deep-research-pack/src/lib/method-library/method-of-question.ts) | question.md 文本 ＋ bundle 在场性/读取态 → 「本次研究」区七态 | 无 run／文件缺／question 读失败／question 空／未记录／无法判定／已记录；**判不了就说判不了**——绝不回落成默认打法名（旧 run 未记录 = 合法形态，不回填）；读方法节须显式足额 limit（模板第 32–40 行卡默认 40 行，BUG-026 同族） |
 | [receipt-fold](../../packages/deep-research-pack/src/lib/run/receipt-fold.ts) | 发送结果 ＋ 回话信号 ＋ 库前后快照 → 回执三态与 diff | 已发送（prompt ok）／Lead 已回话（发送**之后**的 assistant 事件）／已落盘（回读对账出 diff：`把「找来源」从 A 改成 B`）；对账读不出变化就退到已回话，不冒充落地 |
 | [research-defaults](../../packages/deep-research-pack/src/lib/workspace/research-defaults.ts) | `research-defaults.json` 文本 → typed 值 / problems；patch 合并/删除/序列化；按钮粗状态；command 结果解析 | 缺席 = auto（不写 sentinel、不物化默认）；六个 output shape = HITL1 面（protocol 的 literature_review 不在本层）；source families/authorities 与 protocol-core 对账 |
+| [protocol-fold](../../packages/deep-research-pack/src/lib/run/protocol-fold.ts) | `protocol.json` → `ProtocolContract`（强类型 + 五态） | `decodeProtocol` + `readProtocolContract` 走 `readArtifact`；缺 `schema`/`status` 即 `invalid` |
+| [evidence-matrix](../../packages/deep-research-pack/src/lib/run/evidence-matrix.ts) | `topics.md` + `evidence/*.md` → Topic×Lens 矩阵与质量分布 | 解析 8 字段 frontmatter；`unreadable`/`invalid` 卡不折成 0 |
+| [claims-verdicts](../../packages/deep-research-pack/src/lib/run/claims-verdicts.ts) | `claims.json` + `verdicts.json` → 逐条核查视图模型 | 缺 verdict 显性标 `UNVERIFIED`；五态降级不冒充通过 |
+| [evidence-card](../../packages/deep-research-pack/src/lib/run/evidence-card.ts) | `evidence/*.md` + 资源地址 → 证据卡正文/元数据与认领谓词 | `isEvidenceAddress` / `evidenceAddressOf` 仅认领三位置 `evidence/*.md` |
+| [citation-linkify](../../packages/deep-research-pack/src/lib/run/citation-linkify.ts) | 终稿 Markdown → 内存预转可点证据引用链接 | 跳过围栏代码块与行内代码；绝不改写磁盘 `final*.md` |
 
 ---
 
 <a id="cockpit-1"></a>
-### 2.1 研究状态页签
+### 2.1 研究状态页签与顶栏/回合胶囊
 
-**文件**：[ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) + [TrackRail.tsx](../../packages/deep-research-pack/src/client/research-status/TrackRail.tsx)（流程轨道：取色/步态符号/回边几何）+ [useStatusFeed.ts](../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts)（数据装配：journal follow / bundle 扫描 / 绑定可信性 / 锚点与版本面）+ `src/client/research-status/useMemberActivity.ts` + `src/client/research-status/types.ts` + [run-version.ts](../../packages/deep-research-pack/src/lib/run/run-version.ts)
+**文件**：[ResearchStatusTab.tsx](../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) + [TrackRail.tsx](../../packages/deep-research-pack/src/client/research-status/TrackRail.tsx)（`StateDot(appearance="step")` + CSS Modules + `data-step-*`）+ [ProtocolCard.tsx](../../packages/deep-research-pack/src/client/research-status/ProtocolCard.tsx) + [QualityRadar.tsx](../../packages/deep-research-pack/src/client/research-status/QualityRadar.tsx) + [useStatusFeed.ts](../../packages/deep-research-pack/src/client/research-status/useStatusFeed.ts) + `src/client/research-status/useMemberActivity.ts` + `src/client/research-status/types.ts` + [ResearchHeaderPill.tsx](../../packages/deep-research-pack/src/client/ResearchHeaderPill.tsx) + [ResearchMilestoneCard.tsx](../../packages/deep-research-pack/src/client/ResearchMilestoneCard.tsx) + [session-stream-store.ts](../../packages/deep-research-pack/src/client/session-stream-store.ts) + [run-version.ts](../../packages/deep-research-pack/src/lib/run/run-version.ts)
 
-右栏页签，八区按 §2 开头的渲染顺序表自上而下；⑤ 另带 rerun 版本面一行（`v1 已交付 · v2 证据扩张 rerun · HITL2 待审`）+ 已交付后的只读折叠块「还不满意？三种改法」（`rerun-triage` 文案）；队员多路 journal 订阅生命周期在页签私有 hook，注入类型在同目录定义
+右栏页签按 §2 渲染序展示：HITL 挂起/流失败恢复 → ⓪ 业务摘要 → ② `TrackRail` 流程轨道 → **研究契约卡**（`protocol.json`）→ ③ 研究问题 → **证据质量雷达**（`topics.md × evidence/*.md` Topic×Lens 矩阵与 Tier/Quality 分布，缺口显性提示）→ ⑤ 证据与交付 + `rerun` 版本面 + 三种改法只读卡 → ④ 活动流 → ⑦ 队员折叠区。同会话的 `ResearchHeaderPill`（`session.header.actions` + `HoverCard`）、`ResearchMilestoneCard`（`chat.turnTail`）与状态/图谱页签共用 `session-stream-store` 单路 refcounted `follow` 流。
 
 <a id="cockpit-2"></a>
 ### 2.2 活标题
@@ -193,27 +217,27 @@
 **项目默认块（D50）**：页签顶部；方法行只读（库默认/按题型），深度/输出/来源可改；首项「自动」= 字段省略 = Lead 按题型判断（不是系统默认）；无保存按钮，面板经 `/research-defaults` host command 写 workspace 文件；按钮与面板共用 `src/client/defaults/store.ts`。
 
 <a id="cockpit-7"></a>
-### 2.7 方法库主 tab
+### 2.7 全局研究工作台与方法库（`ResearchHubPanel` + `MethodLibraryView`）
 
-**文件**：[MethodLibraryView.tsx](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) + [views.tsx](../../packages/deep-research-pack/src/client/method-library/views.tsx)（详情、来源选择、摘要、访谈/表单，纯展示）+ [coach.tsx](../../packages/deep-research-pack/src/client/method-library/coach.tsx)（访谈对话面板；根级 portal + store）+ [styles.ts](../../packages/deep-research-pack/src/client/method-library/styles.ts) + [locales.ts](../../packages/deep-research-pack/src/client/locales.ts)（方法库文案字典）+ [library-fold.ts](../../packages/deep-research-pack/src/lib/method-library/library-fold.ts) + [method-draft.ts](../../packages/deep-research-pack/src/lib/method-library/method-draft.ts)（`method-draft` 围栏解析 → 表单回填）+ [method-library-write.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-write.ts)（库条目写入纯函数与默认语义）+ [method-library-operation.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-operation.ts)（操作命令编解码）+ [method-library-commands.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-commands.ts)（Host 操作投影与一次性 claim）+ [method-library-events.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-events.ts)（方法编辑 live event 解码）+ [method-library-hash.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-hash.ts)（浏览器 SHA-256）+ [method-library-operation-state.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-operation-state.ts)（预期整库快照与结算判据）+ [method-library-read.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-read.ts)（分页读取完整性）+ [method-library-source.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-source.ts)（run 来源完成判据与最终版本选择）+ [method-library-tool.ts](../../packages/deep-research-pack/src/method-library-tool.ts)（host 工具 `method_library_upsert` / `set_default` / `remove`）+ [MethodLibraryToolCard.tsx](../../packages/deep-research-pack/src/client/MethodLibraryToolCard.tsx)（写库工具卡）
+**文件**：[ResearchHubPanel.tsx](../../packages/deep-research-pack/src/client/ResearchHubPanel.tsx) + [RunsView.tsx](../../packages/deep-research-pack/src/client/research-hub/RunsView.tsx) + [LensesView.tsx](../../packages/deep-research-pack/src/client/research-hub/LensesView.tsx) + [runs-catalog.ts](../../packages/deep-research-pack/src/lib/workspace/runs-catalog.ts) + [MethodLibraryView.tsx](../../packages/deep-research-pack/src/client/MethodLibraryView.tsx) + [views.tsx](../../packages/deep-research-pack/src/client/method-library/views.tsx) + [coach.tsx](../../packages/deep-research-pack/src/client/method-library/coach.tsx) + [styles.ts](../../packages/deep-research-pack/src/client/method-library/styles.ts) + [locales.ts](../../packages/deep-research-pack/src/client/locales.ts) + [MethodLibraryToolCard.tsx](../../packages/deep-research-pack/src/client/MethodLibraryToolCard.tsx) + [library-fold.ts](../../packages/deep-research-pack/src/lib/method-library/library-fold.ts) + [method-draft.ts](../../packages/deep-research-pack/src/lib/method-library/method-draft.ts) + [method-library-write.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-write.ts) + [method-library-operation.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-operation.ts) + [method-library-commands.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-commands.ts) + [method-library-events.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-events.ts) + [method-library-hash.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-hash.ts) + [method-library-operation-state.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-operation-state.ts) + [method-library-read.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-read.ts) + [method-library-source.ts](../../packages/deep-research-pack/src/lib/method-library/method-library-source.ts)
 
-主界面 `conversation.view` 第二 tab（与「对话」同排），两列工作台：左列搜索/选择我的库或内置参考；右列在读态显示条目详情，在新建/编辑态以同一活动草稿显示顶部摘要与「访谈 / 检查表单」两个互斥表面；≤640px 时左列折叠为可切换的全宽库面板，工作台仅隐藏不卸载，返回时保留草稿与 Coach。新建先从零、某条内置参考或一条有完成记录的 run 中显式选来源；run 只以有界预览读取 question.md 与最高 `final/vN.md`，完成判据要求数值最高版本、可读 question，以及 `delivered.json` 或旧式 `acceptance.md` 的接收回执。摘要显示名称、来源、四字段短摘要、`n/4` 完成度与字段来源；摘要字段可直接切到表单并聚焦，内置参考详情可直接作为新方法来源。普通保存、保存并设为默认、独立设/清默认与删除均为明确动作，未满足名称与四字段 trim 非空时保存禁用。活动草稿维护单调 revision，候选回填只接受当前 turn 的未重复 seq 且 revision 仍等于该 turn base 或上一接受版本；用户中途修改后的迟到候选不合并。方法编辑是 D37 的第 5 个 preset（非研究；工具面不含 web/fs），每个活动草稿使用独立 root session，React 树在根级 `shell.overlay`、`createPortal` 进页面访谈区；页面激活时外层主 composer 由 CSS 隐藏（外层问卡让位）。保存/删除/默认命令带 `operationId`（保存另带 SHA-256）；Host 只接受 owning Session 的 owner prompt 与匹配 `callId`，写入后回读，Client 再完整读取整库并核对目标态。超时或回读不明保持 lock；刷新只观察当前状态，不解锁也不重发。
+除 `conversation.view` 内的「方法库」tab 外，经 DSH `sidebar.panellist` + `main` 注册全局「研究工作台」：即使无 active conversation / 在空白首屏也可随时打开，使用 `SegmentedTabs` 切换 **Runs（三位置 `drt_*` 研究档案）/ 方法库 / 研究透镜（8 条内置透镜 + 工作区 `DefaultsPanel` 项目默认）**；并在 `sidebar.right.tab.menu.item` 为 5 个研究类右栏页签注入「打开研究工作台」菜单项，且各页签均通过 `tab.actions.bindCommands({ refresh })` 响应右栏原生的刷新命令。方法编辑走 D37 第 5 个 preset（`shell.overlay` portal；因仍保留 `conversation.view` 快捷入口，按 M6-3 在 `index.ts` 保留最小 `installCoachComposerStyles`）。`useLibraryData` 支持切到「内置参考」时保留选定模板，细节弹窗支持「以此为基础开始」带入新建向导。
 
 <a id="cockpit-8"></a>
 ### 2.8 研究图谱页签
 
-旧图快照读取走 `readArtifact('plan/vN.md')`，状态机含 `empty`（0 字节）/ `invalid`（非空但零节点或解析失败）/ `missing` / `unreadable`；rail 分别显示「快照为空/无法解析/读不到」，不把空快照画成零节点图。`plan/` **目录**的列举另有一态（`snapshotsState`）：抛错/不可读 ≠ 没有快照目录（rail 显示「快照目录读取失败」而不是「无旧图快照」）；差异卡对 `SnapshotState` 穷举给文案（只有 loading/idle 才是「读取中」，失败/空/非法各说各话并给重试），重试同时重跑快照读取。
+旧图快照读取走 `readArtifact('plan/vN.md')`，状态机含 `empty` / `invalid` / `missing` / `unreadable`；`DagMap.tsx` 采用 CSS Modules + `--dsw-*` 语义令牌，支持点击节点高亮上下游依存边，并在有依赖边时把选中节点详情聚焦置于图下方、其余节点收进「查看全部节点」折叠块（消减"图 + 下方全量卡片"双倍占位冗余）。
 
-**文件**：[ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) + [DagMap.tsx](../../packages/deep-research-pack/src/client/research-graph/DagMap.tsx)（DAG 小图，几何/交互只读它）+ [useGraphFeed.ts](../../packages/deep-research-pack/src/client/research-graph/useGraphFeed.ts)（数据装配：journal 绑定 / plan.md 与快照读取）+ [NodeCard.tsx](../../packages/deep-research-pack/src/client/research-graph/NodeCard.tsx)（节点卡与展开详情）+ [GraphVersionRail.tsx](../../packages/deep-research-pack/src/client/research-graph/GraphVersionRail.tsx)（版本轨与旧图快照）+ [GraphNotices.tsx](../../packages/deep-research-pack/src/client/research-graph/GraphNotices.tsx)（plan 结构提示 / 需要你注意）+ [state-note.ts](../../packages/deep-research-pack/src/client/research-graph/state-note.ts)（降级说明的纯映射）+ [styles.ts](../../packages/deep-research-pack/src/client/research-graph/styles.ts)+ [WorkerChips.tsx](../../packages/deep-research-pack/src/client/research-graph/WorkerChips.tsx) + [format.ts](../../packages/deep-research-pack/src/client/research-graph/format.ts) + `src/client/research-graph/types.ts` + [plan-graph.ts](../../packages/deep-research-pack/src/lib/plan/plan-graph.ts)（Team 任务图）+ [plan-index.ts](../../packages/deep-research-pack/src/lib/plan/plan-index.ts)（plan.md 解析/结构提示）+ [graph-model.ts](../../packages/deep-research-pack/src/lib/plan/graph-model.ts)
+**文件**：[ResearchGraphTab.tsx](../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) + [DagMap.tsx](../../packages/deep-research-pack/src/client/research-graph/DagMap.tsx) + [useGraphFeed.ts](../../packages/deep-research-pack/src/client/research-graph/useGraphFeed.ts) + [NodeCard.tsx](../../packages/deep-research-pack/src/client/research-graph/NodeCard.tsx) + [GraphVersionRail.tsx](../../packages/deep-research-pack/src/client/research-graph/GraphVersionRail.tsx) + [GraphNotices.tsx](../../packages/deep-research-pack/src/client/research-graph/GraphNotices.tsx) + [state-note.ts](../../packages/deep-research-pack/src/client/research-graph/state-note.ts) + [styles.ts](../../packages/deep-research-pack/src/client/research-graph/styles.ts) + [WorkerChips.tsx](../../packages/deep-research-pack/src/client/research-graph/WorkerChips.tsx) + [format.ts](../../packages/deep-research-pack/src/client/research-graph/format.ts) + `src/client/research-graph/types.ts` + [graph-model.ts](../../packages/deep-research-pack/src/lib/plan/graph-model.ts)
 
-右栏**只读观察面**：顶层 plan 节点 / `agentTeam` 任务画成 SVG DAG（节点 + 依赖边 + 同层并行 + 状态色）；复合节点 W3.1… 默认收在父节点详情，图上标 `+n`（内部节点数）；`plan.md` 提供 parent/lifecycle/kind/stage（派生）/depth/acceptance、版本与重写记录；节点详情可复制 `drt_<slug>/W3.1` 引用；重号/悬空 parent/deps/墓碑/跨组显示只读结构提示；无 plan/无 blocked_by 时明确「没有可画的 DAG」，不画假图；不提供调整动作
+右栏**只读观察面**：顶层 plan 节点 / `agentTeam` 任务画成交互式 SVG DAG（节点 + 依赖边 + 同层并行 + 状态色）；复合节点收在父节点详情（图上标 `+n`）；节点详情可复制 `drt_<slug>/W3.1` 引用；无 plan/blocked_by 时明确「没有可画的 DAG」，不画假图、不提供调整动作。
 
 <a id="cockpit-9"></a>
-### 2.9 终稿页签
+### 2.9 终稿页签与证据卡阅读页签
 
-**文件**：[ResearchFinalTab.tsx](../../packages/deep-research-pack/src/client/ResearchFinalTab.tsx) + [final-target.ts](../../packages/deep-research-pack/src/lib/run/final-target.ts)
+**文件**：[ResearchFinalTab.tsx](../../packages/deep-research-pack/src/client/ResearchFinalTab.tsx) + [ClaimsAuditView.tsx](../../packages/deep-research-pack/src/client/research-final/ClaimsAuditView.tsx) + [FinalFollowupFooter.tsx](../../packages/deep-research-pack/src/client/research-final/FinalFollowupFooter.tsx) + [FinalToc.tsx](../../packages/deep-research-pack/src/client/research-final/FinalToc.tsx) + [citation-linkify.ts](../../packages/deep-research-pack/src/lib/run/citation-linkify.ts) + [ResearchEvidenceTab.tsx](../../packages/deep-research-pack/src/client/ResearchEvidenceTab.tsx) + [evidence-card.ts](../../packages/deep-research-pack/src/lib/run/evidence-card.ts) + [final-target.ts](../../packages/deep-research-pack/src/lib/run/final-target.ts)
 
-右栏页签：**认领 `drt_<slug>/` 的终稿地址族**（`final.md` / `final/vN.md` / `final/readable.md` / `final/readable-vN.md`；`extension` 带；交付卡片、结句内联引用、Files 树落到同一页签）——正文**有读者版默认看读者版**，否则看 `final/` 版本账最高版（`审计版 vN`）；可切「看审计版 / 看读者版」，没有版本账才直接读 `final.md`。静音条只讲盘上事实（`读者版 vN` / `审计版 vN` / `当前工作稿` / `审查未过`；**不写"已交付"**——版本目录不是交付凭证，交付只由⑤ 的 `present` 见证说），`过程 →` 回研究状态；正文末尾同款只读折叠块「还不满意？三种改法」。读面是一张定表（`final.md` / `final/vN` / `final/readable*` / `review.md` / `final/`），经 run-context 按三位置解析；review.md 读到 eof（终局判定在文末）。`final/` 目录读失败（unreadable）与「没有版本账」（absent）分流：前者显式失败 + 重试，不回落工作稿（否则会把草案伪装成终稿并隐藏同版读者版）；任何失败出口都原子清空上一轮正文与降级条，失败屏不被旧 `text` 遮蔽
+右栏终稿页签认领 `drt_<slug>/` 终稿地址族，顶部使用 DSH `SegmentedControl` 在 **读者版 / 审计版 / 核查清单（`claims.json × verdicts.json`）** 三态间切换，并带「分屏对照」按钮；正文配备折叠目录 `FinalToc`（H1–H3）与内存 `linkifyEvidenceCitations` 引用转换（不改盘上 `final*.md`），点击 `[来源: evidence/xx.md]` 或核查清单里的证据标签通过 `MarkdownDelegateProvider.openFile` → `openResource(..., { preferNewPane: true })` 在右栏分屏打开 `ResearchEvidenceTab`，完整展示证据卡 8 字段 frontmatter 与 Question List；页脚由 `FinalFollowupFooter` 从 `final*.md` 解析「下一版优先项」生成点击预填按钮（经 `inputActions.insertText` 不自动发送），与「三种改法」折叠卡共同守住 D18 只读边界。
 
 <a id="cockpit-10"></a>
 ### 2.10 浏览器 RunSource 适配器
@@ -398,9 +422,7 @@ composer 左侧 `conversation.input.left` 的状态按钮（有 session 才渲�
   Lead 回填后 5s 内与 Team 板对齐；不自动建 task、不改历史 plan。投影未就绪时显示
   「等待团队投影」，不预设缺口。
 
-- **方法库主 tab 只在 active conversation 出现**：DSH 的空白 New Session hero 不渲染
-  `conversation.view` tabs（「对话」也没有）；管理库需打开一个有历史的会话。后续若要让
-  新会话也能进库，应在 hero/左栏补入口，不改 `conversation.view` 本身。
+- **方法库双入口**：`conversation.view` 方法库 tab 在空白 New Session hero 时隐身，现由全局「研究工作台」（`sidebar.panellist` + `main`）在任意会话甚至空白首屏兜底打开（Runs / 方法库 / 研究透镜）；`conversation.view` 页签本身语义不变。
 
 - **右栏 pane 仍可能钉在上一会话（vendor 面板会话绑定，2026-10-21 实测）**：主视图切到绑定会话 A
   后，右栏仍显示会话 B 的页签内容（client-load.entry 实测：active row = d47b…，面板仍是
@@ -420,7 +442,8 @@ composer 左侧 `conversation.input.left` 的状态按钮（有 session 才渲�
   组队——该窗口即组队+侦察进行段，活动流区分两者）；HTML 步骤条通过适配器消费同一 `deriveSteps`。
 - **工具卡只 2 张**：`team_task_*` 等协调类工具不进对话渲染流（harness 排除），团队观察
   由 `ui-agent-team` 任务板承担；
-- 活标题与页签体各开一条 follow 流共用 WebSocket 数据面（v1 接受，合流是后续优化）；
+- 同会话观测面（状态页签 / 图谱页签 / 顶栏进度胶囊 / 回合里程碑 / 活标题）已由 `session-stream-store` 按 `sessionId` refcount 合流复用单条 `follow` 流；
+- **左栏会话行徽标延后**：`sidebar.session.row.leading` 因缺 Host 级聚合态而不按行订阅 `session.follow`，后续需等上游或 pack Host 侧提供统一摘要投影再接入；
 - 终稿页签的标题固定「终稿」（不做活标题）：同一会话先后跑两场研究会有两个同名页签，靠静音条的
   run 路径（hover）与正文 H1 区分——真咬到再升活标题；
 - 交付门的判据是 `present` 事件在 journal 窗口内（回合窗口 ≈ 最近 50 条消息）：窗口外的老交付
@@ -440,4 +463,5 @@ RFC [observability-gui](../../notes/implemented/2026-09-24-observability-gui.md)
 [research-status-ui](../../notes/archived/2026-09-25-research-status-ui.md) →
 [bundle-face-wiring](../../notes/archived/2026-09-26-bundle-face-wiring.md) →
 [right-pane-ux-debt](../../notes/archived/2026-09-28-right-pane-ux-debt.md) →
-[cockpit-naming](../../notes/archived/2026-09-28-cockpit-naming.md)。门禁台账引用 = [evaluation §L0](../evaluation.md)。
+[cockpit-naming](../../notes/archived/2026-09-28-cockpit-naming.md) →
+[cockpit-ux-ui-native-upgrade](../../notes/implemented/2026-11-26-cockpit-ux-ui-native-upgrade.md)。门禁台账引用 = [evaluation §L0](../evaluation.md)。

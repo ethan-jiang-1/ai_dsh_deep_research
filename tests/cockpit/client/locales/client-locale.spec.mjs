@@ -10,11 +10,14 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { en, zh } from '../../../../packages/deep-research-pack/src/client/locales.ts';
+import { zhCockpit } from '../../../../packages/deep-research-pack/src/client/locales/zh-cockpit.ts';
+import { enCockpit } from '../../../../packages/deep-research-pack/src/client/locales/en-cockpit.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
 const INDEX = readFileSync(join(ROOT, 'packages', 'deep-research-pack', 'src', 'client', 'index.ts'), 'utf8');
 
 test('locale 字典：zh 与 en 键集一致，无空值', () => {
+  assert.deepEqual(Object.keys(enCockpit).sort(), Object.keys(zhCockpit).sort(), 'zhCockpit/enCockpit 键集必须一致');
   const zhKeys = Object.keys(zh).sort();
   const enKeys = Object.keys(en).sort();
   assert.ok(zhKeys.length >= 50, `防空语料：字典只有 ${zhKeys.length} 个键`);

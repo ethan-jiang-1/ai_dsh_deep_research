@@ -21,6 +21,7 @@ const CLIENT = join(ROOT, 'packages', 'deep-research-pack', 'src', 'client')
 /** 只能由真浏览器/真装配覆盖的 `.ts`（逐件理由；新增件不登记 = 红）。 */
 const CLIENT_SMOKE_ONLY = {
   'index': 'client 半入口装配：只注册 slot/页签/活标题，行为归 client-load.entry 真浏览器',
+  'css-modules.d': 'type-only：CSS Modules 模块声明，无运行时行为',
   'styles': 'CSS 字符串与 DOM 注入，没有纯函数行为',
   'research-graph/styles': 'CSS 字符串与 DOM 注入，没有纯函数行为',
   'research-graph/types': 'type-only：只有类型声明，没有运行时行为',

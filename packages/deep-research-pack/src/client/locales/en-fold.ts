@@ -247,6 +247,10 @@ export const enFold = {
   toolCardSpawnDetail: 'Team: {name} — {detail}',
   toolCardSearch: 'Search',
   toolCardSearchQueries: 'Search: {queries}',
+  toolCardFetch: 'Fetch page',
+  toolCardFetchUrl: 'Fetch: {url}',
+  toolCardSubagent: 'Delegate subagent',
+  toolCardSubagentDetail: 'Subagent: {detail}',
 
   triageTitle: 'Not satisfied? Three ways to change it',
   triageHint: 'Copy one sentence and send it to me; each line states the cost of that approach.',

@@ -103,6 +103,8 @@ export function inspectKeylessGraph(entries, {
       report(`unreadable local dependency: ${error.message}`)
       return
     }
+    // CSS Modules 等样式表资产不含 JS import / 调用，确认在图边界内且可读即可放行。
+    if (/\.css$/i.test(file)) return
     const parsed = parseKeylessImports(text, file)
     for (const error of parsed.syntaxErrors) report(`syntax error: ${error}`)
     for (const name of parsed.forbiddenCalls) report(`forbidden runtime call: ${name}`)

@@ -26,8 +26,8 @@
  * 折算住 `plan-graph 折算件`（Team 图）与 `plan-index 折算件`（plan.md 解析）；本组件只画。fail-soft：空投影/空任务/缺 plan
  * 都退化为如实空态，不 throw。
  */
-import { useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import { countText } from '../lib/shared/i18n.ts'
 import type { TeamMemberProjection, TeamProjection, TeamTaskView } from '@deepseek-ai/dsh-experimental-agent-team/client'
 import {
@@ -59,25 +59,10 @@ import { NodeCard } from './research-graph/NodeCard.tsx'
 import { GraphVersionRail } from './research-graph/GraphVersionRail.tsx'
 import { GraphNotices } from './research-graph/GraphNotices.tsx'
 import { DagMap } from './research-graph/DagMap.tsx'
+import styles from './research-graph/graph.module.css'
 export type { ResearchGraphInjected, ResearchGraphTabProps } from './research-graph/types.ts'
 
 /** plan.md 只读表头附近（节点表在文首；缺文件合法）。 */
-
-
-const HEADER_STYLE: CSSProperties = { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 8 }
-const MUTED_STYLE: CSSProperties = { fontSize: 11, opacity: 0.62, lineHeight: 1.5 }
-const BADGE_STYLE: CSSProperties = {
-  fontSize: 10, padding: '1px 6px', borderRadius: 999, background: '#00000008',
-  border: '1px solid #00000014', opacity: 0.8,
-}
-const EMPTY_STYLE: CSSProperties = { fontSize: 12, opacity: 0.6, lineHeight: 1.6, padding: '6px 0' }
-const CARD_STYLE: CSSProperties = {
-  border: '1px solid #00000014', borderRadius: 6, padding: '6px 8px', marginBottom: 6, background: '#00000005',
-}
-const BANNER_STYLE: CSSProperties = {
-  marginBottom: 8, padding: '6px 10px', borderRadius: 6,
-  background: '#f59e0b12', border: '1px solid #f59e0b38',
-}
 
 
 
@@ -124,6 +109,9 @@ function formatClock(ms: number): string {
  * @param props - 槽标准 props + 注入面（readFile / openOwner）。
  */
 export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
+  const tabInfo = typeof (props as { useTabInfo?: () => { tab?: { actions?: { bindCommands?: (c: { refresh: () => void }) => () => void } } } }).useTabInfo === 'function'
+    ? (props as { useTabInfo: () => { tab?: { actions?: { bindCommands?: (c: { refresh: () => void }) => () => void } } } }).useTabInfo()
+    : undefined
   // 当前会话若是 teammate，读 Lead 的团队投影（TeamAction 同款；队员自己的投影没有整队视图）。
   const leadSessionId = props.useSession((snapshot) => snapshot.subagent?.address.parentSessionId) ?? props.sessionId
   const team: TeamProjection | undefined = props.useSessions((state) => state.projectionsBySession[leadSessionId]?.values.agentTeam)
@@ -134,6 +122,11 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     snapshotPlan, snapshotState, showSnapshotPlan, setShowSnapshotPlan, planLoadedAt, followError,
     snapshotsState,
   } = useGraphFeed(props, leadSessionId)
+  useEffect(() => {
+    const bind = tabInfo?.tab?.actions?.bindCommands
+    if (typeof bind !== 'function') return undefined
+    return bind({ refresh: retry })
+  }, [tabInfo, retry])
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   // journal → 本会话可信绑定的 run bundle（只用于 plan 基址；不折活动流）。
@@ -289,17 +282,17 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
 
   return (
     // 滚动义务在页签体自己（vendor .tabBody = overflow:hidden 的定高 flex 列——同状态页/终稿页）。
-    <div style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto' }}>
-      <div style={HEADER_STYLE}>
-        <strong style={{ fontSize: 14 }}>{props.t('graphHeader')}</strong>
-        <span style={BADGE_STYLE}>{props.t('graphReadonly')}</span>
-        {boundSlug !== null && <span style={{ ...MUTED_STYLE, opacity: 0.5 }}>run drt_{shortLabel(boundSlug, 32)}</span>}
-        <span style={MUTED_STYLE}>
+    <div className={styles.tabRoot}>
+      <div className={styles.tabHeader}>
+        <strong className={styles.tabTitle}>{props.t('graphHeader')}</strong>
+        <span className={styles.readonlyBadge}>{props.t('graphReadonly')}</span>
+        {boundSlug !== null && <span className={styles.mutedSlug}>run drt_{shortLabel(boundSlug, 32)}</span>}
+        <span className={styles.mutedLine}>
           {hasPlan ? `${props.t('graphPlanLoaded', { version: '' })} ${String(topPlanNodes.length)} ${topPlanNodes.length === 1 ? 'top-level' : 'top-level'}${planNodes.length !== topPlanNodes.length ? ` / ${String(planNodes.length)} nodes` : ''} · ` : ''}{countText(props.t, counts.total, 'graphTeamTasksOne', 'graphTeamTasksOther', { done: String(counts.done) })}
         </span>
-        {counts.running > 0 && <span style={{ ...MUTED_STYLE, color: '#2563eb' }}>● {props.t('graphRunning', { count: String(counts.running) })}</span>}
-        {counts.ready > 0 && <span style={{ ...MUTED_STYLE, color: '#b45309' }}>○ {props.t('graphReady', { count: String(counts.ready) })}</span>}
-        {counts.stalled > 0 && <span style={{ ...MUTED_STYLE, color: '#b45309' }}>⚠ {props.t('graphStalled', { count: String(counts.stalled) })}</span>}
+        {counts.running > 0 && <span className={`${styles.runningText} ${styles.mutedLine}`}>● {props.t('graphRunning', { count: String(counts.running) })}</span>}
+        {counts.ready > 0 && <span className={`${styles.warnText} ${styles.mutedLine}`}>○ {props.t('graphReady', { count: String(counts.ready) })}</span>}
+        {counts.stalled > 0 && <span className={`${styles.warnText} ${styles.mutedLine}`}>⚠ {props.t('graphStalled', { count: String(counts.stalled) })}</span>}
       </div>
 
       <GraphVersionRail
@@ -319,48 +312,50 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
 
       {/* 结构差异：只比 id/lifecycle/deps（重编号靠 superseded_by，不解析散文）。 */}
       {graphView === 'diff' && (
-        <div style={CARD_STYLE}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{props.t('graphStructDiff', { from: String(latestSnapshot) })}</div>
+        <div className={styles.cardBox}>
+          <div className={styles.diffHeading}>{props.t('graphStructDiff', { from: String(latestSnapshot) })}</div>
           {planDiff === null ? (
             <>
-              <div style={MUTED_STYLE}>{snapshotDiffMessage(snapshotState, props.t)}</div>
+              <div className={styles.mutedLine}>{snapshotDiffMessage(snapshotState, props.t)}</div>
               {(snapshotState === 'missing' || snapshotState === 'empty' || snapshotState === 'invalid' || snapshotState === 'unreadable') && (
-                <button type="button" onClick={retry} style={{ marginTop: 6, fontSize: 12 }}>{props.t('graphRetryRead')}</button>
+                <button type="button" onClick={retry} className={styles.retryBtn}>{props.t('graphRetryRead')}</button>
               )}
             </>
           ) : (
             <>
-              <div style={{ fontSize: 12, marginBottom: 2 }}>{planDiff.summary}</div>
-              {planDiff.added.length > 0 && <div style={{ fontSize: 11, color: '#16a34a' }}>{props.t('planAdded', { items: planDiff.added.join(', ') })}</div>}
-              {planDiff.removed.length > 0 && <div style={{ fontSize: 11, color: '#b45309' }}>{props.t('planRemoved', { items: planDiff.removed.join(', ') })}</div>}
-              {planDiff.aliases.length > 0 && <div style={{ fontSize: 11, color: '#6366f1' }}>{props.t('planRenumbered', { items: planDiff.aliases.map((alias) => `${alias.from} → ${alias.to}`).join('、') })}</div>}
-              {planDiff.dependencyChanges.length > 0 && <div style={{ fontSize: 11, color: '#b45309' }}>{props.t('planDepsChanged', { items: planDiff.dependencyChanges.map((change) => `${change.id}（${change.from.join(',') || '—'} → ${change.to.join(',') || '—'}）`).join('；') })}</div>}
-              {planDiff.kept.length > 0 && <div style={MUTED_STYLE}>{countText(props.t, planDiff.kept.length, 'graphKeptOne', 'graphKeptOther')}</div>}
+              <div className={styles.diffSummary}>{planDiff.summary}</div>
+              {planDiff.added.length > 0 && <div className={`${styles.addedText} ${styles.diffDetail}`}>{props.t('planAdded', { items: planDiff.added.join(', ') })}</div>}
+              {planDiff.removed.length > 0 && <div className={`${styles.warnText} ${styles.diffDetail}`}>{props.t('planRemoved', { items: planDiff.removed.join(', ') })}</div>}
+              {planDiff.aliases.length > 0 && <div className={`${styles.aliasText} ${styles.diffDetail}`}>{props.t('planRenumbered', { items: planDiff.aliases.map((alias) => `${alias.from} → ${alias.to}`).join('、') })}</div>}
+              {planDiff.dependencyChanges.length > 0 && <div className={`${styles.warnText} ${styles.diffDetail}`}>{props.t('planDepsChanged', { items: planDiff.dependencyChanges.map((change) => `${change.id}（${change.from.join(',') || '—'} → ${change.to.join(',') || '—'}）`).join('；') })}</div>}
+              {planDiff.kept.length > 0 && <div className={styles.mutedLine}>{countText(props.t, planDiff.kept.length, 'graphKeptOne', 'graphKeptOther')}</div>}
             </>
           )}
         </div>
       )}
 
-      {/* 映射缺口：说“图谱无法判断”，不说“未执行”——这是 BUG-043 的产品层修复点。 */}
-      {hasPlan && teamReady && coverageWarning !== null && (
-        <div style={{ ...BANNER_STYLE, background: '#f59e0b12', borderColor: '#f59e0b48' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2, color: '#b45309' }}>{props.t('graphMappingGap')}</div>
-          <div style={MUTED_STYLE}>{coverageWarning}</div>
-        </div>
-      )}
-
-      {stateNote !== null && (
-        <div style={BANNER_STYLE}>
-          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{stateNote.title}</div>
-          <div style={MUTED_STYLE}>{stateNote.body}</div>
-          {planState === 'error' && (
-            <button type="button" onClick={retry} style={{ marginTop: 6, fontSize: 12 }}>{props.t('graphRetryRead')}</button>
+      {(hasPlan && teamReady && coverageWarning !== null || stateNote !== null) && (
+        <div className={styles.banner}>
+          {hasPlan && teamReady && coverageWarning !== null && (
+            <div className={stateNote !== null ? styles.bannerGroupGap : undefined}>
+              <div className={`${styles.bannerTitle} ${styles.bannerTitleWarn}`}>{props.t('graphMappingGap')}</div>
+              <div className={styles.mutedLine}>{coverageWarning}</div>
+            </div>
+          )}
+          {stateNote !== null && (
+            <div>
+              <div className={styles.bannerTitle}>{stateNote.title}</div>
+              <div className={styles.mutedLine}>{stateNote.body}</div>
+              {planState === 'error' && (
+                <button type="button" onClick={retry} className={styles.retryBtn}>{props.t('graphRetryRead')}</button>
+              )}
+            </div>
           )}
         </div>
       )}
 
       {hasPlan && (
-        <div style={{ ...MUTED_STYLE, marginBottom: 6 }}>
+        <div className={styles.planLoadedRow}>
           {props.t('graphPlanLoaded', { version: plan?.version !== undefined ? ` ${String(plan.version)}` : '' })} · {countText(props.t, coverage.planNodes, 'graphCoverageOne', 'graphCoverageOther', { top: String(coverage.topNodes) })} · {teamReady ? coverageLineOf(coverage, props.t) : props.t('graphWaitingTeam')}
           {planLoadedAt !== null ? props.t('refreshAt', { clock: formatClock(planLoadedAt) }) : ''}
         </div>
@@ -369,46 +364,62 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       <GraphNotices planIssues={planIssues} attention={attention} onFocusTask={focusTask} t={props.t} />
 
       {team === undefined && (
-        <div style={EMPTY_STYLE}>
+        <div className={styles.emptyBlock}>
           {props.t('graphNoTeam')}
         </div>
       )}
       {team !== undefined && tasks.length === 0 && planNodes.length === 0 && (
-        <div style={EMPTY_STYLE}>
+        <div className={styles.emptyBlock}>
           {props.t('graphNoTasks')}
         </div>
       )}
 
-      {hasEdges && graphView === 'current' && (
-        <>
-          <DagMap nodes={graphNodes} selectedId={expandedId} childCounts={childCounts} onSelect={setExpandedId} t={props.t} />
-          <div style={{ ...MUTED_STYLE, marginBottom: 8 }}>
-            {props.t('graphEdgesHint')}
-          </div>
-        </>
-      )}
-
-      {graphView === 'current' && (hasEdges
-        ? waves.map((wave) => (
-          <section key={wave.level} style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>
-              WAVE {wave.level + 1}{wave.tasks.length > 1 ? props.t('parallelCount', { count: String(wave.tasks.length) }) : ''}
+      {hasEdges && graphView === 'current' && (() => {
+        const selectedNode = expandedId !== null ? graphNodes.find((n) => n.id === expandedId) ?? null : null
+        return (
+          <>
+            <DagMap nodes={graphNodes} selectedId={expandedId} childCounts={childCounts} onSelect={setExpandedId} t={props.t} />
+            <div className={styles.edgesHint}>
+              {props.t('graphEdgesHint')}
             </div>
-            {wave.tasks.map((node) => renderNodeCard(node))}
-          </section>
-        ))
-        : graphNodes.length > 0 && (
-          <section style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>{props.t('graphNoEdges')}</div>
-            {graphNodes.map((node) => renderNodeCard(node))}
-          </section>
-        ))}
+            {selectedNode !== null && (
+              <section className={styles.selectedNodeSection} data-testid="graph-selected-node">
+                <div className={styles.sectionEyebrow}>{props.t('graphSelectedNode')}</div>
+                {renderNodeCard(selectedNode)}
+              </section>
+            )}
+          </>
+        )
+      })()}
+
+      {graphView === 'current' && (hasEdges ? (
+        <details className={styles.allNodesDetails} data-testid="graph-all-nodes">
+          <summary className={styles.allNodesSummary}>
+            {props.t('graphAllNodesToggle', { count: String(graphNodes.length) })}
+          </summary>
+          <div className={styles.allNodesBody}>
+            {waves.map((wave) => (
+              <section key={wave.level} className={styles.selectedNodeSection}>
+                <div className={styles.waveTitle}>
+                  WAVE {wave.level + 1}{wave.tasks.length > 1 ? props.t('parallelCount', { count: String(wave.tasks.length) }) : ''}
+                </div>
+                {wave.tasks.map((node) => renderNodeCard(node))}
+              </section>
+            ))}
+          </div>
+        </details>
+      ) : graphNodes.length > 0 && (
+        <section className={styles.selectedNodeSection}>
+          <div className={styles.waveTitle}>{props.t('graphNoEdges')}</div>
+          {graphNodes.map((node) => renderNodeCard(node))}
+        </section>
+      ))}
 
       {unmappedTasks.length > 0 && (
-        <section style={{ marginBottom: 10 }}>
-          <div style={{ fontSize: 11, opacity: 0.55, letterSpacing: 0.5, marginBottom: 4 }}>{props.t('graphUnplannedTasks')}</div>
+        <section className={styles.selectedNodeSection}>
+          <div className={styles.waveTitle}>{props.t('graphUnplannedTasks')}</div>
           {unmappedTasks.map((task) => (
-            <div key={task.id} style={{ ...CARD_STYLE, fontSize: 12 }}>
+            <div key={task.id} className={`${styles.cardBox} ${styles.diffSummary}`}>
               <strong>{task.id}</strong> · {shortLabel(task.subject ?? task.id, 60)} · {props.t('graphOwner', { name: task.ownerName ?? props.t('unassigned') })} · {task.status}
             </div>
           ))}
@@ -416,12 +427,9 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       )}
 
       {planState === 'ready' && planText !== null && (
-        <details style={{ marginTop: 8 }}>
-          <summary style={{ ...MUTED_STYLE, cursor: 'pointer' }}>{props.t('graphPlanSource')}</summary>
-          <pre style={{
-            maxHeight: 180, overflow: 'auto', whiteSpace: 'pre-wrap', fontSize: 11, lineHeight: 1.5,
-            background: '#00000005', padding: 6, borderRadius: 4, marginTop: 4,
-          }}>{planText}</pre>
+        <details className={styles.planDetails}>
+          <summary className={styles.detailsSummary}>{props.t('graphPlanSource')}</summary>
+          <pre className={styles.planSourcePre}>{planText}</pre>
         </details>
       )}
     </div>

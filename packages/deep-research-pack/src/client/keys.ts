@@ -38,6 +38,11 @@ export const RESEARCH_FINAL_PATTERN = 'final.md'
 export const RESEARCH_FINAL_PATTERN_LEDGER = 'v*.md'
 export const RESEARCH_FINAL_PATTERN_READER = 'readable*.md'
 
+/** 「证据卡」页签：接管 `drt_<slug>/evidence/*.md`（与终稿分屏对照）。 */
+export const RESEARCH_EVIDENCE_TAB_KEY = 'dsh-deep-research-pack/research-evidence'
+export const RESEARCH_EVIDENCE_KIND = 'research-evidence'
+export const RESEARCH_EVIDENCE_PATTERN = '*.md'
+
 /** 「研究状态」页签的 keyed 槽名（sidebar.right.pane.tab）。 */
 export const RESEARCH_PANE_SLOT = 'sidebar.right.pane.tab'
 
@@ -49,6 +54,9 @@ export const RESEARCH_BRAND_MARK_SLOT = 'sidebar.brand.mark'
 
 /** 品牌名槽（宿主 ui-sidebar 声明；Orca 名的落点——与 mark 槽并列的 single slot）。 */
 export const RESEARCH_BRAND_NAME_SLOT = 'sidebar.brand.name'
+
+/** 空会话首屏 Hero 品牌标槽（宿主 ui-conversation 声明；Orca 标的第二个正牌落点）。 */
+export const RESEARCH_HERO_BRAND_MARK_SLOT = 'conversation.hero.brand.mark'
 
 /** 产品首屏起步卡的 dock 槽名（conversation.input.dock；D38）。 */
 export const RESEARCH_START_DOCK_SLOT = 'conversation.input.dock'
@@ -65,7 +73,7 @@ export const RESEARCH_TOOLVIEW_SLOT = 'tool.call.toolview'
 /** 研究语义工具卡的 wire 工具名族（toolview 槽的 keyed key——必须与 wire 注册名逐字一致，
  *  拼错不报错、永不渲染）。族正本住这里（审计 P3 件①收口：曾住 ResearchToolCard.tsx，
  *  门禁 client-keys 规则③④⑤把守单一正本）。新增研究语义工具卡时在族尾追加 wire 名。 */
-export const RESEARCH_TOOL_KEYS = ['spawn_teammate', 'web_search'] as const
+export const RESEARCH_TOOL_KEYS = ['spawn_teammate', 'web_search', 'web_fetch', 'subagent'] as const
 
 /** 主界面「方法库」tab 的 conversation.view 槽名（Chat/Trajectory 同排）。 */
 export const METHOD_LIBRARY_VIEW = 'conversation.view' as const
@@ -87,3 +95,21 @@ export const METHOD_LIBRARY_REMOVE = 'method_library_remove'
 
 /** 方法库默认操作工具的 wire 名（toolview 卡 key 与 host 工具名逐字一致）。 */
 export const METHOD_LIBRARY_DEFAULT = 'method_library_set_default'
+
+/** 会话顶栏研究状态胶囊槽与 entry id。 */
+export const RESEARCH_HEADER_PILL_SLOT = 'conversation.session.header.actions'
+export const RESEARCH_HEADER_PILL_ID = 'deep-research-status-pill'
+
+/** 会话回合尾研究里程碑卡槽、entry id 与 Turn data key。 */
+export const RESEARCH_TURN_TAIL_SLOT = 'conversation.chat.turnTail'
+export const RESEARCH_TURN_TAIL_ID = 'deep-research-milestone'
+export const RESEARCH_TURN_DATA_KEY = 'deep-research-milestone'
+
+/** 全局「研究工作台（Research Hub）」左侧导航入口与 main keyed 面板（M6）。 */
+export const RESEARCH_HUB_MAIN_SLOT = 'main'
+export const RESEARCH_HUB_PANEL_SLOT = 'sidebar.panellist'
+export const RESEARCH_HUB_PANEL_ID = 'deep-research-hub'
+
+/** 右栏页签更多菜单项槽位与入口 id。 */
+export const RESEARCH_TAB_MENU_ITEM_SLOT = 'sidebar.right.tab.menu.item'
+export const RESEARCH_TAB_MENU_HUB_ID = 'deep-research-open-hub'

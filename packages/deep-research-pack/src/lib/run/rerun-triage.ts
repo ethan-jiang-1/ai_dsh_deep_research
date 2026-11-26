@@ -80,3 +80,61 @@ export function triageFoldLines(rows: readonly TriageRow[] = RERUN_TRIAGE_ROWS):
     translateZh('triageHint'),
   ]
 }
+
+const FENCE_RE = /^\s{0,3}(`{3,}|~{3,})/
+const PRIORITY_HEADING_RE = /^##\s+(?:下一版优先项|next[- ]version priorities)\s*$/i
+const NEXT_H2_RE = /^##\s+\S/
+const LIST_ITEM_RE = /^(?:[-*]|\d+[.)])\s+(.+)$/
+const QUICK_DEEPEN_RE = /^若要加深，可补[:：]\s*(.+)$/
+
+function cleanPriorityLine(raw: string): string | null {
+  const text = raw.replace(/\*\*/g, '').replace(/`/g, '').trim()
+  if (text === '' || /^<.*>$/.test(text)) return null
+  return text
+}
+
+/**
+ * 从终稿正文抽取 `## 下一版优先项`（或 `## Next-version priorities`）条目，
+ * 供观测面只读预填（D18：只生成草稿文本，不触发发送）。跳过围栏代码块与模板占位符。
+ */
+export function extractNextVersionPriorities(markdown: string | null | undefined): readonly string[] {
+  if (typeof markdown !== 'string' || markdown.trim() === '') return []
+  const lines = markdown.split(/\r?\n/)
+  let fenceChar: string | null = null
+  let fenceLen = 0
+  let inSection = false
+  const out: string[] = []
+
+  for (const rawLine of lines) {
+    const trimmed = rawLine.trim()
+    const fenceMatch = FENCE_RE.exec(rawLine)
+    if (fenceMatch?.[1] !== undefined) {
+      const marker = fenceMatch[1]
+      if (fenceChar === null) {
+        fenceChar = marker[0] ?? null
+        fenceLen = marker.length
+      } else if (marker[0] === fenceChar && marker.length >= fenceLen) {
+        fenceChar = null
+        fenceLen = 0
+      }
+      continue
+    }
+    if (fenceChar !== null) continue
+
+    if (!inSection) {
+      if (PRIORITY_HEADING_RE.test(trimmed)) inSection = true
+      continue
+    }
+    if (NEXT_H2_RE.test(trimmed)) break
+
+    const listMatch = LIST_ITEM_RE.exec(trimmed)
+    const quickMatch = QUICK_DEEPEN_RE.exec(trimmed)
+    const candidate = listMatch?.[1] ?? quickMatch?.[1]
+    if (candidate === undefined) continue
+    const cleaned = cleanPriorityLine(candidate)
+    if (cleaned === null) continue
+    out.push(cleaned)
+    if (out.length >= 5) break
+  }
+  return out
+}

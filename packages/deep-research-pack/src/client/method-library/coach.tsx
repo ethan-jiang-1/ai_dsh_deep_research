@@ -17,6 +17,7 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { PropsRenderFactories, PropsRenderSlots, PropsRuntime, TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ConversationViewsProps } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { METHOD_COACH_CHAT } from '../keys.ts'
+import css from './library.module.css'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface SlotMap {
@@ -225,29 +226,26 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
   return (
     <aside
       data-method-coach-panel=""
-      style={{
-        flex: '1 1 auto', width: '100%', minWidth: 0, minHeight: 0, display: visible ? 'flex' : 'none', flexDirection: 'column', overflow: 'hidden',
-        borderTop: '1px solid var(--dsw-alias-border-l1)', background: 'var(--dsw-alias-bg-layer-1)',
-      }}
+      className={css.coachPanel}
+      style={{ display: visible ? 'flex' : 'none' }}
     >
-      <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--dsw-alias-bg-layer-2)' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <strong style={{ fontSize: 13 }}>{title}</strong>
-          <span style={{ fontSize: 11, opacity: 0.6 }}>{readyLabel}</span>
+      <div className={css.coachHeader}>
+        <div className={css.coachTitleRow}>
+          <strong className={css.coachTitle}>{title}</strong>
+          <span className={css.coachReady}>{readyLabel}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-          {coach !== null && <button type="button" data-method-coach-start="" disabled={started || startBusy} onClick={startInterview} style={{ border: '1px solid var(--dsw-alias-border-l2)', borderRadius: 4, padding: '5px 10px', background: 'var(--dsw-alias-bg-base)' }}>{started ? startedLabel : startBusy ? pendingLabel : startLabel}</button>}
+        <div className={css.coachActions}>
+          {coach !== null && <button type="button" data-method-coach-start="" disabled={started || startBusy} onClick={startInterview} className={css.coachStartBtn}>{started ? startedLabel : startBusy ? pendingLabel : startLabel}</button>}
         </div>
       </div>
       {error !== null && (
-        <div style={{ fontSize: 12, color: 'var(--dsw-alias-label-error)', padding: '6px 12px' }}>{t('coachUnavailable', { detail: error ?? '' })}</div>
+        <div className={css.coachError}>{t('coachUnavailable', { detail: error ?? '' })}</div>
       )}
       <div
         ref={(element) => { setHost(element) }}
         data-method-coach-host=""
-        style={{
-          flex: 1, minHeight: 0, display: started ? 'flex' : 'none', overflow: 'hidden', background: 'var(--dsw-alias-bg-base)',
-        }}
+        className={css.coachHost}
+        style={{ display: started ? 'flex' : 'none' }}
       />
     </aside>
   )

@@ -90,6 +90,10 @@ export const ARTIFACT_POLICY: Readonly<Record<string, ArtifactPolicy>> = {
   'plan.md': { nonEmpty: true, json: false },
   'leads.md': { nonEmpty: true, json: false },
   'findings.md': { nonEmpty: true, json: false },
+  'topics.md': { nonEmpty: true, json: false },
+  'protocol.json': { nonEmpty: true, json: true },
+  'claims.json': { nonEmpty: true, json: true },
+  'verdicts.json': { nonEmpty: true, json: true },
   'final.md': { nonEmpty: true, json: false },
   'final/readable.md': { nonEmpty: true, json: false },
 }
@@ -143,7 +147,12 @@ export function readStateOf(outcome: { readonly ok: boolean; readonly reason?: '
 }
 
 /** JSON 工件受控键：调用方必须传 `decoder`，编译期与运行期双阻断未解码访问。 */
-export type JsonArtifactName = 'delivered.json' | 'review/readiness.json'
+export type JsonArtifactName =
+  | 'delivered.json'
+  | 'review/readiness.json'
+  | 'protocol.json'
+  | 'claims.json'
+  | 'verdicts.json'
 
 /** 运行时 Schema 解码器：把 JSON 解析结果收窄为确定领域类型；非法返回 `{ ok: false }`。 */
 export type JsonDecoder<T> = (

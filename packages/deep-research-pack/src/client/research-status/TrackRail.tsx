@@ -1,22 +1,12 @@
 // TrackRail.tsx — 「研究状态」页签的流程轨道（②）：◆立项确认 + 主轨 + ◆交付审阅 + 交付，
-// 外加 rerun 回边的 U 形连线与图例。
-//
-// 从 ResearchStatusTab.tsx 原样切出（2026-10-28 卫生轮 维度2）：轨道的取色/步态符号/列位/回边
-// 几何是一整块自成体系的呈现逻辑，此前与页签体的数据装配混在一个 424 行函数里。切出后改"轨道
-// 长什么样"只读本文件；页签体只回答"数据是什么"。
-//
-// 输入刻意收窄成三样：锚点、步骤、交付版本数——父级的 face/hitl 细节不进本层（传 null 即"尚未
-// 绑定/未读到"，与 face===null 同义）。步态符号语法与图例文案逐字保留（2026-09-28 trial 的实红
-// 教训：done 与 pending 都读成"没走过"，回边 ▲ 紧贴芯片造成"挖掘被点亮"的误读）。
+// 使用 ui-primitives StateDot(appearance="step") 与自适应换行步进轨。
 import type { ReactNode } from 'react'
+import { StateDot, Tag, type StateDotState } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { RunAnchor } from '../../lib/events/hitl-fold.ts'
 import type { RunStep } from '../../lib/run/run-fold.ts'
 import { countText } from '../../lib/shared/i18n.ts'
-
-/** 列位（1 起）：a1=1，steps[0..5]=2..7，a2=8，final=9；回边跨"挖掘列 → a2 列"。 */
-const EV_COL = 5
-const A2_COL = 8
+import css from './status.module.css'
 
 export function TrackRail(props: {
   readonly anchors: readonly RunAnchor[]
@@ -31,18 +21,47 @@ export function TrackRail(props: {
   const railVisible = hasFace || hitlPending || anchors.some((a) => a.state !== 'upcoming')
   if (!railVisible) return null
 
-  const anchorChip = (a: RunAnchor): ReactNode => (
-    <span key={a.key} style={{ padding: '2px 8px', borderRadius: 4, fontWeight: a.state === 'pending' ? 700 : 400, background: a.state === 'pending' ? '#f59e0b33' : a.state === 'passed' ? '#22c55e22' : '#0000000d', color: a.state === 'pending' ? '#b45309' : a.state === 'passed' ? '#16a34a' : '#888' }}>
-      ◆{a.label}{a.state === 'pending' && a.questions > 0 ? countText(t, a.questions, 'questionCountOne', 'questionCountOther') : ''} {a.state === 'pending' ? '⏳' : a.state === 'passed' ? '✓' : '·'}
-    </span>
-  )
-  // 步态符号（✓ 已过 / ● 进行中 / ○ 未到 / ? 待定）与重入点虚线描边 = 既有视觉契约；? 只给读失败的步。
+  const anchorChip = (a: RunAnchor): ReactNode => {
+    const tone = a.state === 'pending' ? 'warning' : a.state === 'passed' ? 'success' : 'neutral'
+    return (
+      <Tag key={a.key} tone={tone} className={css.stepAnchor}>
+        ◆{a.label}{a.state === 'pending' && a.questions > 0 ? countText(t, a.questions, 'questionCountOne', 'questionCountOther') : ''} {a.state === 'pending' ? '⏳' : a.state === 'passed' ? '✓' : '·'}
+      </Tag>
+    )
+  }
+
   const loopOn = anchors[1] !== undefined && anchors[1].state !== 'upcoming'
+  const stepDotState = (s: RunStep): StateDotState => {
+    if (s.state === 'unknown') return 'warning'
+    if (!hasFace) return 'idle'
+    if (s.state === 'current') return 'ongoing'
+    if (s.state === 'done') return 'done'
+    return 'idle'
+  }
+
   const stepChip = (s: RunStep): ReactNode => {
     const reentry = hasFace && loopOn && s.key === 'evidence'
     const unknown = s.state === 'unknown'
+    const stateClass = unknown
+      ? css.stepUnknown
+      : !hasFace
+        ? css.stepNoFace
+        : s.state === 'current'
+          ? css.stepCurrent
+          : s.state === 'done'
+            ? css.stepDone
+            : css.stepPending
     return (
-      <span key={s.key} style={{ padding: '2px 8px', borderRadius: 4, opacity: !hasFace ? 0.35 : s.state === 'pending' ? 0.4 : 1, fontWeight: hasFace && s.state === 'current' ? 700 : unknown ? 600 : 400, background: hasFace && s.state === 'current' ? '#f59e0b33' : unknown ? '#f59e0b22' : hasFace && s.state === 'done' ? '#22c55e22' : '#0000000d', color: unknown ? '#b45309' : hasFace && s.state === 'done' ? '#16a34a' : undefined, outline: reentry ? '1.5px dashed #c08a2e' : undefined, outlineOffset: reentry ? 1 : undefined }}>{s.state === 'done' ? '✓ ' : s.state === 'current' ? '● ' : unknown ? '? ' : '○ '}{s.label}</span>
+      <span
+        key={s.key}
+        data-step-key={s.key}
+        data-step-state={s.state}
+        data-step-reentry={reentry ? 'true' : 'false'}
+        className={`${css.stepPill} ${stateClass}${reentry ? ` ${css.stepReentry}` : ''}`}
+      >
+        <StateDot appearance="step" state={stepDotState(s)} size={12} />
+        <span>{s.label}{unknown ? ' ?' : ''}</span>
+      </span>
     )
   }
 
@@ -55,21 +74,19 @@ export function TrackRail(props: {
   ]
 
   return (
-    <>
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${railNodes.length}, auto)`, alignItems: 'start', marginBottom: 8, fontSize: 12 }}>
-        {railNodes.map((n, i) => (
-          <div key={n.key} style={{ gridRow: 1, gridColumn: i + 1 }}>{n.chip}</div>
+    <div className={css.railSection}>
+      <div className={css.railFlex}>
+        {railNodes.map((n) => (
+          <span key={n.key} className={css.railNode}>{n.chip}</span>
         ))}
-        {loopOn && (
-          <div style={{ gridRow: 2, gridColumn: `${EV_COL} / ${A2_COL + 1}`, position: 'relative', margin: '4px 6px 0', border: '1px dashed #c08a2e', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '2px 6px 3px', color: '#b45309', textAlign: 'center', minWidth: 0, lineHeight: 1.4, whiteSpace: 'normal' }}>
-            <span style={{ position: 'absolute', top: -9, left: 3, fontSize: 10, color: '#b45309' }}>▲</span>
-            {t('trackRerunLegend', { version: faceVersions !== null && faceVersions >= 2 ? t('trackRerunSuffix', { version: String(faceVersions) }) : '' })}
-          </div>
-        )}
       </div>
-      {hasFace && (
-        <div style={{ fontSize: 11, opacity: 0.55, marginBottom: 8 }}>{t('trackLegend')}</div>
+      {loopOn && (
+        <div className={css.rerunLoop}>
+          <span className={css.rerunArrow}>▲</span>
+          {t('trackRerunLegend', { version: faceVersions !== null && faceVersions >= 2 ? t('trackRerunSuffix', { version: String(faceVersions) }) : '' })}
+        </div>
       )}
-    </>
+      {hasFace && <div className={css.trackLegend}>{t('trackLegend')}</div>}
+    </div>
   )
 }

@@ -59,3 +59,29 @@ test('BUG-399 切会话复位二次确认：s2 首次点击仍只是上膛，不
     rtl.cleanup()
   }
 })
+
+test('SelectMenu：点击深度控件打开 DSH Menu 并在选中项后触发 setPatch', async () => {
+  const rtl = await loadRtl()
+  const sent = []
+  const store = makeStore(sent)
+  const { container } = rtl.render(createElement(DefaultsPanel, { sessionId: 's1', store, t }))
+  try {
+    await rtl.waitFor(() => {
+      if (container.querySelector('[data-testid=defaults-depth]')?.value !== 'quick') throw new Error('wait s1')
+    })
+    const depthBtn = container.querySelector('[data-testid=defaults-depth]')
+    rtl.fireEvent.click(depthBtn)
+    const deepItem = await rtl.waitFor(() => {
+      const items = [...document.querySelectorAll('[role="menuitem"]')]
+      const match = items.find((el) => el.textContent?.includes(t('defaultsDepthDeep')))
+      if (!match) throw new Error('wait menuitem')
+      return match
+    })
+    rtl.fireEvent.click(deepItem)
+    await rtl.waitFor(() => { if (sent.length === 0) throw new Error('wait patch') })
+    assert.equal(sent.length, 1)
+    assert.match(sent[0].line, /effort=deep|deep/)
+  } finally {
+    rtl.cleanup()
+  }
+})

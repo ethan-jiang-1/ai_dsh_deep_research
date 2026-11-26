@@ -5,11 +5,13 @@
  * 「研究配置」页签的「项目默认」块。无 session 不渲染（槽本身 session scope）。
  */
 import type { ReactNode } from 'react'
+import { Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { defaultsButtonState } from '../../lib/workspace/research-defaults.ts'
 import { AUTHORITY_LABEL, DEPTH_LABEL, FAMILY_LABEL, RECENCY_LABEL, SHAPE_LABEL } from './labels.ts'
 import { useDefaults, type DefaultsSnapshot, type DefaultsStore } from './store.ts'
+import css from './defaults.module.css'
 
 /** 注入面：会话 + 同一份 store + 打开配置页签的闭包。 */
 export interface DefaultsButtonInjected {
@@ -81,39 +83,24 @@ export function DefaultsButton(props: DefaultsButtonProps): ReactNode {
       : (warn === '' ? tooltipOf(state, props.t) : `${tooltipOf(state, props.t)}\n${props.t('defaultsWarnings', { detail: warn })}`)
   const active = !loading && !invalid && (button.kind === 'method' || button.kind === 'count')
   return (
-    <button
-      type="button"
-      data-testid="deep-research-defaults"
-      data-defaults-state={loading ? 'loading' : invalid ? 'invalid' : button.kind}
-      aria-label={tooltip === '' ? label : `${label} — ${tooltip}`}
-      title={tooltip}
-      onClick={props.openConfig}
-      style={{
-        height: 26,
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 4,
-        padding: '0 8px',
-        borderRadius: 13,
-        border: `1px solid ${active ? 'var(--dsh-accent, #93c5fd)' : 'var(--dsh-border, #d1d5db)'}`,
-        background: active ? 'color-mix(in srgb, var(--dsh-accent, #2563eb) 10%, transparent)' : 'transparent',
-        color: active ? 'var(--dsh-accent, #1d4ed8)' : 'var(--dsh-text-secondary, #374151)',
-        fontSize: 12,
-        lineHeight: 1,
-        cursor: 'pointer',
-        whiteSpace: 'nowrap',
-        maxWidth: 220,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-      }}
-    >
-      <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" style={{ flex: '0 0 auto' }}>
-        <path d="M1 3h10M1 6h10M1 9h10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-        <circle cx="3.5" cy="3" r="1.4" fill="currentColor" />
-        <circle cx="7" cy="6" r="1.4" fill="currentColor" />
-        <circle cx="4.5" cy="9" r="1.4" fill="currentColor" />
-      </svg>
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
-    </button>
+    <Tooltip label={tooltip} side="top">
+      <button
+        type="button"
+        data-testid="deep-research-defaults"
+        data-defaults-state={loading ? 'loading' : invalid ? 'invalid' : button.kind}
+        aria-label={tooltip === '' ? label : `${label} — ${tooltip}`}
+        title={tooltip}
+        onClick={props.openConfig}
+        className={active ? `${css.triggerButton} ${css.triggerButtonActive}` : css.triggerButton}
+      >
+        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" className={css.triggerIcon}>
+          <path d="M1 3h10M1 6h10M1 9h10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+          <circle cx="3.5" cy="3" r="1.4" fill="currentColor" />
+          <circle cx="7" cy="6" r="1.4" fill="currentColor" />
+          <circle cx="4.5" cy="9" r="1.4" fill="currentColor" />
+        </svg>
+        <span className={css.triggerLabel}>{label}</span>
+      </button>
+    </Tooltip>
   )
 }

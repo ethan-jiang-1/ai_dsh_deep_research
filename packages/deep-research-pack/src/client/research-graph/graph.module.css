@@ -1,0 +1,418 @@
+/* graph.module.css — 研究图谱与 DagMap 样式（全部复用 DSH --dsw-alias-* token）。 */
+
+.root {
+  padding: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.headerTitle {
+  font-size: 14px;
+}
+
+.muted {
+  font-size: 11px;
+  color: var(--dsw-alias-label-secondary);
+  line-height: 1.5;
+}
+
+.badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-2);
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.empty {
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+  line-height: 1.6;
+  padding: 6px 0;
+}
+
+.card {
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-sm, 6px);
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.banner {
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: var(--dsw-radius-sm, 6px);
+  background: var(--dsw-alias-state-warn-tertiary);
+  border: 0.5px solid color-mix(in srgb, var(--dsw-alias-state-warn-primary) 28%, transparent);
+}
+
+.bannerTitle {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.bannerTitleWarn {
+  color: var(--dsw-alias-state-warn-label);
+}
+
+.errorBanner {
+  background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 10%, transparent);
+  border-color: var(--dsw-alias-state-error-secondary);
+}
+
+.errorText {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.attentionBanner {
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border-radius: var(--dsw-radius-sm, 6px);
+  background: var(--dsw-alias-state-warn-tertiary);
+  border: 0.5px solid color-mix(in srgb, var(--dsw-alias-state-warn-primary) 30%, transparent);
+}
+
+.dagWrap {
+  overflow-x: auto;
+  margin-bottom: 6px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-md, 8px);
+  padding: 6px 8px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.dagSvg {
+  display: block;
+  margin: 0 auto;
+}
+
+.dagNode {
+  cursor: pointer;
+}
+
+.planBody {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 0.5px solid var(--dsw-alias-border-l1);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.internalBox {
+  margin-top: 4px;
+  padding: 4px 6px;
+  border: 0.5px solid color-mix(in srgb, var(--dsw-alias-brand-primary) 24%, transparent);
+  border-radius: var(--dsw-radius-xs, 4px);
+  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 8%, transparent);
+}
+
+.internalLabel {
+  font-size: 11px;
+  color: var(--dsw-alias-brand-primary);
+  margin-bottom: 2px;
+}
+
+.internalCount {
+  font-size: 10px;
+  color: var(--dsw-alias-brand-primary);
+}
+
+.warnText {
+  color: var(--dsw-alias-state-warn-label);
+}
+
+.runningText {
+  color: var(--dsw-alias-state-business-primary);
+}
+
+.addedText {
+  color: var(--dsw-alias-state-success-primary);
+}
+
+.aliasText {
+  color: var(--dsw-alias-brand-primary);
+}
+
+.planSourcePre {
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-size: 11px;
+  line-height: 1.5;
+  background: var(--dsw-alias-bg-layer-1);
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  padding: 6px;
+  border-radius: var(--dsw-radius-xs, 4px);
+  margin-top: 4px;
+}
+
+.selectedNodeSection {
+  margin-bottom: 10px;
+}
+
+.sectionEyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-secondary);
+  margin-bottom: 4px;
+}
+
+.allNodesDetails {
+  margin-bottom: 10px;
+}
+
+.allNodesSummary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+  margin-bottom: 6px;
+}
+
+.allNodesBody {
+  display: block;
+}
+
+.waveTitle {
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.tabRoot {
+  padding: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.tabHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.tabTitle {
+  font-size: 14px;
+}
+
+.readonlyBadge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-2);
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.mutedLine {
+  font-size: 11px;
+  color: var(--dsw-alias-label-secondary);
+  line-height: 1.5;
+}
+
+.mutedSlug {
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+  line-height: 1.5;
+}
+
+.emptyBlock {
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+  line-height: 1.6;
+  padding: 6px 0;
+}
+
+.cardBox {
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  background: var(--dsw-alias-bg-layer-1);
+}
+
+.actionButton {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-2);
+  cursor: pointer;
+  color: inherit;
+}
+
+.retryBtn {
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.diffHeading {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.diffSummary {
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.diffDetail {
+  font-size: 11px;
+}
+
+.detailsSummary {
+  font-size: 11px;
+  color: var(--dsw-alias-label-secondary);
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.planDetails {
+  margin-top: 8px;
+}
+
+.edgesHint {
+  font-size: 11px;
+  color: var(--dsw-alias-label-secondary);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.planLoadedRow {
+  font-size: 11px;
+  color: var(--dsw-alias-label-secondary);
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.bannerGroupGap {
+  margin-bottom: 6px;
+}
+
+.versionRailRow {
+  font-size: 11px;
+  color: var(--dsw-alias-label-secondary);
+  line-height: 1.5;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.snapshotBanner {
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--dsw-alias-state-warn-tertiary);
+  border: 0.5px solid color-mix(in srgb, var(--dsw-alias-state-warn-primary) 28%, transparent);
+}
+
+.snapshotNodeRow {
+  font-size: 11px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.workerChips {
+  font-size: 11px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.nodeCardBtn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.nodeCardHead {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.nodeId {
+  font-size: 13px;
+}
+
+.nodeKind {
+  font-size: 11px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.nodeStage {
+  font-size: 10px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.nodeSubject {
+  font-size: 12px;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.nodeStateLabel {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.nodeMetaRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: var(--dsw-alias-label-secondary);
+  margin-top: 2px;
+}
+
+.nodeDesc {
+  white-space: pre-wrap;
+  color: var(--dsw-alias-label-primary);
+  max-height: 120px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.nodeDetailLine {
+  color: var(--dsw-alias-label-secondary);
+}
+
+.nodeChildRow {
+  font-size: 11px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.nodeAttentionGap {
+  margin-top: 2px;
+}
+
+.nodeActionsRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}

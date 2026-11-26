@@ -86,3 +86,27 @@ test('BUG-410 非 Error 拒绝值：错误详情携带真实原因，不是字�
   }
   rtl.cleanup()
 })
+
+test('起步卡研究题型模板：点击只填入草稿，绝不自动提交', async () => {
+  const rtl = await loadRtl()
+  const inserted = []
+  let submitted = 0
+  const inputActions = {
+    captureInsertion: () => ({ start: 0, end: 0, revision: 1 }),
+    insertText: (text) => { inserted.push(text); return true },
+    setDraft: (text) => { inserted.push(`draft:${text}`) },
+    submit: () => { submitted += 1 },
+  }
+  const { container } = rtl.render(createElement(StartCard, propsOf({ inputActions })))
+  try {
+    await rtl.waitFor(() => {
+      if (container.querySelector('[data-testid=deep-research-start-template-landscape]') === null) throw new Error('wait template')
+    })
+    rtl.fireEvent.click(container.querySelector('[data-testid=deep-research-start-template-landscape]'))
+    assert.equal(inserted.length, 1, '点击模板按钮必须写入草稿')
+    assert.equal(inserted[0], zh.startTplLandscapePrompt)
+    assert.equal(submitted, 0, '点击模板按钮绝不得自动提交')
+  } finally {
+    rtl.cleanup()
+  }
+})

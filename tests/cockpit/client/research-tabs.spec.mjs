@@ -7,8 +7,12 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import '../css-module-helpers.mjs'
+import { loadRtl } from '../client-dom-helpers.mjs'
 import { ResearchStatusTab } from '../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx'
 import { ResearchGraphTab } from '../../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx'
+import { ResearchTabMenuItem } from '../../../packages/deep-research-pack/src/client/ResearchTabMenuItem.tsx'
+import { RESEARCH_STATUS_TAB_KIND } from '../../../packages/deep-research-pack/src/client/keys.ts'
 import { zh } from '../../../packages/deep-research-pack/src/client/locales.ts'
 
 const tZh = (key, params = {}) => String(zh[key]).replace(/\{([A-Za-z0-9_]+)\}/g, (all, name) => (name in params ? String(params[name]) : all))
@@ -41,4 +45,59 @@ test('研究图谱：空态渲染 + 只读边界', () => {
   assert.match(html, /研究图谱/)
   assert.match(html, /只读观察/)
   assert.match(html, /还没有团队投影/, '无 Team 投影时不画假图')
+})
+
+test('研究图谱：有依赖边时画 DAG 并折叠全量节点列表，仅点击选中后聚焦详情', () => {
+  const edgeProps = {
+    ...baseProps,
+    useSessionStatus: () => new Map(),
+    useSessions: (selector) => selector({
+      projectionsBySession: {
+        'session-test': {
+          values: {
+            agentTeam: {
+              members: [{ id: 'm1', name: 'Scout-1', role: 'teammate', phase: 'active' }],
+              tasks: [
+                { id: 'W1', subject: 'W1 侦察', status: 'completed', ownerName: 'Scout-1', blockedBy: [] },
+                { id: 'W2', subject: 'W2 综合', status: 'in_progress', ownerName: 'Scout-1', blockedBy: ['W1'] },
+              ],
+            },
+          },
+        },
+      },
+    }),
+  }
+  const html = renderToStaticMarkup(createElement(ResearchGraphTab, edgeProps))
+  assert.match(html, /data-testid="graph-all-nodes"/, '有边时全量节点列表默认折叠进 details')
+  assert.doesNotMatch(html, /data-testid="graph-selected-node"/, '未点击节点前不展开聚焦详情卡')
+})
+
+test('ResearchTabMenuItem：仅研究类页签渲染「打开研究工作台」，点击调用 openHub 与 dismiss', async () => {
+  const nonResearch = renderToStaticMarkup(createElement(ResearchTabMenuItem, {
+    tab: { id: 't1', kind: 'file-preview', label: 'README.md' },
+    dismiss: () => {},
+    openHub: () => {},
+    t: tZh,
+  }))
+  assert.equal(nonResearch, '', '非研究类页签不应挂载工作台菜单项')
+
+  const rtl = await loadRtl()
+  let hubOpened = 0
+  let dismissed = 0
+  try {
+    const { container } = rtl.render(createElement(ResearchTabMenuItem, {
+      tab: { id: 't2', kind: RESEARCH_STATUS_TAB_KIND, label: '研究状态' },
+      dismiss: () => { dismissed += 1 },
+      openHub: () => { hubOpened += 1 },
+      t: tZh,
+    }))
+    const item = container.querySelector('[role="menuitem"]')
+    assert.ok(item !== null, '研究类页签应渲染 menuitem')
+    assert.match(item.textContent ?? '', new RegExp(zh.tabMenuOpenHub))
+    rtl.fireEvent.click(item)
+    assert.equal(hubOpened, 1, '点击后应调用 openHub')
+    assert.equal(dismissed, 1, '点击后应调用 dismiss')
+  } finally {
+    rtl.cleanup()
+  }
 })

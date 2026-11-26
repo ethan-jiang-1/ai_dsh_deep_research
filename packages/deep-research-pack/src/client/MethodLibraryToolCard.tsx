@@ -1,14 +1,23 @@
 /**
- * 方法库写库工具卡：`method_library_upsert` 在对话流里显示成一句人话（"已写入库：name"），
- * 不暴露原始工具参数。纯展示；卡片状态来自 toolview 槽的 call/result 切片。
+ * 方法库写库工具卡：`method_library_upsert` / `method_library_remove` / `method_library_set_default`
+ * 在对话流里以 DSH 原生 DisclosureRow + StateDot 显示一句人话，不暴露原始工具参数。
  */
 import type { ReactNode } from 'react'
+import { DisclosureRow, StateDot, type StateDotState } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ToolCallViewProps } from '@deepseek-ai/dsh-client-ui-tool/client'
 import { cardStateOf, parseArgsObject, stringFieldOfArgsRaw } from '../lib/events/tool-card.ts'
 import { METHOD_LIBRARY_DEFAULT, METHOD_LIBRARY_REMOVE } from './keys.ts'
+import css from './MethodLibraryToolCard.module.css'
 
 type MethodLibraryToolCardProps = ToolCallViewProps & PropsLocale<'deepResearchPack'>
+
+const DOT_STATE: Record<string, StateDotState | undefined> = {
+  running: 'ongoing',
+  ok: 'done',
+  error: 'error',
+  stopped: 'warning',
+}
 
 /**
  * 方法库写库卡。
@@ -46,14 +55,15 @@ export function MethodLibraryToolCard(props: MethodLibraryToolCardProps): ReactN
       ? props.t('toolOutcomeUnknown')
       : removing ? props.t('toolRemoveFailed') : defaulting ? props.t('toolDefaultFailed') : props.t('toolSaveFailed')
   return (
-    <div
-      data-method-library-tool=""
-      style={{ border: '1px solid var(--dsw-alias-border-l1)', borderRadius: 6, padding: '6px 10px', margin: '4px 0', fontSize: 13, background: 'var(--dsw-alias-bg-layer-1)' }}
-    >
-      <span style={{ color: state === 'ok' ? 'var(--dsw-alias-brand-primary)' : state === 'error' ? 'var(--dsw-alias-label-error)' : 'var(--dsw-alias-label-secondary)', fontWeight: 600 }}>
-        {state === 'running' ? '…' : state === 'ok' ? '✓' : state === 'stopped' ? '?' : '✗'}
-      </span>
-      <span style={{ marginLeft: 6 }}>{label}</span>
+    <div data-method-library-tool="" className={css.card}>
+      <DisclosureRow
+        icon={<StateDot state={DOT_STATE[state] ?? 'warning'} />}
+        title={label}
+        open={false}
+        expandable={false}
+        running={state === 'running'}
+        onToggle={() => {}}
+      />
     </div>
   )
 }
