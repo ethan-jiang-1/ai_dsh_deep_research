@@ -6,9 +6,10 @@
 // 算"已覆盖"；越权导出的密钥 = 安全面，必须有直测。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { credentialsPresent, isDevHome, scrubbedEnv, withModelKey } from '../../../checks/lib/shared/env.mjs';
 
 const CREDENTIAL_FILE = ['.credentials', 'yaml'].join('.');
@@ -79,4 +80,16 @@ test('isDevHome：默认 dev home 或 DSH_DEV_HOME 才认，ambient 平台 home 
   assert.equal(isDevHome(join(tmpdir(), 'platform-home'), { root, customHome: '' }), false);
   assert.equal(isDevHome('', { root }), false);
   assert.equal(isDevHome(defaultHome, { root: '' }), false);
+});
+
+// 负例留证 2026-11-27：BUG-450——tools/env.sh 仅用 BASH_SOURCE[0] 取根路径，zsh 下 source 会把
+// _repo_root 解析到仓库父目录；红证 = `zsh -c 'source tools/env.sh && test "$DSH_HOME" = "$PWD/runtime/harness-home"'` exit 1。
+test('BUG-450 tools/env.sh：同时兼容 bash 与 zsh 取仓库根路径并校验根标志', () => {
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+  const text = readFileSync(join(root, 'tools', 'env.sh'), 'utf8');
+  assert.match(text, /BASH_SOURCE\[0\]/, '需保留 bash 分支');
+  assert.match(text, /ZSH_VERSION/, '需显式兼容 zsh');
+  assert.match(text, /\$\{\(%\):-%x\}/, '需使用 zsh source 路径语法');
+  assert.match(text, /package\.json/, '需校验解析出的 _repo_root 为真实仓库根');
+  assert.doesNotMatch(text, /git -C "\$\(cd "\$\(dirname "\$\{BASH_SOURCE\[0\]\}"\)/, 'hooks 设置必须复用已解析的 _repo_root');
 });

@@ -333,9 +333,11 @@ async function main() {
       writeFileSync(defaultsPath, JSON.stringify({ schema: 1, effort: 'deep', unknown: 'x' }, null, 2))
       try {
         await withPage('S21', 'research-config', async (page, pane) => {
-          const value = await page.locator('[data-testid="defaults-depth"]').first().inputValue().catch(() => null)
+          const value = await page.locator('[data-testid="defaults-depth"]').first()
+            .evaluate((el) => el.getAttribute('data-value') ?? el.getAttribute('value') ?? ('value' in el ? String(el.value) : null))
+            .catch(() => null)
           const state = await page.locator('[data-testid="deep-research-defaults"]').first().getAttribute('data-defaults-state').catch(() => null)
-          check('S21 合法 effort 生效（select.value=deep）', value === 'deep', `value=${String(value)} state=${String(state)}`)
+          check('S21 合法 effort 生效（data-value=deep）', value === 'deep', `value=${String(value)} state=${String(state)}`)
           check('S21 未知键只警告不丢合法值', !/未知字段已忽略[^]*深度\s*自动/.test(pane.paneText) || value === 'deep', pane.paneText.slice(0, 260))
         })
       } finally { defaultsBackup() }

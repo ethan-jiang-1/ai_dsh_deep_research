@@ -2,7 +2,7 @@
 import { afterEach, test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createElement } from 'react'
-import { zh } from '../../../packages/deep-research-pack/src/client/locales.ts'
+import { en, zh } from '../../../packages/deep-research-pack/src/client/locales.ts'
 import { flushUi, loadRtl, makeMaliciousRunSource, makeTranslator } from '../client-dom-helpers.mjs'
 
 const { ResearchFinalTab } = await import('../../../packages/deep-research-pack/src/client/ResearchFinalTab.tsx')
@@ -11,6 +11,7 @@ const { extractNextVersionPriorities } = await import('../../../packages/deep-re
 
 const { render, fireEvent, cleanup, act } = await loadRtl()
 const tZh = makeTranslator(zh)
+const tEn = makeTranslator(en)
 
 afterEach(() => {
   cleanup()
@@ -160,9 +161,175 @@ test('ResearchEvidenceTab：渲染 8 字段标签、外链与 Question List 勾�
   await flushUi(act)
   const text = container.textContent ?? ''
   assert.match(text, /官方测试报告/)
-  assert.match(text, /Quality A/)
-  assert.match(text, /primary/)
+  assert.match(text, /质量 A/)
+  assert.match(text, /一手信源/)
   assert.match(text, /example\.org/)
   assert.match(text, /是否官方来源？/)
   assert.ok(container.querySelector('a[href="https://example.org/spec"]') !== null)
+})
+
+// 负例留证 2026-11-27：BUG-437——ClaimsAuditView 统计标签漏渲染 insufficient（对应 unverifiable），且只读根路径忽略 review/。
+// 红配方：删掉 ClaimsAuditView 的 summary.counts.insufficient Tag 或去掉 review/claims.json 读取 → 本例红。
+test('BUG-437 ResearchFinalTab 核查清单：读取 review/claims + review/verdicts 且统计角标包含 insufficient（证据不足/unverifiable）', async () => {
+  const tree = structuredClone(BUNDLE)
+  delete tree.drt_demo['claims.json']
+  delete tree.drt_demo['verdicts.json']
+  tree.drt_demo.review['claims.json'] = JSON.stringify({
+    version: 2, finalRef: 1,
+    claims: [{ id: 'C1', text: '关键断言', critical: true, topics: ['T1'], evidence: [], urls: [] }],
+  })
+  tree.drt_demo.review['verdicts-r1.json'] = JSON.stringify({
+    version: 1, round: 1,
+    verdicts: [{ claim_id: 'C1', verdict: 'unverifiable', quote: '', reason: '无一手出处', rechecked_urls: [], source_tier_ok: null }],
+  })
+  const run = makeMaliciousRunSource({ tree })
+  const { container } = render(createElement(ResearchFinalTab, {
+    sessionId: 's1',
+    t: tZh,
+    useTabInfo: () => ({
+      tab: {
+        navigation: { address: 'dsh-resource://file/session/s1/drt_demo/final.md' },
+        visible: true,
+        actions: { openTab: () => {} },
+      },
+    }),
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  const auditTab = [...container.querySelectorAll('[role="tab"]')].find((el) => el.textContent?.includes('核查清单'))
+  assert.ok(auditTab !== undefined)
+  fireEvent.click(auditTab)
+  await flushUi(act)
+  const text = container.textContent ?? ''
+  assert.match(text, /关键断言/)
+  assert.match(text, /证据不足:\s*1/)
+})
+
+// 负例留证 2026-11-27：BUG-444——ResearchEvidenceTab 把 absent / unreadable / invalid 全折叠为同一读错文案。
+// 红配方：把 ResearchEvidenceTab 非 empty 失败分支合回 evidenceUnreadable → absent 与 invalid 文案碰撞红。
+test('BUG-444 ResearchEvidenceTab：absent / empty / unreadable / invalid 四态呈现各自独立文案与属性', async () => {
+  const renderState = async (tree, fileFaults = {}) => {
+    const run = makeMaliciousRunSource({ tree, fileFaults })
+    const { container } = render(createElement(ResearchEvidenceTab, {
+      sessionId: 's1',
+      t: tZh,
+      useTabInfo: () => ({
+        tab: {
+          navigation: { address: 'dsh-resource://file/session/s1/drt_demo/evidence/e1.md' },
+          visible: true,
+          actions: { openTab: () => {} },
+        },
+      }),
+      runSource: () => run.source,
+      visible: true,
+    }))
+    await flushUi(act)
+    const state = container.querySelector('[data-evidence-state]')?.getAttribute('data-evidence-state') ?? null
+    const text = (container.textContent ?? '').trim()
+    cleanup()
+    return { state, text }
+  }
+  const absent = await renderState({ drt_demo: { 'question.md': '# Q\n', evidence: {} } })
+  const empty = await renderState({ drt_demo: { 'question.md': '# Q\n', evidence: { 'e1.md': '' } } })
+  const unreadable = await renderState({ drt_demo: { 'question.md': '# Q\n' } }, { 'drt_demo/evidence/e1.md': 'unreadable' })
+  assert.equal(absent.state, 'absent')
+  assert.equal(empty.state, 'empty')
+  assert.equal(unreadable.state, 'unreadable')
+  assert.notEqual(absent.text, unreadable.text, 'absent 不得与 unreadable 显示相同读错文案')
+  assert.notEqual(absent.text, empty.text, 'absent 不得与 empty 显示相同文案')
+  assert.notEqual(empty.text, unreadable.text, 'empty 不得与 unreadable 显示相同文案')
+})
+
+// 负例留证 2026-11-27：BUG-445——FinalToc 渲染纯 <div>，点击不滚动正文对应章节。
+// 红配方：把 FinalToc 改回 <div> 或删掉 scrollIntoView 调用 → 本例红。
+test('BUG-445 FinalToc：章节目录渲染为可点击 button，点击可触发对应正文章节 scrollIntoView', async () => {
+  const run = makeMaliciousRunSource({ tree: structuredClone(BUNDLE) })
+  const { container } = render(createElement(ResearchFinalTab, {
+    sessionId: 's1',
+    t: tZh,
+    useTabInfo: () => ({
+      tab: {
+        navigation: { address: 'dsh-resource://file/session/s1/drt_demo/final.md' },
+        visible: true,
+        actions: { openTab: () => {} },
+      },
+    }),
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  const auditTab = [...container.querySelectorAll('[role="tab"]')].find((el) => el.textContent?.includes('审计版'))
+  assert.ok(auditTab !== undefined)
+  fireEvent.click(auditTab)
+  await flushUi(act)
+
+  const tocDetails = container.querySelector('details')
+  assert.ok(tocDetails !== null, '多节终稿应渲染章节目录')
+  const firstBtn = tocDetails.querySelector('button[type="button"]')
+  assert.ok(firstBtn !== null, '目录项必须是可点击 <button type="button">，不能是纯 <div>')
+
+  const h2 = [...container.querySelectorAll('h1, h2, h3')].find((el) => el.textContent?.includes('下一版优先项'))
+  assert.ok(h2 !== undefined)
+  let scrolled = 0
+  h2.scrollIntoView = () => { scrolled += 1 }
+  const targetBtn = [...tocDetails.querySelectorAll('button')].find((b) => b.textContent?.includes('下一版优先项'))
+  assert.ok(targetBtn !== undefined)
+  fireEvent.click(targetBtn)
+  assert.equal(scrolled, 1, '点击目录项必须滚动定位到对应章节标题')
+})
+
+// 负例留证 2026-11-27：BUG-447——ResearchEvidenceTab 重复渲染两份 Question List 且中文硬编码英文 Quality 标签。
+// 红配方：恢复硬编码 Quality 与未裁剪的 bodyMarkdown → 中文模式出现 Quality A 且问项出现 2 次红。
+test('BUG-447 ResearchEvidenceTab：Question List 去重单份渲染，且中英文元信息标签本地化', async () => {
+  const runZh = makeMaliciousRunSource({ tree: structuredClone(BUNDLE) })
+  const zhView = render(createElement(ResearchEvidenceTab, {
+    sessionId: 's1',
+    t: tZh,
+    useTabInfo: () => ({
+      tab: { navigation: { address: 'dsh-resource://file/session/s1/drt_demo/evidence/e1.md' }, visible: true, actions: { openTab: () => {} } },
+    }),
+    runSource: () => runZh.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  const zhText = zhView.container.textContent ?? ''
+  assert.match(zhText, /质量 A/)
+  assert.match(zhText, /一手信源/)
+  assert.doesNotMatch(zhText, /Quality A/)
+  const hits = zhText.match(/是否官方来源？/g) ?? []
+  assert.equal(hits.length, 1, `Question List 条目只应渲染 1 次，实际 ${hits.length} 次`)
+  cleanup()
+
+  const runEn = makeMaliciousRunSource({ tree: structuredClone(BUNDLE) })
+  const enView = render(createElement(ResearchEvidenceTab, {
+    sessionId: 's1',
+    t: tEn,
+    useTabInfo: () => ({
+      tab: { navigation: { address: 'dsh-resource://file/session/s1/drt_demo/evidence/e1.md' }, visible: true, actions: { openTab: () => {} } },
+    }),
+    runSource: () => runEn.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  const enText = enView.container.textContent ?? ''
+  assert.match(enText, /Quality A/)
+  assert.match(enText, /Primary/)
+})
+
+// 负例留证 2026-11-27：BUG-438——终稿分屏窄列下 .segmentedWrap { flex: 1; min-width: 180px } 压缩小于
+// SegmentedControl 固有宽度，导致文字横向溢出遮挡右侧「分屏看状态」按钮。
+// 红配方：将 .segmentedWrap 恢复成 flex: 1; min-width: 180px → 本例红。
+test('BUG-438 ResearchFinalTab.module.css：窄列分屏下 segmentedWrap 不缩窄重叠且支持横向安全容器', async () => {
+  const { readFileSync } = await import('node:fs')
+  const { fileURLToPath } = await import('node:url')
+  const cssText = readFileSync(
+    fileURLToPath(new URL('../../../packages/deep-research-pack/src/client/ResearchFinalTab.module.css', import.meta.url)),
+    'utf8',
+  )
+  const block = /\.segmentedWrap\s*\{([^}]*)\}/.exec(cssText)?.[1] ?? ''
+  assert.doesNotMatch(block, /min-width:\s*180px/, '不得把 segmentedWrap 强压成 min-width: 180px 造成溢出')
+  assert.match(block, /flex:\s*0\s+0\s+auto/, 'segmentedWrap 应保持固有宽度并让父容器 flex-wrap 换行')
+  assert.match(block, /max-width:\s*100%/, '超窄下受 max-width: 100% 约束')
+  assert.match(block, /overflow-x:\s*auto/, '超窄极限下由容器内滚动兜底而非盖住按钮')
 })

@@ -9,7 +9,12 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { readArtifact, type ArtifactState } from '../lib/run/artifact-read.ts'
 import { openRun, type RunSource } from '../lib/run/run-context.ts'
 import { parseEvidenceAddress, parseEvidenceCard, safeExternalUrl, type EvidenceCardView } from '../lib/run/evidence-card.ts'
+import type { CockpitLocaleKey } from './locales/zh-cockpit.ts'
 import css from './ResearchEvidenceTab.module.css'
+
+const BUILTIN_LENS_IDS = new Set([
+  'official', 'academic', 'adversarial', 'quant', 'practitioner', 'historical', 'structural', 'regulatory',
+])
 
 export interface ResearchEvidenceTabInjected {
   readonly runSource: (sessionId: SessionId) => RunSource
@@ -78,13 +83,20 @@ export function ResearchEvidenceTab(props: ResearchEvidenceTabProps): ReactNode 
     footnotes: t('footnotes'),
   }), [t])
 
-  if (parsedAddr === null) return <div className={css.message}>{props.t('evidenceInvalidAddress')}</div>
-  if (state === 'loading') return <div className={css.message}>{props.t('evidenceLoading')}</div>
-  if (state === 'empty') return <div className={css.message}>{props.t('evidenceEmpty')}</div>
+  if (parsedAddr === null) return <div className={css.message} data-evidence-state="invalid">{props.t('evidenceInvalidAddress')}</div>
+  if (state === 'loading') return <div className={css.message} data-evidence-state="loading">{props.t('evidenceLoading')}</div>
   if (state !== 'ok' || card === null) {
+    const effectiveState = state === 'ok' ? 'invalid' : state
+    const msgKey = effectiveState === 'absent'
+      ? 'evidenceAbsent'
+      : effectiveState === 'empty'
+        ? 'evidenceEmpty'
+        : effectiveState === 'invalid'
+          ? 'evidenceInvalid'
+          : 'evidenceUnreadable'
     return (
-      <div className={css.message}>
-        <div>{props.t('evidenceUnreadable')}</div>
+      <div className={css.message} data-evidence-state={effectiveState}>
+        <div>{props.t(msgKey)}</div>
         <div><Button variant="outline" size="sm" onClick={reload}>{props.t('retry')}</Button></div>
       </div>
     )
@@ -94,7 +106,7 @@ export function ResearchEvidenceTab(props: ResearchEvidenceTabProps): ReactNode 
   const externalUrl = safeExternalUrl(meta?.sourceUrl)
   const qualityTone = meta?.quality === 'A' ? 'success' : meta?.quality === 'B' ? 'info' : 'outline'
   return (
-    <div className={css.root} data-testid="research-evidence-tab">
+    <div className={css.root} data-testid="research-evidence-tab" data-evidence-state="ok">
       <div className={css.header}>
         <div className={css.titleRow}>
           <strong className={css.title}>{card.title ?? card.file}</strong>
@@ -106,9 +118,13 @@ export function ResearchEvidenceTab(props: ResearchEvidenceTabProps): ReactNode 
         </div>
         {meta !== null && (
           <div className={css.metaRow}>
-            <Tag tone={qualityTone}>Quality {meta.quality}</Tag>
-            <Tag tone="outline">{meta.sourceTier}</Tag>
-            {meta.lens !== null && <Tag tone="neutral">{meta.lens}</Tag>}
+            <Tag tone={qualityTone}>{props.t('evidenceQualityBadge', { grade: meta.quality })}</Tag>
+            <Tag tone="outline">{props.t(`evidenceTier_${meta.sourceTier}` as CockpitLocaleKey)}</Tag>
+            {meta.lens !== null && (
+              <Tag tone="neutral">
+                {BUILTIN_LENS_IDS.has(meta.lens) ? props.t(`lens_${meta.lens}_name` as CockpitLocaleKey) : meta.lens}
+              </Tag>
+            )}
             {meta.publisher !== null && <Tag tone="quiet">{meta.publisher}</Tag>}
             {meta.retrievedAt !== null && <Tag tone="quiet">{meta.retrievedAt}</Tag>}
           </div>

@@ -25,7 +25,7 @@ const TITLE_SPAN_CHARS = 80;
 
 /**
  * 从页面读到的按钮表里选页签胶囊。
- * @param {{buttons: Array<{tag: string, label: string, title: string, guideEntry: string|null}>, title?: string|string[], entry?: string}} input - 页面只读表与目标页签参数（title 本地化候选；entry 为稳定 guide-entry id）。
+ * @param {{buttons: Array<{tag?: string, label: string, title: string, guideEntry: string|null}>, title?: string|string[], entry?: string}} input - 页面只读表与目标页签参数（title 本地化候选；entry 为稳定 guide-entry id）。
  * @returns {{pickedIndex: number|null, reason: string, title?: string, candidateTitles: string[]}}
  *   pickedIndex = 按钮表下标（页面按同一下标点击）；null 时 reason 说明为什么没点。
  */
@@ -77,4 +77,32 @@ function exactTitle(spanText, title) {
  */
 export function statusPaneOpened({ tabBodies }) {
   return Array.isArray(tabBodies) && tabBodies.some((t) => typeof t === 'string' && t.length > 0);
+}
+
+/**
+ * 右栏状态页签打开状态机的单步决策（BUG-441：可重入）。
+ * 启动期 `ensureProductWorkspace` 会异步切换会话，新会话右栏恢复折叠态；
+ * 将「未展开→展开」「同会话未点胶囊→点胶囊」「页签体出现目标标题→完成」收进同一个
+ * 状态转移，避免双阶段循环退出展开阶段后被 mid-boot 切会话打成 statusPaneOpen=false。
+ * @param {{expanded: boolean, currentSession: string, clickedSession: string|null, buttons: Array<{tag?: string, label: string, title: string, guideEntry: string|null}>, tabBodies: string[], title: string|string[], entry?: string}} input
+ * @returns {{action: 'done'|'expand'|'click-tab'|'wait', index?: number, reason?: string, title?: string}}
+ */
+export function nextStatusPaneAction({ expanded, currentSession, clickedSession, buttons, tabBodies, title, entry }) {
+  const titles = (Array.isArray(title) ? title : [title]).filter((t) => typeof t === 'string' && t !== '');
+  if (Array.isArray(tabBodies) && tabBodies.some((t) => typeof t === 'string' && titles.some((item) => t.includes(item)))) {
+    return { action: 'done' };
+  }
+  if (expanded !== true) {
+    return { action: 'expand' };
+  }
+  const pick = pickStatusTab({ buttons, title: titles, entry });
+  if (pick.pickedIndex !== null && (clickedSession === null || clickedSession !== currentSession)) {
+    return {
+      action: 'click-tab',
+      index: pick.pickedIndex,
+      reason: pick.reason,
+      ...(pick.title === undefined ? {} : { title: pick.title }),
+    };
+  }
+  return { action: 'wait' };
 }

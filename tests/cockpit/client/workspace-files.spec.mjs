@@ -92,3 +92,45 @@ test('BUG-088 readLibrary：1001 行库分两页读到第 1001 行', async () =>
   assert.ok(result.text.includes('line-1001'), '第 1001 行必须读回');
   assert.equal(call, 2);
 });
+
+// 负例留证 2026-11-27：BUG-448——快速切会话时 AbortController 取消旧请求返回的 gateway/cancelled
+// 被 listDir / readText 当真故障打进 console.error，污染控制台零报错门。
+// 红配方：去掉 workspace-files.ts 的 isCancelled 豁免 → 取消场景打出 console.error 红。
+test('BUG-448 workspace-files：gateway/cancelled 与已取消 signal 静默退场不打 console.error，真故障仍 fail-loud', async () => {
+  const original = console.error;
+  const errors = [];
+  console.error = (...args) => { errors.push(args.join(' ')); };
+  try {
+    const cancelledRemote = {
+      list: async () => ({ ok: false, error: { code: 'gateway/cancelled' } }),
+      read: async () => ({ ok: false, error: { code: 'gateway/cancelled' } }),
+    };
+    const wf = createWorkspaceFiles(cancelledRemote);
+    assert.equal(await wf.listDir('s1', '.', signal), null);
+    assert.equal(await wf.readText('s1', 'research-defaults.json', signal, 40, true), null);
+    assert.deepEqual(await wf.readPreview('s1', 'review.md', signal), { kind: 'cancelled' });
+    assert.equal(errors.length, 0, `gateway/cancelled 不应打出 console.error，实际：${errors.join(' | ')}`);
+
+    const abortedController = new AbortController();
+    abortedController.abort();
+    const throwingRemote = {
+      list: async () => { throw new Error('AbortError'); },
+      read: async () => { throw new Error('AbortError'); },
+    };
+    const wfAborted = createWorkspaceFiles(throwingRemote);
+    assert.equal(await wfAborted.listDir('s1', '.', abortedController.signal), null);
+    assert.equal(await wfAborted.readText('s1', 'x.md', abortedController.signal), null);
+    assert.equal(errors.length, 0, 'signal.aborted 抛错不应打出 console.error');
+
+    // 负控：未取消的真实故障必须继续打 console.error
+    const realFail = createWorkspaceFiles({
+      list: async () => ({ ok: false, error: { code: 'workspace-file/boom' } }),
+      read: async () => ({ ok: false, error: { code: 'workspace-file/boom' } }),
+    });
+    assert.equal(await realFail.listDir('s1', '.', signal), null);
+    assert.equal(await realFail.readText('s1', 'x.md', signal), null);
+    assert.equal(errors.length, 2, '真实错误必须保持 fail-loud 记日志');
+  } finally {
+    console.error = original;
+  }
+});

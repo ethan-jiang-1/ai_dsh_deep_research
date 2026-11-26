@@ -22,6 +22,24 @@
 
 ## 最近归档
 
+（2026-11-27 驾驶舱 UX/UI 全量核查修复批〔15 张，436–450〕，批 Note = [2026-11-27-cockpit-ux-ui-audit-fixes](../../notes/implemented/2026-11-27-cockpit-ux-ui-audit-fixes.md)：
+[436](../_archived/fixed_bugs/BUG-436-run-context-40-line-cap-truncates-protocol-topics-claims.md) canonical EOF；
+[437](../_archived/fixed_bugs/BUG-437-claims-verdicts-wrong-paths-and-verdict-enum-mismatch.md) review/ 路径与四值裁决；
+[438](../_archived/fixed_bugs/BUG-438-final-split-pane-segmented-control-overlaps-button.md) 分屏换行防遮挡；
+[439](../_archived/fixed_bugs/BUG-439-header-pill-hovercard-dark-text-on-dark-bg-light-mode.md) HoverCard inline 表面；
+[440](../_archived/fixed_bugs/BUG-440-milestone-card-duplicates-delivered-row-for-multifile-present.md) 交付里程碑去重；
+[441](../_archived/fixed_bugs/BUG-441-run-driver-up-red-status-pane-open-on-blank-session.md) 状态探针可重入展开；
+[442](../_archived/fixed_bugs/BUG-442-cockpit-truth-residuals-s21-fails-on-selectmenu-button.md) SelectMenu data-value；
+[443](../_archived/fixed_bugs/BUG-443-cockpit-truth-substance-trackrail-dot-prefix-breaks-4-checks.md) TrackRail 属性契约；
+[444](../_archived/fixed_bugs/BUG-444-protocolcard-and-evidencetab-collapse-error-states.md) 异常状态拆分；
+[445](../_archived/fixed_bugs/BUG-445-final-toc-headings-not-clickable-no-scroll.md) FinalToc button 跳转；
+[446](../_archived/fixed_bugs/BUG-446-hub-search-input-narrow-intrinsic-width-clips-placeholder.md) Hub 搜索全宽；
+[447](../_archived/fixed_bugs/BUG-447-evidence-tab-duplicates-question-list-and-hardcodes-quality-label.md) Question List 去重与质量本地化；
+[448](../_archived/fixed_bugs/BUG-448-rapid-session-switch-logs-cancelled-rpc-as-console-error.md) cancelled RPC 静默；
+[449](../_archived/fixed_bugs/BUG-449-english-quality-radar-prints-1-domains-plural.md) en 单数 1 domain；
+[450](../_archived/fixed_bugs/BUG-450-env-sh-bash-source-breaks-under-zsh.md) env.sh zsh 兼容。
+）
+
 （2026-11-23 读面行数策略与 JSDOM DOMParser 底座批：
 [385](../_archived/fixed_bugs/BUG-385-run-context-line-caps-truncate-real-artifacts.md) canonical EOF 读策略；
 [395](../_archived/fixed_bugs/BUG-395-client-dom-helpers-missing-domparser-crashes-tex.md) JSDOM DOMParser。

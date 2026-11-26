@@ -6,6 +6,21 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [450](BUG-450-env-sh-bash-source-breaks-under-zsh.md) | `env.sh` 兼容 zsh 取仓库根路径 | （ZSH_VERSION + root 校验） | 2026-11-27 |
+| [449](BUG-449-english-quality-radar-prints-1-domains-plural.md) | 英文域名计数 `1 domains` 复数误差 | （One/Other 单复数分支） | 2026-11-27 |
+| [448](BUG-448-rapid-session-switch-logs-cancelled-rpc-as-console-error.md) | 快速切会话把 `gateway/cancelled` 打成 error | （cancelled 识别 + 静默退场） | 2026-11-27 |
+| [447](BUG-447-evidence-tab-duplicates-question-list-and-hardcodes-quality-label.md) | Question List 双渲染与硬编码英文质量标签 | （正文节裁剪 + locale 映射） | 2026-11-27 |
+| [446](BUG-446-hub-search-input-narrow-intrinsic-width-clips-placeholder.md) | 研究工作台搜索框窄缩截断 placeholder | （`.searchInput` 100% 宽度） | 2026-11-27 |
+| [445](BUG-445-final-toc-headings-not-clickable-no-scroll.md) | 终稿目录不可点击且不滚动 | （`<button>` + `scrollIntoView`） | 2026-11-27 |
+| [444](BUG-444-protocolcard-and-evidencetab-collapse-error-states.md) | 契约/证据卡异常五态文案折叠 | （独立文案 + `data-*-state`） | 2026-11-27 |
+| [443](BUG-443-cockpit-truth-substance-trackrail-dot-prefix-breaks-4-checks.md) | `TrackRail` Dot 改版致 4 项浏览器回归红灯 | （`data-step-key/state` 契约） | 2026-11-27 |
+| [442](BUG-442-cockpit-truth-residuals-s21-fails-on-selectmenu-button.md) | `SelectMenu` button 致 S21 `.inputValue()` null | （`data-value` + 读属性对齐） | 2026-11-27 |
+| [441](BUG-441-run-driver-up-red-status-pane-open-on-blank-session.md) | 活通道探针在 Blank Session 上未重展右栏 | （`nextStatusPaneAction` 重入状态机） | 2026-11-27 |
+| [440](BUG-440-milestone-card-duplicates-delivered-row-for-multifile-present.md) | 多文件 `deliverables/presented` 产双交付卡 | （turn 级 `delivered` 去重） | 2026-11-27 |
+| [439](BUG-439-header-pill-hovercard-dark-text-on-dark-bg-light-mode.md) | 浅色模式顶栏胶囊 `HoverCard` 黑底暗字 | （传 `inline` 激活主题表面） | 2026-11-27 |
+| [438](BUG-438-final-split-pane-segmented-control-overlaps-button.md) | 终稿分屏 `SegmentedControl` 横溢遮挡按钮 | （保持固有宽度 + `flex-wrap`） | 2026-11-27 |
+| [437](BUG-437-claims-verdicts-wrong-paths-and-verdict-enum-mismatch.md) | 核查清单漏 `review/` 路径与四值规范枚举 | （轮次扫描 + `partially_supported`/`unverifiable`） | 2026-11-27 |
+| [436](BUG-436-run-context-40-line-cap-truncates-protocol-topics-claims.md) | 40 行上限截断 `protocol.json` 等 canonical 件 | （`EOF_NAME` 补全） | 2026-11-27 |
 | [431](BUG-431-tool-card-stopped-state-unreachable.md) | 崩溃恢复码被判「失败」 | （stopped = 结果未知） | 2026-11-24 |
 | [432](BUG-432-hitl1-anchor-gate-chinese-only-signature.md) | 门① 只认中文 HITL1 签名 | （askKindOf 同源） | 2026-11-24 |
 | [433](BUG-433-present-witness-misses-readable-paths.md) | 门② 见证不认读者版 present | （pack finalPathOf 词法） | 2026-11-24 |

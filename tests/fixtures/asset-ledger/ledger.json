@@ -1979,7 +1979,7 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "env-credentials 回归 —— 子进程环境清洗与真模型档前置（keyless）。",
-      "oracleType": "structured",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {

@@ -33,6 +33,7 @@ export function SelectMenu(props: SelectMenuProps): ReactNode {
       aria-haspopup="menu"
       aria-expanded={open}
       value={value}
+      data-value={value}
       disabled={disabled}
       className={`${css.selectButton} ${className}`.trim()}
       onClick={() => { setOpen((prev) => !prev) }}

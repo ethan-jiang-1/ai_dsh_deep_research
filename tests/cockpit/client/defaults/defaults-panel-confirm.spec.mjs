@@ -85,3 +85,22 @@ test('SelectMenu：点击深度控件打开 DSH Menu 并在选中项后触发 se
     rtl.cleanup()
   }
 })
+
+// 负例留证 2026-11-27：BUG-442——DefaultsPanel 改用 SelectMenu <button> 后，浏览器 inputValue()
+// 返回 null；控件须显式暴露 data-value 供浏览器断言读取。红配方：去掉 SelectMenu 的 data-value → 红。
+test('BUG-442 SelectMenu：button 控件同时暴露 data-value 与 value 属性', async () => {
+  const rtl = await loadRtl()
+  const store = makeStore([])
+  const { container } = rtl.render(createElement(DefaultsPanel, { sessionId: 's2', store, t }))
+  try {
+    const depthBtn = await rtl.waitFor(() => {
+      const btn = container.querySelector('[data-testid=defaults-depth]')
+      if (btn?.getAttribute('value') !== 'deep') throw new Error('wait deep')
+      return btn
+    })
+    assert.equal(depthBtn.getAttribute('data-value'), 'deep')
+    assert.equal(depthBtn.getAttribute('value'), 'deep')
+  } finally {
+    rtl.cleanup()
+  }
+})

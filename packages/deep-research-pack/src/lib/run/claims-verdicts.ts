@@ -6,6 +6,7 @@
  * claim 存在但 verdict 缺失 → 显性标为 'UNVERIFIED'，绝不静默标为通过。
  */
 import { readArtifact, type ArtifactState, type ArtifactView, type DecodedArtifactResult } from './artifact-read.ts'
+import type { Entry, Outcome } from './run-context.ts'
 
 export type ClaimVerdictStatus = 'supported' | 'partial' | 'unsupported' | 'insufficient' | 'UNVERIFIED'
 
@@ -89,8 +90,9 @@ function strArray(value: unknown): readonly string[] {
 function normalizeVerdict(raw: unknown): Exclude<ClaimVerdictStatus, 'UNVERIFIED'> | null {
   if (typeof raw !== 'string') return null
   const val = raw.trim().toLowerCase()
-  if (val === 'supported' || val === 'partial' || val === 'unsupported') return val
-  if (val === 'insufficient' || val === 'insufficient_evidence') return 'insufficient'
+  if (val === 'supported' || val === 'unsupported') return val
+  if (val === 'partial' || val === 'partially_supported') return 'partial'
+  if (val === 'insufficient' || val === 'insufficient_evidence' || val === 'unverifiable') return 'insufficient'
   return null
 }
 
@@ -168,20 +170,58 @@ export function decodeVerdicts(
   }
 }
 
+export interface ClaimsVerdictsView extends ArtifactView {
+  list?(dir?: string, opts?: { readonly signal?: AbortSignal }): Promise<Outcome<readonly Entry[]>>
+}
+
+async function readLatestVerdicts(
+  view: ClaimsVerdictsView,
+  signal?: AbortSignal,
+): Promise<DecodedArtifactResult<VerdictsDocument>> {
+  const signalOpts = signal === undefined ? {} : { signal }
+  if (typeof view.list === 'function') {
+    const listed = await view.list('review', signalOpts)
+    if (!listed.ok) {
+      if (listed.reason === 'unreadable') return { state: 'unreadable', text: null, value: null }
+      return readArtifact(view, 'verdicts.json', { ...signalOpts, decoder: decodeVerdicts })
+    }
+    const rounds = listed.value
+      .filter((entry) => entry.type === 'file')
+      .map((entry) => {
+        const match = /^verdicts-r([1-9]\d*)\.json$/.exec(entry.name)
+        return match === null ? null : { name: entry.name, round: Number(match[1]) }
+      })
+      .filter((item): item is { readonly name: string; readonly round: number } => item !== null)
+      .sort((a, b) => b.round - a.round)
+    const latest = rounds[0]
+    if (latest !== undefined) {
+      return readArtifact(view, `review/${latest.name}`, { ...signalOpts, decoder: decodeVerdicts })
+    }
+    return readArtifact(view, 'verdicts.json', { ...signalOpts, decoder: decodeVerdicts })
+  }
+  for (const candidate of ['review/verdicts-r2.json', 'review/verdicts-r1.json', 'verdicts.json']) {
+    const res = await readArtifact(view, candidate, { ...signalOpts, decoder: decodeVerdicts })
+    if (res.state !== 'absent') return res
+  }
+  return { state: 'absent', text: null, value: null }
+}
+
 /**
- * 联合读取 `claims.json` 与 `verdicts.json`。
+ * 联合读取 `review/claims.json` + 最新 `review/verdicts-r<N>.json`（缺席时兼容根路径）。
  */
 export async function readClaimsAndVerdicts(
-  view: ArtifactView,
+  view: ClaimsVerdictsView,
   signal?: AbortSignal,
 ): Promise<{
   readonly claims: DecodedArtifactResult<ClaimsDocument>
   readonly verdicts: DecodedArtifactResult<VerdictsDocument>
 }> {
-  const [claims, verdicts] = await Promise.all([
-    readArtifact(view, 'claims.json', { ...(signal === undefined ? {} : { signal }), decoder: decodeClaims }),
-    readArtifact(view, 'verdicts.json', { ...(signal === undefined ? {} : { signal }), decoder: decodeVerdicts }),
-  ])
+  const signalOpts = signal === undefined ? {} : { signal }
+  const canonClaims = await readArtifact(view, 'review/claims.json', { ...signalOpts, decoder: decodeClaims })
+  const claims = canonClaims.state === 'absent'
+    ? await readArtifact(view, 'claims.json', { ...signalOpts, decoder: decodeClaims })
+    : canonClaims
+  const verdicts = await readLatestVerdicts(view, signal)
   return { claims, verdicts }
 }
 

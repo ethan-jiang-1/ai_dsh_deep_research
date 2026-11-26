@@ -2317,6 +2317,127 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "把 decodeSessionLog 的「尾帧失败保留前缀」分支删掉（任意帧失败即 null）→ 尾帧用例红"
+    },
+    {
+      "id": "BUG-436",
+      "mechanism": "run-context.ts EOF_NAME 漏列 protocol.json/topics.md/review/claims.json/review/verdicts-r<N>.json，落回 40 行上限导致模板被截断成 unreadable",
+      "guard": "tests/cockpit/lib/run/artifact-read.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "从 EOF_NAME 移除 protocol.json/topics.md/claims/verdicts 正则 → readPolicyOf 用例红（40 !== eof）"
+    },
+    {
+      "id": "BUG-437",
+      "mechanism": "claims-verdicts 只读根 claims.json/verdicts.json 且漏映 partially_supported/unverifiable，ClaimsAuditView 漏渲染 insufficient 角标",
+      "guard": "tests/cockpit/lib/run/claims-verdicts.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "去掉 review/claims.json / review/verdicts-r<N>.json 优先级或 unverifiable 映射 → readClaimsAndVerdicts / ResearchFinalTab 用例红"
+    },
+    {
+      "id": "BUG-438",
+      "mechanism": "ResearchFinalTab.module.css .segmentedWrap flex:1; min-width:180px 在窄分屏强制缩窄，使 SegmentedControl 文本溢出遮挡分屏按钮",
+      "guard": "tests/cockpit/client/final-evidence.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "将 .segmentedWrap 恢复成 flex:1; min-width:180px → BUG-438 CSS 契约用例红"
+    },
+    {
+      "id": "BUG-439",
+      "mechanism": "ResearchHeaderPill HoverCard 未传 inline，使用暗色 --dsw-hovercard-bg 与亮色文字在 Light 模式冲突",
+      "guard": "tests/cockpit/client/research-tabs.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "从 HoverCard 移除 inline prop → BUG-439 inline 类断言红"
+    },
+    {
+      "id": "BUG-440",
+      "mechanism": "research-turn 单个 turn 一次 deliverables/presented 含多个文件时，对每个路径各产一张「研究报告已正式交付」卡片",
+      "guard": "tests/cockpit/client/research-turn.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "恢复 deliverables/presented 的逐路径循环 push → BUG-440 去重用例红（2 !== 1）"
+    },
+    {
+      "id": "BUG-441",
+      "mechanism": "cdp-probe openStatusPane() 两段顺序循环未在 ensureProductWorkspace 切新会话重设 sidebar 后重入展开右侧栏",
+      "guard": "tests/run/probes/probe-status-tab.spec.mjs",
+      "oracleType": "self-referential",
+      "status": "provisional",
+      "trigger": "cdp-probe 状态面板驱动合并进真实浏览器共享状态机时再升级",
+      "redRecipe": "把 nextStatusPaneAction 的 expanded=false 重展开分支改回点击即返回 null → BUG-441 用例红"
+    },
+    {
+      "id": "BUG-442",
+      "mechanism": "SelectMenu 改为 <button> 后不响应 Playwright inputValue()，导致 cockpit-truth-residuals S21 读取 value=null",
+      "guard": "tests/cockpit/client/defaults/defaults-panel-confirm.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "从 SelectMenu <button> 移除 data-value={value} → BUG-442 用例与 cockpit-truth-residuals S21 红"
+    },
+    {
+      "id": "BUG-443",
+      "mechanism": "TrackRail 改用 SVG StateDot + 后缀 ? 后，cockpit-truth-substance S23/S24/S27/S28 仍按文本前缀 ? 断言导致 4 项全红",
+      "guard": "tests/cockpit/client/research-status/protocol-radar.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "从 TrackRail 步骤项移除 data-step-key/data-step-state 属性 → BUG-443 与 S23/S24/S27/S28 红"
+    },
+    {
+      "id": "BUG-444",
+      "mechanism": "ProtocolCard 与 ResearchEvidenceTab 将 empty/absent/unreadable/invalid 四态折叠成同一读错文案",
+      "guard": "tests/cockpit/client/final-evidence.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "将 ProtocolCard empty/unreadable/invalid 或 ResearchEvidenceTab absent/unreadable/invalid 合回统一文案 → BUG-444 双用例红"
+    },
+    {
+      "id": "BUG-445",
+      "mechanism": "FinalToc 将目录条目渲染为纯 <div> 且未连接正文 scrollIntoView，导致点击目录无法跳转章节",
+      "guard": "tests/cockpit/client/final-evidence.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "将 FinalToc 改回不可点击 <div> 或断开 bodyRef scrollIntoView → BUG-445 用例红"
+    },
+    {
+      "id": "BUG-446",
+      "mechanism": "Hub RunsView/LensesView 的 vendor Input 未挂 width:100% 类，被原生 size=20 锁在 ~198px 截断 placeholder",
+      "guard": "tests/cockpit/client/research-hub-panel.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "从 RunsView/LensesView Input 移除 className={css.searchInput} → BUG-446 用例红"
+    },
+    {
+      "id": "BUG-447",
+      "mechanism": "ResearchEvidenceTab 在解析 questions 后仍原样渲染 bodyMarkdown 里的 Question List，且 Quality/Tier 标签硬编码英文",
+      "guard": "tests/cockpit/client/final-evidence.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "取消 parseEvidenceCard 对 Question List 节的裁剪或恢复硬编码 Quality → BUG-447 双用例红"
+    },
+    {
+      "id": "BUG-448",
+      "mechanism": "快速切换研究会话取消 workspaceFiles 请求时，gateway/cancelled 异常冒泡并打出 console.error",
+      "guard": "tests/cockpit/client/workspace-files.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "在 workspace-files.ts 去掉 gateway/cancelled 取消识别（改为走 error 分支）→ BUG-448 用例红"
+    },
+    {
+      "id": "BUG-449",
+      "mechanism": "QualityRadar 在英文模式下对 1 个独立域名仍输出复数 \"1 domains\"，缺单复数分支",
+      "guard": "tests/cockpit/client/research-status/protocol-radar.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "将 statusRadarPublishersOne 改回 \"{count} domains\" → BUG-449 用例红"
+    },
+    {
+      "id": "BUG-450",
+      "mechanism": "tools/env.sh 仅用 BASH_SOURCE[0] 计算 _repo_root，在 macOS 默认 zsh 下静默漂移到仓库父目录",
+      "guard": "tests/run/channel/env-credentials.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "从 tools/env.sh 移除 ZSH_VERSION ${(%):-%x} 分支与根目录校验 → BUG-450 用例及 zsh source 红"
     }
   ]
 }

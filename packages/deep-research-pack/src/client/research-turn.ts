@@ -90,14 +90,15 @@ export const researchTurnDefinition: ConversationNodeDefinition<ResearchTurnStat
       return context.state
     }
     if (rec.type === 'deliverables/presented' && Array.isArray(rec.data?.files)) {
-      let next = context.state.milestones
-      for (const f of rec.data.files) {
-        const finalPath = finalPathOf(f?.path)
-        if (finalPath !== null) {
-          next = addMilestone(next, { kind: 'delivered', path: finalPath, seq })
-        }
-      }
-      return next === context.state.milestones ? context.state : { ...context.state, milestones: next }
+      const candidates = rec.data.files
+        .map((f) => finalPathOf(f?.path))
+        .filter((p): p is string => p !== null)
+      if (candidates.length === 0) return context.state
+      // 单次多文件交付（主审计版 + 读者版）只产出一条 delivered 里程碑，优先读者版（BUG-440）。
+      const chosen = candidates.find((p) => /\/readable(?:-v[1-9]\d*)?\.md$/.test(p)) ?? candidates[0]!
+      const withoutPrevDelivered = context.state.milestones.filter((m) => m.kind !== 'delivered')
+      const next = addMilestone(withoutPrevDelivered, { kind: 'delivered', path: chosen, seq })
+      return { ...context.state, milestones: next }
     }
     return context.state
   },

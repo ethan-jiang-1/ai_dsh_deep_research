@@ -32,6 +32,9 @@ const SESSION_ADDRESS_PREFIX = 'dsh-resource://file/session/'
 const EVIDENCE_REL_RE = /^((?:archive\/|_abandoned\/)?drt_[\w.-]+)\/evidence\/([^/]+\.md)$/
 const FRONTMATTER_STRIP_RE = /^\uFEFF?---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/
 const QUESTION_ITEM_RE = /^-\s+\[([xX\s])\]\s+(.+)$/
+const FENCE_RE = /^\s{0,3}(`{3,}|~{3,})/
+const QUESTION_HEADING_RE = /^(#{2,3})\s+Question\s+List\b/i
+const ANY_HEADING_RE = /^(#{1,6})\s+/
 
 const encodeSegment = (segment: string): string => encodeURIComponent(segment).replace(/%3A/gi, ':')
 
@@ -85,18 +88,69 @@ export function safeExternalUrl(raw: string | null | undefined): string | null {
   return null
 }
 
-/** 解析单张证据卡文本为头部 8 字段 + 去 frontmatter 正文 + Question List 勾选表。 */
+/** 解析单张证据卡文本为头部 8 字段 + 去 frontmatter 正文 + Question List 勾选表（去重裁剪已提取的 Question List 小节，BUG-447）。 */
 export function parseEvidenceCard(filename: string, raw: string): EvidenceCardView {
   const meta = parseEvidenceMeta(filename, raw)
-  const bodyMarkdown = raw.replace(FRONTMATTER_STRIP_RE, '').trim()
-  const titleMatch = /^\s*#\s+(.+)$/m.exec(bodyMarkdown)
+  const rawBody = raw.replace(FRONTMATTER_STRIP_RE, '').trim()
+  const titleMatch = /^\s*#\s+(.+)$/m.exec(rawBody)
   const questions: EvidenceQuestionItem[] = []
-  for (const line of bodyMarkdown.split(/\r?\n/)) {
-    const m = QUESTION_ITEM_RE.exec(line.trim())
+  const lines = rawBody.split(/\r?\n/)
+  const dropLine = new Set<number>()
+  let fenceChar: string | null = null
+  let qSectionLevel: number | null = null
+  let qSectionLines: number[] = []
+  let qSectionHasItems = false
+
+  const flushQuestionSection = (): void => {
+    if (qSectionLevel !== null && qSectionHasItems) {
+      for (const idx of qSectionLines) dropLine.add(idx)
+    }
+    qSectionLevel = null
+    qSectionLines = []
+    qSectionHasItems = false
+  }
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i]!
+    const trimmed = line.trim()
+    const fence = FENCE_RE.exec(line)
+    if (fence?.[1] !== undefined) {
+      const ch = fence[1][0] ?? null
+      fenceChar = fenceChar === null ? ch : (ch === fenceChar ? null : fenceChar)
+      if (qSectionLevel !== null) qSectionLines.push(i)
+      continue
+    }
+    if (fenceChar !== null) {
+      if (qSectionLevel !== null) qSectionLines.push(i)
+      continue
+    }
+    const qHead = QUESTION_HEADING_RE.exec(trimmed)
+    if (qHead?.[1] !== undefined) {
+      flushQuestionSection()
+      qSectionLevel = qHead[1].length
+      qSectionLines = [i]
+      continue
+    }
+    if (qSectionLevel !== null) {
+      const nextHead = ANY_HEADING_RE.exec(trimmed)
+      if (nextHead?.[1] !== undefined && nextHead[1].length <= qSectionLevel) {
+        flushQuestionSection()
+      } else {
+        qSectionLines.push(i)
+      }
+    }
+    const m = QUESTION_ITEM_RE.exec(trimmed)
     if (m?.[1] !== undefined && m[2] !== undefined) {
       questions.push({ checked: m[1].toLowerCase() === 'x', text: m[2].trim() })
+      if (qSectionLevel !== null) qSectionHasItems = true
     }
   }
+  flushQuestionSection()
+
+  const bodyMarkdown = dropLine.size === 0
+    ? rawBody
+    : lines.filter((_l, idx) => !dropLine.has(idx)).join('\n').replace(/\n{3,}/g, '\n\n').trim()
+
   return {
     file: filename,
     meta,

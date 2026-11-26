@@ -34,6 +34,7 @@
 .hoverCardBody {
   display: grid;
   gap: 4px;
+  padding: 4px 6px;
   font-size: 12px;
   line-height: 1.5;
   color: var(--dsw-alias-label-primary);

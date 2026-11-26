@@ -95,6 +95,11 @@
   min-width: 180px;
 }
 
+.searchInput {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .filterRow {
   display: flex;
   align-items: center;

@@ -213,25 +213,35 @@ async function main() {
     }
     const clearEvidence = () => { for (const n of evidenceFiles()) rmSync(join(evidenceDir, n), { force: true }) }
 
+    const stepInfo = async (page, key) => page.evaluate((stepKey) => {
+      const el = document.querySelector(`[data-sidebar-right-tab] [data-step-key="${stepKey}"]`)
+      return el === null
+        ? { state: null, text: '' }
+        : { state: el.getAttribute('data-step-state'), text: (el.textContent ?? '').replace(/\s+/g, ' ').trim() }
+    }, key)
+
     if (selected('S23')) {
       const restore = backupFile(findingsPath); writeFileSync(findingsPath, '', 'utf8')
-      try { await withStatus('S23', async (_p, s) => {
+      try { await withStatus('S23', async (p, s) => {
+        const step = await stepInfo(p, 'findings')
         check('S23 空 findings 显示综合材料为空/读取失败', /综合材料为空|findings.*为空|findings.*读取失败/.test(s.paneText), s.paneText.slice(0, 260))
-        check('S23 综合不 done', /\?\s*综合/.test(s.paneText) && !/✓\s*综合/.test(s.paneText), s.paneText.slice(0, 260))
+        check('S23 综合不 done', step.state === 'unknown' && /综合\s*\?/.test(step.text), JSON.stringify(step))
       }) } finally { restore() }
     }
     if (selected('S24')) {
       const restore = backupFile(leadsPath); writeFileSync(leadsPath, '', 'utf8')
-      try { await withStatus('S24', async (_p, s) => {
+      try { await withStatus('S24', async (p, s) => {
+        const step = await stepInfo(p, 'leads')
         check('S24 空 leads 显示侦察线索为空/读取失败', /侦察线索为空|leads.*为空|leads.*读取失败/.test(s.paneText), s.paneText.slice(0, 260))
-        check('S24 侦察不 done', /\?\s*侦察/.test(s.paneText) && !/✓\s*侦察/.test(s.paneText), s.paneText.slice(0, 260))
+        check('S24 侦察不 done', step.state === 'unknown' && /侦察\s*\?/.test(step.text), JSON.stringify(step))
       }) } finally { restore() }
     }
     if (selected('S25')) {
       const restore = backupFile(questionPath); writeFileSync(questionPath, '# Question\n\n## Scope\n\n## Notes\n\n## Decisions\n', 'utf8')
-      try { await withStatus('S25', async (_p, s) => {
+      try { await withStatus('S25', async (p, s) => {
+        const step = await stepInfo(p, 'question')
         check('S25 标题-only question 显示正文为空', /研究问题正文为空|问题正文为空/.test(s.paneText), s.paneText.slice(0, 260))
-        check('S25 立项不 done', !/✓\s*立项/.test(s.paneText), s.paneText.slice(0, 260))
+        check('S25 立项不 done', step.state === 'unknown' && /立项\s*\?/.test(step.text), JSON.stringify(step))
         check('S25 不显示「尚未确认」', !/尚未确认/.test(s.paneText), s.paneText.slice(0, 260))
       }) } finally { restore() }
     }
@@ -245,18 +255,20 @@ async function main() {
     if (selected('S27')) {
       const restore = backupEvidence()
       try { clearEvidence(); writeFileSync(join(evidenceDir, '_failed.md'), '# 抓取失败登记\n\n未取得正文。\n', 'utf8')
-        await withStatus('S27', async (_p, s) => {
+        await withStatus('S27', async (p, s) => {
+          const step = await stepInfo(p, 'evidence')
           check('S27 只有失败登记 → 0 份有效证据', /0\s*份证据|没有有效证据|只有检索失败登记/.test(s.paneText), s.paneText.slice(0, 260))
-          check('S27 挖掘不 done', /\?\s*挖掘/.test(s.paneText) && !/✓\s*挖掘/.test(s.paneText), s.paneText.slice(0, 260))
+          check('S27 挖掘不 done', step.state === 'unknown' && /挖掘\s*\?/.test(step.text), JSON.stringify(step))
         })
       } finally { restore() }
     }
     if (selected('S28')) {
       const restore = backupEvidence()
       try { clearEvidence(); writeFileSync(join(evidenceDir, 'empty-card.md'), '', 'utf8')
-        await withStatus('S28', async (_p, s) => {
+        await withStatus('S28', async (p, s) => {
+          const step = await stepInfo(p, 'evidence')
           check('S28 0 字节证据卡 → 0 份/空证据提示', /0\s*份证据|证据为空|没有有效证据/.test(s.paneText), s.paneText.slice(0, 260))
-          check('S28 挖掘不 done', /\?\s*挖掘/.test(s.paneText) && !/✓\s*挖掘/.test(s.paneText), s.paneText.slice(0, 260))
+          check('S28 挖掘不 done', step.state === 'unknown' && /挖掘\s*\?/.test(step.text), JSON.stringify(step))
         })
       } finally { restore() }
     }

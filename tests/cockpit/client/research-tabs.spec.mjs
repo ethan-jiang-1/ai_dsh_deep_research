@@ -12,6 +12,7 @@ import { loadRtl } from '../client-dom-helpers.mjs'
 import { ResearchStatusTab } from '../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx'
 import { ResearchGraphTab } from '../../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx'
 import { ResearchTabMenuItem } from '../../../packages/deep-research-pack/src/client/ResearchTabMenuItem.tsx'
+import { ResearchHeaderPill } from '../../../packages/deep-research-pack/src/client/ResearchHeaderPill.tsx'
 import { RESEARCH_STATUS_TAB_KIND } from '../../../packages/deep-research-pack/src/client/keys.ts'
 import { zh } from '../../../packages/deep-research-pack/src/client/locales.ts'
 
@@ -97,6 +98,37 @@ test('ResearchTabMenuItem：仅研究类页签渲染「打开研究工作台」�
     rtl.fireEvent.click(item)
     assert.equal(hubOpened, 1, '点击后应调用 openHub')
     assert.equal(dismissed, 1, '点击后应调用 dismiss')
+  } finally {
+    rtl.cleanup()
+  }
+})
+
+// 负例留证 2026-11-27：BUG-439——ResearchHeaderPill 使用默认 HoverCard（#2C2C2E 硬深色底）搭配
+// 浅色主题文字 --dsw-alias-label-primary，导致浅色下黑底暗字不可辨；改用 inline 走主题随动底色。
+// 红配方：去掉 ResearchHeaderPill 的 HoverCard inline 属性 → inline 类名缺失即红。
+test('BUG-439 ResearchHeaderPill：HoverCard 使用 inline 主题随动表面（避免浅色模式黑底暗字）', async () => {
+  const rtl = await loadRtl()
+  try {
+    const follow = async function* () {
+      yield {
+        kind: 'history',
+        events: [{ type: 'tool/call', data: { name: 'write_file', arguments: JSON.stringify({ path: 'drt_demo/question.md' }) } }],
+      }
+    }
+    const { container } = rtl.render(createElement(ResearchHeaderPill, {
+      sessionId: 's-pill',
+      t: tZh,
+      follow,
+      openStatus: () => {},
+      openFinal: () => {},
+    }))
+    const btn = await rtl.waitFor(() => {
+      const el = container.querySelector('[data-testid="research-header-pill"]')
+      if (el === null) throw new Error('wait pill')
+      return el
+    })
+    const wrapper = btn.parentElement
+    assert.ok(wrapper !== null && /\binline\b/.test(wrapper.className), `HoverCard 包装元素须含 inline 表面类，实际 className=${wrapper?.className}`)
   } finally {
     rtl.cleanup()
   }

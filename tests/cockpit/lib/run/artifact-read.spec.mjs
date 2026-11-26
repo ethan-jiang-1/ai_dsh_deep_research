@@ -6,6 +6,8 @@ import assert from 'node:assert/strict'
 import {
   ARTIFACT_POLICY, artifactBodyIssueOf, artifactPolicyOf, artifactReadIssueOf, artifactStateOf, assertNever, readArtifact, readStateOf,
 } from '../../../../packages/deep-research-pack/src/lib/run/artifact-read.ts'
+import { openRun, readPolicyOf } from '../../../../packages/deep-research-pack/src/lib/run/run-context.ts'
+import { readProtocolContract } from '../../../../packages/deep-research-pack/src/lib/run/protocol-fold.ts'
 
 const POLICY = { nonEmpty: true, json: false }
 const OUT = (text, extra = {}) => ({ ok: true, value: { text, ...extra } })
@@ -118,4 +120,47 @@ test('artifactReadIssueOf / artifactBodyIssueOf / assertNever：闭集五态穷�
   assert.equal(artifactBodyIssueOf('invalid', false), 'unreadable')
 
   assert.throws(() => assertNever(/** @type {never} */ ('bogus')), /Unexpected union member: bogus/)
+})
+
+// 负例留证 2026-11-27：BUG-436——run-context EOF_NAME 漏掉 protocol.json / topics.md / review/claims.json /
+// review/verdicts-r<N>.json，导致模板（52 行）超过 DEFAULT_LINES=40 被截断判为 unreadable。
+// 红配方：从 EOF_NAME 移除 protocol\.json 或 topics\.md → 下方 readPolicyOf 与 52 行模板读测均红。
+test('BUG-436 readPolicyOf：全部 canonical 工件（含 protocol.json / topics.md / claims / verdicts）读到 eof，不落入 40 行截断', async () => {
+  const { readFileSync } = await import('node:fs')
+  const { fileURLToPath } = await import('node:url')
+  for (const name of [
+    'protocol.json',
+    'topics.md',
+    'review/claims.json',
+    'review/verdicts-r1.json',
+    'review/verdicts-r2.json',
+    'claims.json',
+    'verdicts.json',
+  ]) {
+    assert.equal(readPolicyOf(name), 'eof', `${name} 必须走 eof 策略，不能截断成 40 行`)
+    assert.ok(artifactPolicyOf(name) !== null, `${name} 必须登记在 artifactPolicyOf`)
+  }
+  for (const name of Object.keys(ARTIFACT_POLICY)) {
+    if (name === 'plan.md') continue
+    assert.equal(readPolicyOf(name), 'eof', `ARTIFACT_POLICY.${name} 必须与 EOF_NAME 同步`)
+  }
+  // 真实 52 行模板协议经 40 行上限拦截源读取时，必须走 eof 页读而不被截断
+  const tplPath = fileURLToPath(new URL('../../../../packages/deep-research-pack/content/templates/run/protocol.json', import.meta.url))
+  const tplText = readFileSync(tplPath, 'utf8')
+  const tplLines = tplText.split('\n')
+  assert.ok(tplLines.length > 40, `protocol.json 模板应超过 40 行（实际 ${tplLines.length}）`)
+  const cappedSource = {
+    list: async (dir) => (dir === 'drt_demo' ? { ok: true, value: [{ name: 'protocol.json', type: 'file' }] } : { ok: false, reason: 'missing' }),
+    read: async (_path, { offset, limit }) => {
+      const slice = tplLines.slice(offset - 1, offset - 1 + limit)
+      const eof = offset - 1 + slice.length >= tplLines.length
+      return { ok: true, value: { text: slice.join('\n'), lines: slice.length, eof } }
+    },
+    version: async () => ({ ok: true, value: 'v1' }),
+  }
+  const opened = await openRun(cappedSource, 'drt_demo')
+  assert.equal(opened.ok, true)
+  const res = await readProtocolContract(opened.value)
+  assert.equal(res.state, 'ok', '超过 40 行的真实 protocol.json 不得因截断误判为 unreadable')
+  assert.equal(res.value?.status, 'draft')
 })

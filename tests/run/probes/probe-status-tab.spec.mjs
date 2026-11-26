@@ -8,7 +8,7 @@
 // 判 false。实现前跑本文件：import 失败即红（模块缺席）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pickStatusTab, statusPaneOpened } from '../../../checks/lib/shared/probe-status-tab.mjs';
+import { nextStatusPaneAction, pickStatusTab, statusPaneOpened } from '../../../checks/lib/shared/probe-status-tab.mjs';
 
 const btn = (title, guideEntry = null, label = '') => ({ title, guideEntry, label });
 
@@ -94,4 +94,41 @@ test('statusPaneOpened：只认页签体在场，不认会话正文', () => {
   assert.equal(statusPaneOpened({ tabBodies: [] }), false);
   assert.equal(statusPaneOpened({ tabBodies: ['', ''] }), false);
   assert.equal(statusPaneOpened({}), false);
+});
+
+// 负例留证 2026-11-27：BUG-441——启动期 ensureProductWorkspace 异步切会话后，新会话右栏恢复折叠态，
+// cdp-probe 旧双循环不再二次展开导致 statusPaneOpen=false。红配方：删掉 nextStatusPaneAction 的
+// 「!expanded → expand」可重入分支 → 下方 mid-boot 切会话场景红。
+test('BUG-441 nextStatusPaneAction：会话在展开后被启动期切换时，必须重新展开并点新会话胶囊', () => {
+  const buttons = [
+    btn('研究配置', 'research-config'),
+    btn('研究状态', 'research-status'),
+  ];
+  // 1) 未展开 → expand
+  assert.deepEqual(
+    nextStatusPaneAction({ expanded: false, currentSession: 's1', clickedSession: null, buttons, tabBodies: [], title: ['研究状态'], entry: 'research-status' }),
+    { action: 'expand' },
+  );
+  // 2) s1 已展开且尚未点过 → click-tab
+  const clickS1 = nextStatusPaneAction({ expanded: true, currentSession: 's1', clickedSession: null, buttons, tabBodies: [], title: ['研究状态'], entry: 'research-status' });
+  assert.equal(clickS1.action, 'click-tab');
+  assert.equal(clickS1.index, 1);
+  // 3) 启动期异步切到 s2，右栏变回折叠态 → 必须再次 expand（不能死等）
+  assert.deepEqual(
+    nextStatusPaneAction({ expanded: false, currentSession: 's2', clickedSession: 's1', buttons: [], tabBodies: [], title: ['研究状态'], entry: 'research-status' }),
+    { action: 'expand' },
+  );
+  // 4) s2 展开后虽然 clickedSession === 's1'，仍需对 s2 重新点开胶囊
+  const clickS2 = nextStatusPaneAction({ expanded: true, currentSession: 's2', clickedSession: 's1', buttons, tabBodies: [], title: ['研究状态'], entry: 'research-status' });
+  assert.equal(clickS2.action, 'click-tab');
+  // 5) 同一会话已点过、页签体尚在挂载 → wait
+  assert.deepEqual(
+    nextStatusPaneAction({ expanded: true, currentSession: 's2', clickedSession: 's2', buttons, tabBodies: [''], title: ['研究状态'], entry: 'research-status' }),
+    { action: 'wait' },
+  );
+  // 6) 页签体出现目标标题 → done
+  assert.deepEqual(
+    nextStatusPaneAction({ expanded: true, currentSession: 's2', clickedSession: 's2', buttons, tabBodies: ['研究状态\n本会话尚未绑定'], title: ['研究状态', 'Research Status'], entry: 'research-status' }),
+    { action: 'done' },
+  );
 });

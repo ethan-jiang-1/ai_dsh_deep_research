@@ -56,3 +56,86 @@ test('readClaimsAndVerdicts：五态降级（absent / empty / unreadable / inval
     assert.equal(summary.counts.total, 0)
   }
 })
+
+// 负例留证 2026-11-27：BUG-437——readClaimsAndVerdicts 只读根 claims.json/verdicts.json 且 normalizeVerdict
+// 不认 partially_supported / unverifiable；规范 bundle（review/claims.json + review/verdicts-r<N>.json）永久不可用。
+// 红配方：去掉 review/ 路径或 partially_supported/unverifiable 映射 → 本例红。
+test('BUG-437 readClaimsAndVerdicts：优先读规范 review/claims.json + 最新 review/verdicts-r<N>.json，且兼容四值规范裁决', async () => {
+  const CANON_CLAIMS = {
+    version: 2,
+    finalRef: 1,
+    claims: [
+      { id: 'C1', text: '完全支持', critical: true, topics: ['T1'], evidence: ['evidence/e1.md'], urls: [] },
+      { id: 'C2', text: '部分支持', critical: true, topics: ['T1'], evidence: ['evidence/e1.md'], urls: [] },
+      { id: 'C3', text: '被反驳', critical: true, topics: ['T1'], evidence: ['evidence/e1.md'], urls: [] },
+      { id: 'C4', text: '无法核实', critical: true, topics: ['T1'], evidence: ['evidence/e1.md'], urls: [] },
+    ],
+  }
+  const R1 = {
+    version: 1,
+    round: 1,
+    verdicts: [{ claim_id: 'C1', verdict: 'supported', quote: 'q', reason: 'r', rechecked_urls: [], source_tier_ok: true }],
+  }
+  const R2 = {
+    version: 1,
+    round: 2,
+    verdicts: [
+      { claim_id: 'C1', verdict: 'supported', quote: 'q1', reason: 'r1', rechecked_urls: [], source_tier_ok: true },
+      { claim_id: 'C2', verdict: 'partially_supported', quote: 'q2', reason: 'r2', rechecked_urls: [], source_tier_ok: true },
+      { claim_id: 'C3', verdict: 'unsupported', quote: 'q3', reason: 'r3', rechecked_urls: [], source_tier_ok: true },
+      { claim_id: 'C4', verdict: 'unverifiable', quote: '', reason: '无公开数据', rechecked_urls: [], source_tier_ok: null },
+    ],
+  }
+  const view = {
+    list: async (dir) => (dir === 'review'
+      ? {
+          ok: true,
+          value: [
+            { name: 'claims.json', type: 'file' },
+            { name: 'verdicts-r1.json', type: 'file' },
+            { name: 'verdicts-r2.json', type: 'file' },
+          ],
+        }
+      : { ok: false, reason: 'missing' }),
+    read: async (name) => {
+      if (name === 'review/claims.json') return { ok: true, value: { text: JSON.stringify(CANON_CLAIMS) } }
+      if (name === 'review/verdicts-r1.json') return { ok: true, value: { text: JSON.stringify(R1) } }
+      if (name === 'review/verdicts-r2.json') return { ok: true, value: { text: JSON.stringify(R2) } }
+      return { ok: false, reason: 'missing' }
+    },
+  }
+  const { claims, verdicts } = await readClaimsAndVerdicts(view)
+  assert.equal(claims.state, 'ok')
+  assert.equal(verdicts.state, 'ok')
+  assert.equal(verdicts.value?.round, 2, '多轮裁决必须取最新一轮 verdicts-r2.json')
+  const summary = joinClaimsVerdicts(claims, verdicts)
+  assert.deepEqual(summary.counts, {
+    total: 4,
+    supported: 1,
+    partial: 1,
+    unsupported: 1,
+    insufficient: 1,
+    unverified: 0,
+    critical: 4,
+  })
+
+  // 负控1：review/claims.json 损坏时不得静默回退到根 claims.json
+  const brokenReviewView = {
+    list: async () => ({ ok: false, reason: 'missing' }),
+    read: async (name) => {
+      if (name === 'review/claims.json') return { ok: true, value: { text: '{broken' } }
+      if (name === 'claims.json') return { ok: true, value: { text: JSON.stringify(CLAIMS) } }
+      return { ok: false, reason: 'missing' }
+    },
+  }
+  const broken = await readClaimsAndVerdicts(brokenReviewView)
+  assert.equal(broken.claims.state, 'invalid', 'review/claims.json 坏掉必须显性判 invalid')
+
+  // 负控2：review/ 目录读取失败时不得静默当 absent
+  const unreadableDirView = {
+    list: async (dir) => (dir === 'review' ? { ok: false, reason: 'unreadable' } : { ok: false, reason: 'missing' }),
+    read: async () => ({ ok: false, reason: 'missing' }),
+  }
+  const dirErr = await readClaimsAndVerdicts(unreadableDirView)
+  assert.equal(dirErr.verdicts.state, 'unreadable')
+})

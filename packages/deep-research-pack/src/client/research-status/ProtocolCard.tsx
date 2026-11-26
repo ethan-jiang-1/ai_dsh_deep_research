@@ -28,14 +28,27 @@ export function ProtocolCard(props: {
     )
   }
   if (protocol.state !== 'ok' || protocol.contract === null) {
+    const isEmpty = protocol.state === 'empty'
+    const isUnreadable = protocol.state === 'unreadable'
+    const tagTone = isEmpty ? 'warning' : 'danger'
+    const tagKey = isEmpty
+      ? 'statusProtocolEmptyTag'
+      : isUnreadable
+        ? 'statusProtocolUnreadableTag'
+        : 'statusProtocolInvalid'
+    const bodyKey = isEmpty
+      ? 'statusProtocolEmpty'
+      : isUnreadable
+        ? 'statusProtocolUnreadable'
+        : 'statusProtocolInvalidBody'
     return (
       <div className={css.protocolCard} data-testid="research-protocol-card" data-protocol-state={protocol.state}>
         <div className={css.protocolHeader}>
           <strong className={css.protocolTitle}>{t('statusProtocolTitle')}</strong>
-          <Tag tone="danger">{t('statusProtocolInvalid')}</Tag>
+          <Tag tone={tagTone}>{t(tagKey)}</Tag>
           <Button variant="ghost" size="sm" onClick={onRetry}>{t('retry')}</Button>
         </div>
-        <div className={css.warnText}>{t('statusProtocolUnreadable')}</div>
+        <div className={css.warnText}>{t(bodyKey)}</div>
       </div>
     )
   }

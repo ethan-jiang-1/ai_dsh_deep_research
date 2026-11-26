@@ -46,3 +46,37 @@ publisher: example.com
   assert.equal(safeExternalUrl('https://example.com/a'), 'https://example.com/a')
   assert.equal(safeExternalUrl('javascript:alert(1)'), null)
 })
+
+// 负例留证 2026-11-27：BUG-447——parseEvidenceCard 保留正文里的 `## Question List` 小节，
+// 导致 ResearchEvidenceTab 在正文与 .questionsBox 渲染两份重复的勾选列表。
+// 红配方：移除 parseEvidenceCard 对 Question List 原节的剥离 → bodyMarkdown 仍含 Question List 红。
+test('BUG-447 parseEvidenceCard：提取结构化 questions 后从 bodyMarkdown 裁剪原 Question List 节，保留前后文', () => {
+  const card = parseEvidenceCard('e2.md', `---
+source_url: https://example.com/doc
+retrieved_at: 2026-11-26
+quality: A
+found_by: scout
+supports: T1
+lens: official
+source_tier: primary
+publisher: example.com
+---
+
+# 核心发现
+
+## 原文摘录
+> 关键数据 123。
+
+## Question List（本 topic）
+- [x] 一手出处？
+- [ ] 口径边界？
+
+## 局限说明
+仅覆盖 2026 年。
+`)
+  assert.equal(card.questions.length, 2)
+  assert.match(card.bodyMarkdown, /关键数据 123/)
+  assert.match(card.bodyMarkdown, /仅覆盖 2026 年/)
+  assert.doesNotMatch(card.bodyMarkdown, /## Question List/)
+  assert.doesNotMatch(card.bodyMarkdown, /一手出处？/)
+})

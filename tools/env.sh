@@ -12,7 +12,18 @@
 #   把守）；不借用任何外部 checkout。原「vendor submodule 延后」的偏离（D10）已随
 #   队列「vendor-submodule-and-pnpm-dsh」落地而终结。
 
-_repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [ -n "${BASH_SOURCE[0]:-}" ]; then
+  _env_src="${BASH_SOURCE[0]}"
+elif [ -n "${ZSH_VERSION:-}" ]; then
+  _env_src="${(%):-%x}"
+else
+  _env_src="$0"
+fi
+_repo_root="$(cd "$(dirname "$_env_src")/.." && pwd)"
+if [ ! -f "${_repo_root}/package.json" ] || [ ! -d "${_repo_root}/tools" ]; then
+  echo "tools/env.sh: 无法定位仓库根目录（解析结果：${_repo_root}）——请在 bash/zsh 下 source tools/env.sh" >&2
+  return 1 2>/dev/null || exit 1
+fi
 
 # ① 数据面（默认覆盖平台 DSH_HOME；显式 DSH_DEV_HOME 可把隔离根指到仓外）
 #   实证（2026-09-24 l4-lite 复跑首跑栽坑）：DSH 会话内（agent shell / GUI 环境）自带
@@ -54,7 +65,7 @@ echo "tools/env.sh: dsh → 本仓 vendor/dsh 钉 tag 源码基线（机制权�
 # ③ 提交面：pre-commit 钩子（tools/hooks/pre-commit：verify+tests 红灯拦 commit——收尾纪律
 #    "必跑"的机器化，教训实证见 notes/implemented/2026-09-24-agent-friendly-polish.md）。
 #    git config 幂等；hooksPath 相对路径按仓库顶层解析。
-if git -C "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)" config core.hooksPath tools/hooks 2>/dev/null; then
+if git -C "${_repo_root}" config core.hooksPath tools/hooks 2>/dev/null; then
   echo "tools/env.sh: core.hooksPath=tools/hooks（pre-commit 门禁生效：红灯 commit 被拦）"
 else
   echo "tools/env.sh: ⚠ 无法设置 core.hooksPath——pre-commit 门禁未生效，收尾须按 guides/60 §4 手跑 verify+tests" >&2

@@ -50,6 +50,7 @@ export function ClaimsAuditView(props: {
         <Tag tone="success">{t('finalClaimSupported')}: {String(summary.counts.supported)}</Tag>
         {summary.counts.partial > 0 && <Tag tone="warning">{t('finalClaimPartial')}: {String(summary.counts.partial)}</Tag>}
         {summary.counts.unsupported > 0 && <Tag tone="danger">{t('finalClaimUnsupported')}: {String(summary.counts.unsupported)}</Tag>}
+        {summary.counts.insufficient > 0 && <Tag tone="warning">{t('finalClaimInsufficient')}: {String(summary.counts.insufficient)}</Tag>}
         {summary.counts.unverified > 0 && <Tag tone="outline">{t('finalClaimUnverified')}: {String(summary.counts.unverified)}</Tag>}
       </div>
       {summary.rows.map((row) => (

@@ -21,6 +21,7 @@ export interface WorkspaceFilesRemote {
 }
 
 const codeOf = (error: unknown): string | undefined => (error as { code?: string } | undefined)?.code
+const isCancelled = (signal: AbortSignal, error?: unknown): boolean => signal.aborted || codeOf(error) === 'gateway/cancelled'
 
 /** 建三个读闭包：listDir（渐进面）/ readLibrary（方法库全文，分页拼）/ readPreview（有界预览）。 */
 export function createWorkspaceFiles(remote: WorkspaceFilesRemote) {
@@ -28,6 +29,7 @@ export function createWorkspaceFiles(remote: WorkspaceFilesRemote) {
     try {
       const result = await remote.list(sessionId, path, signal)
       if (!result.ok) {
+        if (isCancelled(signal, result.error)) return null
         // 例外：`workspace-file/not-found` = 目录尚未产出，是合法空态而非故障（2026-10-19 实测：
         // drt_* 无 evidence/ 目录，页签把正常空态当故障报红）。真故障仍 fail-loud。
         if (codeOf(result.error) === 'workspace-file/not-found') return []
@@ -36,6 +38,7 @@ export function createWorkspaceFiles(remote: WorkspaceFilesRemote) {
       }
       return result.value.entries as readonly { type: string; name: string }[]
     } catch (cause) {
+      if (signal.aborted) return null
       console.error('[research-status] workspaceFiles.list 抛错', String(cause))
       return null
     }
@@ -71,6 +74,7 @@ export function createWorkspaceFiles(remote: WorkspaceFilesRemote) {
     try {
       const result = await remote.read(sessionId, path, { offset: 1, limit }, signal)
       if (!result.ok) {
+        if (isCancelled(signal, result.error)) return { kind: 'cancelled' as const }
         return codeOf(result.error) === 'workspace-file/not-found'
           ? { kind: 'absent' as const }
           : { kind: 'error' as const, detail: String(result.error ?? 'workspace read failed') }
@@ -99,6 +103,7 @@ export function createWorkspaceFiles(remote: WorkspaceFilesRemote) {
     try {
       const result = await remote.read(sessionId, path, { offset: 1, limit }, signal)
       if (!result.ok) {
+        if (isCancelled(signal, result.error)) return null
         if (missingOk && codeOf(result.error) === 'workspace-file/not-found') return null
         console.error('[research-status] workspaceFiles.read 失败', JSON.stringify({ path, error: result.error }))
         return null
@@ -106,6 +111,7 @@ export function createWorkspaceFiles(remote: WorkspaceFilesRemote) {
       const text = (result.value as { text?: unknown }).text
       return typeof text === 'string' ? text : null
     } catch (cause) {
+      if (signal.aborted) return null
       console.error('[research-status] workspaceFiles.read 抛错', String(cause))
       return null
     }

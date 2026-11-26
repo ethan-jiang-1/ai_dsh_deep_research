@@ -14,9 +14,10 @@
  *   - 到 eof 的翻页有页数上限；触顶返回 `truncated: true`，绝不静默短读。
  *
  * 当前读策略（与 design/40 的驾驶舱边界同步）：
- *   question.md / leads.md / findings.md / evidence/*.md / review.md / review/readiness.json /
- *   delivered.json / final.md / final/vN.md / final/readable*.md → eof（500 行/页，最多 64 页）
- *   plan.md / plan/vN.md → 800 行；其余 → 40 行
+ *   question.md / leads.md / findings.md / topics.md / protocol.json / evidence/*.md /
+ *   review.md / review/readiness.json / review/claims.json / review/verdicts-rN.json /
+ *   claims.json / verdicts.json / delivered.json / final.md / final/vN.md / final/readable*.md
+ *   → eof（500 行/页，最多 64 页）；plan.md / plan/vN.md → 800 行；其余 → 40 行
  */
 
 /** D28 的三种操作桶；发现顺序 = 根 → archive → _abandoned。 */
@@ -95,8 +96,8 @@ const MAX_PAGES = 64
 const DEFAULT_LINES = 40
 /** plan.md 与其版本快照 plan/vN.md 共用 800 行上限（旧实现分别 800/240）。 */
 const PLAN_NAME = /^(?:plan\.md|plan\/v[1-9]\d*\.md)$/
-/** canonical 研究工件必须读到 eof（最多 MAX_PAGES 页），避免真实长度文件被固定行窗截断成 unreadable（BUG-385）。 */
-const EOF_NAME = /^(?:question\.md|leads\.md|findings\.md|evidence\/[^/]+\.md|review\.md|review\/readiness\.json|delivered\.json|final\.md|final\/v[1-9]\d*\.md|final\/readable(?:-v[1-9]\d*)?\.md)$/
+/** canonical 研究工件必须读到 eof（最多 MAX_PAGES 页），避免真实长度文件被固定行窗截断成 unreadable（BUG-385 / BUG-436）。 */
+const EOF_NAME = /^(?:question\.md|leads\.md|findings\.md|topics\.md|protocol\.json|evidence\/[^/]+\.md|review\.md|review\/readiness\.json|review\/claims\.json|review\/verdicts-r[1-9]\d*\.json|claims\.json|verdicts\.json|delivered\.json|final\.md|final\/v[1-9]\d*\.md|final\/readable(?:-v[1-9]\d*)?\.md)$/
 /** run bundle slug 形态（与 bundle-bind 的 `drt_<slug>/` 词法一致）。 */
 /** run bundle slug 字符集（成文；binding/门/CLI 共用——BUG-135）。 */
 export const RUN_SLUG = /^[A-Za-z0-9][A-Za-z0-9._-]*$/

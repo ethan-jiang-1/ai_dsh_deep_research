@@ -59,3 +59,25 @@ test('ResearchMilestoneCard：无里程碑返回 null；有交付里程碑渲染
   assert.match(html, /研究报告已正式交付/)
   assert.match(html, /阅读终稿/)
 })
+
+// 负例留证 2026-11-27：BUG-440——deliverables/presented 同时包含主本与读者版多文件时，
+// researchTurnDefinition 把每个文件都拆成一条 delivered 里程碑，导致回合尾出现两张重复交付卡片。
+// 红配方：恢复 update 里对 rec.data.files 逐项 addMilestone → 本例红（length=2）。
+test('BUG-440 researchTurnDefinition：单次多文件 deliverables/presented 只产出一张交付里程碑（优先读者版）', () => {
+  const turnStart = { type: 'turn/start', seq: 1, data: { turn: 3 } }
+  let state = researchTurnDefinition.start({}, { event: turnStart, role: 'start', location: { kind: 'session' } }, { previous: () => undefined })
+  const multiPresent = {
+    type: 'deliverables/presented',
+    seq: 8,
+    data: {
+      turn: 3,
+      files: [{ path: 'drt_x/final/v1.md' }, { path: 'drt_x/final/readable-v1.md' }],
+    },
+  }
+  state = researchTurnDefinition.update({ state }, { event: multiPresent, role: 'update', location: { kind: 'session' } })
+  const data = researchTurnDefinition.buildLocationData({ state }, 'turn', null)
+  assert.ok(data !== null)
+  assert.equal(data.value.milestones.length, 1, '同一次多文件交付不得重复渲染多条 delivered 行')
+  assert.equal(data.value.milestones[0]?.kind, 'delivered')
+  assert.equal(data.value.milestones[0]?.path, 'drt_x/final/readable-v1.md')
+})

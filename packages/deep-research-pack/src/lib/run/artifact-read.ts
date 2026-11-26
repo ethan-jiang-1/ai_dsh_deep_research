@@ -92,6 +92,7 @@ export const ARTIFACT_POLICY: Readonly<Record<string, ArtifactPolicy>> = {
   'findings.md': { nonEmpty: true, json: false },
   'topics.md': { nonEmpty: true, json: false },
   'protocol.json': { nonEmpty: true, json: true },
+  'review/claims.json': { nonEmpty: true, json: true },
   'claims.json': { nonEmpty: true, json: true },
   'verdicts.json': { nonEmpty: true, json: true },
   'final.md': { nonEmpty: true, json: false },
@@ -108,6 +109,7 @@ export function artifactPolicyOf(name: string): ArtifactPolicy | null {
   if (fixed !== undefined) return fixed
   if (/^plan\/v[1-9]\d{0,5}\.md$/.test(name)) return { nonEmpty: true, json: false }
   if (/^evidence\/[^/]+\.md$/.test(name)) return { nonEmpty: true, json: false }
+  if (/^review\/verdicts-r[1-9]\d{0,3}\.json$/.test(name)) return { nonEmpty: true, json: true }
   if (/^final\/v[1-9]\d{0,5}\.md$/.test(name)) return { nonEmpty: true, json: false }
   if (/^final\/readable(?:-v[1-9]\d{0,5})?\.md$/.test(name)) return { nonEmpty: true, json: false }
   return null
@@ -151,6 +153,7 @@ export type JsonArtifactName =
   | 'delivered.json'
   | 'review/readiness.json'
   | 'protocol.json'
+  | 'review/claims.json'
   | 'claims.json'
   | 'verdicts.json'
 

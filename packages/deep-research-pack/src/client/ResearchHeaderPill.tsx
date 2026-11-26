@@ -122,6 +122,7 @@ export function ResearchHeaderPill(props: ResearchHeaderPillProps): ReactNode {
 
   return (
     <HoverCard
+      inline
       openDelayMs={300}
       anchor={(
         <button

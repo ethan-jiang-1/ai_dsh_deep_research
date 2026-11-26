@@ -42,7 +42,7 @@ import { readSessionEvents, resolveSessionLog } from '../../checks/lib/shared/se
 import { PREVIEW_NOTICE_PROBE_JS, SHOW_MORE_SESSIONS_PATTERN } from '../../checks/lib/shared/web-ui-nav.mjs';
 import { reconcileInjectedMessage } from '../../checks/lib/channel/inject-reconcile.mjs';
 import { pickSendTarget } from '../../checks/lib/probes/probe-send-target.mjs';
-import { pickStatusTab } from '../../checks/lib/shared/probe-status-tab.mjs';
+import { nextStatusPaneAction } from '../../checks/lib/shared/probe-status-tab.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -208,6 +208,8 @@ try {
       return leaves.length > 0 ? (leaves[0].textContent ?? '') : ''
     }
     return {
+      expanded: document.querySelector('[data-sidebar-right-open]') !== null,
+      currentSession: document.querySelector('[data-conversation-session]')?.getAttribute('data-conversation-session') ?? '',
       buttons: [...document.querySelectorAll('button')].map(b => ({
         label: (b.getAttribute('aria-label') ?? '').trim(),
         title: titleOf(b),
@@ -217,45 +219,44 @@ try {
     }
   })()`);
   const openStatusPane = async () => {
-    // 右栏展开按钮**首屏可能尚未挂载**（2026-10-19 探针实测：frameMounted 后立即查仍是 missing，
-    // 固定单击一次 = 什么都没发生，于是后面 12 轮都在"找不到页签"——假红）。故展开也进循环按
-    // 状态重试（幂等：已展开时按钮变 Collapse right sidebar，不再点）。
-    // 按钮钩子优先用 `data-sidebar-right-expand`：aria-label 随界面语言变（2026-11-02 实测
-    // zh 界面只有「打开右侧边栏」，旧实现只认英文 → 右栏收起时探针假红）。
-    let expanded = false;
-    for (let i = 0; i < 12 && !expanded; i++) {
-      expanded = await evaluate(`(() => {
-        if (document.querySelector('[data-sidebar-right-open]') !== null) return true;
-        const labelled = [...document.querySelectorAll('button')].find((b) =>
-          /^(Open|打开).*(right sidebar|右侧边栏)$/i.test((b.getAttribute('aria-label') ?? '').trim()));
-        const b = document.querySelector('[data-sidebar-right-expand]') ?? labelled;
-        if (b === null || b === undefined) return false;
-        b.click();
-        return false
-      })()`) === true;
-      if (!expanded) await new Promise((resolve) => { setTimeout(resolve, 1000) });
-    }
-    // 等待页签体出现（显式状态，不用固定 sleep 当证据）：右栏挂载 + 页签点开后体才渲染。
-    // 判据 = `[data-sidebar-right-tab]` 里出现了目标页签体（不是会话正文里出现这四个字）。
-    let opened = false;
-    let clicked = false;
-    for (let i = 0; i < 12 && !opened; i++) {
-      await new Promise((resolve) => { setTimeout(resolve, 1000) });
+    // 统一可重入状态机（BUG-441）：启动期 ensureProductWorkspace 异步切会话会让右栏回到
+    // 折叠态；把「展开 → 点胶囊 → 等页签体」收在同一个循环里，切会话后会自动重展再点。
+    let clickedSession = null;
+    for (let i = 0; i < 24; i++) {
       const dom = await readStatusDom();
-      const pick = pickStatusTab({ buttons: dom?.buttons ?? [], title: paneTitles, entry: paneEntry });
-      if (!clicked && pick.pickedIndex !== null) {
-        // 只点一次：点开后面板就位，下一次读到的已是页签体（重复点会把同一页签再切一次，
-        // 实测无害但徒增噪声）——选中判据见下：`clicked` 计数进 --debug-pane。
-        clicked = await evaluate(`(() => { const b = [...document.querySelectorAll('button')][${pick.pickedIndex}]; if (b === undefined) return false; b.click(); return true })()`) === true;
-        await new Promise((resolve) => { setTimeout(resolve, 1500) });
+      const currentSession = typeof dom?.currentSession === 'string' ? dom.currentSession : '';
+      const step = nextStatusPaneAction({
+        expanded: dom?.expanded === true,
+        currentSession,
+        clickedSession,
+        buttons: dom?.buttons ?? [],
+        tabBodies: dom?.tabBodies ?? [],
+        title: paneTitles,
+        entry: paneEntry,
+      });
+      if (step.action === 'done') return true;
+      if (step.action === 'expand') {
+        clickedSession = null;
+        await evaluate(`(() => {
+          const labelled = [...document.querySelectorAll('button')].find((b) =>
+            /^(Open|打开).*(right sidebar|右侧边栏)$/i.test((b.getAttribute('aria-label') ?? '').trim()));
+          const b = document.querySelector('[data-sidebar-right-expand]') ?? labelled;
+          if (b === null || b === undefined) return false;
+          b.click();
+          return true;
+        })()`);
+        await new Promise((resolve) => { setTimeout(resolve, 1000) });
+        continue;
       }
-      const after = await readStatusDom();
-      // 判据 = 页签体在场且**标题已切到目标**（页签体首轮可能只渲染标题 span——实测时序）：
-      // 认标题或正文任一处，不要求正文里出现目标词（未绑定 run 的正常面也该算"页签开了"）。
-      const bodies = after?.tabBodies ?? [];
-      opened = bodies.some((t) => typeof t === 'string' && paneTitles.some((title) => t.indexOf(title) !== -1));
+      if (step.action === 'click-tab') {
+        const clicked = await evaluate(`(() => { const b = [...document.querySelectorAll('button')][${step.index}]; if (b === undefined) return false; b.click(); return true })()`) === true;
+        if (clicked) clickedSession = currentSession;
+        await new Promise((resolve) => { setTimeout(resolve, 1500) });
+        continue;
+      }
+      await new Promise((resolve) => { setTimeout(resolve, 1000) });
     }
-    return opened;
+    return false;
   };
   const paneText = async () => evaluate(`(() => {
     // 页签体优先（不拿会话正文当观察面——那会把对话里提到的词读成页签内容）。多条命中时取

@@ -157,11 +157,11 @@
 | run | `run/evidence-matrix` | `tests/cockpit/lib/run/evidence-matrix.spec.mjs` |
 | run | `run/final-target` | `tests/cockpit/lib/run/run-property.spec.mjs`<br>`tests/contracts/present-version-conformance.spec.mjs`<br>`tests/run/gates/final-target.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs` |
 | run | `run/health` | `tests/cockpit/lib/run/health.spec.mjs` |
-| run | `run/protocol-fold` | `tests/cockpit/lib/run/protocol-fold.spec.mjs` |
+| run | `run/protocol-fold` | `tests/cockpit/lib/run/artifact-read.spec.mjs`<br>`tests/cockpit/lib/run/protocol-fold.spec.mjs` |
 | run | `run/receipt-fold` | `tests/cockpit/lib/run/receipt-fold.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | run | `run/rerun-triage` | `tests/cockpit/client/final-evidence.spec.mjs`<br>`tests/cockpit/lib/run/rerun-triage.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/rerun-triage-contract.spec.mjs` |
-| run | `run/run-context` | `tests/cockpit/client/run-source-browser.spec.mjs`<br>`tests/run/gates/run-context-node.spec.mjs`<br>`tests/run/gates/run-context.spec.mjs` |
-| run | `run/run-fold` | `tests/cockpit/lib/run/run-property.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/gates/final-version.spec.mjs`<br>`tests/run/shared/run-fold.spec.mjs` |
+| run | `run/run-context` | `tests/cockpit/client/run-source-browser.spec.mjs`<br>`tests/cockpit/lib/run/artifact-read.spec.mjs`<br>`tests/run/gates/run-context-node.spec.mjs`<br>`tests/run/gates/run-context.spec.mjs` |
+| run | `run/run-fold` | `tests/cockpit/client/research-status/protocol-radar.spec.mjs`<br>`tests/cockpit/lib/run/run-property.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/gates/final-version.spec.mjs`<br>`tests/run/shared/run-fold.spec.mjs` |
 | run | `run/run-version` | `tests/cockpit/lib/run/run-version.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/present-version-conformance.spec.mjs` |
 | shared | `shared/config-tables` | `tests/cockpit/client/builtin-display.spec.mjs`<br>`tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/lib/method-library/library-fold.spec.mjs` |
 | shared | `shared/error-detail` | `tests/cockpit/lib/shared/error-detail.spec.mjs` |
@@ -233,7 +233,7 @@
 | research-status | `research-status/ProtocolCard` | `tests/cockpit/client/research-status/protocol-radar.spec.mjs` |
 | research-status | `research-status/QualityRadar` | `tests/cockpit/client/research-status/protocol-radar.spec.mjs` |
 | research-status | `research-status/status-state` | `tests/cockpit/client/research-status/status-state.spec.mjs`<br>`tests/cockpit/lib/events/status-feed.spec.mjs` |
-| research-status | `research-status/TrackRail` | — |
+| research-status | `research-status/TrackRail` | `tests/cockpit/client/research-status/protocol-radar.spec.mjs` |
 | research-status | `research-status/types` | — |
 | research-status | `research-status/useMemberActivity` | `tests/cockpit/client/research-status/status-feed-behavior.spec.mjs` |
 | research-status | `research-status/useStatusFeed` | `tests/cockpit/client/research-status/status-feed-behavior.spec.mjs` |
@@ -242,7 +242,7 @@
 | (root) | `ResearchEvidenceTab` | `tests/cockpit/client/final-evidence.spec.mjs` |
 | (root) | `ResearchFinalTab` | `tests/cockpit/client/final-evidence.spec.mjs`<br>`tests/cockpit/client/tabs-fault-matrix.spec.mjs` |
 | (root) | `ResearchGraphTab` | `tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/research-tabs.spec.mjs`<br>`tests/cockpit/client/tabs-fault-matrix.spec.mjs` |
-| (root) | `ResearchHeaderPill` | — |
+| (root) | `ResearchHeaderPill` | `tests/cockpit/client/research-tabs.spec.mjs` |
 | (root) | `ResearchHubPanel` | `tests/cockpit/client/research-hub-panel.spec.mjs` |
 | (root) | `ResearchMilestoneCard` | `tests/cockpit/client/research-turn.spec.mjs` |
 | (root) | `ResearchStatusTab` | `tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/research-tabs.spec.mjs`<br>`tests/cockpit/client/tabs-fault-matrix.spec.mjs` |

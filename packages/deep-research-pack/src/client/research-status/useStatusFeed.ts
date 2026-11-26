@@ -343,8 +343,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           },
         })
       } catch (cause) {
+        if (stopped || scanController?.signal.aborted) return
         console.error('[research-status] scan 异常', String(cause))
-        if (stopped) return
         dispatch({ kind: 'scan-threw' })
       }
     }

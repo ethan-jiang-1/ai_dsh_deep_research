@@ -154,3 +154,34 @@ test('ResearchHubPanel：研究透镜中英文切换、过滤与起草预填', a
   assert.equal(enPanel.container.querySelectorAll('article').length, 8)
   assert.match(enPanel.container.textContent ?? '', /Adversarial/)
 })
+
+// 负例留证 2026-11-27：BUG-446——Hub RunsView / LensesView 搜索 <Input> 未传 width: 100% 类，
+// 停在 DSH Input 固有 ~198px 宽度导致 placeholder 被裁切。
+// 红配方：去掉 RunsView/LensesView 的 searchInput 类名 → 本例红。
+test('BUG-446 ResearchHubPanel：RunsView 与 LensesView 搜索 Input 必须挂载 searchInput 全宽类', async () => {
+  const { readFileSync } = await import('node:fs')
+  const { fileURLToPath } = await import('node:url')
+  const cssText = readFileSync(
+    fileURLToPath(new URL('../../../packages/deep-research-pack/src/client/research-hub/hub.module.css', import.meta.url)),
+    'utf8',
+  )
+  assert.match(cssText, /\.searchInput\s*\{[^}]*width:\s*100%/, 'hub.module.css 须定义 width: 100% 的 .searchInput')
+
+  const run = makeMaliciousRunSource({ tree: {} })
+  const panel = render(createElement(ResearchHubPanel, {
+    t: tZh,
+    useSessions: ONE_SESSION,
+    runSource: () => run.source,
+    methodLibrary: STUB_METHOD_LIBRARY,
+    openFinal: () => {},
+    backToChat: () => {},
+    startResearch: () => {},
+  }))
+  await flushUi(act)
+  const runsInputWrap = panel.getByPlaceholderText(zh.hubSearchRuns).parentElement
+  assert.ok(runsInputWrap !== null && /\bsearchInput\b/.test(runsInputWrap.className), `RunsView 搜索框缺少 searchInput 类：${runsInputWrap?.className}`)
+
+  fireEvent.click(panel.getByRole('tab', { name: zh.hubTabLenses }))
+  const lensesInputWrap = panel.getByPlaceholderText(zh.hubSearchLenses).parentElement
+  assert.ok(lensesInputWrap !== null && /\bsearchInput\b/.test(lensesInputWrap.className), `LensesView 搜索框缺少 searchInput 类：${lensesInputWrap?.className}`)
+})

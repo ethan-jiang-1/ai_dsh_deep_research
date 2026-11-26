@@ -94,6 +94,7 @@ export function RunsView({
       <div className={css.toolbar}>
         <div className={css.searchWrap}>
           <Input
+            className={css.searchInput ?? ''}
             icon={<IconSearchOutlineRegular size={14} />}
             value={query}
             onChange={(e) => { setQuery(e.target.value) }}

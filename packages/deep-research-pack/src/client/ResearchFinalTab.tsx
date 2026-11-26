@@ -120,6 +120,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const [view, setView] = useState<FinalView>('reader')
   const targetRef = useRef<{ dir: string; name: string } | null>(null)
   const targetNamesRef = useRef<{ audit: string; readerName: string | null }>({ audit: '', readerName: null })
+  const bodyRef = useRef<HTMLDivElement | null>(null)
 
   /**
    * 失败出口：**原子**清掉上一轮的展示正文与降级条（BUG-387）——失败态不得被旧 `text` 遮蔽
@@ -453,12 +454,13 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
         <Button
           variant="ghost"
           size="sm"
+          className={css.splitReviewBtn ?? ''}
           onClick={() => { tab.tab.actions.openTab(RESEARCH_STATUS_TAB_KIND, { preferNewPane: true }) }}
         >
           {props.t('finalSplitReview')}
         </Button>
       </div>
-      <div className={css.body}>
+      <div ref={bodyRef} className={css.body}>
         {view === 'claims' ? (
           <ClaimsAuditView
             summary={claimsSummary}
@@ -468,7 +470,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
           />
         ) : (
           <MarkdownDelegateProvider openFile={(path) => { openEvidence(path) }}>
-            <FinalToc markdown={linkifiedMarkdown} t={props.t} />
+            <FinalToc markdown={linkifiedMarkdown} bodyRef={bodyRef} t={props.t} />
             <MarkdownText text={linkifiedMarkdown} labels={markdownLabelsMemo} />
           </MarkdownDelegateProvider>
         )}

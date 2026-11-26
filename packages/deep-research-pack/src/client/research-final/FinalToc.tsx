@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ReactNode, RefObject } from 'react'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import css from '../ResearchFinalTab.module.css'
 
@@ -28,13 +28,35 @@ function extractTocHeadings(markdown: string): readonly TocHeading[] {
   return headings
 }
 
-/** 轻量可折叠章节目录：列出终稿 H1–H3 章节骨架。 */
+/** 轻量可折叠章节目录：列出终稿 H1–H3 章节骨架，点击滚动定位到对应正文标题（BUG-445）。 */
 export function FinalToc(props: {
   readonly markdown: string
+  readonly bodyRef?: RefObject<HTMLDivElement | null>
   readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
   const headings = extractTocHeadings(props.markdown)
   if (headings.length < 2) return null
+
+  const jumpToHeading = (heading: TocHeading, index: number): void => {
+    const root = props.bodyRef?.current
+    if (root === null || root === undefined) return
+    const normalize = (s: string): string => s.replace(/\s+/g, ' ').trim()
+    const targetText = normalize(heading.text)
+    const nodes = [...root.querySelectorAll<HTMLElement>('h1, h2, h3')]
+    const nthSame = headings
+      .slice(0, index + 1)
+      .filter((item) => item.level === heading.level && normalize(item.text) === targetText)
+      .length - 1
+    const byIndex = nodes[index]
+    const sameLevelAndText = nodes.filter(
+      (el) => el.tagName === `H${heading.level}` && normalize(el.textContent ?? '') === targetText,
+    )
+    const target = (byIndex !== undefined && byIndex.tagName === `H${heading.level}` && normalize(byIndex.textContent ?? '') === targetText)
+      ? byIndex
+      : sameLevelAndText[nthSame] ?? nodes.find((el) => normalize(el.textContent ?? '') === targetText)
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <details className={css.tocDetails}>
       <summary className={css.tocSummary}>
@@ -42,9 +64,14 @@ export function FinalToc(props: {
       </summary>
       <div className={css.tocList}>
         {headings.map((h, i) => (
-          <div key={`${i}:${h.text}`} className={h.level >= 2 ? css.tocSubItem : css.tocItem}>
+          <button
+            type="button"
+            key={`${i}:${h.text}`}
+            className={h.level >= 2 ? css.tocSubItem : css.tocItem}
+            onClick={() => { jumpToHeading(h, i) }}
+          >
             {h.text}
-          </div>
+          </button>
         ))}
       </div>
     </details>

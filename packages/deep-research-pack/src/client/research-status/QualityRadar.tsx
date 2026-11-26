@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Button, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { EvidenceMatrix } from '../../lib/run/evidence-matrix.ts'
+import { countText } from '../../lib/shared/i18n.ts'
 import css from './status.module.css'
 
 /**
@@ -42,7 +43,7 @@ export function QualityRadar(props: {
       <div className={css.radarHeader}>
         <strong className={css.protocolTitle}>{t('statusRadarTitle')}</strong>
         <Tag tone={matrix.state === 'ok' ? 'neutral' : 'warning'}>
-          {t('statusRadarPublishers', { count: String(matrix.uniquePublishers) })}
+          {countText(t, matrix.uniquePublishers, 'statusRadarPublishersOne', 'statusRadarPublishersOther')}
         </Tag>
         {(matrix.state === 'partial' || matrix.state === 'unreadable') && (
           <Button variant="ghost" size="sm" onClick={onRetry}>{t('retry')}</Button>
