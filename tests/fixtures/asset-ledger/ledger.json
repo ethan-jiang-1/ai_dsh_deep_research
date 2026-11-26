@@ -1923,6 +1923,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/run/channel/mirror-sync.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "tests/run/channel/mirror-sync.spec.mjs —— checks/lib/channel/mirror-sync.mjs 的漂移分类契约。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/run/channel/profile-health.spec.mjs",
       "domain": "run",
       "lane": "spec",

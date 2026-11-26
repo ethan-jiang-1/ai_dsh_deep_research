@@ -26,7 +26,7 @@ function probeSandbox() {
 const argv = process.argv.slice(2)
 const background = argv.includes('--background')
 const args = argv.filter(arg => arg !== '--background')
-const modes = new Set(['--prepare-profile', '--drift-check', '--drift-only'])
+const modes = new Set(['--prepare-profile', '--drift-check', '--drift-only', '--sync-mirror'])
 const mode = args[0] ?? 'serve'
 const locks = []
 let child = null
@@ -173,7 +173,7 @@ function consumeOutput(chunk, target, { detectBanner = false } = {}) {
 }
 
 async function main() {
-  if (args.length > 1 || (args.length === 1 && !modes.has(mode))) throw fail('unknown mode; use --prepare-profile, --drift-check or --drift-only', 2)
+  if (args.length > 1 || (args.length === 1 && !modes.has(mode))) throw fail('unknown mode; use --prepare-profile, --drift-check, --drift-only or --sync-mirror', 2)
   if (argv.filter(arg => arg === '--background').length > 1) throw fail('duplicate --background', 2)
   if (background && (!process.connected || mode !== 'serve')) throw fail('--background requires a fork IPC channel and serve mode', 2)
   const profile = env.DSH_RUN_PROFILE || 'deep-research'
@@ -207,7 +207,7 @@ async function main() {
     })
   })
 
-  if (mode !== '--drift-only') {
+  if (mode !== '--drift-only' && mode !== '--sync-mirror') {
     // Legacy locks cannot be safely interpreted or reclaimed by the new protocol.
     for (const name of ['boot-run.lock', 'run-driver-up.lock']) {
       if (existsSync(join(state, name))) throw fail(`legacy ownership exists (${join(state, name)}); stop related processes and recover offline`, 2)
@@ -215,6 +215,10 @@ async function main() {
     if (SANDBOX_AVAILABLE === false) safeDiagnostic('start-channel: nested sandbox detected (sandbox-exec EPERM); script-layer fan-out will be declared unavailable')
     // Home-level writes occur during preparation; keeping this lock for the service
     // also prohibits rebuilding a loaded profile. Independent homes can run in parallel.
+    // --sync-mirror is the controlled exception (BUG-435): it only atomically replaces
+    // drifted client artifacts (hot-loaded by the running web via client-hmr stat-poll)
+    // and non-runtime docs, and refuses host-runtime drift — so it must run concurrently
+    // with the service that holds the home lock for its lifetime.
     const paths = [...new Set([join(home, 'channel-start.lock'), join(state, 'channel-start.lock')])].sort()
     for (const path of paths) {
       const lock = acquireStartLock(path)

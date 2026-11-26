@@ -16,7 +16,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // 判据住 checks/lib/channel/run-channel.mjs（壳 = tools/channel/run-driver.mjs 含 spawn，测试不许进其 import
 // 闭包——layering 守卫；2026-10-19 实测红后按分层修正）
-import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../../../checks/lib/channel/run-channel.mjs';
+import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict, bootGraphFromHtml, expectedArtifactRev, artifactServedVerdict } from '../../../checks/lib/channel/run-channel.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
@@ -194,3 +194,61 @@ test('BUG-327：run-driver 只经共享构造器建 probe 键，不再内联身�
   assert.ok(!source.includes('probeIdentityOf('), 'run-driver 又内联了 probeIdentityOf——读写键可能再次不对称');
   assert.ok(source.includes('probeCacheKeyOf('), 'run-driver 未使用共享的 probeCacheKeyOf');
 })
+
+// ── BUG-435：漂移恢复快路径（client 产物原子同步 + 热载就绪判据）─────────────────
+// 负例留证 2026-11-26：BUG-435——修复前 up 复用分支遇漂移直接 exit 2，报错文本承诺的"逐文件 cp 同步"
+// 无实现（boot-run-body.sh 无 --sync-mirror）；channel-start.e2e 新案例首跑红（unknown mode exit 2）。
+// 还原法 = 删 run-driver 的 syncMirror 调用 / body 的 sync 模式。
+
+test('bootGraphFromHtml：解析 globalThis["__DSH_BOOT__"] 注入；缺/坏 → null', () => {
+  const graph = { rev: 'abc', entries: [{ id: 'dsh-deep-research-pack', url: 'plugins/??dsh-deep-research-pack/client.js&rev=r1', rev: 'r1' }] };
+  const html = `<html><head><script>globalThis["__DSH_BOOT__"] = ${JSON.stringify(graph)}</script></head><body></body></html>`;
+  assert.deepEqual(bootGraphFromHtml(html), graph);
+  // vendor 把 < 转义成 \u003c（injections.ts renderRow）——仍是合法 JSON
+  const escaped = `<script>globalThis["__DSH_BOOT__"] = {"rev":"\\u003c/script>","entries":[]}</script>`;
+  assert.deepEqual(bootGraphFromHtml(escaped), { rev: '</script>', entries: [] });
+  assert.equal(bootGraphFromHtml('<html><body>no boot</body></html>'), null);
+  assert.equal(bootGraphFromHtml('<script>globalThis["__DSH_BOOT__"] = {broken</script>'), null);
+});
+
+test('expectedArtifactRev：与 vendor artifactRevision 同公式（stat 三元组 sha1 framedHash）', () => {
+  // 金向量按 vendor 公式独立计算（client/modules/src/index.ts artifactRevision + framedHash）。
+  assert.equal(expectedArtifactRev({ mtimeMs: 1764000000000.5, ctimeMs: 1764000000001.25, size: 782074 }), '921697d9dc42');
+  const base = { mtimeMs: 100, ctimeMs: 200, size: 300 };
+  const rev = expectedArtifactRev(base);
+  assert.match(rev, /^[0-9a-f]{12}$/);
+  assert.notEqual(expectedArtifactRev({ ...base, mtimeMs: 101 }), rev, 'mtime 变 → rev 变');
+  assert.notEqual(expectedArtifactRev({ ...base, ctimeMs: 201 }), rev, 'ctime 变 → rev 变（原子 rename 必改 ctime）');
+  assert.notEqual(expectedArtifactRev({ ...base, size: 301 }), rev, 'size 变 → rev 变');
+  // vendor 漂移锁：公式源头还在（换 pin 时此断言先红，提醒重核）
+  const vendor = read('vendor/dsh/packages/client/modules/src/index.ts');
+  assert.ok(vendor.includes("framedHash('plugin-artifact', [String(baseline.mtimeMs), String(baseline.ctimeMs), String(baseline.size)])"),
+    'vendor artifactRevision 公式变了——expectedArtifactRev 须重核');
+});
+
+test('artifactServedVerdict：boot graph 里 pack 条目 rev = 期望 rev 才算热载就绪', () => {
+  const graph = { entries: [{ id: 'dsh-deep-research-pack', rev: 'newrev123456' }] };
+  const ok = artifactServedVerdict({ graph, packId: 'dsh-deep-research-pack', expectedRev: 'newrev123456' });
+  assert.equal(ok.ok, true);
+  const stale = artifactServedVerdict({ graph, packId: 'dsh-deep-research-pack', expectedRev: 'otherrev000000' });
+  assert.equal(stale.ok, false);
+  assert.ok(stale.detail.includes('newrev123456'), '未就绪详情要带当前 rev 供诊断');
+  const absent = artifactServedVerdict({ graph: { entries: [] }, packId: 'dsh-deep-research-pack', expectedRev: 'newrev123456' });
+  assert.equal(absent.ok, false);
+  assert.equal(artifactServedVerdict({ graph: null, packId: 'dsh-deep-research-pack', expectedRev: 'x' }).ok, false);
+});
+
+test('BUG-435 接线：up 复用遇漂移先 --sync-mirror；sync 模式不取启动锁（服务持锁期间可并发）', () => {
+  const src = read('tools/channel/run-driver.mjs');
+  assert.ok(src.includes("'--sync-mirror'"), 'up 复用分支未调 sync-mirror——纯 client 漂移仍逼人整包重建');
+  const body = read('tools/channel/boot-run-body.sh');
+  assert.ok(body.includes('--sync-mirror'), 'body 缺 sync 模式');
+  assert.match(body, /sync_mirror\(\)/, 'body 缺 sync_mirror 实现');
+  const owner = read('tools/channel/start-channel.mjs');
+  assert.ok(owner.includes("'--sync-mirror'"), 'supervisor 未注册 sync 模式');
+  assert.ok(owner.includes("mode !== '--drift-only' && mode !== '--sync-mirror'"),
+    'sync 必须像 drift-only 一样跳过启动锁——服务生命期持有 home 锁，取锁的 sync 永远进不来');
+  // 文档合同：guides/61 §0 必须写出快路径（报错文本承诺的路径要在操作指南里有名字）
+  const guide = read('docs/guides/61-run-playbook.md');
+  assert.ok(guide.includes('--sync-mirror'), 'guides/61 未登记 --sync-mirror');
+});

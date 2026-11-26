@@ -33,8 +33,9 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileS
 import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isMain } from '../../checks/lib/shared/cli-entry.mjs';
-import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict } from '../../checks/lib/channel/run-channel.mjs';
+import { guiUrlFromWebLog, probeFailureVerdict, runDriverVerdict, bootGraphFromHtml, expectedArtifactRev, artifactServedVerdict } from '../../checks/lib/channel/run-channel.mjs';
 import { profileGuardDecision } from '../../checks/lib/channel/profile-guard.mjs';
+import { clientArtifactRel } from '../../checks/lib/channel/mirror-sync.mjs';
 import { collectPackEntries, packFingerprint, probeCacheHit, probeCacheKeyOf, probeSourceFingerprint, writeJsonAtomic } from '../../checks/lib/channel/channel-cache.mjs';
 import { authenticate } from '../../checks/lib/shared/web-harness.mjs';
 import { parsePort } from '../../checks/lib/shared/port.mjs';
@@ -234,6 +235,43 @@ function mirrorDrift() {
   };
 }
 
+/** BUG-435 恢复快路径：client/文档漂移 → boot-run --sync-mirror 原子同步（不重启、不换 token；
+ *  vendor client-hmr stat-poll 热载）。host 漂移由 body 拒绝（exit 1）→ 调用方回退重建处方。
+ *  不取启动锁，与活通道并发；显式传 home/state，多实例下同步正确的 profile。 */
+function syncMirror() {
+  const r = spawnSync('bash', [join(ROOT, 'tools', 'channel', 'boot-run.sh'), '--sync-mirror'], {
+    encoding: 'utf8', cwd: ROOT, timeout: 180_000,
+    env: { ...process.env, DSH_DEV_HOME: DEV_HOME, DSH_RUN_STATE_DIR: STATE_DIR },
+  });
+  const output = `${r.stderr ?? ''}\n${r.stdout ?? ''}`.split('\n')
+    .filter((line) => line.startsWith('boot-run:')).slice(-8).join('\n');
+  return { ok: r.status === 0, output: output || `--sync-mirror exit=${String(r.status)}` };
+}
+
+/** 同步后的热载就绪检查：轮询首页 boot graph，直到 pack 条目 rev = 同步后镜像 stat 的期望 rev
+ *  （vendor artifactRevision 同公式）。rev 发布 ⟺ registry 已读新 bytes（rebuilt 同步读文件），
+ *  此时探针验的才是当前代码。超时/无条目 → fail-loud，不拿旧页面冒充绿。 */
+async function waitClientArtifactServed(url, profile) {
+  const packId = JSON.parse(readFileSync(join(PACK_DIR, 'package.json'), 'utf8')).name;
+  const mirrorClient = join(DEV_HOME, 'profiles', profile, 'node_modules', 'dsh-deep-research-pack', clientArtifactRel(PACK_DIR));
+  const expectedRev = expectedArtifactRev(statSync(mirrorClient));
+  const parsed = new URL(url);
+  const cookie = await authenticate(parsed.origin, parsed.searchParams.get('token'));
+  const deadline = Date.now() + 8_000; // stat-poll 缺省 500ms；8s 足够多个周期，超时即红
+  let last = { ok: false, detail: '未取证' };
+  while (Date.now() < deadline) {
+    try {
+      const res = await fetch(`${parsed.origin}/`, { headers: { cookie }, signal: AbortSignal.timeout(3000) });
+      last = artifactServedVerdict({ graph: bootGraphFromHtml(await res.text()), packId, expectedRev });
+      if (last.ok) return last;
+    } catch (error) {
+      last = { ok: false, detail: String(error?.message ?? error) };
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  return last;
+}
+
 // ── 判定落盘：每次 up/probe 各留一份现场 ──────────────────────────────────────
 // 旧实现只写固定名 run-driver-verdict.json / -probe-verdict.json：下一次 up/probe 直接覆盖，
 // **红的现场会被后来的绿抹掉**——agent 复跑一次就再也看不到当时哪条检查红、页面长什么样
@@ -313,7 +351,7 @@ if (sub === 'probe') {
     const payload = { url, ...v, driftDetail: drift.detail };
     const saved = persistVerdict('probe', payload);
     console.log(JSON.stringify(payload, null, 2));
-    console.error(`run-driver probe: NOT-RUN——通道镜像漂移/未取证（${saved.dir}）；先按 boot-run 处方重建并重启通道，再验`);
+    console.error(`run-driver probe: NOT-RUN——通道镜像漂移/未取证（${saved.dir}）；先跑 up（纯 client/文档漂移自动同步）或按 guides/61 §0.1 重建，再验`);
     process.exit(2);
   }
   const shot = join(STATE_DIR, 'run-driver-probe.png');
@@ -353,16 +391,31 @@ const requireData = has('--require-data');
 
 let state = channelState();
 let drift = null;
+let syncedThisRun = false;
 if (state.alive) {
   console.log(`run-driver: 通道已存活，复用（端口 ${state.port}，pid ${(state.pids ?? []).join(',')}）——不另起（guides/61 §0：在飞通道别另起）`);
   // 复用不是免检：先证明通道加载的镜像 = 当前 pack 源。旧实现直接 probe，把旧页面判成当前绿。
   drift = mirrorDrift();
   if (!drift.clean) {
+    // BUG-435 快路径：纯 client/文档漂移 → 原子同步 + client-hmr 热载（不重启、不换 token）。
+    // host 漂移由 --sync-mirror 拒绝（运行进程 boot 时缓存 host 代码）→ 回退重建处方。
+    console.log('run-driver: 镜像漂移——尝试 --sync-mirror 原子同步（client/文档漂移免重启；host 漂移会被拒绝）…');
+    const sync = syncMirror();
+    if (sync.ok) {
+      console.log(sync.output);
+      syncedThisRun = true;
+      drift = mirrorDrift(); // 同一道门复验：同步后镜像必须 = 当前 pack 源
+    } else {
+      console.error(sync.output);
+    }
+  }
+  if (!drift.clean) {
     const v = runDriverVerdict({ probe: {}, expectFace, drift });
     const payload = { url: state.url, port: state.port, ...v, driftDetail: drift.detail };
     const saved = persistVerdict('up', payload);
     console.error(`run-driver: NOT-RUN——通道镜像漂移/未取证（${saved.dir}）；当前页面不是当前代码。`);
-    console.error('           先确认没有在飞 run 需要保活，再停通道并重建镜像（bash tools/channel/boot-run.sh），然后重跑 up。');
+    console.error('           纯 client/文档漂移 up 已尝试原子同步；仍红 = host 侧漂移或同步失败——确认没有在飞 run 需要保活，');
+    console.error('           停通道并重建镜像（guides/61 §0.1：rm -rf profile 后重跑 boot-run），然后重跑 up。');
     console.log(JSON.stringify(payload, null, 2));
     process.exit(2);
   }
@@ -399,6 +452,24 @@ if (state.alive) {
 if (noProbe) {
   console.log(JSON.stringify({ url: state.url, level: 'NOT-RUN', reason: '--no-probe：宿主侧已起，浏览器面未验证（未跑 ≠ 通过）' }, null, 2));
   process.exit(2);
+}
+
+// BUG-435：同步过的通道必须先证明运行进程已热载新 client 产物（boot graph rev = 镜像 stat 期望 rev），
+// 再验浏览器面/复用缓存——否则探针与缓存验的都是旧页面。未同步的通道不查（漂移门已保证镜像一致）。
+if (syncedThisRun) {
+  const served = await waitClientArtifactServed(state.url, wantProfile);
+  if (!served.ok) {
+    const payload = {
+      url: state.url, port: state.port, exit: 1, level: 'RED',
+      checks: [{ id: 'client-hot-load', ok: false, detail: served.detail }],
+      reason: `镜像已同步但运行进程未热载新 client 产物（${served.detail}）——不得呈交旧页面`,
+    };
+    const saved = persistVerdict('up', payload);
+    console.error(`run-driver: 热载就绪检查红（${saved.dir}）——${served.detail}`);
+    console.log(JSON.stringify(payload, null, 2));
+    process.exit(1);
+  }
+  console.log(`run-driver: client 产物热载就绪（${served.detail}；不重启、不换 token）`);
 }
 
 // 读写共用的缓存键（BUG-327）：mcp 等身份只在构造器里出现，两处内联已删除。

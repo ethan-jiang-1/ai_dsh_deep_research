@@ -21,6 +21,7 @@
 | channel | `checks/lib/channel/channel-cache` | `tests/run/channel/channel-cache.spec.mjs` |
 | channel | `checks/lib/channel/hitl-card-driver` | — |
 | channel | `checks/lib/channel/inject-reconcile` | `tests/run/channel/inject-reconcile.spec.mjs` |
+| channel | `checks/lib/channel/mirror-sync` | `tests/run/channel/mirror-sync.spec.mjs` |
 | channel | `checks/lib/channel/profile-guard` | `tests/checks/channel/profile-guard.test.mjs` |
 | channel | `checks/lib/channel/run-channel` | `tests/run/channel/run-driver-contract.spec.mjs` |
 | channel | `checks/lib/channel/runtime-clean-core` | `tests/run/channel/runtime-clean.spec.mjs` |

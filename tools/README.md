@@ -24,9 +24,9 @@
 
 | 件 | 职责 |
 |---|---|
-| channel/run-driver.mjs | **驱动入口（启动/验证/呈交一条命令）**：`up` 冷启动 fork 同一个 start-channel supervisor，经本代 READY/交接确认后服务独立存活；复用先跑 `boot-run --drift-only` 验镜像（漂移/未取证 = NOT-RUN）→ cdp-probe 验浏览器面 + 截图 → 呈交；GREEN 验证缓存 30 分钟（身份含 pack/runtime/驱动与实例配置，冷启动可命中，先验 HTTP；`--force-probe` 强制重验）；`probe` 永远真验，`url` 从本次 state 的 `web.log` 最后一条横幅取 URL；exit 0 可呈交 / 1 红 / 2 未跑。`--bootstrap` 先准备环境；多实例边界 = [guides/65 §7](../docs/guides/65-run-forms.md#7-独立环境与多实例) |
+| channel/run-driver.mjs | **驱动入口（启动/验证/呈交一条命令）**：`up` 冷启动 fork 同一个 start-channel supervisor，经本代 READY/交接确认后服务独立存活；复用先跑 `boot-run --drift-only` 验镜像，纯 client/文档漂移自动 `--sync-mirror` 原子同步（不重启、不换 token，热载就绪检查后验面），host 漂移/未取证 = NOT-RUN → cdp-probe 验浏览器面 + 截图 → 呈交；GREEN 验证缓存 30 分钟（身份含 pack/runtime/驱动与实例配置，冷启动可命中，先验 HTTP；`--force-probe` 强制重验）；`probe` 永远真验，`url` 从本次 state 的 `web.log` 最后一条横幅取 URL；exit 0 可呈交 / 1 红 / 2 未跑。`--bootstrap` 先准备环境；多实例边界 = [guides/65 §7](../docs/guides/65-run-forms.md#7-独立环境与多实例) |
 | channel/boot-run.sh | 公开前台 wrapper：自 source env.sh 后 `exec node start-channel.mjs`，由 supervisor 统一持锁、准备与服务回收 |
-| channel/start-channel.mjs | 两个公开启动入口共用的 supervisor：canonical home/state 双锁覆盖准备与完整服务生命；持锁后运行 body，自检 → 组合检查/补装 → 漂移门 → web + 仪表盘；停止时确认整个子进程组静默后才释放锁。无 stale/PID/TTL 自动接管，异常残留按 [Run 指南](../docs/guides/61-run-playbook.md#01-特殊形态与排障按需读首跑不需要) 离线恢复；`--drift-only` 免启动锁、可并发，但会写原子发布清单缓存 |
+| channel/start-channel.mjs | 两个公开启动入口共用的 supervisor：canonical home/state 双锁覆盖准备与完整服务生命；持锁后运行 body，自检 → 组合检查/补装 → 漂移门 → web + 仪表盘；停止时确认整个子进程组静默后才释放锁。无 stale/PID/TTL 自动接管，异常残留按 [Run 指南](../docs/guides/61-run-playbook.md#01-特殊形态与排障按需读首跑不需要) 离线恢复；`--drift-only` 免启动锁、可并发，但会写原子发布清单缓存；`--sync-mirror` 同样免锁并发，只原子替换漂移的 client/非运行时文件（host 漂移拒绝），是服务持锁期间唯一允许的镜像写 |
 | channel/boot-run-body.sh | 私有实现库（非独立执行入口，直接执行 exit 2）；由 supervisor source 后调用；runtime 默认 vendor 构建产物 `lib/bin.js`，`DSH_RUN_RUNTIME=source` 退回 tsx 源码 |
 | channel/run-kickoff.mjs | run 会话驱动：建 lead 会话 + 发 kickoff（GUI 的 RPC 替代入口） |
 | channel/hitl-answer.mjs | HITL 代答（代理模拟；answerer 在浏览器客户端，先盘侧谓词自拒） |

@@ -46,22 +46,19 @@ RUNTMP="$STATE_DIR/run-pack"
 # 比对集合 = **实际随包发布的文件**（`npm pack --dry-run --json` 为准），不是源目录全量：
 # pack 的 `files` 字段决定镜像里有什么（例如 AGENTS.md 是子树开发指令、不随包发布），
 # 按源目录全量比对会把"没发布"误报成"镜像缺席"（0.1.7 升 pin 时实测）。
-# 非运行时文件（README/LICENSE）不参与判红（2026-11-03 G-20）：文档漂移不改变页面行为，
-# 只逐条点名提示；发布集完整性由 release.entry / pack.e2e 负责。否则改一行 README 就把
-# 通道判 NOT-RUN，逼人 `rm -rf profile` 重建。
+# 非运行时文件（README/LICENSE/*.d.ts）不参与判红（2026-11-03 G-20；2026-11-26 BUG-435
+# 扩 .d.ts）：文档/类型声明漂移不改变页面行为，只逐条点名提示；发布集完整性由
+# release.entry / pack.e2e 负责。否则改一行 README 就把通道判 NOT-RUN，逼人 rm -rf profile 重建。
 # 单跑模式：--drift-only（不安装/不起 web，允许原子发布清单缓存；run-driver 复用时调用）
-#           --drift-check（可初始化 profile/MCP patch，旧语义保留）。
-drift_check() {
-  local bad=0 rel mirror
-  local shipped skipped=0
-  # 工具态重定向（本仓纪律）：npm 缓存钉在仓库内，避全局 cache 权限/污染（release.entry 同款）。
-  # ⚠ `--ignore-scripts` 是必需的（2026-09-26 跑 run 时实测的环路缺陷）：pack 的 `prepack`
-  #   钩子会跑 `pnpm build`，tsdown 的横幅（`ℹ tsdown v…`）混进 stdout 把 `--json` 载荷污染，
-  #   下游 `JSON.parse` 抛 SyntaxError → **漂移检测整条崩掉**（而它正是"镜像是否等于 pack 源"的
-  #   唯一机械证明）。本处只要**发布清单**、不要构建，故显式跳过生命周期脚本。
-  # 发布清单缓存（2026-11-05 加速）：`npm pack --dry-run` 是漂移门 ~5s 的主要开销；清单只随
-  # pack 源内容变化，键 = pack 源指纹（路径 + size + mtime，遍历顺序无关）。miss/损坏一律回退真跑。
-  local fp
+#           --drift-check（可初始化 profile/MCP patch，旧语义保留）
+#           --sync-mirror（BUG-435 恢复快路径：client/文档漂移原子同步，host 漂移拒绝）
+
+# 发布清单（漂移门与同步共用）：缓存键 = pack 源指纹（路径 + size + mtime，遍历顺序无关）；
+# miss/损坏一律回退真跑。工具态重定向：npm 缓存钉在仓库内，避全局 cache 权限/污染。
+# ⚠ `--ignore-scripts` 是必需的（2026-09-26 实测环路缺陷）：pack 的 prepack 钩子会跑 pnpm build，
+#   tsdown 横幅混进 stdout 污染 --json 载荷 → 下游 JSON.parse 抛错 → 漂移检测整条崩掉。
+shipped_list() {
+  local fp shipped
   fp="$(node "$ROOT/checks/lib/channel/channel-cache.mjs" fingerprint "$PACKDIR")"
   shipped="$(node "$ROOT/checks/lib/channel/channel-cache.mjs" read "$STATE_DIR/pack-shipped.json" "$fp" 2>/dev/null || true)"
   if [ -z "$shipped" ]; then
@@ -84,13 +81,20 @@ drift_check() {
   else
     echo "boot-run: 发布清单缓存命中（pack 指纹 ${fp:0:12}）" >&2
   fi
+  printf '%s\n' "$shipped"
+}
+
+drift_check() {
+  local bad=0 rel mirror
+  local skipped=0 shipped
+  shipped="$(shipped_list)" || exit 1
   while IFS= read -r rel; do
     mirror="$PROFDIR/node_modules/dsh-deep-research-pack/$rel"
-    # 非运行时文件（README/LICENSE）：文档漂移不改变页面行为，不参与"当前页面是否当前代码"的
-    # 判定（2026-11-03 G-20：改一行 README 曾把整条通道判 NOT-RUN，逼人 rm -rf profile 重建）。
+    # 非运行时文件（README/LICENSE/*.d.ts）：文档/类型声明漂移不改变页面行为，不参与
+    # "当前页面是否当前代码"的判定（G-20；BUG-435 扩 .d.ts——类型声明从不被运行时加载）。
     # 仍逐文件点名提示，不静默；发布集完整性由 release.entry / pack.e2e 负责。
     case "$rel" in
-      README.md|README.zh.md|LICENSE)
+      README.md|README.zh.md|LICENSE|*.d.ts)
         if [ ! -f "$PACKDIR/$rel" ] || [ ! -f "$mirror" ] || ! diff -q "$PACKDIR/$rel" "$mirror" >/dev/null 2>&1; then
           echo "boot-run: 注：非运行时文件漂移（${rel}）——不影响通道判绿" >&2
           skipped=$((skipped + 1))
@@ -104,10 +108,62 @@ drift_check() {
     fi
   done <<< "$shipped"
   if [ "$bad" -ne 0 ]; then
-    echo "boot-run: pack 漂移检测红——修复：rm -rf '$PROFDIR' 后重跑本脚本重建（或逐文件 cp 同步）" >&2
-    exit 1
+    echo "boot-run: pack 漂移检测红——修复：bash tools/channel/boot-run.sh --sync-mirror（client/文档漂移原子同步，不重启）；host 侧漂移须停通道后 rm -rf '$PROFDIR' 重建（guides/61 §0.1）" >&2
+    return 1
   fi
   echo "boot-run: pack 漂移检测绿（运行时集 ↔ 镜像一致；跳过 $skipped 个非运行时文件）"
+}
+
+# BUG-435 恢复快路径：client/文档漂移的原子就地同步（不重启、不换 token）。
+# 机制依据 = vendor client-hmr node 半（500ms stat-poll → clientModules.rebuilt 热载 client
+# 产物）；host 运行时文件 boot 时装载并缓存于进程，同步盘上文件不更新加载面——混入 host
+# 漂移即拒绝（须重建）。分类判据正本 = checks/lib/channel/mirror-sync.mjs（契约测试钉住）。
+# 不取启动锁（服务生命期持有 home 锁，取锁的 sync 永远进不来）；只写漂移的 client/文档文件。
+sync_mirror() {
+  local rel mirror shipped host_rels rc
+  shipped="$(shipped_list)" || exit 1
+  local drift_rels=()
+  while IFS= read -r rel; do
+    mirror="$PROFDIR/node_modules/dsh-deep-research-pack/$rel"
+    if [ ! -f "$PACKDIR/$rel" ] || [ ! -f "$mirror" ] || ! diff -q "$PACKDIR/$rel" "$mirror" >/dev/null 2>&1; then
+      drift_rels+=("$rel")
+    fi
+  done <<< "$shipped"
+  if [ "${#drift_rels[@]}" -eq 0 ]; then
+    echo "boot-run: 镜像与 pack 源一致，无需同步"
+    return 0
+  fi
+  if host_rels="$(printf '%s\n' "${drift_rels[@]}" | node "$ROOT/checks/lib/channel/mirror-sync.mjs" "$PACKDIR")"; then
+    : # 无 host 漂移 → 全部可就地同步
+  else
+    rc=$?
+    if [ "$rc" -ne 1 ]; then
+      echo "boot-run: 漂移分类失败（mirror-sync exit ${rc}）——拒绝同步，fail-loud" >&2
+      return 1
+    fi
+    echo "boot-run: host 侧运行时文件漂移——运行进程 boot 时缓存 host 代码，就地同步不能更新加载面；停通道后 rm -rf '$PROFDIR' 重建（guides/61 §0.1）" >&2
+    while IFS= read -r rel; do
+      [ -n "$rel" ] && echo "boot-run: 漂移——${rel}（host 侧，须重建）" >&2
+    done <<< "$host_rels"
+    return 1
+  fi
+  local synced=0 tmp
+  for rel in "${drift_rels[@]}"; do
+    mirror="$PROFDIR/node_modules/dsh-deep-research-pack/$rel"
+    mkdir -p "$(dirname "$mirror")"
+    # 原子替换：同目录 temp + rename——stat-poll 与浏览器永远看不到半截文件。
+    tmp="$mirror.sync-tmp.$$"
+    if cp "$PACKDIR/$rel" "$tmp" && mv -f "$tmp" "$mirror"; then
+      echo "boot-run: 已同步——$rel"
+      synced=$((synced + 1))
+    else
+      rm -f "$tmp"
+      echo "boot-run: 同步失败——${rel}（源缺席或写失败）" >&2
+      return 1
+    fi
+  done
+  echo "boot-run: 已同步 $synced 个文件（client 产物经 client-hmr stat-poll 热载；文档无运行时影响）——同一道漂移门复验"
+  drift_check
 }
 
 # 只读镜像检查（2026-10-28 反馈真值修复）：run-driver 复用已在飞的通道时必须先回答
@@ -115,8 +171,16 @@ drift_check() {
 # 本模式在端口检查/组合安装/MCP patch/web 启动之前退出，不修改活 profile；缓存原子发布。
 if [ "${1:-}" = "--drift-only" ]; then
   [ -d "$PROFDIR" ] || { echo "boot-run: profile 不存在（先跑一次完整 boot 生成）" >&2; exit 1; }
-  drift_check
+  drift_check || exit 1
   exit 0
+fi
+
+# BUG-435 恢复快路径：与 --drift-only 同一道比对，但 client/文档漂移就地原子同步（不重启、
+# 不换 token；vendor client-hmr stat-poll 热载），host 漂移拒绝。不取启动锁，可与活通道并发；
+# 在端口检查/组合安装/web 启动之前退出。run-driver up 复用分支遇漂移时调用。
+if [ "${1:-}" = "--sync-mirror" ]; then
+  [ -d "$PROFDIR" ] || { echo "boot-run: profile 不存在（先跑一次完整 boot 生成）" >&2; exit 1; }
+  if sync_mirror; then exit 0; else exit 1; fi
 fi
 
 # 端口自检（fail-loud + 补救）：端口已 LISTEN = 另起通道必失败，且可能打断在飞 run 的通道
@@ -241,10 +305,15 @@ fi
 # 旧模式保留（可初始化 profile/MCP patch；测试/CI 用，不起 web）。新的只读检查走 --drift-only。
 if [ "${1:-}" = "--drift-check" ]; then
   [ -d "$PROFDIR" ] || { echo "boot-run: profile 不存在（先跑一次完整 boot 生成）" >&2; exit 1; }
-  drift_check
+  drift_check || exit 1
   exit 0
 fi
-drift_check
+# 冷启动同样走快路径：boot 前的 client/文档漂移就地同步（boot 装载同步后的镜像 = 当前源）；
+# host 漂移仍 fail-loud 须重建（sync_mirror 拒绝）。此时 supervisor 持锁，无并发服务。
+if ! drift_check; then
+  echo "boot-run: 镜像漂移——尝试就地同步（仅 client/文档漂移可同步；host 漂移须重建）" >&2
+  sync_mirror || exit 1
+fi
 
 if [ "${1:-}" = "--prepare-profile" ]; then
   echo "boot-run: profile 已准备（${PROFDIR}）——只安装/校验，不启动 web"

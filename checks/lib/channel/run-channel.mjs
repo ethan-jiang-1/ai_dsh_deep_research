@@ -6,6 +6,7 @@
 // 纯函数），壳与测试都 import 它：与 probe-send-target / probe-status-tab 同款分层。
 //
 // 消费方 = tools/channel/run-driver.mjs（壳）、tests/run-driver-contract.spec.mjs（契约）。
+import { createHash } from 'node:crypto';
 
 /**
  * web.log 文本 → 最后一条横幅的完整 GUI URL。
@@ -47,7 +48,7 @@ export function runDriverVerdict({ probe, expectFace, drift, requireData = false
       exit: 2,
       level: 'NOT-RUN',
       checks: [{ id: 'channel-mirror', ok: false, detail }],
-      reason: '通道镜像未取证或与当前 pack 源漂移——当前页面不是当前代码；先重建/重启通道再验（未跑，不是通过）',
+      reason: '通道镜像未取证或与当前 pack 源漂移——当前页面不是当前代码；先按 boot-run 处方同步（--sync-mirror）或重建通道再验（未跑，不是通过）',
     };
   }
   const p = probe ?? {};
@@ -100,4 +101,49 @@ export function runDriverVerdict({ probe, expectFace, drift, requireData = false
 export function probeFailureVerdict({ error, expectFace, drift, requireData = false }) {
   const verdict = runDriverVerdict({ probe: {}, expectFace, drift, requireData });
   return { ...verdict, probeError: String(error ?? 'probe failed') };
+}
+
+// ── BUG-435 快路径：同步后的热载就绪判据 ──────────────────────────────────────
+// 机制依据（vendor，只读核对）：client-hmr node 半每 500ms stat-poll 每个 graph 条目的
+// client 产物（packages/client/hmr/src/index.ts），stat 变 → clientModules.rebuilt(id)
+// 读新 bytes、以新 rev 重组 boot graph（packages/client/modules/src/index.ts）。
+// 同步落盘后、探针验面前，必须确认运行进程已发布新 rev——否则探针验的是旧页面（假绿）。
+
+/**
+ * 从服务的首页 HTML 解析 boot graph（webserver injections.ts 的 global 行形态：
+ * `<script>globalThis["__DSH_BOOT__"] = {…}</script>`，JSON 内 `<` 转义为 \u003c）。
+ * @param {string} html - 首页全文。
+ * @returns {object|null} 缺席/不可解析 → null（调用方 fail-loud，不猜）。
+ */
+export function bootGraphFromHtml(html) {
+  const match = /globalThis\["__DSH_BOOT__"\]\s*=\s*(\{.*?\})<\/script>/s.exec(String(html));
+  if (match === null) return null;
+  try { return JSON.parse(match[1]); } catch { return null; }
+}
+
+/**
+ * 产物的期望 rev = vendor artifactRevision 同公式：stat 三元组（mtimeMs/ctimeMs/size）
+ * 的 framedHash('plugin-artifact', …) sha1 前 12 位。源 = vendor client/modules/src/index.ts
+ * artifactRevision + framedHash（契约测试有漂移锁断言；换 pin 须重核）。
+ * @param {{mtimeMs: number, ctimeMs: number, size: number}} stat - 同步后镜像文件的 statSync 三元组。
+ * @returns {string} 12 位 hex rev。
+ */
+export function expectedArtifactRev({ mtimeMs, ctimeMs, size }) {
+  const hash = createHash('sha1').update('plugin-artifact').update('\0');
+  for (const part of [String(mtimeMs), String(ctimeMs), String(size)]) {
+    hash.update(`${String(Buffer.byteLength(part))}:`).update(part);
+  }
+  return hash.digest('hex').slice(0, 12);
+}
+
+/**
+ * boot graph 里 pack 条目的 rev 是否已达期望 rev（= 运行进程已热载同步后的产物）。
+ * @param {{graph: object|null, packId: string, expectedRev: string}} input
+ * @returns {{ok: boolean, detail: string, rev?: string}}
+ */
+export function artifactServedVerdict({ graph, packId, expectedRev }) {
+  const row = graph?.entries?.find((entry) => entry?.id === packId);
+  if (row === undefined) return { ok: false, detail: `boot graph 无 ${packId} 条目（graph=${graph === null ? 'null' : 'present'}）` };
+  if (row.rev === expectedRev) return { ok: true, detail: `rev=${row.rev}`, rev: row.rev };
+  return { ok: false, detail: `served rev=${row.rev} ≠ 期望 ${expectedRev}（热载尚未发布）`, rev: row.rev };
 }

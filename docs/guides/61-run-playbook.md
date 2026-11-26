@@ -37,13 +37,19 @@
 - **已有通道时**：取当前 URL = `node tools/channel/run-driver.mjs url`；只验浏览器面（不启动、不换 token）=
   `node tools/channel/run-driver.mjs probe`。probe/up 复用通道时先跑镜像门（`boot-run --drift-only`，可并发，
   不修改活 profile，但会写原子发布清单缓存，详见 §0.1）：
-  通道镜像 ≠ 当前 pack 源 → **exit 2 未跑**（不是绿）——旧页面验不出当前代码，先重建/重启再验。
+  通道镜像 ≠ 当前 pack 源时，`up` 对纯 client/文档漂移自动 `--sync-mirror` 原子同步（不重启、不换 token）再验；
+  host 侧漂移仍 **exit 2 未跑**（不是绿）——旧页面验不出当前代码，先重建/重启再验。
   URL/token 的唯一来源仍是最后一条启动横幅；旧横幅 = 旧 token；
 - **启动三分支（先判"通道活没活 + 镜像一不一致"，再动手）**（实测 2026-11-05：缓存热复用 ≈0.5s，
-  冷启动缓存命中 ≈10s，缓存过期后真验 ≈20–25s，冷重建 ≈2–3 min）：
+  冷启动缓存命中 ≈10s，缓存过期后真验 ≈20–25s，冷重建 ≈2–3 min；2026-11-26 BUG-435：client 漂移
+  同步恢复 ≈2.6s，含真探针的完整 up ≈15s）：
   - 通道活 + 镜像一致 → `up` 复用，按缓存条件复用 GREEN 或跑探针；只要当前 URL = `node tools/channel/run-driver.mjs url`（≈0.2s）；
-  - 通道活 + 镜像漂移 → `up` 判 exit 2；确认在飞 run 的处置后停止所属 supervisor，核实相关进程全部停止，
-    再离线核对实际 home/profile 路径并重建镜像，随后重跑 `up`；停止与异常残留的边界见 §0.1；
+  - 通道活 + 镜像漂移 → 分两类：**纯 client 产物/非运行时文档漂移**（改驾驶舱源码重建 lib 的日常形态）：
+    `up` 自动 `--sync-mirror` 原子同步 + 热载就绪检查后验面，不重启、不换 token，旧 URL 与已打开页面继续有效
+    （vendor client-hmr stat-poll 热载，页面自动更新）；**host 侧运行时漂移**（lib host 半/presets/content/yml 等）：
+    `up` 判 exit 2——运行进程 boot 时缓存 host 代码，同步盘上文件不更新加载面；确认在飞 run 的处置后停止所属
+    supervisor，核实相关进程全部停止，再离线核对实际 home/profile 路径并重建镜像，随后重跑 `up`；
+    停止与异常残留的边界见 §0.1；
   - 通道死 → 无锁残留时直接 `up`（它 fork 同一个 supervisor）；锁残留须先按 §0.1 离线恢复。
     **别手起 `dsh --profile deep-research`**，那会绕漂移门与 ownership；
 - **运行时与验证缓存（加速的事实边界）**：boot-run 默认用 **vendor 构建产物** `lib/bin.js` 启动
@@ -107,7 +113,12 @@
   两者都由 supervisor 持锁执行到退出。`bash tools/channel/boot-run.sh --drift-only` 不取启动锁，可与活通道并发，
   不检查端口、不安装、不改活 profile、不起 web；它会确保 home/state 目录，miss 时写 npm cache 并以临时文件 + rename
   原子发布 `pack-shipped.json`，因此并非无写入。判红只看运行时文件（`lib/`/presets/content/locale/cordis.patch.yml 等）；
-  README/LICENSE 漂移只提示。报漂移后的镜像重建先遵守上面的停止与离线核实步骤，影响面见 [guides/62](62-plugin-authoring.md)。
+  README/LICENSE/*.d.ts 漂移只提示。`bash tools/channel/boot-run.sh --sync-mirror` 是漂移恢复快路径（BUG-435）：
+  同一道发布集比对，client 产物/非运行时文档漂移 → 逐文件原子同步（temp + rename）后复验，host 运行时漂移 → 拒绝
+  （须停止 + 重建）；与 `--drift-only` 一样不取启动锁、可与活通道并发，是服务持锁期间唯一允许的镜像写。
+  client 产物由 vendor client-hmr（500ms stat-poll）热载，不重启、不换 token；分类判据 =
+  [mirror-sync.mjs](../../checks/lib/channel/mirror-sync.mjs)。报漂移后的镜像重建先遵守上面的停止与离线核实步骤，
+  影响面见 [guides/62](62-plugin-authoring.md)。
 - **刷新白屏的判别序**：① `lsof -nP -iTCP:<端口> -sTCP:LISTEN` 有没有监听 → 无 = 进程已停
   （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，
   用当次横幅里的 URL；旧 URL 作废）；③ 有监听且 token 新但页面空 = 前端壳产物陈旧

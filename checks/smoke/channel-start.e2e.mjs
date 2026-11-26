@@ -25,7 +25,8 @@ const required = [
   'tools/channel/start-channel.mjs', 'tools/channel/run-driver.mjs',
   'tools/channel/llm-socket-isolation.cjs', 'checks/lib/channel/start-lock.mjs',
   'checks/lib/channel/channel-cache.mjs', 'checks/lib/channel/profile-guard.mjs',
-  'checks/lib/channel/run-channel.mjs', 'checks/lib/shared/cli-entry.mjs',
+  'checks/lib/channel/run-channel.mjs', 'checks/lib/channel/mirror-sync.mjs', 'checks/lib/shared/cli-entry.mjs',
+  'checks/lib/shared/sandbox-capability.mjs', 'checks/lib/shared/port.mjs',
   'checks/lib/shared/web-harness.mjs', 'checks/lib/shared/web-banner.mjs', 'checks/lib/shared/startup-hint.mjs',
 ]
 let archive
@@ -121,7 +122,7 @@ async function instance(name, { home, state, ready = true, fail = false } = {}) 
   const source = join(archive, 'packages/deep-research-pack')
   const profile = join(home, 'profiles/deep-research')
   const mirror = join(profile, 'node_modules/dsh-deep-research-pack')
-  for (const rel of ['package.json', 'presets/fixture.patch.yml', 'payload.txt']) {
+  for (const rel of ['package.json', 'presets/fixture.patch.yml', 'payload.txt', 'lib/client.js', 'lib/types/fixture.d.ts', 'README.md']) {
     put(join(mirror, rel), readFileSync(join(source, rel)))
   }
   put(join(profile, 'package.json'), JSON.stringify({
@@ -186,11 +187,14 @@ function fixtureRoot() {
   put(join(archive, 'node_modules/tsx/esm.mjs'), '// Dashboard adapter is plain JS; no TypeScript transform needed.\n')
   put(join(archive, 'checks/lib/harness/vendor-artifacts.mjs'), 'console.log("boot 前自检绿：fixture external vendor artifacts")\n')
   const pack = join(archive, 'packages/deep-research-pack')
-  put(join(pack, 'package.json'), '{"name":"dsh-deep-research-pack","version":"1.0.0"}\n')
+  put(join(pack, 'package.json'), '{"name":"dsh-deep-research-pack","version":"1.0.0","exports":{"./client":{"default":"./lib/client.js"}}}\n')
   put(join(pack, 'presets/fixture.patch.yml'), '[]\n')
   put(join(pack, 'payload.txt'), 'independent fixture payload\n')
+  put(join(pack, 'lib/client.js'), 'window.__ModuleLoader__.load({ id: "dsh-deep-research-pack", factory: () => ({}) });\n')
+  put(join(pack, 'lib/types/fixture.d.ts'), 'export declare const fixture: number\n')
+  put(join(pack, 'README.md'), '# fixture pack\n')
   put(join(archive, 'bin/git'), '#!/bin/sh\n# env.sh hook configuration must not touch the real checkout.\nexit 0\n', true)
-  put(join(archive, 'bin/npm'), `#!/bin/sh\nprintf '%s\\n' '[{"files":[{"path":"package.json"},{"path":"presets/fixture.patch.yml"},{"path":"payload.txt"}]}]'\n`, true)
+  put(join(archive, 'bin/npm'), `#!/bin/sh\nprintf '%s\\n' '[{"files":[{"path":"package.json"},{"path":"presets/fixture.patch.yml"},{"path":"payload.txt"},{"path":"lib/client.js"},{"path":"lib/types/fixture.d.ts"},{"path":"README.md"}]}]'\n`, true)
   put(join(archive, 'bin/lsof'), `#!${process.execPath}
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -317,6 +321,43 @@ async function scenarios() {
   assert.match(reuse.output, /--no-probe/)
   assert.equal(assertOwned(first), ownerPid, 'reuse does not acquire or replace ownership')
   report('drift / reuse', 'real drift-only succeeds under active owner; driver reuses without GUI')
+
+  // BUG-435：漂移恢复快路径。client 产物/文档漂移 → --sync-mirror 原子同步（不取锁、不重启）；
+  // host 运行时漂移 → 拒绝就地同步（运行进程 boot 时缓存 host 代码，同步盘上文件不等于更新加载面）。
+  const mirror = join(first.home, 'profiles/deep-research/node_modules/dsh-deep-research-pack')
+  const packSource = join(archive, 'packages/deep-research-pack')
+  const syncMode = (value) => launch('bash', [join(archive, 'tools/channel/boot-run.sh'), '--sync-mirror'], value.env)
+  const driftMode = (value) => launch('bash', [join(archive, 'tools/channel/boot-run.sh'), '--drift-only'], value.env)
+  put(join(mirror, 'lib/client.js'), text(join(packSource, 'lib/client.js')) + '// stale-client\n')
+  assert.equal(await exited(driftMode(first), 'client drift red'), 1)
+  const clientSync = syncMode(first)
+  assert.equal(await exited(clientSync, 'client sync'), 0, clientSync.output)
+  assert.equal(text(join(mirror, 'lib/client.js')), text(join(packSource, 'lib/client.js')), 'sync restored client artifact byte-for-byte')
+  assert.equal(assertOwned(first), ownerPid, 'sync does not acquire or replace ownership')
+  assert.equal(await exited(driftMode(first), 'drift green after sync'), 0)
+  put(join(mirror, 'payload.txt'), 'host mutation\n')
+  const hostSync = syncMode(first)
+  assert.equal(await exited(hostSync, 'host drift refusal'), 1, hostSync.output)
+  assert.match(hostSync.output, /host|重建/, 'refusal names host drift and the rebuild remedy')
+  assert.equal(text(join(mirror, 'payload.txt')), 'host mutation\n', 'refused sync must not touch host files')
+  put(join(mirror, 'payload.txt'), text(join(packSource, 'payload.txt')))
+  put(join(mirror, 'README.md'), 'doc mutation\n')
+  assert.equal(await exited(driftMode(first), 'doc drift not red'), 0, 'README drift stays advisory (G-20 class)')
+  const docSync = syncMode(first)
+  assert.equal(await exited(docSync, 'doc sync'), 0, docSync.output)
+  assert.equal(text(join(mirror, 'README.md')), text(join(packSource, 'README.md')))
+  put(join(mirror, 'lib/types/fixture.d.ts'), 'export declare const mutated: string\n')
+  const dtsSync = syncMode(first)
+  assert.equal(await exited(dtsSync, 'd.ts sync'), 0, dtsSync.output)
+  assert.equal(text(join(mirror, 'lib/types/fixture.d.ts')), text(join(packSource, 'lib/types/fixture.d.ts')), '.d.ts is non-runtime: syncable without rebuild')
+  put(join(mirror, 'lib/client.js'), text(join(packSource, 'lib/client.js')) + '// stale-again\n')
+  const reuseSync = driver(first)
+  assert.equal(await exited(reuseSync, 'driver reuse with client drift'), 2, reuseSync.output)
+  assert.match(reuseSync.output, /--no-probe/)
+  assert.equal(text(join(mirror, 'lib/client.js')), text(join(packSource, 'lib/client.js')), 'driver reuse auto-synced client drift before verdict')
+  assert.equal(assertOwned(first), ownerPid, 'driver sync leaves ownership intact')
+  report('mirror sync recovery', 'client/doc drift syncs atomically under active owner; host drift refuses; driver reuse takes the fast path')
+
   await release(first, ownerPid, owner)
   report('foreground TERM', 'both locks remain until vendor child close; supervisor and dashboard exit')
 

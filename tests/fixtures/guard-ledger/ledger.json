@@ -2295,6 +2295,14 @@
       "redRecipe": "把 hitlAskGate 的签名判据改回 `/研究类型/.test(args)` → 英文/结构化 id 用例红"
     },
     {
+      "id": "BUG-435",
+      "mechanism": "漂移门报错文本承诺的逐文件 cp 同步无实现——client 产物漂移也只有整包重建一条恢复路（≈2–3min+换 token）",
+      "guard": "tests/run/channel/run-driver-contract.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删 run-driver 的 --sync-mirror 调用或 boot-run-body 的 sync 模式 → 接线断言红；分类器未知文件改判 doc → mirror-sync.spec fail-safe 用例红；删 host 拒绝 → channel-start.e2e mirror sync recovery 案例红（2026-11-26 三轮变异均实跑）"
+    },
+    {
       "id": "BUG-433",
       "mechanism": "门② present 见证的路径正则不认 readable*（只收 final.md / final/vN.md），只声明读者版的交付被判缺席",
       "guard": "tests/run/gates/node-gate-session.spec.mjs",
