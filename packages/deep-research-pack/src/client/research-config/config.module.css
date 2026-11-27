@@ -354,3 +354,8 @@
   color: var(--dsw-alias-label-tertiary);
   margin-top: 4px;
 }
+
+.switchMenuList {
+  max-height: min(320px, calc(100vh - 32px));
+  overflow-y: auto;
+}

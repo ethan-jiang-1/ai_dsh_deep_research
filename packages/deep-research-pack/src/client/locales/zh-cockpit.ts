@@ -193,6 +193,11 @@ export const zhCockpit = {
   tabMenuOpenHub: '打开研究工作台',
   finalNextPrioritiesTitle: '下一版优先项（可一键预填）',
   finalNextPriorityPrefill: '请围绕以下下一版优先项补充研究并更新报告：{item}',
+  methodNameIssueBrackets: '名称不能包含括号「（）」/「()」或「〔〕」',
+  methodNameIssueFormatChar: '名称不能包含不可见格式字符',
+  methodNameIssueLeadingHash: '名称不能以「#」开头',
+  methodNameIssueNewline: '名称不能包含换行符',
+  methodDuplicateNameWarning: '库中已存在同名方法「{name}」，保存将覆盖现有条目',
 } as const
 
 export type CockpitLocaleKey = keyof typeof zhCockpit

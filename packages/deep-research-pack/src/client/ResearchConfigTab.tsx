@@ -296,6 +296,8 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
   const methodPicker = (label: string) => (
     <Menu
       open={switchOpen}
+      portal
+      listClassName={css.switchMenuList ?? ''}
       anchor={<Button variant="ghost" size="sm" onClick={() => setSwitchOpen(!switchOpen)}>{label}</Button>}
       onClose={() => setSwitchOpen(false)}
       align="start"
@@ -312,7 +314,14 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
   return (
     <div className={css.root}>
       <div className={css.header}>{props.t('configHeader')}</div>
-      {sessionId === undefined ? null : <DefaultsPanel sessionId={sessionId} store={props.defaults} t={props.t} />}
+      {sessionId === undefined ? null : (
+        <DefaultsPanel
+          sessionId={sessionId}
+          store={props.defaults}
+          t={props.t}
+          {...(props.openMethodLibrary === undefined ? {} : { onOpenMethodLibrary: props.openMethodLibrary })}
+        />
+      )}
       <div className={css.hint}>
         {COMPACT
           ? props.t('configMethodHint')

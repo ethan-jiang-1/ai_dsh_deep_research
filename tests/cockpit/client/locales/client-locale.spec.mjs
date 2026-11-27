@@ -41,3 +41,15 @@ test('驾驶舱 chrome：页签标题/guide 描述不再写死字面量（走 t(
     assert.ok(INDEX.includes(`t('${key}')`), `index.ts 未使用 locale 键 ${key}`);
   }
 });
+
+// 负例留证 2026-11-27：BUG-455——纯文本 UI 字典项混入原始 **...** Markdown 语法，页面直接渲染星号。
+// 红配方：在 zh/en 任意纯文本词条写入 **加粗** 或把 configMethodHint 改回仅提会话顶部 tab → 本例红。
+test('BUG-455 locale 字典：UI 文案不含原始 Markdown 加粗星号，configMethodHint 同步指引研究工作台入口', () => {
+  for (const [lang, dict] of [['zh', zh], ['en', en]]) {
+    for (const [key, value] of Object.entries(dict)) {
+      assert.doesNotMatch(value, /\*\*[^*]+\*\*/, `${lang}.${key} 不得包含原始 Markdown **...** 语法：${value}`);
+    }
+  }
+  assert.match(zh.configMethodHint, /研究工作台/, 'zh.configMethodHint 应提示研究工作台方法库入口');
+  assert.match(en.configMethodHint, /Research Hub/, 'en.configMethodHint 应提示 Research Hub 方法库入口');
+});

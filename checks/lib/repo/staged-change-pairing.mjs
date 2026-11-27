@@ -37,10 +37,10 @@ export function parseStagedChanges(text) {
 
 /**
  * 暂存区配对判据。
- * @param {{staged: {status:string, paths:string[]}[], read: (rel:string)=>string|null, exists: (rel:string)=>boolean}} input
+ * @param {{staged: {status:string, paths:string[]}[], read: (rel:string)=>string|null, exists: (rel:string)=>boolean, readHead?: (rel:string)=>string|null}} input
  * @returns {string[]} 失败原因（空 = 绿）。
  */
-export function stagedChangePairingProblems({ staged, read, exists }) {
+export function stagedChangePairingProblems({ staged, read, exists, readHead }) {
   const problems = []
   const present = new Set()
   const statusOf = new Map()
@@ -69,7 +69,7 @@ export function stagedChangePairingProblems({ staged, read, exists }) {
   // ③ bug 修复卡：同暂存集必须有卡内「改动」声明的代码/测试/文档变更，且红证/绿证在场。
   //    这一条直接咬 2026-11-14 事故：批量翻已修 + 移动卡，repo 没有其它变更。
   //    活跃 修复落地 卡也拦（不只归档）：状态一翻就得有实证，不能等归档才补。
-  const fixPairProblems = (card, text) => {
+  const fixPairProblems = (card, text, { allowPriorLanded = false } = {}) => {
     const evidence = fixEvidenceProblems(text)
     if (evidence.length > 0) return [`${card} 不是可复核的修复：${evidence.join('；')}——先写 ## 修复落地 的 改动/红证/绿证/guard`]
     const guard = fixGuardOf(text)
@@ -91,8 +91,21 @@ export function stagedChangePairingProblems({ staged, read, exists }) {
     const changes = fixChangePathsOf(text).filter((path) => !path.startsWith('_backlog/'))
     // 只做精确文件对账：目录前缀不再命中任意同目录 staged 文件（BUG-189）。
     const hit = changes.filter((path) => present.has(path))
-    if (hit.length === 0) return [`${card} 的「改动」没有任何文件在同一暂存集——只翻状态/移动卡不算修复；先落代码/测试并跑出红→绿`]
+    if (hit.length === 0) {
+      if (allowPriorLanded && changes.length > 0 && changes.every((path) => exists(path))) return []
+      return [`${card} 的「改动」没有任何文件在同一暂存集——只翻状态/移动卡不算修复；先落代码/测试并跑出红→绿`]
+    }
     return []
+  }
+  const hasPriorLandedInHead = (entry) => {
+    if (!/^R/.test(entry.status) || entry.paths.length < 2 || readHead === undefined) return false
+    const prev = entry.paths[0]
+    if (prev === undefined || !/^_backlog\/bugs\/BUG-\d{3}-.+\.md$/.test(prev)) return false
+    const headText = readHead(prev)
+    if (headText === null || !/^status:\s*修复落地\s*$/m.test(headText)) return false
+    if (fixEvidenceProblems(headText).length > 0) return false
+    const headChanges = fixChangePathsOf(headText).filter((path) => !path.startsWith('_backlog/'))
+    return headChanges.length > 0 && headChanges.every((path) => exists(path))
   }
   for (const entry of staged) {
     if (!/^[AM]/.test(entry.status)) continue
@@ -114,7 +127,7 @@ export function stagedChangePairingProblems({ staged, read, exists }) {
       problems.push(`${card} 归档修复卡 status 必须为 已修（当前不是——状态机与目录必须互验）`)
       continue
     }
-    problems.push(...fixPairProblems(card, text))
+    problems.push(...fixPairProblems(card, text, { allowPriorLanded: hasPriorLandedInHead(entry) }))
   }
 
   // ② ui.expected ↔ snapshot.lastRewrite

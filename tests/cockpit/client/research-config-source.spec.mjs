@@ -24,3 +24,14 @@ test('ResearchConfigTab：run 前有选方法入口，不再指向死卡片菜�
   assert.equal(zh.switchMethod, '换一条')
   assert.doesNotMatch(text, /点任意一条的 ⋯/, 'no-run 文案不能指向未渲染的卡片菜单')
 })
+
+// 负例留证 2026-11-27：BUG-454——1280×720 视口下「换一条」Menu 未使用 portal，向下展开溢出底部视口被裁切。
+// 红配方：从 methodPicker <Menu> 移除 portal 或 listClassName → 本例红。
+test('BUG-454 ResearchConfigTab：换一条 Menu 必须启用 portal 与视口限高滚动 listClassName', () => {
+  const text = readFileSync(CONFIG, 'utf8')
+  const start = text.indexOf('const methodPicker =')
+  assert.ok(start >= 0, '找不到 methodPicker')
+  const slice = text.slice(start, start + 350)
+  assert.match(slice, /<Menu[\s\S]*?\bportal\b/, 'methodPicker <Menu> 必须启用 portal 防止在 720p 下被底部裁切')
+  assert.match(slice, /<Menu[\s\S]*?\blistClassName\s*=/, 'methodPicker <Menu> 必须传 listClassName 限制最大高度与内滚')
+})

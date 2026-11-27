@@ -26,7 +26,7 @@ const ONE_SESSION = (selector) => selector({
 })
 
 const STUB_METHOD_LIBRARY = {
-  readLibrary: async () => ({ status: 'absent', path: 'method-library.md' }),
+  readLibrary: async () => ({ kind: 'absent' }),
   ensureCoach: async () => { throw new Error('unused') },
   sendCoach: async () => ({ ok: false }),
   watchCoach: async () => {},
@@ -184,4 +184,60 @@ test('BUG-446 ResearchHubPanel：RunsView 与 LensesView 搜索 Input 必须挂�
   fireEvent.click(panel.getByRole('tab', { name: zh.hubTabLenses }))
   const lensesInputWrap = panel.getByPlaceholderText(zh.hubSearchLenses).parentElement
   assert.ok(lensesInputWrap !== null && /\bsearchInput\b/.test(lensesInputWrap.className), `LensesView 搜索框缺少 searchInput 类：${lensesInputWrap?.className}`)
+})
+
+// 负例留证 2026-11-27：BUG-451——index.ts 的 startResearch 若继续向 startSession 传 initialPrompt，透镜提示词会被静默丢弃。
+test('BUG-451 index.ts startResearch：通过 buildStartResearchOptions 传递 prompt，禁止影子 initialPrompt', async () => {
+  const { readFileSync } = await import('node:fs')
+  const { fileURLToPath } = await import('node:url')
+  const src = readFileSync(
+    fileURLToPath(new URL('../../../packages/deep-research-pack/src/client/index.ts', import.meta.url)),
+    'utf8',
+  )
+  assert.doesNotMatch(src, /\binitialPrompt\b/, '不得使用不存在于 vendor StartSessionOptions 的 initialPrompt 字段')
+  assert.match(src, /buildStartResearchOptions\(/, 'startResearch 应复用 buildStartResearchOptions 构造 StartSessionOptions')
+})
+
+// 负例留证 2026-11-27：BUG-452——ResearchHubPanel Lenses 页内点击 DefaultsPanel 的「方法库 ›」必须切到 methods 页签。
+test('BUG-452 ResearchHubPanel：Lenses 内点击「方法库 ›」按钮切换到方法库页签，且支持 requestedTab 初始化', async () => {
+  const run = makeMaliciousRunSource({ tree: {} })
+  const readySnap = {
+    phase: 'ready',
+    value: { source: {} },
+    problems: [],
+    warnings: [],
+    methodDefault: null,
+    methodConflict: false,
+    methodRead: 'absent',
+    revision: 0,
+    pending: false,
+    outcome: null,
+  }
+  const defaultsStore = {
+    subscribe: () => () => {},
+    getSnapshot: () => readySnap,
+    refresh: async () => {},
+    setPatch: async () => {},
+    unset: async () => {},
+    clear: async () => {},
+    dispose: () => {},
+  }
+  const panel = render(createElement(ResearchHubPanel, {
+    t: tZh,
+    useSessions: ONE_SESSION,
+    runSource: () => run.source,
+    methodLibrary: STUB_METHOD_LIBRARY,
+    defaultsStore,
+    openFinal: () => {},
+    backToChat: () => {},
+    startResearch: () => {},
+  }))
+  await flushUi(act)
+
+  fireEvent.click(panel.getByRole('tab', { name: zh.hubTabLenses }))
+  const linkBtn = panel.container.querySelector('[data-testid="defaults-method-library-link"]')
+  assert.ok(linkBtn !== null && linkBtn.tagName === 'BUTTON', 'DefaultsPanel 必须渲染可点击 <button data-testid="defaults-method-library-link">')
+  fireEvent.click(linkBtn)
+  await flushUi(act)
+  assert.ok(panel.container.querySelector('#hub-panel-methods') !== null, '点击方法库按钮后 Hub 必须切到 methods 页签')
 })

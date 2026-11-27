@@ -10,6 +10,26 @@ interface TocHeading {
 const FENCE_RE = /^\s{0,3}(`{3,}|~{3,})/
 const HEADING_RE = /^(#{1,3})\s+(.+)$/
 
+/**
+ * 剥离标题中的行内 Markdown 语法（图片/链接/引用链接/粗斜体/反引号/转义），
+ * 使章节目录文案与正文渲染后的 `h1/h2/h3.textContent` 一致（BUG-453）。
+ */
+function stripMarkdownInline(raw: string): string {
+  let out = raw.replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+  for (let i = 0; i < 4; i += 1) {
+    const next = out.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    if (next === out) break
+    out = next
+  }
+  out = out
+    .replace(/\[([^\]]+)\]\[[^\]]*\]/g, '$1')
+    .replace(/\\([\\`*_{}[\]()#+\-.!])/g, '$1')
+    .replace(/[*`~]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  return out
+}
+
 function extractTocHeadings(markdown: string): readonly TocHeading[] {
   const headings: TocHeading[] = []
   let fenceChar: string | null = null
@@ -22,7 +42,8 @@ function extractTocHeadings(markdown: string): readonly TocHeading[] {
     if (fenceChar !== null) continue
     const m = HEADING_RE.exec(line.trim())
     if (m?.[1] !== undefined && m[2] !== undefined) {
-      headings.push({ level: m[1].length, text: m[2].replace(/[*`]/g, '').trim() })
+      const text = stripMarkdownInline(m[2])
+      if (text !== '') headings.push({ level: m[1].length, text })
     }
   }
   return headings

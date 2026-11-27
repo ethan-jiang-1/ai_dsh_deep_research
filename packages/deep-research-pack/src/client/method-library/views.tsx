@@ -5,7 +5,10 @@
 import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
-import { SECTION_LABELS, renderLibraryEntry, type LibraryEntry, type LibrarySections } from '../../lib/method-library/library-fold.ts'
+import {
+  SECTION_LABELS, methodNameIssueKind, renderLibraryEntry,
+  type LibraryEntry, type LibrarySections, type MethodNameIssueKind,
+} from '../../lib/method-library/library-fold.ts'
 import type { DraftField } from '../../lib/method-library/method-draft.ts'
 import type { SourcePreview } from '../../lib/method-library/method-library-source.ts'
 import { libraryRowStyle } from './styles.ts'
@@ -136,8 +139,51 @@ export function SourceSelectionView(props: {
   )
 }
 
+const NAME_ISSUE_KEYS: Readonly<Record<MethodNameIssueKind, DeepResearchPackLocaleKey>> = {
+  brackets: 'methodNameIssueBrackets',
+  'format-char': 'methodNameIssueFormatChar',
+  'leading-hash': 'methodNameIssueLeadingHash',
+  newline: 'methodNameIssueNewline',
+}
+
+function nameIssueMessageOf(name: string, t: TranslateNS<'deepResearchPack'>): string | null {
+  const kind = methodNameIssueKind(name)
+  return kind === null ? null : t(NAME_ISSUE_KEYS[kind])
+}
+
+function draftStatusOf(props: {
+  readonly draft: Draft
+  readonly mode?: 'new' | 'edit'
+  readonly existingNames?: readonly string[]
+  readonly t: TranslateNS<'deepResearchPack'>
+}): {
+  readonly missingFields: readonly string[]
+  readonly nameIssue: string | null
+  readonly blockerText: string | null
+  readonly duplicateWarning: string | null
+} {
+  const { draft, mode, existingNames, t } = props
+  const missingFields = [
+    ...(draft.name.trim() === '' ? [t('methodName')] : []),
+    ...SECTION_LABELS.filter(({ key }) => (draft.sections[key] ?? '').trim() === '').map(({ key }) => sectionLabel(t, key)),
+  ]
+  const nameIssue = nameIssueMessageOf(draft.name, t)
+  const parts = [
+    ...(nameIssue === null ? [] : [nameIssue]),
+    ...(missingFields.length > 0 ? [t('incompleteFields', { fields: missingFields.join(t('listSeparator')) })] : []),
+  ]
+  const blockerText = parts.length > 0 ? parts.join(' · ') : null
+  const trimmed = draft.name.trim()
+  const duplicateWarning = mode === 'new' && nameIssue === null && trimmed !== '' && existingNames?.includes(trimmed) === true
+    ? t('methodDuplicateNameWarning', { name: trimmed })
+    : null
+  return { missingFields, nameIssue, blockerText, duplicateWarning }
+}
+
 export function MethodSummaryView(props: {
   readonly draft: Draft
+  readonly mode?: 'new' | 'edit'
+  readonly existingNames?: readonly string[]
   readonly stage: WorkbenchStage
   readonly manualFields: ReadonlySet<DraftField>
   readonly coachFields: ReadonlySet<DraftField>
@@ -150,12 +196,15 @@ export function MethodSummaryView(props: {
   readonly onSave: (setDefault: boolean) => void
   readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
-  const { draft, stage, manualFields, coachFields, sourceFields, onStageChange, onFocusField, onRestartSource, canSave, sending, onSave, t } = props
+  const { draft, mode, existingNames, stage, manualFields, coachFields, sourceFields, onStageChange, onFocusField, onRestartSource, canSave, sending, onSave, t } = props
   const filled = SECTION_LABELS.filter(({ key }) => (draft.sections[key] ?? '').trim() !== '').length
-  const missingFields = [
-    ...(draft.name.trim() === '' ? [t('methodName')] : []),
-    ...SECTION_LABELS.filter(({ key }) => (draft.sections[key] ?? '').trim() === '').map(({ key }) => sectionLabel(t, key)),
-  ]
+  const status = draftStatusOf({
+    draft,
+    ...(mode === undefined ? {} : { mode }),
+    ...(existingNames === undefined ? {} : { existingNames }),
+    t,
+  })
+  const effectiveCanSave = canSave && status.nameIssue === null && status.missingFields.length === 0
   return (
     <section data-method-summary="" className={css.summaryRoot}>
       <div className={css.summaryHeadRow}>
@@ -185,11 +234,12 @@ export function MethodSummaryView(props: {
         <button type="button" role="tab" aria-selected={stage === 'interview'} className={css.button} onClick={() => { onStageChange('interview') }}>{t('interview')}</button>
         <button type="button" role="tab" aria-selected={stage === 'form-check'} className={css.button} onClick={() => { onStageChange('form-check') }}>{t('formCheck')}</button>
       </div>
-      <button type="button" className={css.primaryButton} disabled={!canSave || sending} onClick={() => { onSave(false) }}>{sending ? t('saving') : t('save')}</button>
-      <button type="button" className={css.button} disabled={!canSave || sending} title={t('saveAndSetDefaultDescription')} onClick={() => { onSave(true) }}>{t('saveAndSetDefault')}</button>
+      <button type="button" className={css.primaryButton} disabled={!effectiveCanSave || sending} onClick={() => { onSave(false) }}>{sending ? t('saving') : t('save')}</button>
+      <button type="button" className={css.button} disabled={!effectiveCanSave || sending} title={t('saveAndSetDefaultDescription')} onClick={() => { onSave(true) }}>{t('saveAndSetDefault')}</button>
       <button type="button" className={`${css.button} ${css.mlAuto}`} onClick={onRestartSource}>{t('restartSource')}</button>
       </div>
-      {!canSave && <div role="status" className={`${css.muted} ${css.mt6}`}>{t('incompleteFields', { fields: missingFields.join(t('listSeparator')) })}</div>}
+      {!effectiveCanSave && status.blockerText !== null && <div role="status" className={`${css.muted} ${css.mt6}`}>{status.blockerText}</div>}
+      {status.duplicateWarning !== null && <div role="status" className={`${css.muted} ${css.mt6}`}>{status.duplicateWarning}</div>}
     </section>
   )
 }
@@ -298,6 +348,7 @@ export function EditorView(props: {
   readonly draft: Draft | null
   readonly t: TranslateNS<'deepResearchPack'>
   readonly mode: 'edit' | 'new'
+  readonly existingNames?: readonly string[]
   readonly sending: boolean
   readonly onNameChange: (name: string) => void
   readonly onSectionChange: (key: keyof LibrarySections, value: string) => void
@@ -310,7 +361,7 @@ export function EditorView(props: {
   readonly onUndoCoach?: () => void
 }): ReactNode {
   const {
-    draft, mode, sending, onNameChange, onSectionChange, onSave, onCancel, t,
+    draft, mode, existingNames, sending, onNameChange, onSectionChange, onSave, onCancel, t,
     coachFields, manualFields, activeField, coachUpdated, onUndoCoach,
   } = props
   const rootRef = useRef<HTMLDivElement | null>(null)
@@ -321,11 +372,13 @@ export function EditorView(props: {
     element?.querySelector<HTMLElement>('input, textarea')?.focus()
   }, [activeField])
   if (draft === null) return null
-  const missingFields = [
-    ...(draft.name.trim() === '' ? [t('methodName')] : []),
-    ...SECTION_LABELS.filter(({ key }) => (draft.sections[key] ?? '').trim() === '').map(({ key }) => sectionLabel(t, key)),
-  ]
-  const canSave = missingFields.length === 0
+  const status = draftStatusOf({
+    draft,
+    mode,
+    ...(existingNames === undefined ? {} : { existingNames }),
+    t,
+  })
+  const canSave = status.missingFields.length === 0 && status.nameIssue === null
   const filled = SECTION_LABELS.filter(({ key }) => (draft.sections[key] ?? '').trim() !== '').length
   const marker = (field: DraftField): ReactNode => {
     if (manualFields?.has(field) === true) return <span className={css.markerTag}>{t('changedManually')}</span>
@@ -390,7 +443,8 @@ export function EditorView(props: {
           />
         </label>
       ))}
-      {!canSave && <div role="status" className={css.incompleteMsg}>{t('incompleteFields', { fields: missingFields.join(t('listSeparator')) })}</div>}
+      {!canSave && status.blockerText !== null && <div role="status" className={css.incompleteMsg}>{status.blockerText}</div>}
+      {status.duplicateWarning !== null && <div role="status" className={css.incompleteMsg}>{status.duplicateWarning}</div>}
       <details className={css.previewDetails}>
         <summary className={css.previewSummary}>{t('markdownPreview')}</summary>
         <pre className={css.markdownPre}>{renderLibraryEntry({ name: draft.name.trim() === '' ? t('unnamed') : draft.name.trim(), sections: draft.sections, provenance: draft.provenance }, {

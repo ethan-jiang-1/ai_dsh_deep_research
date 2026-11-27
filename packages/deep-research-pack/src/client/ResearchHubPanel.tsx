@@ -15,12 +15,19 @@ import { RunsView } from './research-hub/RunsView.tsx'
 import { LensesView } from './research-hub/LensesView.tsx'
 import css from './research-hub/hub.module.css'
 
-type HubTab = 'runs' | 'methods' | 'lenses'
+export type HubTab = 'runs' | 'methods' | 'lenses'
+
+export interface HubTabRequest {
+  readonly get: () => HubTab | null
+  readonly clear: () => void
+  readonly subscribe: (listener: () => void) => () => void
+}
 
 export interface ResearchHubInjected {
   readonly runSource: (sessionId: SessionId) => RunSource
   readonly methodLibrary: MethodLibraryInjected
   readonly defaultsStore?: DefaultsStore
+  readonly requestedTab?: HubTabRequest
   readonly openFinal: (sessionId: SessionId, path: string) => void
   readonly backToChat: () => void
   readonly startResearch: (prompt?: string) => void
@@ -39,7 +46,7 @@ export function ResearchHubIcon({ size }: PropsRuntime<'sidebar.panellist'>): Re
  * 聚合当前工作区 `drt_*` 研究档案、方法库（摆脱空白会话限制）与 8 条研究透镜。
  */
 export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
-  const { t, useSessions, runSource, methodLibrary, defaultsStore, openFinal, backToChat, startResearch, readStoredSessionId } = props
+  const { t, useSessions, runSource, methodLibrary, defaultsStore, requestedTab, openFinal, backToChat, startResearch, readStoredSessionId } = props
   const sessions = useSessions((state) => state)
   const storedId = readStoredSessionId?.() ?? null
   const activeSessionId: SessionId | null = (() => {
@@ -55,10 +62,30 @@ export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
     return null
   })()
 
-  const [tab, setTab] = useState<HubTab>('runs')
+  const [tab, setTab] = useState<HubTab>(() => {
+    const req = requestedTab?.get() ?? null
+    if (req !== null) {
+      requestedTab?.clear()
+      return req
+    }
+    return 'runs'
+  })
   const [loading, setLoading] = useState(false)
   const [catalog, setCatalog] = useState<RunCatalogResult>({ runs: [], dirErrors: [] })
   const [refreshTick, setRefreshTick] = useState(0)
+
+  useEffect(() => {
+    if (requestedTab === undefined) return undefined
+    const consume = (): void => {
+      const next = requestedTab.get()
+      if (next !== null) {
+        requestedTab.clear()
+        setTab(next)
+      }
+    }
+    consume()
+    return requestedTab.subscribe(consume)
+  }, [requestedTab])
 
   const reloadRuns = useCallback(() => {
     setRefreshTick((tick) => tick + 1)
@@ -173,7 +200,7 @@ export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
               {activeSessionId !== null && defaultsStore !== undefined && (
                 <section className={css.defaultsSection} data-testid="hub-lenses-defaults">
                   <h2 className={css.defaultsTitle}>{t('hubDefaultsSectionTitle')}</h2>
-                  <DefaultsPanel sessionId={activeSessionId} store={defaultsStore} t={t} />
+                  <DefaultsPanel sessionId={activeSessionId} store={defaultsStore} t={t} onOpenMethodLibrary={() => { setTab('methods') }} />
                 </section>
               )}
             </>

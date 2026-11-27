@@ -7,7 +7,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { BuiltinView, EditorView, ReadMineView } from '../../../../packages/deep-research-pack/src/client/method-library/views.tsx'
+import { BuiltinView, EditorView, MethodSummaryView, ReadMineView } from '../../../../packages/deep-research-pack/src/client/method-library/views.tsx'
 import { SECTION_LABELS } from '../../../../packages/deep-research-pack/src/lib/method-library/library-fold.ts'
 import { zh } from '../../../../packages/deep-research-pack/src/client/locales.ts'
 import { BUILTIN_PREFERENCES } from '../../../../packages/deep-research-pack/src/lib/shared/config-tables.ts'
@@ -68,4 +68,60 @@ test('BuiltinView：只读内置条目的名字/摘要/使用按钮（canonical 
   assert.ok(html.includes(landscape.summary), '内置摘要在场')
   assert.ok(html.includes(landscape.sections.source), '内置四字段值在场')
   assert.match(html, /用于本次研究/)
+})
+
+// 负例留证 2026-11-27：BUG-456——MethodSummaryView 禁用保存时渲染空后缀「还需补齐：」，
+// EditorView 未校验 methodNameIssue 放行前导 #，且缺少新建重名警告。
+test('BUG-456 MethodSummaryView / EditorView：命名错误显示具体原因（不留空还需补齐：），并支持新建重名提示', () => {
+  const baseSections = { source: '官方优先', verify: '两源交叉', report: '六段结论先行', limit: '中文' }
+  const summaryHtml = renderToStaticMarkup(createElement(MethodSummaryView, {
+    draft: { name: '测试 (v1)', currentName: null, provenance: null, legacyText: null, sections: baseSections },
+    mode: 'new',
+    existingNames: ['事实核查'],
+    stage: 'form-check',
+    manualFields: new Set(),
+    coachFields: new Set(),
+    sourceFields: new Set(),
+    onStageChange() {},
+    onFocusField() {},
+    onRestartSource() {},
+    canSave: false,
+    sending: false,
+    onSave() {},
+    t: tZh,
+  }))
+  assert.doesNotMatch(summaryHtml, /还需补齐：<\/div>/, '名称错误且四项已填时不得渲染空后缀 还需补齐：')
+  assert.match(summaryHtml, /括号|（）|\(\)/, '摘要条必须提示名称含括号的原因')
+
+  const dupHtml = renderToStaticMarkup(createElement(MethodSummaryView, {
+    draft: { name: '事实核查', currentName: null, provenance: null, legacyText: null, sections: baseSections },
+    mode: 'new',
+    existingNames: ['事实核查'],
+    stage: 'form-check',
+    manualFields: new Set(),
+    coachFields: new Set(),
+    sourceFields: new Set(),
+    onStageChange() {},
+    onFocusField() {},
+    onRestartSource() {},
+    canSave: true,
+    sending: false,
+    onSave() {},
+    t: tZh,
+  }))
+  assert.match(dupHtml, /已存在同名方法|覆盖/, '新建模式下输入已存在方法名应提示覆盖风险')
+
+  const editorHtml = renderToStaticMarkup(createElement(EditorView, {
+    mode: 'new',
+    existingNames: ['事实核查'],
+    sending: false,
+    t: tZh,
+    draft: { name: '# 非法标题', currentName: null, provenance: null, legacyText: null, sections: baseSections },
+    onNameChange() {},
+    onSectionChange() {},
+    onSave() {},
+    onCancel() {},
+  }))
+  assert.match(editorHtml, /<button[^>]*disabled[^>]*>保存/, '名称含前导 # 时保存按钮必须禁用')
+  assert.match(editorHtml, /#/, 'EditorView 必须显示前导 # 命名错误说明')
 })

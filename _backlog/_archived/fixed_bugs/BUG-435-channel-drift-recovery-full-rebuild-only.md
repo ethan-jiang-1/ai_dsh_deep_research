@@ -1,13 +1,13 @@
 ---
-status: 修复落地
+status: 已修
 severity: P1
 opened: 2026-11-26
 ---
 
 # BUG-435：通道镜像漂移后的启动恢复只有整包重建一条路（≈2–3 min + 换 token）
 
-> 状态：修复落地 — 恢复快路径已进树（`--sync-mirror` + 热载就绪判据），红绿证据与变异反证见 `## 修复落地`；
-> 判据（≤10s、页面确为新代码、host 侧仍强制重建、README 类不触发重建）全部实跑（2026-11-26）。
+> 状态：已修 — 恢复快路径已进树（`16ddd7c6`，`--sync-mirror` + 热载就绪判据），红绿证据与变异反证见 `## 修复落地`；
+> 判据（≤10s、页面确为新代码、host 侧仍强制重建、README 类不触发重建）全部实跑（2026-11-26），2026-11-27 归档。
 
 ## 症状
 
@@ -102,7 +102,7 @@ node tools/channel/run-driver.mjs up          # 冷重建，≈2–3 min，新 t
     `bootGraphFromHtml` / `artifactServedVerdict`）再验面；失败保持 NOT-RUN 并给原处方。
 - 为什么不是 B（诚实降级）：修法证成后降级就是放弃主路径的税；文本已改为真实存在的两条路。
 - 为什么不是 C（token 复用）：快路径不重启，token 问题消失；不引入安全面新决策。
-- 持久决定与输掉的方案 = [Note](../../notes/implemented/2026-11-26-channel-mirror-sync-fast-path.md)。
+- 持久决定与输掉的方案 = [Note](../../../notes/implemented/2026-11-26-channel-mirror-sync-fast-path.md)。
 
 ## 修复判据
 
@@ -114,7 +114,7 @@ node tools/channel/run-driver.mjs up          # 冷重建，≈2–3 min，新 t
 
 ## 修复关联
 
-- 去向：implemented — [2026-11-26-channel-mirror-sync-fast-path](../../notes/implemented/2026-11-26-channel-mirror-sync-fast-path.md)。
+- 去向：implemented — [2026-11-26-channel-mirror-sync-fast-path](../../../notes/implemented/2026-11-26-channel-mirror-sync-fast-path.md)。
 - 文档同变更：`docs/guides/61-run-playbook.md`（§0 三分支 + §0.1 单跑模式）、`tools/README.md`、
   `checks/README.md`（lib 表两行）。
 - 守卫：`tests/run/channel/mirror-sync.spec.mjs`（分类/fail-safe/CLI）、
@@ -147,7 +147,7 @@ node tools/channel/run-driver.mjs up          # 冷重建，≈2–3 min，新 t
     "command": "node checks/smoke/channel-start.e2e.mjs",
     "exit": 0
   },
-  "guard": { "path": "tests/run/channel/mirror-sync.spec.mjs" }
+  "guard": { "path": "tests/run/channel/run-driver-contract.spec.mjs" }
 }
 ```
 

@@ -6,6 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
+| [2026-11-27-cockpit-ux-ui-deep-blindspots-verification](2026-11-27-cockpit-ux-ui-deep-blindspots-verification.md) | 待落地 | 第二轮 UX/UI 深度盲区核查计划（方法库/配置深交互、Files 路由、流式/焦点保护、无障碍与极限压测） |
 | [2026-11-27-cockpit-ux-ui-full-verification](2026-11-27-cockpit-ux-ui-full-verification.md) | 待落地 | 全量 UX/UI 端到端、视觉/主题/视口、异常态与活流全面核查计划（发现即建 BUG 卡） |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。

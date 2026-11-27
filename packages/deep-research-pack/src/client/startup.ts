@@ -70,3 +70,15 @@ export function pickProductWorkspace<T extends WorkspaceRowLike>(
 export function needsProductSwitch(currentCwd: string | undefined, productPath: string): boolean {
   return currentCwd === undefined || currentCwd !== productPath
 }
+
+/**
+ * 构造 `uiWorkspace.startSession` 的草稿初始化参数（BUG-451）：
+ * 必须使用 vendor `DraftInitializationOptions.prompt` 字段，不得使用无效的 `initialPrompt`。
+ */
+export function buildStartResearchOptions(prompt?: string): {
+  readonly prompt: string
+  readonly whenDraftExists: 'keep'
+} | undefined {
+  if (prompt === undefined || prompt.trim() === '') return undefined
+  return { prompt, whenDraftExists: 'keep' }
+}

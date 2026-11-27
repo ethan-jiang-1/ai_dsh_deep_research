@@ -333,3 +333,61 @@ test('BUG-438 ResearchFinalTab.module.css：窄列分屏下 segmentedWrap 不缩
   assert.match(block, /max-width:\s*100%/, '超窄下受 max-width: 100% 约束')
   assert.match(block, /overflow-x:\s*auto/, '超窄极限下由容器内滚动兜底而非盖住按钮')
 })
+
+// 负例留证 2026-11-27：BUG-453——FinalToc 未剥离 Markdown 链接（[文本](url) 或 linkified 证据引用），
+// 导致目录裸露原始 URL 且点击无法匹配 rendered h2.textContent 进行滚动。
+// 红配方：去掉 FinalToc stripMarkdownInline 链接剥离 → 目录出现 https:// 与 evidence/ URL 且 scrolled=0 红。
+test('BUG-453 FinalToc：剥离标题内 Markdown 链接与引用 URL 并可点击滚动定位', async () => {
+  const treeWithLinkHeadings = structuredClone(BUNDLE)
+  treeWithLinkHeadings.drt_demo.final['v1.md'] = [
+    '# 审计终稿',
+    '',
+    '## [参考文档标题](https://example.com/spec)',
+    '外链章节正文。',
+    '',
+    '## 核心结论 [来源: evidence/e1.md]',
+    '带证据引用章节正文。',
+    '',
+  ].join('\n')
+  const run = makeMaliciousRunSource({ tree: treeWithLinkHeadings })
+  const { container } = render(createElement(ResearchFinalTab, {
+    sessionId: 's1',
+    t: tZh,
+    useTabInfo: () => ({
+      tab: {
+        navigation: { address: 'dsh-resource://file/session/s1/drt_demo/final.md' },
+        visible: true,
+        actions: { openTab: () => {} },
+      },
+    }),
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  const auditTab = [...container.querySelectorAll('[role="tab"]')].find((el) => el.textContent?.includes('审计版'))
+  assert.ok(auditTab !== undefined)
+  fireEvent.click(auditTab)
+  await flushUi(act)
+
+  const tocDetails = container.querySelector('details')
+  assert.ok(tocDetails !== null)
+  const buttons = [...tocDetails.querySelectorAll('button[type="button"]')]
+  const tocText = buttons.map((b) => b.textContent ?? '').join('\n')
+  assert.doesNotMatch(tocText, /https:\/\/|example\.com|\(evidence\/e1\.md\)/, `TOC 目录不得裸露原始 URL：${tocText}`)
+  const refBtn = buttons.find((b) => b.textContent?.includes('参考文档标题'))
+  const citeBtn = buttons.find((b) => b.textContent?.includes('核心结论'))
+  assert.ok(refBtn !== undefined && citeBtn !== undefined, `目录项缺失：${tocText}`)
+
+  const h2s = [...container.querySelectorAll('h2')]
+  const hRef = h2s.find((el) => el.textContent?.includes('参考文档标题'))
+  const hCite = h2s.find((el) => el.textContent?.includes('核心结论'))
+  assert.ok(hRef !== undefined && hCite !== undefined)
+  let scrolledRef = 0
+  let scrolledCite = 0
+  hRef.scrollIntoView = () => { scrolledRef += 1 }
+  hCite.scrollIntoView = () => { scrolledCite += 1 }
+  fireEvent.click(refBtn)
+  fireEvent.click(citeBtn)
+  assert.equal(scrolledRef, 1, '点击含外链标题 TOC 项必须滚动命中对应 h2')
+  assert.equal(scrolledCite, 1, '点击含引用后缀标题 TOC 项必须滚动命中对应 h2')
+})

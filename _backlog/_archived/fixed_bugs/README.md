@@ -6,6 +6,14 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [457](BUG-457-track-rail-rerun-arrow-misaligned-from-reentry-step.md) | `TrackRail` 取消错位 `▲` 并在重入节点内展示 `↺` 徽标 | （inline ↺ 徽标） | 2026-11-27 |
+| [456](BUG-456-method-summary-shows-empty-incomplete-fields-on-name-issue.md) | 名称校验拦前导 `#`/换行且不再渲染空后缀「还需补齐：」 | （nameIssueKind + `draftStatusOf`） | 2026-11-27 |
+| [455](BUG-455-config-ui-strings-render-raw-markdown-asterisks.md) | 清除纯文本配置提示槽原始 `**...**` 并补工作台指引 | （locales 纯文本去星号） | 2026-11-27 |
+| [454](BUG-454-config-switch-menu-clips-below-720p-viewport.md) | `1280×720`「换一条」菜单启用 `portal` 与限高滚动防裁切 | （`portal` + `.switchMenuList`） | 2026-11-27 |
+| [453](BUG-453-final-toc-exposes-raw-markdown-links-and-fails-scroll.md) | `FinalToc` 剥离链接与行内 Markdown 语法并与 DOM 对齐 | （`stripMarkdownInline`） | 2026-11-27 |
+| [452](BUG-452-defaults-panel-method-library-link-non-interactive.md) | `DefaultsPanel`「方法库 ›」改为可聚焦 `<button>` 直达方法库 | （`<button>` + `openHubTab`） | 2026-11-27 |
+| [451](BUG-451-hub-lens-start-research-drops-initial-prompt.md) | 工作台「以此透镜发起研究」改传 `prompt` 修复草稿预填丢失 | （vendor `DraftInitializationOptions`） | 2026-11-27 |
+| [435](BUG-435-channel-drift-recovery-full-rebuild-only.md) | 镜像漂移按类快速同步恢复（`lib/client.js` 免全重建） | `16ddd7c6` | 2026-11-26 |
 | [450](BUG-450-env-sh-bash-source-breaks-under-zsh.md) | `env.sh` 兼容 zsh 取仓库根路径 | （ZSH_VERSION + root 校验） | 2026-11-27 |
 | [449](BUG-449-english-quality-radar-prints-1-domains-plural.md) | 英文域名计数 `1 domains` 复数误差 | （One/Other 单复数分支） | 2026-11-27 |
 | [448](BUG-448-rapid-session-switch-logs-cancelled-rpc-as-console-error.md) | 快速切会话把 `gateway/cancelled` 打成 error | （cancelled 识别 + 静默退场） | 2026-11-27 |

@@ -195,4 +195,9 @@ export const enCockpit: Record<CockpitLocaleKey, string> = {
   tabMenuOpenHub: 'Open Research Hub',
   finalNextPrioritiesTitle: 'Next-version priorities (one-click draft)',
   finalNextPriorityPrefill: 'Continue research to address this next-version priority and update the report: {item}',
+  methodNameIssueBrackets: 'Name cannot include brackets (), （）, or 〔〕',
+  methodNameIssueFormatChar: 'Name cannot include invisible formatting characters',
+  methodNameIssueLeadingHash: 'Name cannot start with #',
+  methodNameIssueNewline: 'Name cannot include line breaks',
+  methodDuplicateNameWarning: 'A method named “{name}” already exists; saving will overwrite it',
 }

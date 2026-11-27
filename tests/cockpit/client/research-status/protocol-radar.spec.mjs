@@ -142,3 +142,29 @@ test('BUG-449 QualityRadar：英文模式 1 个独立域名使用单数 "1 domai
   assert.match(renderCount(2, tEn), /\b2 domains\b/)
   assert.match(renderCount(1, tZh), /1 个独立域名/)
 })
+
+// 负例留证 2026-11-27：BUG-457——TrackRail 在 loopOn 时将箭头 ▲ 绝对定位在容器左侧 3px，
+// 与重入步进「挖掘」脱节并在窄屏指向「立项确认 / 审查」。红配方：保留 ▲ 或删掉 evidence 上的 ↺ 徽标 → 红。
+test('BUG-457 TrackRail：loopOn 时不在图例区渲染左偏 ▲ 箭头，改为在重入节点 evidence 内附带 ↺ 标记', () => {
+  const html = renderToStaticMarkup(createElement(TrackRail, {
+    anchors: [
+      { key: 'a1', label: '立项确认', state: 'passed', questions: 0 },
+      { key: 'a2', label: '交付审阅', state: 'passed', questions: 0 },
+    ],
+    steps: [
+      { key: 'scope', label: '立项', state: 'done', note: null },
+      { key: 'team', label: '组队', state: 'done', note: null },
+      { key: 'scout', label: '侦察', state: 'done', note: null },
+      { key: 'evidence', label: '挖掘', state: 'done', note: null },
+      { key: 'synth', label: '综合', state: 'done', note: null },
+      { key: 'review', label: '审查', state: 'done', note: null },
+      { key: 'deliver', label: '交付', state: 'done', note: null },
+    ],
+    faceVersions: 2,
+    hitlPending: false,
+    t: tZh,
+  }))
+  assert.doesNotMatch(html, /▲/, '不得再渲染固定 left:3px 错位 pointing arrow ▲')
+  assert.match(html, /data-step-key="evidence"[^>]*data-step-reentry="true"[^>]*>[\s\S]*↺/, '重入标记 ↺ 必须随 evidence 步骤锚定渲染')
+  assert.match(html, /图例（非执行记录）/, 'rerun 图例说明仍应保留')
+})

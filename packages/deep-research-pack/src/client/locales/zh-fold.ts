@@ -218,7 +218,7 @@ export const zhFold = {
   legacyDistillAction: '从本次 run 沉淀',
   legacyRefreshAction: '刷新（重读库文件）',
   legacyFooter1: '改动由 Lead 执行并回话（面板不直接改文件）；两个入口都是把要求交给 Lead，由它写进库——回执的「已落盘」就是回读库文件对出的结果。',
-  legacyFooter2: '改动影响的是**之后**的研究；要让正在跑的这场改用某条，用「用于本次研究」把指令发给 Lead（它记进 question.md §Decisions，不算重跑）。',
+  legacyFooter2: '改动影响的是之后的研究；要让正在跑的这场改用某条，用「用于本次研究」把指令发给 Lead（它记进 question.md §Decisions，不算重跑）。',
 
   coachUnavailable: '方法编辑暂不可用：{detail}（表单可以继续填，稍后重试）',
   sessionsUnavailable: 'sessions 服务不可用',

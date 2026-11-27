@@ -104,3 +104,33 @@ test('BUG-442 SelectMenu：button 控件同时暴露 data-value 与 value 属性
     rtl.cleanup()
   }
 })
+
+// 负例留证 2026-11-27：BUG-452——DefaultsPanel「方法库 ›」过去是不可点击也不可聚焦的 <span> 伪链接。
+// 红配方：把 <button data-testid="defaults-method-library-link"> 改回 <span> 或无条件渲染 → 本例红。
+test('BUG-452 DefaultsPanel：「方法库 ›」在注入回调时渲染为可点击 button，缺回调时不渲染伪链接', async () => {
+  const rtl = await loadRtl()
+  const store = makeStore([])
+  let clicked = 0
+  const withAction = rtl.render(createElement(DefaultsPanel, {
+    sessionId: 's1',
+    store,
+    t,
+    onOpenMethodLibrary: () => { clicked += 1 },
+  }))
+  try {
+    const linkBtn = withAction.container.querySelector('[data-testid="defaults-method-library-link"]')
+    assert.ok(linkBtn !== null && linkBtn.tagName === 'BUTTON' && linkBtn.getAttribute('type') === 'button')
+    rtl.fireEvent.click(linkBtn)
+    assert.equal(clicked, 1)
+  } finally {
+    rtl.cleanup()
+  }
+
+  const withoutAction = rtl.render(createElement(DefaultsPanel, { sessionId: 's1', store, t }))
+  try {
+    assert.equal(withoutAction.container.querySelector('[data-testid="defaults-method-library-link"]'), null)
+    assert.equal(withoutAction.container.textContent?.includes(t('defaultsMethodLibraryLink')), false, '无跳转回调时不得渲染假链接文案')
+  } finally {
+    rtl.cleanup()
+  }
+})

@@ -218,9 +218,24 @@
 
 .methodLink {
   margin-left: auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
   font-size: 11px;
   color: var(--dsw-alias-link);
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.methodLink:hover {
+  text-decoration: underline;
+}
+
+.methodLink:focus-visible {
+  outline: 2px solid var(--dsw-alias-link);
+  outline-offset: 2px;
+  border-radius: 3px;
 }
 
 .chip {

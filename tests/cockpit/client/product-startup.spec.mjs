@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   CURRENT_SESSION_KEY, PRODUCT_WORKSPACE_KEY, PRODUCT_TITLE_PREFIX,
-  needsProductSwitch, pickProductWorkspace, readCurrentSessionId,
+  buildStartResearchOptions, needsProductSwitch, pickProductWorkspace, readCurrentSessionId,
 } from '../../../packages/deep-research-pack/src/client/startup.ts'
 
 test('readCurrentSessionId：裸 id / {sessionId} / 坏值', () => {
@@ -36,4 +36,14 @@ test('needsProductSwitch：cwd 未知或不同即需要切', () => {
 test('键名稳定（vendor 约定 + 产品键）', () => {
   assert.equal(CURRENT_SESSION_KEY, 'dsh.sessions.current')
   assert.equal(PRODUCT_WORKSPACE_KEY, 'dsh.deep-research.workspaceId.v1')
+})
+
+// 负例留证 2026-11-27：BUG-451——startResearch 向 uiWorkspace.startSession 误传 initialPrompt，
+// vendor StartSessionOptions 实际读 prompt 字段导致透镜预设草稿被静默丢弃。红配方：传 initialPrompt 或删 buildStartResearchOptions → 红。
+test('BUG-451 buildStartResearchOptions：使用 vendor DraftInitializationOptions.prompt 字段且不产出 initialPrompt', () => {
+  assert.equal(buildStartResearchOptions(undefined), undefined)
+  assert.equal(buildStartResearchOptions('   '), undefined)
+  const opts = buildStartResearchOptions('请按监管口径研究 AI 芯片出口规则')
+  assert.deepEqual(opts, { prompt: '请按监管口径研究 AI 芯片出口规则', whenDraftExists: 'keep' })
+  assert.equal('initialPrompt' in opts, false)
 })

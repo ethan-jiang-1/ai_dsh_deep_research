@@ -216,7 +216,7 @@ export const enFold = {
   legacyDistillAction: 'Distill from this run',
   legacyRefreshAction: 'Refresh (re-read the library file)',
   legacyFooter1: 'The Lead applies and reports changes (the panel never edits files directly); both entries hand the request to the Lead, which writes the library — “landed” means a read-back confirmed it.',
-  legacyFooter2: 'Changes affect **future** research; to switch a running study to a method, use “Use for this research” to send the Lead an instruction (recorded in question.md §Decisions, not a rerun).',
+  legacyFooter2: 'Changes affect future research; to switch a running study to a method, use “Use for this research” to send the Lead an instruction (recorded in question.md §Decisions, not a rerun).',
 
   coachUnavailable: 'Method Editor is unavailable: {detail} (you can keep filling the form; retry shortly)',
   sessionsUnavailable: 'sessions service unavailable',

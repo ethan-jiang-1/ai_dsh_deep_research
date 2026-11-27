@@ -23,6 +23,8 @@ export interface DefaultsPanelProps {
   readonly sessionId: SessionId
   readonly store: DefaultsStore
   readonly t: PackTranslate
+  /** 点击「方法库 ›」跳转到研究工作台方法库页签；缺席时不渲染可点入口（BUG-452）。 */
+  readonly onOpenMethodLibrary?: () => void
 }
 
 function sourcePatch(
@@ -56,7 +58,7 @@ function receiptOf(state: DefaultsSnapshot, t: PackTranslate): { tone: 'ok' | 'w
  * @param props - session + store + t。
  * @returns 面板。
  */
-export function DefaultsPanel({ sessionId, store, t }: DefaultsPanelProps): ReactNode {
+export function DefaultsPanel({ sessionId, store, t, onOpenMethodLibrary }: DefaultsPanelProps): ReactNode {
   const state = useDefaults(store, sessionId)
   const [audience, setAudience] = useState(state.value.output?.audience ?? '')
   const [confirmClear, setConfirmClear] = useState(false)
@@ -130,7 +132,17 @@ export function DefaultsPanel({ sessionId, store, t }: DefaultsPanelProps): Reac
         <span className={css.label}>{t('defaultsMethod')}</span>
         <div className={css.rowFlex}>
           <span data-testid="defaults-method" className={css.methodText}>{methodText}</span>
-          <span className={css.methodLink} title={t('defaultsMethodHint')}>{t('defaultsMethodLibraryLink')}</span>
+          {onOpenMethodLibrary !== undefined && (
+            <button
+              type="button"
+              data-testid="defaults-method-library-link"
+              className={css.methodLink}
+              title={t('defaultsMethodHint')}
+              onClick={onOpenMethodLibrary}
+            >
+              {t('defaultsMethodLibraryLink')}
+            </button>
+          )}
         </div>
         <span /><span className={css.hint}>{t('defaultsMethodHint')}</span>
       </div>

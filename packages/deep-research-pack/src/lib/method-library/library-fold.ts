@@ -112,13 +112,33 @@ export function renderMethodHeading(heading: Pick<ParsedMethodHeading, 'name' | 
 /** 库条目标题行（`## ` 与 `##\t` 同判——读/写共用，BUG-083）。 */
 export const isLibraryHeadingLine = (line: string): boolean => parseMethodHeading(line) !== null
 
+export type MethodNameIssueKind = 'brackets' | 'format-char' | 'leading-hash' | 'newline'
+
+/** 名称合法性分类判定，供纯校验与多语言 UI 诊断共享（BUG-081 / BUG-167 / BUG-456）。 */
+export function methodNameIssueKind(name: string): MethodNameIssueKind | null {
+  if (/[\r\n]/.test(name)) return 'newline'
+  if (/^\s*#/.test(name)) return 'leading-hash'
+  if (/[（）()〔〕]/.test(name)) return 'brackets'
+  if (FORMAT_CHAR.test(name)) return 'format-char'
+  return null
+}
+
 /** 名称里不许出现的标注字符：`（…）`/`(…)` 是 provenance 语法、`〔…〕` 是默认标记语法；
  *  含这些字符的名称会让 fold 与写路径名字不对称（BUG-081）。不可见格式字符同理（BUG-167）：
  *  解析会剥离它们，写入路径必须 fail-loud，不能静默新建一条视觉同名的条目。 */
 export function methodNameIssue(name: string): string | null {
-  if (/[（）()〔〕]/.test(name)) return '名称不能包含全角括号「（）」、半角括号「()」或「〔〕」——它们是来源注记/默认标记的语法'
-  if (FORMAT_CHAR.test(name)) return '名称不能包含不可见的 Unicode 格式字符（零宽空格/软连字符/LRM 等）——它们会让同名条目看起来一样'
-  return null
+  switch (methodNameIssueKind(name)) {
+    case 'newline':
+      return '名称不能包含换行符——它必须能作为单行 `## ` 标题写进库文件'
+    case 'leading-hash':
+      return '名称不能以「#」开头——避免与 Markdown 标题层级混淆'
+    case 'brackets':
+      return '名称不能包含全角括号「（）」、半角括号「()」或「〔〕」——它们是来源注记/默认标记的语法'
+    case 'format-char':
+      return '名称不能包含不可见的 Unicode 格式字符（零宽空格/软连字符/LRM 等）——它们会让同名条目看起来一样'
+    case null:
+      return null
+  }
 }
 
 /** 从库文本折算条目清单（顺序 = 文件顺序；重名不去重——如实投影，去重归 Lead）。 */

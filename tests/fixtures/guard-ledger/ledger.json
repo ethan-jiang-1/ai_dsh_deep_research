@@ -2438,6 +2438,62 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "从 tools/env.sh 移除 ZSH_VERSION ${(%):-%x} 分支与根目录校验 → BUG-450 用例及 zsh source 红"
+    },
+    {
+      "id": "BUG-451",
+      "mechanism": "index.ts startResearch 向 uiWorkspace.startSession 误传 initialPrompt，而 vendor StartSessionOptions 读 prompt",
+      "guard": "tests/cockpit/client/research-hub-panel.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 startResearch 的 buildStartResearchOptions(prompt) 改回 { initialPrompt: prompt } → BUG-451 双用例红"
+    },
+    {
+      "id": "BUG-452",
+      "mechanism": "DefaultsPanel 「方法库 ›」渲染为无事件 <span> 伪链接，既不跳转也不支持键盘焦点",
+      "guard": "tests/cockpit/client/defaults/defaults-panel-confirm.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 <button data-testid=\"defaults-method-library-link\"> 改回静态 <span> → BUG-452 用例红"
+    },
+    {
+      "id": "BUG-453",
+      "mechanism": "FinalToc 只剥离 * 和 `，未剥离 [文本](url) 与 linkified 证据引用 URL 语法，导致目录裸露 URL 且点击滚动失配",
+      "guard": "tests/cockpit/client/final-evidence.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "移除 FinalToc stripMarkdownInline 链接剥离 → BUG-453 裸露 URL 与 scroll=0 用例红"
+    },
+    {
+      "id": "BUG-454",
+      "mechanism": "ResearchConfigTab 「换一条」<Menu> 未传 portal 与最大高度滚动类名，在 1280x720 视口下向下溢出被裁切",
+      "guard": "tests/cockpit/client/research-config-source.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "从 ResearchConfigTab methodPicker <Menu> 移除 portal 或 listClassName → BUG-454 用例红"
+    },
+    {
+      "id": "BUG-455",
+      "mechanism": "纯文本 UI 字典项 configMethodHint / configDetailCreateDesc / legacyFooter2 混入 **...** 原始 Markdown 星号且提示过时",
+      "guard": "tests/cockpit/client/locales/client-locale.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "在 zh/en 字典纯文本词条写回 **加粗** 或删去 研究工作台 指引 → BUG-455 用例红"
+    },
+    {
+      "id": "BUG-456",
+      "mechanism": "methodNameIssue 放行前导 #/换行，且 MethodSummaryView/EditorView 名称非法时渲染空后缀「还需补齐：」并缺新建重名提示",
+      "guard": "tests/cockpit/client/method-library/method-library-views.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "移除 views.tsx nameIssue 分支或 library-fold leading-hash 判定 → BUG-456 用例红"
+    },
+    {
+      "id": "BUG-457",
+      "mechanism": "TrackRail 将 rerun ▲ 箭头固定绝对定位在容器左侧 3px，与重入节点 evidence 脱节且窄屏指向审查/立项确认",
+      "guard": "tests/cockpit/client/research-status/protocol-radar.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "在 TrackRail 恢复 <span className={css.rerunArrow}>▲</span> 或删除 evidence 上 ↺ → BUG-457 用例红"
     }
   ]
 }

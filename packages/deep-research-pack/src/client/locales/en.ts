@@ -296,7 +296,7 @@ const enBase = {
   specimenMine: 'Specimen: after a research run uses this method, its output appears here (open to view the skeleton)',
   specimenBuiltin: 'Specimen: after a research run uses this playbook, its output appears here (open to view the skeleton)',
   basedOnBuiltin: 'Custom based on {name}',
-  configMethodHint: 'Which playbook this research uses; “Switch method” sends an instruction to the Lead. Edit/create/delete live in the “Method library” tab of a conversation session (blank New Sessions do not show view tabs).',
+  configMethodHint: 'Which playbook this research uses; “Switch method” sends an instruction to the Lead. Edit, create, or delete methods in the left “Research Hub → Method library” (works even in a blank session) or the “Method library” tab of an active conversation session.',
   configPreferenceHint: 'One “research preference” = one playbook = one four-field recipe (where to look / how to verify / how to report / what is not promised).',
   configDetailCreateDesc: 'The four fields become this preference; the button sends it to the Lead, which writes it into the library (the panel never edits files directly). Receipts appear at the bottom.',
   configDetailEditDesc: 'Changes are sent to the Lead of this session; the draft stays visible until the save lands.',

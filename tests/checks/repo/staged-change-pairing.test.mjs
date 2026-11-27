@@ -221,3 +221,37 @@ test('修复卡 guard 路径不存在 → 红；挂靠未暂存且不含本 BUG 
   const fakeRed = stagedChangePairingProblems({ staged: fixStaged([['M', 'checks/lib/fix.mjs']]), ...harness(files2) })
   assert.ok(fakeRed.length > 0 && /未在同一暂存集|BUG-900/.test(fakeRed.join('；')), `挂靠无关旧测试必须红：${fakeRed.join('；')}`)
 })
+
+// 负例留证 2026-11-27：修复已随前序 commit 落地（HEAD 中 bug 卡已为 status: 修复落地 且证据齐全），
+// 后续单独 git mv 归档为 已修 时不应因代码已在前一次提交而误判假修；HEAD 仍为 等人拍板/排查中 的假归档继续拦截。
+test('二段归档：HEAD 已为 修复落地 且实证文件在盘 → R100 单独归档绿；HEAD 未落地或文件缺失 → 仍红', () => {
+  const active = '_backlog/bugs/BUG-900-fix.md'
+  const archived = '_backlog/_archived/fixed_bugs/BUG-900-fix.md'
+  const landedHead = fixCardText(['checks/lib/fix.mjs']).replace('status: 已修', 'status: 修复落地')
+  const archivedText = fixCardText(['checks/lib/fix.mjs'])
+  const files = new Map([[archived, archivedText], ['checks/lib/fix.mjs', 'x\n']])
+  const renameOnly = changes([['R100', active, archived]])
+
+  const ok = stagedChangePairingProblems({
+    staged: renameOnly,
+    ...harness(files),
+    readHead: (rel) => (rel === active ? landedHead : null),
+  })
+  assert.deepEqual(ok, [])
+
+  const pendingHead = landedHead.replace('status: 修复落地', 'status: 等人拍板')
+  const rejectPending = stagedChangePairingProblems({
+    staged: renameOnly,
+    ...harness(files),
+    readHead: (rel) => (rel === active ? pendingHead : null),
+  })
+  assert.match(rejectPending[0], /同一暂存集/)
+
+  const missingCodeFiles = new Map([[archived, archivedText]])
+  const rejectMissingFile = stagedChangePairingProblems({
+    staged: renameOnly,
+    ...harness(missingCodeFiles),
+    readHead: (rel) => (rel === active ? landedHead : null),
+  })
+  assert.match(rejectMissingFile[0], /同一暂存集/)
+})

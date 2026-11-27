@@ -511,3 +511,13 @@ test('BUG-138 未识别尾部标题：编辑 fail-loud，删除按 fold 名称�
   assert.equal(removed.removed, true)
   assert.equal(foldLibrary(removed.text).some((entry) => entry.name === '方法'), false)
 })
+
+// 负例留证 2026-11-27：BUG-456——methodNameIssue 放行前导 # 与换行符，写入 `## # ...` 污染二级标题解析。
+// 红配方：从 methodNameIssueKind 移除 leading-hash 或 newline 判定 → 本例红。
+test('BUG-456 methodNameIssue：同时拦截前导 #、换行符、括号与不可见格式字符', () => {
+  assert.ok(methodNameIssue('# 含井号非法名称') !== null, '前导 # 必须拦截')
+  assert.ok(methodNameIssue('  ## 二级') !== null, '前导空白 + # 必须拦截')
+  assert.ok(methodNameIssue('多行\n名称') !== null, '换行符必须拦截')
+  assert.ok(methodNameIssue('测试 (v1)') !== null, '半角括号必须拦截')
+  assert.equal(methodNameIssue('C# 编译器方法'), null, '中间包含 # 的正常名称允许')
+})

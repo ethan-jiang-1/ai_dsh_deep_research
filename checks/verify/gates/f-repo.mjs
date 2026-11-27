@@ -209,6 +209,10 @@ export function runF() {
         staged,
         read: (rel) => { try { return readFileSync(join(ROOT, rel), 'utf8'); } catch { return null; } },
         exists: (rel) => existsSync(join(ROOT, rel)),
+        readHead: (rel) => {
+          const out = spawnSync('git', ['show', `HEAD:${rel}`], { cwd: ROOT, encoding: 'utf8', env });
+          return out.status === 0 ? out.stdout : null;
+        },
       });
       if (problems.length > 0) fail(gate, problems.join('；'));
     }

@@ -433,7 +433,22 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
           }}
         >
           {(mode === 'edit' || mode === 'new') && workbenchStage !== 'source' && draft !== null && (
-            <MethodSummaryView draft={draft} stage={workbenchStage} manualFields={manual} coachFields={coachFields} sourceFields={sourceFields} onStageChange={setWorkbenchStage} onFocusField={(field) => { setActiveField(field); setWorkbenchStage('form-check') }} onRestartSource={restartSource} canSave={canSaveDraft} sending={sending || operationUnknown} onSave={(asDefault) => { void save(asDefault) }} t={props.t} />
+            <MethodSummaryView
+              draft={draft}
+              mode={mode}
+              existingNames={entries.map((entry) => entry.name)}
+              stage={workbenchStage}
+              manualFields={manual}
+              coachFields={coachFields}
+              sourceFields={sourceFields}
+              onStageChange={setWorkbenchStage}
+              onFocusField={(field) => { setActiveField(field); setWorkbenchStage('form-check') }}
+              onRestartSource={restartSource}
+              canSave={canSaveDraft}
+              sending={sending || operationUnknown}
+              onSave={(asDefault) => { void save(asDefault) }}
+              t={props.t}
+            />
           )}
           <div className={css.workbenchInner} style={{ overflowY: mode === 'read' || workbenchStage !== 'interview' ? 'auto' : 'hidden' }}>
             {mode === 'read' && segment === 'builtin' && builtin !== null && <BuiltinView entry={builtin} onUse={() => { applyBuiltinReference(builtin) }} useLabel={props.t('useBuiltin')} t={props.t} />}
@@ -462,7 +477,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
               onCancel={cancel}
               t={props.t}
             />}
-            {(mode === 'edit' || mode === 'new') && workbenchStage === 'form-check' && <EditorView draft={draft} mode={mode} sending={sending || operationUnknown} t={props.t} onNameChange={onNameChange} onSectionChange={updateSection} onSave={(asDefault) => { void save(asDefault) }} onCancel={cancel} coachFields={coachFields} manualFields={manual} activeField={activeField} coachUpdated={coachBase !== null} onUndoCoach={undoCoach} />}
+            {(mode === 'edit' || mode === 'new') && workbenchStage === 'form-check' && <EditorView draft={draft} mode={mode} existingNames={entries.map((entry) => entry.name)} sending={sending || operationUnknown} t={props.t} onNameChange={onNameChange} onSectionChange={updateSection} onSave={(asDefault) => { void save(asDefault) }} onCancel={cancel} coachFields={coachFields} manualFields={manual} activeField={activeField} coachUpdated={coachBase !== null} onUndoCoach={undoCoach} />}
             {sessionId !== undefined && (coachVisible || (mode !== 'read' && workbenchStage !== 'source')) && (
               <MethodCoachPanel key={`${sessionId}:${coachEpoch}:${activeDraftKey}`} sessionId={sessionId} draftKey={activeDraftKey ?? 'pending'} visible={(mode === 'edit' || mode === 'new') && workbenchStage === 'interview'} ensure={props.ensureCoach} onCoach={onCoachReady} onError={onCoachError} onStartInterview={startInterview} title={props.t('methodEditorTitle')} startLabel={props.t('startInterview')} readyLabel={props.t('interviewReady')} pendingLabel={props.t('startingInterview')} startedLabel={props.t('interviewStarted')} t={props.t} />
             )}

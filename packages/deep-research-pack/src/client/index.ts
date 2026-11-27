@@ -21,7 +21,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
 // `conversation.view`（Chat/Trajectory 同排的主界面 tab）声明在 ui-conversation。
-import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
+import type { DraftInitializationOptions } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import { en, zh, type DeepResearchPackLocaleKey } from './locales.ts'
 // 品牌槽（`sidebar.brand.mark` / `sidebar.brand.name`）声明在 ui-sidebar 的 SlotMap——类型增强导入即登记槽名。
@@ -68,8 +68,8 @@ import { createLeadPrompt } from './lead-prompt.ts'
 import { StartCard, type StartCardInjected } from './StartCard.tsx'
 import { DefaultsButton, type DefaultsButtonInjected } from './defaults/DefaultsButton.tsx'
 import { createDefaultsStore } from './defaults/store.ts'
-import { ResearchHubIcon, ResearchHubPanel } from './ResearchHubPanel.tsx'
-import { CURRENT_SESSION_KEY, PRODUCT_WORKSPACE_KEY, pickProductWorkspace, readCurrentSessionId } from './startup.ts'
+import { ResearchHubIcon, ResearchHubPanel, type HubTab } from './ResearchHubPanel.tsx'
+import { CURRENT_SESSION_KEY, PRODUCT_WORKSPACE_KEY, buildStartResearchOptions, pickProductWorkspace, readCurrentSessionId } from './startup.ts'
 import { finalAddressOf, isFinalAddress } from '../lib/run/final-target.ts'
 import { isEvidenceAddress } from '../lib/run/evidence-card.ts'
 
@@ -278,7 +278,7 @@ export function apply(ctx: ClientContext): void {
       scoped.slots.register(
         // 「研究配置」注入面 2026-10-18 扩：+ listDir/follow（「本次研究」区要按会话绑定定位
         // bundle 并读 question.md 方法节；回执的「Lead 已回话」信号也走 journal 流）。
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_CONFIG_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ readFile, readLibrary, listDir, follow, runSource, sendInstruction, defaults: defaultsStore }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_CONFIG_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ readFile, readLibrary, listDir, follow, runSource, sendInstruction, defaults: defaultsStore, openMethodLibrary }) },
         ResearchConfigTab,
       ),
       // 「研究图谱」页签体：只读观察（DAG 图 + plan 原文 + 映射），不提供调整动作；
@@ -320,6 +320,24 @@ export function apply(ctx: ClientContext): void {
       inject: () => methodLibrary,
     }, MethodLibraryView)), 'deep-research-pack: method-library conversation view')
 
+    let pendingHubTab: HubTab | null = null
+    const hubTabListeners = new Set<() => void>()
+    const requestedHubTab = {
+      get: (): HubTab | null => pendingHubTab,
+      clear: (): void => { pendingHubTab = null },
+      subscribe: (listener: () => void): (() => void) => {
+        hubTabListeners.add(listener)
+        return () => { hubTabListeners.delete(listener) }
+      },
+    }
+    const openHubTab = (tab: HubTab) => {
+      pendingHubTab = tab
+      for (const listener of hubTabListeners) listener()
+      const layout = (scoped as unknown as { get(name: string): { selectPanel?(id: string | null): void } | undefined }).get('layout')
+      layout?.selectPanel?.(RESEARCH_HUB_PANEL_ID)
+    }
+    const openMethodLibrary = () => { openHubTab('methods') }
+
     const backToChat = () => {
       const layout = (scoped as unknown as { get(name: string): { selectPanel?(id: null): void } | undefined }).get('layout')
       layout?.selectPanel?.(null)
@@ -328,17 +346,14 @@ export function apply(ctx: ClientContext): void {
     const startResearch = (prompt?: string) => {
       const uiWs = (scoped as unknown as {
         uiWorkspace: UiWorkspaceLike & {
-          startSession(workspaceId?: string, options?: { agentPreset?: string; initialPrompt?: string; whenDraftExists?: string }): void
+          startSession(workspaceId?: string, options?: DraftInitializationOptions & { readonly agentPreset?: string }): void
         }
       }).uiWorkspace
       const snap = (scoped.workspaces as unknown as WorkspacesLike).list.getSnapshot()
       const savedId = typeof localStorage !== 'undefined' ? localStorage.getItem(PRODUCT_WORKSPACE_KEY) : null
       const picked = pickProductWorkspace(snap.items, savedId)
       backToChat()
-      uiWs.startSession(
-        picked?.workspaceId,
-        prompt === undefined ? undefined : { initialPrompt: prompt, whenDraftExists: 'keep' },
-      )
+      uiWs.startSession(picked?.workspaceId, buildStartResearchOptions(prompt))
     }
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_HUB_PANEL_SLOT, () => scoped.slots.register({
@@ -357,6 +372,7 @@ export function apply(ctx: ClientContext): void {
         runSource,
         methodLibrary,
         defaultsStore,
+        requestedTab: requestedHubTab,
         openFinal,
         backToChat,
         startResearch,

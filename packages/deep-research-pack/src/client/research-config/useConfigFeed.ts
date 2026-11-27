@@ -35,6 +35,8 @@ export interface ResearchConfigTabInjected {
   readonly sendInstruction: (sessionId: SessionId, text: string) => Promise<{ ok: boolean; detail: string }>
   /** 项目研究默认 store（D50；与 composer 按钮共用）。 */
   readonly defaults: DefaultsStore
+  /** 打开工作台「方法库」页签（BUG-452；从 DefaultsPanel「方法库 ›」直达）。 */
+  readonly openMethodLibrary?: () => void
 }
 
 export type ConfigFeedInput = ResearchConfigTabInjected & { readonly sessionId: SessionId | undefined; readonly t: PackTranslate }

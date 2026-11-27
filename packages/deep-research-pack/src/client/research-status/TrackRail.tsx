@@ -61,6 +61,7 @@ export function TrackRail(props: {
       >
         <StateDot appearance="step" state={stepDotState(s)} size={12} />
         <span>{s.label}{unknown ? ' ?' : ''}</span>
+        {reentry && <span className={css.reentryBadge} aria-hidden="true">↺</span>}
       </span>
     )
   }
@@ -82,7 +83,6 @@ export function TrackRail(props: {
       </div>
       {loopOn && (
         <div className={css.rerunLoop}>
-          <span className={css.rerunArrow}>▲</span>
           {t('trackRerunLegend', { version: faceVersions !== null && faceVersions >= 2 ? t('trackRerunSuffix', { version: String(faceVersions) }) : '' })}
         </div>
       )}

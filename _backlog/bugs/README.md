@@ -18,9 +18,19 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| [435](BUG-435-channel-drift-recovery-full-rebuild-only.md) | 修复落地 | P1 | 镜像漂移后的启动恢复只有整包重建（≈2–3 min + 换 token），报错文本里的"逐文件 cp 同步"未实现 |
 
 ## 最近归档
+
+（2026-11-27 第二轮 UX/UI 深度盲区修复批〔7 张，451–457〕+ 遗留闭环〔435〕，批 Note = [2026-11-27-cockpit-ux-ui-blindspots-fixes](../../notes/implemented/2026-11-27-cockpit-ux-ui-blindspots-fixes.md)：
+[451](../_archived/fixed_bugs/BUG-451-hub-lens-start-research-drops-initial-prompt.md) startResearch prompt；
+[452](../_archived/fixed_bugs/BUG-452-defaults-panel-method-library-link-non-interactive.md) 方法库按钮直达；
+[453](../_archived/fixed_bugs/BUG-453-final-toc-exposes-raw-markdown-links-and-fails-scroll.md) FinalToc 剥链接；
+[454](../_archived/fixed_bugs/BUG-454-config-switch-menu-clips-below-720p-viewport.md) 换一条 portal 限高；
+[455](../_archived/fixed_bugs/BUG-455-config-ui-strings-render-raw-markdown-asterisks.md) 去纯文本星号；
+[456](../_archived/fixed_bugs/BUG-456-method-summary-shows-empty-incomplete-fields-on-name-issue.md) 名称校验/防空补齐；
+[457](../_archived/fixed_bugs/BUG-457-track-rail-rerun-arrow-misaligned-from-reentry-step.md) TrackRail ↺ 随步徽标；
+另 [435](../_archived/fixed_bugs/BUG-435-channel-drift-recovery-full-rebuild-only.md) 镜像快速同步归档，Note = [2026-11-26-channel-mirror-sync-fast-path](../../notes/implemented/2026-11-26-channel-mirror-sync-fast-path.md)。
+）
 
 （2026-11-27 驾驶舱 UX/UI 全量核查修复批〔15 张，436–450〕，批 Note = [2026-11-27-cockpit-ux-ui-audit-fixes](../../notes/implemented/2026-11-27-cockpit-ux-ui-audit-fixes.md)：
 [436](../_archived/fixed_bugs/BUG-436-run-context-40-line-cap-truncates-protocol-topics-claims.md) canonical EOF；
