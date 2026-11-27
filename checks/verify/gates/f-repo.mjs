@@ -10,6 +10,7 @@ import { backlogLivenessProblems } from '../../lib/repo/backlog-liveness.mjs';
 import { parseStagedChanges, stagedChangePairingProblems } from '../../lib/repo/staged-change-pairing.mjs';
 import { isTestFile, placementIssues } from '../../lib/repo/test-placement.mjs';
 import { commandPathsAnywhere, scanCiCommands, scanDocument } from '../../lib/repo/doc-surface.mjs';
+import { gatesLedgerProblems } from '../../lib/repo/docs-reference.mjs';
 import { missingProbeFields, renderProbeIndex, scanProbeEntries } from '../../lib/shared/probe-index.mjs';
 import { ROOT, gates, fail, note, walk, gitOnce, trackedFiles } from '../context.mjs';
 
@@ -249,25 +250,10 @@ export function runF() {
   }
 }
 
-// ── gate-ledger-sync（docs/evaluation.md §L0 门禁登记表 = 本脚本 gates 数组，不漂移）──
-// 抓取形状：表格行首列为 code span（`| `gate-name` |`）——evaluation.md 其他表首列非此形状，不误抓。
+// ── gate-ledger-sync（docs/reference/gates-ledger.generated.md 集合与新鲜度 = context.mjs gates 数组）──
 {
   const gate = 'gate-ledger-sync';
-  const evalPath = join(ROOT, 'docs', 'evaluation.md');
-  if (!existsSync(evalPath)) fail(gate, 'docs/evaluation.md 不存在');
-  else {
-    const ledger = new Set();
-    for (const line of readFileSync(evalPath, 'utf8').split('\n')) {
-      const m = /^\| `([a-z0-9-]+)` \|/.exec(line);
-      if (m) ledger.add(m[1]);
-    }
-    for (const g of gates) {
-      if (!ledger.has(g)) fail(gate, `evaluation.md §L0 登记表缺门禁：${g}——登记表与脚本必须同步`);
-    }
-    for (const l of ledger) {
-      if (!gates.includes(l)) fail(gate, `evaluation.md §L0 登记表多出门禁（脚本 gates 数组无此名）：${l}`);
-    }
-  }
+  for (const problem of gatesLedgerProblems(ROOT, gates)) fail(gate, problem);
 }
 
 // ── entry-chain（文档链骨干存在性——正本 = 根 AGENTS.md §入口链与 §布局）──

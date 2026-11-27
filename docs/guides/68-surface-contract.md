@@ -96,7 +96,7 @@ operate 的两种模式：
 | `tools/channel/llm-socket-isolation.cjs` | 非面（驱动） | `NODE_OPTIONS` 预载，socket 隔离 |
 | `tools/build/vendor-host-bundle.config.ts`、`tools/build/vendor-typert-emit.mjs` | 非面（管道件） | `vendor-build.sh` 的构建配置与产物生成 |
 | `tools/channel/boot-run.sh`、`tools/channel/run-driver.mjs` | operate（run） | 起/复用 run 通道 |
-| `tools/channel/run-kickoff.mjs`、`tools/channel/hitl-answer.mjs`、`tools/build/bootstrap.sh`、`tools/build/vendor-build.sh`、`tools/record/record-asset-ledger.mjs`、`tools/record/record-ci-oracle.mjs`、`tools/record/record-role-fixture.mjs`、`tools/record/render-overlay.mjs`、`tools/record/render-test-index.mjs` | operate（act） | 对活通道或仓库做持久改动：建会话发 kickoff、写 HITL provenance、装环境、产 fixture/索引/overlay |
+| `tools/channel/run-kickoff.mjs`、`tools/channel/hitl-answer.mjs`、`tools/build/bootstrap.sh`、`tools/build/vendor-build.sh`、`tools/record/record-asset-ledger.mjs`、`tools/record/record-ci-oracle.mjs`、`tools/record/record-role-fixture.mjs`、`tools/record/render-overlay.mjs`、`tools/record/render-test-index.mjs`、`tools/record/render-docs-reference.mjs` | operate（act） | 对活通道或仓库做持久改动：建会话发 kickoff、写 HITL provenance、装环境、产 fixture/索引/overlay/参考文档 |
 | `tools/hooks/pre-commit` | judge | git hook 的产物是裁决：红则拦 commit |
 
 ## 6. 已知限制与延后工作

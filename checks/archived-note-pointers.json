@@ -628,88 +628,8 @@
     },
     {
       "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-09-24-entry-chain-fresh-agent-audit.md",
-      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-entry-chain-fresh-agent-audit 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-09-24-foundation-remediation.md",
-      "reason": "L0 登记表 md-links/role-list-sync/gate-ledger-sync 三行的反证出处列引基础整治 Note（红→还原绿实证的历史家；现行执行体 = 门禁本体与 gates.e2e 常驻案例）"
-    },
-    {
-      "source": "docs/evaluation.md",
       "target": "notes/archived/2026-09-24-l1-l2-green.md",
       "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-l1-l2-green 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-09-24-noise-sweep.md",
-      "reason": "2026-11-10 归档批次路径重定向：2026-09-24-noise-sweep 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-09-24-r1-scaffold.md",
-      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-r1-scaffold 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-09-24-review-driven-hardening.md",
-      "reason": "2026-11-10 归档批次路径重定向：2026-09-24-review-driven-hardening 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-09-26-signal-to-noise-remediation.md",
-      "reason": "2026-11-10 归档批次路径重定向：2026-09-26-signal-to-noise-remediation 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-09-28-dist-export.md",
-      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-28-dist-export 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-10-04-fresh-agent-doc-audit.md",
-      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-04-fresh-agent-doc-audit 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-10-07-audit-p3-closure-round.md",
-      "reason": "2026-11-10 归档批次路径重定向：2026-10-07-audit-p3-closure-round 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-10-07-lsfiles-gate-coverage-sweep.md",
-      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-07-lsfiles-gate-coverage-sweep 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-10-07-runtime-scripts-layout.md",
-      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-07-runtime-scripts-layout 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-10-09-release-smoke-hardening.md",
-      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-release-smoke-hardening 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-10-10-archive-review-surface.md",
-      "reason": "2026-11-10 归档批次路径重定向：2026-10-10-archive-review-surface 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-10-19-vendor-pin-bump-021rc2.md",
-      "reason": "2026-11-10 归档批次路径重定向：2026-10-19-vendor-pin-bump-021rc2 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-11-02-dev-product-path-parity.md",
-      "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-02-dev-product-path-parity 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
-    },
-    {
-      "source": "docs/evaluation.md",
-      "target": "notes/archived/2026-11-03-seven-dimension-hygiene-round.md",
-      "reason": "2026-11-10 归档批次路径重定向：2026-11-03-seven-dimension-hygiene-round 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
       "source": "docs/external-materials.md",

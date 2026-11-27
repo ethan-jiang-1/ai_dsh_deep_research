@@ -105,10 +105,9 @@ export function runE() {
   }
 }
 
-// ── dist-manual-version（dist 导出合同——精神移植 ai_dsh_architect docs/distribution.md：
-//    _dist/安装手册.md 是 tracked 生成物（生成器 = tools/release/export-dist.mjs），表头版本必须等于
-//    pack 的 package.json 版本，且指名同目录 tarball 的文件名——版本动而手册不重导出即红，
-//    迫使版本 bump 与重导出同 diff。导出目的地 = _dist/（tarball gitignored）。）──
+// ── dist-manual-version（dist 导出合同：_dist/安装手册.md 表头版本 = pack 版本且指名当前 tarball）──
+//    精神源自外部参考仓分发合同：生成器 = tools/release/export-dist.mjs，版本 bump 须同 diff 重导出；
+//    导出目的地 = _dist/（tarball gitignored）。──
 {
   const gate = 'dist-manual-version';
   const manualPath = join(ROOT, '_dist', '安装手册.md');

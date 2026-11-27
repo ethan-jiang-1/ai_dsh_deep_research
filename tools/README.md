@@ -52,6 +52,7 @@
 | record/record-asset-ledger.mjs | 测试资产组合账生成（spec/check 的 lane/class/cost/uniqueClaim/oracleType/sunset；AST 自动推导 oracleType，测试重算对账，漂移 = 红） |
 | record/render-overlay.mjs | 生成器：从 pack 渲染 `tools/record/research.overlay.yml`（改 pack 后必跑，先于 L1） |
 | record/render-test-index.mjs | 测试 ↔ 源码 owner 索引生成（模块 → owner → 测试；生成物 = tests/INDEX.generated.md；`--check` 只比对） |
+| record/render-docs-reference.mjs | 参考文档生成与新鲜度校验（产出 `docs/reference/{package-catalog,cockpit-registry,gates-ledger}.generated.md`，`--check` 同时校验 `docs/reference/commands.md`） |
 | record/research.overlay.yml | **生成物**（render-overlay 产出，勿手改）——源码域 overlay |
 
 ## release/（分发与移交）

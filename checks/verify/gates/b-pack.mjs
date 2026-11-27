@@ -4,10 +4,11 @@
 // ../context.mjs。改本域门禁只需读本文件——域切分 = docs/evaluation.md §L0 表的 A–F 分组。
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { join, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { satisfiesVersion } from '../../../packages/deep-research-pack/scripts/lib/version-range.mjs';
 import { readmeUserSectionIssues } from '../../lib/repo/shipped-surface.mjs';
+import { cockpitRegistryProblems } from '../../lib/repo/docs-reference.mjs';
 import { ROOT, PACK, PRESETS, VENDOR_TAG, fail, walk, walkMany, trackedFiles } from '../context.mjs';
 import { runPackLint } from './b-pack-lint.mjs';
 
@@ -300,29 +301,10 @@ export function runB() {
 
 runPackLint();
 
-// ── cockpit-doc-registry（驾驶舱构成正本 ↔ 盘上模块登记；issue ③-b 用户拍板
-//    「补一条窄 verify 门」）。规则：`packages/deep-research-pack/src/client/` 任意层级与 `src/lib/`
-//    下每个 .ts/.tsx 的 pack-root-relative path（src/client/... 或 src/lib/...）必须出现在构成正本
-//    `docs/design/40-research-cockpit.md` 里——只比 basename 会让同名模块互相遮盖。
-//    正本是驾驶舱构成的唯一说明，模块上了盘而正本没跟上 = 文档说谎（2026-10-11 实测形态：
-//    业务摘要层 brief-fold 与 review-readiness 上线后，正本仍写「七区」「六件」）。
-//    防空集：两目录合计 0 个模块 / 正本缺席 → 红（静默变空集的门禁等于不存在）。──
+// ── cockpit-doc-registry（驾驶舱模块注册表 docs/reference/cockpit-registry.generated.md 完整性与新鲜度）──
 {
   const gate = 'cockpit-doc-registry';
-  const docPath = join(ROOT, 'docs', 'design', '40-research-cockpit.md');
-  const moduleDirs = [join(PACK, 'src', 'client'), join(PACK, 'src', 'lib')];
-  if (!existsSync(docPath)) fail(gate, 'docs/design/40-research-cockpit.md 缺席（驾驶舱构成正本）');
-  else {
-    const doc = readFileSync(docPath, 'utf8');
-    const modules = moduleDirs.flatMap((dir) => (existsSync(dir) ? walk(dir).filter((f) => /\.(ts|tsx)$/.test(f)) : []));
-    const registeredModulePath = (modulePath) => doc.includes(`\`${modulePath}\``) || doc.includes(`/${modulePath})`);
-    if (modules.length === 0) fail(gate, 'src/client 与 src/lib 下 0 个 .ts/.tsx（防空集：驾驶舱 client 面与折算层常在）');
-    else for (const abs of modules) {
-      const modulePath = relative(PACK, abs).split(sep).join('/');
-      if (!registeredModulePath(modulePath))
-        fail(gate, `${relative(ROOT, abs)} 未在构成正本登记（修正 = 在 docs/design/40-research-cockpit.md §2 的件表或折算层表加一行：pack-root-relative 路径 + 职责）`);
-    }
-  }
+  for (const problem of cockpitRegistryProblems(ROOT)) fail(gate, problem);
 }
 
 // ── run-context-single-source（三操作桶的发现实现只有 run-context 一份）──

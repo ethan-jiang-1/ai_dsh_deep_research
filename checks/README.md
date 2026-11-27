@@ -174,6 +174,7 @@
 | lib/repo/doc-prose-paths.mjs | doc-prose-paths.test | 散文路径枚举薄壳（枚举正本 = doc-surface；BUG-204 的 API 不动） |
 | lib/repo/doc-surface.mjs | a-docs、f-repo、doc-prose-paths、doc-surface-shapes.test | live 文档可读面的唯一枚举器：形态台账（SHAPES / COMMAND_FORMS）↔ 订单案例对账、命令归一（env 前缀 / `./` / 包装器 / `&&` / heredoc / 缩进 / YAML 折叠块）、退役根判据 |
 | lib/repo/doc-counts.mjs | a-docs、doc-counts.test | 资产计数名词闭集（count-free 判据面正本）+ 硬计数 token 抽取 |
+| lib/repo/docs-reference.mjs | a-docs、b-pack、f-repo、render-docs-reference、docs-reference.test | `docs/reference/*.generated.md` 三份参考物纯生成与新鲜度判据 + `commands.md` ↔ `package.json` 双向校验 |
 | lib/shared/skill-golden.mjs | record-skill-golden、skill-golden.test | skill 正文 sha256 清单与漂移判据（快照 B 只比 catalog） |
 | lib/channel/start-lock.mjs | start-channel、start-lock.test | 启动互斥：原子 mkdir + 每次取得的独有 owner 文件；release 仅删除本代文件并 rmdir，无在线 stale 接管；两个入口由 start-channel 统一持有 |
 | lib/channel/profile-guard.mjs | run-driver、profile-guard.test | run-driver 的非默认 profile 守卫：默认 profile 放行，其余 fail-loud（显式 `--allow-stale-profile` 才继续） |

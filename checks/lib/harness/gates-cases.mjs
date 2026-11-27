@@ -214,7 +214,7 @@ const researchThread = (text, { banner = RESEARCH_BANNER, index = 'topic/' } = {
 };
 
 const removeLedgerRow = (gateName) => (dir) => {
-  const p = join(dir, 'docs', 'evaluation.md');
+  const p = join(dir, 'docs', 'reference', 'gates-ledger.generated.md');
   writeFileSync(p, readFileSync(p, 'utf8').split('\n').filter((l) => !l.startsWith(`| \`${gateName}\``)).join('\n'));
 };
 
@@ -469,6 +469,13 @@ export const CASES = [
       const p = join(dir, 'checks', 'README.md');
       const text = readFileSync(p, 'utf8');
       writeFileSync(p, text.replace('维护面：**judge**', '维护面：**show**'));
+    } },
+  // docs-reference-fresh（2026-11-27）：生成物漂移与 commands.md 漏脚本各一条注入案例。
+  { id: 'docs-reference-fresh-catalog-drift', gate: 'docs-reference-fresh',
+    mutate: appendTo('docs/reference/package-catalog.generated.md', '\n<!-- drift-probe -->\n') },
+  { id: 'docs-reference-fresh-commands-drift', gate: 'docs-reference-fresh', mutate: (dir) => {
+      const p = join(dir, 'docs', 'reference', 'commands.md');
+      writeFileSync(p, readFileSync(p, 'utf8').split('\n').filter((l) => !l.startsWith('| `pnpm verify` |')).join('\n'));
     } },
   // call-surface（2026-11-17）：agent 的三个调用入口——文档围栏 / 探针头注 / CI run——
   // 各自注入一条死路径。三类分开钉，防"只扫文档"的半覆盖。
@@ -848,6 +855,8 @@ export const CASES = [
   { id: 'cockpit-doc-registry-unregistered-nested-lib-module', gate: 'cockpit-doc-registry', mutate: dropUnregisteredModule('packages/deep-research-pack/src/lib/nested') },
   { id: 'cockpit-doc-registry-unregistered-spaced-module', gate: 'cockpit-doc-registry', mutate: dropUnregisteredModule('packages/deep-research-pack/src/client/research status') },
   { id: 'cockpit-doc-registry-symlink-client-module', gate: 'cockpit-doc-registry', mutate: addSymlinkClientKey() },
+  { id: 'cockpit-doc-registry-stale-generated', gate: 'cockpit-doc-registry',
+    mutate: appendTo('docs/reference/cockpit-registry.generated.md', '\n<!-- stale-probe -->\n') },
   { id: 'client-keys-nested-client-key-literal', gate: 'client-keys', mutate: addNestedClientKey() },
   { id: 'client-keys-nested-spaced-client-key', gate: 'client-keys', mutate: addNestedClientKey('research status') },
   { id: 'client-keys-symlink-module-key-literal', gate: 'client-keys', mutate: addSymlinkClientKey() },

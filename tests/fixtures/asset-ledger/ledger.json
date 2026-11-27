@@ -173,6 +173,16 @@
       "sunset": "随门禁/台账合同退役"
     },
     {
+      "path": "tests/checks/repo/docs-reference.test.mjs",
+      "domain": "checks",
+      "lane": "checks",
+      "class": "check-gate",
+      "cost": "fast-inproc",
+      "uniqueClaim": "docs-reference.test.mjs — docs/reference 生成物确定性、新鲜度与 commands.md 双向校验（keyless 纯 fs）。",
+      "oracleType": "canonical",
+      "sunset": "随门禁/台账合同退役"
+    },
+    {
       "path": "tests/checks/repo/fix-evidence.test.mjs",
       "domain": "checks",
       "lane": "checks",

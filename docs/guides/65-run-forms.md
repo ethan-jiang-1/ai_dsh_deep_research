@@ -5,7 +5,7 @@
 > 用户安装步骤 = [`_dist/安装手册.md`](../../_dist/安装手册.md)；包合同 = [pack README](../../packages/deep-research-pack/README.md)；
 > 开发操作 = [guides/60](60-dev-loop.md)；入库/跨环境 = [guides/63](63-git-boundary.md)；版本与发布 = [guides/64](64-release-versioning.md)。
 >
-> **编号消歧**：本文 M1/M2/M3 = 运行形态（安装 / 独立开发 / 移交），不是 [evaluation §3](../evaluation.md) 的里程碑 M1/M2/M3+；跨文档引用写「运行形态 M1」。
+> **编号消歧**：本文 `M1`/`M2`/`M3` = 运行形态（安装 / 独立开发 / 移交）；[evaluation §3](../evaluation.md) 的里程碑采用独立前缀 `MS1`/`MS2`/`MS3+`，两者前缀已分离。
 > **术语来源**：`六轴` 借用 `deepseek-harness/_faq_on_digested/26_harness-release` 的检查表装置（该语料明说
 > 不是对象模型，vendor 无此词）；本仓只用它做 owner 检查，不冒充 DSH API，也不自称“Harness 发行版”
 > （runtime/app surface/lifecycle 的提供者是 DSH/用户，不是本包）。决定 = [D41](../decisions.md#d41)。

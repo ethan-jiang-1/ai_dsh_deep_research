@@ -75,8 +75,12 @@
 | [project-map.md](./project-map.md) | **驾驭地图**：运行链路、修改波及面、测试词汇与症状→首个调试/检查入口 |
 | [terms.md](./terms.md) | **术语对照**：本项目说法 ↔ DSH 官方载体 ↔ `vendor/dsh` 落点（新编号词汇登记处） |
 | [decisions.md](./decisions.md) | **D 号纯路由台账**：≤100 字定性结论 + 活载体链接（理由与输掉的方案归 `notes/`，[D56](./decisions.md#d56)） |
-| [external-materials.md](./external-materials.md) | **外部材料登记**：仓外只读参考仓的钉版身份与吸收落点（按需查） |
-| [_backlog/](../_backlog/README.md) · [snapshots/](../snapshots/README.md) | **探索池与场景证据**：`_backlog/`（含 [issues](../_backlog/issues/README.md)）仅承接未定探索，非合同；`snapshots/` 存回放金样 |
+| [external-materials.md](./external-materials.md) | **外部材料**：仓外参考仓钉版与吸收落点 |
+| [reference/package-catalog.generated.md](./reference/package-catalog.generated.md) | **包目录（生成）**：exports / patch / roles / skills / slots |
+| [reference/cockpit-registry.generated.md](./reference/cockpit-registry.generated.md) | **驾驶舱注册表（生成）**：`src/{client,lib}` 全量模块清单 |
+| [reference/gates-ledger.generated.md](./reference/gates-ledger.generated.md) | **门禁台账（生成）**：L0 门禁域归属、摘要与自测覆盖 |
+| [reference/commands.md](./reference/commands.md) | **命令字典**：根 `package.json` 全量 `pnpm` 脚本双向核对 |
+| [_backlog/](../_backlog/README.md) · [snapshots/](../snapshots/README.md) | **探索池与回放**：`_backlog/` 承接未定探索；`snapshots/` 存回放金样 |
 
 > **编号消歧**：`design/60-intent-carriers.md`（仓库治理）与 `guides/60-dev-loop.md`（开发环）同号不同义，引用写全路径。
 

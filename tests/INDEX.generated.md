@@ -69,6 +69,7 @@
 | repo | `checks/lib/repo/doc-counts` | `tests/checks/repo/doc-counts.test.mjs` |
 | repo | `checks/lib/repo/doc-prose-paths` | `tests/checks/repo/doc-prose-paths.test.mjs` |
 | repo | `checks/lib/repo/doc-surface` | `tests/checks/shared/doc-surface-shapes.test.mjs` |
+| repo | `checks/lib/repo/docs-reference` | `tests/checks/repo/docs-reference.test.mjs` |
 | repo | `checks/lib/repo/fix-evidence` | `tests/checks/repo/fix-evidence.test.mjs` |
 | repo | `checks/lib/repo/note-scan` | `tests/checks/shared/note-scan.test.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs` |
 | repo | `checks/lib/repo/pack-deps` | `tests/checks/repo/pack-deps.test.mjs` |

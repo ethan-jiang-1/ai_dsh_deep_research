@@ -30,7 +30,7 @@
 | 产物 / artifacts | —（用户常用词） | = **run bundle**（`<workspace>/drt_<slug>/`）；不另建 artifact store，交付用 `present` 声明工作区文件 |
 | **研究驾驶舱（Research Cockpit）** | —（本仓原生套件名）：观察面 client 套件（观察面伞下最频改的一件） | `packages/deep-research-pack/src/client/` + `src/lib/`；分层与构成正本 = [design/40](./design/40-research-cockpit.md) |
 | 开发 harness / 运行 harness | development harness / runtime harness（同一仓库的两面：前者让 agent 看懂、修改、验证自己；后者是运行侧框架） | 本仓两面并存：`packages/deep-research-pack/` 是 runtime 面，`AGENTS.md` + `docs/` + `notes/` + `.agents/skills/` + 门禁是 development 面 |
-| 运行形态 M1/M2/M3 | run forms（安装 / 独立开发 / 移交） | [guides/65](guides/65-run-forms.md)；M1 = 安装形态（bundle + custom profile）、M2 = 独立开发、M3 = 移交；与 [evaluation §3](evaluation.md) 的里程碑 M1/M2/M3+ **不同前缀语义**——跨文档引用写「运行形态 M1」 |
+| 运行形态 M1/M2/M3 | run forms（安装 / 独立开发 / 移交） | [guides/65](guides/65-run-forms.md)；M1 = 安装形态（bundle + custom profile）、M2 = 独立开发、M3 = 移交；里程碑使用独立前缀 `MS1–MS3+`（[evaluation §3](evaluation.md)） |
 | 参与阶梯 | participation ladder（S0 组合 → S1 扩展点 → S2 capability seam → S3 core loop；前缀 S 与评估五面 L 分离，D27） | [guides/62 §参与阶梯](./guides/62-plugin-authoring.md)（本仓版本：S0 配置行 / S1 preset+skill+观察面 client 面 / S2 尚无 / S3 归上游） |
 | 程序化工作记忆 | procedural memory（可复用工作流 + 专门判断标准） | `.agents/skills/`（开发技能：换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷——清单 = 盘上目录）——与随包 runtime skills（`presets/*/skills/`）严格分家 |
 | plugin / bundle / profile | plugin = 导出 `apply(ctx)` 的模块；bundle = 编写与分发单位（`dsh.bundle`）；profile = `dsh --profile` 启动环境（`dsh.profile`）——**Nothing is both** | bundle = `packages/deep-research-pack/cordis.patch.yml`；profile = `runtime/harness-home/profiles/deep-research/`（`boot-run.sh` 经 `dsh plugin add` 安装；overlay 仅源码域冒烟用） |

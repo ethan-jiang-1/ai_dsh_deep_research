@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { ROOT, fail, gitOnce, note, trackedFiles } from '../context.mjs';
 import { isRetiredRoot, retiredRootHint, scanDocument } from '../../lib/repo/doc-surface.mjs';
 import { COUNT_NOUNS, countFraudTokens } from '../../lib/repo/doc-counts.mjs';
+import { commandsDocProblems, packageCatalogProblems } from '../../lib/repo/docs-reference.mjs';
 import { MAX_REDIRECT_DEPTH, indexRedirects, resolveRedirect } from '../../lib/repo/redirect-ledger.mjs';
 
 export function runA() {
@@ -520,6 +521,12 @@ export function runA() {
     if (!row) { fail(gate, `guides/68 §4 缺 ${root} 行——三根面表必须逐根在场`); continue; }
     if (!row.includes(`| ${face}`)) fail(gate, `guides/68 §4 的 ${root} 面不是 ${face}：${row.slice(0, 80)}…——README 与合同页打架`);
   }
+}
+
+// ── docs-reference-fresh（参考生成物 package-catalog.generated.md 新鲜度与 commands.md ↔ package.json 双向校验）──
+{
+  const gate = 'docs-reference-fresh';
+  for (const problem of [...packageCatalogProblems(ROOT), ...commandsDocProblems(ROOT)]) fail(gate, problem);
 }
 
 // ══ 域 B · pack 与驾驶舱（preset 形状/pack 声明/client 半/槽与登记合同） ══

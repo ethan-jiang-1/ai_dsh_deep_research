@@ -1,8 +1,7 @@
 # 评估框架 — 本 repo 的验收合同
 
-> 性质：**合同**（评估怎么判，只写 now）。改评估标准本身 = 一个 D 号决策，进
-> `notes/`，不悄悄改；时变状态（哪个面跑到哪了）不住本文件；工作进度由当前授权范围与会话记录表达。
-> 证据选择（失败类 → 最低可见层；五关/四账）= [guides/67](guides/67-test-strategy.md)；本页只判验收面与退出语义。
+> 性质：**合同**（评估怎么判，只写 now）。改评估标准本身 = 一个 D 号决策，进 `notes/`，不悄悄改；时变状态（哪个面跑到哪了）不住本文件；工作进度由当前授权范围与会话记录表达。
+> 证据选择（失败类 → 最低可见层；五关/四账）= [guides/67](guides/67-test-strategy.md)；L0 全量门禁逐条台账 = [reference/gates-ledger.generated.md](reference/gates-ledger.generated.md)（自动生成）。
 
 ## 0. 血缘与权威
 
@@ -22,252 +21,129 @@
 
 ### L0 结构面（机械门禁，keyless）
 
-- **定义**：仓库结构、文件卫生、preset 三件套完整性、vendor 铁律（如采用 submodule）等机械可查的不变量。
-- **最小真检查（fresh clone 可跑）**：`pnpm verify`（= `node checks/verify/verify.mjs`，含 `pack-lint`）+ `pnpm test`（命令正本 = `package.json` 的 `test` 脚本；默认回归，含 `.mjs` `checkJs` 与领域语义扫描）——两件均 keyless、无 vendor 构建产物。
+- **定义**：仓库结构、文件卫生、preset 声明完整性、vendor 铁律与静态契约等机械可查的不变量。
+- **最小真检查（fresh clone 可跑）**：`pnpm verify`（= `node checks/verify/verify.mjs`，含 `pack-lint`）+ `pnpm test`（命令正本 = [reference/commands.md](reference/commands.md)；默认回归，含 `.mjs` `checkJs` 与领域语义扫描）——两件均 keyless、无 vendor 构建产物。
 - **加跑面**：
   - `pnpm lint`（standalone oxlint 检查 pack `src/`）；
-  - `pnpm test:vendor`（vendor **源码**契约：组合层与设置 schema；根 tsconfig 的 vendor 源映射，fresh clone 可跑）；
-  - `pnpm typecheck`（pack 双半类型面 + `tsconfig.scripts.json` 脚本域；pack 半需要 vendor 构建产物，CI deploy job 在构建后跑，不计入 fresh clone 最小集）；
-  - 改门禁时可 `--only=<gate[,gate]>` 只判该门（输出与退出码只计它，收尾仍须全量）；
-  - 改驾驶舱（client 面，D18）时加跑 `node --import tsx/esm checks/smoke/client-load.entry.mjs`（干净机器/CI 加 `--seed tests/fixtures/client-load-home` 自建 home；失败留 `runtime/smoke-workspace/client-load-*` 现场；无窗口内交付目标 = exit 2 SKIP，主机不健康/连接死亡 = exit 2 NOT-RUN，判据 = `lib/host-health`，未跑 ≠ 通过）；
-  - 观察面事实/终稿目标改动加跑 `cockpit-truth.entry`、`cockpit-artifact-truth.entry`、`cockpit-truth-residuals.entry`、`cockpit-truth-substance.entry` 与 `cockpit-locale.entry`（dev-only，先 build；路由正本 = [guides/60 §2 改驾驶舱行](./guides/60-dev-loop.md)）。
-- **门禁登记表**（正本在此；与 `checks/verify/context.mjs` 的 `gates` 数组经门禁 `gate-ledger-sync` 机械对账——加门禁须两处同步，漏一处即红）。**列形纪律**：断言列只写现在为真的合同；反证列只留一行指针——注入红/还原绿全程与案例正文住对应 Note 与 [gates.e2e](../checks/smoke/gates.e2e.mjs) 案例表，本表不复述叙事；判定细节与已知边界住对应门禁块头注（`checks/verify/gates/<域>.mjs`）：
-
-> **反证口径（两态）**：常驻 = [gates.e2e 案例表](../checks/lib/harness/gates-cases.mjs) 的 `CASES` 注入案例（零注入对照组绿 + 注入后点名红；覆盖率与"无常驻案例的门禁"正本 = 同文件 `NO_CASE_GATES`，反向对账 = `tests/checks/harness/verify-gates.test.mjs`——本表不记数；逐门禁查法 = `grep -n "gate: '<名>'" checks/lib/harness/gates-cases.mjs`）；结构性不适的门禁（vendor-pin / vendor-clean / pin-agreement / hooks-active / dist-tarball / staged-change-pairing——断言对象是 submodule、本机 git config 或 gitignored 制品的真实状态，副本不可造）理由与登记同住该常量，反证 = 一次性 Note 红录。
-
-| 门禁 | 断言什么 | 反证指针 |
-|---|---|---|
-| `md-utf8-newline` | 所有 tracked .md 严格 UTF-8、恰一个结尾换行（git ls-files 驱动——运行区不扫） | [noise-sweep Note](../notes/archived/2026-09-24-noise-sweep.md) |
-| `md-links` | tracked .md 的相对 Markdown 链接可解析**且目标被 git 跟踪**（运行区/本机数据引用走反引号路径） | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) + [dsh-plugin-corpus-absorption](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md)（BUG-016）；gates.e2e `md-links-untracked` 常驻案例；路径重定向登记簿（`checks/test-path-redirects.json`）扩展 = `md-links-redirected` 正向对照 + `md-links-redirect-stale`/`-dangling` 注入（2026-11-15 test-source-mirror） |
-| `md-anchors` | 相对链接的 `#fragment` 在目标文件真实存在（GitHub slug 规则 + 手写 `<a id>`） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
-| `doc-paths` | live 文档里的仓内路径必须可解析（仓根 / 文档所在目录 / `vendor/dsh/` 三处试；无扩展名再试 `.md/.mjs/.sh/.cjs/.ts`）。**形态正本 = `checks/lib/repo/doc-surface.mjs` 的 `SHAPES`**：反引号 / 散文（带扩展名）/ 表格 / shell 围栏纯路径行 / HTML href / 链接文字——每种形态一条 gates.e2e 注入，台账 ↔ 案例由 `tests/checks/shared/doc-surface-shapes.test.mjs` 双向对账（形态被删或偷偷加案例都红）；**退役根名（`scripts/` `dev/` `probes/run/`）残留引用点名报红**（裸目录名 / vendor / 包内 shorthand 放行）；**活指令面 `_backlog/methods/*.md` + `_backlog/triggers.md` 在合同内**（按目录整树豁免 = BUG-212 的根因）；排除 notes/、tests/fixtures/、snapshots/replay/（录制证据）与三条带理由的外链白名单 | gates.e2e `doc-paths-*` 常驻案例（dangling / prose-dangling / retired-root / retired-label / table-retired-root / fenced-path-line / html-href / live-methods）+ `tests/checks/shared/doc-surface-shapes.test.mjs` 形态台账；来历 = [七维卫生轮 Note](../notes/archived/2026-11-03-seven-dimension-hygiene-round.md) |
-| `doc-drefs` | live 文档里的 `[D<n>]` Markdown 链接必须指向 `docs/decisions.md#d<n>`（该页有对应锚点）——D 号台账是按需跳的唯一落点 | gates.e2e `doc-drefs-misdirected` 常驻案例；来历 = 七维卫生轮（D23/D24 曾指向无锚点的 00-index） |
-| `archived-note-pointer` | 活面（notes/archived/ 之外的 tracked .md）链接引用 `notes/archived/<具名 Note>` 须在 checks/archived-note-pointers.json 登记，双向对账 | [archive-review-surface Note](../notes/archived/2026-10-10-archive-review-surface.md)；gates.e2e `archived-pointer-unregistered` / `archived-pointer-stale-entry` 常驻案例 |
-| `preset-structure` | presets/ 每角色 `<role>.patch.yml`（0.1.7 形态）：声明行 + config 字段 + **恰一条 `time-context` 时钟行（D32）** + `presets/<role>/skills/` ≥1 skill（frontmatter name = 目录名） | [noise-sweep Note](../notes/archived/2026-09-24-noise-sweep.md)；时钟行反证 = 删 lead 的 time-context 行即红（gates.e2e `preset-structure-clock-missing`） |
-| `claude-symlink` | 两条 symlink：根 `CLAUDE.md` → `AGENTS.md`；`.claude/skills` → `../.agents/skills`（Claude 系 harness 发现与 DSH 同一批开发技能） | [r1-scaffold Note](../notes/archived/2026-09-24-r1-scaffold.md) + [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
-| `pack-bundle-compat` | pack 的 dsh.bundle.patch 指向真实文件，**盘上每个 `presets/<role>.patch.yml` 都在数组里**；`engines.dsh` 是宿主范围且覆盖当前 vendor tag（版本合同只有它，没有第二个兼容矩阵字段）；根 README / 包 README（中英）/ design/40 / 手册源 / 生成手册的 `engines.dsh` 人类副本与 `package.json` 同步 | [noise-sweep Note](../notes/archived/2026-09-24-noise-sweep.md) + [release.entry-hardening Note](../notes/archived/2026-10-09-release-smoke-hardening.md)；gates.e2e `pack-bundle-compat-preset-unlisted` / `pack-bundle-compat-engines-drift` / `pack-bundle-compat-engines-copy-drift` 常驻案例 |
-| `pack-manifest` | 发布清单只写 DSH 读的东西：`dsh.*` 仅 `bundle`/`client`，`engines.dsh` 在场；`files` 含 locale/icon、不含 `src/` 与 maps；四个 specifier 的 en/zh `meta.title`+`meta.description` 与 `./icon` 导出齐（子路径不读 package.json） | [lifecycle Note](../notes/implemented/2026-11-01-plugin-lifecycle-conformance.md)；gates.e2e `pack-manifest-invented-key` 常驻案例 |
-| `market-index` | `_dist/market.json` 是 format 1 的 **staged 空索引**：`description.en` 含 `staged`、`plugins` 为空；npm 未发布时不得出现可安装条目（真 `parseMarketIndex` 归 lifecycle.entry） | [lifecycle Note](../notes/implemented/2026-11-01-plugin-lifecycle-conformance.md)；gates.e2e `market-index-staged-claim` 常驻案例 |
-| `readme-shape` | 插件 README = DSH `package-bundle`（`kind: "package-bundle"`、模板节、七问、91 数据卡、无维护者/教程节、≤310 行、无 `dsh.compatibility`）；**pack README 的 profile 引导必须先于 tarball 装包**；安装手册源 ≥10 节且含运行时/安全/平台/Discover 前置，profile 的 CLI 引导先于 Plugins 页、Plugins 页先于 CLI 装包且标注"仅 `dsh web`" | [lifecycle Note](../notes/implemented/2026-11-01-plugin-lifecycle-conformance.md) + [D41](../docs/decisions.md#d41)；gates.e2e `readme-shape-no-frontmatter` / `readme-shape-wrong-kind` / `readme-shape-maintainer-section` / `readme-shape-too-long` / `readme-shape-no-profile-bootstrap` / `readme-shape-install-before-profile` / `readme-shape-profile-after-plugins` / `manual-shape-missing-security` / `manual-shape-no-market` 常驻案例；**用户段（`<details>` 折叠区之外）零开发命令/开发路径**——README 随 npm 发布，`node checks/…` / `pnpm build` 只许出现在维护者折叠段（判据正本 = `lib/repo/shipped-surface.mjs`） |
-| `release-vocab` | 现行合同文档（README/AGENTS/CONTRIBUTING/docs/guides/design/pack README/manual 源）不出现 D41 退役词（`插件即产品`、`产品 profile`、`产品形态`、`产品设置`、`产品用户`、`产品启动`、`产品面`、`产品化`、`产品包`、`产品账本`、`产品内`、`P0–P4`）；`产品` 仅作 DSH 形容词 | [D41](../docs/decisions.md#d41) + [terms](../docs/terms.md)；gates.e2e `release-vocab-retired-term` 常驻案例 | <!-- term-policy: allow -->
-| `client-half` | pack client 半声明闭环：`exports ./client` ⟺ `dsh.client` 双向一致（声明面归本门禁，安装形状归 L2 release.entry） | [release.entry-hardening Note](../notes/archived/2026-10-09-release-smoke-hardening.md)；gates.e2e `client-half-no-export` / `client-half-no-decl` 常驻案例 |
-| `guard-red-record` | `test/it` 标题串带 BUG-nnn = 守卫声明：事故卡双址可解析 + 同文件逐编号留证块（负例/夹具二形态），零声明被扫到即红；扫描面 = `tests/**/*.spec.mjs` + `tests/checks/*/*.test.mjs`（判据测试 `*conformance*` 同样要红配方） | [guard-red-record Note](../notes/implemented/2026-10-09-guard-red-record.md)；gates.e2e 两案例常驻 |
-| `row-deps` | preset 与 bundle 行引用的 `@deepseek-ai/*` 全在 peerDependencies | [m2-p1-run-channel Note](../notes/implemented/2026-09-24-m2-p1-run-channel.md) |
-| `content-shape` | 研究内容只在包内：`content/manual.md` 在场且只含 `research_pack_root` 插值、**硬顶 12,288 字符（下放触发 10,000，`content-disclosure` 把守）**、`content/templates/run/` 八件齐；包内无 `workspace/` 种子、无 `seed.json`；`files` 含 `content/**` 不含 `workspace/**` | D40；反证 = 放回 `workspace/seed.json`、删一件模板或把手册加超预算即红（`content-shape-manual-over-budget`） |
-| `pack-contract-sync` | pack 的 tracked yml/md 文本零 `runs/` 旧契约路径（D17） | 反证 = D17 事故 2 真实红实录（verify 逐文件点名残留 → 同 commit 修复） |
-| `note-tree` | notes/ 树形闭集与深度：生命周期目录闭集、禁止嵌套（含隐藏目录）、文件名 `yyyy-mm-dd-` 前缀（隐藏 `.md` 不豁免）、禁 `INDEX.md`、空语料红；点文件仅对非 `.md` 文件忽略（闭集正本 = `c-notes.mjs` 本门禁常量） | [notes-discipline-hardening](../notes/implemented/2026-11-14-notes-discipline-hardening.md)；gates.e2e `note-tree-hidden-*` / `note-tree-dot-store` 常驻案例 |
-| `note-format` | 活动 Note 裸状态行（**唯一且住头七行**，值域与目录互验；fenced code / HTML 注释 / indented code / 容器前缀先剥离，0–3 空格行锚）；proposed/ 另需输掉的方案；implemented/ 需「决定/输掉的方案/实际跑过的验证」三节或 grandfather（证据 = 至少一条非否定证据 h2，围栏里的示例不算）；rejected/ 需标题含「复活条件/重启/重新引入」的节；archived/ 只读元数据（`> 状态：implemented` + 唯一 `> 归档：<合法日期>` 且不早于文件名日期，不查骨架） | [note-lifecycle-absorption](../notes/implemented/2026-09-24-note-lifecycle-absorption.md) + [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（含 2026-10-08 二轮复核）+ 状态/归档元数据 = [notes-discipline-hardening](../notes/implemented/2026-11-14-notes-discipline-hardening.md)（含 BUG-175 围栏语义） |
-| `note-status` | notes/ 每子目录有 README.md（含 archived/ 冻结层）；research/ 重现时状态行与索引对账断言复活 | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
-| `note-graduation-rewrite` | implemented/ 活跃 Note 零计划体残留（裸节名 `## 验收` 与未来时态标记，词表正本 = gates/c-notes.mjs 本门禁 markers 数组） | [graduation-rewrite-gate Note](../notes/implemented/2026-09-27-graduation-rewrite-gate.md) |
-| `dev-skill-format` | `.agents/skills/*/SKILL.md` 在场 + frontmatter name = 目录名 + description 以 "Use " 开头 | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
-| `vendor-pin` | vendor/dsh submodule 在位：.gitmodules 正源 URL + 钉 commit `b830ec950f`（tag dsh-v0.2.1-rc.5） | [vendor-submodule Note](../notes/implemented/2026-09-24-vendor-submodule.md)；副本注入不适（理由：断言对象 = submodule 真实状态——fixture 副本不拷 submodule 内容，基线即红），反证 = 一次性 Note 红录 |
-| `vendor-clean` | vendor/dsh `git status --porcelain` 零未提交改动（机制权威不许就地改） | [vendor-submodule Note](../notes/implemented/2026-09-24-vendor-submodule.md)；副本注入不适（理由：断言对象 = submodule 的 git 状态——fixture 副本无此仓库，基线即红），反证 = 一次性 Note 红录 |
-| `secrets-untracked` | tracked 清单零敏感/残留物（credentials/.env/.pem/.tgz/.log/node_modules/.tmp*/_tmp/、pack 构建产物 lib/、编辑器/OS/缓存残留…） | [入口链审计 Note](../notes/archived/2026-09-24-entry-chain-fresh-agent-audit.md) |
-| `host-paths` | live 面（随包内容/当前文档/脚本/CI）零本机绝对 home 路径；历史 notes/_backlog/snapshots/tests fixtures 豁免 | [git 边界指南](./guides/63-git-boundary.md)；反证 = gates.e2e 注入 `/Users/<name>/...` 红 |
-| `probe-registry` | 根 `probes/` 每支探针头注六字段齐全（状态/一句话/何时跑/档位/判据/不证明）；`INDEX.generated.md` 与目录渲染字节一致；`probes/README.md` 链接索引；零探针即红 | [probe-surfacing Note](../notes/implemented/2026-11-10-probe-surfacing.md)；gates.e2e `probe-registry-missing-header` 常驻案例 |
-| `role-list-sync` | 角色清单单一事实源 = 盘上 presets/；checks/tests/dev 代码里的清单字面量（≥3 角色名）即红 | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) |
-| `gate-ledger-sync` | 本表门禁名集合 = `context.gates`（登记与实现不漂移） | [基础整治 Note](../notes/archived/2026-09-24-foundation-remediation.md) |
-| `entry-chain` | 根入口链与子树指令门牌成员在场（六份子树 AGENTS.md 在成员清单内），AGENTS 的入口链标题存在；链接解析归 md-links | gates.e2e `entry-chain-no-title` 注入案例 + [review-driven-hardening Note](../notes/archived/2026-09-24-review-driven-hardening.md)；成员扩围反证（移除 `tests/AGENTS.md`/`_backlog/AGENTS.md` 看红→还原绿）= 2026-10-12 卫生轮实录 |
-| `doc-budgets` | 常驻文档 UTF-8 字节预算：[checks/doc-budgets.json](../checks/doc-budgets.json) 拥有上限——登记项在场且不超字节限，仓内新增 AGENTS.md 必须登记 | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) + [审计 P3 收尾轮](../notes/archived/2026-10-07-audit-p3-closure-round.md)；gates.e2e `doc-budgets-underscore-file` 常驻案例 |
-| `surface-claims` | 三个门户 README 首屏声明的维护面（judge/show/operate）与 [guides/68 §4](guides/68-surface-contract.md) 三根面表逐根一致——面词是判据不是文风；同一套分类在多处各写一遍时，漂移由此现形 | 2026-11-17 维护层对齐轮；红证 = gates.e2e `surface-claims-face-drift` |
-| `call-surface` | **agent 调用面**：live 文档命令（围栏 / 四空格缩进）、探针头注「何时跑」、CI `run:`（内联 + 块标量：保留 / 折叠 / chomping 变体）里的仓内路径必须存在。**形态与命令归一的唯一正本 = `checks/lib/repo/doc-surface.mjs`**（env 前缀 / `./` / sudo·env·time 包装器 / `&&`·`;` 链 / `--require=` 赋值 / heredoc body / 缩进块 / YAML 折叠块）；`COMMAND_FORMS` ↔ gates.e2e 案例双向对账。这些字符串不在 import 图、也不在 doc-paths 的路径面；搬文件后断链只能等 agent/CI 真跑时才现形 | gates.e2e `call-surface-*` 常驻案例（fenced / probe-header / ci-run / env-prefix / dot-slash / wrapper / and-chain / require-qualifier / heredoc / indented-command / ci-folded-run）+ `tests/checks/shared/doc-surface-shapes.test.mjs` |
-| `align-ledger` | `docs/alignment-ledger.json` 机读对账：source 在 vendor/dsh 存在、adopted/adapted 落点存在；na 须给理由 + 活性依据（liveness 或 reReviewOn，**两者皆无即红**） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)（含 2026-10-08 二轮复核）；gates.e2e 案例常驻 |
-| `discipline-state-vocab` | [discipline-map.md](discipline-map.md) 状态列首词属三态闭集（照搬/带证据适配/不适用），按表头定位状态列，越界即红 | 反证 = 2026-10-19 首次运行即红，抓出 2 行 `已具备`（`证据匹配面`/`六误区清单`）→ 改 `照搬`/`带证据适配` 后绿；来历 = [discipline-map-semantic-drift Note](../notes/implemented/2026-10-19-discipline-map-semantic-drift.md)（「已具备」暗示免于重校，「带证据适配」要求每次换 pin 重验，混用 = 悄悄签免检）；gates.e2e 案例常驻 |
-| `discipline-na-trigger` | [discipline-map.md](discipline-map.md) 状态列以「不适用」开头的每行必须含可判定的重估触发词 | 反证 = 2026-10-19 注入回归：把一行状态列还原成裸 `不适用` → 该门禁红、还原后绿；来历 = [vendor-pin-bump-021rc2](../notes/archived/2026-10-19-vendor-pin-bump-021rc2.md)（§维护规则 承诺的"由门禁复核"原未兑现——`align-ledger` 只读 JSON，从不读人读表）；gates.e2e 案例常驻 |
-| `repo-conventions` | 与 vendor 机械约定对齐：.editorconfig/.gitattributes 形态、engines.node = vendor 值、pre-commit 含 `git diff --cached --check`、**子进程凭据卫生**（`checks/lib/shared/env.mjs` 在场 + scripts 入口零 `env: {...process.env}` 整体透传）、**dev shell 入口的 `checks/lib/*.mjs` 字面量可解析**（模块搬家后消费方未跟 = 红） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md)；gates.e2e `repo-conventions-editorconfig-root-missing` / `repo-conventions-dev-script-path` 常驻案例 |
-| `vendor-links` | 根 package.json 的 `@deepseek-ai/*` devDependencies 在 lockfile 解析为 `link:vendor/dsh/...`；overrides 三件套无 registry 条目 | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
-| `overlay-fresh` | `tools/record/research.overlay.yml` = `tools/record/render-overlay.mjs` 从 pack 的渲染结果（tracked 生成物，勿手改） | [agent-ready-absorption](../notes/implemented/2026-09-25-agent-ready-absorption.md) |
-| `client-keys` | 观察面 client 的 keyed 字面量单一正本 = `src/client/keys.ts`（拼错不报错永不渲染）：槽名/描述符键/族值/注入标识符全须出自其导出 | [observability-gui Note](../notes/implemented/2026-09-24-observability-gui.md) + [审计 P3 收尾轮](../notes/archived/2026-10-07-audit-p3-closure-round.md) + gates.e2e 覆盖嵌套目录、空格路径、`.ts` 符号链接及忽略目录/目录链接 |
-| `client-effect-wrap` | 驾驶舱 slot/页签/活标题注册全量包 `scoped.effect`（零裸注册），只查 index.ts 登记装配位 | [test-strategy 采纳 Note](../notes/implemented/2026-10-04-test-strategy-adoption.md) |
-| `pack-lint` | pack `src/` 的 oxlint 静态检查（`.oxlintrc.json`：react-hooks/exhaustive-deps & rules-of-hooks、no-shadow、eqeqeq、correctness；`node_modules` 缺席时记 note） | [静态语义防线 Note](../notes/implemented/2026-11-23-static-semantic-guardrails.md)；gates.e2e `pack-lint-missing-config` + `oxlint` 违规红录 |
-| `client-tokens` | `src/client/**/*.{ts,tsx,css}` 与 `graph-model.ts` 的样式 token 守卫：禁裸 hex 颜色、禁幽灵 `--dsh-*` 变量、禁未在 `vendor/dsh/.../ui-theme` 声明的 `--dsw-*` 变量（需例外标 `token-exempt:`） | [cockpit-ux-ui-native-upgrade Note](../notes/implemented/2026-11-26-cockpit-ux-ui-native-upgrade.md)；gates.e2e `client-tokens-raw-hex`、`client-tokens-phantom-dsh-var` 常驻案例 |
-| `proposed-pointer-live` | live 文件里指向 `notes/proposed/<x>.md` 的具体指针必须存在（notes/ 历史层与 vendor/ 除外——md 链接族的盲区） | [信噪整治 RFC](../notes/archived/2026-09-26-signal-to-noise-remediation.md) + [lsfiles RFC](../notes/archived/2026-10-07-lsfiles-gate-coverage-sweep.md) |
-| `pin-agreement` | live 文件里的钉身份复述与 submodule 一致：40 位 hex 串 = submodule HEAD，`dsh-v*` tag = submodule tag | [信噪比整治 RFC](../notes/archived/2026-09-26-signal-to-noise-remediation.md)；扩围与收口 = [fresh-agent-doc-audit](../notes/archived/2026-10-04-fresh-agent-doc-audit.md) / [runtime-scripts Note](../notes/archived/2026-10-07-runtime-scripts-layout.md) / [snapshots 采纳 Note](../notes/implemented/2026-10-09-snapshots-adoption.md)；副本注入不适（理由：fixture 无 submodule，门禁在读钉身份一步即 fail-loud，注入的伪串永不到达扫描步），反证 = 一次性 Note 红录 |
-| `count-free` | live 文件不写硬编码计数：`<数>（个/条/道）门禁/tests/断言/条源面/案例/注入案例`——计数有正本，散文副本必腐。**名词闭集 = `checks/lib/repo/doc-counts.mjs` 的 `COUNT_NOUNS`**（词表窄于承诺 = 换个名词就静默逃检，BUG-214）；正/负样本 = `tests/checks/repo/doc-counts.test.mjs`；活指令面（`_backlog/methods` + `triggers.md`）同扫；录制证据（`snapshots/replay/**`、`tests/fixtures/run-state/**`）豁免，改夹具迁就门禁 = 篡改证据 | gates.e2e `count-free-hard-count` / `count-free-case-noun`；[信噪比整治 RFC](../notes/archived/2026-09-26-signal-to-noise-remediation.md) + [lsfiles RFC](../notes/archived/2026-10-07-lsfiles-gate-coverage-sweep.md) |
-| `port-exclusive` | tracked checks/ 与 tools/ 的端口缺省声明同一端口号至多一文件认领（`DSH_RUN_PORT` 引用方豁免） | [审计 P3 收尾轮 Note](../notes/archived/2026-10-07-audit-p3-closure-round.md) |
-| `dev-parity` | dev 通道 = 用户安装路径的同机制子集：公开 wrapper 实际 exec supervisor，supervisor 委托 body；body 的默认 profile 名 `deep-research`、团队层版本从 `dsh --version` 派生、profile 用户层零写入（dev-only 行走 `--patch` 覆盖层）、`tools/README` 的 parity 表在场且 ≥8 个机制点 | [dev-parity Note](../notes/archived/2026-11-02-dev-product-path-parity.md)；gates.e2e `dev-parity-driver-profile`、`dev-parity-body-*`、`dev-parity-wrapper-bypass-owner`、`dev-parity-owner-body-missing` 常驻案例 |
-| `hooks-active` | pre-commit 激活态：`git config core.hooksPath` 指向 tools/hooks | [审计 P3 收尾轮 Note](../notes/archived/2026-10-07-audit-p3-closure-round.md)；副本注入不适（理由：断言对象 = 本机 git config 而非 tracked 文件面——fixture 副本 git init 后本就未设 hooksPath，注入无红可造），反证 = 一次性 Note 红录 |
-| `doc-now-only` | live 文档只写 now：禁「已销账 / 修订 → / 曾用 / 首版…已由…替换」措辞（docs/AGENTS.md 与本门禁自我引用行豁免） | [信噪比整治 RFC](../notes/archived/2026-09-26-signal-to-noise-remediation.md) + [lsfiles RFC](../notes/archived/2026-10-07-lsfiles-gate-coverage-sweep.md) |
-| `backlog-liveness` | backlog 各池（问题/缺陷/调研/方法/触发索引/归档）在场且生命周期合同合规——含研究题目录/题名页状态与材料清单对账、`待落地` 的非空验收标准与去向、`修复就绪/修复落地` 的修复判据、`修复就绪` 的同边界复现命令（或 `复现状态：未复现` + 读法协议）、`修复落地` 的结构化 fix-evidence（changes/red/green/guard，exit 为 oracle；旧卡 < 2026-11-15 grandfather）；结构检查不证明结论、证据质量或实施授权 | gates.e2e 注入案例（含生命周期形态 + 活跃索引幽灵 / 归档退出值 / 研究题平铺与题名页 + 新 ready 形状 + 无复现命令的 ready 卡）+ 仓内红→绿实录；借鉴三态 = [借鉴 Note](../notes/implemented/2026-10-12-backlog-process-borrow.md)；规则正本 = [backlog 门牌](../_backlog/AGENTS.md) + [入口](../_backlog/README.md)，实现 = [backlog-liveness](../checks/lib/repo/backlog-liveness.mjs) |
-| `staged-change-pairing` | 暂存区成对变更：归档卡 ↔ 去向 Note 同暂存集；`ui.expected` ↔ `snapshot.lastRewrite`（why 非空、载体存在）；bug 修复卡 `修复落地`/新归档 = `json fix-evidence` 块（含 guard 路径在场）+ changes 声明的文件同暂存集（只翻状态/移卡 = 假修）；无暂存 = 无对象 | 一次性注入红录（需 git 索引；gates.e2e 副本无索引，NO_CASE 登记）+ `tests/checks/repo/staged-change-pairing.test.mjs` 的假修/缺证/路径未暂存矩阵；决定理由 = [红绿证据 Note](../notes/implemented/2026-11-14-bug-fix-red-green-evidence.md) |
-| `release-version` | 发布版本单一源：root/pack `package.json` 都是三段 semver 且相等（tag 一致性由 `release-check` 在发布前查；移交配对由 `release-check --handoff` 查） | [发布规则](./guides/64-release-versioning.md)；反证 = gates.e2e 改 pack 版本为 9.9.9 红 |
-| `dist-manual-version` | dist 导出合同：`_dist/安装手册.md` 在库且表头版本 = pack 版本、指名 `dsh-deep-research-pack-<version>.tgz` | [dist-export Note](../notes/archived/2026-09-28-dist-export.md) |
-| `dist-manual-fresh` | 源手册 `tools/release/product-manual.md` 的正文与 `_dist/安装手册.md` 正文逐字一致（表头版本由 `dist-manual-version` 管） | [dist-export Note](../notes/archived/2026-09-28-dist-export.md)；gates.e2e `dist-manual-fresh-body` 常驻案例 |
-| `dist-tarball` | 若 `_dist/dsh-deep-research-pack-<version>.tgz` 在场：手册 sha256 = 制品 sha256、制品内 `package.json` version = pack version、`dsh.bundle.patch` 每个目标与 `content/templates/run/` 源文件、以及 `exports` 的 `lib/` 入口逐件在制品内；缺席（clean clone）→ note 而非静默 | [handoff gap closure Note](../notes/implemented/2026-11-11-handoff-gap-closure.md)；反证 = 改手册 sha 行 → 红、重导出 → 绿（一次性红录；制品 gitignored，gates.e2e 副本无 tarball，故登记 NO_CASE） |
-| `dist-freshness` | 三态：当前版本 tarball 缺席（clean clone/源码 handoff）或 pack `lib/` 缺席（接收方把 sender 三件放进未构建 clone）→ note；两者都在场 → `build-manifest.json` 源指纹必须等于当前 pack 源（不符或缺 manifest = 红）。tag=HEAD 仍归 `release-check --handoff`（发布/移交时点；CI 不假定 tag 在场） | [handoff 锚 Note](../notes/implemented/2026-11-15-handoff-anchor-mechanical.md)；反证 = 2026-11-15 真实旧制品在场被点名红（`source-changed（409 → 409 files）`）、无 `lib/` 的接收方形态只 note、重导出后绿；制品 gitignored，gates.e2e 副本无 tarball，故登记 NO_CASE |
-| `dev-runtime-clean` | `tools/` 只住源码驱动：盘上无 `harness-home` / `drt_*` / `sessions` / `.credentials.yaml`；运行态必须住 `runtime/` 或研究工作区 | 反证 = `gates.e2e` 注入案例（在 `tools/harness-home` 造 `drt_probe`）；规则依据 = [guides/63](guides/63-git-boundary.md) 的跨环境与运行态边界 |
-| `cockpit-doc-registry` | 驾驶舱 src/client 与 src/lib 每个模块的路径必须出现在[构成正本](design/40-research-cockpit.md)里（同名模块不互相遮盖） | 反证 = gates.e2e 注入案例（嵌套/同名模块/空格路径/符号链接/忽略目录）；规则来源 = [构成正本](design/40-research-cockpit.md) + `checks/verify/gates/b-pack.mjs` |
-| `run-context-single-source` | `src/client` 的 tracked `.ts/.tsx`（注释除外）不得出现 `_abandoned` 三位置候选链——发现实现唯一正本 = `src/lib/run/run-context.ts`；`src/lib/run/final-target.ts` 的终稿地址校验是另一件事，不在本词法门禁范围 | 反证 = gates.e2e 注入案例（客户端文件追加候选链 → 点名红）；规则来源 = [run-context Note](../notes/implemented/2026-10-23-run-context.md) |
-| `test-placement` | tests 落点全集 − 已知子集 = 空：测试文件只住 run/<owner>/<file>、cockpit/lib/<domain>/<file>、cockpit/client/<file> 或 client/<sub>/<file>、cockpit/shared、pack/<surface>、contracts/、checks/、vendor/（后三者平铺）——未知子树/深度/顶层平铺 = 红；tests 下符号链接条目（git mode 120000）另判红（node --test 不跟随） | [move-side-effect-guards Note](../notes/implemented/2026-11-15-move-side-effect-guards.md)（BUG-191）；gates.e2e `test-placement-unknown-subtree` / `test-placement-unknown-depth` / `test-placement-symlink-dir` 常驻案例 |
-
-- **契约回归**（`pnpm test` 守卫族的面对应登记）：
-  - **文档与台账**：
-    - 决策台账 now-only = [tests/checks/repo/decisions-now.test.mjs](../tests/checks/repo/decisions-now.test.mjs)（已定表 ≤800 字、无日期化修订/退役措辞、连续 D 号锚点唯一）
-    - 文档单向依赖与跨面一致 = [tests/checks/repo/docs-consistency.test.mjs](../tests/checks/repo/docs-consistency.test.mjs)（`docs/` 禁链 `_backlog/_archived/` 与具体方法、00-index 地图全覆盖、GFM 表格完整性、入口链导航合同）
-    - 可驾驭性契约 = [tests/checks/repo/navigability-contract.test.mjs](../tests/checks/repo/navigability-contract.test.mjs)（design/50 与状态合同唯一正本、任务入口矩阵逐行完整与链接目标、checks/tools/fixtures 资产索引全覆盖、fixture 每组真实 consumer 零孤儿——[项目可驾驭性 Phase 1 Note](../notes/implemented/2026-10-05-project-navigability-phase1.md)）；fixture 分类 = [tests/fixtures/README.md](../tests/fixtures/README.md)
-    - README 命令与生成手册同源 = [tests/checks/repo/readme-manual-commands.test.mjs](../tests/checks/repo/readme-manual-commands.test.mjs)（README 的 `dsh` 行逐字出现在 `_dist/安装手册.md`；`DSH_VER` 赋值行同守）
-  - **run 与数据面**：
-    - run bundle 契约版本 / 见证下界 = [tests/contracts/run-bundle-charter.spec.mjs](../tests/contracts/run-bundle-charter.spec.mjs) + [tests/run/gates/schema-scan.spec.mjs](../tests/run/gates/schema-scan.spec.mjs)（D33；整数契约、模板↔解析器同源、`epochDateOf` 三形态）
-    - claim 级裁决 = [verdict-audit.spec.mjs](../tests/run/gates/verdict-audit.spec.mjs) + [verdict-audit-fixture.spec.mjs](../tests/run/gates/verdict-audit-fixture.spec.mjs)（真实 child 日志线形夹具）
-    - 模型可见语义（findings gap 四态 / lens_gaps 差集 / scope_role 闭集 / review 覆盖表与 severity / protocol sections→final 映射 / skill 正文 hash / probe 缓存键 import 闭包）= [tests/run/gates/{findings-contract,review-contract}.spec.mjs](../tests/run/gates/findings-contract.spec.mjs) + [protocol-core.spec](../tests/run/gates/protocol-core.spec.mjs) + [skill-golden.test](../tests/checks/shared/skill-golden.test.mjs) + [channel-cache.spec](../tests/run/channel/channel-cache.spec.mjs)（run 门消费 = `node-gate` 的门 L/F、`protocol-audit`、`deliveryGate`）
-    - 回执三态 / 数据卡形状 = [tests/pack/contract/data-plane-invariants.spec.mjs](../tests/pack/contract/data-plane-invariants.spec.mjs)（D34；10 列 + 可移植闭集）
-  - **pack 与内容**：
-    - 内容注入 / 模板 schema 集 / 渐进披露 = [tests/pack/contract/content-injection.spec.mjs](../tests/pack/contract/content-injection.spec.mjs) + [tests/pack/contract/template-contract.spec.mjs](../tests/pack/contract/template-contract.spec.mjs) + [tests/pack/contract/content-disclosure.spec.mjs](../tests/pack/contract/content-disclosure.spec.mjs)（D40；`CORE_TEMPLATES` 双向对账、T0 ≤10,000 且每个 generic 被点名）
-    - preset 技能接线 / content 覆盖 / 角色消费者矩阵 = [tests/pack/contract/presets-wiring.spec.mjs](../tests/pack/contract/presets-wiring.spec.mjs) + [tests/pack/contract/content-coverage.spec.mjs](../tests/pack/contract/content-coverage.spec.mjs) + [tests/pack/contract/role-consumer-matrix.spec.mjs](../tests/pack/contract/role-consumer-matrix.spec.mjs)
-    - 组合层与导出形态 = [tests/vendor/bundle-composition.vendor.spec.mjs](../tests/vendor/bundle-composition.vendor.spec.mjs)（Loader `applyEntryPatches`/`entryListSchema` 组合 base→web-app→pack：零跳过 + 出厂面契约）+ [tests/pack/contract/export-shape.spec.mjs](../tests/pack/contract/export-shape.spec.mjs) + [tests/vendor/export-shape.vendor.spec.mjs](../tests/vendor/export-shape.vendor.spec.mjs)
-    - Skill / 模板 ↔ Parser 双向契约 = [tests/contracts/skill-parser-contract.spec.mjs](../tests/contracts/skill-parser-contract.spec.mjs)（`presets/*/skills/*/SKILL.md` 与 `content/templates/run/*` 样例经 `parseReadinessDeclaration`/`parseClaims`/`parseVerdicts`/`EVIDENCE_FIELDS`/`LENS_IDS`/`foldLibrary`/`validateProtocol`/`planGate` 双向对账 + 变异必红负控）
-  - **驾驶舱与客户端**：
-    - client 直测面 / 组件渲染 / 文件体积 / 回收 = [tests/checks/test-infra/client-surface.test.mjs](../tests/checks/test-infra/client-surface.test.mjs) + [tests/cockpit/shared/client-pure-logic.spec.mjs](../tests/cockpit/shared/client-pure-logic.spec.mjs) + [tests/cockpit/client/method-library/method-library-views.spec.mjs](../tests/cockpit/client/method-library/method-library-views.spec.mjs) + [tests/checks/repo/client-file-size.test.mjs](../tests/checks/repo/client-file-size.test.mjs) + [tests/checks/repo/client-effect-return.test.mjs](../tests/checks/repo/client-effect-return.test.mjs) + [tests/checks/repo/no-unused-code.test.mjs](../tests/checks/repo/no-unused-code.test.mjs)
-    - 方法库标题同源 = [tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs](../tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs)（40 格矩阵）
-    - L0 客户端行为、纯状态机与故障矩阵 = [tests/cockpit/client/tabs-fault-matrix.spec.mjs](../tests/cockpit/client/tabs-fault-matrix.spec.mjs) + [tests/cockpit/client/research-status/status-feed-behavior.spec.mjs](../tests/cockpit/client/research-status/status-feed-behavior.spec.mjs) + [tests/cockpit/client/research-status/status-state.spec.mjs](../tests/cockpit/client/research-status/status-state.spec.mjs) + [tests/cockpit/client/research-graph/graph-feed-behavior.spec.mjs](../tests/cockpit/client/research-graph/graph-feed-behavior.spec.mjs) + [tests/cockpit/client/research-graph/graph-state.spec.mjs](../tests/cockpit/client/research-graph/graph-state.spec.mjs) + [tests/cockpit/client/research-config/config-feed-behavior.spec.mjs](../tests/cockpit/client/research-config/config-feed-behavior.spec.mjs)
-    - PBT 与 `mdast` 差分寻虫 = [tests/cockpit/lib/run/run-property.spec.mjs](../tests/cockpit/lib/run/run-property.spec.mjs) + [tests/cockpit/lib/plan/plan-mdast.spec.mjs](../tests/cockpit/lib/plan/plan-mdast.spec.mjs) + [tests/cockpit/lib/shared/markdown-mask-diff.spec.mjs](../tests/cockpit/lib/shared/markdown-mask-diff.spec.mjs) + [tests/cockpit/lib/workspace/research-defaults-property.spec.mjs](../tests/cockpit/lib/workspace/research-defaults-property.spec.mjs) + [tests/run/gates/review-readiness-property.spec.mjs](../tests/run/gates/review-readiness-property.spec.mjs)
-  - **测试车道、静态防线与发布闭环**：
-    - 测试车道 / 资产账 / 慢资产预算 / owner 镜像 = [tests/checks/shared/test-lanes.test.mjs](../tests/checks/shared/test-lanes.test.mjs) + [tests/checks/test-infra/smoke-oracle-surface.test.mjs](../tests/checks/test-infra/smoke-oracle-surface.test.mjs) + [tests/checks/test-infra/smoke-cost-budget.test.mjs](../tests/checks/test-infra/smoke-cost-budget.test.mjs) + [tests/checks/shared/test-owner-mirror.test.mjs](../tests/checks/shared/test-owner-mirror.test.mjs) + [tests/checks/test-infra/test-index.test.mjs](../tests/checks/test-infra/test-index.test.mjs) + [tests/checks/shared/pack-mirror.test.mjs](../tests/checks/shared/pack-mirror.test.mjs)
-    - 快照只读与 CI 作业 = [tests/checks/harness/snapshot-readonly.test.mjs](../tests/checks/harness/snapshot-readonly.test.mjs) + [tests/checks/test-infra/ci-jobs.test.mjs](../tests/checks/test-infra/ci-jobs.test.mjs) + [tests/checks/test-infra/ci-workflow.test.mjs](../tests/checks/test-infra/ci-workflow.test.mjs)
-    - 依赖闭包 / 干净室 / 发布自足与发布锚 = [tests/checks/{repo/pack-deps,harness/clean-room-policy,repo/publish-manifest,channel/profile-guard,repo/shipped-surface}.test.mjs](../tests/checks/repo/pack-deps.test.mjs) + [tests/checks/repo/shipped-surface.test.mjs](../tests/checks/repo/shipped-surface.test.mjs) + [tests/checks/repo/release-anchor.test.mjs](../tests/checks/repo/release-anchor.test.mjs) + `node checks/release/release-check.mjs --handoff` / `--receiver`（[handoff-anchor Note](../notes/implemented/2026-11-15-handoff-anchor.md)）+ `checks/smoke/{cold-start,release,lifecycle}.entry.mjs` + `pack.e2e`
-    - 脚本 checkJs / 领域语义防线 = [tests/checks/repo/scripts-typecheck.test.mjs](../tests/checks/repo/scripts-typecheck.test.mjs) + [tests/checks/repo/semantic-guardrails.test.mjs](../tests/checks/repo/semantic-guardrails.test.mjs)（`LEGACY_RUNVIEW_CALLS` 清零、`readArtifact` JSON 强制传 `decoder`、封闭联合 `never` 穷举、未标注吞错 `catch`、`AbortController` 生命周期）；其余守卫的归属见各自文件头注。
-- **版本与常驻面副本回归**：live 安装文档只写当前 pack 版本与 tarball 名（[release-copies.test.mjs](../tests/checks/repo/release-copies.test.mjs)）；T0 与 lead persona 的常驻预算（[content-disclosure.spec.mjs](../tests/pack/contract/content-disclosure.spec.mjs)）；安装命令副本顺序与团队层（[install-copies.test.mjs](../tests/checks/repo/install-copies.test.mjs)）——反证 = 改副本/预算/顺序即红。
-- **通过判据**：全绿；`verify` 的门禁清单与 `tests/` 守卫一一登记在案，每条带反证记录（上表）。
+  - `pnpm test:vendor`（vendor **源码**契约：组合层与设置 schema；根 tsconfig 源映射，fresh clone 可跑）；
+  - `pnpm typecheck`（pack 双半类型面 + `tsconfig.scripts.json` 脚本域；pack 半需要 vendor 构建产物，不计入 fresh clone 最小集）；
+  - 改门禁时可 `--only=<gate[,gate]>` 只判该门（收尾仍须全量）并跑 `node checks/smoke/gates.e2e.mjs --gate=<name>`；
+  - 改驾驶舱（client 面，[D18](decisions.md#d18)）加跑 `node --import tsx/esm checks/smoke/client-load.entry.mjs`（CI/干净机器加 `--seed tests/fixtures/client-load-home`；失败留 `runtime/smoke-workspace/client-load-*` 现场；无窗口内交付目标 = exit 2 SKIP，主机不健康/连接死亡 = exit 2 NOT-RUN，判据 = `lib/host-health`，未跑 ≠ 通过）；观察面事实/终稿目标改动加跑 `cockpit-truth.entry`、`cockpit-artifact-truth.entry`、`cockpit-truth-residuals.entry`、`cockpit-truth-substance.entry`、`cockpit-locale.entry`（路由正本 = [guides/60 §2](./guides/60-dev-loop.md)）。
+- **门禁自动台账**：全量 L0 门禁清单与域归属、断言摘要、自测覆盖自动生成于 [reference/gates-ledger.generated.md](reference/gates-ledger.generated.md)（由 `gate-ledger-sync` 与 `checks/verify/context.mjs` `gates` 数组机械对账，改门禁后执行 `pnpm docs:gen`）。
+- **反证口径（两态）**：常驻 = [gates-cases.mjs](../checks/lib/harness/gates-cases.mjs) 的 `CASES` 注入案例（零注入对照组绿 + 注入后点名红；结构性不适门禁的例外清单与理由住同文件 `NO_CASE_GATES`，由 `tests/checks/harness/verify-gates.test.mjs` 反向对账，反证 = 一次性 Note 红录）。
+- **契约回归（`pnpm test` 守卫族，全量模块映射见 [tests/INDEX.generated.md](../tests/INDEX.generated.md)）**：
+  - **文档与台账**：[decisions-now.test.mjs](../tests/checks/repo/decisions-now.test.mjs)、[docs-consistency.test.mjs](../tests/checks/repo/docs-consistency.test.mjs)、[docs-reference.test.mjs](../tests/checks/repo/docs-reference.test.mjs)、[navigability-contract.test.mjs](../tests/checks/repo/navigability-contract.test.mjs)、[readme-manual-commands.test.mjs](../tests/checks/repo/readme-manual-commands.test.mjs)、[release-copies.test.mjs](../tests/checks/repo/release-copies.test.mjs)、[install-copies.test.mjs](../tests/checks/repo/install-copies.test.mjs)；
+  - **run 与数据面**：[run-bundle-charter.spec.mjs](../tests/contracts/run-bundle-charter.spec.mjs)、[schema-scan.spec.mjs](../tests/run/gates/schema-scan.spec.mjs)、[verdict-audit.spec.mjs](../tests/run/gates/verdict-audit.spec.mjs)、[findings-contract.spec.mjs](../tests/run/gates/findings-contract.spec.mjs)、[review-contract.spec.mjs](../tests/run/gates/review-contract.spec.mjs)、[protocol-core.spec.mjs](../tests/run/gates/protocol-core.spec.mjs)、[data-plane-invariants.spec.mjs](../tests/pack/contract/data-plane-invariants.spec.mjs)；
+  - **pack 与内容**：[content-injection.spec.mjs](../tests/pack/contract/content-injection.spec.mjs)、[template-contract.spec.mjs](../tests/pack/contract/template-contract.spec.mjs)、[content-disclosure.spec.mjs](../tests/pack/contract/content-disclosure.spec.mjs)、[presets-wiring.spec.mjs](../tests/pack/contract/presets-wiring.spec.mjs)、[content-coverage.spec.mjs](../tests/pack/contract/content-coverage.spec.mjs)、[role-consumer-matrix.spec.mjs](../tests/pack/contract/role-consumer-matrix.spec.mjs)、[bundle-composition.vendor.spec.mjs](../tests/vendor/bundle-composition.vendor.spec.mjs)、[skill-parser-contract.spec.mjs](../tests/contracts/skill-parser-contract.spec.mjs)；
+  - **驾驶舱与客户端**：[client-surface.test.mjs](../tests/checks/test-infra/client-surface.test.mjs)、[client-file-size.test.mjs](../tests/checks/repo/client-file-size.test.mjs)、[client-effect-return.test.mjs](../tests/checks/repo/client-effect-return.test.mjs)、[no-unused-code.test.mjs](../tests/checks/repo/no-unused-code.test.mjs)、[tabs-fault-matrix.spec.mjs](../tests/cockpit/client/tabs-fault-matrix.spec.mjs)、[run-property.spec.mjs](../tests/cockpit/lib/run/run-property.spec.mjs)、[plan-mdast.spec.mjs](../tests/cockpit/lib/plan/plan-mdast.spec.mjs)；
+  - **车道、静态防线与发布闭环**：[test-lanes.test.mjs](../tests/checks/shared/test-lanes.test.mjs)、[smoke-oracle-surface.test.mjs](../tests/checks/test-infra/smoke-oracle-surface.test.mjs)、[smoke-cost-budget.test.mjs](../tests/checks/test-infra/smoke-cost-budget.test.mjs)、[ci-workflow.test.mjs](../tests/checks/test-infra/ci-workflow.test.mjs)、[shipped-surface.test.mjs](../tests/checks/repo/shipped-surface.test.mjs)、[release-anchor.test.mjs](../tests/checks/repo/release-anchor.test.mjs)、[scripts-typecheck.test.mjs](../tests/checks/repo/scripts-typecheck.test.mjs)、[semantic-guardrails.test.mjs](../tests/checks/repo/semantic-guardrails.test.mjs)。
+- **通过判据**：全绿；门禁自动台账与 `tests/` 守卫完整同步。
 - **何时跑**：每轮 goal 续驶必跑。
 
 ### L1 挂载面（真挂载 = preset 类改动的完成定义）
 
-- **定义**：每个研究角色 preset 在**真 DSH 会话**里挂载成功——persona 生效、skills 可见、工具面齐全。dump/roster 可见不算（company postmortem 0001 实证：挂载失败只有真会话抓得到）。
-- **最小真检查**：`node checks/smoke/preset.e2e.mjs`——keyless 预检（环境/安装形状断言）+ 真会话档（`DSH_SMOKE_REAL=1`：boot 真 web/headless 逐角色建会话，机器断言工具/skill 面在场；落地证据 = [L1/L2 绿灯 Note](../notes/archived/2026-09-24-l1-l2-green.md)）。
-- **通过判据**：全部角色真挂载绿；失败角色即里程碑未完成，无例外。
-- **何时跑**：preset 内容/结构改动时；框架里程碑必跑。**CI**：deploy job 在 vendor 构建后跑真挂载档（`DSH_SMOKE_REAL=1`），与 L0 同一次 push。
+- **定义**：每个研究角色 preset 在**真 DSH 会话**里挂载成功——persona 生效、skills 可见、工具面齐全（dump/roster 可见不算，挂载失败只有真会话抓得到）。
+- **最小真检查**：`node checks/smoke/preset.e2e.mjs`——keyless 预检 + 真会话档（`DSH_SMOKE_REAL=1`：boot 真 web/headless 逐角色建会话，机器断言工具/skill 面在场；落地证据 = [L1/L2 绿灯 Note](../notes/archived/2026-09-24-l1-l2-green.md)）。
+- **通过判据**：全部角色真挂载绿；失败角色即里程碑未完成。
+- **何时跑**：preset 内容/结构改动时；里程碑必跑。
 
 ### L2 安装面（真实安装形状）
 
-- **定义**：插件以用户实际获得的方式可用——`npm pack` 产物完整，装进**干净 profile** 成功，起会话可用；client 半（观察面）在安装形状里在场。
-- **发布面/显示面最小真检查**：`node checks/smoke/lifecycle.entry.mjs`——`_dist/market.json` 是 staged 空索引且过 DSH 的 `parseMarketIndex`、tarball 带 locale/icon 无 sourcemap、干净 profile 装 tarball 后 dump 出本包声明的行（未装团队层时无 `ui-agent-team`）、真启动无降级、装起后 `content.apply` 真注册 `research_pack_root`/`research:manual`、`startup.apply` 真登记工作区、`defaults.apply` 真注册 context/命令，均返回 disposer、运行期 `readPluginMeta` 读出五个 specifier 的中英标题/描述/图标、`remove` 后 roster 回落；缺 dsh/pnpm/_dist = exit 2。
-- **安装/首启面最小真检查（D40）**：`node checks/smoke/install-shape.entry.mjs`——原样执行手册的 CLI 装包分支（profile init → `dsh plugin --profile … add` pack+team → 真启动），断言 roster 三状态、无 `did not activate`、首屏可达；缺 pnpm/registry/缓存 = exit 2（未跑 ≠ 绿）。`node checks/smoke/product-boot.entry.mjs`——真 Web + 浏览器，断言 Host 注册工作区、首屏 blank Lead Session（`cwd` = 工作区）、Orca/工作区标题/起步卡/Lead preset/composer；无模型调用。
-- **安装形态最小真检查**：`release.entry`：`npm pack` → 在选定 `DSH_HOME` 重建测试 profile → `dsh plugin --profile … add` → doctor（`--install-only`，跳过模型就绪检查）→ 安装域会话断言；无模型调用。独立默认 doctor 仍检查凭据在场。进程卫生全程有界：run() 超时预算（install 180s / 默认 120s / preset.e2e 外层 300s——company 实证值）+ mkdir 原子并发锁 + 子进程组退出确认回收。
-- **冷启动补充**：`cold-start.entry` 用独立 `DSH_DEV_HOME` + 独立 profile/端口/state，从 tarball 安装并经 `run-driver up --bootstrap` 到浏览器面 GREEN；证明不依赖仓内既有 home/profile。MCP 关闭，团队层需 registry 或缓存。
-- **真用户 home 补充**：`install-shape.entry` 在系统临时 home 里原样执行手册的 CLI 装包分支（profile init → plugin add pack+team → 真启动），断言 roster 三状态、无 `did not activate`；缺全局 dsh/pnpm/团队层/tarball = exit 2。`doctor.e2e` 用 fake anchor 覆盖“缺 pack 红 / engines 不匹配红 / 坏设置 warn / 不写 profile”。
-- **通过判据**：pack 清单与 `files` 声明一致、安装零缺失警告、干净 profile 会话能列出研究角色；安装/首启面 = `install-shape.entry`/`product-boot.entry` 绿（roster 三状态、首屏 Lead Session、cwd = 工作区）；安装副本带 `lib/client.js`、manifest peers-only（`dependencies` 缺席）、boot 页模块表含本包 client 行（preset.e2e 真会话档断言，安装域经 release.entry ⑤ 委托覆盖）、端口用后无监听残留；doctor 的运行时行依赖只从安装锚解析，不把 client/构建期 peer 混进 Node 解析。
-- **何时跑**：包结构/release 相关改动时；框架里程碑必跑。**CI**：deploy job 在 `export-dist` 之后以 vendor CLI 作 `DSH_BIN` 跑 `lifecycle.entry`（安装→显示→remove，无全局 dsh）。
+- **定义**：插件以用户实际获得的方式可用——`npm pack` 产物完整，装进**干净 profile** 成功，起会话可用，client 半在安装形状里在场。
+- **最小真检查族**（命令与参数正本 = [guides/60 §2](./guides/60-dev-loop.md)）：
+  - **发布面/显示面**：`node checks/smoke/lifecycle.entry.mjs`（`market.json` 过 DSH `parseMarketIndex` → 装 tarball → dump → 真启动无降级 → `readPluginMeta` 五 specifier 中英元数据 → `remove` 回落；缺前置 exit 2）；
+  - **安装与首启（[D40](decisions.md#d40)）**：`node checks/smoke/install-shape.entry.mjs`（手册 CLI 装包分支：profile init → plugin add → 真启动）+ `node checks/smoke/product-boot.entry.mjs`（真 Web + 浏览器首屏与工作区会话）+ `node checks/smoke/release.entry.mjs`（`npm pack` → 重建 profile → `plugin add` → doctor `--install-only` → 安装域会话断言）；
+  - **冷启动与诊断**：`node checks/smoke/cold-start.entry.mjs`（独立 home/profile/端口/state 到浏览器面 GREEN）+ `doctor.e2e.mjs`（fake anchor 只读判据）。
+- **通过判据**：pack 清单与 `files` 一致、安装零缺失警告、roster 三态正确、首屏可达、`lib/client.js` 在场、端口释放无残留。
+- **何时跑**：包结构、startup/client 恢复、release 相关改动及里程碑必跑。
 
-### L3 领域面（Deep Research 方法论完整性 — 本项目独有）
+### L3 领域面（Deep Research 方法论完整性）
 
-- **定义**：从 codex Deep Research harness（作者本地 `ai_tool_deepresearch`，不随仓）提炼的方法论在本插件上有完整落点，且**用 DSH 原生载体**实现。
-- **最小真检查**：`docs/design/30-methodology-mapping.md`（映射表）审查 + `tests/checks/analyze/evaluation-contract.test.mjs` 的 keyless 断言。
+- **定义**：从 codex Deep Research harness 提炼的方法论在本插件上有完整落点，且用 DSH 原生载体实现。
+- **最小真检查**：[design/30-methodology-mapping.md](design/30-methodology-mapping.md) 映射表审查 + `tests/checks/analyze/evaluation-contract.test.mjs` 与 `tests/contracts/methodology-mapping.spec.mjs` 断言。
 - **通过判据**（五条全要）：
-  1. **生命周期映射完整**：研究生命周期每一环节（立项对齐 / 广度侦察 / 深度挖掘 / 综合写作 / 质量把关 / 审阅交付）在映射表有 DSH 落点（preset persona / skill / agent-team / todo / present…），或带证据的显式弃用理由；
-  2. **角色分工单一职责**：每角色一个 owner 列（职责、产出物、验收判据）；任何两类事实不得双 owner 或无 owner；
-  3. **证据可追溯载体存在**：最终报告的关键结论 → 来源的追溯链有明确文件载体与格式约定（verify the world 的领域版：结论抽查必须能落到来源文件）；
-  4. **信噪比策略显式**：对"搜索结果信噪比差"的处置有显式机制（来源质量分级 / 多源交叉 / 弃用判据），写进角色方法论，不能只靠模型自觉；
-  5. **读者版合同**：Lead 在 review 终局 PASS 后、HITL2 前按 `reader-final` skill 派生
-     `final/readable.md`，定稿后复制为 `final/readable-vN.md`；模型可见文本由
-     `tests/pack/scripts/presets.spec.mjs` 的「读者版终稿」断言钉，交付机械把守 = node-gate 门C
-     （同版/六节/长度/无 `[来源:]`/`evidence/` 路径），真实 run 的 5 分钟三问是人工可读性判据。
-- **何时跑**：方法论/preset 内容改动时；框架里程碑必跑。
+  1. **生命周期映射完整**：立项对齐 / 广度侦察 / 深度挖掘 / 综合写作 / 质量把关 / 审阅交付在映射表均有 DSH 落点或带证据的弃用理由；
+  2. **角色分工单一职责**：每类事实单一 owner，无双 owner 或无 owner；
+  3. **证据可追溯载体存在**：最终报告关键结论 → 来源文件有明确 frontmatter 契约与追溯链；
+  4. **信噪比策略显式**：来源质量分级 / 多源交叉 / 反例与弃用判据写进角色 skill；
+  5. **读者版合同**：critic PASS 后按 `reader-final` 派生 `final/readable.md` → `final/readable-vN.md`，由 `node-gate` 门C 与 `presets.spec.mjs` 机械把守。
+- **何时跑**：方法论/preset 内容改动及里程碑必跑。
 
 ### 证据谓词与机械强度（开发仓观察面，非模型可见）
 
-> 2026-10-20 从研究手册移出：这两段只服务开发仓的仪表盘/审计工具链，研究角色（含部署侧）
-> 不需要；手册只留角色必须遵守的证据契约。
+- **有效证据谓词（分层）**：run 仪表盘与驾驶舱按同一契约投影——**硬五字段**（`source_url` / `retrieved_at` / `quality` / `found_by` / `supports`）全齐才算有效证据，缺任一标无效；**软二字段**（`source_tier` / `publisher`）缺失不否决有效性，标"未分级"（旧 run 存量不回填）；对账 = `tests/checks/analyze/evaluation-contract.test.mjs`。
+- **机械强度诚实记账**：`evidence-audit` 核 `source_url` 成功抓取、摘录覆盖与 final 引用链（结果落 `audit.md`），不校验日期校准或版式结构（由 critic 狩猎）。
 
-**有效证据谓词（观察面对账，分层）**：run 仪表盘（run-dashboard）按同一契约渲染——**硬五字段**
-（source_url / retrieved_at / quality / found_by / supports）全齐才算有效证据，缺任一标无效
-（不计入 topic × evidence 矩阵）；**软二字段**（source_tier / publisher）缺失不否决有效性，
-标"未分级"（旧 run 的存量证据按此显示，不回填——run bundle 是交付记录，不改历史）；谓词正本 =
-本节，tests/checks/analyze/evaluation-contract.test.mjs 对账。
-
-**机械强度诚实记账**：契约测试核七字段在场与执行者副本对账；仪表盘按上文谓词投影。
-**evidence-audit 溯源审计**核 `source_url` 的成功抓取、摘录文本对 web-only 语料的覆盖率与
-final 引用链，结果落 bundle 的 audit.md。它不校验日期校准或摘录版式、分段、逐格结构；这些语义
-与结构约束由 critic 狩猎，不在仓级结构门中。
-
-### L4 交付面（真模型端到端 — 唯一证明"研究做得好"）
+### L4 交付面（真模型端到端）
 
 - **定义**：真模型、真实研究问题、完整研究 run，产出可核查报告。
-- **最小真检查**：
-  - **L4-lite（框架里程碑档）**：每角色一条消息的真模型冒烟（验证模型响应 + 工具调用真实发生，类比 company presence-e2e ~$1 档）；
-  - **L4 全量（方法论里程碑档）**：一个真实问题的完整 run。六条判据里**四条机器、两条人工走查**：
+- **L4-lite（框架里程碑档）**：`l4-lite.e2e.mjs` 每角色一条真模型消息 + scout `web_search` 真实调用。
+- **L4 全量（方法论里程碑档）**：一个真实问题的完整 run；六条判据中**四条机器、两条人工走查**：
 
-    | 判据 | 类型 | 载体 / 命令 | 通过 |
-    |---|---|---|---|
-    | ① 报告存在且含来源清单 | 机器 | `node checks/run-gates/node-gate.mjs <bundle>`（门A）+ `final/vN` 在场 | exit 0 |
-    | ② 结论能回溯到来源文件 | 机器 | `node checks/run-gates/evidence-audit.mjs <bundle>` → `audit.md` | exit 0 且 `CRITICAL=0` |
-    | ⑤ claim 级裁决覆盖（新契约 run） | 机器 | `node checks/run-gates/verdict-audit.mjs <bundle>` → `review/verdict-audit-r<N>.md` | exit 0（critical 全有结论性裁决；旧 bundle/quick_factual/契约日前不适用） |
-    | ⑥ Protocol 工件与审计（新契约 run） | 机器 | `node checks/run-gates/protocol-audit.mjs <bundle>` → `protocol-audit.md` | exit 0（schema/effort/output/投影/版本/批准链自洽；§Protocol 的 来源/投入/输出 行缺席 = warning（不静默通过），行在值漂移 = 红；深度集合按端点区间或显式集合对账（单值/非连续不再跳过）；plan 的 `- 策略:` 行按 Strategy 投影对账通道/worker/预算上限，通道缺席 = warning，声明 workflow 无 Wave 拓扑 = 红，预算不可解析 = 红；plan 依赖图有环 = 红；旧 bundle/契约日前不适用） |
-    | ③ 两点交互纪律（HITL 之间静默自主） | 人工走查 | 会话日志里 HITL1 与 HITL2 之间无 `ask_user_question`、无"要不要继续"式汇报 | 结论一行 + 日期写进 bundle 的 `acceptance.md`「人工走查」节 |
-    | ④ 中断后从 run 工作区恢复 | 人工走查 | 停通道 → 重启 → 新会话说「继续 `<slug>`」，能接着跑且不依赖 chat memory | 同上 |
+  | 判据 | 类型 | 载体 / 命令 | 通过 |
+  |---|---|---|---|
+  | ① 报告存在且含来源清单 | 机器 | `node checks/run-gates/node-gate.mjs <bundle>`（门A）+ `final/vN` 在场 | exit 0 |
+  | ② 结论能回溯到来源文件 | 机器 | `node checks/run-gates/evidence-audit.mjs <bundle>` → `audit.md` | exit 0 且 `CRITICAL=0` |
+  | ⑤ claim 级裁决覆盖（新契约 run） | 机器 | `node checks/run-gates/verdict-audit.mjs <bundle>` → `review/verdict-audit-r<N>.md` | exit 0（critical 全有结论性裁决） |
+  | ⑥ Protocol 工件与审计（新契约 run） | 机器 | `node checks/run-gates/protocol-audit.mjs <bundle>` → `protocol-audit.md` | exit 0（schema/effort/output/投影/批准链与无环图自洽） |
+  | ③ 两点交互纪律（HITL 之间静默自主） | 人工走查 | 会话日志里 HITL1 与 HITL2 之间无 `ask_user_question` 或请示汇报 | 结论一行 + 日期写入 bundle `acceptance.md`「人工走查」节 |
+  | ④ 中断后从 run 工作区恢复 | 人工走查 | 停通道 → 重启 → 新会话说「继续 `<slug>`」可接续且不依赖 chat memory | 同上 |
 
-    人工走查不是"随便看看"：**没有记录 = 未跑**（未跑 ≠ 通过）。记录位之所以选 `acceptance.md`
-    而不是新文件，是因为它已经由 `run-accept` 生成、随 bundle 交付。该文件的「人工走查」节是
-    唯一不可再生的部分：重新验收与 `--repair` 都保留它（只重建机械回执）；要清除必须手改文件。
-- **通过判据**：按档位全绿；L4 全量**不进常规回归**（成本），只在里程碑跑。
-- **何时跑**：**里程碑 + [guides/60 §2 任务型路由表](guides/60-dev-loop.md)要求跑 L4-lite 的改动，取并集**。
+  人工走查不是"随便看看"：**没有记录 = 未跑**（未跑 ≠ 通过）；`acceptance.md`「人工走查」节不可再生，`run-accept` 重跑与 `--repair` 均保留它。
+- **何时跑**：里程碑 + [guides/60 §2](guides/60-dev-loop.md) 要求跑 L4-lite 的改动取并集；L4 全量仅在里程碑跑。
 
 ### 五面的退出语义（统一口径）
 
-每面的最小真检查都按三态收口：**exit 0 = 该面绿 / 1 = 红 / 2 = 未跑（前置缺席）**。未跑 ≠ 通过——
-交付报告必须分列"已跑绿 / 已跑红 / 未跑"。脚本层面的正本 = [checks/AGENTS §verdict 契约](../checks/AGENTS.md)；
-本页只声明它适用于**全部五面**，不只 L0：
+每面的最小真检查按三态收口：**exit 0 = 该面绿 / 1 = 红 / 2 = 未跑（前置缺席）**。未跑 ≠ 通过——交付报告必须分列"已跑绿 / 已跑红 / 未跑"。脚本正本 = [checks/AGENTS §冒烟脚本可靠性纪律](../checks/AGENTS.md)：
 
 | 面 | 最小真检查的退出码来源 |
 |---|---|
 | L0 | `node checks/verify/verify.mjs` + `pnpm test`（均 0/1；无 2 态） |
 | L1 | `preset.e2e`（缺环境 exit 2） |
-| L2 | `lifecycle.entry` / `release.entry` / `install-shape.entry` / `product-boot.entry` / `cold-start.entry` / `doctor.e2e`（缺全局 dsh、tarball、chromium = exit 2） |
-| L3 | `pnpm test` 的 `methodology-mapping` + `evaluation-contract` 契约（0/1） |
-| L4 | 上表机器 ①②⑤⑥ 的 node-gate / evidence-audit / verdict-audit / protocol-audit 退出码；③④ 人工走查记录在场即"已跑"，缺席即"未跑" |
+| L2 | `lifecycle.entry` / `release.entry` / `install-shape.entry` / `product-boot.entry` / `cold-start.entry` / `doctor.e2e`（缺前置 exit 2） |
+| L3 | `pnpm test` 的 `methodology-mapping` + `evaluation-contract`（0/1） |
+| L4 | 机器 ①②⑤⑥ 审计脚本退出码；③④ 人工走查记录在场即"已跑"，缺席即"未跑" |
 
 ### 完成判断四分离（交付判断公理）
 
-**能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准——四个结果必须分别被观察和记录**（语料
-来源登记 = [discipline-map 源 11](discipline-map.md#source-11)；判据正本 = 本节）：任何一个
-结果都不被其余结果自动补齐，门禁绿灯只证明它执行的断言通过。
+**能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准——四个结果必须分别被观察和记录**（[discipline-map 源 11](discipline-map.md#source-11)）：
 
 | 结果 | 证明它的面 | 不证明 |
 |---|---|---|
 | 能加载 | L1 真挂载（roster、逐角色会话建起） | 行为正确、安装形态可用 |
-| 有行为证据 | L1 行为断言（工具/skill 面）+ L3 契约 + L4 与 run 机械审计 | 安装形态可用、交付获批 |
-| 能安装 | L2 release.entry（发布产物 → 干净 profile → 安装域） | 交付获批 |
+| 有行为证据 | L1 行为断言 + L3 契约 + L4 与 run 机械审计 | 安装形态可用、交付获批 |
+| 能安装 | L2 `release.entry`（发布产物 → 干净 profile → 安装域） | 交付获批 |
 | 已获交付批准 | 收尾对账 + 语义自审（[reviewing-a-delivery](../.agents/skills/reviewing-a-delivery/SKILL.md)）+ 用户批准 | —（终点） |
 
-**交付判断四角色**各证明不同的东西、互不冒充：**机械检查**（门禁/契约测试——只证明它执行的
-断言通过）· **语义自审**（技能——意图/实现/文档/证据是否说的是同一件事，agent 可自主完成）·
-**用户批准**（Plan 呈批/验收——方向取舍）· **显式交互**（HITL 等）。拿 L4 绿掩盖 L0 红 =
-§2 互抵违例；拿机械全绿冒充语义自审或用户批准，同理。
+**交付判断四角色**各证明不同的东西、互不冒充：**机械检查** · **语义自审** · **用户批准** · **显式交互**。
 
 ### 完成判据的四个作用域（谁管哪一层）
 
-"完成"在本仓有四个作用域，**不互相顶替**：
-
 | 作用域 | 回答什么 | 正本 |
 |---|---|---|
-| 面级 | 这次改动涉及的每个评估面各自绿了吗 | 本页 §1（下限：任何一件都不能少） |
+| 面级 | 这次改动涉及的每个评估面各自绿了吗 | 本页 §1（下限：缺一面即未完成） |
 | 任务级 | 本轮授权范围内的交付做完了吗 | [guides/60 §0/§4](guides/60-dev-loop.md)（交付收尾五件） |
 | goal 级 | 跨轮目标达成吗 | 本页 §3 里程碑矩阵（只对持续目标） |
 | 语义级 | diff 与意图/文档/证据说的是同一件事吗 | [reviewing-a-delivery](../.agents/skills/reviewing-a-delivery/SKILL.md) |
 
-**优先序**：面级是下限（缺一面即未完成，不能被任务级的"做完了"覆盖）；任务级决定当次能不能
-交付；goal 级只在有持续目标时生效；语义级是最后一道自审——它可以否决前三者，但不能替代它们
-（"我看了一遍觉得没问题"不是面级证据）。
+**优先序**：面级是下限；任务级决定当次能否交付；goal 级只在持续目标生效；语义级可否决前三者但不能替代机械面证据。
 
 ### 判据形状：判据不猜，投影不编（跨面）
 
 <a id="verdict-shape"></a>
-
-机器判据与投影是两种东西，失败方式不同，纪律也不同：
 
 | 层 | 例子 | 读不出 / 有歧义时 | 禁止 |
 |---|---|---|---|
 | 判据 | 交付门、审计、验收决定 | **红**，并给出可执行的改法 | 「取最后一个 / 取最像的 / 关键词命中即算」 |
 | 投影 | 驾驶舱、仪表盘、回放 | 显式 `unknown` / `unreadable` | 显示一个看起来合理的值 |
 
-- **权威输入 = 结构化事实**：canonical JSON、会话事件、文件事实。散文（review.md / question.md / leads.md）是人读副本；判据读它只做交叉核对，不一致 = 红。交付终局的第一例 = `review/readiness.json`（critic 写；门禁以它为准，review.md 的判定行只做副本）。
-- **不猜**：同一行或同一文件存在互斥判定，或只有散文包裹、没有裸写声明 → 不判 PASS/FAIL，判「无法判定」。
-- **不新增兼容分支**：新判据对全部 bundle 同一口径；历史 bundle 冲突时由操作者按清单删除（用户 2026-11-13 裁定），不为它加 epoch 豁免。既有门的 schema/日期断代 = [D33](decisions.md#d33)，不在本条范围。
-- **机械化**：可判的是行为，不是措辞——变异矩阵 + 不变量测试住 `tests/contracts/`（L0），不另造 grep 门禁；判据须明确四项（权威输入 / 读取方 / 缺·非法·互斥判定 / 旧形态退场），见 [workflow-substance-gates Note](../notes/implemented/2026-11-13-workflow-substance-gates.md)。判据形状的常驻守卫 = `tests/contracts/verdict-conformance.spec.mjs`（五条不变量 + 生成矩阵）。
-- **逐面迁移**：判据迁移结论与范围 = [verdict-shape Note](../notes/implemented/2026-11-13-verdict-shape.md)；本页只写规则，不复述进度。
+- **权威输入 = 结构化事实**：canonical JSON、会话事件、文件事实；散文仅作交叉核对，不一致 = 红（交付终局权威 = `review/readiness.json`）。
+- **不猜、不增兼容分支**：互斥或只有散文包裹 → 判「无法判定」；既有 schema/日期断代见 [D33](decisions.md#d33)。
+- **机械化**：变异矩阵 + 不变量测试住 `tests/contracts/verdict-conformance.spec.mjs`；规则依据 = [verdict-shape Note](../notes/implemented/2026-11-13-verdict-shape.md) + [workflow-substance-gates Note](../notes/implemented/2026-11-13-workflow-substance-gates.md)。
 
 ## 2. 负面判据（任一出现 = 框架不合理，触发重构而非继续堆功能）
 
-1. 自建机制与 DSH 现成载体重复（如自建 markdown 任务队列 vs agent-team 任务板），且拿不出"DSH 载体不可用"的证据——**不发明纪律**（company D13/D15 否决依据同源）；
+1. 自建机制与 DSH 现成载体重复，且拿不出"DSH 载体不可用"的证据——**不发明纪律**；
 2. 角色职责重叠或漂移，某类事实出现双 owner / 无 owner；
 3. 挂载假绿：preset 在 dump/roster 可见但真会话缺工具/skill；
 4. 生命周期环节在 DSH 上无落点且无弃用登记；
@@ -276,22 +152,24 @@ final 引用链，结果落 bundle 的 audit.md。它不校验日期校准或摘
 
 ## 3. 里程碑 × 面 矩阵
 
+> 里程碑前缀统一为 `MS1` / `MS2` / `MS3+`，与运行形态 `M1–M3`（[guides/65](guides/65-run-forms.md)）彻底分离。
+
 | 里程碑 | L0 | L1 | L2 | L3 | L4 |
 |---|---|---|---|---|---|
-| M1 框架搭建 | ✓ | ✓ | ✓ | ✓ | lite |
-| M2 首次完整研究 run | ✓ | 改动则跑 | 改动则跑 | ✓ | **全量** |
-| M3+ 打磨/回归固化 | ✓ | 改动则跑 | 改动则跑 | 改动则跑 | 按需 |
+| MS1 框架搭建 | ✓ | ✓ | ✓ | ✓ | lite |
+| MS2 首次完整研究 run | ✓ | 改动则跑 | 改动则跑 | ✓ | **全量** |
+| MS3+ 打磨/回归固化 | ✓ | 改动则跑 | 改动则跑 | 改动则跑 | 按需 |
 
-里程碑进度由本轮目标与交付范围判断；本表只定义里程碑的验收形状，不携带时变状态。
+里程碑进度由本轮目标与交付范围判断；本表只定义里程碑验收形状，不携带时变状态。
 
 ## 4. 每轮 goal 续驶的判定程序
 
-1. 每轮必跑 L0；本轮改动涉及哪些面，就加跑哪些面（判定权在代理，跑过什么报什么，只报告实际跑过的检查）；
+1. 每轮必跑 L0；改动涉及哪些面就加跑哪些面，只报告实际跑过的检查；
 2. goal 标 `complete` 的唯一条件：当前里程碑矩阵全绿；
-3. 同一面连续 3 轮无法转绿且阻塞条件明确 → goal 标 `blocked`，报告具体条件（区分"缺上游能力"与"设计缺陷"：前者找 DSH seam 或提议上游，后者触发负面判据重构）；
+3. 同一面连续 3 轮无法转绿且阻塞条件明确 → goal 标 `blocked`，区分"缺上游能力"与"设计缺陷"；
 4. 评估标准本身的变更 = D 号决策登记，禁止静默放宽。
 
 ## 5. 已知限制与延后工作（诚实记账）
 
-- L1/L2/L4 需要真 DSH 环境与（L4）`DEEPSEEK_API_KEY`；环境未就绪时该面标"未跑"，**不等同通过**（已 green 面的证据 = 各面定义里的毕业 Note 引用；未闭面的状态由当前工作证据表达，"未跑"≠"通过"）。
-- watch-run 的轮询循环与 `tools/env.sh` 本体为壳面不测（状态谓词与折算已下沉 `checks/lib/` 被 `pnpm test` 覆盖；维持现状的显式登记，防下次审计重复排查）。
+- L1/L2/L4 需要真 DSH 环境与（L4）`DEEPSEEK_API_KEY`；环境未就绪时该面标"未跑"，**不等同通过**。
+- `watch-run` 轮询循环与 `tools/env.sh` 本体为壳面不测（状态谓词与折算已下沉 `checks/lib/` 由 `pnpm test` 覆盖）。
