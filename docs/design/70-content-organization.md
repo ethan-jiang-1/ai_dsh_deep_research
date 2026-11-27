@@ -2,7 +2,7 @@
 
 > 层：设计（为什么 / 怎么长）。适用 = `packages/deep-research-pack/{presets,content}`。
 > 本页不是文件清单：清单 = 盘上目录。本页只定**新内容放哪、怎么长、什么时候该动结构**。
-> 相关：常驻面预算 = `content-shape` 门禁；接线守卫 = `tests/pack/{presets-wiring,content-coverage}.spec.mjs`；
+> 相关：常驻面预算 = `content-shape` 门禁；接线守卫 = `tests/pack/contract/{presets-wiring,content-coverage}.spec.mjs`；
 > 测试落家 = [project-map §测试怎么选](../project-map.md)；上游参照（只读，不随仓）= `ai_dsh_company/docs/content-charter.md`。
 
 ## 0. 一句话

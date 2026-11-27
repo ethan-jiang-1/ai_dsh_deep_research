@@ -36,7 +36,7 @@
 
 ## 预算与处置序
 
-常驻文档的行数上限由 [checks/doc-budgets.json](../checks/doc-budgets.json) 拥有，
+常驻文档的 UTF-8 字节上限由 [checks/doc-budgets.json](../checks/doc-budgets.json) 拥有，
 门禁 `doc-budgets` 强制（超限或缺登记即红）。红了按序处置：
 
 1. **下放**（把内容移到拥有它的层，原地留一行链接）；

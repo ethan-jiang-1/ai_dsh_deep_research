@@ -27,7 +27,7 @@
 |---|---|---|---|
 | verify.mjs | L0 入口：`--only` 配置 + 按域调用 + 汇总；门禁本体住 `verify/gates/{a-docs,b-pack,c-notes,d-vendor,e-workspace,f-repo}.mjs`，共享助手 = `verify/context.mjs` | keyless | [evaluation §L0 台账](../docs/evaluation.md) |
 
-根面（不分组的配置与指令件）：`doc-budgets.json`（常驻文档行数上限，被 doc-budgets 门禁消费，正本即自身）、`archived-note-pointers.json`（活面→notes/archived 链接的历史指针登记簿，被 archived-note-pointer 门禁消费，正本即自身）、`test-path-redirects.json`（搬家路径重定向登记簿：旧路径→新路径，被 md-links 消费，正本即自身）、`README.md`（本索引）、`AGENTS.md`（子树常设指令：新门禁流程、范围纪律、命名即层）。
+根面（不分组的配置与指令件）：`doc-budgets.json`（常驻文档 UTF-8 字节上限，被 doc-budgets 门禁消费，正本即自身）、`archived-note-pointers.json`（活面→notes/archived 链接的历史指针登记簿，被 archived-note-pointer 门禁消费，正本即自身）、`test-path-redirects.json`（搬家路径重定向登记簿：旧路径→新路径，被 md-links 消费，正本即自身）、`README.md`（本索引）、`AGENTS.md`（子树常设指令：新门禁流程、范围纪律、命名即层）。
 
 ## smoke/（分级冒烟）
 

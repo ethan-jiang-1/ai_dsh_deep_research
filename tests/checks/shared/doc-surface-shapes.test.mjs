@@ -10,7 +10,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  ASSERTION_CASES, COMMAND_FORMS, SHAPES, commandPathsAnywhere, commandPathsOf, scanCiCommands, scanDocument,
+  ASSERTION_CASES, COMMAND_FORMS, SHAPES, commandPathsAnywhere, commandPathsOf, expandBracePath, scanCiCommands, scanDocument,
 } from '../../../checks/lib/repo/doc-surface.mjs'
 import { CASES } from '../../../checks/lib/harness/gates-cases.mjs'
 
@@ -86,4 +86,17 @@ test('台账案例 ↔ gates.e2e CASES 双向对账（案例被删 / 偷偷加�
   const owned = CASES.filter((entry) => ['doc-paths', 'call-surface'].includes(entry.gate)).map((entry) => entry.id)
   assert.deepEqual(owned.filter((id) => !declared.has(id)), [],
     'doc-paths / call-surface 名下出现未声明形态的案例——先登记形态，再写注入（否则台账不覆盖实际判据面）')
+})
+
+test('花括号展开路径：{a,b} 逐项展开；单占位 {x} 与含 * glob 不误展开', () => {
+  assert.deepEqual(
+    expandBracePath('tests/pack/contract/{presets-wiring,content-coverage}.spec.mjs'),
+    ['tests/pack/contract/presets-wiring.spec.mjs', 'tests/pack/contract/content-coverage.spec.mjs'],
+  )
+  assert.deepEqual(expandBracePath('tests/pack/{single}.spec.mjs'), [])
+  assert.deepEqual(expandBracePath('tests/{run,cockpit}/**/*.spec.mjs'), [])
+  const tokens = scanDocument('守卫 = `tests/pack/contract/{a,b}.spec.mjs`；模板 = `tests/{x}.mjs`；glob = `tests/{a,b}/**/*.spec.mjs`')
+    .filter((t) => t.kind === 'path')
+    .map((t) => t.path)
+  assert.deepEqual(tokens, ['tests/pack/contract/a.spec.mjs', 'tests/pack/contract/b.spec.mjs'])
 })

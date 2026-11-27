@@ -69,7 +69,7 @@
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
 | Tier 分类法：一处事实一个家（docs 只写 now） | 00-index 文档地图分层原则；docs/notes/_backlog 三层分工 | 照搬 |
-| Wordcount budgets（入口文件行数顶） | verify 门禁 `doc-budgets`（逐件行数上限——vendor verify-doc-budgets 裁剪版；上限正本 = [checks/doc-budgets.json](../checks/doc-budgets.json)，此处不复制计数；超顶处置序 = 下放>压缩>升顶须同变更登记理由） | 带证据适配 |
+| Wordcount budgets（入口文件词数顶） | verify 门禁 `doc-budgets`（逐件 UTF-8 字节上限——vendor `verify-doc-budgets` 中文等价；上限正本 = [checks/doc-budgets.json](../checks/doc-budgets.json)，此处不复制计数；超顶处置序 = 下放>压缩>升顶须同变更登记理由） | 带证据适配 |
 | Cross-reference with machine-checkable links, never free prose | 上游含两个机检面：链接可解析 + 禁 commit id 引用。本仓只落前者（md-links，全 tracked md 的方括号圆括号语法）；后者零对应物——正文写 commit 哈希不会被任何门禁拦。entry-chain 门禁只断言文件存在、不判指针语义，不构成兜底 | 带证据适配（语义被收窄：链接面已机检，禁 commit id 面未落；引入条件 = 出现引用 commit 而非文件/Note 的漂移时补门禁） |
 | Slop checklist（文档废话清单） | 上游是 9 条可运行审计。本仓已机械化其中至少两条：`count-free`（禁把易漂移计数写进文档）、`doc-now-only`（只写当前合同、不写历史时态）；其余条目定性吸收进行文规范 | 带证据适配（部分机械化：2 条成门禁，余为规范；不是未机械化） |
 | 一段一行（`verify-md-wrap` 门禁） | 硬折行 ~90 列 | 不适用（登记偏离）：中文优先仓折行是既有惯例，整仓重排会淹没审阅（成本 > 收益）；引入条件 = 转英文或双语文档时 |

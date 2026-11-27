@@ -49,6 +49,7 @@ export const SHAPES = Object.freeze([
 export const ASSERTION_CASES = Object.freeze([
   { case: 'doc-paths-retired-root', owner: 'doc-paths', note: '退役根在反引号面判红 + vendor shorthand 放行对照' },
   { case: 'doc-paths-live-methods', owner: 'doc-paths', note: '活指令面（_backlog/methods + triggers.md）在扫描范围内' },
+  { case: 'doc-paths-brace-expansion', owner: 'doc-paths', note: '花括号展开路径 `{a,b}` 逐项校验存在性（单占位 `{x}` 与含 `*` glob 放行）' },
 ])
 
 // 命令形态台账：每种「可直接执行」的写法都必须有一条注入案例（归一器负责把它们折成同一判据）。
@@ -68,8 +69,23 @@ const SEGMENT_SPLIT = /\s*(?:&&|\|\||;)\s*/
 const ENV_PREFIX = /^(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)+/
 const WRAPPERS = /^(?:(?:sudo|time|env|command|nohup)\s+)+/
 const PATH_IN_TEXT = new RegExp(`(?:^|[\\s"'\`(=])((?:\\./)?(?:${ROOT_ALT})/[A-Za-z0-9_./-]+)`, 'g')
+const BRACE_PATH_IN_TEXT = new RegExp(`(?:^|[\\s"'\`(=])((?:\\./)?(?:${ROOT_ALT})/[A-Za-z0-9_./-]*\\{[A-Za-z0-9_./-]+(?:,[A-Za-z0-9_./-]+)+\\}[A-Za-z0-9_./-]*)`, 'g')
 const PROSE_PATH = new RegExp(`(?<![A-Za-z0-9_./-])(?:${ROOT_ALT})/[A-Za-z0-9_./-]+\\.${EXT}`, 'g')
 const ROOTED = new RegExp(`^(?:\\./)?(?:${ROOT_ALT})/`)
+
+/**
+ * 展开单层 `{a,b}` 花括号枚举路径（如 `tests/pack/contract/{a,b}.spec.mjs`）。
+ * 仅处理含逗号的非空枚举且不含通配/占位符（`*` `<` `>` `?` `$` `…` `[` `]`）；不满足时返回空数组。
+ */
+export function expandBracePath(raw) {
+  const s = cleanPath(raw)
+  if (/[<>*?$…[\]]/.test(s)) return []
+  const m = /^([^{}]*)\{([^{}]+)\}([^{}]*)$/.exec(s)
+  if (!m) return []
+  const items = m[2].split(',').map((part) => part.trim())
+  if (items.length < 2 || items.some((part) => part === '')) return []
+  return items.map((part) => cleanPath(`${m[1]}${part}${m[3]}`))
+}
 
 /** 归一单条路径 token：去 `./` 前缀、行号/锚点/尾标点。 */
 export function cleanPath(raw) {
@@ -182,7 +198,17 @@ export function scanDocument(text) {
     }
     // 反引号内联代码：命令与散路径都按路径面判（call-surface 只承诺围栏/头注/CI 三入口）。
     for (const m of line.matchAll(/`([^`\n]+)`/g)) {
+      const braceSpans = []
+      for (const bm of m[1].matchAll(BRACE_PATH_IN_TEXT)) {
+        const end = bm.index + bm[0].length
+        if (/[<>*?$…[\]]/.test(m[1].slice(end, end + 1))) continue
+        const expanded = expandBracePath(bm[1])
+        if (expanded.length === 0) continue
+        braceSpans.push([bm.index, end])
+        for (const path of expanded) out.push({ line: at, form: 'backtick', kind: 'path', text: m[1].trim(), path })
+      }
       for (const pm of m[1].matchAll(PATH_IN_TEXT)) {
+        if (braceSpans.some(([s, e]) => pm.index >= s && pm.index < e)) continue
         if (isPlaceholderAt(m[1], pm.index + pm[0].length)) continue
         out.push({ line: at, form: 'backtick', kind: 'path', text: m[1].trim(), path: cleanPath(pm[1]) })
       }

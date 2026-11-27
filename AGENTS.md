@@ -43,7 +43,11 @@ README.md                 人类门面（使用者：结果 / 安装 / 第一次
 _backlog/                 问题澄清与证据区：issues/、bugs/、research/、methods/、triggers.md、_archived/；
                           手册 = _backlog/README.md、子树门牌 = _backlog/AGENTS.md（状态机/下一步/守卫）
 package.json / pnpm-workspace.yaml / pnpm-lock.yaml   根 workspace（scripts: verify/test；pnpm 只挂本仓包，vendor 入 workspace 按实际构建需求——见 pnpm-workspace.yaml 头注）
-packages/deep-research-pack/   唯一自写包（配置为主 + 启动行/内容注入（D40）+ 研究驾驶舱[Research Cockpit，观察面 client 套件，[D18](docs/decisions.md#d18)，构成正本 = docs/design/40-research-cockpit.md]）：presets/<role>.patch.yml（单行形态=一条 @deepseek-ai/dsh-agent-preset 行，config.plugins 内声明 persona/时钟/skills/工具行）+ presets/<role>/skills/<n>/SKILL.md、content/（研究手册 + run 模板 + lens 目录；src/content 以 runtime context 注入）、cordis.patch.yml（bundle 行）、scripts/doctor.mjs（只读 doctor）、src/{content,startup}/、src/client/ 与 src/lib/（驾驶舱 client 半与折算纯函数，构建产物 lib/）；交付与部署形态 = guides/62，合同 = 包 README
+packages/deep-research-pack/   唯一自写包（配置为主 + content/ 研究手册/run 模板/lens 注入 + 启动行 D40）：
+                         presets/<role>.patch.yml（单行形态 = @deepseek-ai/dsh-agent-preset，含 persona/时钟/skills/工具行）+
+                         presets/<role>/skills/<n>/SKILL.md、cordis.patch.yml（bundle 行）、scripts/doctor.mjs（只读）、
+                         src/{content,startup}/、研究驾驶舱（src/client/ + src/lib/，D18，正本 = docs/design/40-research-cockpit.md，
+                         构建产物 lib/）；交付与部署形态 = guides/62，合同 = 包 README
 vendor/dsh/               pinned submodule（只读铁律——verify vendor-pin/vendor-clean 把守；机制权威正本，tag/commit 见 §DSH 源码表）
 research-workspace/      dev 工作区实例（角色会话 cwd；用户工作区 = 任意目录）：method-library.md（本工作区
                          方法库）、drt_<slug>/（run bundle）、archive/（已交付归档）、_abandoned/
@@ -55,11 +59,15 @@ notes/                   开发记忆与证据链（见下节）：proposed/（�
 .agents/skills/          开发技能（DSH 约定路径：project-agents 发现根）：任务匹配即加载的程序化工作记忆
                          （换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷）；与随包 runtime skills（presets/*/skills/）分家
 probes/                  show · 证据第一入口（behavior / browser / analyze 三域 + stream 仪器；_index 是生成器、stream tee 是驱动——非面）：真实边界实验（behavior/browser）与只读取证投影（analyze/）；不装裁决与持久改动；指南 = docs/guides/66，索引 = probes/INDEX.generated.md（生成物），面合同 = docs/guides/68
-checks/                  judge（+ 非面支撑）：verify/、smoke/（*.e2e.mjs / *.entry.mjs）、run-gates/（含 run-accept / acceptance-check）、dist/（release-check）；非面 = test/（车道 runner）、lib/、*.support.mjs、配置 JSON——组级面表与逐件职责/档位 = checks/README.md，面规则 = docs/guides/68
+checks/                  judge（+ 非面支撑）：verify/、smoke/（*.e2e.mjs / *.entry.mjs）、run-gates/（含 run-accept / acceptance-check）、release/（release-check）；
+                         非面 = test/（车道 runner）、lib/、*.support.mjs、配置 JSON——组级面表与逐件职责/档位 = checks/README.md，面规则 = docs/guides/68
 tests/                   keyless 回归（node:test；*.spec.mjs = 进程内 spec，checks/*.test.mjs = 门禁自身；layering 守卫五件套——规则见 tests/AGENTS.md）
 snapshots/               场景证据层：整组录制资产 + 场景声明 snapshot.json（消费 = snapshot-replay.entry
                          经 checks/lib/harness/replay-scene.mjs）；分类与证据边界 = snapshots/README.md
-tools/                   operate（run+act）：channel/（boot-run / run-driver / run-kickoff / hitl-answer / socket 隔离预载）、build/（bootstrap / vendor-build 及其配置）、record/（record-* 录制 / render-* 生成器 / overlay 生成物）、release/（export-dist / market / export-handoff / 手册源）、clean/（runtime-clean）、hooks/（pre-commit = judge 例外）；env.sh 留根 = sourced 配置入口（非面）——不装裁决与只读投影；逐件职责 = tools/README.md，面规则 = docs/guides/68
+tools/                   operate（run+act）：channel/（boot-run / run-driver / run-kickoff / hitl-answer / socket 隔离预载）、
+                         build/（bootstrap / vendor-build 及其配置）、record/（record-* 录制 / render-* 生成器 / overlay 生成物）、
+                         release/（export-dist / market / export-handoff / 手册源）、clean/（runtime-clean）、hooks/（pre-commit = judge 例外）；
+                         env.sh 留根 = sourced 配置入口（非面）——不装裁决与只读投影；逐件职责 = tools/README.md，面规则 = docs/guides/68
 runtime/                 运行态区（gitignored）：harness-home/（开发 DSH home：会话/凭据/插件安装）+
                          smoke-workspace/（冒烟与 boot 运行产物）——tools/ 只住源码驱动，跑出来的东西住这里
 _dist/                   对外交付件：安装手册.md（tracked 生成物，生成器 = tools/release/export-dist.mjs）

@@ -465,11 +465,10 @@ export function runA() {
   }
 }
 
-// ── doc-budgets（常驻文档预算——上游 verify-doc-budgets 的等价物：预算由
-//    checks/doc-budgets.json 拥有（不硬编码），登记项必须存在且不超限，仓内新增
-//    AGENTS.md 必须登记（缺登记即红）。台账（00-index）与 guides 是生长面，不设顶
-//    （vendor "review governs unbudgeted tiers" 同款）。行数 = split('\n') - 1
-//    （结尾恰一换行由 md-utf8-newline 保证）；运行区（tools/）与 vendor 不扫。──
+// ── doc-budgets（常驻文档 UTF-8 字节预算——上游 verify-doc-budgets 的中文等价物：预算由
+//    checks/doc-budgets.json 拥有（不硬编码），登记项必须存在且不超字节上限，仓内新增
+//    AGENTS.md 必须登记（缺登记即红）。guides 与正文档是生长面，不设顶（vendor "review
+//    governs unbudgeted tiers" 同款）。运行区（tools/）与 vendor 不扫。──
 {
   const gate = 'doc-budgets';
   const manifestPath = join(ROOT, 'checks', 'doc-budgets.json');
@@ -478,15 +477,20 @@ export function runA() {
     let manifest = {};
     try { manifest = JSON.parse(readFileSync(manifestPath, 'utf8')); }
     catch (error) { fail(gate, `doc-budgets.json 不是合法 JSON：${String(error).slice(0, 80)}`); }
-    // `_` 前缀默认是 manifest 元数据键（_note/_raises）；但 `_backlog/AGENTS.md` 是真实路径，
-    // 也必须受预算（2026-10-20 审计 P1：旧过滤把它的 48 行预算静默跳过）。
+    // `_` 前缀默认是 manifest 元数据键（_note/_unit/_raises）；但 `_backlog/AGENTS.md` 是真实路径，
+    // 也必须受预算（2026-10-20 审计 P1：旧过滤把它的预算静默跳过）。
     const budgeted = Object.keys(manifest).filter((k) => !k.startsWith('_') || k.endsWith('.md'));
     for (const rel of budgeted) {
+      const limit = manifest[rel];
+      if (typeof limit !== 'number' || !Number.isFinite(limit) || limit <= 0) {
+        fail(gate, `${rel}: 预算上限非法（${JSON.stringify(limit)}）——须为正整数字节数`);
+        continue;
+      }
       const f = join(ROOT, rel);
       if (!existsSync(f)) { fail(gate, `${rel}: 已登记预算但文件缺席`); continue; }
-      const lines = readFileSync(f, 'utf8').split('\n').length - 1;
-      if (lines > manifest[rel]) {
-        fail(gate, `${rel} ${lines} 行 > 预算 ${manifest[rel]} 行——处置序：下放/压缩；升顶须改 manifest 并在同一变更登记理由`);
+      const bytes = Buffer.byteLength(readFileSync(f, 'utf8'), 'utf8');
+      if (bytes > limit) {
+        fail(gate, `${rel} ${bytes} B > 预算 ${limit} B——处置序：下放/压缩；升顶须改 manifest 并在同一变更登记理由`);
       }
     }
     // AGENTS.md 枚举 = tracked-only（git ls-files；md-links 族同款 quotepath=false）。

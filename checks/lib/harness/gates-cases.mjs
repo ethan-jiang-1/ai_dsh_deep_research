@@ -461,6 +461,9 @@ export const CASES = [
   // 会让「照方法文档敲命令」直接失败。注入到 methods 页必须被点名。
   { id: 'doc-paths-live-methods', gate: 'doc-paths', expect: '退役根名 `scripts/__gone__.mjs`',
     mutate: appendTo('_backlog/methods/bug-to-fix.md', '\n活指令探针：`scripts/__gone__.mjs`\n') },
+  // 花括号展开（2026-11-27）：`{a,b}` 枚举曾被 `{` 占位跳过，4 处陈旧路径静默逃检；展开后缺席项必红。
+  { id: 'doc-paths-brace-expansion', gate: 'doc-paths', expect: 'checks/verify/gates/__missing__.mjs',
+    mutate: appendTo('docs/project-map.md', '\n花括号探针：`checks/verify/gates/{a-docs,__missing__}.mjs`\n') },
   // surface-claims（2026-11-17 维护层对齐轮）：门户 README 的面词与 guides/68 §4 面表打架。
   { id: 'surface-claims-face-drift', gate: 'surface-claims', mutate: (dir) => {
       const p = join(dir, 'checks', 'README.md');
@@ -693,10 +696,10 @@ export const CASES = [
   { id: 'backlog-issue-mirror-drift', gate: 'backlog-liveness', mutate: backlogIssue((text) => text.replace('> 状态：推敲中｜', '> 状态：等人拍板｜')) },
   { id: 'backlog-bug-enum-invalid', gate: 'backlog-liveness', mutate: (dir) => fixtureFile(dir, '_backlog/bugs/BUG-998-probe.md', '---\nstatus: 修复中\nseverity: P1\nopened: 2099-01-01\n---\n\n# Probe\n> 严重级别：P1｜发现：2099-01-01｜状态：修复中\n') },
   // 活跃索引幽灵 / 归档退出值（2026-10-20 P0-3 扩）：两形态各一条。
-  // `_` 前缀真实路径也受 doc-budgets（2026-10-20 P1）：给 `_backlog/AGENTS.md` 追加超预算行。
+  // `_` 前缀真实路径也受 doc-budgets（2026-10-20 P1；2026-11-27 切 UTF-8 字节上限）：给 `_backlog/AGENTS.md` 追加超字节预算正文。
   { id: 'doc-budgets-underscore-file', gate: 'doc-budgets', mutate: (dir) => {
     const p = join(dir, '_backlog', 'AGENTS.md');
-    writeFileSync(p, readFileSync(p, 'utf8') + '\n'.repeat(60));
+    writeFileSync(p, readFileSync(p, 'utf8') + 'x'.repeat(4000) + '\n');
   } },
   { id: 'backlog-active-index-ghost', gate: 'backlog-liveness', mutate: (dir) => {
     const p = join(dir, '_backlog', 'issues', 'README.md');

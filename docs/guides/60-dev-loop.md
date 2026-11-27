@@ -192,7 +192,7 @@ node --import tsx/esm tools/channel/hitl-answer.mjs --port 3083 --token <t>   # 
 pnpm dsh <args…>                      # 机制基线 CLI（vendor/dsh 钉 tag 源码；等价 tools/env.sh 的 dsh 函数）
 node --import tsx/esm checks/smoke/client-hitl.entry.mjs   # 观察面活标题触发验证（真模型档：RPC followup 造挂起态 + 盘侧谓词 + 浏览器观察点）
 node --import tsx/esm checks/smoke/cdp-ask.entry.mjs    # 交互探针端到端（真模型档：一次性通道跑 --ask，断言发出 + journal 落盘；空闲态与在飞态两阶段）
-`research` 手工 profile 已弃用：回放/录制/团队预检统一用 `deep-research`（`tools/channel/boot-run.sh` 维护版本面）；残留的 `research` 档不要再扩用。
+# 注：research 手工 profile 已弃用；回放/录制/团队预检统一用 deep-research（tools/channel/boot-run.sh 维护版本面），残留的 research 档不再扩用。
 
 node checks/smoke/snapshot-replay.entry.mjs --read-only --layers a,b   # keyless 回放冒烟（须先 source tools/env.sh，端口 3103）：CI job `snapshot-replay` 跑同一条 A/B；场景集由 snapshots/replay/research-face/snapshot.json 声明（研究角色集与盘上 presets/ 对账；方法编辑不属 run 生命周期）——逐场景 A 回放收尾逐字命中 + B 组装请求 diff（persona 全文 + 全部 request/header + 四处 user/message 注入（含时钟序列））；`--layers c` + 声明了 renderExpected 的场景做 C 渲染金标准比对（C 本地/里程碑）；`--scenario <id>` 单场景、`--update-expected --why <载体>` 重写金标准
 node --import tsx/esm tools/record/record-role-fixture.mjs --role <scout|analyst|critic|lead>   # 角色组装面 fixture 录制（真模型档一次性：`deep-research` profile（与回放同域，boot-run 维护版本面）+ 哨兵「探针完成」收尾 + 日志静默判定；录制品人审后入库 + 在场景声明登记 source 身份，此后 keyless 永久回放）

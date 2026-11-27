@@ -836,6 +836,7 @@ test('负控：带未识别后缀的标题 → upsert 抛错，而不是新建',
 - 本仓：`tests/AGENTS.md:44`（不变量 + 变异矩阵）、`_backlog/methods/judgment-design.md`、
   `checks/verify/gates/f-repo.mjs:130-191`（`guard-red-record`）、
   八个样本测试文件、`checks/lib/shared/replay-request.mjs`、`checks/lib/harness/run-lock.mjs`、
-  `packages/deep-research-pack/src/lib/{review-readiness,library-fold,method-library-write}.ts`、
+  `packages/deep-research-pack/src/lib/review/review-readiness.ts`、
+  `packages/deep-research-pack/src/lib/method-library/{library-fold,method-library-write}.ts`、
   `_backlog/_archived/fixed_bugs/BUG-{081,085,093,123,124,127,128,138,074,141,150}-*.md`、
   `_backlog/_archived/settled_issues/2026-11-13-test-asset-fence.md`、`_backlog/_archived/research/test-asset-fence/2026-11-13-test-asset-fence.md`
