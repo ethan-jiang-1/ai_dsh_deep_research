@@ -7,9 +7,22 @@
  *
  * 边界：只存工作区与上次会话；无秘密；不是 DSH Settings（Settings UI 不暴露工作区）。
  */
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { randomUUID } from 'node:crypto'
+import { chmodSync, closeSync, existsSync, fsyncSync, mkdirSync, openSync, readFileSync, renameSync, rmSync, statSync, writeSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
+
+/** 仅限当前用户读写（0600）并强制落盘刷新。 */
+function writeRestrictedFile(filePath: string, content: string): void {
+  const fd = openSync(filePath, 'w', 0o600)
+  try {
+    writeSync(fd, content, undefined, 'utf8')
+    fsyncSync(fd)
+  } finally {
+    closeSync(fd)
+  }
+  chmodSync(filePath, 0o600)
+}
 
 /** 当前设置 schema。旧文件（schema 1/缺失）读到即按缺失处理，首次写入升到 2。 */
 export const SETTINGS_SCHEMA = 2
@@ -84,7 +97,7 @@ export function readSettings(env: NodeJS.ProcessEnv = process.env): SettingsRead
   } catch {
     // 坏文件先留证据再让调用方按"未设置"处理；不静默覆盖用户内容。
     try {
-      writeFileSync(`${path}.corrupt`, raw)
+      writeRestrictedFile(`${path}.corrupt`, raw)
       rmSync(path, { force: true })
     } catch { /* @silent-catch: 备份失败不阻断读取方 */ }
     return { ok: false, reason: 'corrupt', detail: path }
@@ -127,9 +140,9 @@ export function writeSettings(patch: SettingsPatch, env: NodeJS.ProcessEnv = pro
     ...(sessionId === undefined ? {} : { sessionId }),
     updatedAt: new Date().toISOString(),
   }
-  mkdirSync(dirname(path), { recursive: true })
-  const temp = `${path}.${process.pid}.tmp`
-  writeFileSync(temp, `${JSON.stringify(next, null, 2)}\n`)
+  mkdirSync(dirname(path), { recursive: true, mode: 0o700 })
+  const temp = `${path}.${process.pid}-${randomUUID()}.tmp`
+  writeRestrictedFile(temp, `${JSON.stringify(next, null, 2)}\n`)
   renameSync(temp, path)
   return next
 }

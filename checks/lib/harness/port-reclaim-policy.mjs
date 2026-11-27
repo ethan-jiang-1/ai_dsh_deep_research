@@ -3,7 +3,7 @@
 // 只认**真正在跑 DSH web** 的命令行（BUG-104/113）：node + vendor/安装副本的 CLI 入口，
 // 或 `dsh` 可执行；仓库路径子串、tail、任意 node 脚本都不算（否则仓库里的用户服务会被杀）。
 // 另承载 BUG-136 的纯编排核：预收割被外部进程拒杀时回落临时空闲端口，finally 整组 SIGKILL + 端口复收割。
-const DSH_ENTRY = /(?:^|\s)(?:node|nodejs)\s+[^\n]*(?:vendor[\\/]dsh[\\/]apps[\\/]cli[\\/](?:src[\\/]bin\.ts|lib[\\/]bin\.js)|@deepseek-ai[\\/]dsh[\\/]apps[\\/]cli[\\/](?:src[\\/]bin\.ts|lib[\\/]bin\.js))/i
+const DSH_ENTRY = /(?:^|\s)(?:\S*[\\/])?(?:node|nodejs)(?:\.exe)?\s+[^\n]*(?:vendor[\\/]dsh[\\/]apps[\\/]cli[\\/](?:src[\\/]bin\.ts|lib[\\/]bin\.js)|@deepseek-ai[\\/]dsh[\\/]apps[\\/]cli[\\/](?:src[\\/]bin\.ts|lib[\\/]bin\.js))/i
 const DSH_BIN = /(?:^|\s)(?:\S*[\\/])?dsh\s+(?:web\b|--profile\b)/i
 const NON_DSH = /^\s*(?:tail|cat|less|more|grep|rg|vim|nano|code|python|ruby|perl)\b/i
 

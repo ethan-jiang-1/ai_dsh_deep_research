@@ -52,8 +52,14 @@ jobs:
       - name: Lint (oxlint)
         run: source tools/env.sh && pnpm lint
 
+      - name: Typecheck scripts (keyless checkJs)
+        run: npx tsc -p tsconfig.scripts.json --noEmit
+
       - name: Test (keyless regression)
         run: source tools/env.sh && pnpm test
+
+      - name: Test vendor contracts (keyless)
+        run: source tools/env.sh && pnpm test:vendor
 
       # 覆盖率是观察面、不设阈值；但命令本身必须真能跑（2026-11-04 实证：
       # test:coverage 缺 TSX_TSCONFIG_PATH，4 个 views 测试红而 pnpm test 绿）。

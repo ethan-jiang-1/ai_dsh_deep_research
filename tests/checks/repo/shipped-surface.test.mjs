@@ -13,8 +13,9 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
-  devRefsOf, filesAllowlistIssues, isShippedFile, matchesFilesPattern, readmeUserSectionIssues,
-  shippedSourceFilesOf, shippedTextIssues, topLevelIssues, typeClosureOf, typeEntryPathsOf, typeSetIssues,
+  devRefsOf, displayMetaTargetsOf, filesAllowlistIssues, insertedRowIdsOf, isShippedFile, matchesFilesPattern,
+  packSpecifiersOf, readmeUserSectionIssues, runtimeJsPathsOf, shippedSourceFilesOf, shippedTextIssues,
+  topLevelIssues, typeClosureOf, typeEntryPathsOf, typeSetIssues,
 } from '../../../checks/lib/repo/shipped-surface.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
@@ -126,4 +127,35 @@ test('README 用户段判据：折叠区外开发命令红，折叠区内维护�
   assert.ok(readmeUserSectionIssues('## Usage\n`pnpm build`\n').some((p) => p.includes('开发命令')))
   assert.ok(readmeUserSectionIssues('see `docs/guides/run-ops.md`\n').some((p) => p.includes('开发面')))
   assert.deepEqual(readmeUserSectionIssues('## Usage\n<details><summary>maintainers</summary>\n`pnpm build`\n</details>\n'), [])
+})
+
+test('单一事实源派生：runtimeJsPathsOf / packSpecifiersOf / insertedRowIdsOf / displayMetaTargetsOf 全量对齐盘上声明', () => {
+  const jsPaths = runtimeJsPathsOf(pkg)
+  assert.deepEqual(jsPaths, [
+    'lib/client.js', 'lib/content.js', 'lib/defaults.js', 'lib/fetch-fallback.js',
+    'lib/index.js', 'lib/method-library-tool.js', 'lib/startup.js',
+  ])
+  const yamlTexts = (pkg.dsh?.bundle?.patch ?? []).map((rel) => readFileSync(join(PACK, rel), 'utf8'))
+  const specs = packSpecifiersOf(yamlTexts)
+  assert.deepEqual(specs, [
+    'dsh-deep-research-pack',
+    'dsh-deep-research-pack/content',
+    'dsh-deep-research-pack/defaults',
+    'dsh-deep-research-pack/fetch-fallback',
+    'dsh-deep-research-pack/method-library-tool',
+    'dsh-deep-research-pack/startup',
+  ])
+  const targets = displayMetaTargetsOf(specs, pkg)
+  assert.equal(targets.length, 6)
+  for (const t of targets) {
+    assert.ok(pkg.files.includes(t.filesGlob), `files 缺 ${t.filesGlob}`)
+    assert.ok(Object.hasOwn(pkg.exports, t.localeKey), `exports 缺 ${t.localeKey}`)
+    assert.ok(Object.hasOwn(pkg.exports, t.iconKey), `exports 缺 ${t.iconKey}`)
+  }
+  const inserted = insertedRowIdsOf(yamlTexts)
+  assert.equal(inserted.length, 13, `预期 13 条新增行（5 preset + 2 worker + 6 bundle insert），实得 ${inserted.join(', ')}`)
+  for (const id of ['preset-lead', 'preset-method-editor', 'preset-research-worker', 'preset-research-wave', 'research-defaults']) {
+    assert.ok(inserted.includes(id), `insertedRowIdsOf 缺 ${id}`)
+  }
+  assert.equal(inserted.includes('time-context'), false, 'preset 内嵌 plugins 子列表行不应混入顶层 insert 行')
 })

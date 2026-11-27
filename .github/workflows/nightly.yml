@@ -89,9 +89,9 @@ jobs:
           if-no-files-found: warn
 
   snapshot-replay:
-    name: snapshot A/B (fresh profile, keyless)
+    name: snapshot A/B/C (fresh profile, keyless)
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - name: Checkout (with pinned DSH submodule)
         uses: actions/checkout@v5
@@ -142,14 +142,17 @@ jobs:
       - name: Build pack (npm pack prepack)
         run: pnpm build
 
-      - name: Prepare fresh profile + snapshot A/B
+      - name: Install chromium (C-layer golden render)
+        run: pnpm --dir vendor/dsh/packages/experimental/inspector exec playwright install --with-deps chromium
+
+      - name: Prepare fresh profile + snapshot A/B/C
         run: |
           export DSH_DEV_HOME="$GITHUB_WORKSPACE/runtime/ci-home"
           export DSH_RUN_STATE_DIR="$GITHUB_WORKSPACE/runtime/ci-state"
           export DSH_RUN_PORT=3199
           source tools/env.sh
-          bash tools/channel/boot-run.sh --prepare-profile
-          node checks/smoke/snapshot-replay.entry.mjs --read-only --layers a,b --port 3110
+          MCP_PLAYWRIGHT=0 bash tools/channel/boot-run.sh --prepare-profile
+          node checks/smoke/snapshot-replay.entry.mjs --read-only --layers a,b,c --port 3110
 
   deploy:
     name: keyless deploy smokes

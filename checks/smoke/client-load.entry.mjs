@@ -769,7 +769,9 @@ async function pass1BoundFacePhase() {
           const pendingColor = pendingPill === undefined ? null : getComputedStyle(pendingPill).color
           const doneDotAndColor = (lbl) => pills.some((n) => {
             if (n.getAttribute('data-step-state') !== 'done') return false
-            const text = (n.textContent ?? '').replace(/\s+/g, ' ').trim()
+            const clone = n.cloneNode(true)
+            clone.querySelectorAll('[aria-hidden="true"]').forEach((el) => el.remove())
+            const text = (clone.textContent ?? '').replace(/\s+/g, ' ').trim()
             if (text !== lbl) return false
             const hasDot = n.querySelector('svg') !== null || n.querySelector('[data-state]') !== null
             const color = getComputedStyle(n).color

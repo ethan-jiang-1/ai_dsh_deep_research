@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process'
 import { chmodSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { scrubbedEnv } from '../lib/shared/env.mjs'
-import { presetRoles } from '../lib/shared/roles.mjs'
+import { displayMetaTargetsOf, packSpecifiersOf, runtimeJsPathsOf } from '../lib/repo/shipped-surface.mjs'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -23,7 +23,10 @@ const check = (name, ok, detail = '') => {
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${ok || detail === '' ? '' : `\n      → ${detail}`}`)
   if (!ok) failures.push(name)
 }
-const packVersion = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8')).version
+const packPkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
+const packVersion = packPkg.version
+const packPatchYamls = (packPkg.dsh?.bundle?.patch ?? []).map((rel) => readFileSync(join(PACK, rel), 'utf8'))
+const packMetaTargets = displayMetaTargetsOf(packSpecifiersOf(packPatchYamls), packPkg)
 
 function sandbox() {
   rmSync(TEMP, { recursive: true, force: true })
@@ -38,20 +41,23 @@ function sandbox() {
   writeFileSync(join(anchor, 'package.json'), JSON.stringify({ name: '@deepseek-ai/dsh', version: ANCHOR_VERSION, type: 'module' }))
   const installed = join(profile, 'node_modules', 'dsh-deep-research-pack')
   writeFileSync(join(installed, 'package.json'), JSON.stringify({ name: 'dsh-deep-research-pack', version: packVersion }))
-  writeFileSync(join(installed, 'cordis.patch.yml'), '')
-  mkdirSync(join(installed, 'presets'), { recursive: true })
-  for (const role of presetRoles(ROOT)) {
-    writeFileSync(join(installed, 'presets', `${role}.patch.yml`), '')
+  writeFileSync(join(installed, 'icon.svg'), '<svg xmlns="http://www.w3.org/2000/svg"></svg>')
+  for (const rel of (packPkg.dsh?.bundle?.patch ?? []).map((p) => p.replace(/^\.\//, ''))) {
+    const abs = join(installed, rel)
+    mkdirSync(dirname(abs), { recursive: true })
+    writeFileSync(abs, '')
   }
   mkdirSync(join(installed, 'lib'), { recursive: true })
-  for (const file of ['client.js', 'index.js', 'startup.js', 'content.js', 'fetch-fallback.js', 'method-library-tool.js']) {
-    writeFileSync(join(installed, 'lib', file), '')
+  for (const rel of runtimeJsPathsOf(packPkg)) {
+    writeFileSync(join(installed, rel), '')
   }
   mkdirSync(join(installed, 'content'), { recursive: true })
   writeFileSync(join(installed, 'content', 'manual.md'), '')
-  mkdirSync(join(installed, 'locale'), { recursive: true })
-  writeFileSync(join(installed, 'locale', 'en.json'), '{}')
-  writeFileSync(join(installed, 'locale', 'zh.json'), '{}')
+  for (const { localeDir } of packMetaTargets) {
+    mkdirSync(join(installed, localeDir), { recursive: true })
+    writeFileSync(join(installed, localeDir, 'en.json'), '{}')
+    writeFileSync(join(installed, localeDir, 'zh.json'), '{}')
+  }
   writeFileSync(join(profile, 'node_modules', ...TEAM.split('/'), 'package.json'), JSON.stringify({ name: TEAM, version: ANCHOR_VERSION }))
   writeFileSync(join(home, 'deep-research', 'settings.json'), JSON.stringify({ schemaVersion: 2, workspace: ws, updatedAt: new Date().toISOString() }))
   return { home, anchor, ws, profile }
@@ -108,6 +114,21 @@ try {
   const halfStartup = runDoctor(box)
   check('半装：缺 startup 行产物 → exit 1 且点名', halfStartup.status === 1 && /安装副本完整性/.test(halfStartup.stdout), `${halfStartup.status}\n${halfStartup.stdout}`)
   writeFileSync(join(box.profile, 'node_modules', 'dsh-deep-research-pack', 'lib', 'startup.js'), '')
+
+  rmSync(join(box.profile, 'node_modules', 'dsh-deep-research-pack', 'lib', 'defaults.js'))
+  const halfDefaults = runDoctor(box)
+  check('半装：缺 defaults 行产物 → exit 1 且点名 lib/defaults.js', halfDefaults.status === 1 && /lib\/defaults\.js/.test(halfDefaults.stdout), `${halfDefaults.status}\n${halfDefaults.stdout}`)
+  writeFileSync(join(box.profile, 'node_modules', 'dsh-deep-research-pack', 'lib', 'defaults.js'), '')
+
+  rmSync(join(box.profile, 'node_modules', 'dsh-deep-research-pack', 'workers', 'research-wave.patch.yml'))
+  const halfWorker = runDoctor(box)
+  check('半装：缺 worker patch → exit 1 且点名 workers/research-wave.patch.yml', halfWorker.status === 1 && /workers\/research-wave\.patch\.yml/.test(halfWorker.stdout), `${halfWorker.status}\n${halfWorker.stdout}`)
+  writeFileSync(join(box.profile, 'node_modules', 'dsh-deep-research-pack', 'workers', 'research-wave.patch.yml'), '')
+
+  rmSync(join(box.profile, 'node_modules', 'dsh-deep-research-pack', 'locale-defaults', 'zh.json'))
+  const halfLocale = runDoctor(box)
+  check('半装：缺子路径 locale → exit 1 且点名 locale-defaults/zh.json', halfLocale.status === 1 && /locale-defaults\/zh\.json/.test(halfLocale.stdout), `${halfLocale.status}\n${halfLocale.stdout}`)
+  writeFileSync(join(box.profile, 'node_modules', 'dsh-deep-research-pack', 'locale-defaults', 'zh.json'), '{}')
 
   writeFileSync(join(box.home, 'deep-research', 'settings.json'), '{not json')
   const corrupt = runDoctor(box)

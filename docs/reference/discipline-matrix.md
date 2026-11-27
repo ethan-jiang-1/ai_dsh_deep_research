@@ -34,7 +34,7 @@
 | Tests describe behavior, not correctness（过时行为随测试一起改） | tests/ 契约测试（evaluation-contract 对手册谓词、dashboard 对文件形状）；行为变更同 diff 改锚 | 照搬 |
 | No hardcoded tunables（部署可变量必须是 config 字段） | preset 工具行 config（tool-todo allowParallelInProgress、tool-web 超时）皆声明为 config；层版本钉在运行中 dsh 的 exact 版本 | 带证据适配（载体 = cordis 行 config 而非代码 Config 类型） |
 | TODO 标记分级（FIXME/TODO/XXX 按紧急度） | 沿用（仓内出现时按此分级） | 照搬 |
-| Record externally perceptible breaking changes in an upgrade guide（对外可感知破坏面在其引入的变更内即写 `docs/upgrade-guide/`；0.2.0 新增） | 本仓 pack private、无下游消费者；换 pin 的迁移与重审结论由升 pin Note 承载 | 不适用（对外分发/发布 pack 时重估） |
+| Record externally perceptible breaking changes in an upgrade guide（对外可感知破坏面在其引入的变更内即写 `docs/upgrade-guide/`；0.2.0 新增） | 本仓当前为本地 tarball 交付（npm 市场 staged，尚无外部 npm 下游版本树）；上游 `vendor/dsh/docs/upgrade-guide/v*` 各版本目录逐条纳管入 `alignment-ledger.json`（`align-ledger` 门禁），本包自身换 pin 与兼容迁移由升 pin Note 承载 | 不适用（本仓尚未公开发布 npm——**重估触发**：首次执行 `npm publish` 对外分发且随后引入破坏性配置/数据面变更时） |
 | Source plane vs artifact plane, never mixed（静态测试走 src，吃构建产物的测试声明依赖） | L1 双通道：preset.e2e 源码域（overlay 指 src）+ 安装域（plugin add 正式路径）；根 tsconfig 门面 = 源码面解析 | 带证据适配（两平面在本仓 = 源码域/安装域两通道，D14） |
 | Design each tool's UI presentation up front（呈现先于实现设计） | 观察面确实先设计后实现：run-dashboard 走 RFC；debug-dashboard-plus 无独立 RFC（该文档名悬空，实际随 [observability-gui](../../notes/implemented/2026-09-24-observability-gui.md) 落地）。preset persona/skill 是工具的行为呈现面（先定稿文本再挂载），但「R1 起逐角色先定稿」在 R1 scaffold Note 中无记载——属事后归纳，不是当时纪律 | 带证据适配（呈现面 = 观察面的先设计兑现；persona 侧是归纳而非既成纪律） |
 | Plan unit/e2e/snapshot coverage for seams | testing.md 五面合同（L0–L4）先于框架定案（D6） | 带证据适配 |
@@ -42,8 +42,8 @@
 | ~~Runtime invariants assert owned relationships~~（invariant 包规则） | **vendor 0.2.1 已删除**该条与布局行 `runtime-diagnostics/`，`packages/` 下亦无 invariant 组——本仓无需落点。**复活条件** = 上游恢复 invariant 包族 | 不适用（上游已移除——2026-10-19 复核：pin 0.1.7 有该条、0.2.1 零命中；**复活条件**：上游恢复 invariant 包族时） |
 | Typed events / declaration merging / assertNever / waterfall next() / branded ids / Trust TypeScript / explicit request-spec split | TS 面（`src/client/` 观察面 + `src/lib/` 折算）只**消费** vendor 的声明合并类型（`import type {} from '@deepseek-ai/dsh-*/client'`），不 author 会话事件、不注册服务或 waterfall 监听器、无跨边界自持 id、无 request/spec 默认化面 | 不适用（无对应机制面；本仓开始 author 事件或服务时重估） |
 | Keep compiler faces explicit（host/client 各出叶配置，根仅 solution） | `packages/deep-research-pack/tsconfig.host.json` · `tsconfig.client.json` 两叶（各自拉不同的 Context 类型增强）+ solution-only 根 `tsconfig.json`（`files: []` + references）；构建 = `tsc -b .` | 照搬 |
-| ESM everywhere / 包命名与 rescope / cordis peer 约定 | 不发布 npm 包（private pack 经 plugin add 分发） | 不适用（本仓无 npm 发布面——**重估触发**：pack 转为公开发布、或需与其他插件共享 peer 依赖时） |
-| Client UI copy is locale-owned | chrome 文案走 `src/client/locales.ts` 的 zh/en 字典（`ctx.locale.register` + `t()`；键集对账 = [client-locale](../../tests/cockpit/client/locales/client-locale.spec.mjs)）；研究面板正文仍以中文为主（产品中文优先，未逐条迁） | 带证据适配（chrome 已迁字典；正文中文优先——**重估触发**：需要英文 UI 或对外多语分发时逐条迁 `views.tsx` / `ResearchConfigTab`） |
+| ESM everywhere / 包命名与 rescope / cordis peer 约定 | `packages/deep-research-pack/package.json` 已切 `private: false`、`type: "module"`，全量宿主/客户端依赖走 optional `peerDependencies`（范围与 `engines.dsh` 强绑定，由 `pack-deps` 把守）；当前本地 tarball 交付、npm 发布 staged | 带证据适配（ESM + optional `peerDependencies` + `export-dist` 剥离 `workspace:*` 已由 `pack.e2e` / `lifecycle.entry` 实证；`rescope` 不适用因本仓零 vendor 补丁） |
+| Client UI copy is locale-owned | 驾驶舱 chrome（`zh-cockpit.ts` / `en-cockpit.ts`）、折算层数据文本（`zh-fold.ts` / `en-fold.ts`）与内置打法展示投影已全量双语字典化，由 [client-locale](../../tests/cockpit/client/locales/client-locale.spec.mjs) / `cjk-source` 把守；仅模型面 prompt 与工作区产物保持中文 canonical 不翻译 | 带证据适配（UI 展示面已全量 `zh/en` 字典化 + `cockpit-locale.entry` 实证；模型面 prompt 按产品定位保持单语 canonical） |
 | Choose PR history deliberately / GitHub stacks / Labels taxonomy | 无 GitHub PR 流（本地单仓窄切片提交） | 不适用（等价物 = 窄证据切片 commit 纪律 + pre-commit 门禁；**重估触发**：需多 commit 叠加审阅的 PR 流出现时） |
 | Both SDKs project the loop | 无 SDK 维护面 | 不适用（本仓不维护任何 SDK——**重估触发**：本仓开始对外提供 SDK 或需要同时投影两种运行时面时） |
 

@@ -9,7 +9,7 @@
 | 字段 | 值 |
 |---|---|
 | 包名 | `dsh-deep-research-pack` |
-| 版本 | `0.3.7` |
+| 版本 | `0.3.8` |
 | DSH 兼容范围（`engines.dsh`） | `>=0.2.1-rc.2 <=0.2.1-rc.5` |
 | Node 范围（`engines.node`） | `^22.19.0 \|\| >=24.0.0` |
 | Client 平台 | `web` |
@@ -25,6 +25,7 @@
 | `./package.json` | `./package.json` | — |
 | `./cordis.patch.yml` | `./cordis.patch.yml` | — |
 | `./presets/*.patch.yml` | `./presets/*.patch.yml` | — |
+| `./workers/*.patch.yml` | `./workers/*.patch.yml` | — |
 | `./icon` | `./icon.svg` | — |
 | `./locale/*.json` | `./locale/*.json` | — |
 | `./content/locale/*.json` | `./locale-content/*.json` | — |
@@ -39,6 +40,8 @@
 | `./content` | `./lib/content.js` | `./lib/types/content/index.d.ts` |
 | `./startup` | `./lib/startup.js` | `./lib/types/startup/index.d.ts` |
 | `./defaults` | `./lib/defaults.js` | `./lib/types/defaults/index.d.ts` |
+| `./defaults/icon` | `./icon.svg` | — |
+| `./defaults/locale/*.json` | `./locale-defaults/*.json` | — |
 
 ## Bundle Patch 声明
 
@@ -76,10 +79,13 @@
 
 - `@deepseek-ai/dsh-api-remotes`
 - `@deepseek-ai/dsh-client-ui-primitives`
+- `@deepseek-ai/dsh-client-ui-layout`
 - `@deepseek-ai/dsh-client-ui-renderer`
 - `@deepseek-ai/dsh-client-ui-session`
 - `@deepseek-ai/dsh-client-ui-conversation`
+- `@deepseek-ai/dsh-client-ui-sidebar`
 - `@deepseek-ai/dsh-client-ui-sidebar-right`
+- `@deepseek-ai/dsh-client-ui-workspace`
 - `@deepseek-ai/dsh-client-ui-tool`
 - `@deepseek-ai/dsh-client-locale`
 

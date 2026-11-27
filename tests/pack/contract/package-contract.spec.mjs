@@ -4,8 +4,9 @@
 // 运行期产物与 client 模块表由 checks/smoke/pack.e2e.mjs 验（它本就要求 lib/ 在位）。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
-import { filesAllowlistIssues } from '../../../checks/lib/repo/shipped-surface.mjs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { displayMetaTargetsOf, filesAllowlistIssues, packSpecifiersOf } from '../../../checks/lib/repo/shipped-surface.mjs'
+import { externalImportsOf } from '../../../checks/lib/repo/pack-deps.mjs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { BUNDLE_PATCH, loadPatchRows } from '../preset-helpers.mjs'
@@ -38,12 +39,37 @@ test('T0 exports：入口与 client 都有声明，且不依赖未发布源码',
   assert.equal(pkg.exports?.['./defaults']?.types, './lib/types/defaults/index.d.ts')
   assert.equal(pkg.exports?.['./cordis.patch.yml'], './cordis.patch.yml')
   assert.equal(pkg.exports?.['./presets/*.patch.yml'], './presets/*.patch.yml')
-  assert.equal(pkg.exports?.['./method-library-tool/icon'], './icon.svg')
-  assert.equal(pkg.exports?.['./method-library-tool/locale/*.json'], './locale-method-library/*.json')
-  for (const file of ['locale-method-library/en.json', 'locale-method-library/zh.json']) {
-    assert.ok(existsSync(join(PACK, file)), `subpath 显示元数据缺席：${file}`)
+  assert.equal(pkg.exports?.['./workers/*.patch.yml'], './workers/*.patch.yml')
+  const patchYamls = (pkg.dsh?.bundle?.patch ?? []).map((rel) => readFileSync(join(PACK, rel), 'utf8'))
+  const metaTargets = displayMetaTargetsOf(packSpecifiersOf(patchYamls), pkg)
+  assert.equal(metaTargets.length, 6, '本包全部 6 个可独立寻址 specifier 都须覆盖显示面契约')
+  for (const { localeDir, localeKey, iconKey } of metaTargets) {
+    assert.equal(pkg.exports?.[iconKey], './icon.svg', `exports[${iconKey}] 须指向 ./icon.svg`)
+    assert.equal(pkg.exports?.[localeKey], `./${localeDir}/*.json`, `exports[${localeKey}] 须指向 ./${localeDir}/*.json`)
+    for (const lang of ['en', 'zh']) {
+      assert.ok(existsSync(join(PACK, localeDir, `${lang}.json`)), `subpath 显示元数据缺席：${localeDir}/${lang}.json`)
+    }
   }
   assert.equal(pkg.main, undefined, 'main 与 exports 双写会制造第二份入口')
+})
+
+test('T0 源码依赖与发布命令合同：src 全部外部 import 镜像进 pack devDependencies（不靠根 node_modules 隐式提升），且 npm publish 只准对 _dist tarball 执行', () => {
+  const walkSrc = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((ent) => {
+    const abs = join(dir, ent.name)
+    if (ent.isDirectory()) return walkSrc(abs)
+    return /\.(?:ts|tsx)$/.test(ent.name) ? [readFileSync(abs, 'utf8')] : []
+  })
+  const srcImports = new Set(walkSrc(join(PACK, 'src')).flatMap((text) => externalImportsOf(text).map((x) => x.name)))
+  assert.ok(srcImports.size >= 10, `防空语料：src 外部 import 过少（${srcImports.size}）`)
+  const missingDev = [...srcImports].filter((name) => !Object.hasOwn(pkg.devDependencies ?? {}, name)).sort()
+  assert.deepEqual(missingDev, [], `packages/deep-research-pack/src 引用了未在 pack devDependencies 声明的包（根 node_modules 隐式提升会让独立类型检查失效）：${missingDev.join(', ')}`)
+  assert.equal(Object.hasOwn(pkg.devDependencies ?? {}, '@types/react'), false, 'vendor/dsh client 规范禁止在子包写 @types/react')
+  assert.equal(Object.hasOwn(pkg.devDependencies ?? {}, '@types/react-dom'), false, 'vendor/dsh client 规范禁止在子包写 @types/react-dom')
+
+  const releaseDoc = readFileSync(join(ROOT, 'docs', 'contracts', 'release.md'), 'utf8')
+  const releaseCheck = readFileSync(join(ROOT, 'checks', 'release', 'release-check.mjs'), 'utf8')
+  assert.match(releaseDoc, /npm publish "_dist\/dsh-deep-research-pack-<version>\.tgz"/, 'release.md 必须指定发布已剥离 workspace:* 的 _dist tarball')
+  assert.match(releaseCheck, /npm publish "_dist\/dsh-deep-research-pack-\$\{version\}\.tgz"/, 'release-check.mjs 提示必须指向 _dist tarball')
 })
 
 test('D40 分发：只有只读 doctor；无 launcher/scaffold；startup/content 入口声明在场', () => {

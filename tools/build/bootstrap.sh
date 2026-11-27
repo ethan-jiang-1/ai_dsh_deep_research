@@ -72,6 +72,26 @@ else
   bash "$ROOT/tools/build/vendor-build.sh" || bad "vendor 构建失败"
 fi
 
+# ④b 本包构建产物（client-load / pack.e2e / export-dist 前置）
+if [ -f "$ROOT/packages/deep-research-pack/lib/client.js" ] && [ -f "$ROOT/packages/deep-research-pack/lib/index.js" ]; then
+  ok "deep-research-pack 构建产物在场（lib/index.js + lib/client.js）"
+elif [ "$MODE" = check ]; then
+  would "pnpm build（packages/deep-research-pack/lib 缺席）"
+else
+  echo "bootstrap: pnpm build…"
+  (cd "$ROOT" && pnpm build) || bad "deep-research-pack 构建失败"
+fi
+
+# ④c 原生预构建件可达性（lifecycle 显示面 / product-boot 前置）
+if node -e "import { createRequire } from 'node:module'; const r = createRequire(process.argv[1]); r('node-addon-require-builtin')" "$ROOT/vendor/dsh/packages/boot/app-boot/package.json" >/dev/null 2>&1; then
+  ok "原生 addon node-addon-require-builtin 可加载"
+elif [ "$MODE" = check ]; then
+  would "pnpm rebuild node-addon-require-builtin（require_builtin.node 不可加载）"
+else
+  echo "bootstrap: pnpm rebuild node-addon-require-builtin…"
+  (cd "$ROOT" && pnpm rebuild node-addon-require-builtin) || bad "node-addon-require-builtin 构建失败"
+fi
+
 # ⑤ 数据面隔离 + 凭据/端口工具
 # shellcheck source=/dev/null
 source "$ROOT/tools/env.sh" >/dev/null

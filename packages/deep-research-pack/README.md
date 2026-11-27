@@ -43,7 +43,7 @@ installer.
 user's named assembly, not something this package ships. After installation the profile's
 `dsh.profile.bundles` contains `dsh-deep-research-pack`, and the bundle inserts
 `preset-{lead,scout,analyst,critic,method-editor}`, `preset-{research-worker,research-wave}`,
-`research-content`, `research-client`, `research-startup`, `research-fetch-fallback`, and
+`research-content`, `research-defaults`, `research-client`, `research-startup`, `research-fetch-fallback`, and
 `tool-present`. The team UI row
 (`ui-agent-team`) comes from the team-mechanics layer, installed separately in the same profile;
 this bundle does not insert it.
@@ -60,7 +60,7 @@ Do not run it on an existing profile: it replaces dependencies and the user patc
 installs the current local tarball into that profile (npm/Plugins are staged); the full
 install/upgrade/uninstall sequence is owned by the installation manual.
 
-**3. How to install (current).** 0.3.7 is delivered as a local tarball; the npm/Plugins page path is
+**3. How to install (current).** 0.3.8 is delivered as a local tarball; the npm/Plugins page path is
 **staged** (no npm publication yet). Install the tarball into the profile:
 
 ```sh
@@ -72,7 +72,7 @@ manages the application-owned `desktop` profile; that is an interoperability for
 `deep-research` custom profile. This package is developed and verified against the Web surface.
 
 **4. CLI installation (package-name form, post-publish; also Web automation or offline).**
-`dsh plugin --profile` forwards to pnpm. For 0.3.7 the current install is the local tarball in
+`dsh plugin --profile` forwards to pnpm. For 0.3.8 the current install is the local tarball in
 step 2; the package-name form below applies after npm publication and to Web automation/offline.
 npm/source `dsh` refuses the `desktop` profile; the
 Desktop application's own carrier can manage it, but third-party instructions should stay on
@@ -146,7 +146,7 @@ plus the global Research Hub (Runs, Methods, Lenses).
 
 ### Upgrade and rollback
 
-For 0.3.7, update by installing the new tarball (the same command as step 2, pointing at the
+For 0.3.8, update by installing the new tarball (the same command as step 2, pointing at the
 new file); after npm publication the Plugins page Update or the package-name form also work.
 Then **restart the profile** when bundle membership changes.
 Configuration-only edits can hot-reload when HMR is enabled. DSH has no command-level rollback:
@@ -215,7 +215,7 @@ use a separate `DSH_HOME` for a clean environment.
 `cordis.patch.yml` is the bundle layer. It sets the preset roster default (`lead`), re-points
 `web` (search + fetch selection), `llm-deepseek` (retry policy), `session-query-sqlite`
 (`openAt: first-search`, `path: ':memory:'`), and `agent-preset-registry`, and inserts
-`research-fetch-fallback`, `tool-present`, and the package's content, startup, and client rows.
+`research-fetch-fallback`, `tool-present`, and the package's content, defaults, startup, and client rows.
 The team UI row (`ui-agent-team`) belongs to the team-mechanics layer, not this patch. `presets/<role>.patch.yml` is
 one `@deepseek-ai/dsh-agent-preset` row per role; `workers/<profile>.patch.yml` is one
 non-role worker row; `presets/<role>/skills/` holds the role's methodology skills. `content/` is injected as runtime context, not written into the workspace.
@@ -255,7 +255,7 @@ A deterministic Loader scenario prices the real first request (messages + tool s
 
 Tool schemas are stable within a request series; per-operation command text and the method entry append as user content, not replacing the prefix. Other bundle rows are composition carriers whose model-facing behavior is owned by the inserted row packages.
 
-### Research roles (Lead / Scout)
+### Research roles (Lead / Scout / Analyst / Critic)
 
 #### What the model sees
 
@@ -263,7 +263,7 @@ Each role's first request carries its persona, role-scoped skill descriptions, t
 
 #### Token effect
 
-A maintainer-side keyless smoke prices the real assembled first request. Stable per-version faces: Lead tool schemas 6,634 tokens, Scout 4,999, manual 2,506 ≈50.6% of Lead message tokens. Absolute totals (Lead ≈11.6k, Scout ≈8.7k) vary with the clock injection; regenerate via the smoke. Comparative estimate, not provider tokenization or billing.
+A maintainer-side keyless smoke prices the real assembled first request across all five presets. Stable per-version faces: Lead tool schemas 6,634 tokens, Scout 4,999, Analyst 4,999, Critic 5,894, Method Editor 5,583, manual 2,507 ≈50.6% of Lead message tokens. Absolute totals (Lead ≈11.6k, Scout ≈8.7k, Analyst ≈8.7k, Critic ≈9.7k, Method Editor ≈9.3k) vary with the clock injection; regenerate via the smoke. Comparative estimate, not provider tokenization or billing.
 
 #### KV Cache effect
 

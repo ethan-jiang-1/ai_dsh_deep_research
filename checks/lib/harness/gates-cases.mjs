@@ -276,6 +276,20 @@ const naLivenessMissing = () => (dir) => {
   writeFileSync(p, `${JSON.stringify(ledger, null, 2)}\n`);
 };
 
+/** 升级指南未登记注入：在 vendor/dsh/docs/upgrade-guide/ 下新增一个未进台账的版本目录 → align-ledger 必须点名未登记。 */
+const upgradeGuideUnindexed = () => (dir) => {
+  const p = join(dir, 'docs', 'reference', 'alignment-ledger.json');
+  const ledger = JSON.parse(readFileSync(p, 'utf8'));
+  for (const s of ledger.sources.filter((x) => x.source.endsWith('AGENTS.md')).slice(0, 22)) {
+    const stub = join(dir, 'vendor', 'dsh', s.source);
+    mkdirSync(dirname(stub), { recursive: true });
+    writeFileSync(stub, '# stub\n');
+  }
+  const u = join(dir, 'vendor', 'dsh', 'docs', 'upgrade-guide', 'v9.9.9-probe');
+  mkdirSync(u, { recursive: true });
+  writeFileSync(join(u, 'README.md'), '# probe\n');
+};
+
 /** discipline-map 人读表「不适用」行的免检区注入（缺重估触发形态）：把某行状态列还原成
  *  只写理由、不写触发条件的裸形态 → 门禁须报"没写什么情况下来重估"。
  *  防"新增 na 行时忘记给失效条件"重新变成永久免检区（该规则写在 discipline-map §维护规则，
@@ -770,6 +784,12 @@ export const CASES = [
     pkg.dsh.bundle.patch = pkg.dsh.bundle.patch.filter((rel) => !rel.includes('scout'));
     writeFileSync(p, JSON.stringify(pkg, null, 2) + '\n');
   } },
+  { id: 'pack-bundle-compat-worker-unlisted', gate: 'pack-bundle-compat', mutate: (dir) => {
+    const p = join(dir, 'packages/deep-research-pack/package.json');
+    const pkg = JSON.parse(readFileSync(p, 'utf8'));
+    pkg.dsh.bundle.patch = pkg.dsh.bundle.patch.filter((rel) => !rel.includes('research-wave'));
+    writeFileSync(p, JSON.stringify(pkg, null, 2) + '\n');
+  } },
   // 宿主只认 engines.dsh；范围必须覆盖当前 vendor tag。删掉 engines.dsh = 退回 peer 语义。
   { id: 'pack-bundle-compat-engines-drift', gate: 'pack-bundle-compat', mutate: (dir) => {
     const p = join(dir, 'packages/deep-research-pack/package.json');
@@ -843,6 +863,8 @@ export const CASES = [
     expect: 'docs/session-format-status.md: verdict=na 必须给 liveness' },
   { id: 'align-ledger-na-liveness-missing', gate: 'align-ledger', mutate: naLivenessMissing(),
     expect: 'website/AGENTS.md: verdict=na 必须给 liveness' },
+  { id: 'align-ledger-upgrade-guide-unindexed', gate: 'align-ledger', mutate: upgradeGuideUnindexed(),
+    expect: '未登记：docs/upgrade-guide/v9.9.9-probe' },
   // 本门禁在零注入副本基线 PASS（只读 docs/reference/discipline-matrix.md，副本里是实拷贝），按驱动壳
   // 约定「基线 PASS 则不给 expect」——注入报因的精确性由真实仓反证记录背书
   // （evaluation.md §L0 登记表该行），此处只断言"被点名报红"。
@@ -987,6 +1009,13 @@ export const CASES = [
     const p = join(dir, 'packages', 'deep-research-pack', 'package.json');
     const pkg = JSON.parse(readFileSync(p, 'utf8'));
     pkg.dsh.compatibility = { dshReleases: ['0.2.1-rc.2'] };
+    writeFileSync(p, JSON.stringify(pkg, null, 2) + '\n');
+  } },
+  // pack-manifest：任意子路径行（如 defaults）缺显示资源 exports 或 locale 文件即红（防硬编码 4 子路径漏网）。
+  { id: 'pack-manifest-subpath-display-missing', gate: 'pack-manifest', mutate: (dir) => {
+    const p = join(dir, 'packages', 'deep-research-pack', 'package.json');
+    const pkg = JSON.parse(readFileSync(p, 'utf8'));
+    delete pkg.exports['./defaults/locale/*.json'];
     writeFileSync(p, JSON.stringify(pkg, null, 2) + '\n');
   } },
   // market-index：staged 索引里放回插件条目——npm 未发布时会让用户点到 404。

@@ -4,7 +4,7 @@
 
 ## 先分流：用它还是改它
 
-**运行模型**：DSH bundle 插件 + 用户自建 custom profile `deep-research`（[D41](./decisions.md#d41)）；**0.3.7 用本地 tarball 装包（`file:`）**，npm / Plugins / Discover 为 staged；启动 `dsh --profile deep-research`（无 launcher/scaffold，只留只读 doctor）。安装合同 = [`tools/release/product-manual.md`](../tools/release/product-manual.md) → [`_dist/安装手册.md`](../_dist/安装手册.md)。
+**运行模型**：DSH bundle 插件 + 用户自建 custom profile `deep-research`（[D41](./decisions.md#d41)）；**0.3.8 用本地 tarball 装包（`file:`）**，npm / Plugins / Discover 为 staged；启动 `dsh --profile deep-research`（无 launcher/scaffold，只留只读 doctor）。安装合同 = [`tools/release/product-manual.md`](../tools/release/product-manual.md) → [`_dist/安装手册.md`](../_dist/安装手册.md)。
 
 | 意图 | owner | 首个动作 |
 |---|---|---|

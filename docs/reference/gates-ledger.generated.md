@@ -18,7 +18,7 @@
 | `surface-claims` | `checks/verify/gates/a-docs.mjs` | 维护面声明一致性，2026-11-17）：三个门户 README 首屏的面词 = docs/policy.md §3.2 | `surface-claims-face-drift` |
 | `docs-reference-fresh` | `checks/verify/gates/a-docs.mjs` | 参考生成物 package-catalog.generated.md 新鲜度与 commands.md ↔ package.json 双向校验 | `docs-reference-fresh-catalog-drift`、`docs-reference-fresh-commands-drift` |
 | `preset-structure` | `checks/verify/gates/b-pack.mjs` | 0.1.7 形态：presets/<role>.patch.yml 一条 @deepseek-ai/dsh-agent-preset | `preset-structure-field-missing`、`preset-structure-clock-missing` |
-| `pack-bundle-compat` | `checks/verify/gates/b-pack.mjs` | dsh.bundle.patch 指向真实文件；engines.dsh 覆盖当前 vendor tag | `pack-bundle-compat-preset-unlisted`、`pack-bundle-compat-engines-drift`、`pack-bundle-compat-engines-copy-drift`、`pack-bundle-compat-engines-zh-drift` |
+| `pack-bundle-compat` | `checks/verify/gates/b-pack.mjs` | dsh.bundle.patch 指向真实文件；engines.dsh 覆盖当前 vendor tag | `pack-bundle-compat-preset-unlisted`、`pack-bundle-compat-worker-unlisted`、`pack-bundle-compat-engines-drift`、`pack-bundle-compat-engines-copy-drift` 等 |
 | `client-half` | `checks/verify/gates/b-pack.mjs` | pack 的 client 半声明闭环——release.entry-hardening 件⑤a | `client-half-no-export`、`client-half-no-decl` |
 | `row-deps` | `checks/verify/gates/b-pack.mjs` | preset 与 bundle 行引用的 @deepseek-ai/* 包必须在 peerDependencies | `row-deps-peer-missing` |
 | `pack-contract-sync` | `checks/verify/gates/b-pack.mjs` | pack 的 tracked yml/md 零 runs/ 旧契约路径——persona | `pack-contract-sync-runs-path` |
@@ -29,7 +29,7 @@
 | `client-tokens` | `checks/verify/gates/b-pack-tokens.mjs` | 禁止裸 hex 颜色、幽灵 --dsh-* 变量与未声明的 --dsw-* 变量 | `client-tokens-raw-hex`、`client-tokens-phantom-dsh-var` |
 | `cockpit-doc-registry` | `checks/verify/gates/b-pack.mjs` | 驾驶舱模块注册表 docs/reference/cockpit-registry.generated.md 完整性与新鲜度 | `cockpit-doc-registry-unregistered-module`、`cockpit-doc-registry-unregistered-nested-client-module`、`cockpit-doc-registry-duplicate-basename`、`cockpit-doc-registry-unregistered-nested-lib-module` 等 |
 | `run-context-single-source` | `checks/verify/gates/b-pack.mjs` | 三操作桶的发现实现只有 run-context 一份 | `run-context-single-source-client-chain` |
-| `pack-manifest` | `checks/verify/gates/b-pack.mjs` | 发布清单合同：DSH 读什么、我们只写什么 | `pack-manifest-invented-key` |
+| `pack-manifest` | `checks/verify/gates/b-pack.mjs` | 发布清单合同：DSH 读什么、我们只写什么 | `pack-manifest-invented-key`、`pack-manifest-subpath-display-missing` |
 | `market-index` | `checks/verify/gates/b-pack.mjs` | 发现面：_dist/market.json 是 format 1，且与包清单同源同版本 | `market-index-staged-claim` |
 | `readme-shape` | `checks/verify/gates/b-pack.mjs` | 文档合同：DSH package-bundle + 安装手册默认路径 | `readme-shape-user-section-dev-command`、`readme-shape-no-frontmatter`、`readme-shape-no-profile-bootstrap`、`readme-shape-profile-after-plugins` 等 |
 | `release-vocab` | `checks/verify/gates/b-pack.mjs` | 现行合同文档不复活退役词 | `release-vocab-retired-term`、`release-vocab-product-embedded`、`release-vocab-docs-moved` |

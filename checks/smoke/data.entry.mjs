@@ -131,6 +131,11 @@ try {
   mkdirSync(WS, { recursive: true })
   writeFileSync(join(WS, 'method-library.md'), '# data.entry user library\n')
   const before = treeHash(INSTALLED)
+  const stale = await reclaimPort(Number(PORT))
+  if (stale !== null) {
+    console.error(`data.entry: 端口 ${PORT} 预收割失败：${stale}`)
+    process.exit(2)
+  }
 
   child = spawn(process.execPath, ['--import', 'tsx/esm', BIN, '--profile', PROFILE, '--', '--port', PORT, '--no-open'], {
     cwd: ROOT,

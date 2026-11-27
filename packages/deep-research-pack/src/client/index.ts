@@ -17,6 +17,7 @@ import type { Context as ClientContext } from '@deepseek-ai/cordis'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 // 纯类型导入：remote 命名空间（follow）与右栏页签契约（sidebarRightTabs）的类型增强。
 import type {} from '@deepseek-ai/dsh-api-remotes/client'
+import type { MainPanelId } from '@deepseek-ai/dsh-client-ui-layout/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar-right/client'
@@ -81,7 +82,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
   }
 }
 
-export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'remote.commands', 'sessions', 'workspaces', 'uiWorkspace', 'uiConversation', 'locale']
+export const inject = ['slots', 'layout', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'remote.commands', 'sessions', 'workspaces', 'uiWorkspace', 'uiConversation', 'locale']
 
 /**
  * Client plugin body：登记「研究状态」页签（类型 + keyed 槽体共享同一 key——拼错任一处
@@ -89,7 +90,7 @@ export const inject = ['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'r
  * @param ctx - client root context。
  */
 export function apply(ctx: ClientContext): void {
-  ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'remote.commands', 'sessions', 'workspaces', 'uiWorkspace', 'uiConversation', 'locale'], (scoped) => {
+  ctx.inject(['slots', 'layout', 'sidebarRightTabs', 'sidebarRight', 'remote', 'remote.session', 'remote.workspaceFiles', 'remote.commands', 'sessions', 'workspaces', 'uiWorkspace', 'uiConversation', 'locale'], (scoped) => {
     // 字典必须**同步**注册后再 bind：effect 回调可能延迟到 inject 回调返回后才跑，
     // 而页签/guide 的 title 在注册期就会被求值（2026-11-03 实测：包成 effect 后标题取不到值）。
     // 注册是 effect 语义 —— 同步取得 disposer，再交给 scoped.effect 管回收。
@@ -97,7 +98,8 @@ export function apply(ctx: ClientContext): void {
     scoped.effect(() => disposeDictionaries, 'deep-research-pack: dictionaries')
     const t = scoped.locale.bind('deepResearchPack')
     // 服务句柄在**注入回调内**取好再闭包：Cordis 在属性访问时校验当前 fiber 的 inject；
-    // follow 会在页签渲染 fiber 里被调用，届时再取 `remote.session` 会 `without inject`（实测）。
+    // follow / selectPanel 会在页签或菜单渲染 fiber 里被调用，届时再取服务会 `without inject`（实测）。
+    const layout = scoped.layout
     const remoteSession = scoped.remote.session
     const rawFollow = createFollow({ session: { follow: (input, signal) => remoteSession.follow({ address: input.address as never }, signal) } })
     const streamStore = createSessionStreamStore(rawFollow)
@@ -338,17 +340,16 @@ export function apply(ctx: ClientContext): void {
         return () => { hubTabListeners.delete(listener) }
       },
     }
+    const HUB_PANEL_ID = RESEARCH_HUB_PANEL_ID as MainPanelId
     const openHubTab = (tab: HubTab) => {
       pendingHubTab = tab
       for (const listener of hubTabListeners) listener()
-      const layout = (scoped as unknown as { get(name: string): { selectPanel?(id: string | null): void } | undefined }).get('layout')
-      layout?.selectPanel?.(RESEARCH_HUB_PANEL_ID)
+      layout.selectPanel(HUB_PANEL_ID)
     }
     const openMethodLibrary = () => { openHubTab('methods') }
 
     const backToChat = () => {
-      const layout = (scoped as unknown as { get(name: string): { selectPanel?(id: null): void } | undefined }).get('layout')
-      layout?.selectPanel?.(null)
+      layout.selectPanel(null)
     }
 
     const startResearch = (prompt?: string) => {
@@ -395,8 +396,7 @@ export function apply(ctx: ClientContext): void {
       locale: 'deepResearchPack',
       inject: () => ({
         openHub: () => {
-          const layout = (scoped as unknown as { get(name: string): { selectPanel?(id: string | null): void } | undefined }).get('layout')
-          layout?.selectPanel?.(RESEARCH_HUB_PANEL_ID)
+          layout.selectPanel(HUB_PANEL_ID)
         },
       }),
     }, ResearchTabMenuItem)), 'deep-research-pack: right-tab menu open-hub item')

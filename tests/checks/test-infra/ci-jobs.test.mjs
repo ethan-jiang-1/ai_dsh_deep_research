@@ -65,7 +65,7 @@ test('重冒烟：在 ci.yml 或 nightly.yml 里按正确参数执行（snapshot
     assert.ok(runs.includes(file), `${jobId} job 没跑 ${file}`)
     if (file === 'snapshot-replay.entry.mjs') {
       assert.match(runs, /--read-only/, 'snapshot 在 CI 时必须只读')
-      assert.match(runs, /--layers a,b/, 'snapshot 在 CI 时必须只跑 A/B（C 不在 CI）')
+      assert.match(runs, /--layers a,b,c\b/, 'snapshot 在 nightly 时必须跑完整 A/B/C 三层')
     }
   }
 })

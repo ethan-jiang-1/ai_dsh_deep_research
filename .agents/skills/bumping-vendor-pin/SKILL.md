@@ -40,6 +40,7 @@ build-time externals 会把新 host 半的改动静默稀释（020rc2 轮实证�
 逐条判定并写进毕业 Note：
 
 - `engines.dsh` 必须覆盖新 tag（`pack-bundle-compat` 会红；上界 = 当前 pin 意味着每次升 pin 都必须同 diff 放宽）；
+- 上游新增 `vendor/dsh/docs/upgrade-guide/v*` 版本目录必须逐篇审阅并登记进 `docs/reference/alignment-ledger.json`（漏登记 `align-ledger` 立即报红）；
 - 被本包 `replace` 的 base 行（`web` / `llm-deepseek` / `session-query-sqlite` / `locale` /
   `agent-preset-registry` / 两个 UI 行）若新增 config 键，必须同 diff 重述——
   `tests/pack/contract/package-contract.spec.mjs` 的「replace 行不得丢键」会红；

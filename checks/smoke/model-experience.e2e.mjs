@@ -11,6 +11,7 @@ import { mkdir, lstat, symlink } from 'node:fs/promises'
 import { join, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { runLoaderSmoke } from '@deepseek-ai/dsh-loader-smoke'
+import { presetRoles } from '../lib/shared/roles.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const DRIVER = join(ROOT, 'tests/fixtures/model-experience/driver.ts')
@@ -44,8 +45,9 @@ const { stdout, stderr } = await runLoaderSmoke({
 assert.equal(stderr, '', `model-experience smoke wrote stderr: ${stderr}`)
 const lines = stdout.trim().split('\n')
 const result = JSON.parse(lines.at(-1) ?? 'null')
+const expectedRoles = presetRoles(ROOT)
 assert.equal(result?.type, 'model-experience.e2e')
-assert.ok(Array.isArray(result.roles) && result.roles.length === 2)
+assert.ok(Array.isArray(result.roles) && result.roles.length === expectedRoles.length, `expected all ${expectedRoles.length} presets priced, got ${result.roles?.length}`)
 for (const role of result.roles) {
   assert.ok(Number.isInteger(role.total) && role.total > 0, `${role.role}: first-request total must be a positive integer`)
   assert.ok(Number.isInteger(role.toolTokens) && role.toolTokens > 0, `${role.role}: tool schema tokens must be positive`)
@@ -53,6 +55,8 @@ for (const role of result.roles) {
 }
 assert.ok(Number.isInteger(result.manualTokens) && result.manualTokens > 0, 'manual.md token estimate must be positive')
 assert.ok(result.manualShareOfLeadMessages > 0 && result.manualShareOfLeadMessages <= 1, 'manual share of Lead messages out of range')
-const lead = result.roles.find((role) => role.role === 'lead')
-const scout = result.roles.find((role) => role.role === 'scout')
-process.stdout.write(`PASS model-experience: Lead first request ${lead.total} tokens (tools ${lead.toolTokens}); Scout ${scout.total} tokens (tools ${scout.toolTokens}); manual.md ${result.manualTokens} tokens ≈ ${(result.manualShareOfLeadMessages * 100).toFixed(1)}% of Lead message tokens\n`)
+const byRole = Object.fromEntries(result.roles.map((r) => [r.role, r]))
+const summary = expectedRoles
+  .map((id) => `${id} ${byRole[id].total} (tools ${byRole[id].toolTokens})`)
+  .join('; ')
+process.stdout.write(`PASS model-experience: ${summary}; manual.md ${result.manualTokens} tokens ≈ ${(result.manualShareOfLeadMessages * 100).toFixed(1)}% of Lead message tokens\n`)

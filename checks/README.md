@@ -119,8 +119,8 @@
 
 | 模块 | 被谁消费 | 说明 |
 |---|---|---|
-| lib/repo/content-budget.mjs | e-workspace、content-disclosure.spec | 常驻面预算唯一正本：T0 两级（下放 10,000 / 硬顶 12,288）+ lead persona/合计的 char/byte/token |
-| lib/shared/roles.mjs | discipline-probe、doctor.e2e、fetch-fallback-orchestration.spec、l4-lite.e2e、preset.e2e、presets.spec、release.entry、replay-fixtures.spec、replay-scene.spec、role-consumer-matrix.spec、snapshot-replay.entry、strategy-core.spec、team-preflight.e2e、plan-gate | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
+| lib/repo/content-budget.mjs | e-workspace、content-disclosure.spec | 常驻面预算唯一正本：T0 两级（下放 10,000 / 硬顶 12,288）+ 全量角色 persona 与常驻合计的 char/byte/token |
+| lib/shared/roles.mjs | content-disclosure.spec、discipline-probe、fetch-fallback-orchestration.spec、l4-lite.e2e、model-experience.e2e、preset.e2e、presets.spec、release.entry、replay-fixtures.spec、replay-scene.spec、role-consumer-matrix.spec、snapshot-replay.entry、strategy-core.spec、team-preflight.e2e、plan-gate | 角色清单访问器（presetRoles = 盘上全部；researchRoles = 研究面；事实源 = 盘上 presets/） |
 | lib/shared/sandbox-capability.mjs | sandbox-capability.spec、start-channel | 嵌套沙箱探测判据（darwin 上 sandbox-exec 失败/EPERM = 脚本层不可用；其它平台 null） |
 | lib/shared/boot-port.mjs | client-load.entry、cold-start.entry、port-reclaim.spec、snapshot-replay.entry | 自动端口的有界重选（BUG-338）：纯逻辑，pick/boot 注入；显式端口不重选 |
 | lib/shared/cli-entry.mjs | export-handoff、gates.e2e、market、run-dashboard、protocol-audit、schema-scan、verdict-audit、node-gate、evidence-audit、channel-cache、mirror-sync、run-driver、vendor-artifacts、release-check、cli-entry.test、gate-cli-args.spec | symlink-safe CLI 入口判定（realpath 归一；macOS `/tmp` → `/private/tmp` 下不静默）+ `cliArgsOf`（位置参数/带值选项分离；`--sessions` 缺值 exit 2，BUG-406） |
@@ -182,11 +182,11 @@
 | lib/gates/review-contract.mjs | node-gate-delivery-gate、review-contract.spec | review 覆盖表（topic × lens）+ CRITICAL 与 readiness 交叉 |
 | lib/gates/plan-gate.mjs | node-gate-contracts.spec、node-gate-core、plan-gate.spec、skill-parser-contract.spec、text-encoding-equivalence.spec | plan 图硬结构（环/悬空/重号/自依赖）+ owner/kind/lifecycle/剩余工作/版本快照 |
 | lib/harness/role-picker.mjs | client-load.entry、role-picker.test | 角色选择器纯判据：四研究角色连续相邻 + Method Editor（D37）；逐角色 C 归场景级 |
-| lib/repo/pack-deps.mjs | pack.e2e、pack-deps.test | 发布物依赖闭包 = peers：require/动态 import()/.d.ts import 正向、死 peer 反向（host-row 显式 allowlist）、DSH-tag peer 范围 = engines.dsh |
+| lib/repo/pack-deps.mjs | package-contract.spec、pack.e2e、pack-deps.test | 发布物依赖闭包 = peers：require/动态 import()/.d.ts import 正向、死 peer 反向（host-row 显式 allowlist）、DSH-tag peer 范围 = engines.dsh |
 | lib/repo/publish-manifest.mjs | export-dist、pack.e2e、publish-manifest.test | 发布 manifest 收口：剥离 devDependencies/scripts + workspace 协议检查 |
 | lib/harness/clean-room.mjs | cold-start.entry、release.entry、lifecycle.entry | 干净室安装矩阵：仓外 home / 钉版 dsh / tarball 安装 / 解析祖先 / 版本合同 / 起 web |
 | lib/harness/clean-room-policy.mjs | clean-room、clean-room-policy.test、cold-start.entry、lifecycle.entry、release.entry | 干净室纯判据：仓外 home、版本 ∈ engines、profile 解析不落仓根、peer 全集派生 |
-| lib/repo/shipped-surface.mjs | b-pack、package-contract.spec、pack.e2e、record-type-closure、shipped-surface.test | 发布面自足判据正本：随包文本零 dev 引用（歧义根只认真实子目录）、README 用户段零开发命令、`files` = `exports.types` 反投影、tarball 顶层/类型集合对账 |
+| lib/repo/shipped-surface.mjs | b-pack、doctor.e2e、export-dist、lifecycle.entry、package-contract.spec、pack.e2e、record-type-closure、shipped-surface.test | 发布面自足判据正本：随包文本零 dev 引用（歧义根只认真实子目录）、README 用户段零开发命令、`files` = `exports.types` 反投影、tarball 顶层/类型集合对账 + 子路径/运行期 JS/新增行单一派生源 |
 | lib/repo/redirect-ledger.mjs | a-docs、redirect-ledger.test | 搬家账本链式解析：append-only 后旧条目的 `to` 可再次成为 `from`，解析走到最终落点；环/过深/重复 from fail-loud |
 | lib/probes/direct-authorization-boundary.mjs | entry-chain-probe、entry-chain-probe.spec | 按授权范围执行、无需重复请批的词面判定；由探针与 keyless 回归消费 |
 | lib/harness/replay-scene.mjs | replay-fixtures.spec、replay-scene.spec、snapshot-replay.entry | 场景声明消费者：roster/版本/来源形状/路径校验（缺件、串角色、垃圾锚点 fail-loud）+ 场景集发现（`replay/*/snapshot.json` 全集、防空语料、--face 全名定向） |

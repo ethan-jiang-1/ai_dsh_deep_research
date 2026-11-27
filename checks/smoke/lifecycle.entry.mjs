@@ -24,11 +24,15 @@ import { scrubbedEnv } from '../lib/shared/env.mjs'
 import { artifactFreshness, packInputRoots, packagedInputEntries } from '../lib/shared/artifact-freshness.mjs'
 import { engineIssues, moduleLeakOf, pinnedDshBin } from '../lib/harness/clean-room.mjs'
 import { peerNamesOf } from '../lib/harness/clean-room-policy.mjs'
+import { insertedRowIdsOf, packSpecifiersOf } from '../lib/repo/shipped-surface.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
 const PROFILE = 'lifecycle'
 const pkg = JSON.parse(readFileSync(join(PACK, 'package.json'), 'utf8'))
+const PACK_YAMLS = (pkg.dsh?.bundle?.patch ?? []).map((rel) => readFileSync(join(PACK, rel), 'utf8'))
+const EXPECTED_SPECS = packSpecifiersOf(PACK_YAMLS)
+const EXPECTED_ROWS = insertedRowIdsOf(PACK_YAMLS)
 const globalDsh = process.argv.includes('--global-dsh')
 const dsh = process.env.DSH_BIN ?? (globalDsh ? 'dsh' : pinnedDshBin(ROOT))
 if (dsh === null) { console.error('lifecycle.entry: NOT-RUN — vendor 钉版 dsh 缺席（vendor/dsh 未初始化）；或用 --global-dsh / DSH_BIN 显式指定'); process.exit(2) }
@@ -121,7 +125,7 @@ export async function apply() {
     const requireFromProfile = createRequire(process.env.LIFECYCLE_PROBE_BASE)
     const appBoot = await import(pathToFileURL(requireFromProfile.resolve('@deepseek-ai/dsh-app-boot')).href)
     const base = pathToFileURL(process.env.LIFECYCLE_PROBE_BASE).href
-    for (const spec of ['dsh-deep-research-pack', 'dsh-deep-research-pack/content', 'dsh-deep-research-pack/startup', 'dsh-deep-research-pack/fetch-fallback', 'dsh-deep-research-pack/method-library-tool']) {
+    for (const spec of ${JSON.stringify(EXPECTED_SPECS)}) {
       try { out.results[spec] = appBoot.readPluginMeta(spec, base) } catch (error) { out.results[spec] = { error: String(error) } }
     }
     try {
@@ -209,12 +213,11 @@ try {
 
   const dump = run(['--profile', PROFILE, '--dump-config'])
   const dumpText = `${dump.stdout ?? ''}`
-  // 本包自己的行 = 5 preset + content/client/startup/fetch-fallback/tool-present。
+  // 本包自己的行由随包 YAML 单一正本派生（5 preset + 2 worker + 6 bundle insert = 13 行）。
   // `ui-agent-team` 归团队机制层（agent-team-profile），本 smoke 不装该层，故不在此列。
-  const ours = ['preset-lead', 'preset-scout', 'preset-analyst', 'preset-critic', 'preset-method-editor',
-    'research-content', 'research-client', 'research-startup', 'research-fetch-fallback', 'tool-present']
+  const ours = EXPECTED_ROWS
   const missing = ours.filter((id) => !dumpText.includes(id))
-  check('③ dump 有本包 10 行', missing.length === 0, `缺：${missing.join(', ')}`)
+  check(`③ dump 有本包 ${ours.length} 行`, missing.length === 0, `缺：${missing.join(', ')}`)
   check('③ 未装团队层：dump 无 ui-agent-team（可选层缺席不阻断本包）', !dumpText.includes('ui-agent-team'), '团队层未装却出现 ui-agent-team 行——可选层归属/组合漂移')
   check('③ dump 无 entry not found', !/patch: entry ".*" not found/.test(`${dumpText}${dump.stderr ?? ''}`), tail(dump))
 
@@ -241,7 +244,7 @@ try {
   if (!existsSync(probeOut)) check('⑤ 显示面探针落盘', false, '探针没有写出结果（apply 没跑或 readPluginMeta 抛错）')
   else {
     const result = JSON.parse(readFileSync(probeOut, 'utf8'))
-    const specs = ['dsh-deep-research-pack', 'dsh-deep-research-pack/content', 'dsh-deep-research-pack/startup', 'dsh-deep-research-pack/fetch-fallback', 'dsh-deep-research-pack/method-library-tool']
+    const specs = EXPECTED_SPECS
     for (const spec of specs) {
       const meta = result.results?.[spec]
       const ok = meta?.title?.zh !== undefined && meta?.description?.zh !== undefined && String(meta?.icon ?? '').startsWith('data:image/svg+xml')

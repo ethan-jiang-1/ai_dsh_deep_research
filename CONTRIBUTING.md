@@ -128,9 +128,8 @@ They need pnpm, the team-layer registry/cache, and Playwright chromium (the repo
 missing prerequisites exit 2, not green.
 
 `product-boot.entry` and the display-meta item of `lifecycle.entry` additionally need the
-`node-addon-require-builtin` native build (this repo's `allowBuilds` disables that compile). Without
-it those items fail with `MODULE_NOT_FOUND … require_builtin.node`; the boot/roster/remove items in
-the same entries still judge. Recorded as a machine prerequisite in
+`node-addon-require-builtin` native addon (`bash tools/build/bootstrap.sh` checks and rebuilds it
+automatically when prebuilds are absent; `--check` reports it before running smokes). Recorded in
 [the 2026-11-24 Note](notes/implemented/2026-11-24-gate-cli-parsing-and-session-local-state.md).
 
 `pnpm verify` is the structural gate suite; `pnpm test` is the keyless regression

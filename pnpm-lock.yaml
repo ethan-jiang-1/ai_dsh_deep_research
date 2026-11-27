@@ -151,9 +151,6 @@ importers:
       '@deepseek-ai/dsh-agent-preset-registry':
         specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/preset/agent-preset-registry
-      '@deepseek-ai/dsh-client-ui-primitives':
-        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
-        version: link:../../vendor/dsh/packages/client/ui-primitives
       '@deepseek-ai/dsh-experimental-client-ui-agent-team':
         specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/experimental/client-ui-agent-team
@@ -202,33 +199,12 @@ importers:
       '@deepseek-ai/dsh-tool-workflow':
         specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/workflow/tool-workflow
-      '@deepseek-ai/dsh-tools':
-        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
-        version: link:../../vendor/dsh/packages/core/tools
-      '@deepseek-ai/dsh-web':
-        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
-        version: link:../../vendor/dsh/packages/web/web
-      '@deepseek-ai/dsh-web-deepseek-api':
-        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
-        version: link:../../vendor/dsh/packages/web/web-deepseek-api
-      '@deepseek-ai/dsh-web-fetch-http':
-        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
-        version: link:../../vendor/dsh/packages/web/web-fetch-http
       '@deepseek-ai/dsh-workflow-ptc':
         specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
         version: link:../../vendor/dsh/packages/workflow/workflow-ptc
-      '@deepseek-ai/dsh-workspace':
-        specifier: '>=0.2.1-rc.2 <=0.2.1-rc.5'
-        version: link:../../vendor/dsh/packages/workspace/workspace
       '@deepseek-ai/schemastery':
         specifier: link:../../vendor/dsh/vendor/schemastery
         version: link:../../vendor/dsh/vendor/schemastery
-      react:
-        specifier: ^18.2.0
-        version: 18.3.1
-      react-dom:
-        specifier: ^18.2.0
-        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@deepseek-ai/dsh-api-remotes':
         specifier: workspace:*
@@ -242,6 +218,12 @@ importers:
       '@deepseek-ai/dsh-client-ui-conversation':
         specifier: workspace:*
         version: link:../../vendor/dsh/packages/client/ui-conversation
+      '@deepseek-ai/dsh-client-ui-layout':
+        specifier: workspace:*
+        version: link:../../vendor/dsh/packages/client/ui-layout
+      '@deepseek-ai/dsh-client-ui-primitives':
+        specifier: workspace:*
+        version: link:../../vendor/dsh/packages/client/ui-primitives
       '@deepseek-ai/dsh-client-ui-renderer':
         specifier: workspace:*
         version: link:../../vendor/dsh/packages/client/ui-renderer
@@ -260,6 +242,9 @@ importers:
       '@deepseek-ai/dsh-client-ui-tool':
         specifier: workspace:*
         version: link:../../vendor/dsh/packages/client/ui-tool
+      '@deepseek-ai/dsh-client-ui-workspace':
+        specifier: workspace:*
+        version: link:../../vendor/dsh/packages/client/ui-workspace
       '@deepseek-ai/dsh-experimental-agent-team':
         specifier: workspace:*
         version: link:../../vendor/dsh/packages/experimental/agent-team
@@ -269,6 +254,27 @@ importers:
       '@deepseek-ai/dsh-session-projection':
         specifier: workspace:*
         version: link:../../vendor/dsh/packages/session/session-projection
+      '@deepseek-ai/dsh-tools':
+        specifier: workspace:*
+        version: link:../../vendor/dsh/packages/core/tools
+      '@deepseek-ai/dsh-web':
+        specifier: workspace:*
+        version: link:../../vendor/dsh/packages/web/web
+      '@deepseek-ai/dsh-web-deepseek-api':
+        specifier: workspace:*
+        version: link:../../vendor/dsh/packages/web/web-deepseek-api
+      '@deepseek-ai/dsh-web-fetch-http':
+        specifier: workspace:*
+        version: link:../../vendor/dsh/packages/web/web-fetch-http
+      '@deepseek-ai/dsh-workspace':
+        specifier: workspace:*
+        version: link:../../vendor/dsh/packages/workspace/workspace
+      react:
+        specifier: ^18.2.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.3.1(react@18.3.1)
       zod:
         specifier: ^4.4.3
         version: 4.4.3

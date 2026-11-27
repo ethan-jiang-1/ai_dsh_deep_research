@@ -231,7 +231,7 @@ export function typeSetIssues(actualPaths, expectedPaths) {
 export const ALLOWED_TOP_LEVEL = Object.freeze([
   'LICENSE', 'README.md', 'README.zh.md', 'package.json', 'icon.svg', 'cordis.patch.yml',
   'content', 'presets', 'workers', 'scripts', 'lib',
-  'locale', 'locale-content', 'locale-startup', 'locale-fetch-fallback', 'locale-method-library',
+  'locale', 'locale-content', 'locale-startup', 'locale-fetch-fallback', 'locale-method-library', 'locale-defaults',
 ])
 
 /** 顶层条目允许集判据（多/少都不静默：少由 pack.e2e 的必需件断言兜）。 */
@@ -239,4 +239,67 @@ export function topLevelIssues(entries) {
   const top = new Set(entries.map((entry) => entry.split('/')[0]))
   return [...top].filter((name) => !ALLOWED_TOP_LEVEL.includes(name)).sort()
     .map((name) => `tarball 顶层出现未登记条目 ${name}（允许集 = ${ALLOWED_TOP_LEVEL.join(' / ')}）`)
+}
+
+/** 从 pkg.exports 派生全部运行时 JS 产物路径（lib/*.js，按字母序去重）。 */
+export function runtimeJsPathsOf(pkg) {
+  const out = new Set()
+  for (const spec of Object.values(pkg?.exports ?? {})) {
+    const target = typeof spec === 'string' ? spec : spec?.default
+    if (typeof target === 'string' && /^\.\/lib\/[^/]+\.js$/.test(target)) {
+      out.add(target.slice(2))
+    }
+  }
+  return [...out].sort()
+}
+
+/** 从随包 YAML 文本派生全部被挂载引用的本包 specifier（根包名 + 各子路径）。 */
+export function packSpecifiersOf(yamlTexts, packName = 'dsh-deep-research-pack') {
+  const escaped = packName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const re = new RegExp(`^\\s*name:\\s*['"]?(${escaped}(?:\\/[a-z0-9-]+)?)['"]?\\s*$`, 'gm')
+  const specs = new Set()
+  for (const text of yamlTexts ?? []) {
+    for (const m of String(text ?? '').matchAll(re)) specs.add(m[1])
+  }
+  return [...specs].sort()
+}
+
+/** 从随包 YAML 文本派生本包新增（`- insert:` 顶层行）的全部行 ID（不含 preset 内嵌 plugins 子列表）。 */
+export function insertedRowIdsOf(yamlTexts) {
+  const ids = []
+  const seen = new Set()
+  for (const text of yamlTexts ?? []) {
+    const lines = String(text ?? '').split('\n')
+    let inInsert = false
+    for (const line of lines) {
+      if (/^- insert:\s*$/.test(line)) { inInsert = true; continue }
+      if (/^- /.test(line)) { inInsert = false; continue }
+      if (!inInsert) continue
+      const m = /^ {4}- id:\s*([a-z0-9-]+)\s*$/.exec(line)
+      if (m !== null && !seen.has(m[1])) {
+        seen.add(m[1])
+        ids.push(m[1])
+      }
+    }
+  }
+  return ids
+}
+
+/**
+ * 为每个本包 specifier 派生宿主 `readPluginMeta` 所需的 exports 键与对应 locale 目录。
+ * @param {string[]} specifiers
+ * @param {any} pkg
+ * @param {string} [packName]
+ */
+export function displayMetaTargetsOf(specifiers, pkg, packName = 'dsh-deep-research-pack') {
+  const exportsMap = pkg?.exports ?? {}
+  return (specifiers ?? []).map((spec) => {
+    const sub = spec === packName ? '' : spec.slice(packName.length)
+    const localeKey = `.${sub}/locale/*.json`
+    const iconKey = `.${sub}/icon`
+    const rawTarget = typeof exportsMap[localeKey] === 'string' ? exportsMap[localeKey] : null
+    const dirMatch = rawTarget === null ? null : /^\.\/([^/]+)\/\*\.json$/.exec(rawTarget)
+    const localeDir = dirMatch !== null ? dirMatch[1] : (sub === '' ? 'locale' : `locale-${sub.slice(1)}`)
+    return { spec, localeKey, iconKey, localeDir, filesGlob: `${localeDir}/**` }
+  })
 }

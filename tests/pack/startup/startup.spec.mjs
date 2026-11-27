@@ -2,10 +2,11 @@
 // 反证：删掉"无配置短路" / 删掉工作区校验 / 删掉 registry 缺席分支 → 本文件红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { runStartup } from '../../../packages/deep-research-pack/src/startup/index.ts'
+import { readSettings, writeSettings } from '../../../packages/deep-research-pack/src/startup/settings.ts'
 
 const temp = () => mkdtempSync(join(tmpdir(), 'dr-startup-'))
 const cleanup = (dir) => rmSync(dir, { recursive: true, force: true })
@@ -130,6 +131,33 @@ test('设置文件来源：建会话并回写 sessionId', async () => {
     assert.deepEqual(sessions, [{ cwd: dir, agentPreset: 'lead' }])
     const saved = JSON.parse(readFileSync(join(home, 'deep-research', 'settings.json'), 'utf8'))
     assert.equal(saved.sessionId, 'session-test')
+  } finally { cleanup(home); cleanup(dir) }
+})
+
+test('settings 权限与并发原子写：settings.json 与 .corrupt 均为 0600，同进程并发写零残留 .tmp', async () => {
+  const home = temp()
+  const dir = temp()
+  try {
+    const env = { DSH_HOME: home }
+    await Promise.all([
+      Promise.resolve().then(() => writeSettings({ workspace: dir, sessionId: 's-1' }, env)),
+      Promise.resolve().then(() => writeSettings({ workspace: dir, sessionId: 's-2' }, env)),
+    ])
+    const settingsDir = join(home, 'deep-research')
+    const settingsFile = join(settingsDir, 'settings.json')
+    if (process.platform !== 'win32') {
+      assert.equal(statSync(settingsFile).mode & 0o777, 0o600, 'settings.json 必须限制为 0600 权限')
+    }
+    assert.deepEqual(readdirSync(settingsDir).filter((f) => f.endsWith('.tmp')), [], '原子写后不得残留 .tmp 文件')
+
+    writeFileSync(settingsFile, '{bad-json', { mode: 0o644 })
+    const res = readSettings(env)
+    assert.equal(res.ok, false)
+    assert.equal(res.reason, 'corrupt')
+    const corruptFile = `${settingsFile}.corrupt`
+    if (process.platform !== 'win32') {
+      assert.equal(statSync(corruptFile).mode & 0o777, 0o600, 'settings.json.corrupt 备份必须限制为 0600 权限')
+    }
   } finally { cleanup(home); cleanup(dir) }
 })
 

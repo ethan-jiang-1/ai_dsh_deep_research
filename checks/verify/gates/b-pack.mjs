@@ -7,7 +7,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { satisfiesVersion } from '../../../packages/deep-research-pack/scripts/lib/version-range.mjs';
-import { readmeUserSectionIssues } from '../../lib/repo/shipped-surface.mjs';
+import { displayMetaTargetsOf, packSpecifiersOf, readmeUserSectionIssues } from '../../lib/repo/shipped-surface.mjs';
 import { cockpitRegistryProblems } from '../../lib/repo/docs-reference.mjs';
 import { ROOT, PACK, PRESETS, VENDOR_TAG, fail, walk, walkMany, trackedFiles } from '../context.mjs';
 import { runPackLint } from './b-pack-lint.mjs';
@@ -73,13 +73,14 @@ export function runB() {
       // 0.1.7：preset 即行，bundle 必须随包携带自己的 preset patch（否则角色根本没被声明）
       const presetPatches = list.filter((x) => typeof x === 'string' && /presets\/[a-z0-9-]+\.patch\.yml$/.test(x));
       if (presetPatches.length === 0) fail(gate, 'dsh.bundle.patch 未携带任何 presets/<role>.patch.yml（0.1.7 preset 行随 bundle 装载）');
-      // 覆盖完整性（2026-09-26 复验发现：原判据只要"≥1 条"，新增角色忘登记第 5 条会**绿而坏**）：
-      // 盘上每个 presets/<role>.patch.yml 都必须在数组里——事实源 = 盘上目录（同 role-list-sync）。
-      if (existsSync(PRESETS)) {
-        const onDisk = readdirSync(PRESETS).filter((f) => /\.patch\.yml$/.test(f)).map((f) => `./presets/${f}`);
-        if (onDisk.length === 0) fail(gate, '防空语料：presets/ 下零个 .patch.yml');
+      // 覆盖完整性（2026-09-26 复验发现：原判据只要"≥1 条"，新增角色忘登记第 5 条会**绿而坏**；
+      // 2026-11-28 扩至 workers/：非角色 worker profile 同理，盘上每个 .patch.yml 都必须进 dsh.bundle.patch）：
+      for (const [subDir, dirAbs] of [['presets', PRESETS], ['workers', join(PACK, 'workers')]]) {
+        if (!existsSync(dirAbs)) continue;
+        const onDisk = readdirSync(dirAbs).filter((f) => /\.patch\.yml$/.test(f)).map((f) => `./${subDir}/${f}`);
+        if (onDisk.length === 0) fail(gate, `防空语料：${subDir}/ 下零个 .patch.yml`);
         for (const rel1 of onDisk) {
-          if (!list.includes(rel1)) fail(gate, `presets/${rel1.replace('./presets/', '')} 在盘上但未登记进 dsh.bundle.patch——新增角色漏登记 = 绿而坏`);
+          if (!list.includes(rel1)) fail(gate, `${subDir}/${rel1.replace(`./${subDir}/`, '')} 在盘上但未登记进 dsh.bundle.patch——新增 ${subDir} 漏登记 = 绿而坏`);
         }
       }
     }
@@ -352,7 +353,13 @@ runPackLint();
     if (typeof pkg.description !== 'string' || pkg.description.trim() === '')
       fail(gate, 'package.json.description 缺失——Plugins 页卡片只剩包名');
     const files = Array.isArray(pkg.files) ? pkg.files : [];
-    for (const required of ['icon.svg', 'locale/**', 'locale-content/**', 'locale-startup/**', 'locale-fetch-fallback/**']) {
+    const patchYamls = (Array.isArray(pkg?.dsh?.bundle?.patch) ? pkg.dsh.bundle.patch : [])
+      .filter((rel) => typeof rel === 'string' && existsSync(join(PACK, rel)))
+      .map((rel) => readFileSync(join(PACK, rel), 'utf8'));
+    const specifiers = packSpecifiersOf(patchYamls);
+    if (specifiers.length === 0) fail(gate, '防空语料：dsh.bundle.patch 未解析出任何 dsh-deep-research-pack specifier');
+    const metaTargets = displayMetaTargetsOf(specifiers, pkg);
+    for (const required of ['icon.svg', ...new Set(metaTargets.map((t) => t.filesGlob))]) {
       if (!files.includes(required)) fail(gate, `files 缺 ${required}——显示元数据不会进 tarball（修正入口 = packages/deep-research-pack/package.json 的 files）`);
     }
     const forbidden = files.filter((f) => !f.startsWith('!') && (/\.map$/.test(f) || /^src\//.test(f)));
@@ -364,24 +371,25 @@ runPackLint();
       if (bytes.length > 256 * 1024) fail(gate, `icon 超过 256 KiB（${bytes.length}）——宿主会判无效元数据`);
       if (!/^\s*<svg[\s>]/u.test(bytes.toString('utf8'))) fail(gate, 'icon.svg 不是自包含 SVG');
     }
-    // 显示面：四个 specifier 各自要有 en+zh 的 title/description（子路径不读 package.json）。
-    const locales = ['locale', 'locale-content', 'locale-startup', 'locale-fetch-fallback'];
-    for (const dir of locales) {
+    // 显示面：随包 YAML 点名的每个本包 specifier 都必须有 en+zh 的 title/description 与对应 exports（子路径不读 package.json）。
+    const exports = pkg.exports ?? {};
+    for (const { localeDir, localeKey, iconKey } of metaTargets) {
       for (const lang of ['en', 'zh']) {
-        const file = join(PACK, dir, `${lang}.json`);
-        if (!existsSync(file)) { fail(gate, `locale 缺 ${dir}/${lang}.json`); continue; }
+        const file = join(PACK, localeDir, `${lang}.json`);
+        if (!existsSync(file)) { fail(gate, `locale 缺 ${localeDir}/${lang}.json`); continue; }
         let meta;
-        try { meta = JSON.parse(readFileSync(file, 'utf8')).meta } catch (error) { fail(gate, `${dir}/${lang}.json 不是合法 JSON：${String(error)}`); continue; }
+        try { meta = JSON.parse(readFileSync(file, 'utf8')).meta } catch (error) { fail(gate, `${localeDir}/${lang}.json 不是合法 JSON：${String(error)}`); continue; }
         for (const field of ['title', 'description']) {
           if (typeof meta?.[field] !== 'string' || meta[field].trim() === '')
-            fail(gate, `${dir}/${lang}.json 缺 meta.${field}——插件卡片会回退到包名/空描述`);
+            fail(gate, `${localeDir}/${lang}.json 缺 meta.${field}——插件卡片会回退到包名/空描述`);
         }
       }
+      for (const key of [localeKey, iconKey]) {
+        if (!Object.hasOwn(exports, key)) fail(gate, `exports 缺 ${key}——显示资源无法被宿主按 specifier 解析`);
+      }
     }
-    const exports = pkg.exports ?? {};
-    for (const key of ['./locale/*.json', './icon', './content/locale/*.json', './content/icon',
-      './startup/locale/*.json', './startup/icon', './fetch-fallback/locale/*.json', './fetch-fallback/icon']) {
-      if (!Object.hasOwn(exports, key)) fail(gate, `exports 缺 ${key}——显示资源无法被宿主按 specifier 解析`);
+    for (const patchGlob of ['./presets/*.patch.yml', './workers/*.patch.yml']) {
+      if (!Object.hasOwn(exports, patchGlob)) fail(gate, `exports 缺 ${patchGlob}——随包 patch 子路径未显式导出`);
     }
   }
 }

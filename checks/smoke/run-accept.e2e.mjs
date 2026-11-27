@@ -214,7 +214,11 @@ try {
     const { bundle, sessions } = writeBundle('repair', '', '# v1\n\nclean\n')
     writeSession(join(sessions, 'sess', 'session.v4.jsonl'), 'repair', WS, join(bundle, 'final', 'v1.md'))
     writeFileSync(join(bundle, 'delivered.json'), JSON.stringify({
-      version: 1, slug: 'drt_repair', present: { path: join(bundle, 'final', 'v1.md'), callId: 'old', version: 1 },
+      version: 1,
+      slug: 'drt_repair',
+      acceptedAt: '2026-10-24T02:00:00.000Z',
+      gate: { status: 'PASS', exit: 0 },
+      present: { path: join(bundle, 'final', 'v1.md'), callId: 'old', version: 1 },
     }, null, 2) + '\n')
     writeFileSync(join(bundle, 'acceptance.md'), '# Acceptance\n')
     writeFileSync(join(bundle, 'node-gate.md'), '# Gate\n')

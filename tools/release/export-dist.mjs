@@ -23,6 +23,7 @@ import { localDateStr } from '../../checks/lib/shared/local-date.mjs'
 import { packInputRoots, writeBuildManifest } from '../../checks/lib/shared/artifact-freshness.mjs'
 import { writeMarketIndex } from './market.mjs'
 import { stripDevDependencies, stripScripts } from '../../checks/lib/repo/publish-manifest.mjs'
+import { displayMetaTargetsOf, packSpecifiersOf, runtimeJsPathsOf } from '../../checks/lib/repo/shipped-surface.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PACK = join(ROOT, 'packages', 'deep-research-pack')
@@ -78,25 +79,21 @@ try {
   const tarballSha = createHash('sha256').update(readFileSync(tarball)).digest('hex')
   const listed = spawnSync('tar', ['-tzf', tarball], { encoding: 'utf8' })
   const entries = (listed.stdout ?? '').split('\n').filter(Boolean)
+  const patchYamls = (pkg.dsh?.bundle?.patch ?? []).map((rel) => readFileSync(join(PACK, rel), 'utf8'))
+  const metaTargets = displayMetaTargetsOf(packSpecifiersOf(patchYamls), pkg)
   const must = [
     'package/LICENSE',
-    'package/cordis.patch.yml',
     'package/README.md',
+    'package/README.zh.md',
     'package/package.json',
-    'package/lib/index.js',
-    'package/lib/client.js',
     'package/content/manual.md',
     'package/content/templates/run/run.md',
-    'package/lib/content.js',
-    'package/lib/startup.js',
     'package/scripts/doctor.mjs',
     'package/scripts/lib/profile-read.mjs',
     'package/icon.svg',
-    'package/locale/en.json',
-    'package/locale/zh.json',
-    'package/locale-content/en.json',
-    'package/locale-startup/en.json',
-    'package/locale-fetch-fallback/en.json',
+    ...(pkg.dsh?.bundle?.patch ?? []).map((rel) => `package/${rel.replace(/^\.\//, '')}`),
+    ...runtimeJsPathsOf(pkg).map((rel) => `package/${rel}`),
+    ...metaTargets.flatMap(({ localeDir }) => [`package/${localeDir}/en.json`, `package/${localeDir}/zh.json`]),
   ]
   const missing = must.filter((entry) => !entries.includes(entry))
   // 发布边界：sourcemap 与 lib/types 下的 JS 是构建中间产物，不是运行时；进包即用户装垃圾

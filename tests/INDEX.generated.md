@@ -72,7 +72,7 @@
 | repo | `checks/lib/repo/docs-reference` | `tests/checks/repo/docs-reference.test.mjs` |
 | repo | `checks/lib/repo/fix-evidence` | `tests/checks/repo/fix-evidence.test.mjs` |
 | repo | `checks/lib/repo/note-scan` | `tests/checks/shared/note-scan.test.mjs`<br>`tests/contracts/markdown-mask-conformance.spec.mjs` |
-| repo | `checks/lib/repo/pack-deps` | `tests/checks/repo/pack-deps.test.mjs` |
+| repo | `checks/lib/repo/pack-deps` | `tests/checks/repo/pack-deps.test.mjs`<br>`tests/pack/contract/package-contract.spec.mjs` |
 | repo | `checks/lib/repo/publish-manifest` | `tests/checks/repo/publish-manifest.test.mjs` |
 | repo | `checks/lib/repo/redirect-ledger` | `tests/checks/repo/redirect-ledger.test.mjs` |
 | repo | `checks/lib/repo/release-anchor` | `tests/checks/repo/release-anchor.test.mjs` |
@@ -99,7 +99,7 @@
 | shared | `checks/lib/shared/probe-status-tab` | `tests/run/probes/probe-status-tab.spec.mjs` |
 | shared | `checks/lib/shared/profile-health` | `tests/run/channel/profile-health.spec.mjs` |
 | shared | `checks/lib/shared/replay-request` | `tests/run/harness/replay-request.spec.mjs` |
-| shared | `checks/lib/shared/roles` | `tests/pack/contract/role-consumer-matrix.spec.mjs`<br>`tests/pack/fetch-fallback/fetch-fallback-orchestration.spec.mjs`<br>`tests/pack/scripts/presets.spec.mjs`<br>`tests/run/gates/strategy-core.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/harness/replay-scene.spec.mjs` |
+| shared | `checks/lib/shared/roles` | `tests/pack/contract/content-disclosure.spec.mjs`<br>`tests/pack/contract/role-consumer-matrix.spec.mjs`<br>`tests/pack/fetch-fallback/fetch-fallback-orchestration.spec.mjs`<br>`tests/pack/scripts/presets.spec.mjs`<br>`tests/run/gates/strategy-core.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/harness/replay-scene.spec.mjs` |
 | shared | `checks/lib/shared/run-receipt` | `tests/contracts/run-bundle-charter.spec.mjs`<br>`tests/run/gates/run-receipt.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs` |
 | shared | `checks/lib/shared/run-state` | `tests/run/shared/run-state.spec.mjs` |
 | shared | `checks/lib/shared/sandbox-capability` | `tests/run/shared/sandbox-capability.spec.mjs` |

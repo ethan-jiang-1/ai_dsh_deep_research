@@ -140,7 +140,7 @@ function main(argv = process.argv.slice(2)) {
   if (receiver) {
     console.log('  receiver：tag/manual/tarball/manifest 已对齐；源指纹由 sender 的 --handoff 证明。')
   } else {
-    console.log('  下一步：git push origin master && git push origin ' + tag + '；然后 npm publish')
+    console.log(`  下一步：git push origin master && git push origin ${tag}；然后 npm publish "_dist/dsh-deep-research-pack-${version}.tgz"`)
   }
   return 0
 }

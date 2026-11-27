@@ -24,8 +24,8 @@ import { runD } from './gates/d-vendor.mjs';
 import { runE } from './gates/e-workspace.mjs';
 import { runF } from './gates/f-repo.mjs';
 
-// `--only=<gate[,gate]>`：只判指定门禁（输出与退出码都只看它们）。其余门禁照常执行
-// （读文件、无副作用），只是失败不计入、汇总不打印——省的是噪声与注意力，不是时间。
+// `--only=<gate[,gate]>`：只判指定门禁（输出与退出码都只看它们），且按域跳过与 `only` 无交集的模块，
+// 避免跑单道门禁仍拉起无关域的全树扫描或 `oxlint` 子进程；同域内门禁的判据与全量跑完全一致。
 const onlyNames = process.argv
   .filter((a) => a.startsWith('--only='))
   .flatMap((a) => a.slice('--only='.length).split(','))
@@ -41,13 +41,30 @@ if (only !== null) {
   }
 }
 
-runA();
-runB();
-runClientTokens();
-runC();
-runD();
-runE();
-runF();
+/** @type {Array<[() => void, string[]]>} */
+const DOMAIN_RUNNERS = [
+  [runA, ['md-utf8-newline', 'md-links', 'md-anchors', 'doc-paths', 'doc-drefs', 'archived-note-pointer', 'count-free', 'doc-now-only', 'doc-budgets', 'surface-claims', 'docs-reference-fresh']],
+  [runB, ['preset-structure', 'pack-bundle-compat', 'client-half', 'row-deps', 'pack-contract-sync', 'role-list-sync', 'client-keys', 'client-effect-wrap', 'pack-lint', 'cockpit-doc-registry', 'run-context-single-source', 'pack-manifest', 'market-index', 'readme-shape', 'release-vocab']],
+  [runClientTokens, ['client-tokens']],
+  [runC, ['note-tree', 'note-format', 'note-status', 'note-graduation-rewrite', 'dev-skill-format', 'proposed-pointer-live']],
+  [runD, ['vendor-pin', 'vendor-clean', 'pin-agreement', 'align-ledger', 'discipline-na-trigger', 'discipline-state-vocab', 'repo-conventions', 'vendor-links']],
+  [runE, ['content-shape', 'dev-runtime-clean', 'overlay-fresh', 'release-version', 'dist-manual-version', 'dist-tarball', 'dist-freshness', 'dist-manual-fresh']],
+  [runF, ['claude-symlink', 'secrets-untracked', 'dev-parity', 'host-paths', 'probe-registry', 'guard-red-record', 'gate-ledger-sync', 'test-placement', 'entry-chain', 'backlog-liveness', 'staged-change-pairing', 'port-exclusive', 'hooks-active', 'call-surface']],
+];
+
+{
+  const covered = new Set(DOMAIN_RUNNERS.flatMap(([, list]) => list));
+  const unmapped = gates.filter((g) => !covered.has(g));
+  const extra = [...covered].filter((g) => !gates.includes(g));
+  if (unmapped.length > 0 || extra.length > 0) {
+    console.error(`verify: DOMAIN_RUNNERS 与 context.gates 失步（缺：${unmapped.join(', ') || '无'}；多：${extra.join(', ') || '无'}）`);
+    process.exit(2);
+  }
+}
+
+for (const [runDomain, domainGates] of DOMAIN_RUNNERS) {
+  if (only === null || domainGates.some((g) => only.has(g))) runDomain();
+}
 
 // ── 汇报 ──
 // 归因正则钉 [^\]]+（到首个 ] 为止）：贪婪 (.+)\] 会被消息内嵌的 ]（如队列行的 [RFC] 链接）

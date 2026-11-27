@@ -16,6 +16,8 @@ test('BUG-104 / BUG-113 只认本仓 DSH web 命令行；仓内无关 listener �
   const harnessSrc = readFileSync(join(ROOT, 'checks/lib/shared/web-harness.mjs'), 'utf8')
   assert.ok(harnessSrc.includes("'--import', 'tsx/esm', bin, '--profile'"), 'web-harness 启动 argv 形状仍在位')
   assert.equal(isOwnListener(`node --import tsx/esm ${vendorBin} --profile deep-research -- --port 3103 --no-open`), true)
+  assert.equal(isOwnListener(`/Users/me/.nvm/versions/node/v22.23.1/bin/node --import tsx/esm ${vendorBin} --profile data.entry -- --port 3141 --no-open`), true, 'process.execPath 绝对路径 node（nvm/volta/homebrew）必须被认作本仓 DSH 进程')
+  assert.equal(isOwnListener('/Users/me/.nvm/versions/node/v22.23.1/bin/node /Users/me/ai_dsh_deep_research/checks/my-server.mjs'), false, '绝对路径 node 跑非 DSH 入口仍必须拒杀')
   assert.equal(isOwnListener('node /Users/me/ai_dsh_deep_research/packages/deep-research-pack/lib/client.js'), false)
   assert.equal(isOwnListener('python3 -m http.server 3103'), false)
   assert.equal(isOwnListener('tail -f /Users/me/ai_dsh_deep_research/runtime/x.log'), false)

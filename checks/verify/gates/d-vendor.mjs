@@ -217,6 +217,12 @@ export function runD() {
             if (f.endsWith('.md') && !f.endsWith('.zh.md')) must.push(`${sub}/${f}`);
           }
         }
+        const upgradeDir = join(V, 'docs', 'upgrade-guide');
+        if (existsSync(upgradeDir)) {
+          for (const d of readdirSync(upgradeDir, { withFileTypes: true })) {
+            if (d.isDirectory()) must.push(`docs/upgrade-guide/${d.name}`);
+          }
+        }
         for (const rel of ['package.json', '.editorconfig', '.gitattributes', 'lefthook.yml', 'vendor/README.md', 'snapshots/AGENTS.md', '.github/AGENTS.md', 'packages/README.md', 'scripts/run-gates.ts', 'scripts/doc-budgets.manifest.json']) {
           if (existsSync(join(V, rel))) must.push(rel);
         }

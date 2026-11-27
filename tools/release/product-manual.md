@@ -253,7 +253,7 @@ DSH 的配置层从低到高：Config schema 默认值 → bundle patch（本包
 - **整份替换**：patch 对目标 row 的 `config` 是整份替换，不是字段合并。只写 `port` 会丢 `host` 等必填字段，required plugin 可能在 boot 时失败；要么写全，要么只覆盖非必填字段。
 - **`!!js` 表达式**：row 保留表达式时，`--port` 等 app 参数才能压过 config；用户 patch 换成字面值后，参数会被静默忽略。
 - **Settings 页**：只有 `research-fetch-fallback.enabled` 标了 `.volatile()`，可即时生效；超时等其余字段不是 volatile。
-- **组合树（`--dump-config`）**：应出现 `preset-lead`、`research-content`、`research-client`、`research-startup`、`research-fetch-fallback`、`tool-present`、`session-query-sqlite`；同时改写 base 的 `web`（检索）、`llm-deepseek`（重试）、`session-query-sqlite`（会话检索）与 `agent-preset-registry`（默认 preset = lead）。打开团队层时还会有 `ui-agent-team`；stderr 不应有 `patch: entry "…" not found`。
+- **组合树（`--dump-config`）**：应出现 `preset-{lead,scout,analyst,critic,method-editor}`、`preset-{research-worker,research-wave}`、`research-content`、`research-defaults`、`research-client`、`research-startup`、`research-fetch-fallback`、`tool-present`、`session-query-sqlite`；同时改写 base 的 `web`（检索）、`llm-deepseek`（重试）、`session-query-sqlite`（会话检索）与 `agent-preset-registry`（默认 preset = lead）。打开团队层时还会有 `ui-agent-team`；stderr 不应有 `patch: entry "…" not found`。
 
 ## 已知限制与延后工作
 

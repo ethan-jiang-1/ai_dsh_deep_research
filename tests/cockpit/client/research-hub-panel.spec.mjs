@@ -196,6 +196,8 @@ test('BUG-451 index.ts startResearch：通过 buildStartResearchOptions 传递 p
   )
   assert.doesNotMatch(src, /\binitialPrompt\b/, '不得使用不存在于 vendor StartSessionOptions 的 initialPrompt 字段')
   assert.match(src, /buildStartResearchOptions\(/, 'startResearch 应复用 buildStartResearchOptions 构造 StartSessionOptions')
+  assert.doesNotMatch(src, /\.get\(\s*['"]layout['"]\s*\)/, 'layout 服务必须走显式 Cordis inject，禁止无类型 .get("layout") 静默降级')
+  assert.match(src, /export const inject = \[[^\]]*'layout'/, 'export const inject 必须声明 layout 服务依赖')
 })
 
 // 负例留证 2026-11-27：BUG-452——ResearchHubPanel Lenses 页内点击 DefaultsPanel 的「方法库 ›」必须切到 methods 页签。

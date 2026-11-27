@@ -101,12 +101,24 @@ if (manifest === null) {
   // 半装/旧装：profile 认了本包，但安装副本缺 patch/client 产物时 roster 会空或驾驶舱白屏。
   const installedRoot = join(profileDir, 'node_modules', PACK_NAME)
   if (installed !== null && existsSync(installedRoot)) {
-    const required = [
-      'cordis.patch.yml',
-      ...(pkg.dsh?.bundle?.patch ?? []).filter((p) => p.startsWith('./presets/')).map((p) => p.slice(2)),
-      'lib/client.js', 'lib/index.js', 'lib/startup.js', 'lib/content.js', 'lib/fetch-fallback.js', 'lib/method-library-tool.js',
-      'content/manual.md', 'locale/en.json', 'locale/zh.json',
-    ]
+    const bundlePatches = (pkg.dsh?.bundle?.patch ?? []).map((p) => p.replace(/^\.\//, ''))
+    const runtimeJs = Object.values(pkg.exports ?? {})
+      .map((spec) => (typeof spec === 'string' ? spec : spec?.default))
+      .filter((t) => typeof t === 'string' && /^\.\/lib\/[^/]+\.js$/.test(t))
+      .map((t) => t.slice(2))
+    const localeFiles = Object.values(pkg.exports ?? {})
+      .filter((spec) => typeof spec === 'string' && /^\.\/locale[^/]*\/\*\.json$/.test(spec))
+      .flatMap((spec) => {
+        const dir = spec.slice(2).replace(/\/\*\.json$/, '')
+        return [`${dir}/en.json`, `${dir}/zh.json`]
+      })
+    const required = [...new Set([
+      ...bundlePatches,
+      ...runtimeJs,
+      ...localeFiles,
+      'content/manual.md',
+      'icon.svg',
+    ])]
     const missing = required.filter((p) => !existsSync(join(installedRoot, p)))
     record(missing.length === 0, '安装副本完整性', missing.length === 0 ? `${required.length} 件在场` : `缺 ${missing.join(', ')}；重装本包`)
   }

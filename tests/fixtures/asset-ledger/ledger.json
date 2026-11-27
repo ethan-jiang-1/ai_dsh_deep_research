@@ -1869,7 +1869,7 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "startup — 产品 Host 启动行（D40）：env/设置 → 登记工作区 → best-effort Lead 会话。",
-      "oracleType": "structured",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {

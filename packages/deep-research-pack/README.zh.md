@@ -40,10 +40,10 @@ Analyst、Critic、Method Editor）、两个非角色 worker profile（Research 
 
 ### 安装到 profile
 
-**1. 它是什么、装到哪里。** 一个**组合包**：`package.json` 在 `dsh.bundle.patch` 下声明六个
+**1. 它是什么、装到哪里。** 一个**组合包**：`package.json` 在 `dsh.bundle.patch` 下声明八个
 patch 文件。它装进名为 `deep-research` 的 **custom profile**；profile 是用户自己的具名组装，不是本包
 发布的东西。安装后，该 profile 的 `dsh.profile.bundles` 含有 `dsh-deep-research-pack`，该组合包插入
-`preset-{lead,scout,analyst,critic,method-editor}`、`preset-{research-worker,research-wave}`、`research-content`、`research-client`、
+`preset-{lead,scout,analyst,critic,method-editor}`、`preset-{research-worker,research-wave}`、`research-content`、`research-defaults`、`research-client`、
 `research-startup`、`research-fetch-fallback` 与 `tool-present`。团队可视化行（`ui-agent-team`）
 由团队机制层提供（同一 profile 内单独安装），本包不插它。
 
@@ -56,7 +56,7 @@ dsh --profile deep-research --from-default-profile web --dump-default-config
 
 不要在已存在的 profile 上执行它：它会替换依赖与用户 patch。下一步把当前本地 tarball 装进该 profile。
 
-**3. 怎么装（当前）。** 0.3.7 以本地 tarball 交付；npm/Plugins 页路径为 **staged**（尚未发布 npm）。
+**3. 怎么装（当前）。** 0.3.8 以本地 tarball 交付；npm/Plugins 页路径为 **staged**（尚未发布 npm）。
 把 tarball 装进 profile：
 
 ```sh
@@ -69,7 +69,7 @@ dsh plugin --profile deep-research add file:/path/to/dsh-deep-research-pack-<ver
 安装手册；本节只是包级摘要。
 
 **4. CLI 安装（包名形式，发布后；也用于 Web 自动化或离线）。** `dsh plugin --profile` 转发给 pnpm；
-0.3.7 当前安装走第 3 步的本地 tarball，下面的包名形式在 npm 发布后以及 Web 自动化/离线时使用。
+0.3.8 当前安装走第 3 步的本地 tarball，下面的包名形式在 npm 发布后以及 Web 自动化/离线时使用。
 npm/源码版 `dsh` 拒绝 `desktop` profile；Desktop 应用自有的载体可以管理它，但第三方说明应
 停留在显式的非 `desktop` profile 上：
 
@@ -135,7 +135,7 @@ dsh --profile deep-research --no-open --port 0
 
 ### 升级与回退
 
-0.3.7 升级用新版本的 tarball 重走第 3 步；npm 发布后也可用 Plugins 页更新或包名形式。
+0.3.8 升级用新版本的 tarball 重走第 3 步；npm 发布后也可用 Plugins 页更新或包名形式。
 然后在组合包成员关系变化时**重启该 profile**。仅配置的修改在启用 HMR
 时可以热重载。DSH 没有命令级回退：回退就是重装旧的确切版本，且旧包必须满足正在运行的 DSH 的
 `engines.dsh`。工作区数据不会回退。
@@ -198,7 +198,7 @@ dsh plugin --profile deep-research remove @deepseek-ai/dsh-experimental-agent-te
 
 `cordis.patch.yml` 是组合包层。它把 preset 名册默认值设为 `lead`，改写 `web`（搜索 + 抓取选择）、
 `llm-deepseek`（重试策略）、`session-query-sqlite`（`openAt: first-search`，`path: ':memory:'`）与
-`agent-preset-registry`，并插入 `research-fetch-fallback`、`tool-present` 以及本包的内容、启动与
+`agent-preset-registry`，并插入 `research-fetch-fallback`、`tool-present` 以及本包的内容、默认、启动与
 client 行。团队可视化行（`ui-agent-team`）归团队机制层，不在本 patch 内。
 `presets/<role>.patch.yml` 是每个角色一条 `@deepseek-ai/dsh-agent-preset` 行；
 `presets/<role>/skills/` 存放该角色的方法论 skill。`content/` 以 runtime context 注入，不写入工作区。
@@ -239,7 +239,7 @@ client 行。团队可视化行（`ui-agent-team`）归团队机制层，不在�
 
 工具 schema 在同一请求序列内稳定；逐操作命令文本与方法条目作为用户内容追加，不替换前缀。其他行是组合载体，其模型可见行为由被插入的行包各自拥有。
 
-### 研究角色（Lead / Scout）
+### 研究角色（Lead / Scout / Analyst / Critic）
 
 #### 模型看到什么
 
@@ -247,7 +247,7 @@ client 行。团队可视化行（`ui-agent-team`）归团队机制层，不在�
 
 #### Token 影响
 
-源仓的维护者冒烟捕获真实组装的首请求计价。稳定、由包版本决定的面：Lead 工具 schema 6,634 token、Scout 4,999、手册 2,506 ≈ Lead 消息 token 的 50.6%。绝对总数（Lead ≈11.6k、Scout ≈8.7k）随时钟注入变化；用冒烟重生成。比较性估计，非特定 provider 分词或计费。
+源仓的维护者冒烟捕获全部五个预设真实组装的首请求计价。稳定、由包版本决定的面：Lead 工具 schema 6,634 token、Scout 4,999、Analyst 4,999、Critic 5,894、Method Editor 5,583、手册 2,507 ≈ Lead 消息 token 的 50.6%。绝对总数（Lead ≈11.6k、Scout ≈8.7k、Analyst ≈8.7k、Critic ≈9.7k、Method Editor ≈9.3k）随时钟注入变化；用冒烟重生成。比较性估计，非特定 provider 分词或计费。
 
 #### KV 缓存影响
 

@@ -12,9 +12,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { genericFiles, manualT0 } from '../handbook-surface-helpers.mjs';
 import { PACK, loadPreset } from '../preset-helpers.mjs';
+import { presetRoles } from '../../../checks/lib/shared/roles.mjs';
 import {
   estimateFixedDensity,
   LEAD_PERSONA_MAX_BYTES,
@@ -23,9 +25,14 @@ import {
   RESIDENT_TOTAL_MAX_BYTES,
   RESIDENT_TOTAL_MAX_CHARS,
   RESIDENT_TOTAL_MAX_TOKENS,
+  ROLE_PERSONA_BUDGETS,
   T0_HARD_MAX_CHARS,
+  T0_MAX_BYTES,
+  T0_MAX_TOKENS,
   T0_TRIGGER_CHARS,
 } from '../../../checks/lib/repo/content-budget.mjs';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 
 const CONTENT = join(PACK, 'content');
 const GENERIC = join(CONTENT, 'generic');
@@ -42,10 +49,31 @@ function leadPersona() {
   return text;
 }
 
-test('T0 常驻面 ≤ 下放触发阈值', () => {
+test('T0 常驻面 ≤ 下放触发阈值（char / byte / token）', () => {
   const t0 = manualT0();
   assert.ok(t0.length <= T0_TRIGGER_CHARS,
     `manual T0 ${t0.length} 字符 > 下放触发 ${T0_TRIGGER_CHARS}——先下放/压缩；硬顶 ${T0_HARD_MAX_CHARS} 不是豁免`);
+  const bytes = Buffer.byteLength(t0, 'utf8');
+  const tokens = estimateFixedDensity(t0);
+  assert.ok(bytes <= T0_MAX_BYTES, `manual T0 ${bytes} B > 预算 ${T0_MAX_BYTES} B——先下放/压缩`);
+  assert.ok(tokens <= T0_MAX_TOKENS, `manual T0 ${tokens} tok > 预算 ${T0_MAX_TOKENS} tok——先下放/压缩`);
+});
+
+test('全部角色 persona 常驻面均有登记且 ≤ 各自 char/byte/token 预算', () => {
+  const roles = presetRoles(ROOT);
+  assert.ok(roles.length >= 5, `防空语料：盘上 preset 角色过少（${roles.length}）`);
+  for (const role of roles) {
+    const budget = ROLE_PERSONA_BUDGETS[role];
+    assert.ok(budget !== undefined, `presets/${role}.patch.yml 未在 content-budget.mjs 的 ROLE_PERSONA_BUDGETS 登记预算`);
+    const row = loadPreset(role).rows.find((r) => r?.id === 'persona');
+    const text = row?.config?.prefix;
+    assert.equal(typeof text, 'string', `${role} preset 缺 persona prefix`);
+    const bytes = Buffer.byteLength(text, 'utf8');
+    const tokens = estimateFixedDensity(text);
+    assert.ok(text.length <= budget.maxChars, `${role} persona ${text.length} 字符 > 预算 ${budget.maxChars}`);
+    assert.ok(bytes <= budget.maxBytes, `${role} persona ${bytes} B > 预算 ${budget.maxBytes} B`);
+    assert.ok(tokens <= budget.maxTokens, `${role} persona ${tokens} tok > 预算 ${budget.maxTokens} tok`);
+  }
 });
 
 test('lead persona 常驻面 ≤ 预算', () => {

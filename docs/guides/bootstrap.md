@@ -17,14 +17,15 @@ pnpm verify && pnpm test
 
 - `pnpm install` 以 `link:vendor/dsh/...` 解析工作区依赖（受 `vendor-links` 门禁校验）。
 - `source tools/env.sh` 幂等完成三件事：① 将 `DSH_HOME` 指向 `runtime/harness-home`（数据面隔离，不动日用 `~/.dsh`）；② 拦截裸 `dsh` 指向本仓 `vendor/dsh` 源码（代码面隔离）；③ 激活 `tools/hooks/pre-commit`（`hooks-active` 门禁校验）。
-- **一键预检**：`bash tools/build/bootstrap.sh --check` 检查 Node/pnpm/git、submodule、依赖、vendor 构建产物、env 与凭据状态；不带 `--check` 时幂等补齐缺件。
+- **一键预检**：`bash tools/build/bootstrap.sh --check` 检查 Node/pnpm/git、submodule、依赖、vendor 与本包构建产物、`node-addon-require-builtin` 原生插件、env 与凭据状态；不带 `--check` 时幂等补齐缺件。
 
-## 2. 构建 vendor 产物（L1 / L2 / `pnpm typecheck` / `pnpm dsh` / run 通道前置）
+## 2. 构建 vendor 与插件包产物（L1 / L2 / `pnpm typecheck` / `pnpm dsh` / run 通道前置）
 
-DSH 0.1.7+ 启动与双半类型检查依赖 vendor 构建产物（逐包 `lib/types`、`lib/typert.<face>.js`、`lib/client.js` 与前端壳）。fresh clone 首次跑 L1/L2/typecheck/run 通道，或每次换 `vendor/dsh` pin 后，执行：
+DSH 0.1.7+ 启动与双半类型检查依赖 vendor 构建产物（逐包 `lib/types`、`lib/typert.<face>.js`、`lib/client.js` 与前端壳），浏览器与打包冒烟另依赖本包 `packages/deep-research-pack/lib/`。fresh clone 首次跑 L1/L2/typecheck/run 通道，或每次换 `vendor/dsh` pin 后，执行：
 
 ```sh
-bash tools/build/vendor-build.sh          # 首次构建（换 pin 后加 --clean 清旧产物）
+bash tools/build/vendor-build.sh          # 首次构建 vendor（换 pin 后加 --clean 清旧产物）
+pnpm build                                # 构建 packages/deep-research-pack/lib/（host + client + types）
 pnpm typecheck && pnpm lint               # 验证 pack 双半 TS 类型与脚本 checkJs/oxlint
 ```
 

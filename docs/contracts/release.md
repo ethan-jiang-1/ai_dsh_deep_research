@@ -1,7 +1,7 @@
 # 发布版本、tag 与 npm 发布顺序
 
 > **读法**：本页是版本号单一源、git annotated tag、handoff 锚与发布顺序的唯一合同，发布前逐条执行。
-> **当前发布形态（0.3.7）= 本地 tarball；npm publish 未执行（凭据未就绪）。以下 npm 顺序是发布后路径，不是当前完成条件。**
+> **当前发布形态（0.3.8）= 本地 tarball；npm publish 未执行（凭据未就绪）。以下 npm 顺序是发布后路径，不是当前完成条件。**
 > 决定理由与输掉的方案 = [release-versioning Note](../../notes/implemented/2026-10-25-release-versioning.md)。
 
 ## 单一版本源
@@ -44,11 +44,11 @@
    `node checks/release/release-check.mjs --handoff`（tag=HEAD、工作树干净、manual sha=制品 sha、
    制品由当前源生成），再 `git push origin master` + `git push origin X.Y.Z`。
    接收方在 clean clone 上跑 `node checks/release/release-check.mjs --receiver`（tag/manual/tarball/manifest）。
-8. `npm publish`（在 `packages/deep-research-pack`，需 `npm login`/2FA）；发布后
+8. `npm publish "_dist/dsh-deep-research-pack-<version>.tgz"`（必须直接发布 `export-dist` 剥离了 `workspace:*` `devDependencies` 与 `scripts` 的已验 tarball，严禁在 `packages/deep-research-pack/` 裸跑 `npm publish`；需 `npm login`/2FA）；发布后
    `npm view dsh-deep-research-pack@X.Y.Z version`。
 9. 发布后 tag 不再移动；后续修复发新 patch，不改旧 tag。
 
-**市场索引的时序**：`_dist/market.json` 是发现面元数据，不是安装单位；0.3.7 它是 **staged 空索引**
+**市场索引的时序**：`_dist/market.json` 是发现面元数据，不是安装单位；0.3.8 它是 **staged 空索引**
 （`plugins: []` + staged 文案），不承诺可安装。npm publish 成功后由发布流程恢复条目；索引内容
 （版本/engines/图标）由 `export-dist` 从包清单与 locale 生成，不手写。
 

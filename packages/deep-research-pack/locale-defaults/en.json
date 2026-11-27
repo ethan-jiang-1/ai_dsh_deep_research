@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Project Defaults",
+    "description": "Injects workspace research defaults and registers the /research-defaults host command."
+  }
+}

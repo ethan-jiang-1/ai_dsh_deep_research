@@ -18,8 +18,8 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scrubbedEnv } from '../lib/shared/env.mjs'
 import {
-  filesAllowlistIssues, readmeUserSectionIssues, shippedSourceFilesOf, shippedTextIssues, topLevelIssues,
-  typeClosureOf, typeSetIssues,
+  displayMetaTargetsOf, filesAllowlistIssues, packSpecifiersOf, readmeUserSectionIssues, runtimeJsPathsOf,
+  shippedSourceFilesOf, shippedTextIssues, topLevelIssues, typeClosureOf, typeSetIssues,
 } from '../lib/repo/shipped-surface.mjs'
 import { packDepsIssues } from '../lib/repo/pack-deps.mjs'
 import { scriptIssues, workspaceProtocolIssues } from '../lib/repo/publish-manifest.mjs'
@@ -47,7 +47,17 @@ let listed = []
 try { listed = JSON.parse(run.stdout)[0].files.map((f) => f.path) } catch {}
 check(run.status === 0 && listed.length > 0, 'npm pack --dry-run --json 可解析', (run.stderr || '').slice(-500))
 const has = (rel) => listed.includes(rel)
-for (const required of ['package.json', 'cordis.patch.yml', 'lib/index.js', 'lib/client.js', 'lib/content.js', 'lib/startup.js', 'presets/lead.patch.yml', 'content/manual.md', 'content/templates/run/run.md', 'scripts/doctor.mjs']) {
+const patchYamls = (pkg.dsh?.bundle?.patch ?? []).map((rel) => readFileSync(join(PACK, rel), 'utf8'))
+const requiredEntries = [
+  'package.json',
+  ...(pkg.dsh?.bundle?.patch ?? []).map((rel) => rel.replace(/^\.\//, '')),
+  ...runtimeJsPathsOf(pkg),
+  ...displayMetaTargetsOf(packSpecifiersOf(patchYamls), pkg).flatMap(({ localeDir }) => [`${localeDir}/en.json`, `${localeDir}/zh.json`]),
+  'content/manual.md',
+  'content/templates/run/run.md',
+  'scripts/doctor.mjs',
+]
+for (const required of [...new Set(requiredEntries)]) {
   check(has(required), `tarball 含 ${required}`)
 }
 for (const forbidden of ['.env', '.credentials' + '.yaml', 'node_modules', '_dist']) {

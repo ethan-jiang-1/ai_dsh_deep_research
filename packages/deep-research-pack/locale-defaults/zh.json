@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "项目研究默认",
+    "description": "向会话注入工作区研究默认，并注册 /research-defaults 宿主命令。"
+  }
+}

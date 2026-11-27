@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { Context } from '@deepseek-ai/cordis'
@@ -76,30 +76,45 @@ async function main(): Promise<void> {
   let ctx: Context | undefined
   try {
     loadEnv(NAME)
+    const roleIds = readdirSync(join(PACK, 'presets'))
+      .filter((f) => f.endsWith('.patch.yml'))
+      .map((f) => f.replace(/\.patch\.yml$/, ''))
+      .sort()
+    const workerIds = readdirSync(join(PACK, 'workers'))
+      .filter((f) => f.endsWith('.patch.yml'))
+      .map((f) => f.replace(/\.patch\.yml$/, ''))
+      .sort()
     ctx = await bootProductionProfile({
       binName: NAME,
       profile: 'headless',
       overlayPaths: [
         patchPath,
-        presetPatch('lead'), presetPatch('scout'), presetPatch('analyst'), presetPatch('critic'), presetPatch('method-editor'),
-        workerPatch('research-worker'), workerPatch('research-wave'),
+        ...roleIds.map(presetPatch),
+        ...workerIds.map(workerPatch),
       ],
     })
-    const lead = await priceRole(ctx, 'lead', '研究一下 2026 年开源推理模型的进展。')
-    const scout = await priceRole(ctx, 'scout', '侦察开源推理模型的来源。')
-    assert(lead.total > 0 && scout.total > 0, 'first-request estimate must be positive')
-    assert(lead.toolNames.length > 0 && scout.toolNames.length > 0, 'role request carried no tools')
+    const allRoles = []
+    for (const id of roleIds) {
+      allRoles.push(await priceRole(ctx, id, `探针首请求计价（preset=${id}）。`))
+    }
+    for (const r of allRoles) {
+      assert(r.total > 0, `${r.role}: first-request estimate must be positive`)
+      assert(r.toolNames.length > 0, `${r.role}: role request carried no tools`)
+    }
 
     const manual = readFileSync(join(PACK, 'content/manual.md'), 'utf8')
     const manualTokens = estimateMessage({ role: 'user', content: [{ type: 'text', text: manual }] })
     assert(manualTokens > 0, 'manual.md token estimate must be positive')
     const manualMarker = manual.split('\n')[0]
-    assert(lead.requestJson.includes(manualMarker), 'Lead first request did not actually inject the research manual (D40)')
-    assert(scout.requestJson.includes(manualMarker), 'Scout first request did not actually inject the research manual (D40)')
+    for (const r of allRoles) {
+      assert(r.requestJson.includes(manualMarker), `${r.role} first request did not actually inject the research manual (D40)`)
+    }
+    const lead = allRoles.find((r) => r.role === 'lead')
+    assert(lead !== undefined, 'lead role missing from presets/')
 
     process.stdout.write(`${JSON.stringify({
       type: 'model-experience.e2e',
-      roles: [lead, scout],
+      roles: allRoles.map(({ requestJson: _omit, ...summary }) => summary),
       manualTokens,
       manualShareOfLeadMessages: Number((manualTokens / lead.messageTokens).toFixed(3)),
     })}\n`)
