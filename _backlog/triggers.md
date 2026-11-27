@@ -6,6 +6,7 @@
 
 | 对象 | 当前决定 | 具体观察（出现位置） | owner |
 |---|---|---|---|
+| 真模型活流 UX 边界 | 三轮核查已用合成回放补证 UI 反应（纯函数 L0 覆盖 `shouldOpenFinal`/`draftInProgress`）；live SSE 推流的 `deliverables/presented` 焦点保护、live `agent-team` 投影与 `MethodCoach` 真多轮访谈因无 `DEEPSEEK_API_KEY` 未实证 | 下一次 L4-lite / `client-hitl` 真模型 run 在场时：验焦点保护、`MemberActivity` 对齐与教练多轮；异常 → 引用[第三轮 Note](../notes/implemented/2026-11-27-cockpit-ux-ui-round3-verification.md) 建卡；验证绿 → 移除本行 | [第三轮 Note](../notes/implemented/2026-11-27-cockpit-ux-ui-round3-verification.md) |
 | 内容实质两入口（dev-only） | `cockpit-truth-substance`（zh 六场景）与 `cockpit-locale`（en 二场景）在树内，分别 19/19、3/3；未进 CI/nightly | 连续两轮稳定，或 `client-load` 吸收 → 升 nightly；任一场景复发 → 引用批 Note 建卡 | [批 Note](../notes/implemented/2026-11-23-observation-substance.md) |
 | 379 subagent 顶栏计数 | vendor-owned（pack locale 无该键）；本批只修 pack-owned evidence/questions/checkpoints/nodes/tasks | vendor 暴露 locale 计数键或用户报告顶栏 `1 subagents` → 另立 vendor 边界卡，不冒充 pack 修好 | [批 Note](../notes/implemented/2026-11-23-observation-substance.md) |
 | 380 主 tab 短标签 | pack 用 `Methods` + 完整 `Method library` 页标题；不改 vendor 宽度 | 用户要求完整 `Method Library` 标签或短标签仍被截断 → 另议布局/标题，不改 vendor | [批 Note](../notes/implemented/2026-11-23-observation-substance.md) |

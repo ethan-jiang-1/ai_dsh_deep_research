@@ -1,15 +1,15 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-27
 ---
 
 # 推敲：全量 UX/UI 端到端与异常态全面核查（发现即建 BUG 卡）
 
-> 立卡：2026-11-27 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
-> 去向：implemented — `notes/implemented/2026-11-27-cockpit-ux-ui-full-verification.md`（全量过完并产出缺陷台账后同变更落盘）
-> 前置依据：[2026-11-26-cockpit-ux-ui-native-upgrade](../_archived/settled_issues/2026-11-26-cockpit-ux-ui-native-upgrade.md) · [40-research-cockpit](../../docs/design/40-research-cockpit.md) · [guides/67 测试策略](../../docs/guides/67-test-strategy.md)
+> 立卡：2026-11-27 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 去向：implemented — [2026-11-27-cockpit-ux-ui-full-verification](../../../notes/implemented/2026-11-27-cockpit-ux-ui-full-verification.md)（业务验收 owner = 用户；2026-11-27 确认三轮核查闭环，Note 与归档同变更落盘）
+> 前置依据：[2026-11-26-cockpit-ux-ui-native-upgrade](2026-11-26-cockpit-ux-ui-native-upgrade.md) · [40-research-cockpit](../../../docs/design/40-research-cockpit.md) · [guides/67 测试策略](../../../docs/guides/67-test-strategy.md)
 
-**问题与期望结果：** 研究驾驶舱（Research Cockpit）刚完成“五态事实诚实性修复（BUG-340…434）”与“DSH 原生 UX/UI 全面升级（M1–M7）”，新增或重构了 10 余个交互面（首屏 Hero/模板、研究默认选单、顶栏进度胶囊、对话里程碑卡、4 类工具卡、状态步进轨/Protocol 卡/质量雷达、图谱缩略与边高亮、终稿三视图/TOC/Claim 核查/证据卡分屏溯源/续研预填、全局「研究工作台」Hub 等）。由于交互路径深、状态组合多，且用户对新版界面尚不熟悉，单靠人工手点必然遗漏边界与异常路径。本卡制定一份**零盲区、可自动化复跑 + 真人视角复核**的全量 UX/UI 核查计划：由 Agent 借助既有门禁、浏览器冒烟、CDP 探针、多主题/多视口截图巡检与真模型/合成夹具逐环过一遍；**每发现一处真实缺陷（视觉断裂、交互卡死、数据失真、串会话、错误吞没、布局溢出、翻译漏词、控制台报错等），直接按 [_backlog/bugs/README.md](../bugs/README.md) 建独立 `BUG-NNN` 卡并留可复现命令与现场截图/日志，不静默放过或顺手掩盖**。
+**问题与期望结果：** 研究驾驶舱（Research Cockpit）刚完成“五态事实诚实性修复（BUG-340…434）”与“DSH 原生 UX/UI 全面升级（M1–M7）”，新增或重构了 10 余个交互面（首屏 Hero/模板、研究默认选单、顶栏进度胶囊、对话里程碑卡、4 类工具卡、状态步进轨/Protocol 卡/质量雷达、图谱缩略与边高亮、终稿三视图/TOC/Claim 核查/证据卡分屏溯源/续研预填、全局「研究工作台」Hub 等）。由于交互路径深、状态组合多，且用户对新版界面尚不熟悉，单靠人工手点必然遗漏边界与异常路径。本卡制定一份**零盲区、可自动化复跑 + 真人视角复核**的全量 UX/UI 核查计划：由 Agent 借助既有门禁、浏览器冒烟、CDP 探针、多主题/多视口截图巡检与真模型/合成夹具逐环过一遍；**每发现一处真实缺陷（视觉断裂、交互卡死、数据失真、串会话、错误吞没、布局溢出、翻译漏词、控制台报错等），直接按 [_backlog/bugs/README.md](../../bugs/README.md) 建独立 `BUG-NNN` 卡并留可复现命令与现场截图/日志，不静默放过或顺手掩盖**。
 
 **当前情况：**
 - M1–M7 代码与 L0 单测/门禁已在工作区就位，但现有 `tests/fixtures/client-load-home` 种子夹具尚未完整覆盖新引入的 `protocol.json`、`claims.json` / `verdicts-r*.json`、8 字段 `evidence/*.md`、终稿 `[来源: evidence/...]` 分屏引用、`## 下一版优先项` 续研预填，以及直播流（live `present` / `HITL` 自动弹栏 / `MemberActivity` / `ResearchMilestoneCard`）；
@@ -27,7 +27,7 @@ opened: 2026-11-27
 ## 核查总原则（不可退让的纪律）
 
 1. **真机真浏览器优先于静态推断**：JSDOM 通过不代表真实 DSH Web 壳里不遮挡、不溢出、不吞事件、CSS Modules 正确注入；能起真浏览器就必须在真实 `dsh` Web 进程上验。
-2. **发现即建 BUG 卡（不藏、不洗绿）**：任何断言失败、视觉破损、控制台 `console.error` / `pageerror`、HTTP 失败、或与 [40-research-cockpit.md](../../docs/design/40-research-cockpit.md) 合同不符的现象，一律在 `_backlog/bugs/` 建卡（写清复现命令、边界、截图/日志路径、预期 vs 实际），不改断言或放宽选择器凑绿。
+2. **发现即建 BUG 卡（不藏、不洗绿）**：任何断言失败、视觉破损、控制台 `console.error` / `pageerror`、HTTP 失败、或与 [40-research-cockpit.md](../../../docs/design/40-research-cockpit.md) 合同不符的现象，一律在 `_backlog/bugs/` 建卡（写清复现命令、边界、截图/日志路径、预期 vs 实际），不改断言或放宽选择器凑绿。
 3. **未跑 ≠ 通过**：主机不健康（`exit 2`）或无凭据/缺夹具 `SKIP` 必须显式记为 `NOT-RUN` / `SKIP` 并写明原因，绝不写进“已通过”。
 4. **守住红线不越界**：不修改 `vendor/dsh/`；测试造数仅在隔离临时 home 或 `--seed` 沙箱，绝不污染仓内 `research-workspace/` 真实研究数据。
 
@@ -62,7 +62,7 @@ opened: 2026-11-27
 
 ### Stage 2 · 全 UX/UI 用户旅程端到端走查（真实浏览器交互 + 全功能点）
 
-> 对照 [40-research-cockpit.md](../../docs/design/40-research-cockpit.md) §2.0–§2.19 逐件逐路径实操，使用 Playwright / `probes/browser/cdp-probe.mjs` 驱动点击、输入、悬停、切页、切会话与分屏。
+> 对照 [40-research-cockpit.md](../../../docs/design/40-research-cockpit.md) §2.0–§2.19 逐件逐路径实操，使用 Playwright / `probes/browser/cdp-probe.mjs` 驱动点击、输入、悬停、切页、切会话与分屏。
 
 #### Journey A · 首次启动与空白会话（Blank Session / Onboarding）
 1. **出厂白名单验证（§2.0）**：确认主区只有「对话 / 方法库」（无 `ui-trajectory`），右栏无 `New Terminal`（`ui-sidebar-terminal` 关），文件树（`ui-sidebar-files`）可用；

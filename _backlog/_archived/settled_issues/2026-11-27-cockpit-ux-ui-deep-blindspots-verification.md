@@ -1,13 +1,13 @@
 ---
-status: 待落地
+status: 已结
 opened: 2026-11-27
 ---
 
 # 推敲：UX/UI 第二轮深度盲区核查计划（交互深水区、实时流、无障碍与极限压力）
 
-> 立卡：2026-11-27 ｜ 状态：待落地 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：否
-> 去向：implemented — `notes/implemented/2026-11-27-cockpit-ux-ui-deep-blindspots-verification.md`（全轮核查收口并产出缺陷台账后同变更落盘）
-> 前置依据：[2026-11-27-cockpit-ux-ui-full-verification](2026-11-27-cockpit-ux-ui-full-verification.md) · [2026-11-27-cockpit-ux-ui-audit-fixes](../../notes/implemented/2026-11-27-cockpit-ux-ui-audit-fixes.md) · [40-research-cockpit](../../docs/design/40-research-cockpit.md)
+> 立卡：2026-11-27 ｜ 状态：已结 ｜ 类型：Task ｜ 结论倾向：现在做 ｜ 可关闭：是
+> 去向：implemented — [2026-11-27-cockpit-ux-ui-deep-blindspots-verification](../../../notes/implemented/2026-11-27-cockpit-ux-ui-deep-blindspots-verification.md)（业务验收 owner = 用户；2026-11-27 确认三轮核查闭环，Note 与归档同变更落盘）
+> 前置依据：[2026-11-27-cockpit-ux-ui-full-verification](2026-11-27-cockpit-ux-ui-full-verification.md) · [2026-11-27-cockpit-ux-ui-audit-fixes](../../../notes/implemented/2026-11-27-cockpit-ux-ui-audit-fixes.md) · [40-research-cockpit](../../../docs/design/40-research-cockpit.md)
 
 **问题与期望结果：** 首轮 UX/UI 全量核查定位的 15 项缺陷（BUG-436…450）已在提交 `7191bdb0` 中批量修复归档。但回顾首轮执行面，核查主要集中在“主路径首屏展示 + Light/Dark/EN 静态快照 + 基础故障态”，仍有六大片真实 UI/UX 深水区**历史上从未真机端到端走通、或仅在修复当轮做过窄切片验证**：
 1. `BUG-436…450` 修复补丁引入的新交互边界（`FinalToc` 滚动容器定位、分屏控件换行、`HoverCard inline` 表面、`evidence-card` 正文裁剪、`review/claims.json` + `verdicts-r<N>.json` 多轮、以及此前因主机负载未跑的 `client-load.entry.mjs`）；
@@ -35,7 +35,7 @@ opened: 2026-11-27
 
 1. **只查未覆盖深水区与修复后真实回归**：不重复首轮已 100% 绿过的静态快照，除非处于 BUG-436…450 修复面或其组合交互上。
 2. **真实 DSH Web 进程 + 真 DOM 交互为唯一裁决**：所有拖拽、键盘输入、定时器等待、文件热改、分屏打开与焦距测试一律跑真实浏览器（Playwright + Chromium）。
-3. **发现即建 `BUG-NNN` 卡，绝不擅自修补或放宽判据**：每发现一条新问题，立刻在 [_backlog/bugs/](../bugs/README.md) 建卡（带复现命令、截图/日志路径、预期 vs 实际及涉及源码定位），不顺手改代码洗绿。
+3. **发现即建 `BUG-NNN` 卡，绝不擅自修补或放宽判据**：每发现一条新问题，立刻在 [_backlog/bugs/](../../bugs/README.md) 建卡（带复现命令、截图/日志路径、预期 vs 实际及涉及源码定位），不顺手改代码洗绿。
 4. **原生弹窗 / 环境阻塞诚实标 `NOT-RUN`**：如系统原生目录选择窗、主机高负载或模型额度限流，严格区分“未跑”与“通过”。
 5. **只读红线**：不动 `vendor/dsh/`，不污染仓内 `research-workspace/`（隔离沙箱与 `DSH_HOME` 运行）。
 
@@ -48,12 +48,12 @@ opened: 2026-11-27
 - **目标**：确认 `7191bdb0` 后全仓基线洁净，并把此前因宿主机负载 `NOT-RUN` 的入口补齐实跑；同时对 BUG-436…450 修复引入的新 UI 路径做真机对抗复核。
 - **动作清单**：
   1. 用 `zsh -c 'source tools/env.sh && pnpm verify && pnpm test'` 实测 BUG-450（`zsh` 下直接 `source tools/env.sh` 隔离生效与全量 L0 通过）；
-  2. 补跑上轮批注 `NOT-RUN` 的 [client-load.entry.mjs](../../checks/smoke/client-load.entry.mjs) 与全套 `cockpit-truth*` / `cockpit-locale` 门禁，确认 BUG-442 / BUG-443 真实全绿；
+  2. 补跑上轮批注 `NOT-RUN` 的 [client-load.entry.mjs](../../../checks/smoke/client-load.entry.mjs) 与全套 `cockpit-truth*` / `cockpit-locale` 门禁，确认 BUG-442 / BUG-443 真实全绿；
   3. 实跑 `node tools/channel/run-driver.mjs up --force-probe`，核验 BUG-441 在真实 Blank Session 通道上的 `statusPaneOpen=true`；
   4. 针对 BUG-436…450 修复点做**对抗性边界检查**：
-     - `HoverCard inline`（[ResearchHeaderPill.tsx](../../packages/deep-research-pack/src/client/ResearchHeaderPill.tsx)）在 Light/Dark 下边框、圆角、暗黑文字可读性与视口边缘翻转；
-     - `FinalToc`（[FinalToc.tsx](../../packages/deep-research-pack/src/client/research-final/FinalToc.tsx)）面对**同名二级标题**、**带加粗/反引号/链接语法的标题**、以及**在读者版/审计版切换后再点目录**时，能否精准滚到对应正文章节；
-     - `evidence-card.ts`（[evidence-card.ts](../../packages/deep-research-pack/src/lib/run/evidence-card.ts)）在 `## Question List` 之后**还有后续其它 `##` 小节**时，裁剪是否仅移除 Question List 而不误吞后文；
+     - `HoverCard inline`（[ResearchHeaderPill.tsx](../../../packages/deep-research-pack/src/client/ResearchHeaderPill.tsx)）在 Light/Dark 下边框、圆角、暗黑文字可读性与视口边缘翻转；
+     - `FinalToc`（[FinalToc.tsx](../../../packages/deep-research-pack/src/client/research-final/FinalToc.tsx)）面对**同名二级标题**、**带加粗/反引号/链接语法的标题**、以及**在读者版/审计版切换后再点目录**时，能否精准滚到对应正文章节；
+     - `evidence-card.ts`（[evidence-card.ts](../../../packages/deep-research-pack/src/lib/run/evidence-card.ts)）在 `## Question List` 之后**还有后续其它 `##` 小节**时，裁剪是否仅移除 Question List 而不误吞后文；
      - `review/verdicts-r1.json` + `review/verdicts-r2.json` 同在场时是否正确选取最高轮 r2，且 `insufficient`/`unverifiable` 统计标签正常渲染。
 
 ---
@@ -69,7 +69,7 @@ opened: 2026-11-27
      - 路径 ②「基于内置参考」点「以此为基础开始」检查预填内容（zh 下中文预填，en 下英文投影预填，不泄漏另一语种）；
      - 路径 ③「**基于已完成 run（`useRunSourcePicker`）**」打开 run 选择器列表，筛选并预览历史 run 提取的 4 字段，核查无 run 时空态与读 `question.md` 失败态；
   3. **摘要视图 ↔ 表单视图与教练联调**：
-     - 在 [MethodSummaryView](../../packages/deep-research-pack/src/client/method-library/views.tsx) 点击单个字段直接跳转到 `EditorView` 并确认对应 `<textarea>` 获得焦点（`document.activeElement`）；
+     - 在 [MethodSummaryView](../../../packages/deep-research-pack/src/client/method-library/views.tsx) 点击单个字段直接跳转到 `EditorView` 并确认对应 `<textarea>` 获得焦点（`document.activeElement`）；
      - 切换「访谈（`MethodCoachPortal`）」↔「检查表单」：检查 `[data-method-coach-host]` 高度裁剪、`CoachChat` 滚动条可用、切换过程中外层对话 composer（`installCoachComposerStyles`）在回到对话/Hub 返回/开新会话时均不残留 `display:none`；
      - **流式/异常故障注入**：在编辑中触发 `coach` 报错/断流提示降级（表单仍可手改）；触发 **重名覆盖二次确认（`overwriteConfirm`）**、**删除二次确认**、以及队列挂起/未知态 `operationUnknown`（确认发送中锁定按钮、点击刷新恢复且提示不自动重发）；
      - 验证 **`selectedName` 跨切换清洁**：编辑中途切到 `内置参考` 再切回 `我的库`，不残留幽灵高亮与脏草稿误显示。
@@ -89,11 +89,11 @@ opened: 2026-11-27
      - `drt_*/evidence/_failed.md`、`drt_*/drafts/final.md`、工作区根非 bundle 的 `final.md` → 断言**不误接管**，正确回退到 DSH 默认文本/Markdown 预览；
   2. 测试非法或手工拼接的 `dsh-resource://` 证据地址 → 验证渲染 `evidenceInvalidAddress` 提示而非白屏报错。
 - **2.2 右栏页签菜单 `ResearchTabMenuItem` & Hub 跨跳转**：
-  1. 打开右栏任意研究页签（Status / Graph / Final / Config），定位宿主页签溢出菜单或右键菜单中的「打开研究工作台」（[ResearchTabMenuItem.tsx](../../packages/deep-research-pack/src/client/ResearchTabMenuItem.tsx)），真实点击后断言切到 `ResearchHubPanel`；
+  1. 打开右栏任意研究页签（Status / Graph / Final / Config），定位宿主页签溢出菜单或右键菜单中的「打开研究工作台」（[ResearchTabMenuItem.tsx](../../../packages/deep-research-pack/src/client/ResearchTabMenuItem.tsx)），真实点击后断言切到 `ResearchHubPanel`；
   2. 在 Hub `RunsView` 点击某已完成 run 的「打开终稿」，断言自动切回对话并打开该 run 终稿；在 `LensesView` 展开「展开口径与边界」全部 8 条明细，点击「以此透镜发起研究」断言回到对话并在输入框填入带透镜名的提示词草稿（**不自动发送**）；点 Hub 顶部「发起新研究」验证创建新空白会话并聚焦。
 - **2.3 `StartCard` 选工作区与 `DefaultsPanel` 全字段交互**：
-  1. `StartCard`（[StartCard.tsx](../../packages/deep-research-pack/src/client/StartCard.tsx)）：测试 `选择项目目录` 点击交互与目录选择取消/RPC 拒绝报错 `errorDetailOf`（若浏览器端无原生 Electron dialog 桥，验证降级/报错文案清晰不卡死 `choosing` 按钮锁态），验证切换会话后 `chooseError` 瞬态自动清零；
-  2. `DefaultsPanel`（[DefaultsPanel.tsx](../../packages/deep-research-pack/src/client/defaults/DefaultsPanel.tsx)）：逐一实操上轮未动的 6 组控件——
+  1. `StartCard`（[StartCard.tsx](../../../packages/deep-research-pack/src/client/StartCard.tsx)）：测试 `选择项目目录` 点击交互与目录选择取消/RPC 拒绝报错 `errorDetailOf`（若浏览器端无原生 Electron dialog 桥，验证降级/报错文案清晰不卡死 `choosing` 按钮锁态），验证切换会话后 `chooseError` 瞬态自动清零；
+  2. `DefaultsPanel`（[DefaultsPanel.tsx](../../../packages/deep-research-pack/src/client/defaults/DefaultsPanel.tsx)）：逐一实操上轮未动的 6 组控件——
      - 输出形态 `defaults-output-shape`（SelectMenu）+ 字数区间 `min`/`max` 输入与非法数值边界（负数/min>max）；
      - 来源家族 `defaults-source-<family>` 多选 `Pill` 切换与 `defaults-source-auto` 一键恢复自动；
      - 权威级别 `authority`、时效窗 `recency`、语言 `language`、目标读者 `defaults-audience`（输入中英文长文本）；
@@ -152,7 +152,7 @@ opened: 2026-11-27
 ### Stage 6 · 缺陷汇总建卡、经验回流与交付验收
 
 - **输出物**：
-  1. **新增缺陷卡**：本轮发现的所有真实 UI/UX 缺陷（按 `P0 / P1 / P2` 分级）全部按规范在 [_backlog/bugs/](../bugs/README.md) 建独立 `BUG-NNN-<slug>.md` 卡（`status: 等人拍板`，附精确可复现命令、境界、截图与日志证据路径），同步更新 [_backlog/bugs/README.md](../bugs/README.md) 并确保 `pnpm verify` 全绿；
+  1. **新增缺陷卡**：本轮发现的所有真实 UI/UX 缺陷（按 `P0 / P1 / P2` 分级）全部按规范在 [_backlog/bugs/](../../bugs/README.md) 建独立 `BUG-NNN-<slug>.md` 卡（`status: 等人拍板`，附精确可复现命令、境界、截图与日志证据路径），同步更新 [_backlog/bugs/README.md](../../bugs/README.md) 并确保 `pnpm verify` 全绿；
   2. **盲区核查报告表**：输出「覆盖单元 × 验证手段 × 实跑结论（PASS / FAIL → BUG-NNN / NOT-RUN）× 证据文件」全表与优先修复建议，并保留整套截图与日志到 `runtime/smoke-workspace/` 隔离审计目录；
   3. **守卫/夹具补缺建议**：说明哪些盲区（例如 `MethodLibrary` 抽屉、长文矩阵溢出、30s `staleWatcher`、`delivery-watch` 焦点保护）建议后续收编进常规冒烟或单测。
 
@@ -199,11 +199,11 @@ opened: 2026-11-27
   - `DSH_CLIENT_LOAD_ALLOW_UNHEALTHY=1 node --import tsx/esm checks/smoke/client-load.entry.mjs --seed tests/fixtures/client-load-home`：ALL PASS（补齐首轮 `NOT-RUN`）；
   - `cockpit-truth-residuals.entry.mjs`（28/28 PASS，含 30s `staleWatcher` S17 & `DefaultsPanel` S21）与 `cockpit-truth-substance.entry.mjs`（19/19 PASS）全绿。
 - **Stage 0.4–Stage 5 盲区实跑发现 7 张新缺陷卡**（均已独立建卡 `status: 等人拍板`，未擅自修改产品源码）：
-  - [BUG-451](../_archived/fixed_bugs/BUG-451-hub-lens-start-research-drops-initial-prompt.md)（P1）：ResearchHub「以此透镜发起研究」将 `initialPrompt` 错传给 `uiWorkspace.startSession`，提示词被静默丢弃；
-  - [BUG-452](../_archived/fixed_bugs/BUG-452-defaults-panel-method-library-link-non-interactive.md)（P1）：`DefaultsPanel`「方法库 ›」伪链接 Styled 为导航蓝字却无 `onClick` 与键盘焦点；
-  - [BUG-453](../_archived/fixed_bugs/BUG-453-final-toc-exposes-raw-markdown-links-and-fails-scroll.md)（P2）：`FinalToc` 未剥离 Markdown 链接语法，裸露原始 URL 且点击无法跳转滚动；
-  - [BUG-454](../_archived/fixed_bugs/BUG-454-config-switch-menu-clips-below-720p-viewport.md)（P2）：`1280×720` 视口下「研究配置」面板「换一条」下拉菜单溢出底部视口 `72px` 被裁切；
-  - [BUG-455](../_archived/fixed_bugs/BUG-455-config-ui-strings-render-raw-markdown-asterisks.md)（P2）：研究配置纯文本提示槽 `configMethodHint`/`configDetailCreateDesc` 裸露 `**...**` 星号；
-  - [BUG-456](../_archived/fixed_bugs/BUG-456-method-summary-shows-empty-incomplete-fields-on-name-issue.md)（P2）：`MethodSummaryView` 在 `methodNameIssue` 禁用保存时渲染空后缀「还需补齐：」，且 `methodNameIssue` 放行前导 `#`；
-  - [BUG-457](../_archived/fixed_bugs/BUG-457-track-rail-rerun-arrow-misaligned-from-reentry-step.md)（P2）：`TrackRail` 复盘回边箭头 `▲` 固定左偏 `3px` 指向「立项确认 / 审查」而非重入节点「挖掘」。
+  - [BUG-451](../fixed_bugs/BUG-451-hub-lens-start-research-drops-initial-prompt.md)（P1）：ResearchHub「以此透镜发起研究」将 `initialPrompt` 错传给 `uiWorkspace.startSession`，提示词被静默丢弃；
+  - [BUG-452](../fixed_bugs/BUG-452-defaults-panel-method-library-link-non-interactive.md)（P1）：`DefaultsPanel`「方法库 ›」伪链接 Styled 为导航蓝字却无 `onClick` 与键盘焦点；
+  - [BUG-453](../fixed_bugs/BUG-453-final-toc-exposes-raw-markdown-links-and-fails-scroll.md)（P2）：`FinalToc` 未剥离 Markdown 链接语法，裸露原始 URL 且点击无法跳转滚动；
+  - [BUG-454](../fixed_bugs/BUG-454-config-switch-menu-clips-below-720p-viewport.md)（P2）：`1280×720` 视口下「研究配置」面板「换一条」下拉菜单溢出底部视口 `72px` 被裁切；
+  - [BUG-455](../fixed_bugs/BUG-455-config-ui-strings-render-raw-markdown-asterisks.md)（P2）：研究配置纯文本提示槽 `configMethodHint`/`configDetailCreateDesc` 裸露 `**...**` 星号；
+  - [BUG-456](../fixed_bugs/BUG-456-method-summary-shows-empty-incomplete-fields-on-name-issue.md)（P2）：`MethodSummaryView` 在 `methodNameIssue` 禁用保存时渲染空后缀「还需补齐：」，且 `methodNameIssue` 放行前导 `#`；
+  - [BUG-457](../fixed_bugs/BUG-457-track-rail-rerun-arrow-misaligned-from-reentry-step.md)（P2）：`TrackRail` 复盘回边箭头 `▲` 固定左偏 `3px` 指向「立项确认 / 审查」而非重入节点「挖掘」。
 - **诚实标记 `NOT-RUN` 项**：无 API key 下真实 LLM 活流推入 `deliverables/presented` 的焦点保护与完整 `MethodCoach` 多轮问答交互（纯函数 `shouldOpenFinal` / `draftInProgress` 已由 L0 单测覆盖，活流推流与 `StartCard` 跨空白组实机路径受限于无真模型 key/合成日志索引，未报假 PASS）。
