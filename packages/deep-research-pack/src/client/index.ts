@@ -69,7 +69,7 @@ import { StartCard, type StartCardInjected } from './StartCard.tsx'
 import { DefaultsButton, type DefaultsButtonInjected } from './defaults/DefaultsButton.tsx'
 import { createDefaultsStore } from './defaults/store.ts'
 import { ResearchHubIcon, ResearchHubPanel, type HubTab } from './ResearchHubPanel.tsx'
-import { CURRENT_SESSION_KEY, PRODUCT_WORKSPACE_KEY, buildStartResearchOptions, pickProductWorkspace, readCurrentSessionId } from './startup.ts'
+import { CURRENT_SESSION_KEY, PRODUCT_WORKSPACE_KEY, buildStartResearchOptions, openResourceWhenMounted, pickProductWorkspace, readCurrentSessionId } from './startup.ts'
 import { finalAddressOf, isFinalAddress } from '../lib/run/final-target.ts'
 import { isEvidenceAddress } from '../lib/run/evidence-card.ts'
 
@@ -238,12 +238,20 @@ export function apply(ctx: ClientContext): void {
     // 终稿页签的读面：run-context 的浏览器适配器（三位置/读策略/翻页归 lib；页签只拿 view）。
     const runSource = (sessionId: SessionId) => browserRunSource(workspaceFiles, sessionId)
 
+    let cancelPendingFinal: (() => void) | null = null
+    scoped.effect(() => () => {
+      cancelPendingFinal?.()
+      cancelPendingFinal = null
+    }, 'deep-research-pack: pending open-final cleanup')
+
     const openFinal = (sessionId: SessionId, path: string) => {
-      try { scoped.sidebarRight.openResource(finalAddressOf(sessionId, path)) }
-      catch (cause) {
-        /* @silent-catch: sidebar openResource fails soft when host frame is closing */
-        console.error('[research-final] openResource 失败', String(cause))
-      }
+      cancelPendingFinal?.()
+      cancelPendingFinal = openResourceWhenMounted(scoped.sidebarRight, finalAddressOf(sessionId, path), {
+        onError: (cause) => {
+          /* @silent-catch: sidebar openResource fails soft when host frame is closing */
+          console.error('[research-final] openResource 失败', String(cause))
+        },
+      })
     }
 
     // 挂起显性化入口（RFC right-pane-ux-debt）：pending 迁移时页签体调用——openTab 落定时

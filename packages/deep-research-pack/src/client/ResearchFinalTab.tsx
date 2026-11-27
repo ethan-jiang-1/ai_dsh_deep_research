@@ -442,6 +442,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
           <SegmentedControl<'reader' | 'audit' | 'claims'>
             id="research-final-view"
             label={props.t('tabFinal')}
+            className={css.segmentedControl ?? ''}
             value={view === 'claims' ? 'claims' : showingReader ? 'reader' : 'audit'}
             options={[
               { value: 'reader', label: props.t('finalTabReader'), disabled: !hasReader },

@@ -182,10 +182,10 @@ export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
               loading={loading}
               result={catalog}
               onRefresh={reloadRuns}
-              onOpenFinal={(rootPath) => {
+              onOpenFinal={(finalPath) => {
                 if (activeSessionId === null) return
-                openFinal(activeSessionId, `${rootPath}/final.md`)
                 backToChat()
+                openFinal(activeSessionId, finalPath)
               }}
               onStartResearch={() => { startResearch() }}
               t={t}

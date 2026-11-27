@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   CURRENT_SESSION_KEY, PRODUCT_WORKSPACE_KEY, PRODUCT_TITLE_PREFIX,
-  buildStartResearchOptions, needsProductSwitch, pickProductWorkspace, readCurrentSessionId,
+  buildStartResearchOptions, needsProductSwitch, openResourceWhenMounted, pickProductWorkspace, readCurrentSessionId,
 } from '../../../packages/deep-research-pack/src/client/startup.ts'
 
 test('readCurrentSessionId：裸 id / {sessionId} / 坏值', () => {
@@ -46,4 +46,48 @@ test('BUG-451 buildStartResearchOptions：使用 vendor DraftInitializationOptio
   const opts = buildStartResearchOptions('请按监管口径研究 AI 芯片出口规则')
   assert.deepEqual(opts, { prompt: '请按监管口径研究 AI 芯片出口规则', whenDraftExists: 'keep' })
   assert.equal('initialPrompt' in opts, false)
+})
+
+// 负例留证 2026-11-27：BUG-459——从 ResearchHub 返回对话时会话右栏尚未完成重挂，直接调 openResource 会抛
+// `sidebarRight: no session surface is mounted` 并被静默吞掉；且已收起的右栏必须确保展开。
+// 红配方：删除 startup.ts openResourceWhenMounted 或移除重试 / toggleExpanded 逻辑 → 本例红。
+test('BUG-459 openResourceWhenMounted：等待会话右栏重挂后打开资源，并在收起时展开右栏', async () => {
+  let mounted = false
+  let expanded = false
+  const opened = []
+  let errors = 0
+  const cancel = openResourceWhenMounted(
+    {
+      openResource(addr) {
+        if (!mounted) throw new Error('sidebarRight: no session surface is mounted')
+        opened.push(addr)
+      },
+      isExpanded: () => expanded,
+      toggleExpanded: () => { expanded = true },
+    },
+    'dsh-resource://file/session/s1/archive/drt_a/final/readable-v1.md',
+    { intervalMs: 5, maxAttempts: 10, onError: () => { errors += 1 } },
+  )
+  setTimeout(() => { mounted = true }, 12)
+  await new Promise((r) => setTimeout(r, 60))
+  cancel()
+  assert.deepEqual(opened, ['dsh-resource://file/session/s1/archive/drt_a/final/readable-v1.md'])
+  assert.equal(expanded, true, '原本收起的右栏必须被展开')
+  assert.equal(errors, 0)
+
+  // dispose 时取消挂起重试，避免已卸载插件继续调宿主接口
+  let postCancelAttempts = 0
+  const cancelImmediate = openResourceWhenMounted(
+    {
+      openResource() {
+        postCancelAttempts += 1
+        throw new Error('sidebarRight: no session surface is mounted')
+      },
+    },
+    'dsh-resource://file/session/s1/drt_a/final.md',
+    { intervalMs: 5, maxAttempts: 10 },
+  )
+  cancelImmediate()
+  await new Promise((r) => setTimeout(r, 30))
+  assert.equal(postCancelAttempts, 1, '取消后不得继续调度后台重试')
 })

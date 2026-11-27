@@ -241,3 +241,98 @@ test('BUG-452 ResearchHubPanel：Lenses 内点击「方法库 ›」按钮切换
   await flushUi(act)
   assert.ok(panel.container.querySelector('#hub-panel-methods') !== null, '点击方法库按钮后 Hub 必须切到 methods 页签')
 })
+
+// 负例留证 2026-11-27：BUG-459——ResearchHub 点击归档 run「打开终稿」时曾先调 openFinal（此时 Hub 未关闭、
+// 会话面未挂载，必抛 no session surface is mounted）且硬编码 `${rootPath}/final.md` 漏掉仅有 final/readable-vN.md 的归档。
+// 红配方：把 onOpenFinal 改回先调 openFinal(`${rootPath}/final.md`) 再 backToChat → 本例红。
+test('BUG-459 ResearchHubPanel：点击归档「打开终稿」先回对话再开真实终稿路径，且 index.ts 走 openResourceWhenMounted', async () => {
+  const { readFileSync } = await import('node:fs')
+  const { fileURLToPath } = await import('node:url')
+  const indexSrc = readFileSync(
+    fileURLToPath(new URL('../../../packages/deep-research-pack/src/client/index.ts', import.meta.url)),
+    'utf8',
+  )
+  assert.match(indexSrc, /openResourceWhenMounted\(/, 'index.ts openFinal 必须通过 openResourceWhenMounted 等待挂载并展开右栏')
+
+  const run = makeMaliciousRunSource({
+    tree: {
+      archive: {
+        drt_arch: {
+          'question.md': '# Q\n归档无根 final.md 测试\n',
+          final: {
+            'v1.md': '# V1\n',
+            'readable-v2.md': '# Readable V2\n',
+          },
+        },
+      },
+    },
+  })
+  const trace = []
+  const panel = render(createElement(ResearchHubPanel, {
+    t: tZh,
+    useSessions: ONE_SESSION,
+    runSource: () => run.source,
+    methodLibrary: STUB_METHOD_LIBRARY,
+    openFinal: (sid, path) => { trace.push({ event: 'openFinal', sid, path }) },
+    backToChat: () => { trace.push({ event: 'backToChat' }) },
+    startResearch: () => {},
+  }))
+  await flushUi(act)
+
+  fireEvent.click(panel.getByText(zh.hubOpenFinal))
+  assert.deepEqual(trace, [
+    { event: 'backToChat' },
+    { event: 'openFinal', sid: 's-hub', path: 'archive/drt_arch/final/readable-v2.md' },
+  ], '必须先 backToChat 重挂会话面，再打开 archive/drt_arch/final/readable-v2.md')
+})
+
+// 负例留证 2026-11-27：BUG-461——RunsView copyPath 把 setCopiedPath 同步写在 clipboard.writeText().catch() 之外，
+// 导致无剪贴板权限或 navigator.clipboard 缺失时仍假绿显示「已复制」。
+// 红配方：在 RunsView.tsx 恢复无条件同步 setCopiedPath → 本例红。
+test('BUG-461 RunsView：剪贴板被拒或缺失时不得假绿显示「已复制」，须诚实反馈失败状态', async () => {
+  const run = makeMaliciousRunSource({
+    tree: {
+      drt_clip: { 'question.md': '# Q\n剪贴板失败态测试\n' },
+    },
+  })
+  const origClipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard')
+  try {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: async () => { throw new Error('NotAllowedError') } },
+    })
+    const panel = render(createElement(ResearchHubPanel, {
+      t: tZh,
+      useSessions: ONE_SESSION,
+      runSource: () => run.source,
+      methodLibrary: STUB_METHOD_LIBRARY,
+      openFinal: () => {},
+      backToChat: () => {},
+      startResearch: () => {},
+    }))
+    await flushUi(act)
+
+    const copyBtn = panel.getByText(zh.hubCopyPath)
+    fireEvent.click(copyBtn)
+    await flushUi(act)
+    assert.equal(copyBtn.textContent, '复制失败', 'clipboard reject 时应诚实显示「复制失败」而非「已复制」')
+    assert.equal(copyBtn.getAttribute('data-copy-state'), 'failed')
+
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined })
+    fireEvent.click(copyBtn)
+    await flushUi(act)
+    assert.equal(copyBtn.textContent, '复制失败', '缺少 navigator.clipboard 时应显示「复制失败」')
+
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: async () => {} },
+    })
+    fireEvent.click(copyBtn)
+    await flushUi(act)
+    assert.equal(copyBtn.textContent, zh.hubCopied, 'clipboard resolve 后才显示「已复制」')
+    assert.equal(copyBtn.getAttribute('data-copy-state'), 'copied')
+  } finally {
+    if (origClipboard !== undefined) Object.defineProperty(navigator, 'clipboard', origClipboard)
+    else delete navigator.clipboard
+  }
+})

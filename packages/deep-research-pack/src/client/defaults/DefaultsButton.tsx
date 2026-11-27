@@ -89,7 +89,6 @@ export function DefaultsButton(props: DefaultsButtonProps): ReactNode {
         data-testid="deep-research-defaults"
         data-defaults-state={loading ? 'loading' : invalid ? 'invalid' : button.kind}
         aria-label={tooltip === '' ? label : `${label} — ${tooltip}`}
-        title={tooltip}
         onClick={props.openConfig}
         className={active ? `${css.triggerButton} ${css.triggerButtonActive}` : css.triggerButton}
       >

@@ -21,6 +21,14 @@
 
 ## 最近归档
 
+（2026-11-27 第三轮 UX/UI 盲区修复批〔5 张，458–462〕，批 Note = [2026-11-27-cockpit-ux-ui-round3-fixes](../../notes/implemented/2026-11-27-cockpit-ux-ui-round3-fixes.md)：
+[458](../_archived/fixed_bugs/BUG-458-final-toc-truncates-markdown-links-with-nested-parens.md) 平衡括号链接剥离；
+[459](../_archived/fixed_bugs/BUG-459-hub-runs-open-final-fails-expand-and-hardcodes-root-final.md) Hub 打开终稿顺序与真路径；
+[460](../_archived/fixed_bugs/BUG-460-final-segmented-control-clips-active-tab-in-narrow-split.md) 窄分屏分段控件自适应；
+[461](../_archived/fixed_bugs/BUG-461-runs-view-copy-path-shows-copied-on-clipboard-reject.md) 复制失败诚实反馈；
+[462](../_archived/fixed_bugs/BUG-462-defaults-button-renders-double-tooltip-and-native-title.md) DefaultsButton 去重原生 title。
+）
+
 （2026-11-27 第二轮 UX/UI 深度盲区修复批〔7 张，451–457〕+ 遗留闭环〔435〕，批 Note = [2026-11-27-cockpit-ux-ui-blindspots-fixes](../../notes/implemented/2026-11-27-cockpit-ux-ui-blindspots-fixes.md)：
 [451](../_archived/fixed_bugs/BUG-451-hub-lens-start-research-drops-initial-prompt.md) startResearch prompt；
 [452](../_archived/fixed_bugs/BUG-452-defaults-panel-method-library-link-non-interactive.md) 方法库按钮直达；

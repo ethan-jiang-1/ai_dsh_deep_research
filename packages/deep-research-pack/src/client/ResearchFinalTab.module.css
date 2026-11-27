@@ -116,6 +116,7 @@
 }
 
 .controlsBar {
+  container-type: inline-size;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -130,6 +131,35 @@
   max-width: 100%;
   min-width: 0;
   overflow-x: auto;
+}
+
+.segmentedControl {
+  max-width: 100%;
+}
+
+@container (max-width: 340px) {
+  .segmentedWrap {
+    width: 100%;
+  }
+
+  .segmentedControl {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .segmentedControl > button[role='tab'] {
+    padding: 0 4px;
+    font-size: 11px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@container (max-width: 260px) {
+  .controlsBar {
+    padding: 0 6px 8px;
+  }
 }
 
 .splitReviewBtn {

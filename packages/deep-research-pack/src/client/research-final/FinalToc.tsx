@@ -10,24 +10,84 @@ interface TocHeading {
 const FENCE_RE = /^\s{0,3}(`{3,}|~{3,})/
 const HEADING_RE = /^(#{1,3})\s+(.+)$/
 
+function findMatchingBracket(raw: string, openIndex: number): number {
+  let depth = 0
+  for (let i = openIndex; i < raw.length; i += 1) {
+    const ch = raw[i]
+    if (ch === '\\') {
+      i += 1
+      continue
+    }
+    if (ch === '[') depth += 1
+    else if (ch === ']') {
+      depth -= 1
+      if (depth === 0) return i
+    }
+  }
+  return -1
+}
+
+function findMatchingParen(raw: string, openIndex: number): number {
+  let depth = 0
+  let inAngle = false
+  for (let i = openIndex; i < raw.length; i += 1) {
+    const ch = raw[i]
+    if (ch === '\\') {
+      i += 1
+      continue
+    }
+    if (ch === '<' && depth === 1) {
+      inAngle = true
+      continue
+    }
+    if (ch === '>' && inAngle) {
+      inAngle = false
+      continue
+    }
+    if (inAngle) continue
+    if (ch === '(') depth += 1
+    else if (ch === ')') {
+      depth -= 1
+      if (depth === 0) return i
+    }
+  }
+  return -1
+}
+
+function stripMarkdownLinks(raw: string): string {
+  let out = ''
+  let i = 0
+  while (i < raw.length) {
+    const isImage = raw[i] === '!' && raw[i + 1] === '['
+    const bracketStart = isImage ? i + 1 : raw[i] === '[' ? i : -1
+    if (bracketStart !== -1) {
+      const bracketEnd = findMatchingBracket(raw, bracketStart)
+      if (bracketEnd !== -1 && raw[bracketEnd + 1] === '(') {
+        const parenEnd = findMatchingParen(raw, bracketEnd + 1)
+        if (parenEnd !== -1) {
+          out += stripMarkdownLinks(raw.slice(bracketStart + 1, bracketEnd))
+          i = parenEnd + 1
+          continue
+        }
+      }
+    }
+    out += raw[i]
+    i += 1
+  }
+  return out
+}
+
 /**
- * 剥离标题中的行内 Markdown 语法（图片/链接/引用链接/粗斜体/反引号/转义），
- * 使章节目录文案与正文渲染后的 `h1/h2/h3.textContent` 一致（BUG-453）。
+ * 剥离标题中的行内 Markdown 语法（图片/含嵌套括号链接/引用链接/粗斜体/反引号/转义），
+ * 使章节目录文案与正文渲染后的 `h1/h2/h3.textContent` 一致（BUG-453、BUG-458）。
  */
 function stripMarkdownInline(raw: string): string {
-  let out = raw.replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
-  for (let i = 0; i < 4; i += 1) {
-    const next = out.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-    if (next === out) break
-    out = next
-  }
-  out = out
+  return stripMarkdownLinks(raw)
     .replace(/\[([^\]]+)\]\[[^\]]*\]/g, '$1')
     .replace(/\\([\\`*_{}[\]()#+\-.!])/g, '$1')
     .replace(/[*`~]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
-  return out
 }
 
 function extractTocHeadings(markdown: string): readonly TocHeading[] {

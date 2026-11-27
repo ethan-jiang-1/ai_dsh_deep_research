@@ -253,6 +253,16 @@ export async function scanRunsCatalog(source: RunSource, signal?: AbortSignal): 
   return { runs, dirErrors }
 }
 
+/** 按位置桶优先级挑选该研究档案最合适的可读终稿路径（读者版 > 审计版 > 根 final.md）。 */
+export function preferredFinalPathOf(
+  run: Pick<RunCatalogEntry, 'rootPath' | 'hasFinalMd' | 'latestFinalVersion' | 'latestReaderVersion'>,
+): string | null {
+  if (run.latestReaderVersion !== null) return `${run.rootPath}/final/readable-v${run.latestReaderVersion}.md`
+  if (run.latestFinalVersion !== null) return `${run.rootPath}/final/v${run.latestFinalVersion}.md`
+  if (run.hasFinalMd) return `${run.rootPath}/final.md`
+  return null
+}
+
 /** 按关键词与位置桶筛选 run 档案。 */
 export function filterRunsCatalog(
   runs: readonly RunCatalogEntry[],

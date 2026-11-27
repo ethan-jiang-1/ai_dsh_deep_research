@@ -2494,6 +2494,46 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "在 TrackRail 恢复 <span className={css.rerunArrow}>▲</span> 或删除 evidence 上 ↺ → BUG-457 用例红"
+    },
+    {
+      "id": "BUG-458",
+      "mechanism": "FinalToc stripMarkdownInline 用非嵌套正则 [^)]* 匹配 Markdown 链接目标，含平衡括号 URL 时截断于内层 ) 并留下多余闭括号",
+      "guard": "tests/cockpit/client/final-evidence.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "将 FinalToc stripMarkdownLinks 改回非嵌套 regex [^)]* → BUG-458 用例红"
+    },
+    {
+      "id": "BUG-459",
+      "mechanism": "ResearchHubPanel onOpenFinal 先于 backToChat 调 openFinal 必抛未挂载错、未展开收起右栏且硬编码 ${rootPath}/final.md",
+      "guard": "tests/cockpit/client/research-hub-panel.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "ResearchHubPanel 改回先 openFinal(`${rootPath}/final.md`) 再 backToChat 或 index.ts 移除 openResourceWhenMounted → BUG-459 用例红"
+    },
+    {
+      "id": "BUG-460",
+      "mechanism": "ResearchFinalTab.module.css 未随窄分屏（~238px）缩紧 SegmentedControl 宽度与字号/内边距，导致激活标签与白框右缘裁切",
+      "guard": "tests/cockpit/client/final-evidence.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "去掉 ResearchFinalTab SegmentedControl 的 segmentedControl 类或 .controlsBar container-type: inline-size → BUG-460 用例红"
+    },
+    {
+      "id": "BUG-461",
+      "mechanism": "RunsView copyPath 把 setCopiedPath 同步写在 clipboard.writeText().catch() 之外，拒绝写剪贴板仍假绿显示已复制",
+      "guard": "tests/cockpit/client/research-hub-panel.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "在 RunsView copyPath 恢复无条件同步置已复制 → BUG-461 用例红"
+    },
+    {
+      "id": "BUG-462",
+      "mechanism": "DefaultsButton 同时套用自定义 <Tooltip> 与原生 <button title={tooltip}>，悬停触发双重提示浮窗",
+      "guard": "tests/cockpit/shared/defaults-ui.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "在 DefaultsButton <button> 恢复 title={tooltip} → BUG-462 用例红"
     }
   ]
 }

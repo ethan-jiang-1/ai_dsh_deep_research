@@ -391,3 +391,83 @@ test('BUG-453 FinalToc：剥离标题内 Markdown 链接与引用 URL 并可点�
   assert.equal(scrolledRef, 1, '点击含外链标题 TOC 项必须滚动命中对应 h2')
   assert.equal(scrolledCite, 1, '点击含引用后缀标题 TOC 项必须滚动命中对应 h2')
 })
+
+// 负例留证 2026-11-27：BUG-458——FinalToc stripMarkdownInline 使用非嵌套正则 [^)]*，
+// 遇到 URL 内含成对小括号（如 Wikipedia 词条）时过早截断并把外层 ) 留在目录里。
+// 红配方：将 stripMarkdownLinks 改回正则 /\[([^\]]+)\]\([^)]*\)/g → 本例红。
+test('BUG-458 FinalToc：完整剥离 URL 内含成对嵌套括号的 Markdown 链接并命中滚动', async () => {
+  const tree = structuredClone(BUNDLE)
+  tree.drt_demo.final['v1.md'] = [
+    '# 审计终稿',
+    '',
+    '## 参考 [United Nations](https://en.wikipedia.org/wiki/United_Nations_(disambiguation)) 说明',
+    '百科括号链接章节正文。',
+    '',
+    '## 深度 [API (v2)](https://docs.example.com/a_(b_(c))) 概览',
+    '多层括号链接章节正文。',
+    '',
+  ].join('\n')
+  const run = makeMaliciousRunSource({ tree })
+  const { container } = render(createElement(ResearchFinalTab, {
+    sessionId: 's1',
+    t: tZh,
+    useTabInfo: () => ({
+      tab: {
+        navigation: { address: 'dsh-resource://file/session/s1/drt_demo/final.md' },
+        visible: true,
+        actions: { openTab: () => {} },
+      },
+    }),
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  const auditTab = [...container.querySelectorAll('[role="tab"]')].find((el) => el.textContent?.includes('审计版'))
+  assert.ok(auditTab !== undefined)
+  fireEvent.click(auditTab)
+  await flushUi(act)
+
+  const buttons = [...(container.querySelector('details')?.querySelectorAll('button[type="button"]') ?? [])]
+  const labels = buttons.map((b) => (b.textContent ?? '').trim())
+  assert.deepEqual(labels, ['审计终稿', '参考 United Nations 说明', '深度 API (v2) 概览'])
+
+  const h2 = [...container.querySelectorAll('h2')].find((el) => el.textContent?.includes('United Nations'))
+  assert.ok(h2 !== undefined)
+  let scrolled = 0
+  h2.scrollIntoView = () => { scrolled += 1 }
+  fireEvent.click(buttons[1])
+  assert.equal(scrolled, 1)
+})
+
+// 负例留证 2026-11-27：BUG-460——窄分屏（~238px）下 SegmentedControl 按最长项 1fr 撑宽裁切「核查清单」与高亮白框。
+// 红配方：去掉 ResearchFinalTab SegmentedControl 的 segmentedControl 类或去掉 .controlsBar @container 窄栏自适应 → 本例红。
+test('BUG-460 ResearchFinalTab：启用 container query 与 segmentedControl 类防止窄分屏裁切激活标签', async () => {
+  const { readFileSync } = await import('node:fs')
+  const { fileURLToPath } = await import('node:url')
+  const cssText = readFileSync(
+    fileURLToPath(new URL('../../../packages/deep-research-pack/src/client/ResearchFinalTab.module.css', import.meta.url)),
+    'utf8',
+  )
+  assert.match(cssText, /\.controlsBar\s*\{[^}]*container-type:\s*inline-size/, '.controlsBar 须启用 container-type: inline-size')
+  assert.match(cssText, /@container\s*\(max-width:/, '须定义 @container 窄栏规则压缩分段控件')
+  assert.match(cssText, /\.segmentedControl\s*\{[^}]*width:\s*100%/, '窄栏下 .segmentedControl 须贴合容器宽 100%')
+  assert.match(cssText, /\.segmentedControl\s*>\s*button\[role='tab'\][^}]*min-width:\s*0/, '窄栏分段 tab 须允许收缩并省略溢出')
+
+  const run = makeMaliciousRunSource({ tree: structuredClone(BUNDLE) })
+  const { container } = render(createElement(ResearchFinalTab, {
+    sessionId: 's1',
+    t: tZh,
+    useTabInfo: () => ({
+      tab: {
+        navigation: { address: 'dsh-resource://file/session/s1/drt_demo/final.md' },
+        visible: true,
+        actions: { openTab: () => {} },
+      },
+    }),
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  const tablist = container.querySelector('[role="tablist"]')
+  assert.ok(tablist !== null && /\bsegmentedControl\b/.test(tablist.className), `SegmentedControl 须挂 segmentedControl 类：${tablist?.className}`)
+})

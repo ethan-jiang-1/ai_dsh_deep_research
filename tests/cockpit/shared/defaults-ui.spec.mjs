@@ -76,3 +76,13 @@ test('面板渲染：显式值进入控件（depth/shape/audience/families）', 
   assert.match(html, /aria-pressed="true"[^>]*>官方|官方/)
   assert.match(html, /v2/)
 })
+
+// 负例留证 2026-11-27：BUG-462——DefaultsButton 同时渲染 <Tooltip> 与原生 <button title={tooltip}> 造成双浮窗。
+// 红配方：把 title={tooltip} 放回 DefaultsButton.tsx 的 <button> 上 → 本例红。
+test('BUG-462 DefaultsButton：渲染按钮不带原生 title 属性（保留 aria-label 与外层 Tooltip）', () => {
+  const parsed = parseDefaults(JSON.stringify({ schema: 1, effort: 'deep' }))
+  const html = button(snapshot({ value: parsed.value, methodDefault: '格局调研', revision: 1 }))
+  assert.match(html, /data-testid="deep-research-defaults"/)
+  assert.match(html, /aria-label="[^"]+格局调研/)
+  assert.doesNotMatch(html, /\stitle="/, 'DefaultsButton <button> 不得再带重复的原生 title 属性')
+})

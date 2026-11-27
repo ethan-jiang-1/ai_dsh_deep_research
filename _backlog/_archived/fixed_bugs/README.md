@@ -6,6 +6,11 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [462](BUG-462-defaults-button-renders-double-tooltip-and-native-title.md) | `DefaultsButton` 移除 `<button>` 重复原生 `title` 属性 | （去重复 title） | 2026-11-27 |
+| [461](BUG-461-runs-view-copy-path-shows-copied-on-clipboard-reject.md) | `RunsView`「复制路径」按剪贴板 Promise 异步反馈成功/失败 | （三态 `copyFeedback`） | 2026-11-27 |
+| [460](BUG-460-final-segmented-control-clips-active-tab-in-narrow-split.md) | 终稿 `SegmentedControl` 窄分屏启用 `@container` 自适应不裁切 | （`container-type` 缩紧） | 2026-11-27 |
+| [459](BUG-459-hub-runs-open-final-fails-expand-and-hardcodes-root-final.md) | `ResearchHub`「打开终稿」先回对话再开真终稿路径并展开右栏 | （`openResourceWhenMounted` + `preferredFinalPathOf`） | 2026-11-27 |
+| [458](BUG-458-final-toc-truncates-markdown-links-with-nested-parens.md) | `FinalToc` 平衡括号扫描完整剥离含嵌套括号 Markdown 链接 | （`stripMarkdownLinks`） | 2026-11-27 |
 | [457](BUG-457-track-rail-rerun-arrow-misaligned-from-reentry-step.md) | `TrackRail` 取消错位 `▲` 并在重入节点内展示 `↺` 徽标 | （inline ↺ 徽标） | 2026-11-27 |
 | [456](BUG-456-method-summary-shows-empty-incomplete-fields-on-name-issue.md) | 名称校验拦前导 `#`/换行且不再渲染空后缀「还需补齐：」 | （nameIssueKind + `draftStatusOf`） | 2026-11-27 |
 | [455](BUG-455-config-ui-strings-render-raw-markdown-asterisks.md) | 清除纯文本配置提示槽原始 `**...**` 并补工作台指引 | （locales 纯文本去星号） | 2026-11-27 |

@@ -109,6 +109,7 @@ export const zhCockpit = {
   hubOpenFinal: '打开终稿',
   hubCopyPath: '复制路径',
   hubCopied: '已复制',
+  hubCopyFailed: '复制失败',
   hubSearchLenses: '搜索研究透镜（学术 / 反例 / 定量 / 官方 / 监管…）',
   hubLensesEmpty: '没有匹配的研究透镜。',
   hubLensWhen: '适用',

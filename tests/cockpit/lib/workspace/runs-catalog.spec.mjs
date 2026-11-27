@@ -8,6 +8,7 @@ import {
   BUILT_IN_LENSES,
   filterLenses,
   filterRunsCatalog,
+  preferredFinalPathOf,
   scanRunsCatalog,
 } from '../../../../packages/deep-research-pack/src/lib/workspace/runs-catalog.ts'
 
@@ -161,4 +162,35 @@ test('filterRunsCatalog 与 filterLenses：按关键词与位置过滤', async (
   assert.equal(filterLenses(BUILT_IN_LENSES, 'adversarial').length, 2) // adversarial + quant pairsWith
   assert.equal(filterLenses(BUILT_IN_LENSES, 'regulatory').length, 1)
   assert.equal(filterLenses(BUILT_IN_LENSES, '监管', (l) => (l.id === 'regulatory' ? '监管与合规' : '')).length, 1)
+})
+
+// 负例留证 2026-11-27：BUG-459——RunsView 过去无视 in-disk final 目录，一律硬编码 `${rootPath}/final.md`。
+// 红配方：preferredFinalPathOf 退化为永远返回 `${rootPath}/final.md` → 本例红。
+test('BUG-459 preferredFinalPathOf：优先选择可读读者版/审计版再回退根 final.md', () => {
+  const base = {
+    slug: 'demo',
+    dirName: 'drt_demo',
+    location: 'archive',
+    title: 'demo',
+    status: 'archived',
+    delivered: false,
+    evidenceCount: 1,
+    reviewVerdict: 'absent',
+  }
+  assert.equal(
+    preferredFinalPathOf({ ...base, rootPath: 'archive/drt_demo', hasFinalMd: true, latestFinalVersion: 2, latestReaderVersion: 2 }),
+    'archive/drt_demo/final/readable-v2.md',
+  )
+  assert.equal(
+    preferredFinalPathOf({ ...base, rootPath: '_abandoned/drt_demo', hasFinalMd: true, latestFinalVersion: 3, latestReaderVersion: null }),
+    '_abandoned/drt_demo/final/v3.md',
+  )
+  assert.equal(
+    preferredFinalPathOf({ ...base, rootPath: 'drt_demo', hasFinalMd: true, latestFinalVersion: null, latestReaderVersion: null }),
+    'drt_demo/final.md',
+  )
+  assert.equal(
+    preferredFinalPathOf({ ...base, rootPath: 'drt_demo', hasFinalMd: false, latestFinalVersion: null, latestReaderVersion: null }),
+    null,
+  )
 })

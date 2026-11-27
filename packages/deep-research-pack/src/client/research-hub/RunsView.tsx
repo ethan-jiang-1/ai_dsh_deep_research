@@ -1,8 +1,9 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Button, IconSearchOutlineRegular, Input, Pill, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import {
   filterRunsCatalog,
+  preferredFinalPathOf,
   type RunCatalogEntry,
   type RunCatalogResult,
   type RunLocation,
@@ -16,7 +17,7 @@ export interface RunsViewProps extends PropsLocale<'deepResearchPack'> {
   readonly loading: boolean
   readonly result: RunCatalogResult
   readonly onRefresh: () => void
-  readonly onOpenFinal: (rootPath: string) => void
+  readonly onOpenFinal: (finalPath: string) => void
   readonly onStartResearch: () => void
 }
 
@@ -62,7 +63,12 @@ export function RunsView({
 }: RunsViewProps): ReactNode {
   const [query, setQuery] = useState('')
   const [locationFilter, setLocationFilter] = useState<LocationFilter>('all')
-  const [copiedPath, setCopiedPath] = useState<string | null>(null)
+  const [copyFeedback, setCopyFeedback] = useState<{ readonly path: string; readonly state: 'copied' | 'failed' } | null>(null)
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => () => {
+    if (copyTimerRef.current !== null) clearTimeout(copyTimerRef.current)
+  }, [])
 
   if (!hasSession) {
     return (
@@ -75,11 +81,25 @@ export function RunsView({
 
   const visible = filterRunsCatalog(result.runs, query, locationFilter)
 
+  const setTimedFeedback = (path: string, state: 'copied' | 'failed') => {
+    if (copyTimerRef.current !== null) clearTimeout(copyTimerRef.current)
+    setCopyFeedback({ path, state })
+    copyTimerRef.current = setTimeout(() => {
+      setCopyFeedback((current) => (current?.path === path && current.state === state ? null : current))
+      copyTimerRef.current = null
+    }, 2000)
+  }
+
   const copyPath = (rootPath: string) => {
-    void navigator.clipboard?.writeText(rootPath).catch(() => {
-      /* @silent-catch: clipboard write fails soft when browser denies clipboard permission */
-    })
-    setCopiedPath(rootPath)
+    const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard
+    if (clipboard === undefined || typeof clipboard.writeText !== 'function') {
+      setTimedFeedback(rootPath, 'failed')
+      return
+    }
+    void clipboard.writeText(rootPath).then(
+      () => { setTimedFeedback(rootPath, 'copied') },
+      () => { setTimedFeedback(rootPath, 'failed') },
+    )
   }
 
   const filterOptions: readonly { readonly id: LocationFilter; readonly label: string }[] = [
@@ -135,7 +155,8 @@ export function RunsView({
       {visible.length > 0 && (
         <div className={css.grid}>
           {visible.map((run) => {
-            const canOpenFinal = run.hasFinalMd || run.latestFinalVersion !== null || run.latestReaderVersion !== null
+            const finalPath = preferredFinalPathOf(run)
+            const copyState = copyFeedback?.path === run.rootPath ? copyFeedback.state : 'idle'
             return (
               <article key={run.rootPath} className={css.card}>
                 <div className={css.cardTop}>
@@ -160,13 +181,18 @@ export function RunsView({
                   <div className={css.errorBox}>{run.error}</div>
                 )}
                 <div className={css.cardFooter}>
-                  {canOpenFinal && (
-                    <Button variant="primary" size="sm" onClick={() => { onOpenFinal(run.rootPath) }}>
+                  {finalPath !== null && (
+                    <Button variant="primary" size="sm" onClick={() => { onOpenFinal(finalPath) }}>
                       {t('hubOpenFinal')}
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm" onClick={() => { copyPath(run.rootPath) }}>
-                    {copiedPath === run.rootPath ? t('hubCopied') : t('hubCopyPath')}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    data-copy-state={copyState}
+                    onClick={() => { copyPath(run.rootPath) }}
+                  >
+                    {copyState === 'copied' ? t('hubCopied') : copyState === 'failed' ? t('hubCopyFailed') : t('hubCopyPath')}
                   </Button>
                 </div>
               </article>

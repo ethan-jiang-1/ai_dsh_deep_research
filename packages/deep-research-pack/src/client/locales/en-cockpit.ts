@@ -111,6 +111,7 @@ export const enCockpit: Record<CockpitLocaleKey, string> = {
   hubOpenFinal: 'Open final',
   hubCopyPath: 'Copy path',
   hubCopied: 'Copied',
+  hubCopyFailed: 'Copy failed',
   hubSearchLenses: 'Search lenses (academic, adversarial, quant, official…)',
   hubLensesEmpty: 'No matching research lenses.',
   hubLensWhen: 'When',

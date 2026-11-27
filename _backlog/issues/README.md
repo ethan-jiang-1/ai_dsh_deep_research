@@ -6,6 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
+| [2026-11-27-cockpit-ux-ui-round3-verification](2026-11-27-cockpit-ux-ui-round3-verification.md) | 待落地 | 第三轮 UX/UI 盲区核查计划（ef5aff1f 复验、全英文与热切语言、多工作区 Hub 路由、工具卡/Agent Team 与深边缘矩阵） |
 | [2026-11-27-cockpit-ux-ui-deep-blindspots-verification](2026-11-27-cockpit-ux-ui-deep-blindspots-verification.md) | 待落地 | 第二轮 UX/UI 深度盲区核查计划（方法库/配置深交互、Files 路由、流式/焦点保护、无障碍与极限压测） |
 | [2026-11-27-cockpit-ux-ui-full-verification](2026-11-27-cockpit-ux-ui-full-verification.md) | 待落地 | 全量 UX/UI 端到端、视觉/主题/视口、异常态与活流全面核查计划（发现即建 BUG 卡） |
 

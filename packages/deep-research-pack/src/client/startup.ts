@@ -82,3 +82,53 @@ export function buildStartResearchOptions(prompt?: string): {
   if (prompt === undefined || prompt.trim() === '') return undefined
   return { prompt, whenDraftExists: 'keep' }
 }
+
+export interface SidebarRightResourceHost {
+  openResource(address: string): void
+  isExpanded?: () => boolean
+  toggleExpanded?: () => void
+}
+
+/**
+ * 在主区切回对话后等待 `ui-sidebar-right` 完成当前会话表面挂载，再打开目标资源并展开收起的右栏（BUG-459）。
+ */
+export function openResourceWhenMounted(
+  sidebarRight: SidebarRightResourceHost,
+  address: string,
+  opts?: {
+    readonly intervalMs?: number
+    readonly maxAttempts?: number
+    readonly onError?: (cause: unknown) => void
+  },
+): () => void {
+  const intervalMs = opts?.intervalMs ?? 25
+  const maxAttempts = opts?.maxAttempts ?? 24
+  let cancelled = false
+  let timer: ReturnType<typeof setTimeout> | null = null
+  let attempts = 0
+
+  const tryOpen = (): void => {
+    if (cancelled) return
+    attempts += 1
+    try {
+      sidebarRight.openResource(address)
+      if (sidebarRight.isExpanded?.() === false) sidebarRight.toggleExpanded?.()
+    } catch (cause) {
+      const msg = cause instanceof Error ? cause.message : String(cause)
+      if (/no session surface is mounted/i.test(msg) && attempts < maxAttempts) {
+        timer = setTimeout(tryOpen, intervalMs)
+        return
+      }
+      opts?.onError?.(cause)
+    }
+  }
+
+  tryOpen()
+  return () => {
+    cancelled = true
+    if (timer !== null) {
+      clearTimeout(timer)
+      timer = null
+    }
+  }
+}
