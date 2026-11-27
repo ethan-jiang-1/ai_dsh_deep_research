@@ -34,7 +34,7 @@ build-time externals 会把新 host 半的改动静默稀释（020rc2 轮实证�
 按 [§重审触发路径](../../../docs/discipline-map.md) 清单**逐条重读**我们赖以立论的 vendor
 源（根/子树 AGENTS、testing、architecture、notes 约定、skills 约定……），三态结论有变的
 更新 discipline-map 对应行。外部材料登记同步对账：钉版语料/参考仓若自钉旧 DSH 版本，
-其结论标记"待复核"（00-index §外部研究材料的钉版纪律）。
+其结论标记"待复核"（[external-materials.md](../../../docs/external-materials.md) 的钉版纪律）。
 
 **破坏面清单（升 pin 的交付物，不是可选项）**：新版本可能让本包的既有写法失效，而 L0 只证结构。
 逐条判定并写进毕业 Note：

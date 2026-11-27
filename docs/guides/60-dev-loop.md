@@ -24,7 +24,7 @@
 - 两门都是 DSH 自带机制（base bundle，零接线）；**不要发明 tasks.md**（DSH 明文否决计划
   文件："a plan directory creates a second durable home"——会话日志即计划与清单的持久真相）。
 - **验收门（TDD 式，[D23](../decisions.md#d23)）**：对已授权工作，在实施前把可判定的验收判据绑定检查方式；可机械者先立红，人工判据明确记录走查证据。验收尚不明确时，澄清是当前任务需要，不会自动阻断已授权且可独立推进的工作；证据设计复用本仓现有 owner，不另造队列。四条硬边界：①**改断言迁就实现不是修法**——断言只在行为/合同真实变化时同 diff 改（[tests/AGENTS](../../tests/AGENTS.md)）；②**未验项不得写 implemented**，被阻断检查如实注明；③**复发升格**——implemented 缺真实验证证据复发时，才考虑升为机械门禁并配负例；④证据和结论不得超出检查实际证明的范围（依据见 [external-materials.md](../external-materials.md) 与 [item-lifecycle-tdd Note](../../notes/archived/2026-10-05-item-lifecycle-tdd.md)）。
-- **修复卡证据（红→绿）**：bug 翻 `修复落地/已修` 必须写 `## 修复落地` 的 `json fix-evidence` 块（changes/red/green/guard；exit 是 oracle；红证可重放或 changes 含测试/门禁资产），且归档与代码/测试同暂存集；只翻状态/移卡 = 假修（规则 = [_backlog/bugs/README.md](../../_backlog/bugs/README.md)；方法 = [_backlog/methods/bug-to-fix.md](../../_backlog/methods/bug-to-fix.md)）。
+- **修复卡证据（红→绿）**：bug 翻 `修复落地/已修` 必须写 `## 修复落地` 的 `json fix-evidence` 块（changes/red/green/guard；exit 是 oracle；红证可重放或 changes 含测试/门禁资产），且归档与代码/测试同暂存集；只翻状态/移卡 = 假修（规则 = [_backlog/bugs/README.md](../../_backlog/bugs/README.md)；工艺依据 = [缺陷修复工艺 Note](../../notes/implemented/2026-11-15-bug-fix-process-dsh-plugin.md)）。
 - 同一授权范围内直接实施、验证、自审和修复，不重复询问是否开始或继续；只有缺少必要的人类判断或范围变化时才澄清。阶段验收中的产品取舍归用户，技术证据与自主审查归 agent（[研发宪章](../../CONTRIBUTING.md#development-charter)）。
 - 工具执行许可由当前运行时的 sandbox/approval policy 单独强制，与实施授权、Plan Mode 和业务验收分开；遇到实际拒绝时按工具支持的最窄权限请求，不另发问卡重复确认，也不从仓库内任务推导对其他路径或任意操作的许可。原生机制见 `vendor/dsh/packages/interaction/user-approval/README.md`；项目指南不改变运行时策略。用户限定只改 repo 时，不以 Full access 或全局配置消除弹窗；受限检查记未跑，继续独立工作，不为同类操作反复申请升权。
 - 多步实施按可独立验收结果拆解；小问题不强行拆成子任务。一次需要多个相互独立的人类判断时，分别记录问题与依赖，不把它们伪装成执行步骤。
@@ -53,7 +53,7 @@
   **加/改门禁** → `writing-a-gate`；**加/调节点轨道** → `changing-node-topology`；
   **归档/删除/合并 Note** → `archiving-a-note`；
   **换 vendor pin** → `bumping-vendor-pin`；**间歇/环境依赖缺陷** → `reproducing-a-failure`；
-  **已建缺陷卡** → [_backlog/methods/bug-to-fix.md](../../_backlog/methods/bug-to-fix.md)（表面/边界 → 证据 → 红绿）；
+  **已建缺陷卡** → [_backlog/bugs/README.md](../../_backlog/bugs/README.md)（表面/边界 → 证据 → 红绿；工艺依据 = [缺陷修复工艺 Note](../../notes/implemented/2026-11-15-bug-fix-process-dsh-plugin.md)）；
   **真实边界单点证据** → `using-a-probe`；**回归绿但输入空间没枚举** → `exploratory-verification`。
 
 任务命中 `.agents/skills/` 某条 description（上列项）时**先读该 `SKILL.md` 全文再动手**，不从
@@ -72,7 +72,7 @@
 
 新增或替换 parser、机器判据、资源 ownership/lifecycle 操作，或改变这些合同、共享事实写方、生产者/消费者集合、模型能力与可见行为时，先查相关 owner、已有 Module/Interface、旧性质及其测试，再进入改动。
 
-在本次既有验收记录中说明：哪些旧性质继续成立、全部受影响的真实入口/消费者、复用公共操作或另建实现的理由，以及正常与失败/取消后的外部结果；将这些结果绑定最低可见层的正反证据。没有同类旧性质时说明查过的范围与新增承诺，继承方法见[类级守卫](../../_backlog/methods/class-level-guards.md#01-旧性质随变更继承)。
+在本次既有验收记录中说明：哪些旧性质继续成立、全部受影响的真实入口/消费者、复用公共操作或另建实现的理由，以及正常与失败/取消后的外部结果；将这些结果绑定最低可见层的正反证据。没有同类旧性质时说明查过的范围与新增承诺，类级守卫与旧性质继承见 [guides/67 §2](67-test-strategy.md#类级守卫三判据与旧性质继承) 与 [测试制度 Note](../../notes/implemented/2026-11-13-test-strategy-operating-model.md)。
 
 普通改名、唯一写方的闭集常量投影或保持上述语义不变的整理，沿原任务型验证即可；更名若改变解析、发现或消费者可达性，仍按语义变更处理。记录沿用当前 issue/验收说明/交付报告，不新增必填字段或独立总账；交付核对由[语义自审](../../.agents/skills/reviewing-a-delivery/SKILL.md#从什么开始)承担。
 

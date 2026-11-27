@@ -240,7 +240,7 @@ BUG-020）。
   可继续有用工作但 pending 通知明示"这不是许可"；你之后随时可答，答复作为新消息唤醒
   会话。**不是**按推荐项自动落定。timed 放行是无人值守 run 的生命线：lead persona 的
   ask 硬约束（禁 `wait: -1`，模型单参即可拆掉它）由回归测试钉住——形态判别与救活路径
-  的机制正本 = [BUG-005 卡](../../_backlog/_archived/fixed_bugs/BUG-005-hitl1-indefinite-wait-no-floor.md)。
+  的机制依据 = BUG-005（[goal-hitl-alignment Note](../../notes/implemented/2026-11-10-goal-hitl-alignment.md)）。
   等待判据：`watch-run` 的状态行带 `hitlAgeMs`，挂起时另打 `STATE-NOTE: HITL 已等待 N 分钟`——
   600s 超时后仍显示挂起是预期（问题保持可答），不是"卡死"；判卡死看年龄 + 日志回退。
 
@@ -259,17 +259,17 @@ BUG-020）。
 - **通道跑久后 UI 可能"零会话行"**（实测约 5 小时后：侧栏组能展开成 `aria-expanded=true`，却渲染不出任何
   `session:` 行；代答于是报"侧栏没有目标会话行"）——**不是**归档、也不是回合终局化。处置 = 重跑
   `node tools/channel/run-driver.mjs up` + **新会话**；`hitl-answer` 自 2026-10-16 起在报错里给「错因判据 = aging」这一行
-  （判据正本 = [BUG-031](../../_backlog/_archived/fixed_bugs/BUG-031-hitl-answer-sidebar-session-rows-unrendered.md)）；
+  （BUG-031；机制与 aging 判据见 `tools/channel/hitl-answer.mjs`）；
 - **被通道重启打断的 ask 不会终局化，会永久留在盘上算 pending**（UI 卡在场但点不动、答复永不落地，盘侧谓词会继续
   把它当"最新挂起"报出）→ 别去答它：重开新会话说"继续 <slug> 这个 run"，让 lead 原样重发问询；
 - **会话日志尾部在通道死亡时不保证**（SIGTERM 后未落盘缓冲蒸发实测）——"文件即真相"只对
   bundle 文件断言；盘侧谓词消费日志前先过回退检测（watch-run 内建，回退即 fail-loud），
-  跨会话取证的结论要意识到日志可能被截断（[BUG-007 卡](../../_backlog/_archived/fixed_bugs/BUG-007-channel-death-loses-log-tail.md)）；
+  跨会话取证的结论要意识到日志可能被截断（BUG-007，[vendor-wire-semantics-and-log-tail Note](../../notes/implemented/2026-11-24-vendor-wire-semantics-and-log-tail.md)）；
 - **run 目标态（0.2.0 tool-goal）**：HITL1 拍板后 lead 用 create_goal 钉住本次 run
   （objective = 定稿问题 + 交付判据）——goal-round-driver 随 base 在位，会话存活期中断的
   回合由 goal 驱动续轮（韧性增益；goal 语义随 run 生效有实测）；**通道死亡场景以文件恢复
   为准，不假设自动续轮**（通道死亡下续轮未单独实测——机制描述须有盘面支撑，
-  [BUG-009 卡](../../_backlog/_archived/fixed_bugs/BUG-009-no-finalization-on-restart.md) 同款教训）；
+  BUG-009（[goal-hitl-alignment Note](../../notes/implemented/2026-11-10-goal-hitl-alignment.md)）同款教训）；
   HITL2 用 `ask_user_question` 的 `timeout: -1` 保持开放回合（答案未到不进交付；goal 轮
   不空转；无人值守时保持 pending、不烧模型调用）；lead 不再 pause/resume goal——模型不能
   resume durable paused goal，goal 从 HITL1 后保持 active，交付时 complete；

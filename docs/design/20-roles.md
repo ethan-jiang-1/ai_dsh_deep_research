@@ -64,9 +64,7 @@ skill = 盘上目录本身**（单一事实源：`ls packages/deep-research-pack
 跨角色硬契约（证据 frontmatter 等）住[研究手册](../../packages/deep-research-pack/content/manual.md)。
 
 **脚本层（D45）**：analyst 的 `wave-execution` skill 承载同质 wave 执行器——Lead 用
-`subagent(agent_preset=analyst)` 派它，child 是 analyst 克隆；只做 deep-dive 的 lens×topic
-取证，child 写 evidence、executor 对账写 `waves/<wave>.json`。它不是新角色，也不是第五个
-角色；`spawn_teammate` 不能替代（队友 composeFrom Lead，没有 analyst preset 的 workflow/skill）。
+`subagent(agent_preset=research-wave)` 派它（D47），child 继承薄 worker 组合（无 Team/goal/ask-user/present/subagent，不会递归 workflow）；只做 deep-dive 的 lens×topic 取证，child 写 evidence、executor 对账写 `waves/<wave>.json`。它不是研究角色，也不计入 `presets/` 角色清单；`spawn_teammate` 不能替代（队友 composeFrom Lead，没有 `research-wave` 的 workflow 组合）。
 
 ## 3. 信噪比策略落点（L3 判据 4：显式机制，不靠模型自觉）
 

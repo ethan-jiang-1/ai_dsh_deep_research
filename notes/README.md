@@ -36,7 +36,7 @@
 
 `notes/` 整体是时间维度，内部按**生命周期**分（vendor `.agents/notes/` 同构，且目录名
 自带时态）——按时间分目录必然长出"烂尾层"（company D10 教义，见
-[00-index §组织原则](../docs/00-index.md)）。**目录名 = 状态**：不熟悉本仓的人扫一眼
+[00-index §文档地图](../docs/00-index.md)）。**目录名 = 状态**：不熟悉本仓的人扫一眼
 `proposed / implemented / archived / rejected` 就知道每条记忆处在哪个时态，不必读规则全文
 （vendor 教学页原话："目录本身就是流程"）。
 
@@ -81,7 +81,7 @@ triggers；事故原文只作证据。
 
 ## proposed → implemented 的执行纪律（门牌）
 
-从 RFC 到毕业不是"写完再补证据"——**判据可检验化先行、红绿循环推进、真证据才毕业**。流程正本（一个家，不在此复述）= [guides/60 §0 验收门](../docs/guides/60-dev-loop.md)：验收判据逐条绑定检查方式（机械门禁 / 契约测试 / 对账命令 / 人工判据四型），能机械的先立红（判据在实现前必须能失败）；实施期按红→实现→绿循环；收尾逐条对账——**未验项不得写 implemented**，被阻断的检查如实写「阻断 + 原因」。决策登记 = [00-index D23](../docs/00-index.md)；首个完整闭环 = [项目可驾驭性 Phase 1](implemented/2026-10-05-project-navigability-phase1.md)。外部同源参照（同日同定调的姊妹仓落地形态）= `ai_dsh_assitant` notes/README §二之三（钉版登记见 [00-index §外部研究材料](../docs/00-index.md)）。
+从 RFC 到毕业不是"写完再补证据"——**判据可检验化先行、红绿循环推进、真证据才毕业**。流程正本（一个家，不在此复述）= [guides/60 §0 验收门](../docs/guides/60-dev-loop.md)：验收判据逐条绑定检查方式（机械门禁 / 契约测试 / 对账命令 / 人工判据四型），能机械的先立红（判据在实现前必须能失败）；实施期按红→实现→绿循环；收尾逐条对账——**未验项不得写 implemented**，被阻断的检查如实写「阻断 + 原因」。决策登记 = [00-index D23](../docs/00-index.md)；首个完整闭环 = [项目可驾驭性 Phase 1](implemented/2026-10-05-project-navigability-phase1.md)。外部同源参照（同日同定调的姊妹仓落地形态）= `ai_dsh_assitant` notes/README §二之三（钉版登记见 [external-materials.md](../docs/external-materials.md)）。
 
 ## 决定覆盖与取代检查（DSH SDLC reference 01 吸纳，2026-09-24）
 

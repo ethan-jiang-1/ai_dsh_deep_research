@@ -95,15 +95,9 @@
 
 ## 8. 当前债与下一步
 
-`content/manual.md` 现为 **9,996 字符**：下放触发 = 10,000（余 4），硬顶 = 12,288（余 2,292）。
-两个数只住 `checks/lib/repo/content-budget.mjs`：触发由 `tests/pack/contract/content-disclosure.spec.mjs` 把守，
-硬顶由 `content-shape` 门禁把守；硬顶只防失控，不是可挪用的余量。
+`content/manual.md` 的下放触发（10,000 字符）与硬顶（12,288 字符）正本住 `checks/lib/repo/content-budget.mjs`，分别由 `tests/pack/contract/content-disclosure.spec.mjs` 与 `content-shape` 门禁把守；硬顶只防失控，不是可挪用的余量。
 
-**首刀已落（2026-11-11）**：状态头/读序/恢复细则下放到 `content/generic/state-and-recovery.md`；
-`content-disclosure` 守卫在场；L1 真挂载绿；L4-lite 全角色真模型绿。
-snapshot B 的旧回放仍绿，但回放的是旧录制对，**不捕获**本次手册变更——重录窗口未开，不能拿它冒充
-新手册的组装证据。下一刀 = 证据文件契约或目录约定，按同一形状增量下放；
-trigger = T0 >10,000 或新增跨角色规则装不下。首刀卡 = [2026-11-11-content-organization-t0](../../_backlog/_archived/settled_issues/2026-11-11-content-organization-t0.md)。
+状态头/读序/恢复细则住 `content/generic/state-and-recovery.md`；下放记录、证据与重录窗口边界见 [content-organization-t0 Note](../../notes/implemented/2026-11-11-content-organization-t0.md)。下一刀候选 = 证据文件契约或目录约定，trigger = T0 触及 10,000 字符或新增跨角色规则装不下。
 
 ## 9. 指针
 

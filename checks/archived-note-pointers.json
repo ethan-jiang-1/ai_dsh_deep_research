@@ -612,6 +612,11 @@
       "reason": "§7 历史指针（挂起显性化 + 会话绑定）"
     },
     {
+      "source": "docs/design/40-research-cockpit.md",
+      "target": "notes/archived/2026-10-11-member-activity-first-validation.md",
+      "reason": "2026-11-27 docs 解耦 _backlog 依赖：队员动态折叠区与 member-activity 粒度定夺改指既有归档 Note，不再链接 _backlog/_archived 卡"
+    },
+    {
       "source": "docs/discipline-map.md",
       "target": "notes/archived/2026-09-24-dsh-discipline.md",
       "reason": "头部枚举方法行的首轮清点实录指针（历史出处；现行三态正本 = 本表自身）"

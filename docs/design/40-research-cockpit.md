@@ -129,7 +129,7 @@
 | ③ 研究问题行 | 本场研究问题（读 question.md） |
 | ⑤ 证据与交付 | 证据计数（`ok` 时只计**有效卡**：排除 `_failed.md`/`_` 前缀、0 字节/frontmatter-only；`unreadable` → 「证据读取失败」+ 重试，不显示 0；只有失败登记/空卡 → 「没有有效证据卡」+ 挖掘 unknown）+ 交付状态（present 见证；回执 `unreadable/empty/invalid` → 「交付回执读取失败/不合法」+ 重试，不显示「交付未见证」）+ rerun 版本面一行（`run-version`：已交付版本/rerun 声明/HITL2 待审）；已交付后追加只读折叠块「还不满意？三种改法」 |
 | ④ 活动流 | 人性化活动行（检索 / 派出 / 成员 / 交付）；原始事件类型名不出正文 |
-| ⑦ 队员动态折叠区（条件：有队员） | [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)：agentTeam 投影取 roster → 多路 follow 队员会话 → 检索/抓取/出错动作行，每人一节默认折叠 + 计数徽标 |
+| ⑦ 队员动态折叠区（条件：有队员） | [member-activity-first-validation](../../notes/archived/2026-10-11-member-activity-first-validation.md)：agentTeam 投影取 roster → 多路 follow 队员会话 → 检索/抓取/出错动作行，每人一节默认折叠 + 计数徽标 |
 
 折算层（`src/lib/`，全部纯函数、fail-soft 永不 throw；全量清单 = 盘上目录；下表为核心折算件，`library-fold` / `stream-failure` 见上表组件行；journal-wire 为五个入参折算件共享的 wire 解析核）：
 
@@ -154,7 +154,7 @@
 | [tool-card](../../packages/deep-research-pack/src/lib/events/tool-card.ts) | call/result 切片 → 卡片状态 | running / ok / error / stopped |
 | [start-card](../../packages/deep-research-pack/src/lib/workspace/start-card.ts) | blank Session 事实（用户消息 + 工作区根条目）→ 首屏起步卡显隐 | 有用户消息或 `drt_*` 就收起；纯函数，keyless 钉 |
 | [final-target](../../packages/deep-research-pack/src/lib/run/final-target.ts) | journal 交付事件 / 文件地址 / 终稿路径 → 本次交付 + 会话文件 + 读面定表 + 地址目标版本 + 自动打开判据 | `present`（`deliverables/presented`）是交付的机械判据（node-gate 门②）；`final.md` 在场只说明"有终稿可审"（综合步就落盘），不是交付。地址认领终稿族（根 / `archive/` / `_abandoned/` 三位置 + `final/` 下 `vN.md`、`readable.md`、`readable-vN.md`），`drafts/final.md` 与绝对域全拒；`final/vN` / `readable-vN` 地址点名的版本是正文身份（缺失即失败，版本账最高号不得覆盖）；`final.md` / 通用地址才回退最高版本/工作稿；交付记录的位置失效时由 run-context 的 `openRun` 按三位置回退；`finalViewOf`（body/reader × ok/absent/unreadable/empty/invalid × 请求视图）决定展示哪一版，互补回退必须带提示，双坏 → 空/失败态；`watchTargetOf` 让 stale watcher 盯当前显示件（reader/audit/draft），不是固定 audit；自动打开 = `shouldOpenFinal`（有交付 / `callId` 未开过 / 焦点不在可编辑元素），present 同时带 reader 与 vN 时优先打开 reader |
-| [member-activity](../../packages/deep-research-pack/src/lib/events/member-activity.ts) | 队员 journal 事件 → 检索/抓取/出错动作行 + 全量计数 | 粒度定夺 = [member-activity-stream 卡](../../_backlog/_archived/settled_issues/2026-10-09-member-activity-stream.md)（2026-10-10 用户三问：文件读写不入流）；失败行剥 "Error: " 工程前缀；行截尾窗与 activity-fold 同款 |
+| [member-activity](../../packages/deep-research-pack/src/lib/events/member-activity.ts) | 队员 journal 事件 → 检索/抓取/出错动作行 + 全量计数 | 粒度定夺 = [member-activity-first-validation](../../notes/archived/2026-10-11-member-activity-first-validation.md)（2026-10-10 用户三问：文件读写不入流）；失败行剥 "Error: " 工程前缀；行截尾窗与 activity-fold 同款 |
 | [brief-fold](../../packages/deep-research-pack/src/lib/run/brief-fold.ts) | 既有事实源投影 → 业务摘要五问 | 输入面**不含**证据计数与工具调用数（计数在类型层面进不了完成态文案，keyless 禁词单测钉）；优先级 = 挂起 > 立项预检窗 > 未绑定 > **bundle 读失败** > **已交付 × 审查 FAIL（两事实共存）** > **审查未定** > **审查冲突** > 审查 FAIL（未交付政策） > 已交付 > 推进中；`questionIssue`（含 `body-empty`）覆盖目标行、`reviewUnconfirmed`/`reviewConflict` 覆盖审查行；`ArtifactState` 五态（ok/absent/unreadable/empty/invalid）由 `artifact-read` 单一映射；派生不出的状态显式缺省，不虚构 |
 | [workspace-title](../../packages/deep-research-pack/src/lib/workspace/workspace-title.ts) | 工作区目录名 → 产品标题 | 前缀单一正本（client 的 startsWith 过滤与 host 的登记标题共用）；空名 = `Deep Research` |
 | [review-readiness](../../packages/deep-research-pack/src/lib/review/review-readiness.ts) | review.md 全文 → 终局 readiness 三态 | 只认**行首**判定行、取最后一条：文末附录保留的轮次血统（如首轮 `readiness: FAIL`）是行内引用，不得夺权；空模板 `PASS \| FAIL`、无判定行或输入畸形 → `null`（不猜）。驾驶舱、仪表盘与 client-load.entry 直接消费；node-gate 在纯 `.mjs` 边界镜像同一规则并由 `gateBundle` 回归覆盖 |

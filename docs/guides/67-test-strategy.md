@@ -2,8 +2,9 @@
 
 > 层：指南（怎么选证据）。**不是第六个评估面**——五面验收合同仍以
 > [evaluation.md](../evaluation.md) 为准；本页回答「这次改动该配什么证据、算不算够」。
-> 失败类全量账本 = [research/dsh-test-strategy 的普查](../../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md)；
-> 类级守卫形态 = [_backlog/methods/class-level-guards.md](../../_backlog/methods/class-level-guards.md)；
+> 制度依据 = [三环四账五关 Note](../../notes/implemented/2026-11-13-test-strategy-operating-model.md) ·
+> [制度化交付 Note](../../notes/implemented/2026-11-13-test-strategy-institutionalization.md) ·
+> [守卫契约加固 Note](../../notes/implemented/2026-11-16-guard-contract-hardening.md)；
 > 命名车道 = [D53](../decisions.md#d53)。
 
 ## 0. 一句话
@@ -41,53 +42,16 @@
 | C11 文档/规则漂移 | 门禁/契约 | 文档副本同源、计数正本、路径/锚点门禁 | 人读 |
 | C12 残余 | 先归因 | 一次探针/现场；归不进去 = 先补归因，不硬塞 | 猜 |
 
-### 2026-11-14 批 A 增量（8 卡；探索卡第六轮）
+历史探索批次的逐 BUG 守卫映射住 [guard-ledger/ledger.json](../../tests/fixtures/guard-ledger/ledger.json)，制度化交付记录见 [制度化交付 Note](../../notes/implemented/2026-11-13-test-strategy-institutionalization.md)。
 
-> 失败类账本的增量案例；159 例全量见[普查](../../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md)。
-> 每条卡的复现、根因与判据在卡内；这一表只记「类 → 缺口的共同形状 → 类级守卫方向」。
+### 类级守卫三判据与旧性质继承
 
-| 失败类 | 卡 | 共同缺口 | 类级守卫方向 |
-|---|---|---|---|
-| C7/C2 | [160](../../_backlog/_archived/fixed_bugs/BUG-160-smoke-registry-mention-not-execution.md)、[161](../../_backlog/_archived/fixed_bugs/BUG-161-ci-jobs-job-id-regex-skips-underscore.md)、[162](../../_backlog/_archived/fixed_bugs/BUG-162-nested-smoke-invisible-to-registry-and-lane.md) | 枚举/执行面窄于声称面：文件名提及、job 名正则、顶层目录 | 结构化解析（run steps / jobs keys / 递归 walk）或显式禁例外；反证覆盖合法 id/路径 |
-| C7/C11 | [163](../../_backlog/_archived/fixed_bugs/BUG-163-model-workflow-pull-request-target-trigger.md) | 允许面用否定词表（只禁 `pull_request`/`push`） | 枚举完整键集合，白名单恰等于预期事件 |
-| C4/C9 | [164](../../_backlog/_archived/fixed_bugs/BUG-164-snapshot-why-accepts-flag-as-carrier.md) | CLI 值 token 未区分 flag 与载体 | 值 token 类型校验 + 缺值/flag/空值矩阵 |
-| C8/C4 | [165](../../_backlog/_archived/fixed_bugs/BUG-165-note-format-quoted-status-and-negated-evidence.md) | 全文正则冒充语义（引用状态行、否定节） | 先剥离引用/围栏；按节判定「至少一条非否定证据」 |
-| C2/C7 | [166](../../_backlog/_archived/fixed_bugs/BUG-166-note-tree-hidden-directory-bypass.md) | 扫描面在目录类型判断前收窄 | 类型判断先于点文件豁免；隐藏目录红 |
-| C4 | [167](../../_backlog/_archived/fixed_bugs/BUG-167-method-heading-invisible-format-chars-duplicate.md) | Unicode 身份未归一（`\p{Cf}`） | 标题 codec 单一归一面；空白 + 格式符矩阵 |
-
-### 2026-11-14 批 B 增量（7 卡；探索卡第七轮）
-
-| 失败类 | 卡 | 共同缺口 | 类级守卫方向 |
-|---|---|---|---|
-| C7/C8 | [168](../../_backlog/_archived/fixed_bugs/BUG-168-legacy-present-payload-substring-false-positive.md) | 旧场 present 按整段载荷找 slug（内容提及冒充路径） | present 路径字段 codec；所有分支只读 `files[].path` + 精确前缀 |
-| C7/C8 | [169](../../_backlog/_archived/fixed_bugs/BUG-169-readiness-fenced-code-verdict.md)、[170](../../_backlog/_archived/fixed_bugs/BUG-170-readiness-bold-label-not-recognized.md) | readiness 的 Markdown 结构建模不全：fenced block 与标签加粗 | 先块级剥离 fence；标签装饰归一；示例/引用不计 |
-| C7/C2 | [171](../../_backlog/_archived/fixed_bugs/BUG-171-protocol-version-chain-only-previous-snapshot.md) | 版本链只建模一跳（v3 不查 v1） | 按 1..v-1 枚举快照；逐份 schema/version/hash |
-| C7/C2 | [172](../../_backlog/_archived/fixed_bugs/BUG-172-smoke-registry-if-false-step-counted.md)、[176](../../_backlog/_archived/fixed_bugs/BUG-176-smoke-symlink-invisible-to-registry.md) | 「执行」不含 step 条件（`if: false` 仍算）；盘上枚举看不见 symlink | step-aware 执行面 + lstat 分类；跳过条件/continue-on-error/symlink 红 |
-| C8/C2 | [175](../../_backlog/_archived/fixed_bugs/BUG-175-note-gates-fenced-code-and-hidden-md.md) | notes 门禁不剥 fenced code；隐藏 `.md` 绕过日期前缀 | 块级 mask（```/~~~、未闭合）+ 点文件只豁免非 `.md`；三读者共用 |
-| C7/C2 | [173](../../_backlog/_archived/fixed_bugs/BUG-173-client-effect-bracket-access-escapes-return-gate.md) | AST 形状窄于 API（方括号 effect 逃逸） | effect 调用的单一 predicate（Property/Element 同判） |
-| C9/C10 | [174](../../_backlog/_archived/fixed_bugs/BUG-174-lifecycle-stale-dist-tarball.md) | 产物新鲜度未建模（旧 tarball 冒充 HEAD） | 所有消费 `_dist` 的 entry 共用 artifact freshness 谓词 |
-
-### 2026-11-14 批 C 增量（7 卡；探索卡第八轮）
-
-| 失败类 | 卡 | 共同缺口 | 类级守卫方向 |
-|---|---|---|---|
-| C7/C8 | [177](../../_backlog/_archived/fixed_bugs/BUG-177-ci-workflow-expression-normalization.md)、[178](../../_backlog/_archived/fixed_bugs/BUG-178-readiness-markdown-containers-and-bold-paren.md)、[179](../../_backlog/_archived/fixed_bugs/BUG-179-html-comments-not-masked.md) | 表达式/Markdown 结构建模不完整（`${{ }}`、容器、HTML 注释） | 条件与块级 mask 单一实现；结构闭集矩阵 |
-| C3/C4 | [180](../../_backlog/_archived/fixed_bugs/BUG-180-method-heading-duplicate-unknown-segments-dropped.md)、[183](../../_backlog/_archived/fixed_bugs/BUG-183-note-scan-indented-status-heading.md) | 已识别段/缩进口径不一致，未知形态被静默消费 | 单一 codec；CommonMark 容器缩进矩阵 |
-| C9/C10 | [181](../../_backlog/_archived/fixed_bugs/BUG-181-artifact-freshness-deletion-blind.md) | artifact 新鲜度只看 mtime，文件集变化不可见 | 构建清单/哈希；mtime 只作预检 |
-| C3/C8 | [182](../../_backlog/_archived/fixed_bugs/BUG-182-model-workflow-duplicate-onkeys-empty-map.md) | on: 解析有第二份实现；空映射 `{}` 假红 | 单一事件解析器；空值/mapping 矩阵 |
-
-### 2026-11-14 批 D 增量（7 卡；探索卡第九轮）
-
-| 失败类 | 卡 | 共同缺口 | 类级守卫方向 |
-|---|---|---|---|
-| C7/C8 | [184](../../_backlog/_archived/fixed_bugs/BUG-184-ci-workflow-quoted-comment-expressions.md)、[187](../../_backlog/_archived/fixed_bugs/BUG-187-ci-workflow-shell-short-circuit.md)、[190](../../_backlog/_archived/fixed_bugs/BUG-190-ci-workflow-inline-on-flow-mapping.md) | 表达式/shell/on: 的下一层形状未归一 | 单一表达式/命令/事件解析器；quoted/comment/短路/flow 矩阵 |
-| C7/C8 | [185](../../_backlog/_archived/fixed_bugs/BUG-185-markdown-mask-html-before-fence.md) | 块级 mask 顺序（fence vs HTML comment） | fence 优先的单一状态机；组合形态 conformance |
-| C7/C11 | [186](../../_backlog/_archived/fixed_bugs/BUG-186-fix-evidence-negation-and-exit-markers.md)、[189](../../_backlog/_archived/fixed_bugs/BUG-189-fix-evidence-directory-path-prefix.md) | 修复证据的 marker/路径是宽子串 | 结构化 fix-evidence（exit 为 oracle；guard 必填）；旧卡 grandfather |
-| C8/C4 | [188](../../_backlog/_archived/fixed_bugs/BUG-188-note-scan-bold-status-label.md) | 状态标签的 Markdown 装饰未统一 | notes/readiness 共用装饰词表 |
+- **类级三判据（缺一不算类级）**：① 断言含显式全称命题，覆盖整族输入而非单条示例；② 变体由同一事实的多种写法、多读者或多时刻生成；③ 能指名一条**非本次报错原例**的邻近变体使守卫真实报红（负控）。
+- **旧性质继承**：语义变更先从当前 owner 与已有测试追溯适用性质，优先由公共 Module 拥有操作，用独立 expected 在新实现上重跑原有正反例；保留多实现时须在家族 suite 显式列出批准实现并逐个对账实际执行集合。
 
 **成本原则**：同一失败类能在纯函数层证，就不上进程/浏览器/模型；上贵层必须能说出「unit 为什么
 看不见」。**不是所有测试都要矩阵**：纯算术、封闭枚举 + 唯一写方、否决式不变量、受控常量路径、
-单次调用契约，举例/不变量就够（详见 class-level-guards §F）。
+单次调用契约，举例/不变量就够（不强行写矩阵）。
 
 ## 3. 五关
 
@@ -106,7 +70,7 @@
 | 账 | 记什么 | 载体 | 何时更新 |
 |---|---|---|---|
 | **资产账** | lane / class / cost / uniqueClaim / oracleType / sunset | 慢车道 = [checks/smoke/registry.json](../../checks/smoke/registry.json)（`smoke-oracle-surface`）；进程内 spec/check = [asset-ledger/ledger.json](../../tests/fixtures/asset-ledger/ledger.json)（AST 推导 `oracleType`，禁手写覆盖字典，`asset-ledger.test` 重算对账） | 新增/退役/改判据或改 import |
-| **失败类与守卫账** | 类 → 代表 BUG → 守卫路径 → `oracleType` → 红配方 | [失败类普查](../../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md) + 本文表 + [guard-ledger/ledger.json](../../tests/fixtures/guard-ledger/ledger.json)（与 `asset-ledger` 及测试标题双向对账，`guard-ledger.test`） | 每次 P0/P1/复发或入账 |
+| **失败类与守卫账** | 类 → 代表 BUG → 守卫路径 → `oracleType` → 红配方 | [测试制度 Note](../../notes/implemented/2026-11-13-test-strategy-operating-model.md) + 本文表 + [guard-ledger/ledger.json](../../tests/fixtures/guard-ledger/ledger.json)（与 `asset-ledger` 及测试标题双向对账，`guard-ledger.test`） | 每次 P0/P1/复发或入账 |
 | **证据账** | 证据/层/失败类/负控/CI/显式未覆盖 | [reviewing-a-delivery](../../.agents/skills/reviewing-a-delivery/SKILL.md) 的证据账本节 | 每次非平凡交付 |
 | **探索账** | charter/面/oracle/结果/毕业/日期 | [research 题目录](../../_backlog/research/README.md) + [探索技能](../../.agents/skills/exploratory-verification/SKILL.md) | 每轮探索 |
 
@@ -132,7 +96,7 @@
 
 `pnpm test` = spec + checks；慢车道显式跑。错后缀/错 lane 由 `test-lanes` + `smoke-registry` 判红。
 
-## 8. 成本预算（重资产治理）
+## 7. 成本预算（重资产治理）
 
 - **默认回归必须秒级**：`pnpm test` = spec + checks；重资产不在 pre-commit。
 - **三条装配车道按变更类型触发**：模型可见文本 → snapshot B；客户端 → client-load；安装/发布 →
@@ -153,11 +117,10 @@
   夜间档不消耗 required cap。
 - **墙钟不写进合同**：耗时随机器漂移；基线只在当次报告里写实测命令与结果。
 - **成本看的是每次发现**，不是测试数量或覆盖率；慢而重复的资产比少一个测试更贵。
-- **成本看的是每次发现**，不是测试数量或覆盖率；慢而重复的资产比少一个测试更贵。
 
-## 7. 反模式
+## 8. 反模式
 
-- 为 159 张 BUG 逐张补测试（实例修）→ 先归类，落类级守卫或显式不可机械化。
+- 为历史 BUG 逐张补测试（实例修）→ 先归类，落类级守卫或显式不可机械化。
 - 用 E2E/真模型测纯逻辑；为凑绿加 retry/sleep/改 normalizer/放宽断言。
 - 用「文件在场」「点击计数」「有限词表」「自报成功」当内容证明。
 - 新资产没有 uniqueClaim/oracle/sunset；慢资产只增不减。

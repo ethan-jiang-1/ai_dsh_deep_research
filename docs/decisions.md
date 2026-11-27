@@ -35,7 +35,7 @@
 | <a id="d25"></a>D25 | **研究配置中继面**：管理指令经 Lead；写库唯一路径 = Method Editor 窄 host 工具，面板不直写 | [40 §2.6](./design/40-research-cockpit.md) · [Note](../notes/implemented/2026-10-12-research-config-tab.md) |
 | <a id="d26"></a>D26 | **测试栈偏离 vendor：node:test 而非 vitest**；verify 用 regex 断言 | [tests/AGENTS](../tests/AGENTS.md) · [Note](../notes/implemented/2026-09-24-vendor-submodule.md) |
 | <a id="d27"></a>D27 | **参与阶梯编号 = S0–S3**（避开评估面 L0–L4 前缀撞车） | [62](./guides/62-plugin-authoring.md) · [docs/AGENTS](./AGENTS.md) · [Note](../notes/archived/2026-10-21-six-dim-hygiene-round.md) |
-| <a id="d28"></a>D28 | **run bundle 状态 = 内容，位置 = 操作桶**；在飞/archive/_abandoned 只用于发现与展示 | [50](./design/50-agent-loop-and-state.md) · [宪章卡](../_backlog/_archived/settled_issues/2026-10-23-run-bundle-agent-state-and-read-chain.md) |
+| <a id="d28"></a>D28 | **run bundle 状态 = 内容，位置 = 操作桶**；在飞/archive/_abandoned 只用于发现与展示 | [50](./design/50-agent-loop-and-state.md) · [Note](../notes/implemented/2026-10-23-run-bundle-charter.md) |
 | <a id="d29"></a>D29 | **可读终稿层**：critic PASS 后 Lead 写 `final/readable.md`，与 canonical 一起 present | [Note](../notes/implemented/2026-10-23-reader-final.md) · [手册](../packages/deep-research-pack/content/manual.md) |
 | <a id="d30"></a>D30 | **检索底座 = DeepSeek Search API 搜索 + 本地 http 抓取**；bundle `- id: web` 替换行钉两项选择 | [10 §4](./design/10-architecture.md) · [Note](../notes/implemented/2026-10-27-deepseek-search-api-retrieval.md) |
 | <a id="d31"></a>D31 | **抓取回退 provider = D7 第二处有界例外**：本地失败再补 DeepSeek Fetch API；仅 fetch，阻断类不回退 | [10](./design/10-architecture.md) · [Note](../notes/implemented/2026-10-27-fetch-fallback-provider.md) |
@@ -43,7 +43,7 @@
 | <a id="d33"></a>D33 | **run bundle 契约版本整数化**：`run.md` 用 `schema: 2` + `created`；写了 schema 就按现行从严 | [50](./design/50-agent-loop-and-state.md) · [Note](../notes/implemented/2026-10-28-data-plane-hardening.md) |
 | <a id="d34"></a>D34 | **交付承诺与数据现实对齐**：回执三态、数据卡 `可移植` 列、方法库 = 本工作区 | [65](./guides/65-run-forms.md) · [README](../packages/deep-research-pack/README.md) · [Note](../notes/implemented/2026-10-28-data-plane-hardening.md) |
 | <a id="d36"></a>D36 | **交付见证 = `delivered.json` 哈希 + present 事件**；`manifest.json` 只是目录快照，不是见证 | [50](./design/50-agent-loop-and-state.md) · [Note](../notes/implemented/2026-10-28-data-plane-hardening.md) |
-| <a id="d37"></a>D37 | **第 5 个 preset = Method Editor**（非研究角色）：窄 host 工具写库，页面按钮触发，面板不直写 | [20 §5](./design/20-roles.md) · [40](./design/40-research-cockpit.md) · [卡](../_backlog/_archived/settled_issues/2026-10-28-method-library-cocreation.md) |
+| <a id="d37"></a>D37 | **第 5 个 preset = Method Editor**（非研究角色）：窄 host 工具写库，页面按钮触发，面板不直写 | [20 §5](./design/20-roles.md) · [40](./design/40-research-cockpit.md) · [Note](../notes/implemented/2026-10-29-method-library-workbench.md) |
 | <a id="d40"></a>D40 | **交付 = bundle + 自建 custom profile `deep-research` + 启动期工作区**；无 launcher/scaffold，只留只读 doctor | [65](./guides/65-run-forms.md) · [Note](../notes/implemented/2026-11-02-release-model-terms.md) · [D42](#d42) |
 | <a id="d41"></a>D41 | **交付模型术语收口**：合同文档只用 DSH 对象词；不自称 Harness 发行版 | [65](./guides/65-run-forms.md) · [terms](./terms.md) · [Note](../notes/implemented/2026-11-02-release-model-terms.md) |
 | <a id="d42"></a>D42 | **当前安装事实 = 本地 tarball**；npm / Plugins 页 / Discover 为 staged | [安装手册](../_dist/安装手册.md) · [Note](../notes/implemented/2026-11-10-current-install-fact.md) |
@@ -56,7 +56,7 @@
 | <a id="d49"></a>D49 | **默认界面语言 = 中文**（bundle patch 钉 `locale.preference=zh`，profile 可覆盖） | [bundle](../packages/deep-research-pack/cordis.patch.yml) · [Note](../notes/implemented/2026-11-12-default-locale-zh.md) |
 | <a id="d50"></a>D50 | **项目研究默认 = workspace `research-defaults.json` + host command**；只存 depth/output/source | [65](./guides/65-run-forms.md) · [Note](../notes/implemented/2026-11-12-project-research-defaults.md) |
 | <a id="d51"></a>D51 | **判据不猜，投影不编**：互斥或无法判定 = 红；权威输入 = 结构化事实 | [evaluation](./evaluation.md#verdict-shape) · [Note](../notes/implemented/2026-11-13-verdict-shape.md) |
-| <a id="d52"></a>D52 | **加工环路的实体检查 = 字段 + 门**：判据类卡/Note 必填 `## 判据形状`；收口门看暂存区成对判据 | [60](./guides/60-dev-loop.md) · [judgment-design](../_backlog/methods/judgment-design.md) · [Note](../notes/implemented/2026-11-13-workflow-substance-gates.md) |
+| <a id="d52"></a>D52 | **加工环路的实体检查 = 字段 + 门**：判据类卡/Note 必填 `## 判据形状`；收口门看暂存区成对判据 | [60](./guides/60-dev-loop.md) · [判据形状](./evaluation.md#verdict-shape) · [Note](../notes/implemented/2026-11-13-workflow-substance-gates.md) |
 | <a id="d53"></a>D53 | **测试文件名 = 证据车道**：spec / e2e / entry / checks 四后缀；错后缀或错 lane = 红；新增车道 = 新 D 号 | [67 §6](./guides/67-test-strategy.md) · [tests/AGENTS](../tests/AGENTS.md) · [Note](../notes/implemented/2026-11-13-test-naming-lanes.md) |
 | <a id="d54"></a>D54 | **测试制度 = 三环四账五关**：先归失败类，再选最低可见层，类级守卫或不可机械化；`tier` = 频率（ci / nightly / dev-only） | [67](./guides/67-test-strategy.md) · [Note](../notes/implemented/2026-11-13-test-strategy-operating-model.md) |
 | <a id="d55"></a>D55 | **测试制度 oracle 独立化**：判据锚定独立真值；自指显式入账待迁；修复证据唯一 `json fix-evidence` | [67](./guides/67-test-strategy.md) · [Note](../notes/implemented/2026-11-14-verification-oracle-hardening.md) |

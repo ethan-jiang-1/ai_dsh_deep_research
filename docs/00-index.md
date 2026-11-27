@@ -1,105 +1,85 @@
 # 00 · 文档地图、组织原则与正本指针
 
-本目录是"DSH Deep Research 插件"项目的文档层。性质：**当前合同 + 设计依据**——实现开始后，
-随代码同 diff 维护"现在为真"的部分；单次决策与时间线归 `notes/`。
+本目录是「DSH Deep Research 插件」唯一维护**核心思想主干与当前合同**的地方（只写现在为真）。
+**单向依赖**：`docs/` 可依赖 `notes/`（决定理由与验证）与源码，不依赖 `_backlog/` 的历史探索卡与具体方法（仅限 `_backlog/triggers.md` 与池入口）。
 
-> **读法（省上下文）**：入口链第 2 步只读本页 §先分流 + §文档地图；术语对照 = [terms.md](./terms.md)、
-> D 号台账 = [decisions.md](./decisions.md)、外部材料 = [external-materials.md](./external-materials.md)，按需跳。
+> **省上下文读法**：改仓入口链第 2 步先看下方「怎么读」选起点；`terms.md` / `decisions.md` / `external-materials.md` 按需跳转。
+
+## 怎么读（先按目标选起点）
+
+| 你的目标 | 从哪读起 | 核心主干顺序 |
+|---|---|---|
+| **看系统内部技术架构与设计** | [10-architecture](./design/10-architecture.md) | `10 架构` → `20 角色` → `30 方法论映射` → `40 研究驾驶舱` → `50 状态与循环` → `70 内容组织` |
+| **安装 / 启动 / 跑一次研究** | 下方「先分流」 | 安装走 [`_dist/安装手册.md`](../_dist/安装手册.md)；本仓开发通道走 [guides/61](./guides/61-run-playbook.md) |
+| **改插件、改仓或选验证层** | [guides/62](./guides/62-plugin-authoring.md) · [guides/60](./guides/60-dev-loop.md) | 插件作者看 `62`；仓级开发闭环看 `60`；测试证据选择看 `67`；运行调试定位看 [project-map](./project-map.md) |
+| **查为什么这样定、放弃了什么** | [decisions.md](./decisions.md) | D 号纯路由 → `notes/implemented/`（`_backlog/` 是探索池，不作合同源） |
 
 ## 先分流：用户要"用它"还是"改它"
 
-**先记住这条模型**：本包是 DSH 插件（bundle），运行环境 = 用户自建的 **custom profile**
-`deep-research`（[D41](./decisions.md#d41)）。首次由 CLI 建 profile（仅首次、破坏性）；**当前 0.3.7 用本地 tarball 装包（`file:`）**，npm/Plugins 页/Discover 为 staged（未发布 npm）；启动 `dsh --profile deep-research`。没有 launcher、没有 scaffold、没有自定义安装器；
-只保留只读 doctor。开发者在本仓走同名 profile（隔离 home）+ `research-workspace/` + run-driver。
-两条路径的命令与数据根不同，不要互相套用。**完整安装合同的 owner = [`tools/release/product-manual.md`](../tools/release/product-manual.md)；生成物 = [`_dist/安装手册.md`](../_dist/安装手册.md)（勿手改，重导出 = `node tools/release/export-dist.mjs`）；根 [README](../README.md) 承担用户路径（最短安装 + 一次走查），包 README 承担包级安装摘要与首装顺序（`readme-shape` + `install-copies` 校验），完整步骤归手册，完整合同 = 手册，命令由契约测试对账**。
+**核心运行模型**：本包是 DSH 插件（bundle），运行环境 = 用户自建 **custom profile** `deep-research`（[D41](./decisions.md#d41)）。**当前 0.3.7 用本地 tarball 装包（`file:`）**，npm / Plugins 页 / Discover 为 staged；启动 `dsh --profile deep-research`（无独立 launcher/scaffold，只留只读 doctor）。完整安装合同的 owner = [`tools/release/product-manual.md`](../tools/release/product-manual.md) → 生成物 [`_dist/安装手册.md`](../_dist/安装手册.md)；根 [README](../README.md) 与 [pack README](../packages/deep-research-pack/README.md) 承载安装摘要与首装顺序。
 
-| 用户的说法 | 走哪（该事的唯一 owner） | 首个动作 |
+| 用户的说法 | 唯一 owner | 首个动作 |
 |---|---|---|
-| "用它""启动这个插件""跑研究""装到我的 DSH"（安装用户） | [`_dist/安装手册.md`](../_dist/安装手册.md)（生成物；源 = [product-manual](../tools/release/product-manual.md)）+ [pack README](../packages/deep-research-pack/README.md) + [guides/65](./guides/65-run-forms.md) | 按手册：CLI 建 profile（仅首次）→ `dsh plugin --profile deep-research add file:<tgz>`（当前唯一发布形态）；npm/Plugins 页/Discover 为 staged |
-| "在本仓启动/开跑/接着上次跑"（开发通道，默认 `runtime/harness-home`） | [guides/61](./guides/61-run-playbook.md) | `node tools/channel/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 呈交 URL） |
-| "换 profile/home""装进现有 web profile""诊断装得对不对" | [guides/65](./guides/65-run-forms.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | 换 profile 用新名字重新初始化；**已有 profile 不要重复 `--from-default-profile`**（破坏性）；诊断 = 安装副本的 `dsh-deep-research-doctor` |
-| "只验证插件还能挂载/安装"（证据面，不产生可用实例） | [guides/60 §2](./guides/60-dev-loop.md) | `node checks/smoke/install-shape.entry.mjs`（自带临时 home，无需 source；或 `source tools/env.sh && node checks/smoke/preset.e2e.mjs` / `release.entry`） |
-| "复现/验证某个机制"（模型不按纪律/角色、GUI、入口链、流）或"看 run 现场"（状态/会话/交付投影） | [guides/66](guides/66-probe-playbook.md) + [probes/](../probes/README.md) | 先看 [探针索引](../probes/INDEX.generated.md)，再跑现有探针或 `analyze/` 取证件；没有就按指南新增 |
-| "这次改动该配什么证据 / 算不算够" | [guides/67](./guides/67-test-strategy.md) | 先归失败类，再选最低可见层；五关/四账/三环；命名车道 = D53 |
-| "改插件内容"（角色 / skill / 驾驶舱 / 部署面） | [guides/62](./guides/62-plugin-authoring.md) | 该页 §参与阶梯 + §改动影响面 |
-| "改本仓开发流程或仓库文档"（门禁 / docs / notes / 入口链 / 各 README） | [guides/60 §1](./guides/60-dev-loop.md) | 按工作类型分支（入口链第 3–4 步在此展开） |
-| "这个目录/脚本干嘛的""跑它会不会动盘"（维护面） | [guides/68](./guides/68-surface-contract.md) | 按主要产出判面：裁决 / 证据 / 持久状态；逐件例外在页内 |
+| "用它""装到我的 DSH"（安装用户） | [`_dist/安装手册.md`](../_dist/安装手册.md) + [pack README](../packages/deep-research-pack/README.md) + [guides/65](./guides/65-run-forms.md) | 按安装手册：CLI 建 profile（仅首次）→ `dsh plugin --profile deep-research add file:<tgz>` |
+| "在本仓启动/开跑/接着上次跑" | [guides/61](./guides/61-run-playbook.md) | `node tools/channel/run-driver.mjs up`（起/复用通道 + 验浏览器面 + 呈交 URL） |
+| "换 profile/home""装进现有 web profile""诊断" | [guides/65](./guides/65-run-forms.md) + [`_dist/安装手册.md`](../_dist/安装手册.md) | 新名字建 profile（**已有 profile 勿重复 `--from-default-profile`**）；诊断 = `dsh-deep-research-doctor` |
+| "验证挂载/安装" / "复现单点机制" | [guides/60 §2](./guides/60-dev-loop.md) · [guides/66](./guides/66-probe-playbook.md) | 冒烟 `checks/smoke/*.entry.mjs` / `preset.e2e.mjs`；单点机制先看 [探针索引](../probes/INDEX.generated.md) |
+| "改插件" / "改仓流程与文档" / "选测试" | [guides/62](./guides/62-plugin-authoring.md) · [guides/60 §1](./guides/60-dev-loop.md) · [guides/67](./guides/67-test-strategy.md) | 按改动面查影响、入口链与失败类→最低可见层；目录归属判据见 [guides/68](./guides/68-surface-contract.md) |
 
-**开跑前置**（安装 / 开发两套）
-
-- **安装用户**：DSH 满足 `engines.dsh` + Node 满足 `engines.node`；`dsh` 在 PATH；首次团队层需要 pnpm；
-  工作区可写；研究 run 需要模型凭据（首启/安装不需要）。
-- **开发**：仓根 `pnpm install` + vendor submodule + vendor 构建（`bash tools/build/vendor-build.sh`）；
-  `runtime/harness-home` 凭据；端口空闲（缺省 3083）；`research-workspace` 已注册（run-kickoff 幂等补登）。
-  `bash tools/channel/boot-run.sh` 自己 source `tools/env.sh`；命令/前置唯一 owner = [guides/60 §2](./guides/60-dev-loop.md)。
-
-**歧义裁定**：用户未指定 home 时——安装用户默认 `$DSH_HOME`；开发通道默认
-`runtime/harness-home`（source env.sh）。"启动这个插件"没有额外上下文时默认指本仓开发通道；
-要给外部用户安装走安装行。**开发通道**别绕过 run-driver 的漂移门（直接 `dsh --profile deep-research`
-会用旧镜像）；**安装用户**用 DSH 原生 profile（CLI 建 profile）+ 本地 tarball 装包（npm/Plugins 为 staged）+ `dsh --profile deep-research`；首屏问项目目录。
-
-**裸动词也指开发通道**："启动一下""起一下"未点名对象时，默认指本仓 DSH 环境，首个动作 = `node tools/channel/run-driver.mjs up`；仅当对话正围着另一个可启动物（某条冒烟/探针）时才跟随该物。
-
-**每次开发通道"启动"前先扫一眼在飞 run**：根目录下每个未归档 bundle（`archive/` 除外）都要报出来，
-接续/归档/新开问用户、带 slug + mtime；分类判据与问询全文 = [61 §0](./guides/61-run-playbook.md)。
-
-## 文档组织原则
-
-**docs/ 按"性质"分层，不按"时间"分层**（沿 ai_dsh_company D10）：时间维度的东西（初始意图、
-提案、已废方案）住 `notes/`；按时间分目录必然长出"烂尾层"。
-
-| 层 | 目录 | 性质 | 生命周期 |
-|---|---|---|---|
-| 导航 | 本文件 | 地图 + 台账 | 活（每决策/每新文档更新） |
-| 合同 | [evaluation.md](./evaluation.md) | **验收怎么判**（五面） | 活（变更须 D 号） |
-| 设计 | `design/` | **现在怎么组成、为什么**：机制依据、方案取舍 | 稳定；被推翻时归档并记 D 号 |
-| 问题与证据 | 根 `_backlog/`（[issues](../_backlog/issues/README.md) + bugs/ + research/ + methods/） | **问题澄清、查证与结论准备**：按需使用，不是实施前置 | 按结论关闭或归档 |
-| 指南 | `guides/` | **怎么操作**：开发环 | 活（随操作方式演进） |
+**开跑前置**：安装用户需满足 `engines.dsh`、`engines.node` 与模型凭据；开发通道需仓根 `pnpm install` + `bash tools/build/vendor-build.sh` + `runtime/harness-home` 凭据 + 端口空闲（缺省 3083）+ `research-workspace` 已注册（run-kickoff 幂等补登），其余命令与前置正本 = [guides/60 §2](./guides/60-dev-loop.md)。
+**歧义裁定**：用户未指定 home 时——安装用户默认 `$DSH_HOME`，开发通道默认 `runtime/harness-home`（source `tools/env.sh`）；"启动这个插件""启动一下""起一下"未点名对象时，默认指本仓开发通道（首个动作 = `node tools/channel/run-driver.mjs up`，勿直接 `dsh --profile deep-research` 绕过漂移门）；给外部用户安装走安装行。每次启动前先扫在飞 run（`archive/` 除外）问用户接续/归档/新开，判据见 [guides/61 §0](./guides/61-run-playbook.md)。
 
 ## 文档地图
 
-| 文档 | 层 | 回答什么 |
-|---|---|---|
-| [terms.md](./terms.md) | 导航/合同 | **术语对照**：本项目说法 → DSH 官方载体 → vendor 落点（按需查；新编号词汇先在此登记） |
-| [project-map.md](./project-map.md) | 导航 | 人和 Agent 的驾驭地图：运行链、职责划分、测试资产分层与失败定位入口 |
-| [decisions.md](./decisions.md) | 导航/合同 | D 号纯路由台账（≤100 字结论 + 活载体链接；理由/输掉的方案归 notes/，D56） |
-| [external-materials.md](./external-materials.md) | 导航/合同 | 外部材料钉版身份与吸收落点（按需查） |
-| [evaluation.md](./evaluation.md) | 合同 | 评估五面（L0 结构/L1 挂载/L2 安装/L3 领域/L4 交付）与里程碑矩阵——**先于框架定案** |
-| [design/10-architecture.md](./design/10-architecture.md) | 设计 | repo 形态与组合层（单包 5 preset：四研究角色 + 方法编辑）；通道选型（agent-team 主通道）；工具面；偏离登记 |
-| [design/20-roles.md](./design/20-roles.md) | 设计 | 角色内容：四研究角色 + 方法编辑（D37）的职责 owner 表、persona 要素、skills 面（清单 = 盘上目录）、信噪比策略落点 |
-| [design/30-methodology-mapping.md](./design/30-methodology-mapping.md) | 设计 | **方法论映射**：codex Deep Research harness 内核 → DSH 载体（L3 领域面的核心载体） |
-| [design/40-research-cockpit.md](./design/40-research-cockpit.md) | 设计 | **研究驾驶舱**：观察面 client 套件的当前事实正本（定位/构成/通道/纪律/验证/边界——agent 一找就到的单一入口） |
-| [design/50-agent-loop-and-state.md](./design/50-agent-loop-and-state.md) | 设计 | **Agent Loop 与状态模型**：运行驱动链总览 + 四类运行状态（run bundle / session log / goal·任务板 / 观察面）的 canonical 合同、恢复优先级与交付判定——当前事实正本 |
-| [design/60-intent-carriers.md](./design/60-intent-carriers.md) | 设计 | **意图载体总图**：问题、授权工作、结论去向、RFC/Note 与 TODO 的 owner、适用条件和出场方式 |
-| [design/70-content-organization.md](./design/70-content-organization.md) | 设计 | **内容组织**：presets/content 按寿命分家、四槽三层、T0/generic 缝、生长协议与结构性 trigger——新内容“放哪、怎么长、何时动结构”的单一入口 |
-| [AGENTS.md](./AGENTS.md) | 指令 | **文档标准**（`docs/` 子树）：层级归属（一个事实一个家）/ 写作规则 / slop 清单 / 预算处置序——上游 `docs/AGENTS.md` 同构 |
-| [alignment-ledger.json](./alignment-ledger.json) | 合同 | **对齐台账（机读）**：vendor/dsh harness 源面逐项结论（adopted/adapted/na + 落点 + 理由；条数以台账 `sources` 数组为准）；门禁 `align-ledger` 对账（source 在 vendor 存在 / 落点存在 / na 有理由）——人读视图 = discipline-map 全源表 |
-| [discipline-map.md](./discipline-map.md) | 合同 | **纪律全量枚举**：vendor 逐源三态表（照搬/带证据适配/不适用+理由）——AGENTS §纪律的正本（随 vendor 换 tag 重校） |
-| [_backlog/](../_backlog/README.md)（[问题](../_backlog/issues/README.md)） | 问题与证据 | 问题澄清、查证方法、调研材料、缺陷、结论去向与归档 |
-| [snapshots/](../snapshots/README.md) | 问题与证据 | 场景证据层：有持久消费者的整组录制回放资产与场景声明（消费 = snapshot-replay.entry；证据边界与维护规则见该页） |
-| [guides/60-dev-loop.md](./guides/60-dev-loop.md) | 指南 | 开发环：六步闭环、面选择表、双 home、密钥 |
-| [guides/61-run-playbook.md](./guides/61-run-playbook.md) | 指南 | **开发通道 run 操作（M2）**：run-driver/boot-run、lead 会话、HITL 两点、观察面——run 通道（`deep-research` profile：本包 + vendor agent-team-profile 层，P1 定案）的使用面；安装用户看 pack README / 安装手册 / 65 |
-| [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | 指南 | **插件作者入口**（改插件内容的人/agent 入口）：DSH 词汇对齐（plugin/bundle/profile/preset）、参与阶梯 S0–S3、新行为归属、范本与证据义务、**交付与部署形态**（bundle/profile 拓扑 + 包内 content + 部署 bin）、**改动影响面**（添/换/删要一起动什么）——上游 `docs/user/develop/**` 的本仓投影 |
-| [guides/63-git-boundary.md](./guides/63-git-boundary.md) | 指南 | **Git 入库边界与跨环境纪律**：源/合同/证据 vs 生成物/运行态/本机态；三问判据、tracked 生成物条件、跨环境规则与门禁 |
-| [guides/64-release-versioning.md](./guides/64-release-versioning.md) | 指南 | **发布版本、tag 与 npm 发布顺序**：pack 版本 = 唯一发布源、root 镜像、annotated tag、发布前 `release-check`（含 `--handoff`）与 `release-version` 门禁 |
-| [guides/65-run-forms.md](./guides/65-run-forms.md) | 指南 | **运行形态合同**：M1 安装形态 / M1 互操作 / M2 独立开发 / M3 移交；六轴 owner 表；profile 归属与 patch 层；数据卡指针；`engines.dsh` + 团队层钉版；首屏工作区；`DSH_DEV_HOME`/多实例；干净 handoff 与证据矩阵 |
-| [guides/66-probe-playbook.md](./guides/66-probe-playbook.md) | 指南 | **探针**：定义、何时用、头注与索引、新增步骤、证据与边界；根 [probes/](../probes/README.md) 的单一入口 |
-| [guides/67-test-strategy.md](./guides/67-test-strategy.md) | 指南 | **测试策略**：三环/四账/五关；失败类→最低可见层；证据账本与命名车道；不是第六评估面 |
-| [guides/68-surface-contract.md](./guides/68-surface-contract.md) | 指南 | **维护面合同**：judge / show / operate 三分与判定序；本仓目录的面归属与例外清单——「这个入口会不会动我的世界」的单一入口 |
+按"性质"分层，不按"时间"分层（时间维度的决策理由与演进史住 `notes/`）。
 
-> **编号消歧**：`design/60-intent-carriers.md` 与 `guides/60-dev-loop.md` 同号不同义——design/ 按设计层编号（10 架构 … 60 意图载体），guides/ 按操作手册编号（60 开发环 / 61 run / 62 作者入口 / 63 git 边界 / 64 发布 / 65 运行形态）；引用写全路径。
+### 1. 系统与技术设计（插件系统内核：`design/`）
+
+| 文档 | 回答什么 |
+|---|---|
+| [design/10-architecture.md](./design/10-architecture.md) | repo 形态、`harness(bundle)` 第一性分层、两层组合面、协作通道、工具面与偏离登记 |
+| [design/20-roles.md](./design/20-roles.md) | 四研究角色 + Method Editor（[D37](./decisions.md#d37)）+ worker profiles（[D47](./decisions.md#d47)）职责、persona、skills 与信噪比防线 |
+| [design/30-methodology-mapping.md](./design/30-methodology-mapping.md) | **方法论映射**：codex Deep Research harness 内核 → DSH 载体与诚实取舍账 |
+| [design/40-research-cockpit.md](./design/40-research-cockpit.md) | **研究驾驶舱**：`src/client/` + `src/lib/` 构成、出厂面白名单、数据通道、分层与防御红线 |
+| [design/50-agent-loop-and-state.md](./design/50-agent-loop-and-state.md) | **Agent Loop 与状态模型**：运行驱动链总览 + 四类运行状态合同、恢复优先级与交付判定 |
+| [design/70-content-organization.md](./design/70-content-organization.md) | **内容组织**：`presets/` 与 `content/` 按寿命分家、四槽三层、T0/generic 缝与生长协议 |
+
+### 2. 基准合同与治理规则
+
+| 文档 | 回答什么 |
+|---|---|
+| [evaluation.md](./evaluation.md) | **验收合同**：评估五面（L0–L4）、L0 门禁登记表、契约回归索引、判据形状与里程碑矩阵 |
+| [discipline-map.md](./discipline-map.md) | **纪律全量枚举**：vendor 逐源三态表（照搬 / 带证据适配 / 不适用+触发）——[AGENTS](../AGENTS.md) §纪律正本 |
+| [alignment-ledger.json](./alignment-ledger.json) | **对齐台账（机读）**：vendor/dsh 源面逐项结论，门禁 `align-ledger` 机械对账 |
+| [AGENTS.md](./AGENTS.md) | **文档标准**（`docs/` 子树）：层级归属、写作规则、slop 清单与常驻文档预算处置序 |
+| [design/60-intent-carriers.md](./design/60-intent-carriers.md) | **仓库工作流治理**：问题、授权工作、RFC/Note、`_backlog` 与 TODO 的意图载体边界与单向依赖律 |
+
+### 3. 操作与工程指南（`guides/`）
+
+| 文档 | 回答什么 |
+|---|---|
+| [guides/60-dev-loop.md](./guides/60-dev-loop.md) | **开发环**：反馈双门、六步闭环、语义变更准入、全档命令与任务型路由表 |
+| [guides/61-run-playbook.md](./guides/61-run-playbook.md) | **开发通道 run 操作**：run-driver/boot-run、Lead 会话、HITL 两点、观察面与中断恢复 |
+| [guides/62-plugin-authoring.md](./guides/62-plugin-authoring.md) | **插件作者入口**：DSH 词汇、参与阶梯 S0–S3、自写代码证据阶梯、交付部署与改动影响面 |
+| [guides/63-git-boundary.md](./guides/63-git-boundary.md) | **Git 入库边界**：源/合同/证据 vs 生成物/运行态/本机态的三问判据与跨环境纪律 |
+| [guides/64-release-versioning.md](./guides/64-release-versioning.md) | **发布顺序**：pack 版本唯一源、root 镜像、annotated tag 与发布前检查 |
+| [guides/65-run-forms.md](./guides/65-run-forms.md) | **运行形态合同**：安装/互操作/独立开发/移交四形态、六轴 owner、profile 与首屏工作区 |
+| [guides/66-probe-playbook.md](./guides/66-probe-playbook.md) | **探针手册**：真实边界单点实验的定义、何时用、头注协议与覆盖地图 |
+| [guides/67-test-strategy.md](./guides/67-test-strategy.md) | **测试策略**：三环/四账/五关、失败类→最低可见层、类级守卫三判据与重资产预算 |
+| [guides/68-surface-contract.md](./guides/68-surface-contract.md) | **维护面合同**：`checks/`（judge）、`probes/`（show）、`tools/`（operate）三分与例外清单 |
+
+### 4. 按需字典与仓外导航
+
+| 文档 | 回答什么 |
+|---|---|
+| [project-map.md](./project-map.md) | **驾驭地图**：运行链路、修改波及面、测试词汇与症状→首个调试/检查入口 |
+| [terms.md](./terms.md) | **术语对照**：本项目说法 ↔ DSH 官方载体 ↔ `vendor/dsh` 落点（新编号词汇登记处） |
+| [decisions.md](./decisions.md) | **D 号纯路由台账**：≤100 字定性结论 + 活载体链接（理由与输掉的方案归 `notes/`，[D56](./decisions.md#d56)） |
+| [external-materials.md](./external-materials.md) | **外部材料登记**：仓外只读参考仓的钉版身份与吸收落点（按需查） |
+| [_backlog/](../_backlog/README.md) · [snapshots/](../snapshots/README.md) | **探索池与场景证据**：`_backlog/`（含 [issues](../_backlog/issues/README.md)）仅承接未定探索，非合同；`snapshots/` 存回放金样 |
+
+> **编号消歧**：`design/60-intent-carriers.md`（仓库治理）与 `guides/60-dev-loop.md`（开发环）同号不同义，引用写全路径。
 
 ## 决策台账
 
-D 号正文 = [decisions.md](./decisions.md)（按需查，不在本页通读；新决策 = 台账一行 ≤100 字路由，参数归合同、理由归 notes/，D56）。
-本页只保留"先去哪读"的地图与术语；决策理由/输掉的方案仍归 `notes/`。
-
-## 术语映射
-
-本项目 ↔ DSH 官方 ↔ vendor 落点的对照表在 [terms.md](./terms.md)（按需查：遇到同名不同义、
-或要给新编号词汇定所指时打开）。
-
-
-## 外部研究材料登记
-
-外部材料、钉版身份与吸收落点 = [external-materials.md](./external-materials.md)（按需查；本页不复制）。
+D 号正文 = [decisions.md](./decisions.md)；术语对照 = [terms.md](./terms.md)；外部材料 = [external-materials.md](./external-materials.md)——均为按需跳转，不在本页通读或复制。

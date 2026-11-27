@@ -14,7 +14,7 @@
 | `docs/design/` | 系统**现在**怎么组成、为什么这样组成（架构/角色/方法论映射/机制依据） | 当前 API 的唯一说明（→ 源码/README） |
 | `docs/guides/` | 按任务怎么操作（清单 = 盘上目录，不在此枚举；入口 = 60 开发环 / 61 run / 62 插件作者） | 设计理由（→ notes/implemented） |
 | `docs/discipline-map.md` · [evaluation.md](evaluation.md) | 纪律三态表 · 验收合同与门禁台账 | 变更史 |
-| `notes/` | 为什么这样决定、放弃了什么、跑了什么验证 | 当前合同（→ `docs/`） |
+| `notes/` | 为什么这样决定、放弃了什么、跑了什么验证（`docs/` 可依赖它，不链 `_backlog/_archived/` 或具体方法，只链 `_backlog/triggers.md` 与池入口） | 当前合同（→ `docs/`） |
 | 运行区（`research-workspace/`、`runtime/`） | 这次实际发生了什么 | 可复现的回归证据（→ `tests/`） |
 
 高层文档只描述自己的主题与**直接子项**的职责；更低层的细节链接到拥有它的下层文档。

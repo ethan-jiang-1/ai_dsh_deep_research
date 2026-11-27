@@ -68,7 +68,7 @@
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| Tier 分类法：一处事实一个家（docs 只写 now） | 00-index 组织原则；docs/notes/_backlog 三层分工 | 照搬 |
+| Tier 分类法：一处事实一个家（docs 只写 now） | 00-index 文档地图分层原则；docs/notes/_backlog 三层分工 | 照搬 |
 | Wordcount budgets（入口文件行数顶） | verify 门禁 `doc-budgets`（逐件行数上限——vendor verify-doc-budgets 裁剪版；上限正本 = [checks/doc-budgets.json](../checks/doc-budgets.json)，此处不复制计数；超顶处置序 = 下放>压缩>升顶须同变更登记理由） | 带证据适配 |
 | Cross-reference with machine-checkable links, never free prose | 上游含两个机检面：链接可解析 + 禁 commit id 引用。本仓只落前者（md-links，全 tracked md 的方括号圆括号语法）；后者零对应物——正文写 commit 哈希不会被任何门禁拦。entry-chain 门禁只断言文件存在、不判指针语义，不构成兜底 | 带证据适配（语义被收窄：链接面已机检，禁 commit id 面未落；引入条件 = 出现引用 commit 而非文件/Note 的漂移时补门禁） |
 | Slop checklist（文档废话清单） | 上游是 9 条可运行审计。本仓已机械化其中至少两条：`count-free`（禁把易漂移计数写进文档）、`doc-now-only`（只写当前合同、不写历史时态）；其余条目定性吸收进行文规范 | 带证据适配（部分机械化：2 条成门禁，余为规范；不是未机械化） |
@@ -262,9 +262,9 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
   按 [源 10](#source-10) 重校。
 - **本仓立卡的 vendor seam 缺口**（升 pin 时核上游是否已修——已修即撤本行，未修带证据重估）：
   会话日志逐帧 / 逐 turn flush + SIGTERM finalizer 清缓冲、至少 turn 边界强制落盘
-  （[BUG-007 卡](../_backlog/_archived/fixed_bugs/BUG-007-channel-death-loses-log-tail.md)）；
+  （BUG-007，[vendor-wire-semantics-and-log-tail Note](../notes/implemented/2026-11-24-vendor-wire-semantics-and-log-tail.md)）；
   boot 时对 turnOpen 会话做中断对账、补写 `turn/end` + `end-seed` 终局事件
-  （[BUG-009 卡](../_backlog/_archived/fixed_bugs/BUG-009-no-finalization-on-restart.md)）。
+  （BUG-009，[goal-hitl-alignment Note](../notes/implemented/2026-11-10-goal-hitl-alignment.md)）。
 
 复核结论（"无命中/改写哪几行"）连同新 tag 与日期，写进该轮「升 pin 重校」条目的毕业 Note
 ——**逐条结论本身即是重审记录**，不另建维护页（避免第二份会漂移的清单）。
@@ -274,7 +274,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | 纪律 | 落点 | 机械把守 |
 |---|---|---|
 | [D53](decisions.md#d53) 测试文件名 = 证据车道 | [tests/AGENTS](../tests/AGENTS.md) / [checks/AGENTS](../checks/AGENTS.md) / [checks/README](../checks/README.md) | [test-lanes](../tests/checks/shared/test-lanes.test.mjs) / [smoke-registry](../tests/checks/test-infra/smoke-registry.test.mjs) / [smoke-oracle-surface](../tests/checks/test-infra/smoke-oracle-surface.test.mjs) / layering ④ |
-| [D54](decisions.md#d54) 三环四账五关 | [guides/67](guides/67-test-strategy.md) / [失败类普查](../_backlog/_archived/research/dsh-test-strategy/2026-11-13-failure-class-census.md) | [test-lanes](../tests/checks/shared/test-lanes.test.mjs) / [smoke-registry](../tests/checks/test-infra/smoke-registry.test.mjs) / [smoke-oracle-surface](../tests/checks/test-infra/smoke-oracle-surface.test.mjs) / [ci-jobs](../tests/checks/test-infra/ci-jobs.test.mjs) / decisions-now |
+| [D54](decisions.md#d54) 三环四账五关 | [guides/67](guides/67-test-strategy.md) / [三环四账五关 Note](../notes/implemented/2026-11-13-test-strategy-operating-model.md) | [test-lanes](../tests/checks/shared/test-lanes.test.mjs) / [smoke-registry](../tests/checks/test-infra/smoke-registry.test.mjs) / [smoke-oracle-surface](../tests/checks/test-infra/smoke-oracle-surface.test.mjs) / [ci-jobs](../tests/checks/test-infra/ci-jobs.test.mjs) / decisions-now |
 
 ## 维护规则
 
@@ -284,8 +284,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
   的现状，因此下列事件发生时须同 diff 复核相关行——① 新增/退役自写代码面（如 D18 驾驶舱
   client 插件）；② 激活或清空某个 notes 层（如 archived/ 2026-09-27 启用）；③ 新增对接面、
   生成物或夹具族（如 snapshot-replay 夹具）。**只认 vendor 换 tag 会让"本仓落点"列单边腐烂**
-  ——实测教训 = [吸收对表推敲卡](../_backlog/_archived/settled_issues/2026-10-08-sdlc-reference-absorption.md)
-  §二轮复核（当时 10 处 `na`/落点已失真，`align-ledger` 只判存在性、判不出语义过期）；
+  ——实测教训 = [agent-ready-absorption Note](../notes/implemented/2026-09-25-agent-ready-absorption.md)（2026-10-08 二轮复核：当时 10 处 `na`/落点已失真，`align-ledger` 只判存在性、判不出语义过期）；
 - ⚠️ **`不适用` 是"当时不适用"，不是豁免**：写 `不适用` 必须同时给出**可判定的失效条件**
   （"本仓无 X" 形态），由 `align-ledger` 门禁的活性断言机械复核——理由变假即红。**把
   `不适用` 当成永久免检区 = 依据静默腐烂**（同上教训）；

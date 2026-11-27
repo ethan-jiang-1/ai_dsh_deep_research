@@ -4,7 +4,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
-import { join, dirname } from 'node:path'
+import { join, dirname, resolve, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..')
@@ -228,4 +228,96 @@ test('GFM 表格完整性：docs/ 下所有表格必须带分隔行、列数一�
   }
   assert.ok(tablesChecked >= 25, `防空语料：扫描到的表格过少（${tablesChecked}）`)
   assert.deepEqual(problems, [], `docs/ 存在 GFM 表格渲染断裂：\n${problems.join('\n')}`)
+})
+
+const ALLOWED_DOCS_BACKLOG_TARGETS = new Set([
+  '_backlog/triggers.md',
+  '_backlog/README.md',
+  '_backlog/AGENTS.md',
+  '_backlog/issues/README.md',
+  '_backlog/bugs/README.md',
+  '_backlog/research/README.md',
+  '_backlog/methods/README.md',
+])
+
+/**
+ * 检查 docs/ 下文档是否反向依赖 _backlog/_archived/** 或 _backlog/methods/<具名方法>（白名单仅放行
+ * triggers.md 与各池入口 README/AGENTS）。跳过代码围栏。
+ * @param {Array<{ rel: string, text: string }>} entries
+ * @returns {string[]}
+ */
+export function checkDocsBacklogLinks(entries) {
+  const violations = []
+  for (const { rel, text } of entries) {
+    const lines = text.split('\n')
+    let inFence = null
+    for (let i = 0; i < lines.length; i += 1) {
+      const t = lines[i].trim()
+      const fm = /^(`{3,}|~{3,})/.exec(t)
+      if (fm) {
+        if (!inFence) inFence = fm[1][0]
+        else if (t.startsWith(inFence.repeat(3)) && new RegExp(`^${inFence}+\\s*$`).test(t)) inFence = null
+        continue
+      }
+      if (inFence) continue
+      for (const m of lines[i].matchAll(/\[[^\]]*\]\(([^)\s]+)\)/g)) {
+        const raw = m[1].split('#')[0]
+        if (!raw || /^[a-z]+:\/\//i.test(raw) || raw.startsWith('mailto:')) continue
+        const resolved = relative(ROOT, resolve(dirname(join(ROOT, rel)), raw)).replaceAll('\\', '/')
+        if (!resolved.startsWith('_backlog/')) continue
+        if (!ALLOWED_DOCS_BACKLOG_TARGETS.has(resolved)) {
+          violations.push(`${rel}:${i + 1} -> ${resolved}`)
+        }
+      }
+    }
+  }
+  return violations
+}
+
+test('单向依赖守卫：docs/ 禁止链接 _backlog/_archived/ 与 _backlog/methods/<具体方法>', () => {
+  const docs = readdirSync(join(ROOT, 'docs'), { recursive: true })
+    .filter((f) => typeof f === 'string' && f.endsWith('.md'))
+    .map((f) => `docs/${f.replaceAll('\\', '/')}`)
+  assert.ok(docs.length >= 15, `防空语料：docs/ 下 .md 过少（${docs.length}）`)
+  const entries = docs.map((rel) => ({ rel, text: read(rel) }))
+  assert.deepEqual(checkDocsBacklogLinks(entries), [],
+    'docs/ 应只依赖 notes/ 与源码，禁止反向链接 _backlog/_archived/ 或具体方法文件（仅限 triggers.md 与池入口）')
+})
+
+test('单向依赖守卫变异矩阵：白名单放行、越界与围栏内外判别准确', () => {
+  const okEntries = [
+    {
+      rel: 'docs/design/40-research-cockpit.md',
+      text: [
+        '触发 = [triggers](../../_backlog/triggers.md)',
+        '入口 = [README](../../_backlog/README.md) · [AGENTS](../../_backlog/AGENTS.md)',
+        '方法索引 = [methods](../../_backlog/methods/README.md)',
+        '```md',
+        '[示例](../../_backlog/_archived/fixed_bugs/BUG-001.md)',
+        '```',
+      ].join('\n'),
+    },
+  ]
+  assert.deepEqual(checkDocsBacklogLinks(okEntries), [])
+
+  const badEntries = [
+    {
+      rel: 'docs/evaluation.md',
+      text: [
+        '[bug](../_backlog/_archived/fixed_bugs/BUG-001.md)',
+        '[issue](../_backlog/_archived/settled_issues/2026-10-01-x.md)',
+        '[research](../_backlog/_archived/research/topic/a.md)',
+        '[method](../_backlog/methods/judgment-design.md)',
+      ].join('\n'),
+    },
+    {
+      rel: 'docs/guides/60-dev-loop.md',
+      text: '[guard](../../_backlog/methods/class-level-guards.md#01-旧性质随变更继承)',
+    },
+  ]
+  const hits = checkDocsBacklogLinks(badEntries)
+  assert.equal(hits.length, 5)
+  assert.match(hits[0], /_backlog\/_archived\/fixed_bugs\/BUG-001\.md/)
+  assert.match(hits[3], /_backlog\/methods\/judgment-design\.md/)
+  assert.match(hits[4], /_backlog\/methods\/class-level-guards\.md/)
 })

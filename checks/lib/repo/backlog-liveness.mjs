@@ -34,7 +34,7 @@ function metadata(text) {
 }
 
 // 状态行 = 卡头 12 行内首条 `> …状态：…` 引用行（加粗剥壳）；镜像记号 = 状态值取到空白/竖线/
-// 括号为止并剥 🔒。生命周期互查（loop_advisor 借鉴，钉版见 docs/00-index §外部研究材料）：
+// 括号为止并剥 🔒。生命周期互查（loop_advisor 借鉴，钉版见 docs/external-materials.md）：
 // 活跃卡状态行记号必须等于 frontmatter status（frontmatter = 阶段唯一家，状态行 = 镜像 + 历史）；
 // issues 另须带结论倾向闭集头。归档卡豁免——历史形态保留，退出值只查 CARD_STATES。
 const statusLineOf = (text) => text.split('\n').slice(0, 12)
