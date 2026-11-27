@@ -1,7 +1,7 @@
 # pnpm 命令字典
 
 > 类型：reference。本页是根 [`package.json`](../../package.json) 全部 `pnpm` 脚本的完整字典，由 `docs-reference-fresh` 门禁与 `package.json` 双向校验（缺项或多出即红）。
-> 任务级执行次序与运行通道脚本（`run-driver` / `boot-run` / 冒烟脚本）见 [guides/60 §2](../guides/60-dev-loop.md)。
+> 任务级执行次序与运行通道脚本（`run-driver` / `boot-run` / 冒烟脚本）见 [guides/dev-loop.md §2](../guides/dev-loop.md)。
 
 ## 根 `package.json` 脚本全表
 
@@ -25,7 +25,7 @@
 
 ## 常用非 `pnpm` 运维入口速查
 
-完整命令块与前置条件正本 = [guides/60 §2](../guides/60-dev-loop.md) 与 [tools/README](../../tools/README.md)：
+完整命令块与前置条件正本 = [guides/dev-loop.md §2](../guides/dev-loop.md) 与 [tools/README](../../tools/README.md)：
 
 - **冷启动前置**：`bash tools/build/bootstrap.sh --check` / `bash tools/build/vendor-build.sh`
 - **环境隔离与 hooks**：`source tools/env.sh`

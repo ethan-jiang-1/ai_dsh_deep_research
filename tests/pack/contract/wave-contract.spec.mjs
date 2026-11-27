@@ -2,7 +2,7 @@
 //
 // 配方本身的确定面由 `wave-recipes.spec.mjs` 钉；本件钉的是「配方之外、模型要照做的文本」：
 // plan 模板的 `## Wave 执行`、analyst 的 wave-execution skill、Lead 的 research-planning /
-// team-assembly / research-brief、以及 design/30 的映射落点。没有这些，preset 挂上了
+// team-assembly / research-brief、以及 contracts/methodology-mapping.md 的映射落点。没有这些，preset 挂上了
 // workflow 也没人知道何时/怎么写报告。
 //
 // 反证（同 diff 实测）：删 plan 模板的 `## Wave 执行` → 用例 1 红；删 skill 的
@@ -52,8 +52,8 @@ test('Lead skills：planning / team-assembly / brief 都点名脚本层', () => 
   assert.match(brief, /W<n> 脚本扇出/, 'research-brief 缺计划卡授权句');
 });
 
-test('design/30：脚本层落点在 L3 映射表', () => {
-  const map = read('docs/design/30-methodology-mapping.md');
-  assert.match(map, /wave-execution/, 'design/30 未登记 wave-execution');
-  assert.match(map, /lens-fanout/, 'design/30 未登记 lens-fanout');
+test('contracts/methodology-mapping.md：脚本层落点在 L3 映射表', () => {
+  const map = read('docs/contracts/methodology-mapping.md');
+  assert.match(map, /wave-execution/, 'contracts/methodology-mapping.md 未登记 wave-execution');
+  assert.match(map, /lens-fanout/, 'contracts/methodology-mapping.md 未登记 lens-fanout');
 });

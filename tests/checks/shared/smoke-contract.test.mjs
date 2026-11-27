@@ -100,7 +100,7 @@ test('真模型档脚本：收尾 exit(断言红 1 / 全绿 0) 在场（失败�
 });
 
 // 2026-10-20 审计 P1-5：preset.e2e 缺 DSH_HOME 时曾把前置缺席判成断言红（exit 1），
-// 而 guides/60 / AGENTS / adding-a-research-role 都写"未 source 自拒 exit 2"。
+// 而 guides/dev-loop.md / AGENTS / adding-a-research-role 都写"未 source 自拒 exit 2"。
 // 这条只钉形状：前置分支必须明确 exit 2（未跑），不能落到预检失败/真会话红。
 test('preset.e2e：缺 DSH_HOME 走 exit 2（未跑，不是断言红）', () => {
   const src = readFileSync(join(SCRIPTS, 'smoke', 'preset.e2e.mjs'), 'utf8');

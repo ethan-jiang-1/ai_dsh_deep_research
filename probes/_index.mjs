@@ -40,7 +40,7 @@ const missing = entries.flatMap(({ file, fields }) =>
   missingProbeFields(fields).map((field) => `${file} 缺「${field}」`));
 if (missing.length > 0) {
   console.error(`probe-index: 头注必填字段缺失：\n  ${missing.join('\n  ')}`);
-  console.error('修正 = 按 docs/guides/66-probe-playbook.md 的头注协议补字段');
+  console.error('修正 = 按 docs/guides/probe-playbook.md 的头注协议补字段');
   process.exit(1);
 }
 

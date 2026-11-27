@@ -37,11 +37,11 @@ fails through the real runner **for each changed acceptance rule**」）。注�
 
 ### 0.1 旧性质随变更继承
 
-[开发环语义准入](../../docs/guides/60-dev-loop.md#13-语义变更的验收准备)触发后，从当前 owner 与已有测试追溯适用性质，而非从新文件名或 import 猜同类。优先由公共 Module 拥有操作，让调用者和测试经过同一 Interface；复用失败时说明语义差异。
+[开发环语义准入](../../docs/guides/dev-loop.md#13-语义变更的验收准备)触发后，从当前 owner 与已有测试追溯适用性质，而非从新文件名或 import 猜同类。优先由公共 Module 拥有操作，让调用者和测试经过同一 Interface；复用失败时说明语义差异。
 
 用独立的行为承诺定义 expected，再让原有反例与正常对照在新实现运行；失败/取消同时断言外部状态。共享算法的两个结果相等只能证明一致，不能单独证明正确。
 
-若确需保留不同实现，在该家族 suite 显式列出批准实现并逐个执行适用性质，对账实际执行集合；漏执行一个实现及各实现注入旧错误都应被发现。真实入口参与的核对归[交付自审](../../.agents/skills/reviewing-a-delivery/SKILL.md#从什么开始)，证明边界归[五关](../../docs/guides/67-test-strategy.md#3-五关)。
+若确需保留不同实现，在该家族 suite 显式列出批准实现并逐个执行适用性质，对账实际执行集合；漏执行一个实现及各实现注入旧错误都应被发现。真实入口参与的核对归[交付自审](../../.agents/skills/reviewing-a-delivery/SKILL.md#从什么开始)，证明边界归[五关](../../docs/testing.md#22-五关与四账)。
 
 ---
 
@@ -113,7 +113,7 @@ or `assistant/message` appears」。其余全靠在**标题里写不变量**：
 | `loader-composition.spec.ts:1-4` | 真 Loader 起 `cordis.yml` + 配置值两面跟随 | 无 | 「Proves `allowParallelInProgress` is **real configurability and not a constant**」 |
 
 分工判据一句话：**行为 / 集成 / 生命周期 / 组合，四个面各有一个文件，文件头注写明「真是哪个、假是哪个」**。
-本仓的五台阶（`docs/guides/62-plugin-authoring.md:82-88`）是同一个分类轴，但落成「一张表 + 各自载体」，
+本仓的五台阶（`docs/guides/plugin-authoring.md:82-88`）是同一个分类轴，但落成「一张表 + 各自载体」，
 没有这个「每件自述真假」的写法。这一点值得抄：**头注里的「真/假对照」是类级守卫的可读性来源**——
 读标题知道守什么，读头注知道这个守卫站在哪一层。
 
@@ -687,7 +687,7 @@ test('负控：<邻近形态> 必被拒', () => { assert.equal(judge(NEIGHBOR), 
 **一个反面教训**：BUG-150 的修法（去掉关键词）本身是对的，但**修法落地在 `lastInlineVerdict`，
 而守卫在 `verdict-conformance`**——两者之间没有指针。下次有人改 `lastInlineVerdict`，
 `review-readiness.spec.mjs` 的 21 例会红，`verdict-conformance` 也会红，但**没人知道去跑后者**
-（`guides/60 §2` 的路由表只写「改判据 → 对应 `tests/<domain>/*.spec.mjs`」）。
+（`guides/dev-loop.md §2` 的路由表只写「改判据 → 对应 `tests/<domain>/*.spec.mjs`」）。
 修法成本 ≈ 在 `review-readiness.spec.mjs` 头注加一行「矩阵正本见 verdict-conformance」。
 
 ### D.3 示例二：方法库标题族（BUG-081/085/093/123/124/127/128/138）

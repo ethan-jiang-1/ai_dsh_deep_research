@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/policy.md
 // 状态：常驻
 // 一句话：上游流错误（回合被终结）的跨场分布投影
 // 何时跑：BUG-022 类复发时数它；需要跨场而非单场分布

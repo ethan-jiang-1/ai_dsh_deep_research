@@ -1,10 +1,27 @@
-# 61 · Run 操作指南（研究发起人入口）
+# Run 操作与排障指南（研究发起人入口）
 
-> 层：指南（怎么操作）。通道 = run 通道（安装域 `deep-research` profile：本包 + vendor
-> agent-team-profile 层，P1 定案——[毕业 Note](../../notes/implemented/2026-09-24-m2-p1-run-channel.md)）；
-> **作用域**：本页只服务 M2 开发通道（仓内 `deep-research` profile + `research-workspace/` + run-driver）。安装用户（`dsh --profile deep-research` + 任意工作区）看 [pack README](../../packages/deep-research-pack/README.md)、[`_dist/安装手册.md`](../../_dist/安装手册.md) 与 [guides/65](65-run-forms.md)；不要把本页的 3083/仓内路径套到用户安装。
-> 跨角色纪律与文件契约 = [研究手册](../../packages/deep-research-pack/content/manual.md)；节点 I/O 正本 = [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；
-> 2026-09-24 的四角色流程快照 = [m2-run-mechanics](../../notes/archived/2026-09-24-m2-run-mechanics.md)（历史，非现行）。本页只答"你现在做什么"。
+> 层：指南（怎么操作、怎么追踪运行与排障）。通道 = run 通道（安装域 `deep-research` profile：本包 + vendor `agent-team-profile` 层，[毕业 Note](../../notes/implemented/2026-09-24-m2-p1-run-channel.md)）。
+> **作用域**：本页服务 M2 开发通道（仓内 `deep-research` profile + `research-workspace/` + run-driver）与运行态排障。安装用户（`dsh --profile deep-research` + 任意工作区）看 [pack README](../../packages/deep-research-pack/README.md)、[`_dist/安装手册.md`](../../_dist/安装手册.md) 与 [contracts/run-forms.md](../contracts/run-forms.md)。
+> 跨角色纪律与文件契约 = [研究手册](../../packages/deep-research-pack/content/manual.md)；节点 I/O 正本 = [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；四类运行状态合同 = [contracts/data-model.md](../contracts/data-model.md)；2026-09-24 历史快照 = [m2-run-mechanics](../../notes/archived/2026-09-24-m2-run-mechanics.md)。
+
+## 任务入口矩阵
+
+每个任务只有一个首选入口；Agent Loop 与四类运行状态正本 = [contracts/data-model.md](../contracts/data-model.md)，节点 I/O = [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)，全档命令正本 = [dev-loop.md §2](./dev-loop.md)。
+
+| 任务 | 首选入口 | 写盘 | 档位 | 事实来源 | 失败后的下一站 |
+|---|---|---|---|---|---|
+| **启动安装形态（安装用户）** | 按 [`_dist/安装手册.md`](../../_dist/安装手册.md)：CLI 建 profile（仅首次）→ `dsh plugin --profile deep-research add file:<tgz>`（当前唯一发布形态）→ 启动 → 首屏选项目目录；npm/Plugins 页/Discover 为 staged | 是（profile/会话/设置文件） | boot keyless；run 需凭据 | [pack README](../../packages/deep-research-pack/README.md) + [`_dist/安装手册.md`](../../_dist/安装手册.md) | 见 [run-forms](../contracts/run-forms.md)；诊断 = `dsh-deep-research-doctor` |
+| 启动一次研究（开发通道） | `node tools/channel/run-driver.mjs up`（内部调 `bash tools/channel/boot-run.sh`；想守前台看日志才直接跑 boot-run） | 是（会话与 bundle） | boot keyless；run 需凭据 | 本页 §0 | boot 终端报错 → 下文「调试先看哪份事实」 |
+| 继续在飞 run | 同上；起来后 lead 会话说「继续 \<slug\>」 | 是 | 同上 | bundle 文件 + 本页 §5 | bundle 缺件 → NODES 判据定位 |
+| 观察在飞 run | boot 自带后台仪表盘 + Web 驾驶舱 | 只读投影 | 浏览器 | [contracts/client-ui.md](../contracts/client-ui.md) | 页签坏 → `client-load.entry` |
+| 回答 HITL | Web GUI 选项卡（Web 面）；代理代答 = `tools/channel/hitl-answer.mjs`（开发面） | 是 | 浏览器；代答需真挂起在场 | 本页 §3 | 卡未弹 → `watch-run` 看挂起谓词 |
+| 查看 run 状态与交付 | `<workspace>/drt_<slug>/` 文件事实（dev 实例 = `research-workspace/drt_<slug>/`；仪表盘只是投影） | 只读 | keyless | [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) | 交付不明 → `node-gate` 门②③ |
+| 验证挂载（插件真挂载） | `source tools/env.sh && DSH_SMOKE_REAL=1 node checks/smoke/preset.e2e.mjs` | 否 | keyless 真挂载 | [dev-loop §2](./dev-loop.md) | 红 → preset 源 + `render-overlay` 后复跑 |
+| 验证安装 | `source tools/env.sh && node checks/smoke/install-shape.entry.mjs`（手册 CLI 装包分支）/ `release.entry`（安装域） | 是（测试 home/profile） | keyless（`--install-only` 跳凭据） | [dev-loop §2](./dev-loop.md) | 红 → pack 发布集对账 |
+| 验证首启（安装面） | `node checks/smoke/product-boot.entry.mjs`（真 Web + 浏览器，无模型） | 是（测试 home/workspace） | keyless + 浏览器 | [dev-loop §2](./dev-loop.md) | 红 → startup/StartCard/client 恢复 |
+| 查漂移（镜像一致性） | boot-run 漂移门（启动即查，不静默用旧镜像）；复用通道时 `run-driver up/probe` 先跑 `boot-run --drift-only`（漂移 = NOT-RUN） | 否 | keyless | boot-run 输出 + run-driver verdict | 红 → 按失败消息同步或重建镜像 |
+| 复现/验证一个机制（不是整链） | [probes/](../../probes/README.md) + [probe-playbook](./probe-playbook.md) | 证据默认写 `runtime/` | 真模型档/连已起 GUI/仪器 | [探针索引](../../probes/INDEX.generated.md) | 红/缺件 → 头注「何时跑」与指南 §5 |
+| 定位故障 | 下文「调试先看哪份事实」与「症状 → 首个测试入口」 | 只读 | keyless | 现象 → 事实源映射 | 事实源看完仍不明 → `watch-run` / `node-gate` |
 
 ## 0. 开跑（一次性准备 + 每次启动）
 
@@ -105,7 +122,7 @@
   运行同一入口。run-driver 后台启动时，本次 state 的 `run-driver.pid` 记录 supervisor PID，须核实进程身份后
   向该 supervisor 请求停止。supervisor 回收整个子进程组，确认 body、web、仪表盘等相关进程静默后才释放锁。
 - **锁与离线恢复**：supervisor 在准备前对 canonical home/state 各取 `channel-start.lock`，完整服务生命期持续持有；
-  同 home 不同 state/profile 也保守串行，独立 home/state 才可并发（实例变量见 [guides/65 §7](65-run-forms.md#7-独立环境与多实例)）。
+  同 home 不同 state/profile 也保守串行，独立 home/state 才可并发（实例变量见 [contracts/run-forms.md §7](../contracts/run-forms.md#7-独立环境与多实例)）。
   锁在场即拒绝进入；没有 stale/PID/TTL 自动接管，owner 元数据缺失或损坏同样阻断。crash 或无法证明子进程组静默时
   保留锁；旧 `boot-run.lock` / `run-driver-up.lock` 也要求离线恢复。先确认该 home/state 的所有相关进程全部停止，
   再核对 canonical 路径与残留内容后人工恢复；不要在线删锁，也不要把 PID 消失或经过一段时间当成可接管证明。
@@ -118,12 +135,12 @@
   （须停止 + 重建）；与 `--drift-only` 一样不取启动锁、可与活通道并发，是服务持锁期间唯一允许的镜像写。
   client 产物由 vendor client-hmr（500ms stat-poll）热载，不重启、不换 token；分类判据 =
   [mirror-sync.mjs](../../checks/lib/channel/mirror-sync.mjs)。报漂移后的镜像重建先遵守上面的停止与离线核实步骤，
-  影响面见 [guides/62](62-plugin-authoring.md)。
+  影响面见 [guides/plugin-authoring.md](./plugin-authoring.md)。
 - **刷新白屏的判别序**：① `lsof -nP -iTCP:<端口> -sTCP:LISTEN` 有没有监听 → 无 = 进程已停
   （重跑上面任一形态）；② 有监听但仍白屏/401 = token 过期（**每次启动都是新 token**，
   用当次横幅里的 URL；旧 URL 作废）；③ 有监听且 token 新但页面空 = 前端壳产物陈旧
   （`pnpm --filter @deepseek-ai/dsh-web-frontend run build` 重建；vendor 构建产物整体重建 =
-  `bash tools/build/vendor-build.sh`，见 [guides/60 §2](./60-dev-loop.md)）。
+  `bash tools/build/vendor-build.sh`，见 [guides/dev-loop.md §2](./dev-loop.md)）。
 
 ## 1. 开哪个会话
 
@@ -146,7 +163,7 @@ workspaceId 形态把会话建在 research-workspace。
 - web GUI 新建会话：preset 选 Deep Research Lead（默认项），工作区选 research-workspace；
 - 无 GUI 手（代理操作）：`node tools/channel/run-kickoff.mjs --port 3083 --token <横幅 token>
   [--prompt-file <file>]` 建 Lead 会话（workspace/create 幂等自检已内建；全档参数 =
-  [guides/60 §2](./60-dev-loop.md)）；
+  [guides/dev-loop.md §2](./dev-loop.md)）；
 - 只跟 lead 对话——它是唯一入口与出口：立项、组队、派活、综合、交付全归它；
   scout / analyst / critic 是它的队员，不直接听你指挥。
 
@@ -172,7 +189,7 @@ workspaceId 形态把会话建在 research-workspace。
   **在场看 Web**（下 1–4，驾驶舱为主面）；**离机看投影** = boot-run 自动起的
   `runtime/smoke-workspace/dashboard.html`（fail-soft 只读，不是交付判据）：
   1. 研究驾驶舱「研究状态」页签（**主观察面**——流程轨道 / 活动流 / 活标题 / HITL 挂起横幅，
-     构成正本 = [design/40](../design/40-research-cockpit.md)）；
+     构成正本 = [contracts/client-ui.md](../contracts/client-ui.md)）；
   2. 各角色会话的实时消息流（scout 的搜索调用、analyst 的抓取逐条可见）；
   3. `ui-agent-team` 任务板（谁领了什么活、起止状态）；
   4. deliverables 面板（final.md 交付后出现）。
@@ -246,7 +263,7 @@ BUG-020）。
 
 ## 5. 中断与恢复
 
-四类运行状态（run bundle / session log / goal·任务板 / 观察面）的 canonical 合同与恢复优先级正本 = [design/50](../design/50-agent-loop-and-state.md)——本节只载人的操作步骤。
+四类运行状态（run bundle / session log / goal·任务板 / 观察面）的 canonical 合同与恢复优先级正本 = [contracts/data-model.md](../contracts/data-model.md)——本节只载人的操作步骤。
 
 - 任何时候可关页面/停机。恢复 = 重跑 `node tools/channel/run-driver.mjs up` → 新开 lead 会话说
   "继续 <slug> 这个 run"——lead 只凭 `drt_<slug>/` 的文件事实重建上下文，
@@ -304,7 +321,7 @@ BUG-020）。
 
 ## 6. 判定"研究完成"
 
-判定正本 = [研究手册 §完成判据](../../packages/deep-research-pack/content/manual.md)（+ [NODES 交付行](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；设计层视图 = [design/50 §交付判定](../design/50-agent-loop-and-state.md)）——文件事实链六件缺一不可，逐件细节住正本；口头宣告与观察面显示都不算。
+判定正本 = [研究手册 §完成判据](../../packages/deep-research-pack/content/manual.md)（+ [NODES 交付行](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；设计层视图 = [contracts/data-model.md §交付判定](../contracts/data-model.md)）——文件事实链六件缺一不可，逐件细节住正本；口头宣告与观察面显示都不算。
 
 ## 7. 归档时收割判型模式（增长协议的收割步）
 
@@ -319,3 +336,67 @@ grep -rn "判型" research-workspace/ --include=journal.md
 候选过晋升门槛（跨 run 复现 ≥2 次，或单次造成真实成本〔HITL1 返工 / §Decisions 方向
 修正 / 前提级发现〕）才按六段骨架写新条目、标（留察）；连续 3 次收割零命中的条目移
 休眠节。库的任何变更同 diff 跑 l4-lite + `content-shape`。
+
+## 8. 一次运行怎么串起来与副本同步面
+
+从仓根运行 `node tools/channel/run-driver.mjs up`（内部调 `bash tools/channel/boot-run.sh`），避免相对路径观察工具扫描错位。
+
+```mermaid
+flowchart TD
+  E[boot-run：env + vendor 产物检查 + 端口检查] --> P[检查 deep-research profile 组合；缺席或不完整才补装]
+  P --> M[MCP patch + pack 发布集与安装镜像漂移检查]
+  M -->|漂移| X[停止；按失败消息同步或重建镜像]
+  M -->|一致| W[启动 DSH web；输出 URL]
+  M -->|一致| D[后台 HTML 仪表盘；持续读取文件与日志]
+  W --> G[GUI：登记工作区 + 建 Lead 会话 + 发问题]
+  W --> R[run-kickoff RPC：登记工作区 + 建 Lead 会话 + 可选发问题]
+  G --> L[模型执行研究方法论]
+  R -->|收到问题| L
+  L --> B[工作区 run bundle + DSH 会话日志]
+  B -.观察.-> D
+  B -.观察.-> C[Web 驾驶舱 / 团队任务板 / 会话流 / 交付面板]
+```
+
+| 正本 → 派生物 | 用于什么 | 同步与检查 |
+|---|---|---|
+| pack 角色/bundle 配置 → 开发 overlay | L1 源码域冒烟；不是正式 run 的安装源 | [render-overlay](../../tools/record/render-overlay.mjs)；L0 `overlay-fresh` |
+| 研究手册/模板 → pack `content/`；NODES/判型库 → Lead skills | 随包只读内容，由 `src/content` 注入 | L0 `content-shape` + snapshot B 层 + `l4-lite` |
+| pack 发布集 → `deep-research` profile 的安装副本 | 正式研究 run 加载的包 | [boot-run](../../tools/channel/boot-run.sh) 组合检查与漂移门；修复次序见 [plugin-authoring](./plugin-authoring.md) |
+| pack client 源码 → 浏览器构建产物 | Web 驾驶舱 | 构建与浏览器验收次序见 [dev-loop](./dev-loop.md) |
+
+## 9. 调试先看哪份事实
+
+| 现象 | 先看 | 定位下一步 |
+|---|---|---|
+| 无法启动/镜像漂移 | 本次 [boot-run](../../tools/channel/boot-run.sh) 终端报错；进入 web 启动后再看 `runtime/smoke-workspace/web.log` | 环境/构建/组合/镜像检查；修复入口见本页 §0.1 |
+| 页面能开但页签或交互坏 | 浏览器加载/console 与 [client-load.entry](../../checks/smoke/client-load.entry.mjs)；随手抓现场 = [scene-capture](../../probes/analyze/scene-capture.mjs) | [client-ui](../contracts/client-ui.md) 装配与数据通道；HITL 行为另用真模型证据 |
+| 要看某次 `up`/`probe` 的现场 | `runtime/smoke-workspace/run-verdicts/<ts>-<kind>/`：`verdict.json` + `page.png`（打开过页面另写 `page.html`；NOT-RUN 无页面） | `latest-verdict.json` 指向最近一次；每次判定独立归档 |
+| 想复看**历史会话**当时/现在的页面 | [session-replay](../../probes/analyze/session-replay.mjs) `<session-id\|标题子串>`（keyless：起通道 → 登记 cwd → 按 id 打开 → 抓场景包）；日志先看 [session-events](../../probes/analyze/session-events.mjs) | 场景包读回 = [scene-capture](../../probes/analyze/scene-capture.mjs) `--show <name>`；边界 = 现在的客户端代码 + 当年数据 |
+| 研究卡住、工具报错、present 不明 | 先用 [session-events](../../probes/analyze/session-events.mjs) 看事件尾部；原始日志在 `runtime/harness-home/sessions/<工作区组>/<会话>/` | [watch-run](../../probes/analyze/watch-run.mjs) 看状态；[node-gate](../../checks/run-gates/node-gate.mjs) 查交付声明 |
+| HITL 卡没弹出来 / 挂起不明 | [watch-run](../../probes/analyze/watch-run.mjs) 的挂起谓词 + [hitl-answer](../../tools/channel/hitl-answer.mjs) 盘侧自拒信息 | 挂起与代答语义 = 本页 §3；「卡永久 pending」边界 = 本页 §5 |
+| 模型回合被流错误终结 / 重试风暴 | [stream-diagnostics](../../probes/analyze/stream-diagnostics.mjs) `--session <id>` 或 `--recent N` | 模型尝试时间线/失败密度/provider 实名；处置 = 本页 §0.1 |
+| 研究内容/交接缺件 | 该 bundle 的问题、证据、发现、审查与最终报告 | [NODES](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md) + run 机械审计；恢复查本页 §5 |
+| 不知道改什么、怎么验 | 根 [AGENTS.md](../../AGENTS.md) 入口链与本轮请求授权 | 对应 RFC 与 [dev-loop](./dev-loop.md) 任务型路由 |
+
+### 症状 → 首个测试入口（keyless 优先）
+
+| 症状 | 最小证据 | 失败时看什么 |
+|---|---|---|
+| 页面空白 / 插件横幅报错 | [client-load.entry](../../checks/smoke/client-load.entry.mjs) | `runtime/smoke-workspace/client-load-*/{page.png,page.html,console.txt,meta.json}`；**最近一次 = `client-load-latest.json`** |
+| 页签不出现 / keyed 槽空白 | 同上 + `client-keys` 门禁 | `keys.ts` 字面量与 [client-ui §2](../contracts/client-ui.md) 登记 |
+| 状态页显示“未绑定” | [client-load.entry](../../checks/smoke/client-load.entry.mjs) 绑定断言；run 通道用 `run-driver probe --require-data` | [bundle-sessions](../../probes/analyze/bundle-sessions.mjs) 反查会话 id + 状态摘要 |
+| run 卡住 / HITL 不弹 | [watch-run](../../probes/analyze/watch-run.mjs) + [bundle-sessions](../../probes/analyze/bundle-sessions.mjs) | 挂起谓词与日志回退检测；语义 = 本页 §3 |
+| 方法库保存失败 | [method-library 单测](../../tests/cockpit/lib/method-library/method-library-operation-state.spec.mjs) + [method-library-tool.e2e](../../checks/smoke/method-library-tool.e2e.mjs) | 回执三态；`useOperationQueue` |
+| 交付门红 | [node-gate-delivery 测试](../../tests/run/gates/node-gate-delivery.spec.mjs) + [node-gate](../../checks/run-gates/node-gate.mjs) | 门 A/C 判据与 `present` 见证 |
+| 证据链红 | [evidence-audit 测试](../../tests/run/gates/evidence-audit.spec.mjs) + [evidence-audit](../../checks/run-gates/evidence-audit.mjs) | `source_url` / 摘录 / 引用链 |
+| 安装 / 首启坏 | CI [lifecycle.entry](../../checks/smoke/lifecycle.entry.mjs)；本地 [product-boot.entry](../../checks/smoke/product-boot.entry.mjs) / [install-shape.entry](../../checks/smoke/install-shape.entry.mjs) | market/tarball 形状；首屏工作区 |
+| 模型不按纪律/角色回话 | [discipline-probe](../../probes/behavior/discipline-probe.mjs)（真模型档） | 对应纪律合同/persona；先看头注「何时跑」 |
+| Lead 不知道偏好库/条目 | [method-library-probe](../../probes/behavior/method-library-probe.mjs)（真模型档） | 偏好库播种/手册指路；BUG-042 |
+| 驾驶舱页签/点击/发送坏 | [cdp-probe](../../probes/browser/cdp-probe.mjs)；`--ask` 判据 = 会话日志落盘 | 驾驶舱装配；按会话档决定是否调模型 |
+| 镜像漂移（旧页面） | `run-driver probe` 返回 NOT-RUN | 按 boot-run 处方同步或重建；不要直起 `dsh` |
+
+## 已知限制与延后工作
+
+- HTML 仪表盘使用 canonical 日志选择器、共享 HITL 折算和共享步骤折算，但仍是 fail-soft 观察投影，不是交付绿灯；判据消费方 = `watch-run` 与机械门。
+- L2 无模型调用；`release.entry` 使用显式 `--install-only` 跳过模型就绪检查，独立默认 doctor 仍检查凭据在场。
+- 职责分组与维护面定位见 [checks/README](../../checks/README.md)、[tools/README](../../tools/README.md) 与 [policy.md](../policy.md)（历史依据 = [目录与入口治理 Note](../../notes/implemented/2026-10-05-project-navigability.md)）。

@@ -117,13 +117,13 @@ test('dev 引用判据的边界：前缀归一、裸根、反斜杠、开发实�
   assert.deepEqual(refs('运行期：content/manual.md、presets/lead.patch.yml、lib/index.js、scripts/doctor.mjs、drt_<slug>/'), [])
   assert.deepEqual(refs('包内相对 import 形态：./chunk.js 与 ../shared/x.ts 不是开发根'), [])
   assert.deepEqual(refs('release notes/registry 与 changelog 不是路径'), [])
-  assert.deepEqual(refs('见 https://example.com/docs/design/50.md 与 https://github.com/x/y/blob/master/_dist/manual.md'), [],
+  assert.deepEqual(refs('见 https://example.com/docs/contracts/data-model.md 与 https://github.com/x/y/blob/master/_dist/manual.md'), [],
     '绝对 URL 是外部导航，不按包内路径判')
-  assert.equal(refs('正本 = docs/design/50-agent-loop-and-state.md')[0], 'docs/design/50-agent-loop-and-state.md')
+  assert.equal(refs('正本 = docs/contracts/data-model.md')[0], 'docs/contracts/data-model.md')
 })
 
 test('README 用户段判据：折叠区外开发命令红，折叠区内维护者语境绿（BUG-220 负控）', () => {
   assert.ok(readmeUserSectionIssues('## Usage\n`pnpm build`\n').some((p) => p.includes('开发命令')))
-  assert.ok(readmeUserSectionIssues('see `docs/guides/61-run-playbook.md`\n').some((p) => p.includes('开发面')))
+  assert.ok(readmeUserSectionIssues('see `docs/guides/run-ops.md`\n').some((p) => p.includes('开发面')))
   assert.deepEqual(readmeUserSectionIssues('## Usage\n<details><summary>maintainers</summary>\n`pnpm build`\n</details>\n'), [])
 })

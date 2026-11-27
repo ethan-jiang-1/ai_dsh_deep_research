@@ -1,7 +1,7 @@
 // b-pack.mjs — 域 B · pack 与驾驶舱：preset/bundle 形状、client 半声明、keyed 字面量、构成正本登记。
 //
 // 从 2026-10-27 卫生轮前的单文件 verify.mjs 原样切出（判据与文案逐字未改）；共享助手住
-// ../context.mjs。改本域门禁只需读本文件——域切分 = docs/evaluation.md §L0 表的 A–F 分组。
+// ../context.mjs。改本域门禁只需读本文件——域切分 = docs/testing.md §L0 表的 A–F 分组。
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -90,7 +90,7 @@ export function runB() {
     else if (!satisfiesVersion(VENDOR_TAG.replace(/^dsh-v/, ''), engine))
       fail(gate, `engines.dsh ${engine} 不覆盖当前 vendor tag ${VENDOR_TAG}——范围写窄或写错`);
     else {
-      // 同一版本事实的人类副本：根 README / 包 README en+zh / design/40 / 手册源 / 生成手册（中文版 2026-11-25 补入）。
+      // 同一版本事实的人类副本：根 README / 包 README en+zh / contracts/client-ui.md / 手册源 / 生成手册（中文版 2026-11-25 补入）。
       const range = engine.trim();
       const endpoints = range.match(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/g) ?? [];
       if (endpoints.length < 2) fail(gate, `engines.dsh ${range} 解析不出两个端点——无法对账人类副本`);
@@ -98,7 +98,7 @@ export function runB() {
       const copies = [
         ['packages/deep-research-pack/README.md', true],
         ['packages/deep-research-pack/README.zh.md', true],
-        ['docs/design/40-research-cockpit.md', true],
+        ['docs/contracts/client-ui.md', true],
         ['_dist/安装手册.md', true],
         ['README.md', false],
       ];
@@ -492,11 +492,13 @@ runPackLint();
     'README.md', 'CONTRIBUTING.md',
     'packages/deep-research-pack/README.md', 'packages/deep-research-pack/AGENTS.md',
     'tools/release/product-manual.md',
-    'docs/00-index.md', 'docs/evaluation.md', 'docs/project-map.md', 'docs/discipline-map.md',
-    'docs/guides/60-dev-loop.md', 'docs/guides/61-run-playbook.md', 'docs/guides/62-plugin-authoring.md',
-    'docs/guides/63-git-boundary.md', 'docs/guides/64-release-versioning.md', 'docs/guides/65-run-forms.md',
-    'docs/design/10-architecture.md', 'docs/design/40-research-cockpit.md', 'docs/design/50-agent-loop-and-state.md',
-    'docs/design/60-intent-carriers.md',
+    'docs/README.md', 'docs/architecture.md', 'docs/testing.md', 'docs/policy.md',
+    'docs/contracts/presets.md', 'docs/contracts/client-ui.md', 'docs/contracts/data-model.md',
+    'docs/contracts/release.md', 'docs/contracts/roles.md', 'docs/contracts/methodology-mapping.md',
+    'docs/contracts/run-forms.md', 'docs/contracts/git-boundary.md',
+    'docs/guides/bootstrap.md', 'docs/guides/dev-loop.md', 'docs/guides/run-ops.md',
+    'docs/guides/plugin-authoring.md', 'docs/guides/probe-playbook.md',
+    'docs/reference/discipline-matrix.md', 'docs/reference/glossary.md', 'docs/reference/external.md',
   ];
   // 中文裸子串匹配；`产品内(?!容)` 豁免复合词「产品内容」（BUG-072）——真正要退的「产品内嵌」仍红。
   const banned = /插件即产品|产品 profile|产品形态|产品设置|产品用户|产品启动|产品面|产品化|产品包|产品账本|产品内(?!容)|P0–P4/;

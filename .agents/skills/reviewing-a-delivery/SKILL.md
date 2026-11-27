@@ -10,7 +10,7 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
 
 ## 这一层补的是什么
 
-交付判断四角色（判据正本 = [evaluation §完成判断四分离](../../../docs/evaluation.md)）各
+交付判断四角色（判据正本 = [evaluation §完成判断四分离](../../../docs/testing.md)）各
 证明不同的东西：**机械检查**（门禁/契约测试——只证明它执行的断言通过）、**语义自审**
 （本技能——意图-实现-文档-证据是否说的是同一件事）、**用户批准**（Plan 呈批/验收——
 产品取舍归它）、**显式交互**（HITL 等）。本技能承担其中 agent 可自主完成的角色——收尾
@@ -18,7 +18,7 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
 
 ## 触发
 
-- 条目收尾前（[guides/60 §0](../../../docs/guides/60-dev-loop.md) 反馈门③，位于 §4 收尾之前；毕业复查时）；
+- 条目收尾前（[guides/dev-loop.md §0](../../../docs/guides/dev-loop.md) 反馈门③，位于 §4 收尾之前；毕业复查时）；
 - 用户点名 review / 对质量有疑问时；
 - 改动跨面（同时触及 pack、docs、scripts、notes 中多面）时必做。
 
@@ -26,7 +26,7 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
 
 重读**当前**工作树与 diff（`git status` + `git diff`）、本次授权与验收记录、受影响面的 owner；有 RFC 时一并对照。review 的对象是现在这个 diff。
 
-按[开发环语义触发](../../../docs/guides/60-dev-loop.md#13-语义变更的验收准备)核对实际改动：旧性质是否在新实现执行，全部受影响入口/消费者是否实际经过守卫；逐项指向运行结果，未执行者写明缺口。共享 helper 的单测只证明 helper，全部消费者参与须由对应真实入口证据支持；证明边界见[五关](../../../docs/guides/67-test-strategy.md#3-五关)。
+按[开发环语义触发](../../../docs/guides/dev-loop.md#13-语义变更的验收准备)核对实际改动：旧性质是否在新实现执行，全部受影响入口/消费者是否实际经过守卫；逐项指向运行结果，未执行者写明缺口。共享 helper 的单测只证明 helper，全部消费者参与须由对应真实入口证据支持；证明边界见[五关](../../../docs/testing.md#22-五关与四账)。
 
 ## 阻塞判据（任何一条答不上 = 未完成，不许收尾）
 
@@ -99,12 +99,12 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
 
 9. **shipped entry path**：Loader / bin / worker / subprocess / built artifact 走的是
    真入口路径。本仓实例：L2 安装验收 = `npm pack → 干净 profile → plugin add → 真会话`
-   （`docs/evaluation.md:14`）；`gates.e2e` 用**真实 verify 入口**注入而非单测门禁函数；
+   （`docs/testing.md:14`）；`gates.e2e` 用**真实 verify 入口**注入而非单测门禁函数；
    `client-load.entry` 经真 DSH web 装载。查：新证据是否走真入口，还是走了测试专用旁路。
 10. **assertion 在目标 regression 上真会失败 + negative control 经真实 runner 被拒**：
     正本 = [`.agents/skills/writing-a-gate`](../writing-a-gate/SKILL.md)（先想红再写绿）。
     本仓实例：`gates.e2e` 的零注入对照组 + 注入组双轨；新门禁必须同 diff 带反证；
-    改断言迁就实现不是修法（`guides/60 §0` 硬边界②）。
+    改断言迁就实现不是修法（`guides/dev-loop.md §0` 硬边界②）。
 11. **proposed Note 被实现时同 diff 移动并改写为 present-tense shipped reality**：
     计划体不许留在 implemented。本仓实例：交付后的 RFC 迁 `implemented/` + **正文
     改写**（删未来时态）；机械侧 = `note-graduation-rewrite` +
@@ -120,7 +120,7 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
   只改新篇不改旧篇 = 旧结论继续打架。
 - **live 文档**：计数、时变状态、变更叙事有没有混进"只写 now"的层
   （机械侧 = `count-free` / `doc-now-only`；本轮实证：`discipline-map` 写错 fixtures
-  组数、`evaluation.md` 声称未跑过的形态数——**计数是陈旧的高发处**）。
+  组数、`testing.md` 声称未跑过的形态数——**计数是陈旧的高发处**）。
 
 ## 证据账本（非平凡交付）
 
@@ -136,7 +136,7 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
   逐条写 ✅/❌；失败类选层可查 [类级守卫方法](../../../_backlog/methods/class-level-guards.md)。
 - **显式未覆盖**：哪类失败没证、为什么现在不做、留下什么 issue/trigger；没有就写「无」。
 - **未跑**：与「已跑绿」分列；skip 不算 pass；值级改动写「值级不可证」。
-- 这是 `docs/evaluation.md` §完成判断四分离在**一次交付**上的纸面，不是新门禁；缺表 = 交付
+- 这是 `docs/testing.md` §完成判断四分离在**一次交付**上的纸面，不是新门禁；缺表 = 交付
   证据链不完整，不能拿「机械全绿」冒充语义自审或用户批准。
 
 ## 产出与边界

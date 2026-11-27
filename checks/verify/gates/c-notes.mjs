@@ -1,7 +1,7 @@
 // c-notes.mjs — 域 C · notes 与开发技能：决定记录的骨架/状态/毕业纪律与 .agents/skills 形状。
 //
 // 从 2026-10-27 卫生轮前的单文件 verify.mjs 原样切出（判据与文案逐字未改）；共享助手住
-// ../context.mjs。改本域门禁只需读本文件——域切分 = docs/evaluation.md §L0 表的 A–F 分组。
+// ../context.mjs。改本域门禁只需读本文件——域切分 = docs/testing.md §L0 表的 A–F 分组。
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -121,7 +121,7 @@ export function runC() {
   });
   // implemented/：骨架在场（决定 + 输掉的方案）；grandfather 条款豁免门禁生效前的遗留形态
   // 2026-10-08 补宽：加"实际跑过的验证"节断言。动因 = 复核实测该节零校验，而 notes/README.md
-  // 与 evaluation.md 都宣称它是骨架四节之一（文档声明严于门禁 = 缺口）。实测 70 篇里有 25 篇
+  // 与 testing.md 都宣称它是骨架四节之一（文档声明严于门禁 = 缺口）。实测 70 篇里有 25 篇
   // 的验证内容存在但落在**自造标题**下（## 实际跑过的检查 / ## 验收怎么闭的（逐条）/
   // ## L1 挂载面（…）…）——正是"当前事实 vs 变更史"漂移的入口。词表取实测变体 + 日期后缀容忍，
   // 既咬住"根本没有验证节"，又不为格式洁癖逼人重命名历史标题。

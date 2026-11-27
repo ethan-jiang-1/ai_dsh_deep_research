@@ -1,5 +1,5 @@
 // 测试分层守卫 — 回归层（tests/）禁止真实模型/浏览器/网络/子进程/密钥依赖（layering 二代）。
-// 定义：docs/evaluation.md §L0；语义移植自 ai_dsh_company tests/harness/layering.spec.ts 四件套
+// 定义：docs/testing.md §L0；语义移植自 ai_dsh_company tests/harness/layering.spec.ts 四件套
 // （2026-10-09 探查实录与拍板 = _backlog/issues/2026-10-09-layering-v2.md）；解析器 =
 // checks/lib/test-infra/keyless-imports.mjs（company tools/lib/keyless-imports.mjs@59551f2 移植，
 // typescript 作纯函数解析器——typescript@6.0.3 是本仓既有 root devDep；keyless 判据 =

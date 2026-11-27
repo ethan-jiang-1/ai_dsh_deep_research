@@ -1,9 +1,7 @@
-# 70 · 内容组织：按寿命分家，按需披露
+# 内容组织：按寿命分家，按需披露
 
-> 层：设计（为什么 / 怎么长）。适用 = `packages/deep-research-pack/{presets,content}`。
-> 本页不是文件清单：清单 = 盘上目录。本页只定**新内容放哪、怎么长、什么时候该动结构**。
-> 相关：常驻面预算 = `content-shape` 门禁；接线守卫 = `tests/pack/contract/{presets-wiring,content-coverage}.spec.mjs`；
-> 测试落家 = [project-map §测试怎么选](../project-map.md)；上游参照（只读，不随仓）= `ai_dsh_company/docs/content-charter.md`。
+> **读法**：本页是 `packages/deep-research-pack/{presets,content}` 的内容组织合同——只定**新内容放哪、怎么长、什么时候动结构**，不维护手写文件清单（盘上目录与 [reference/package-catalog.generated.md](../reference/package-catalog.generated.md) 是清单正本）。
+> 相关：常驻面预算 = `content-shape` 门禁；接线守卫 = `tests/pack/contract/{presets-wiring,content-coverage}.spec.mjs`；测试落家 = [testing.md](../testing.md)；上游参照（只读，不随仓）= `ai_dsh_company/docs/content-charter.md`。
 
 ## 0. 一句话
 
@@ -103,5 +101,5 @@
 
 - 常驻面预算与准入规则 = [`content-shape` 门禁](../../checks/verify/gates/e-workspace.mjs)
 - 内容接线守卫 = [presets-wiring](../../tests/pack/contract/presets-wiring.spec.mjs) · [content-coverage](../../tests/pack/contract/content-coverage.spec.mjs)
-- 测试落家与证据分层 = [project-map §测试怎么选](../project-map.md) · [evaluation §L0/L3](../evaluation.md)
+- 测试落家与证据分层 = [project-map §测试怎么选](../guides/run-ops.md) · [evaluation §L0/L3](../testing.md)
 - 参照仓内容宪章（只读） = `ai_dsh_company/docs/content-charter.md`

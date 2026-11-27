@@ -64,7 +64,7 @@ Add one line under the status line when the card closes; an implementation-bound
 
 ```
 > 去向：implemented — `notes/implemented/<date>-<topic>.md`；业务验收：用户
-> 去向：none — `docs/guides/60-dev-loop.md`
+> 去向：none — `docs/guides/dev-loop.md`
 > 去向：deferred — `_backlog/triggers.md`
 ```
 

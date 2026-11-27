@@ -1,14 +1,10 @@
-# 65 · 运行形态合同：DSH 原生安装、custom profile、工作区与移交
+# 运行形态合同：DSH 原生安装、custom profile、工作区与移交
 
-> 层：指南（当前合同）。回答“这个 bundle 以什么形态运行、六轴谁定、数据归谁、怎么装/升级/移交、
-> 用什么证据证明”。
-> 用户安装步骤 = [`_dist/安装手册.md`](../../_dist/安装手册.md)；包合同 = [pack README](../../packages/deep-research-pack/README.md)；
-> 开发操作 = [guides/60](60-dev-loop.md)；入库/跨环境 = [guides/63](63-git-boundary.md)；版本与发布 = [guides/64](64-release-versioning.md)。
+> **读法**：本页回答“这个 bundle 以什么形态运行、六轴谁定、数据归谁、怎么装/升级/移交、用什么证据证明”。
+> 用户安装步骤 = [`_dist/安装手册.md`](../../_dist/安装手册.md)；包合同 = [pack README](../../packages/deep-research-pack/README.md)；开发操作 = [guides/dev-loop.md](../guides/dev-loop.md)；入库/跨环境 = [git-boundary.md](./git-boundary.md)；版本与发布 = [release.md](./release.md)。
 >
-> **编号消歧**：本文 `M1`/`M2`/`M3` = 运行形态（安装 / 独立开发 / 移交）；[evaluation §3](../evaluation.md) 的里程碑采用独立前缀 `MS1`/`MS2`/`MS3+`，两者前缀已分离。
-> **术语来源**：`六轴` 借用 `deepseek-harness/_faq_on_digested/26_harness-release` 的检查表装置（该语料明说
-> 不是对象模型，vendor 无此词）；本仓只用它做 owner 检查，不冒充 DSH API，也不自称“Harness 发行版”
-> （runtime/app surface/lifecycle 的提供者是 DSH/用户，不是本包）。决定 = [D41](../decisions.md#d41)。
+> **编号消歧**：本文 `M1`/`M2`/`M3` = 运行形态（安装 / 独立开发 / 移交）；[testing.md §5](../testing.md) 的里程碑采用独立前缀 `MS1`/`MS2`/`MS3+`，两者前缀已分离。
+> **术语来源**：`六轴` 借用 `deepseek-harness/_faq_on_digested/26_harness-release` 的检查表装置（vendor 无此词）；本仓只用它做 owner 检查，不冒充 DSH API，也不自称“Harness 发行版”。决定 = [D41](../decisions.md#d41)。
 
 ## 1. 运行形态
 
@@ -130,7 +126,7 @@ node tools/channel/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览�
 同一 workspace 不支持两个实例共用（无跨进程锁）。
 
 锁没有 stale/PID/TTL 自动接管；缺失或损坏的 owner 元数据也视为占用。crash 残留、旧启动锁或无法确认进程组静默时，
-先确认相关进程全部停止，再核对路径与内容后离线恢复。操作步骤归 [Run 指南 §0.1](61-run-playbook.md#01-特殊形态与排障按需读首跑不需要)。
+先确认相关进程全部停止，再核对路径与内容后离线恢复。操作步骤归 [Run 指南 §0.1](../guides/run-ops.md#01-特殊形态与排障按需读首跑不需要)。
 
 `--drift-only` 不取启动锁，可并发检查镜像，不修改活 profile；它仍会确保目录并写 npm cache / 原子发布清单缓存，
 因此不能当成无写入操作。`--prepare-profile` / `--drift-check` 会持锁到本次准备或检查结束；模式细节见同节。
@@ -155,7 +151,7 @@ node tools/channel/run-driver.mjs up --bootstrap # 准备 + 起通道 + 浏览�
 
 ## 9. 证据
 
-证据档位、命令与选择规则 = [guides/60 §2](60-dev-loop.md)（唯一 owner，本页不复述）。本合同的增量证据：
+证据档位、命令与选择规则 = [guides/dev-loop.md §2](../guides/dev-loop.md)（唯一 owner，本页不复述）。本合同的增量证据：
 
 - `install-shape.entry`：原样执行手册的 CLI 装包分支（profile init → plugin add → 真启动）；断言
   roster 三状态、无 `did not activate`、首屏可达。

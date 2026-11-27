@@ -101,7 +101,7 @@ export function renderProbeIndex(entries) {
     '# 探针索引（生成物，勿手改）',
     '',
     '> 生成器 = `probes/_index.mjs --write`；事实源 = 每支探针头注；本表只答「有哪些、在哪」。',
-    '> 指南 = [../docs/guides/66-probe-playbook.md](../docs/guides/66-probe-playbook.md)。',
+    '> 指南 = [../docs/guides/probe-playbook.md](../docs/guides/probe-playbook.md)。',
   ];
   for (const domain of [...groups.keys()].sort()) {
     const rows = groups.get(domain)

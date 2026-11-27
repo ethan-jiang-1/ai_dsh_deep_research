@@ -2,7 +2,7 @@
 
 `tests/` 拥有 **keyless 回归**：`pnpm test`（命令正本 = [package.json](../package.json)）。
 它验证契约、纯函数、解析、折算与渲染输出的确定性行为；宿主挂载、浏览器交互与模型行为另取
-分级冒烟证据（[docs/evaluation.md](../docs/evaluation.md)）；上游对应物 = DSH `snapshots/AGENTS.md` 的“证据住在被它证明的对象旁边”。
+分级冒烟证据（[docs/testing.md](../docs/testing.md)）；上游对应物 = DSH `snapshots/AGENTS.md` 的“证据住在被它证明的对象旁边”。
 
 ## 分域（2026-10-20 用户指令：目录映射源代码）
 
@@ -48,5 +48,5 @@
 - **改夹具先想红**：夹具语义由消费它的契约测试钉住（node-gate / schema-scan 的用例即永久反证
   记录）——改夹具应预期变红，绿了说明钉歪了；
 - 新契约（手册谓词、门禁登记、模板形状）→ 同 diff 加测试，并在
-  [docs/evaluation.md](../docs/evaluation.md) 的对应面登记；
+  [docs/testing.md](../docs/testing.md) 的对应面登记；
 - 测试描述行为，不描述"正确性"：行为变了就同 diff 改断言，不留下与代码打架的旧断言。

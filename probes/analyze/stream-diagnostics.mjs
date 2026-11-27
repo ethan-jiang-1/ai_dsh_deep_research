@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/policy.md
 // 状态：常驻
 // 一句话：流失败归因诊断：模型尝试时间线 / 失败密度 / provider 与重试策略实名
 // 何时跑：回合被流错误终结、重试风暴、上游错误归因

@@ -1,6 +1,6 @@
-# 64 · 发布版本、tag 与 npm 发布顺序
+# 发布版本、tag 与 npm 发布顺序
 
-> 层：指南。本页拥有版本号、git tag、npm 发布三者的唯一顺序。发布前逐条走，不凭记忆。
+> **读法**：本页是版本号单一源、git annotated tag、handoff 锚与发布顺序的唯一合同，发布前逐条执行。
 > **当前发布形态（0.3.7）= 本地 tarball；npm publish 未执行（凭据未就绪）。以下 npm 顺序是发布后路径，不是当前完成条件。**
 > 决定理由与输掉的方案 = [release-versioning Note](../../notes/implemented/2026-10-25-release-versioning.md)。
 
@@ -34,7 +34,7 @@
    `pnpm install --lockfile-only`。
 3. `node tools/release/export-dist.mjs` 重导出 `_dist/安装手册.md`、tarball 与 `_dist/market.json`（三件同源同版本；首次/换 pin 后先 `bash tools/build/vendor-build.sh`——pack 的 tsc 读 vendor 构建产物）；装/起发布前跑 `node checks/smoke/lifecycle.entry.mjs`（market 索引 → tarball → dump → 真启动 → remove 回落）+ `node checks/smoke/install-shape.entry.mjs` + `node checks/smoke/product-boot.entry.mjs`（缺前置 exit 2，未跑 ≠ 通过）。
 4. `pnpm verify && pnpm test && pnpm typecheck` 全绿；若本次发布**宣告新的 DSH 版本支持**，
-   先在该版本的全局宿主上跑 L1 真挂载 + L2 安装/首启 + client-load（命令 = [guides/60 §2](60-dev-loop.md)；
+   先在该版本的全局宿主上跑 L1 真挂载 + L2 安装/首启 + client-load（命令 = [guides/dev-loop.md §2](../guides/dev-loop.md)；
    缺环境 exit 2，未跑 ≠ 通过）。
 5. `node checks/release/release-check.mjs`：确认 root = pack；HEAD 未打 tag 时它只提示
    “未打 tag”。
@@ -64,7 +64,7 @@
 - `release-version`（L0）：root/pack `version` 相等且为三段 semver。
 - `dist-manual-version`：`_dist/安装手册.md` 版本 = pack 版本。
 - L1 真挂载 / L2 安装/首启 / client-load：宣告新 DSH 版本支持时的安装面与客户端挂载证据
-  （命令 = [guides/60 §2](60-dev-loop.md)；缺环境 exit 2）。
+  （命令 = [guides/dev-loop.md §2](../guides/dev-loop.md)；缺环境 exit 2）。
 - `node checks/release/release-check.mjs`：发布前检查 root=pack、HEAD tag 与版本一致、tag 为
   annotated；`--handoff` 另查 tag=HEAD、工作树干净、手册 sha=制品 sha、制品由当前 pack 源生成；
   `--receiver` 在 clean clone 上只查 tag/manual/tarball/manifest（跳过源指纹）；不联网、不写盘。
@@ -72,5 +72,5 @@
   [release-anchor.yml](../../.github/workflows/release-anchor.yml) 的 `release-check`（tag 名/类型/版本，
   无制品也能判）。制品↔源同源 = L0 门禁 `dist-freshness`；tag=HEAD + 手册/制品配对 = 发送方
   `release-check --handoff`（需要 `_dist` 三件，CI 不假定它们在场）。
-- 发布规则与 git 入库规则分家：本页管“版本与发布”，[guides/63](./63-git-boundary.md) 管
+- 发布规则与 git 入库规则分家：本页管“版本与发布”，[contracts/git-boundary.md](./git-boundary.md) 管
   “什么进 git”。

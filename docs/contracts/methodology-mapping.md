@@ -1,12 +1,8 @@
-# 30 · 方法论映射：codex Deep Research harness 内核 → DSH 载体
+# 方法论映射：codex Deep Research harness 内核 → DSH 载体
 
-> 层：设计（为什么）。这是 [evaluation.md](../evaluation.md) L3 领域面的核心载体：
-> 读完去哪：角色内容与信噪比防线落点 = [20](./20-roles.md)；观察面构成 = [40](./40-research-cockpit.md)。
-> 生命周期每一环节在本插件的落点，或带证据的弃用理由。考古来源 =
-> [deep-research-harness-analysis（考古报告）](../../notes/archived/2026-09-24-deep-research-harness-analysis.md)
-> （codex harness 11-phase 生命周期 / wave 语义 / gate 体系 / 证据四层 / 8 条实证教训）。
-> 原则（用户定案 + company D13）：**不发明**——codex 因宿主缺原语自建的机制，在 DSH 上
-> 一律换原生载体；每个自建残留须有"DSH 载体不可用"的证据。
+> **读法**：本页是 [testing.md](../testing.md) L3 领域面的核心合同——记录 codex Deep Research harness 生命周期每一环节在本插件的 DSH 落点或带证据的弃用理由。
+> 角色职责与信噪比防线落点 = [roles.md](./roles.md)；观察面构成 = [client-ui.md](./client-ui.md)；考古来源 = [deep-research-harness-analysis（考古报告）](../../notes/archived/2026-09-24-deep-research-harness-analysis.md)。
+> 原则（用户定案 + company D13）：**不发明**——codex 因宿主缺原语自建的机制，在 DSH 上一律换原生载体；每个自建残留须有"DSH 载体不可用"的证据。
 
 ## 1. 生命周期映射表（L3 判据 1）
 
@@ -90,7 +86,7 @@
 
 ## 6. 与 L3 四判据的对账
 
-| evaluation.md L3 判据 | 本文落点 |
+| testing.md L3 判据 | 本文落点 |
 |---|---|
 | 1. 生命周期映射完整 | §1 表的每个环节都有落点或弃用理由 |
 | 2. 角色单一职责 | 20-roles §0 owner 表 + 手册 owner 全表 |

@@ -233,7 +233,7 @@ const naLivenessAppears = () => (dir) => {
  *  `src/lib/session-v5.ts` 之于 session-format 行）仍不被捕捉——那是 `reReviewOn`
  *  声明层负责的语义面，无机械判据可锁。勿把本案例读成"能力级腐烂已被覆盖"。 */
 const naLivenessDecorative = () => (dir) => {
-  const p = join(dir, 'docs', 'alignment-ledger.json');
+  const p = join(dir, 'docs', 'reference', 'alignment-ledger.json');
   const ledger = JSON.parse(readFileSync(p, 'utf8'));
   for (const s of ledger.sources) {
     if (s.verdict === 'na' && s.source === 'docs/api-gateway.md') {
@@ -254,7 +254,7 @@ const naLivenessGlob = () => (dir) => {
  *  → 门禁须报"两者皆无"红。锁的是 2026-10-08 二轮修正后的诚实分层：能力面缺席不得靠
  *  猜路径冒充机械覆盖（对抗自审实证：造 `src/lib/session-v5.ts` 时首版门禁照旧全绿）。 */
 const naCapabilityUndefended = () => (dir) => {
-  const p = join(dir, 'docs', 'alignment-ledger.json');
+  const p = join(dir, 'docs', 'reference', 'alignment-ledger.json');
   const ledger = JSON.parse(readFileSync(p, 'utf8'));
   for (const s of ledger.sources) {
     if (s.verdict === 'na' && s.source === 'docs/session-format-status.md') {
@@ -268,7 +268,7 @@ const naCapabilityUndefended = () => (dir) => {
 /** na 活性注入（缺字段形态）：删掉某条 na 的 liveness → 门禁须报"必须给 liveness"。
  *  防"新增 na 行时忘记登记缺席断言"重新变成永久免检区。 */
 const naLivenessMissing = () => (dir) => {
-  const p = join(dir, 'docs', 'alignment-ledger.json');
+  const p = join(dir, 'docs', 'reference', 'alignment-ledger.json');
   const ledger = JSON.parse(readFileSync(p, 'utf8'));
   for (const s of ledger.sources) {
     if (s.verdict === 'na' && s.source === 'website/AGENTS.md') delete s.liveness;
@@ -281,7 +281,7 @@ const naLivenessMissing = () => (dir) => {
  *  防"新增 na 行时忘记给失效条件"重新变成永久免检区（该规则写在 discipline-map §维护规则，
  *  原先由 align-ledger 名义上复核，实际它只读 JSON 从不读人读表——2026-10-19 实证）。 */
 const naTriggerMissing = () => (dir) => {
-  const p = join(dir, 'docs', 'discipline-map.md');
+  const p = join(dir, 'docs', 'reference', 'discipline-matrix.md');
   const lines = readFileSync(p, 'utf8').split('\n');
   const out = lines.map((line) => {
     if (!line.startsWith('| 站点投影：')) return line;
@@ -293,7 +293,7 @@ const naTriggerMissing = () => (dir) => {
 /** 防空语料注入：把全部 na 行的「不适用」改成 N/A → 门禁解析到 0 条，须报下限守卫而非静默绿。
  *  防"表格改版/正则失效使门禁静默变空集"（空门禁等于不存在）。 */
 const naRowsVanished = () => (dir) => {
-  const p = join(dir, 'docs', 'discipline-map.md');
+  const p = join(dir, 'docs', 'reference', 'discipline-matrix.md');
   const out = readFileSync(p, 'utf8').split('\n').map((line) => {
     const cols = line.split('|');
     if (cols.length > 4 && /不适用/.test(cols[3])) cols[3] = cols[3].replace(/不适用/g, 'N/A');
@@ -304,7 +304,7 @@ const naRowsVanished = () => (dir) => {
 
 /** 三态值域越界注入：把一行状态列改成闭集外的「已具备」→ discipline-state-vocab 须点名报红。 */
 const stateVocabOutOfDomain = () => (dir) => {
-  const p = join(dir, 'docs', 'discipline-map.md');
+  const p = join(dir, 'docs', 'reference', 'discipline-matrix.md');
   const lines = readFileSync(p, 'utf8').split(String.fromCharCode(10));
   const out = lines.map((line) => {
     if (!line.startsWith('| 证据匹配面')) return line;
@@ -322,7 +322,7 @@ const stateVocabOutOfDomain = () => (dir) => {
  *  清空状态列只触发下限守卫一条，归因唯一。
  *  注意清空 ≠ 写成合法值：写「照搬」会保持行数与合法性，案例同样空转（本函数第二版踩过）。 */
 const stateRowsVanished = () => (dir) => {
-  const p = join(dir, 'docs', 'discipline-map.md');
+  const p = join(dir, 'docs', 'reference', 'discipline-matrix.md');
   const lines = readFileSync(p, 'utf8').split(String.fromCharCode(10));
   const out = [...lines];
   const KEEP_FROM = 12; // 只保留前 12 行状态列，其余清空 → 远低于下限 60
@@ -433,38 +433,38 @@ export const CASES = [
   // `vendor/` 前缀的资产路径（terms/AGENTS 的既有写法）在副本内必然未命中 → expect 指名
   // 本案例的注入报因，防止既有报因把"注入未生效"蒙混成绿。
   { id: 'doc-paths-dangling', gate: 'doc-paths', expect: 'checks/__missing-probe.mjs',
-    mutate: appendTo('docs/project-map.md', '\n路径探针：`checks/__missing-probe.mjs` 与 `packages/deep-research-pack/__missing__/`\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n路径探针：`checks/__missing-probe.mjs` 与 `packages/deep-research-pack/__missing__/`\n') },
   // doc-paths 散文面（BUG-204）：不在反引号里的散路径同样会被 agent 照读。注入追加一条
   // `checks/lib/__gone__.mjs` 到 live 文档；副本基线已有 doc-paths 非 PASS 报因，必须带
   // expect 指名本案例的散文报因。
   { id: 'doc-paths-prose-dangling', gate: 'doc-paths', expect: '散文路径 checks/lib/__gone__.mjs',
-    mutate: appendTo('docs/project-map.md', '\n散文路径探针：checks/lib/__gone__.mjs\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n散文路径探针：checks/lib/__gone__.mjs\n') },
   // 退役根名（2026-11-17 根名统一）：ROOTS 只认现行根，退役根（scripts/ dev/ probes/run/）的残留
   // 引用会**因不匹配 ROOTS 而静默逃检**——实测 runtime/README 的 `dev/env.sh` 就这样绿着漏过去。
   // 本案例钉住守卫：注入退役根路径 → 点名报红；同时注入 vendor/包内 shorthand 作放行对照。
   { id: 'doc-paths-retired-root', gate: 'doc-paths', expect: '退役根名 `scripts/__retired__.mjs`',
-    mutate: appendTo('docs/project-map.md', '\n退役根探针：`scripts/__retired__.mjs` 放行对照：`scripts/AGENTS.md`\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n退役根探针：`scripts/__retired__.mjs` 放行对照：`scripts/AGENTS.md`\n') },
   // 退役根名藏在**链接文字**里（2026-11-17 审计实证：`[probes/run](…)` 目标有效、文字退役；
   // 反引号 token 面与散文 token 面都看不见它）。标签是 agent 读取的入口名，必须与路径同判。
   { id: 'doc-paths-retired-label', gate: 'doc-paths', expect: '链接文字是退役根名 `probes/run`',
-    mutate: appendTo('docs/project-map.md', '\n标签探针：[probes/run](../probes/README.md)\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n标签探针：[probes/run](../probes/README.md)\n') },
   // 形态加宽（BUG-211，2026-11-17）：退役根写在**表格单元**里——散文枚举的根集合不含退役根时静默放行。
   { id: 'doc-paths-table-retired-root', gate: 'doc-paths', expect: '退役根名 `scripts/__gone__.mjs`',
-    mutate: appendTo('docs/project-map.md', '\n| 形态探针 | scripts/__gone__.mjs | 说明 |\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n| 形态探针 | scripts/__gone__.mjs | 说明 |\n') },
   // shell 围栏里的**纯路径行**（不是命令）：路径清单同样是 agent 读取面（用户 2026-11-17 拍板纳入）。
   { id: 'doc-paths-fenced-path-line', gate: 'doc-paths', expect: '退役根名 `scripts/__gone__.mjs`',
-    mutate: appendTo('docs/project-map.md', '\n```sh\nscripts/__gone__.mjs\n```\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n```sh\nscripts/__gone__.mjs\n```\n') },
   // HTML href：链接语法之外的第三种可读路径载体。
   { id: 'doc-paths-html-href', gate: 'doc-paths', expect: '退役根名 `scripts/__gone__.mjs`',
-    mutate: appendTo('docs/project-map.md', '\n<a href="scripts/__gone__.mjs">形态探针</a>\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n<a href="scripts/__gone__.mjs">形态探针</a>\n') },
   // 活指令面（BUG-212）：_backlog/methods 与 triggers.md 是当前步骤，不是历史证据——按目录整树豁免
   // 会让「照方法文档敲命令」直接失败。注入到 methods 页必须被点名。
   { id: 'doc-paths-live-methods', gate: 'doc-paths', expect: '退役根名 `scripts/__gone__.mjs`',
     mutate: appendTo('_backlog/methods/bug-to-fix.md', '\n活指令探针：`scripts/__gone__.mjs`\n') },
   // 花括号展开（2026-11-27）：`{a,b}` 枚举曾被 `{` 占位跳过，4 处陈旧路径静默逃检；展开后缺席项必红。
   { id: 'doc-paths-brace-expansion', gate: 'doc-paths', expect: 'checks/verify/gates/__missing__.mjs',
-    mutate: appendTo('docs/project-map.md', '\n花括号探针：`checks/verify/gates/{a-docs,__missing__}.mjs`\n') },
-  // surface-claims（2026-11-17 维护层对齐轮）：门户 README 的面词与 guides/68 §4 面表打架。
+    mutate: appendTo('docs/guides/run-ops.md', '\n花括号探针：`checks/verify/gates/{a-docs,__missing__}.mjs`\n') },
+  // surface-claims（2026-11-17 维护层对齐轮）：门户 README 的面词与 docs/policy.md §3.2 面表打架。
   { id: 'surface-claims-face-drift', gate: 'surface-claims', mutate: (dir) => {
       const p = join(dir, 'checks', 'README.md');
       const text = readFileSync(p, 'utf8');
@@ -480,7 +480,7 @@ export const CASES = [
   // call-surface（2026-11-17）：agent 的三个调用入口——文档围栏 / 探针头注 / CI run——
   // 各自注入一条死路径。三类分开钉，防"只扫文档"的半覆盖。
   { id: 'call-surface-fenced-command', gate: 'call-surface',
-    mutate: appendTo('docs/project-map.md', '\n```sh\nnode checks/__missing-probe.mjs\n```\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n```sh\nnode checks/__missing-probe.mjs\n```\n') },
   { id: 'call-surface-probe-header', gate: 'call-surface', mutate: (dir) => {
       const p = join(dir, 'probes', 'analyze', 'watch-run.mjs');
       writeFileSync(p, '// 何时跑：`node checks/__missing-probe.mjs`\n' + readFileSync(p, 'utf8'));
@@ -492,21 +492,21 @@ export const CASES = [
   // 命令形态矩阵（BUG-210，2026-11-17）：只认行首命令词的实现会把 env 前缀 / `./` / 包装器 / `&&` 链 /
   // require 限定全部静默放行。每形态一条，独立钉（同一归一器，失败互不遮蔽）。
   { id: 'call-surface-env-prefix', gate: 'call-surface',
-    mutate: appendTo('docs/project-map.md', '\n```sh\nFOO=1 node checks/__missing-probe.mjs\n```\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n```sh\nFOO=1 node checks/__missing-probe.mjs\n```\n') },
   { id: 'call-surface-dot-slash', gate: 'call-surface',
-    mutate: appendTo('docs/project-map.md', '\n```sh\nnode ./checks/__missing-probe.mjs\n```\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n```sh\nnode ./checks/__missing-probe.mjs\n```\n') },
   { id: 'call-surface-wrapper', gate: 'call-surface',
-    mutate: appendTo('docs/project-map.md', '\n```sh\nsudo node checks/__missing-probe.mjs\n```\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n```sh\nsudo node checks/__missing-probe.mjs\n```\n') },
   { id: 'call-surface-and-chain', gate: 'call-surface',
-    mutate: appendTo('docs/project-map.md', '\n```sh\necho x && node checks/__missing-probe.mjs\n```\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n```sh\necho x && node checks/__missing-probe.mjs\n```\n') },
   { id: 'call-surface-require-qualifier', gate: 'call-surface',
-    mutate: appendTo('docs/project-map.md', '\n```sh\nNODE_OPTIONS=--require=checks/__missing-probe.cjs node checks/release/release-check.mjs\n```\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n```sh\nNODE_OPTIONS=--require=checks/__missing-probe.cjs node checks/release/release-check.mjs\n```\n') },
   // heredoc body 是第二层 shell：body 行必须逐行同判（只认首行 `bash -s` 会放过 body）。
   { id: 'call-surface-heredoc', gate: 'call-surface',
-    mutate: appendTo('docs/project-map.md', "\n```sh\nbash -s <<'EOF'\nnode ./checks/__missing-probe.mjs\nEOF\n```\n") },
+    mutate: appendTo('docs/guides/run-ops.md', "\n```sh\nbash -s <<'EOF'\nnode ./checks/__missing-probe.mjs\nEOF\n```\n") },
   // 四空格缩进的可执行行（不在围栏内）：第三种可执行载体。
   { id: 'call-surface-indented-command', gate: 'call-surface',
-    mutate: appendTo('docs/project-map.md', '\n\n    缩进块说明文字不参与判据。\n\n    node ./checks/__missing-probe.mjs\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\n\n    缩进块说明文字不参与判据。\n\n    node ./checks/__missing-probe.mjs\n') },
   // YAML 折叠块：`run: >-`（旧 runLines 只认 `|` / `>`，`>-` 整块跳过）。
   { id: 'call-surface-ci-folded-run', gate: 'call-surface', mutate: (dir) => {
       appendFileSync(join(dir, '.github', 'workflows', 'ci.yml'),
@@ -536,7 +536,7 @@ export const CASES = [
   // doc-drefs（2026-11-03 七维审计）：D 号引用指向没有该锚点的地图页——点进去落空，
   // 而 md-anchors 只校验目标文件里有没有 fragment，不校验"这个 D 号该住 decisions"。
   { id: 'doc-drefs-misdirected', gate: 'doc-drefs',
-    mutate: appendTo('docs/project-map.md', '\nD 号引用探针：[D24](../00-index.md)\n') },
+    mutate: appendTo('docs/guides/run-ops.md', '\nD 号引用探针：[D24](../README.md)\n') },
   // 非 ASCII 路径形态（2026-10-21 卫生轮补宽）：md-utf8-newline / md-anchors 的 ls-files 原无
   // core.quotepath=false——非 ASCII tracked 路径（_dist/安装手册.md）被引号转义后 existsSync
   // miss → 稀疏态 continue 静默跳过 = md-links 已修过的同款漏扫（BUG-016 家族）。案例先红实录：
@@ -687,7 +687,7 @@ export const CASES = [
   { id: 'note-format-archive-date-early', gate: 'note-format', mutate: rewriteArchiveDate('2000-01-01') },
   { id: 'note-format-rejected-no-revival', gate: 'note-format', mutate: stripRejectedRevival },
   { id: 'entry-chain-member-missing', gate: 'entry-chain', mutate: (dir) => {
-    rmSync(join(dir, 'docs', 'design', '60-intent-carriers.md'));
+    rmSync(join(dir, 'docs', 'policy.md'));
   } },
   { id: 'entry-chain-no-title', gate: 'entry-chain', mutate: (dir) => {
     const p = join(dir, 'AGENTS.md');
@@ -839,7 +839,7 @@ export const CASES = [
     expect: 'docs/session-format-status.md: verdict=na 必须给 liveness' },
   { id: 'align-ledger-na-liveness-missing', gate: 'align-ledger', mutate: naLivenessMissing(),
     expect: 'website/AGENTS.md: verdict=na 必须给 liveness' },
-  // 本门禁在零注入副本基线 PASS（只读 docs/discipline-map.md，副本里是实拷贝），按驱动壳
+  // 本门禁在零注入副本基线 PASS（只读 docs/reference/discipline-matrix.md，副本里是实拷贝），按驱动壳
   // 约定「基线 PASS 则不给 expect」——注入报因的精确性由真实仓反证记录背书
   // （evaluation.md §L0 登记表该行），此处只断言"被点名报红"。
   { id: 'discipline-na-trigger-missing', gate: 'discipline-na-trigger', mutate: naTriggerMissing() },
@@ -865,7 +865,7 @@ export const CASES = [
   //    案例（一次性 Note 红证不防 verify 重构致钝化）；本批优先补「mutate 便宜 × 判据复杂」
   //    的文本门禁。不适合副本注入的四道（vendor-pin / vendor-clean / pin-agreement /
   //    hooks-active——断言对象 = submodule 真实状态或本机 git config，fixture 副本天然不可达）
-  //    在 docs/evaluation.md §L0 各行的反证指针列登记理由，本表不收。──
+  //    在 docs/reference/gates-ledger.generated.md 登记理由，本表不收。──
   // count-free：向 live 文档注入硬计数行（数字 + 四计数名词之一）。源码里数字经运算拼出——
   // count-free 的扫描面包含本文件，写死「数字+名词」字面会咬到真仓的这张表自己。
   { id: 'count-free-hard-count', gate: 'count-free', mutate: (dir) => {
@@ -1122,6 +1122,10 @@ export const CASES = [
   { id: 'release-vocab-product-embedded', gate: 'release-vocab', mutate: (dir) => {
     const p = join(dir, 'README.md');
     writeFileSync(p, `${readFileSync(p, 'utf8')}\n产品内嵌\n`);
+  } },
+  { id: 'release-vocab-docs-moved', gate: 'release-vocab', mutate: (dir) => {
+    const p = join(dir, 'docs', 'contracts', 'run-forms.md');
+    writeFileSync(p, `${readFileSync(p, 'utf8')}\n产品 profile\n`);
   } },
   // dist-manual-fresh：生成物正文漂移。
   { id: 'dist-manual-fresh-body', gate: 'dist-manual-fresh', mutate: (dir) => {

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/policy.md
 // 状态：常驻
 // 一句话：M2 run 只读 HTML 投影（步骤条 / HITL 等待横幅 / 归档标注；多场扫描）
 // 何时跑：要看 run 进度或多场对比；给用户看现场

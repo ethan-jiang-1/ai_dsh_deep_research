@@ -2701,145 +2701,825 @@
       "to": "tools/clean/runtime-clean.mjs",
       "reason": "2026-11-17 tools/ 子组化（channel/build/record/clean）"
     },
-    {"from":"checks/lib/ops/bundle-sessions.mjs","to":"checks/lib/analyze/bundle-sessions.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/ops/provider-errors.mjs","to":"checks/lib/analyze/provider-errors.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/ops/run-dashboard-core.mjs","to":"checks/lib/analyze/run-dashboard-core.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/ops/run-dashboard-html.mjs","to":"checks/lib/analyze/run-dashboard-html.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/ops/run-inventory-core.mjs","to":"checks/lib/analyze/run-inventory-core.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/ops/scene-pack.mjs","to":"checks/lib/analyze/scene-pack.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/ops/session-events-core.mjs","to":"checks/lib/analyze/session-events-core.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/ops/session-replay.mjs","to":"checks/lib/analyze/session-replay.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/ops/stream-diagnostics-core.mjs","to":"checks/lib/analyze/stream-diagnostics-core.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/ops/unconsumed-evidence.mjs","to":"checks/lib/analyze/unconsumed-evidence.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/ops/acceptance-check.mjs","to":"checks/lib/gates/acceptance-check.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/ops/bundle-date-sanity.mjs","to":"checks/lib/gates/bundle-date-sanity.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/ops/runtime-clean-core.mjs","to":"checks/lib/channel/runtime-clean-core.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/tools/asset-ledger.mjs","to":"checks/lib/test-infra/asset-ledger.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/tools/ci-workflow.mjs","to":"checks/lib/test-infra/ci-workflow.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/tools/keyless-imports.mjs","to":"checks/lib/test-infra/keyless-imports.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/tools/test-index.mjs","to":"checks/lib/test-infra/test-index.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from":"checks/lib/tools/workspace-parsers.mjs","to":"checks/lib/test-infra/workspace-parsers.mjs","reason":"2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"},
-    {"from": "tests/run/ops/acceptance-check.spec.mjs", "to": "tests/run/gates/acceptance-check.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/bundle-date-sanity.spec.mjs", "to": "tests/run/gates/bundle-date-sanity.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/runtime-clean.spec.mjs", "to": "tests/run/channel/runtime-clean.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/bundle-sessions.spec.mjs", "to": "tests/run/analyze/bundle-sessions.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/provider-errors.spec.mjs", "to": "tests/run/analyze/provider-errors.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/run-dashboard.spec.mjs", "to": "tests/run/analyze/run-dashboard.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/run-inventory.spec.mjs", "to": "tests/run/analyze/run-inventory.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/scene-pack.spec.mjs", "to": "tests/run/analyze/scene-pack.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/session-events.spec.mjs", "to": "tests/run/analyze/session-events.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/session-replay.spec.mjs", "to": "tests/run/analyze/session-replay.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/stream-diagnostics.spec.mjs", "to": "tests/run/analyze/stream-diagnostics.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/unconsumed-evidence.spec.mjs", "to": "tests/run/analyze/unconsumed-evidence.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/activity-fold.spec.mjs", "to": "tests/run/shared/activity-fold.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/journal-wire.spec.mjs", "to": "tests/run/shared/journal-wire.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/member-activity-fold.spec.mjs", "to": "tests/run/shared/member-activity-fold.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/run-accept.spec.mjs", "to": "tests/run/shared/run-accept.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/run-fold.spec.mjs", "to": "tests/run/shared/run-fold.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/run-state.spec.mjs", "to": "tests/run/shared/run-state.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/session-log.spec.mjs", "to": "tests/run/shared/session-log.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/stream-failure.spec.mjs", "to": "tests/run/shared/stream-failure.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "tests/run/ops/tool-card.spec.mjs", "to": "tests/run/shared/tool-card.spec.mjs", "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"},
-    {"from": "checks/dist/release-check.mjs", "to": "checks/release/release-check.mjs", "reason": "2026-11-17 维护层对齐：checks/dist → checks/release（与 _dist 交付物去撞名）"},
-    {"from": "_backlog/issues/2026-11-11-exploratory-test-strategy.md", "to": "_backlog/_archived/settled_issues/2026-11-11-exploratory-test-strategy.md", "reason": "2026-11-17 探索账本换卡：老卡归档为参考，新卡 2026-11-17-exploratory-namespace-move"},
-    {"from": "tests/checks/artifact-freshness.test.mjs", "to": "tests/checks/shared/artifact-freshness.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/asset-ledger.test.mjs", "to": "tests/checks/test-infra/asset-ledger.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/backlog-liveness.test.mjs", "to": "tests/checks/repo/backlog-liveness.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/boot-timer.test.mjs", "to": "tests/checks/shared/boot-timer.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/ci-jobs.test.mjs", "to": "tests/checks/test-infra/ci-jobs.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/ci-workflow-oracle.test.mjs", "to": "tests/checks/test-infra/ci-workflow-oracle.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/ci-workflow.test.mjs", "to": "tests/checks/test-infra/ci-workflow.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/cjk-source.test.mjs", "to": "tests/checks/repo/cjk-source.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/clean-room-policy.test.mjs", "to": "tests/checks/harness/clean-room-policy.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/cli-entry.test.mjs", "to": "tests/checks/shared/cli-entry.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/cli-exit-contract.test.mjs", "to": "tests/checks/shared/cli-exit-contract.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/client-effect-return.test.mjs", "to": "tests/checks/repo/client-effect-return.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/client-file-size.test.mjs", "to": "tests/checks/repo/client-file-size.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/client-load-same-source.test.mjs", "to": "tests/checks/repo/client-load-same-source.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/client-surface.test.mjs", "to": "tests/checks/test-infra/client-surface.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/decisions-now.test.mjs", "to": "tests/checks/repo/decisions-now.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/doc-counts.test.mjs", "to": "tests/checks/repo/doc-counts.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/doc-prose-paths.test.mjs", "to": "tests/checks/repo/doc-prose-paths.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/doc-surface-shapes.test.mjs", "to": "tests/checks/shared/doc-surface-shapes.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/docs-consistency.test.mjs", "to": "tests/checks/repo/docs-consistency.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/evaluation-contract.test.mjs", "to": "tests/checks/analyze/evaluation-contract.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/fix-evidence.test.mjs", "to": "tests/checks/repo/fix-evidence.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/generated-artifacts.test.mjs", "to": "tests/checks/repo/generated-artifacts.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/guard-ledger.test.mjs", "to": "tests/checks/test-infra/guard-ledger.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/install-copies.test.mjs", "to": "tests/checks/repo/install-copies.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/isolation-preload.test.mjs", "to": "tests/checks/repo/isolation-preload.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/layering.test.mjs", "to": "tests/checks/test-infra/layering.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/model-workflow.test.mjs", "to": "tests/checks/test-infra/model-workflow.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/navigability-contract.test.mjs", "to": "tests/checks/repo/navigability-contract.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/no-unused-code.test.mjs", "to": "tests/checks/repo/no-unused-code.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/note-scan.test.mjs", "to": "tests/checks/shared/note-scan.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/pack-deps.test.mjs", "to": "tests/checks/repo/pack-deps.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/pack-mirror.test.mjs", "to": "tests/checks/shared/pack-mirror.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/probe-port-policy.test.mjs", "to": "tests/checks/harness/probe-port-policy.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/profile-guard.test.mjs", "to": "tests/checks/channel/profile-guard.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/publish-manifest.test.mjs", "to": "tests/checks/repo/publish-manifest.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/readme-manual-commands.test.mjs", "to": "tests/checks/repo/readme-manual-commands.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/redirect-ledger.test.mjs", "to": "tests/checks/repo/redirect-ledger.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/release-anchor.test.mjs", "to": "tests/checks/repo/release-anchor.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/release-copies.test.mjs", "to": "tests/checks/repo/release-copies.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/script-file-size.test.mjs", "to": "tests/checks/repo/script-file-size.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/shipped-surface.test.mjs", "to": "tests/checks/repo/shipped-surface.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/smoke-assets.test.mjs", "to": "tests/checks/test-infra/smoke-assets.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/smoke-child-paths.test.mjs", "to": "tests/checks/repo/smoke-child-paths.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/smoke-contract.test.mjs", "to": "tests/checks/shared/smoke-contract.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/smoke-cost-budget.test.mjs", "to": "tests/checks/test-infra/smoke-cost-budget.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/smoke-identifiers.test.mjs", "to": "tests/checks/repo/smoke-identifiers.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/smoke-imports.test.mjs", "to": "tests/checks/test-infra/smoke-imports.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/smoke-lane.test.mjs", "to": "tests/checks/repo/smoke-lane.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/smoke-oracle-surface.test.mjs", "to": "tests/checks/test-infra/smoke-oracle-surface.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/smoke-registry.test.mjs", "to": "tests/checks/test-infra/smoke-registry.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/snapshot-readonly.test.mjs", "to": "tests/checks/harness/snapshot-readonly.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/staged-change-pairing.test.mjs", "to": "tests/checks/repo/staged-change-pairing.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/test-index.test.mjs", "to": "tests/checks/test-infra/test-index.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/test-lanes.test.mjs", "to": "tests/checks/shared/test-lanes.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/test-owner-mirror.test.mjs", "to": "tests/checks/shared/test-owner-mirror.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/test-placement.test.mjs", "to": "tests/checks/repo/test-placement.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/test-surface.test.mjs", "to": "tests/checks/test-infra/test-surface.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/verify-gates.test.mjs", "to": "tests/checks/harness/verify-gates.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/web-ui-nav-bilingual.test.mjs", "to": "tests/checks/shared/web-ui-nav-bilingual.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "tests/checks/workspace-parsers.test.mjs", "to": "tests/checks/test-infra/workspace-parsers.test.mjs", "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"},
-    {"from": "_backlog/bugs/BUG-320-boot-run-drift-only-lock-regression.md", "to": "_backlog/_archived/suspended_bugs/BUG-320-boot-run-drift-only-lock-regression.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
-    {"from": "_backlog/bugs/BUG-321-boot-run-stale-lock-no-recovery.md", "to": "_backlog/_archived/suspended_bugs/BUG-321-boot-run-stale-lock-no-recovery.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
-    {"from": "_backlog/bugs/BUG-322-start-lock-stale-reclaim-race.md", "to": "_backlog/_archived/suspended_bugs/BUG-322-start-lock-stale-reclaim-race.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
-    {"from": "_backlog/bugs/BUG-323-start-lock-future-timestamp-blocks.md", "to": "_backlog/_archived/suspended_bugs/BUG-323-start-lock-future-timestamp-blocks.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
-    {"from": "_backlog/bugs/BUG-324-start-lock-10min-steals-long-boot.md", "to": "_backlog/_archived/suspended_bugs/BUG-324-start-lock-10min-steals-long-boot.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
-    {"from": "_backlog/bugs/BUG-325-start-lock-release-removes-new-owner.md", "to": "_backlog/_archived/suspended_bugs/BUG-325-start-lock-release-removes-new-owner.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
-    {"from": "_backlog/bugs/BUG-326-run-driver-boot-run-two-locks.md", "to": "_backlog/_archived/suspended_bugs/BUG-326-run-driver-boot-run-two-locks.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
-    {"from": "_backlog/bugs/BUG-331-start-lock-owner-write-failure-leaks.md", "to": "_backlog/_archived/suspended_bugs/BUG-331-start-lock-owner-write-failure-leaks.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
-    {"from": "_backlog/bugs/BUG-332-start-lock-no-pid-liveness.md", "to": "_backlog/_archived/suspended_bugs/BUG-332-start-lock-no-pid-liveness.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
-    {"from": "_backlog/bugs/BUG-337-boot-run-port-invalid.md", "to": "_backlog/_archived/suspended_bugs/BUG-337-boot-run-port-invalid.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
-    {"from": "_backlog/bugs/BUG-339-boot-run-trap-removes-new-lock.md", "to": "_backlog/_archived/suspended_bugs/BUG-339-boot-run-trap-removes-new-lock.md", "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"},
-    {"from": "_backlog/bugs/BUG-330-output-length-heuristic-still.md", "to": "_backlog/_archived/suspended_bugs/BUG-330-output-length-heuristic-still.md", "reason": "2026-11-21 已由 BUG-313 修复；迁暂停池（用户直派）"},
-    {"from": "_backlog/bugs/BUG-340-protocol-audit-cli-missing-readdir-import.md", "to": "_backlog/_archived/fixed_bugs/BUG-340-protocol-audit-cli-missing-readdir-import.md", "reason": "2026-11-21 BUG-340 已修归档"},
-    {"from": "_backlog/bugs/BUG-346-start-channel-ps-unreadable-retains-lock.md", "to": "_backlog/_archived/fixed_bugs/BUG-346-start-channel-ps-unreadable-retains-lock.md", "reason": "2026-11-21 BUG-346 已修归档"},
-    {"from": "_backlog/bugs/BUG-327-probe-cache-mcp-read-write-key-mismatch.md", "to": "_backlog/_archived/fixed_bugs/BUG-327-probe-cache-mcp-read-write-key-mismatch.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-333-run-driver-port-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-333-run-driver-port-nan.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-334-cold-start-port-env-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-334-cold-start-port-env-nan.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-335-snapshot-port-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-335-snapshot-port-nan.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-336-client-load-port-nan.md", "to": "_backlog/_archived/fixed_bugs/BUG-336-client-load-port-nan.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-343-readiness-json-extra-count-keys.md", "to": "_backlog/_archived/fixed_bugs/BUG-343-readiness-json-extra-count-keys.md", "reason": "2026-11-21 BUG-343 已修归档"},
-    {"from": "_backlog/bugs/BUG-350-claims-json-schema-mismatch.md", "to": "_backlog/_archived/fixed_bugs/BUG-350-claims-json-schema-mismatch.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-342-plan-remaining-work-owner-next-literal.md", "to": "_backlog/_archived/fixed_bugs/BUG-342-plan-remaining-work-owner-next-literal.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-341-findings-one-line-vs-f-block.md", "to": "_backlog/_archived/fixed_bugs/BUG-341-findings-one-line-vs-f-block.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-328-plan-snapshot-same-text-only.md", "to": "_backlog/_archived/fixed_bugs/BUG-328-plan-snapshot-same-text-only.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-329-threshold-critical-scope-null.md", "to": "_backlog/_archived/fixed_bugs/BUG-329-threshold-critical-scope-null.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-347-review-absent-shown-as-fail.md", "to": "_backlog/_archived/fixed_bugs/BUG-347-review-absent-shown-as-fail.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-344-watch-run-settled-while-subagent-live.md", "to": "_backlog/_archived/fixed_bugs/BUG-344-watch-run-settled-while-subagent-live.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-345-delivery-witness-window-and-receipt-shape.md", "to": "_backlog/_archived/fixed_bugs/BUG-345-delivery-witness-window-and-receipt-shape.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-338-pick-free-port-toctou.md", "to": "_backlog/_archived/fixed_bugs/BUG-338-pick-free-port-toctou.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/bugs/BUG-349-workflow-sandbox-nested-eph.md", "to": "_backlog/_archived/fixed_bugs/BUG-349-workflow-sandbox-nested-eph.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/issues/2026-11-21-bug-stack-repair-program.md", "to": "_backlog/_archived/settled_issues/2026-11-21-bug-stack-repair-program.md", "reason": "2026-11-21 批程序收口归档"},
-    {"from": "_backlog/bugs/BUG-348-long-run-silent-stall-no-alert.md", "to": "_backlog/_archived/fixed_bugs/BUG-348-long-run-silent-stall-no-alert.md", "reason": "2026-11-21 已修归档"},
-    {"from": "_backlog/issues/2026-11-19-low-confidence-40.md", "to": "_backlog/_archived/settled_issues/2026-11-19-low-confidence-40.md", "reason": "2026-11-21 第 9 轮探索收口"},
-    {"from": "_backlog/bugs/BUG-352-delivery-receipt-slug-prefix-mismatch.md", "to": "_backlog/_archived/fixed_bugs/BUG-352-delivery-receipt-slug-prefix-mismatch.md", "reason": "2026-11-22 已修归档"},
-    {"from": "_backlog/bugs/BUG-351-stalled-banner-reset-by-open-events.md", "to": "_backlog/_archived/fixed_bugs/BUG-351-stalled-banner-reset-by-open-events.md", "reason": "2026-11-22 已修归档"},
-    {"from": "_backlog/bugs/BUG-353-stalled-banner-after-delivery.md", "to": "_backlog/_archived/fixed_bugs/BUG-353-stalled-banner-after-delivery.md", "reason": "2026-11-22 已修归档"},
-    {"from": "_backlog/bugs/BUG-354-stalled-banner-unbound-session.md", "to": "_backlog/_archived/fixed_bugs/BUG-354-stalled-banner-unbound-session.md", "reason": "2026-11-22 已修归档"},
-    {"from": "_backlog/bugs/BUG-355-graph-plan-read-failure-as-missing.md", "to": "_backlog/_archived/fixed_bugs/BUG-355-graph-plan-read-failure-as-missing.md", "reason": "2026-11-22 已修归档"}
+    {
+      "from": "checks/lib/ops/bundle-sessions.mjs",
+      "to": "checks/lib/analyze/bundle-sessions.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/ops/provider-errors.mjs",
+      "to": "checks/lib/analyze/provider-errors.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/ops/run-dashboard-core.mjs",
+      "to": "checks/lib/analyze/run-dashboard-core.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/ops/run-dashboard-html.mjs",
+      "to": "checks/lib/analyze/run-dashboard-html.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/ops/run-inventory-core.mjs",
+      "to": "checks/lib/analyze/run-inventory-core.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/ops/scene-pack.mjs",
+      "to": "checks/lib/analyze/scene-pack.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/ops/session-events-core.mjs",
+      "to": "checks/lib/analyze/session-events-core.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/ops/session-replay.mjs",
+      "to": "checks/lib/analyze/session-replay.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/ops/stream-diagnostics-core.mjs",
+      "to": "checks/lib/analyze/stream-diagnostics-core.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/ops/unconsumed-evidence.mjs",
+      "to": "checks/lib/analyze/unconsumed-evidence.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/ops/acceptance-check.mjs",
+      "to": "checks/lib/gates/acceptance-check.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/ops/bundle-date-sanity.mjs",
+      "to": "checks/lib/gates/bundle-date-sanity.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/ops/runtime-clean-core.mjs",
+      "to": "checks/lib/channel/runtime-clean-core.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/tools/asset-ledger.mjs",
+      "to": "checks/lib/test-infra/asset-ledger.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/tools/ci-workflow.mjs",
+      "to": "checks/lib/test-infra/ci-workflow.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/tools/keyless-imports.mjs",
+      "to": "checks/lib/test-infra/keyless-imports.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/tools/test-index.mjs",
+      "to": "checks/lib/test-infra/test-index.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "checks/lib/tools/workspace-parsers.mjs",
+      "to": "checks/lib/test-infra/workspace-parsers.mjs",
+      "reason": "2026-11-17 维护层对齐：ops→analyze/gates/channel、tools→test-infra"
+    },
+    {
+      "from": "tests/run/ops/acceptance-check.spec.mjs",
+      "to": "tests/run/gates/acceptance-check.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/bundle-date-sanity.spec.mjs",
+      "to": "tests/run/gates/bundle-date-sanity.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/runtime-clean.spec.mjs",
+      "to": "tests/run/channel/runtime-clean.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/bundle-sessions.spec.mjs",
+      "to": "tests/run/analyze/bundle-sessions.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/provider-errors.spec.mjs",
+      "to": "tests/run/analyze/provider-errors.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/run-dashboard.spec.mjs",
+      "to": "tests/run/analyze/run-dashboard.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/run-inventory.spec.mjs",
+      "to": "tests/run/analyze/run-inventory.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/scene-pack.spec.mjs",
+      "to": "tests/run/analyze/scene-pack.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/session-events.spec.mjs",
+      "to": "tests/run/analyze/session-events.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/session-replay.spec.mjs",
+      "to": "tests/run/analyze/session-replay.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/stream-diagnostics.spec.mjs",
+      "to": "tests/run/analyze/stream-diagnostics.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/unconsumed-evidence.spec.mjs",
+      "to": "tests/run/analyze/unconsumed-evidence.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/activity-fold.spec.mjs",
+      "to": "tests/run/shared/activity-fold.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/journal-wire.spec.mjs",
+      "to": "tests/run/shared/journal-wire.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/member-activity-fold.spec.mjs",
+      "to": "tests/run/shared/member-activity-fold.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/run-accept.spec.mjs",
+      "to": "tests/run/shared/run-accept.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/run-fold.spec.mjs",
+      "to": "tests/run/shared/run-fold.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/run-state.spec.mjs",
+      "to": "tests/run/shared/run-state.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/session-log.spec.mjs",
+      "to": "tests/run/shared/session-log.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/stream-failure.spec.mjs",
+      "to": "tests/run/shared/stream-failure.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "tests/run/ops/tool-card.spec.mjs",
+      "to": "tests/run/shared/tool-card.spec.mjs",
+      "reason": "2026-11-17 维护层对齐：tests/run/ops 按 owner 归位"
+    },
+    {
+      "from": "checks/dist/release-check.mjs",
+      "to": "checks/release/release-check.mjs",
+      "reason": "2026-11-17 维护层对齐：checks/dist → checks/release（与 _dist 交付物去撞名）"
+    },
+    {
+      "from": "_backlog/issues/2026-11-11-exploratory-test-strategy.md",
+      "to": "_backlog/_archived/settled_issues/2026-11-11-exploratory-test-strategy.md",
+      "reason": "2026-11-17 探索账本换卡：老卡归档为参考，新卡 2026-11-17-exploratory-namespace-move"
+    },
+    {
+      "from": "tests/checks/artifact-freshness.test.mjs",
+      "to": "tests/checks/shared/artifact-freshness.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/asset-ledger.test.mjs",
+      "to": "tests/checks/test-infra/asset-ledger.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/backlog-liveness.test.mjs",
+      "to": "tests/checks/repo/backlog-liveness.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/boot-timer.test.mjs",
+      "to": "tests/checks/shared/boot-timer.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/ci-jobs.test.mjs",
+      "to": "tests/checks/test-infra/ci-jobs.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/ci-workflow-oracle.test.mjs",
+      "to": "tests/checks/test-infra/ci-workflow-oracle.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/ci-workflow.test.mjs",
+      "to": "tests/checks/test-infra/ci-workflow.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/cjk-source.test.mjs",
+      "to": "tests/checks/repo/cjk-source.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/clean-room-policy.test.mjs",
+      "to": "tests/checks/harness/clean-room-policy.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/cli-entry.test.mjs",
+      "to": "tests/checks/shared/cli-entry.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/cli-exit-contract.test.mjs",
+      "to": "tests/checks/shared/cli-exit-contract.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/client-effect-return.test.mjs",
+      "to": "tests/checks/repo/client-effect-return.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/client-file-size.test.mjs",
+      "to": "tests/checks/repo/client-file-size.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/client-load-same-source.test.mjs",
+      "to": "tests/checks/repo/client-load-same-source.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/client-surface.test.mjs",
+      "to": "tests/checks/test-infra/client-surface.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/decisions-now.test.mjs",
+      "to": "tests/checks/repo/decisions-now.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/doc-counts.test.mjs",
+      "to": "tests/checks/repo/doc-counts.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/doc-prose-paths.test.mjs",
+      "to": "tests/checks/repo/doc-prose-paths.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/doc-surface-shapes.test.mjs",
+      "to": "tests/checks/shared/doc-surface-shapes.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/docs-consistency.test.mjs",
+      "to": "tests/checks/repo/docs-consistency.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/evaluation-contract.test.mjs",
+      "to": "tests/checks/analyze/evaluation-contract.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/fix-evidence.test.mjs",
+      "to": "tests/checks/repo/fix-evidence.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/generated-artifacts.test.mjs",
+      "to": "tests/checks/repo/generated-artifacts.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/guard-ledger.test.mjs",
+      "to": "tests/checks/test-infra/guard-ledger.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/install-copies.test.mjs",
+      "to": "tests/checks/repo/install-copies.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/isolation-preload.test.mjs",
+      "to": "tests/checks/repo/isolation-preload.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/layering.test.mjs",
+      "to": "tests/checks/test-infra/layering.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/model-workflow.test.mjs",
+      "to": "tests/checks/test-infra/model-workflow.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/navigability-contract.test.mjs",
+      "to": "tests/checks/repo/navigability-contract.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/no-unused-code.test.mjs",
+      "to": "tests/checks/repo/no-unused-code.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/note-scan.test.mjs",
+      "to": "tests/checks/shared/note-scan.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/pack-deps.test.mjs",
+      "to": "tests/checks/repo/pack-deps.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/pack-mirror.test.mjs",
+      "to": "tests/checks/shared/pack-mirror.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/probe-port-policy.test.mjs",
+      "to": "tests/checks/harness/probe-port-policy.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/profile-guard.test.mjs",
+      "to": "tests/checks/channel/profile-guard.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/publish-manifest.test.mjs",
+      "to": "tests/checks/repo/publish-manifest.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/readme-manual-commands.test.mjs",
+      "to": "tests/checks/repo/readme-manual-commands.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/redirect-ledger.test.mjs",
+      "to": "tests/checks/repo/redirect-ledger.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/release-anchor.test.mjs",
+      "to": "tests/checks/repo/release-anchor.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/release-copies.test.mjs",
+      "to": "tests/checks/repo/release-copies.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/script-file-size.test.mjs",
+      "to": "tests/checks/repo/script-file-size.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/shipped-surface.test.mjs",
+      "to": "tests/checks/repo/shipped-surface.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/smoke-assets.test.mjs",
+      "to": "tests/checks/test-infra/smoke-assets.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/smoke-child-paths.test.mjs",
+      "to": "tests/checks/repo/smoke-child-paths.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/smoke-contract.test.mjs",
+      "to": "tests/checks/shared/smoke-contract.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/smoke-cost-budget.test.mjs",
+      "to": "tests/checks/test-infra/smoke-cost-budget.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/smoke-identifiers.test.mjs",
+      "to": "tests/checks/repo/smoke-identifiers.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/smoke-imports.test.mjs",
+      "to": "tests/checks/test-infra/smoke-imports.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/smoke-lane.test.mjs",
+      "to": "tests/checks/repo/smoke-lane.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/smoke-oracle-surface.test.mjs",
+      "to": "tests/checks/test-infra/smoke-oracle-surface.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/smoke-registry.test.mjs",
+      "to": "tests/checks/test-infra/smoke-registry.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/snapshot-readonly.test.mjs",
+      "to": "tests/checks/harness/snapshot-readonly.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/staged-change-pairing.test.mjs",
+      "to": "tests/checks/repo/staged-change-pairing.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/test-index.test.mjs",
+      "to": "tests/checks/test-infra/test-index.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/test-lanes.test.mjs",
+      "to": "tests/checks/shared/test-lanes.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/test-owner-mirror.test.mjs",
+      "to": "tests/checks/shared/test-owner-mirror.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/test-placement.test.mjs",
+      "to": "tests/checks/repo/test-placement.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/test-surface.test.mjs",
+      "to": "tests/checks/test-infra/test-surface.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/verify-gates.test.mjs",
+      "to": "tests/checks/harness/verify-gates.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/web-ui-nav-bilingual.test.mjs",
+      "to": "tests/checks/shared/web-ui-nav-bilingual.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "tests/checks/workspace-parsers.test.mjs",
+      "to": "tests/checks/test-infra/workspace-parsers.test.mjs",
+      "reason": "tests/checks owner 镜像（与 checks/lib/<owner>/ 同名；2026-11-18）"
+    },
+    {
+      "from": "_backlog/bugs/BUG-320-boot-run-drift-only-lock-regression.md",
+      "to": "_backlog/_archived/suspended_bugs/BUG-320-boot-run-drift-only-lock-regression.md",
+      "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"
+    },
+    {
+      "from": "_backlog/bugs/BUG-321-boot-run-stale-lock-no-recovery.md",
+      "to": "_backlog/_archived/suspended_bugs/BUG-321-boot-run-stale-lock-no-recovery.md",
+      "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"
+    },
+    {
+      "from": "_backlog/bugs/BUG-322-start-lock-stale-reclaim-race.md",
+      "to": "_backlog/_archived/suspended_bugs/BUG-322-start-lock-stale-reclaim-race.md",
+      "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"
+    },
+    {
+      "from": "_backlog/bugs/BUG-323-start-lock-future-timestamp-blocks.md",
+      "to": "_backlog/_archived/suspended_bugs/BUG-323-start-lock-future-timestamp-blocks.md",
+      "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"
+    },
+    {
+      "from": "_backlog/bugs/BUG-324-start-lock-10min-steals-long-boot.md",
+      "to": "_backlog/_archived/suspended_bugs/BUG-324-start-lock-10min-steals-long-boot.md",
+      "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"
+    },
+    {
+      "from": "_backlog/bugs/BUG-325-start-lock-release-removes-new-owner.md",
+      "to": "_backlog/_archived/suspended_bugs/BUG-325-start-lock-release-removes-new-owner.md",
+      "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"
+    },
+    {
+      "from": "_backlog/bugs/BUG-326-run-driver-boot-run-two-locks.md",
+      "to": "_backlog/_archived/suspended_bugs/BUG-326-run-driver-boot-run-two-locks.md",
+      "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"
+    },
+    {
+      "from": "_backlog/bugs/BUG-331-start-lock-owner-write-failure-leaks.md",
+      "to": "_backlog/_archived/suspended_bugs/BUG-331-start-lock-owner-write-failure-leaks.md",
+      "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"
+    },
+    {
+      "from": "_backlog/bugs/BUG-332-start-lock-no-pid-liveness.md",
+      "to": "_backlog/_archived/suspended_bugs/BUG-332-start-lock-no-pid-liveness.md",
+      "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"
+    },
+    {
+      "from": "_backlog/bugs/BUG-337-boot-run-port-invalid.md",
+      "to": "_backlog/_archived/suspended_bugs/BUG-337-boot-run-port-invalid.md",
+      "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"
+    },
+    {
+      "from": "_backlog/bugs/BUG-339-boot-run-trap-removes-new-lock.md",
+      "to": "_backlog/_archived/suspended_bugs/BUG-339-boot-run-trap-removes-new-lock.md",
+      "reason": "2026-11-21 不再修：迁暂停池（用户直派；不制造修复证据）"
+    },
+    {
+      "from": "_backlog/bugs/BUG-330-output-length-heuristic-still.md",
+      "to": "_backlog/_archived/suspended_bugs/BUG-330-output-length-heuristic-still.md",
+      "reason": "2026-11-21 已由 BUG-313 修复；迁暂停池（用户直派）"
+    },
+    {
+      "from": "_backlog/bugs/BUG-340-protocol-audit-cli-missing-readdir-import.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-340-protocol-audit-cli-missing-readdir-import.md",
+      "reason": "2026-11-21 BUG-340 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-346-start-channel-ps-unreadable-retains-lock.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-346-start-channel-ps-unreadable-retains-lock.md",
+      "reason": "2026-11-21 BUG-346 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-327-probe-cache-mcp-read-write-key-mismatch.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-327-probe-cache-mcp-read-write-key-mismatch.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-333-run-driver-port-nan.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-333-run-driver-port-nan.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-334-cold-start-port-env-nan.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-334-cold-start-port-env-nan.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-335-snapshot-port-nan.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-335-snapshot-port-nan.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-336-client-load-port-nan.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-336-client-load-port-nan.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-343-readiness-json-extra-count-keys.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-343-readiness-json-extra-count-keys.md",
+      "reason": "2026-11-21 BUG-343 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-350-claims-json-schema-mismatch.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-350-claims-json-schema-mismatch.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-342-plan-remaining-work-owner-next-literal.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-342-plan-remaining-work-owner-next-literal.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-341-findings-one-line-vs-f-block.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-341-findings-one-line-vs-f-block.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-328-plan-snapshot-same-text-only.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-328-plan-snapshot-same-text-only.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-329-threshold-critical-scope-null.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-329-threshold-critical-scope-null.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-347-review-absent-shown-as-fail.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-347-review-absent-shown-as-fail.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-344-watch-run-settled-while-subagent-live.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-344-watch-run-settled-while-subagent-live.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-345-delivery-witness-window-and-receipt-shape.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-345-delivery-witness-window-and-receipt-shape.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-338-pick-free-port-toctou.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-338-pick-free-port-toctou.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-349-workflow-sandbox-nested-eph.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-349-workflow-sandbox-nested-eph.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/issues/2026-11-21-bug-stack-repair-program.md",
+      "to": "_backlog/_archived/settled_issues/2026-11-21-bug-stack-repair-program.md",
+      "reason": "2026-11-21 批程序收口归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-348-long-run-silent-stall-no-alert.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-348-long-run-silent-stall-no-alert.md",
+      "reason": "2026-11-21 已修归档"
+    },
+    {
+      "from": "_backlog/issues/2026-11-19-low-confidence-40.md",
+      "to": "_backlog/_archived/settled_issues/2026-11-19-low-confidence-40.md",
+      "reason": "2026-11-21 第 9 轮探索收口"
+    },
+    {
+      "from": "_backlog/bugs/BUG-352-delivery-receipt-slug-prefix-mismatch.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-352-delivery-receipt-slug-prefix-mismatch.md",
+      "reason": "2026-11-22 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-351-stalled-banner-reset-by-open-events.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-351-stalled-banner-reset-by-open-events.md",
+      "reason": "2026-11-22 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-353-stalled-banner-after-delivery.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-353-stalled-banner-after-delivery.md",
+      "reason": "2026-11-22 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-354-stalled-banner-unbound-session.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-354-stalled-banner-unbound-session.md",
+      "reason": "2026-11-22 已修归档"
+    },
+    {
+      "from": "_backlog/bugs/BUG-355-graph-plan-read-failure-as-missing.md",
+      "to": "_backlog/_archived/fixed_bugs/BUG-355-graph-plan-read-failure-as-missing.md",
+      "reason": "2026-11-22 已修归档"
+    },
+    {
+      "from": "docs/00-index.md",
+      "to": "docs/README.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/evaluation.md",
+      "to": "docs/testing.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/discipline-map.md",
+      "to": "docs/reference/discipline-matrix.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/project-map.md",
+      "to": "docs/guides/run-ops.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/terms.md",
+      "to": "docs/reference/glossary.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/external-materials.md",
+      "to": "docs/reference/external.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/alignment-ledger.json",
+      "to": "docs/reference/alignment-ledger.json",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/design/10-architecture.md",
+      "to": "docs/architecture.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/design/20-roles.md",
+      "to": "docs/contracts/roles.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/design/30-methodology-mapping.md",
+      "to": "docs/contracts/methodology-mapping.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/design/40-research-cockpit.md",
+      "to": "docs/contracts/client-ui.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/design/50-agent-loop-and-state.md",
+      "to": "docs/contracts/data-model.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/design/60-intent-carriers.md",
+      "to": "docs/policy.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/design/70-content-organization.md",
+      "to": "docs/contracts/presets.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/guides/60-dev-loop.md",
+      "to": "docs/guides/dev-loop.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/guides/61-run-playbook.md",
+      "to": "docs/guides/run-ops.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/guides/62-plugin-authoring.md",
+      "to": "docs/guides/plugin-authoring.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/guides/63-git-boundary.md",
+      "to": "docs/contracts/git-boundary.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/guides/64-release-versioning.md",
+      "to": "docs/contracts/release.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/guides/65-run-forms.md",
+      "to": "docs/contracts/run-forms.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/guides/66-probe-playbook.md",
+      "to": "docs/guides/probe-playbook.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/guides/67-test-strategy.md",
+      "to": "docs/testing.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/guides/68-surface-contract.md",
+      "to": "docs/policy.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（去数字前缀 + 三分区）"
+    },
+    {
+      "from": "docs/design",
+      "to": "docs/README.md",
+      "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（design/ 目录拆分为 architecture.md + contracts/ + policy.md，统一由 docs/README.md 索引）"
+    }
   ]
 }

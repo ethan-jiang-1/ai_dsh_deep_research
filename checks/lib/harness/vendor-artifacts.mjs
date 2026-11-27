@@ -38,7 +38,7 @@ export function assertVendorArtifacts(root) {
 
 /** 一行 remedy（boot 面失败消息用它，指引升 pin 固定动作）。 */
 export const ARTIFACT_REMEDY =
-  'vendor 构建产物缺失——先跑 `bash tools/build/vendor-build.sh --clean`（升 pin 固定动作，见 docs/guides/60-dev-loop.md §3）';
+  'vendor 构建产物缺失——先跑 `bash tools/build/vendor-build.sh --clean`（升 pin 固定动作，见 docs/guides/dev-loop.md §3）';
 
 /** CLI 缺省 root = 仓根。本文件住 checks/lib/harness/：向上三层才是仓根；搬家前住
  *  checks/lib/（两层）。2026-11-15 owner 镜像重构后 `../..` 只到 checks/，bootstrap 因此

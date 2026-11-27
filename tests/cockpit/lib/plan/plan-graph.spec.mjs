@@ -1,6 +1,6 @@
 // tests/cockpit/lib/plan/plan-graph.spec.mjs —— 「研究图谱」Team 任务图纯折算的 keyless 契约（W2 / F3）。
 // 家 = packages/deep-research-pack/src/lib/plan/plan-graph.ts（plan.md 解析/问题提示 = plan-index.spec.mjs）；
-// 设计 = docs/design/40-research-cockpit.md §2 + _backlog/research/dynamic-research-dag/2026-10-21-cockpit-plan-graph.md §3–§5。
+// 设计 = docs/contracts/client-ui.md §2 + _backlog/research/dynamic-research-dag/2026-10-21-cockpit-plan-graph.md §3–§5。
 // 钉住四件事：最长路径分层（缺 blocker/环/自环 fail-soft）、wave 稳定序、attention 的
 // 四条判据（不发明 failed 任务状态、不猜年龄）、worker chips 的降级面。
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/policy.md
 // 状态：常驻
 // 一句话：场景包捕获/读取：截图 + DOM + 正文 + console + meta（token 脱敏）
 // 何时跑：看见「当时页面」；事后看现场（--list / --show）

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/policy.md
 // 状态：常驻
 // 一句话：bundle 的 evidence/ 未进 findings.md 的差集投影（收尾核验入口）
 // 何时跑：收活前核验证据是否被消费

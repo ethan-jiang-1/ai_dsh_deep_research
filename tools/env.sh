@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tools/env.sh — 双 home 隔离 + dsh 机制基线（source 本文件，不要 bash 执行）
-# 设计依据：docs/design/10-architecture.md §5；company tools/env.sh 同款机制。
+# 设计依据：docs/architecture.md §5；company tools/env.sh 同款机制。
 #
 # 两个隔离面：
 #   ① 数据面：DSH_HOME 重定向到本仓 runtime/harness-home —— 开发会话/凭据/插件安装与
@@ -68,5 +68,5 @@ echo "tools/env.sh: dsh → 本仓 vendor/dsh 钉 tag 源码基线（机制权�
 if git -C "${_repo_root}" config core.hooksPath tools/hooks 2>/dev/null; then
   echo "tools/env.sh: core.hooksPath=tools/hooks（pre-commit 门禁生效：红灯 commit 被拦）"
 else
-  echo "tools/env.sh: ⚠ 无法设置 core.hooksPath——pre-commit 门禁未生效，收尾须按 guides/60 §4 手跑 verify+tests" >&2
+  echo "tools/env.sh: ⚠ 无法设置 core.hooksPath——pre-commit 门禁未生效，收尾须按 guides/dev-loop.md §4 手跑 verify+tests" >&2
 fi

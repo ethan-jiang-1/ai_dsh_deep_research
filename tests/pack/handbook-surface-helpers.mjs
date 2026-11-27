@@ -1,6 +1,6 @@
 // tests/pack/handbook-surface-helpers.mjs —— T0 手册 + generic 按需细则的读取缝（非 spec）。
 //
-// 为什么单独成文件：manual 是可生长 T0，细则会按 design/70 的缝下放到 `content/generic/`；
+// 为什么单独成文件：manual 是可生长 T0，细则会按 contracts/presets.md 的缝下放到 `content/generic/`；
 // 断言“手册必须说某件事”的测试若只读 manual.md，会在下放后假红。这里把 T0 + generic 视为同一个
 // “模型可见手册面”，顺序 = T0 在前、generic 字典序在后；只被需要的 spec import，不进入发现面。
 import { existsSync, readFileSync, readdirSync } from 'node:fs';

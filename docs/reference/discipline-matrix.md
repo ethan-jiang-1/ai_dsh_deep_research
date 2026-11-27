@@ -1,11 +1,7 @@
-# discipline-map — DSH 纪律全量枚举（三态表）
+# DSH 纪律全量矩阵（逐源三态表）
 
-> 层：合同（该遵守什么）。本表 = [AGENTS.md §纪律](../AGENTS.md) 的**全量正本**（AGENTS.md
-> 只留速查关键词与指针）；枚举方法 = vendor 逐源清点（"你无法继承你从没清点过的东西"——
-> 首轮清点实录 = [dsh-discipline Note](../notes/archived/2026-09-24-dsh-discipline.md)）。
-> 每行三态：**照搬**（原样继承，带本仓落点）/ **带证据适配**（语义保留、载体改造，带证据）/
-> **不适用**（带理由——本仓无该设施对应面）。源头 = vendor/dsh submodule（tag
-> dsh-v0.2.1-rc.5，只读铁律）。
+> 层：参考查表。治理摘要、载体分工与维护面合同住 [policy.md](../policy.md)；本表是 [AGENTS.md](../../AGENTS.md) §纪律的**全量三态明细**（首轮清点实录 = [dsh-discipline Note](../../notes/archived/2026-09-24-dsh-discipline.md)）。
+> 每行三态：**照搬**（原样继承，带本仓落点）/ **带证据适配**（语义保留、载体改造，带证据）/ **不适用**（带可判定重估触发——受 `discipline-na-trigger` 与 `discipline-state-vocab` 门禁把守）。源头 = `vendor/dsh` submodule（tag `dsh-v0.2.1-rc.5`，只读铁律）。
 
 ## 源目录（按需查询入口）
 
@@ -30,24 +26,24 @@
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
 | Model-visible ⟺ logged（进模型请求的输入必须可从会话日志重建） | 会话日志即真相：L4-lite/探针断言全走 zstd 日志逐事件；手册完成判据 = 文件事实 | 照搬 |
-| Misconfiguration fails loud（配置错在最早可判定点炸，不静默跳过） | verify 门禁全 fail-loud（清单正本 = evaluation §L0）；boot-run 漂移检测；design/10 记 ENOENT 静默空教训 | 照搬 |
+| Misconfiguration fails loud（配置错在最早可判定点炸，不静默跳过） | verify 门禁全 fail-loud（清单正本 = evaluation §L0）；boot-run 漂移检测；architecture.md 记 ENOENT 静默空教训 | 照搬 |
 | Files end with exactly one trailing newline | verify 门禁 md-utf8-newline（tracked 全量） | 照搬 |
 | Add/update an Agent Note **only for lasting decision rationale**（机械与局部编辑——含本地 UI 呈现/交互——豁免；0.1.7 判据自 0.1.5 的 non-trivial 全量收窄） | AGENTS §notes 写入触发（同 diff）+ notes/AGENTS.md §什么时候必须写 Note + note-format 门禁 | 照搬（判据按 0.1.7 收窄） |
 | Plugins, not loop changes（新行为走扩展点，不改 agent-loop） | 组合面（preset/skill/bundle 行）+ 观察面 client 面（`src/client/` 只注册页签/工具卡槽，D18） | 带证据适配（两处贡献都走 DSH 扩展点；agent-loop 属 vendor，本仓零改动——client 面只用 `slots`/`sidebarRightTabs` 注册面） |
-| Prefer maintained dependencies over hand-rolling（真能删掉自 owned 代码与测试时） | 测试栈 node:test、regex 断言——维护中的标准件顶掉自造；tsx/pnpm 构建链引入（vendor 落地）而非自造。**zstd 解压是反例且有意为之**：`checks/lib/shared/zstd-read.mjs` 走 `spawnSync('zstd')` 调 CLI，非 `node:zlib`——多帧拼接日志 node:zlib 只解第一帧（2026-09-24 实测整轮误判「1 事件」），该项否决见 [observability-gui](../notes/implemented/2026-09-24-observability-gui.md) 与 [layering-v2](../notes/implemented/2026-10-09-layering-v2.md) 输掉的方案 | 带证据适配（标准件**确实删掉自 owned 代码与测试**的两处兑现：测试栈、构建链；zstd 一项经实测后**主动保留自 owned 调用段**——判据的后半句「确实删掉」不成立时就不替换，正是本规则的边界，非偏离） |
+| Prefer maintained dependencies over hand-rolling（真能删掉自 owned 代码与测试时） | 测试栈 node:test、regex 断言——维护中的标准件顶掉自造；tsx/pnpm 构建链引入（vendor 落地）而非自造。**zstd 解压是反例且有意为之**：`checks/lib/shared/zstd-read.mjs` 走 `spawnSync('zstd')` 调 CLI，非 `node:zlib`——多帧拼接日志 node:zlib 只解第一帧（2026-09-24 实测整轮误判「1 事件」），该项否决见 [observability-gui](../../notes/implemented/2026-09-24-observability-gui.md) 与 [layering-v2](../../notes/implemented/2026-10-09-layering-v2.md) 输掉的方案 | 带证据适配（标准件**确实删掉自 owned 代码与测试**的两处兑现：测试栈、构建链；zstd 一项经实测后**主动保留自 owned 调用段**——判据的后半句「确实删掉」不成立时就不替换，正是本规则的边界，非偏离） |
 | Tests describe behavior, not correctness（过时行为随测试一起改） | tests/ 契约测试（evaluation-contract 对手册谓词、dashboard 对文件形状）；行为变更同 diff 改锚 | 照搬 |
 | No hardcoded tunables（部署可变量必须是 config 字段） | preset 工具行 config（tool-todo allowParallelInProgress、tool-web 超时）皆声明为 config；层版本钉在运行中 dsh 的 exact 版本 | 带证据适配（载体 = cordis 行 config 而非代码 Config 类型） |
 | TODO 标记分级（FIXME/TODO/XXX 按紧急度） | 沿用（仓内出现时按此分级） | 照搬 |
 | Record externally perceptible breaking changes in an upgrade guide（对外可感知破坏面在其引入的变更内即写 `docs/upgrade-guide/`；0.2.0 新增） | 本仓 pack private、无下游消费者；换 pin 的迁移与重审结论由升 pin Note 承载 | 不适用（对外分发/发布 pack 时重估） |
 | Source plane vs artifact plane, never mixed（静态测试走 src，吃构建产物的测试声明依赖） | L1 双通道：preset.e2e 源码域（overlay 指 src）+ 安装域（plugin add 正式路径）；根 tsconfig 门面 = 源码面解析 | 带证据适配（两平面在本仓 = 源码域/安装域两通道，D14） |
-| Design each tool's UI presentation up front（呈现先于实现设计） | 观察面确实先设计后实现：run-dashboard 走 RFC；debug-dashboard-plus 无独立 RFC（该文档名悬空，实际随 [observability-gui](../notes/implemented/2026-09-24-observability-gui.md) 落地）。preset persona/skill 是工具的行为呈现面（先定稿文本再挂载），但「R1 起逐角色先定稿」在 R1 scaffold Note 中无记载——属事后归纳，不是当时纪律 | 带证据适配（呈现面 = 观察面的先设计兑现；persona 侧是归纳而非既成纪律） |
-| Plan unit/e2e/snapshot coverage for seams | evaluation.md 五面合同（L0–L4）先于框架定案（D6） | 带证据适配 |
+| Design each tool's UI presentation up front（呈现先于实现设计） | 观察面确实先设计后实现：run-dashboard 走 RFC；debug-dashboard-plus 无独立 RFC（该文档名悬空，实际随 [observability-gui](../../notes/implemented/2026-09-24-observability-gui.md) 落地）。preset persona/skill 是工具的行为呈现面（先定稿文本再挂载），但「R1 起逐角色先定稿」在 R1 scaffold Note 中无记载——属事后归纳，不是当时纪律 | 带证据适配（呈现面 = 观察面的先设计兑现；persona 侧是归纳而非既成纪律） |
+| Plan unit/e2e/snapshot coverage for seams | testing.md 五面合同（L0–L4）先于框架定案（D6） | 带证据适配 |
 | Registrations are effects（一切贡献走 ctx.effect，register 返回 disposer） | client 面 `src/client/index.ts`：四处注册全量 `scoped.effect(...)` 包裹（页签类型 `sidebarRightTabs.register` / 页签槽体 / 活标题槽体 / 工具卡循环逐 key `slots.inject`） | 照搬（D18 后本仓有自写 cordis 插件代码；证据 = 门禁 `client-effect-wrap` 全量断言 + `client-load.entry` 真浏览器挂载断言） |
 | ~~Runtime invariants assert owned relationships~~（invariant 包规则） | **vendor 0.2.1 已删除**该条与布局行 `runtime-diagnostics/`，`packages/` 下亦无 invariant 组——本仓无需落点。**复活条件** = 上游恢复 invariant 包族 | 不适用（上游已移除——2026-10-19 复核：pin 0.1.7 有该条、0.2.1 零命中；**复活条件**：上游恢复 invariant 包族时） |
 | Typed events / declaration merging / assertNever / waterfall next() / branded ids / Trust TypeScript / explicit request-spec split | TS 面（`src/client/` 观察面 + `src/lib/` 折算）只**消费** vendor 的声明合并类型（`import type {} from '@deepseek-ai/dsh-*/client'`），不 author 会话事件、不注册服务或 waterfall 监听器、无跨边界自持 id、无 request/spec 默认化面 | 不适用（无对应机制面；本仓开始 author 事件或服务时重估） |
 | Keep compiler faces explicit（host/client 各出叶配置，根仅 solution） | `packages/deep-research-pack/tsconfig.host.json` · `tsconfig.client.json` 两叶（各自拉不同的 Context 类型增强）+ solution-only 根 `tsconfig.json`（`files: []` + references）；构建 = `tsc -b .` | 照搬 |
 | ESM everywhere / 包命名与 rescope / cordis peer 约定 | 不发布 npm 包（private pack 经 plugin add 分发） | 不适用（本仓无 npm 发布面——**重估触发**：pack 转为公开发布、或需与其他插件共享 peer 依赖时） |
-| Client UI copy is locale-owned | chrome 文案走 `src/client/locales.ts` 的 zh/en 字典（`ctx.locale.register` + `t()`；键集对账 = [client-locale](../tests/cockpit/client/locales/client-locale.spec.mjs)）；研究面板正文仍以中文为主（产品中文优先，未逐条迁） | 带证据适配（chrome 已迁字典；正文中文优先——**重估触发**：需要英文 UI 或对外多语分发时逐条迁 `views.tsx` / `ResearchConfigTab`） |
+| Client UI copy is locale-owned | chrome 文案走 `src/client/locales.ts` 的 zh/en 字典（`ctx.locale.register` + `t()`；键集对账 = [client-locale](../../tests/cockpit/client/locales/client-locale.spec.mjs)）；研究面板正文仍以中文为主（产品中文优先，未逐条迁） | 带证据适配（chrome 已迁字典；正文中文优先——**重估触发**：需要英文 UI 或对外多语分发时逐条迁 `views.tsx` / `ResearchConfigTab`） |
 | Choose PR history deliberately / GitHub stacks / Labels taxonomy | 无 GitHub PR 流（本地单仓窄切片提交） | 不适用（等价物 = 窄证据切片 commit 纪律 + pre-commit 门禁；**重估触发**：需多 commit 叠加审阅的 PR 流出现时） |
 | Both SDKs project the loop | 无 SDK 维护面 | 不适用（本仓不维护任何 SDK——**重估触发**：本仓开始对外提供 SDK 或需要同时投影两种运行时面时） |
 
@@ -69,7 +65,7 @@
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
 | Tier 分类法：一处事实一个家（docs 只写 now） | 00-index 文档地图分层原则；docs/notes/_backlog 三层分工 | 照搬 |
-| Wordcount budgets（入口文件词数顶） | verify 门禁 `doc-budgets`（逐件 UTF-8 字节上限——vendor `verify-doc-budgets` 中文等价；上限正本 = [checks/doc-budgets.json](../checks/doc-budgets.json)，此处不复制计数；超顶处置序 = 下放>压缩>升顶须同变更登记理由） | 带证据适配 |
+| Wordcount budgets（入口文件词数顶） | verify 门禁 `doc-budgets`（逐件 UTF-8 字节上限——vendor `verify-doc-budgets` 中文等价；上限正本 = [checks/doc-budgets.json](../../checks/doc-budgets.json)，此处不复制计数；超顶处置序 = 下放>压缩>升顶须同变更登记理由） | 带证据适配 |
 | Cross-reference with machine-checkable links, never free prose | 上游含两个机检面：链接可解析 + 禁 commit id 引用。本仓只落前者（md-links，全 tracked md 的方括号圆括号语法）；后者零对应物——正文写 commit 哈希不会被任何门禁拦。entry-chain 门禁只断言文件存在、不判指针语义，不构成兜底 | 带证据适配（语义被收窄：链接面已机检，禁 commit id 面未落；引入条件 = 出现引用 commit 而非文件/Note 的漂移时补门禁） |
 | Slop checklist（文档废话清单） | 上游是 9 条可运行审计。本仓已机械化其中至少两条：`count-free`（禁把易漂移计数写进文档）、`doc-now-only`（只写当前合同、不写历史时态）；其余条目定性吸收进行文规范 | 带证据适配（部分机械化：2 条成门禁，余为规范；不是未机械化） |
 | 一段一行（`verify-md-wrap` 门禁） | 硬折行 ~90 列 | 不适用（登记偏离）：中文优先仓折行是既有惯例，整仓重排会淹没审阅（成本 > 收益）；引入条件 = 转英文或双语文档时 |
@@ -80,12 +76,12 @@
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| Agent Note 生命周期（proposed/implemented/rejected + archived 冻结） | notes/ 四目录全在场：proposed/ · implemented/ · **[archived/](../notes/archived/README.md)**（冻结快照，2026-09-27 用户指令启用；含事故复盘）· rejected/；`postmortem/` 已于 2026-10-30 退役（事故复盘冻结进 archived/）；冻结纪律 = archived/README | 照搬 |
+| Agent Note 生命周期（proposed/implemented/rejected + archived 冻结） | notes/ 四目录全在场：proposed/ · implemented/ · **[archived/](../../notes/archived/README.md)**（冻结快照，2026-09-27 用户指令启用；含事故复盘）· rejected/；`postmortem/` 已于 2026-10-30 退役（事故复盘冻结进 archived/）；冻结纪律 = archived/README | 照搬 |
 | Every new Note triggers a supersession check（同决定搜树：更新/互链/吸收后删） | AGENTS §notes 取代检查 bullet + notes/README §决定覆盖与取代检查（SDLC reference 01 吸纳） | 照搬 |
-| Alternatives considered mandatory（没记击败了什么 = 会重开讼） | guides/60 §4 骨架 + note-format 门禁（## 输掉的方案在场断言） | 照搬 |
-| Implemented Note 保持 current（路径/默认值随实现同 diff；逆转写新 Note 互链） | [notes/implemented/README.md](../notes/implemented/README.md) 头注 + [notes/README.md](../notes/README.md) 时态表；毕业 = 正文改写（guides/60 §4）。（根 AGENTS §notes 已压成指针，具体条文在子树——2026-10-19 复核修正） | 照搬 |
+| Alternatives considered mandatory（没记击败了什么 = 会重开讼） | guides/dev-loop.md §4 骨架 + note-format 门禁（## 输掉的方案在场断言） | 照搬 |
+| Implemented Note 保持 current（路径/默认值随实现同 diff；逆转写新 Note 互链） | [notes/implemented/README.md](../../notes/implemented/README.md) 头注 + [notes/README.md](../../notes/README.md) 时态表；毕业 = 正文改写（guides/dev-loop.md §4）。（根 AGENTS §notes 已压成指针，具体条文在子树——2026-10-19 复核修正） | 照搬 |
 | Note 格式机械化（verify-agent-note-format） | verify 门禁 note-format（regex 版 + grandfather 条款——本仓轻量适配） | 带证据适配 |
-| 归档树 append-only hash manifest | [archived/](../notes/archived/README.md) 用"单文件 + `> 归档：<日期>` 行"等价落地（无 triplet/hash 基础设施）；冻结纪律 = 正文永不修改 | 带证据适配（manifest 面不引入——当前规模下目录树即清单） |
+| 归档树 append-only hash manifest | [archived/](../../notes/archived/README.md) 用"单文件 + `> 归档：<日期>` 行"等价落地（无 triplet/hash 基础设施）；冻结纪律 = 正文永不修改 | 带证据适配（manifest 面不引入——当前规模下目录树即清单） |
 
 ## 源 5：vendor docs/postmortem/（事故复盘）
 
@@ -96,8 +92,8 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（编号条目 + `README.md`
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| 事故复盘的进门判据（到达不该到达的地方）+ 编号条目 + 必须链接由事故催生的 guardrails | 本仓不设独立目录：判据与五节骨架（症状/为什么没早发现/根因/修复/新增防线）= [notes/README §事故复盘](../notes/README.md)；事故原文冻结在 [notes/archived/](../notes/archived/README.md)（2026-10-30 层退役迁入）；产物落 `evaluation.md` / `triggers.md` 才闭环 | 带证据适配 |
-| 层的位置：`docs/postmortem/`（与"当前合同"同层，属文档 tier 表一行） | 事故原文冻结在 `notes/archived/`（历史证据层；2026-10-30 由 `notes/postmortem/` 退役迁入）；活跃判据 = [notes/README §事故复盘](../notes/README.md) | 带证据适配（登记偏离：docs 只写 now，事故叙事归冻结证据层） |
+| 事故复盘的进门判据（到达不该到达的地方）+ 编号条目 + 必须链接由事故催生的 guardrails | 本仓不设独立目录：判据与五节骨架（症状/为什么没早发现/根因/修复/新增防线）= [notes/README §事故复盘](../../notes/README.md)；事故原文冻结在 [notes/archived/](../../notes/archived/README.md)（2026-10-30 层退役迁入）；产物落 `testing.md` / `triggers.md` 才闭环 | 带证据适配 |
+| 层的位置：`docs/postmortem/`（与"当前合同"同层，属文档 tier 表一行） | 事故原文冻结在 `notes/archived/`（历史证据层；2026-10-30 由 `notes/postmortem/` 退役迁入）；活跃判据 = [notes/README §事故复盘](../../notes/README.md) | 带证据适配（登记偏离：docs 只写 now，事故叙事归冻结证据层） |
 | 双子语三件套 | 单语 | 不适用（同全仓单语登记——**重估触发**：转双语交付时） |
 
 ## 源 6：vendor .agents/skills/（开发 Skill——2026-09-25 吸纳，`.agents/skills/` 落地）
@@ -108,7 +104,7 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（编号条目 + `README.md`
 | Skill 的定位 = 可复用工作流 + 专门判断标准（不是公开 API，也不是自动门禁） | 各开发技能带触发条件/步骤/完成判据；机制细节仍链接 owner 文档而非复制 | 照搬 |
 | 五步调用：Match（description 命中）→ Load（读全文，不从摘要猜）→ Resolve sources（读 owner）→ Apply judgment → Verify and report | 技能正文按此组织；`dev-skill-format` 门禁断言 frontmatter 在场且 `name` = 目录名 | 带证据适配（门禁为 regex 版，非 vendor 的 schema 校验） |
 | Skill ≠ gate：机械可判的下沉到类型/脚本/invariant，语义留给 review | 本仓分工表见末节「载体分工」 | 照搬 |
-| 按需加载控制上下文成本（progressive disclosure） | AGENTS 只放常驻（入口链 + 布局树 + 三行命令速查 + 指针），完整命令与流程按需加载（全档命令正本 = guides/60 §2） | 照搬 |
+| 按需加载控制上下文成本（progressive disclosure） | AGENTS 只放常驻（入口链 + 布局树 + 三行命令速查 + 指针），完整命令与流程按需加载（全档命令正本 = guides/dev-loop.md §2） | 照搬 |
 
 ## 源 7：仓库分类学与维护形态（vendor `repo-harness/08`，2026-09-25 吸纳）
 
@@ -117,7 +113,7 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（编号条目 + `README.md`
 | 形态 | DSH 例子 | 本仓实例 | 机器边界 |
 |---|---|---|---|
 | 手写维护 | AGENTS、docs、README、活动 Note、Skills | 全部 `docs/`、`notes/`、`AGENTS.md`、presets、skills | 结构受门禁（预算/格式/链接），内容人写 |
-| 生成 + freshness 门禁 | tool/config/persistence catalog、module-graph | `tools/record/research.overlay.yml`（门禁 `overlay-fresh`；[evaluation.md](evaluation.md) §L0 登记为"本仓首个 tracked 生成物"）+ `_dist/安装手册.md`（门禁 `dist-manual-fresh` / `dist-manual-version`） | 改源不重生成即红（门禁机械对账） |
+| 生成 + freshness 门禁 | tool/config/persistence catalog、module-graph | `tools/record/research.overlay.yml`（门禁 `overlay-fresh`；[testing.md](../testing.md) §L0 登记为"本仓首个 tracked 生成物"）+ `_dist/安装手册.md`（门禁 `dist-manual-fresh` / `dist-manual-version`） | 改源不重生成即红（门禁机械对账） |
 | 混合（生成区嵌手写页） | subsystem 页的 cordis-surface 区、type-equiv 块 | `packages/deep-research-pack/presets/<role>.patch.yml`（手写）↔ `tools/record/research.overlay.yml`（渲染生成）+ profile 镜像（同事实的第二落点）——由 `boot-run.sh` 漂移检测承担 freshness | 漂移即 fail-loud |
 | 录制（机器写、人审、封存不改） | snapshots/、archived Note、persistence releases | run bundle（`research-workspace/drt_*` 在飞 + `archive/` 已交付）——gitignored 运行区，事实由 bundle 文件承载 | 不进 L0（运行区不扫）；完整性归 run 内 critic + 观察面谓词 |
 | 投影（canonical 源的抛弃型派生物） | `website/.generated/`（vendor 站点产物，不入库） | `runtime/smoke-workspace/dashboard.html`（canonical = 会话日志 + bundle 文件） | 随时可重建；永不手改、永不入库 |
@@ -146,9 +142,9 @@ implemented/ 而退役）。
 
 **三问自检**（评估任何 development harness，vendor `repo-harness/07` 归纳）：
 ① 规则住在哪里（人脑 vs 可搜索文档/类型/生成索引/可执行检查）→ 本仓：AGENTS 入口链 +
-docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.md) §L0）；
+docs 合同 + notes 记忆 + 门禁（清单正本 = [testing.md](../testing.md) §L0）；
 ② 正确入口是否明确（能否从目标找到 owner、范本与升级条件）→ 本仓：布局树 + 参与阶梯
-（[guides/62 §参与阶梯](guides/62-plugin-authoring.md)）+ `.agents/skills/` 范本；
+（[guides/plugin-authoring.md §参与阶梯](../guides/plugin-authoring.md)）+ `.agents/skills/` 范本；
 ③ 错误何时被发现（编译/加载/局部/运行时/push 前/评审/生产）→ 本仓：pre-commit 门禁 +
 契约测试 + 三级冒烟 + 真模型档 + 人工验收。
 
@@ -175,67 +171,67 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [evaluation.md](evaluation.
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| **子树 `AGENTS.md` 层**：根只放每轮常驻指令（1–3 行 + 链 home），子树专属指令放子树 `AGENTS.md`（vendor 28 份） | 六份子树 AGENTS.md（`docs/` · `checks/` · `notes/` · `packages/deep-research-pack/` · [tests/](../tests/AGENTS.md) · [_backlog](../_backlog/AGENTS.md)）；`entry-chain` 门禁把守成员在场 | 照搬 |
-| `docs/AGENTS.md` = 文档标准：层级归属（一个事实一个家）/ 写作规则 / slop 清单 / 预算处置序 / 机检链接 | [docs/AGENTS.md](AGENTS.md)：tier 表、写作规则、slop 清单（中文适配）、`## 已知限制与延后工作` 节约定 | 带证据适配 |
-| 预算由 **manifest 拥有**（`scripts/doc-budgets.manifest.json`），门禁拒超限**与缺登记** | [checks/doc-budgets.json](../checks/doc-budgets.json) + 门禁 `doc-budgets`（登记项须存在且不超限；仓内新增 AGENTS.md 未登记即红） | 带证据适配（度量词数 → 行数：CJK 词数不可靠） |
-| `scripts/AGENTS.md` = 门禁写作规则（无 shell / 端口与临时路径自持有 / 只在单独运行通过的 spec 是缺陷） | [checks/AGENTS.md](../checks/AGENTS.md)：范围（git ls-files tracked-only）、剥 `GIT_*`、端口独占、stdlib-only 分层 | 带证据适配（换成我们的实测教训） |
-| `packages/AGENTS.md` = 包级约定（插件导出形态 / 当前 owner 与需求 / 限制节） | [packages/deep-research-pack/AGENTS.md](../packages/deep-research-pack/AGENTS.md)：三处同步、模型可见面 + 重启、roster 单一事实源、**部署义务**（发布集/种子/部署脚本变更跑 L2） | 带证据适配（配置为主 + 一个 client 面版） |
-| `.agents/notes/AGENTS.md` = Note 子树常设指令（**取代检查硬触发**） | [notes/AGENTS.md](../notes/AGENTS.md)：写入触发 + 取代检查 + 格式与毕业；根只留指针 | 照搬 |
+| **子树 `AGENTS.md` 层**：根只放每轮常驻指令（1–3 行 + 链 home），子树专属指令放子树 `AGENTS.md`（vendor 28 份） | 六份子树 AGENTS.md（`docs/` · `checks/` · `notes/` · `packages/deep-research-pack/` · [tests/](../../tests/AGENTS.md) · [_backlog](../../_backlog/AGENTS.md)）；`entry-chain` 门禁把守成员在场 | 照搬 |
+| `docs/AGENTS.md` = 文档标准：层级归属（一个事实一个家）/ 写作规则 / slop 清单 / 预算处置序 / 机检链接 | [docs/AGENTS.md](../AGENTS.md)：tier 表、写作规则、slop 清单（中文适配）、`## 已知限制与延后工作` 节约定 | 带证据适配 |
+| 预算由 **manifest 拥有**（`scripts/doc-budgets.manifest.json`），门禁拒超限**与缺登记** | [checks/doc-budgets.json](../../checks/doc-budgets.json) + 门禁 `doc-budgets`（登记项须存在且不超限；仓内新增 AGENTS.md 未登记即红） | 带证据适配（度量词数 → 行数：CJK 词数不可靠） |
+| `scripts/AGENTS.md` = 门禁写作规则（无 shell / 端口与临时路径自持有 / 只在单独运行通过的 spec 是缺陷） | [checks/AGENTS.md](../../checks/AGENTS.md)：范围（git ls-files tracked-only）、剥 `GIT_*`、端口独占、stdlib-only 分层 | 带证据适配（换成我们的实测教训） |
+| `packages/AGENTS.md` = 包级约定（插件导出形态 / 当前 owner 与需求 / 限制节） | [packages/deep-research-pack/AGENTS.md](../../packages/deep-research-pack/AGENTS.md)：三处同步、模型可见面 + 重启、roster 单一事实源、**部署义务**（发布集/种子/部署脚本变更跑 L2） | 带证据适配（配置为主 + 一个 client 面版） |
+| `.agents/notes/AGENTS.md` = Note 子树常设指令（**取代检查硬触发**） | [notes/AGENTS.md](../../notes/AGENTS.md)：写入触发 + 取代检查 + 格式与毕业；根只留指针 | 照搬 |
 | Note 头三行恰为 `# Agent Note: <title>` / 空 / `Status: <status>`（**裸值，无日期括号**），与生命周期目录互验；rejected 的理由用 `—` 附在状态行 | `> 状态：<裸值>` + 目录互验（`note-format` 门禁）；rejected 允许 `— 一行理由`；章节名映射（问题↔Problem · 决定↔Decision · 输掉的方案↔Alternatives considered · 验证↔Verification · 环境状态↔Consequences）登记在 notes/AGENTS.md | 带证据适配（头三行结构与裸值照搬；`## Problem` 不强制于遗留篇——grandfather） |
 | 包 README 的 `## Known Limitations and Deferred Work` 固定节 | `## 已知限制与延后工作` 写进 docs/AGENTS.md 与包 AGENTS | 照搬 |
 | 根 AGENTS 的 “Editing these instructions” 节 | 根新增 §编辑这些指令（预算 manifest / 子树归属 / 门禁把守） | 照搬 |
 | `.agents/skills/` 命名带产品前缀（`dsh-`），少数通用技能无前缀 | 开发技能一律无前缀（与 vendor 的 `agent-experience`、`record-browser-gif` 同风格）；本仓没有产品前缀面，因为技能是仓内开发技能而非随包发布的用户技能 | 不适用（本仓无随包发布用户技能面；引入条件 = 本仓开始对外发布技能集时） |
 | **一段一行**（`verify-md-wrap` 门禁） | 本仓用硬折行 ~90 列，是同一规则（控制行宽以利审阅）的不同实现；上游一条一行是为了收窄 diff 噪声，本仓折行同样收窄横向滚动。没有 `verify-md-wrap` 门禁，靠惯例 | 带证据适配（同规则不同实现：无门禁、靠惯例；引入条件 = 折行漂移成审阅负担时补 wrap 门禁） |
-| `docs/defensive-patterns/`（0.2.1 起为五卷目录：general / package-surface / client-components / conversation-and-session / remote-and-api，双语对 + i18n sidecar；高风险缺陷模式供 review 逐条扫） | 主体已按职责本地化并接入机检闭环：观察面与折算层红线（One value states one fact / Honor contracts on BOTH sides / Identity & disposal / Narrow inject / Timing correctness）→ [design/40 §5.1](design/40-research-cockpit.md#defensive-redlines) + 机检守卫 [semantic-guardrails](../tests/checks/repo/semantic-guardrails.test.mjs) + [skill-parser-contract](../tests/contracts/skill-parser-contract.spec.mjs)；门禁与子进程陷阱 → [checks/AGENTS.md](../checks/AGENTS.md)；事故与教训 → notes/archived/ 的事故复盘与各毕业 Note | 带证据适配（重点 TS/契约条目内化至 design/40 并由语义门禁与双向扫描强制；Cordis host/store-spec 类纯上游骨架按适用面取舍） |
+| `docs/defensive-patterns/`（0.2.1 起为五卷目录：general / package-surface / client-components / conversation-and-session / remote-and-api，双语对 + i18n sidecar；高风险缺陷模式供 review 逐条扫） | 主体已按职责本地化并接入机检闭环：观察面与折算层红线（One value states one fact / Honor contracts on BOTH sides / Identity & disposal / Narrow inject / Timing correctness）→ [contracts/client-ui.md §5.1](../contracts/client-ui.md#defensive-redlines) + 机检守卫 [semantic-guardrails](../../tests/checks/repo/semantic-guardrails.test.mjs) + [skill-parser-contract](../../tests/contracts/skill-parser-contract.spec.mjs)；门禁与子进程陷阱 → [checks/AGENTS.md](../../checks/AGENTS.md)；事故与教训 → notes/archived/ 的事故复盘与各毕业 Note | 带证据适配（重点 TS/契约条目内化至 contracts/client-ui.md 并由语义门禁与双向扫描强制；Cordis host/store-spec 类纯上游骨架按适用面取舍） |
 
 vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗漏"的误读）：
 
 | vendor 文件/目录 | 本仓处置 |
 |---|---|
 | `.claude/skills` symlink | **采纳**：`.claude/skills -> ../.agents/skills`（Claude 系 harness 发现同一批开发技能）；门禁 `claude-symlink` 覆盖两条 symlink |
-| `docs/glossary.md` | 已具备：`docs/terms.md`（一个概念一个 canonical term，含 DSH↔本仓对照） |
-| `docs/development.md` · `docs/testing.md` · `docs/architecture.md` · `docs/cookbook/` · `docs/subsystems/` | 已具备（改名映射）：guides/60 · evaluation + guides/60 §2 · design/10 · guides/61/62 · design/ |
+| `docs/glossary.md` | 已具备：`docs/reference/glossary.md`（一个概念一个 canonical term，含 DSH↔本仓对照） |
+| `docs/development.md` · `docs/testing.md` · `docs/architecture.md` · `docs/cookbook/` · `docs/subsystems/` | 已具备（改名映射）：guides/dev-loop.md · evaluation + guides/dev-loop.md §2 · architecture.md · guides/run-ops.md/62 · design/ |
 | `docs/i18n/` · `docs/user/` · `website/` | 不适用：单语、无对外产品文档站与站点投影 |
-| `snapshots/`（session 回放 fixture） | **已具备（带证据适配）**：[snapshots/](../snapshots/README.md) 场景证据层——研究角色场景 [场景证据层 snapshots/](../snapshots/README.md) 的 `snapshot.json` 由 [replay-scene](../checks/lib/harness/replay-scene.mjs) 消费并驱动 [snapshot-replay.entry](../checks/smoke/snapshot-replay.entry.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）；纯函数夹具仍住 `tests/fixtures/`；判据见本表源 2 "Snapshot tests" 行 |
+| `snapshots/`（session 回放 fixture） | **已具备（带证据适配）**：[snapshots/](../../snapshots/README.md) 场景证据层——研究角色场景 [场景证据层 snapshots/](../../snapshots/README.md) 的 `snapshot.json` 由 [replay-scene](../../checks/lib/harness/replay-scene.mjs) 消费并驱动 [snapshot-replay.entry](../../checks/smoke/snapshot-replay.entry.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）；纯函数夹具仍住 `tests/fixtures/`；判据见本表源 2 "Snapshot tests" 行 |
 | `benchmarks/` · `native/` · `python/` · `patches/` · `apps/` | 不适用：本仓无这些发布 lane 与运行时面 |
 | `CONTRIBUTING.md` · `SAFETY.md` · `SECURITY` · `THIRD_PARTY_NOTICES.md` · `BRAND_GUIDELINES.md` | **已具备（2026-10-25 开源发布）**：`CONTRIBUTING.md` / `SECURITY.md` / `.github/workflows/ci.yml`；`SAFETY.md`、`THIRD_PARTY_NOTICES.md`、`BRAND_GUIDELINES.md` 仍不适用（无运行时安全授权面、无捆绑第三方代码、无独立品牌资产政策）；重估触发 = 出现外部贡献分级审批或捆绑第三方代码时 |
 | `.editorconfig` · `.gitattributes` · lint（oxlint）· 重复代码检测（jscpd）· vitest 系列配置 · `lefthook.yml` | 前两件已具备（`repo-conventions` 门禁强制与 vendor 对齐）；**`oxlint` 已采纳**（`.oxlintrc.json` + `pnpm lint` + verify `pack-lint`；因 CI `keyless` 无 `vendor-build` 暂不引入 `oxlint-tsgolint`，领域语义由 `semantic-guardrails.test.mjs` 承担）；后三件未引入（测试栈 = node:test），Markdown 纪律由门禁承担，git 钩子 = `tools/hooks/pre-commit` |
-| `LICENSE` | **已定：MIT**（2026-10-25 开源发布；根与 pack 各一份 [LICENSE](../LICENSE)，两处 `package.json` 均 `license: MIT`；pack `private: false` 可发布）——决定与输掉的方案 = [开源发布 Note](../notes/implemented/2026-10-25-open-source-launch.md) |
+| `LICENSE` | **已定：MIT**（2026-10-25 开源发布；根与 pack 各一份 [LICENSE](../../LICENSE)，两处 `package.json` 均 `license: MIT`；pack `private: false` 可发布）——决定与输掉的方案 = [开源发布 Note](../../notes/implemented/2026-10-25-open-source-launch.md) |
 
 <a id="source-10"></a>
-## 源 10：_digested/test-strategy 语料（测试策略消化 16 篇；catalog 基线 = rc.5，7 篇 reverified / 9 篇 carried；见 [external-materials](./external-materials.md)）
+## 源 10：_digested/test-strategy 语料（测试策略消化 16 篇；catalog 基线 = rc.5，7 篇 reverified / 9 篇 carried；见 [external-materials](./external.md)）
 
-> 语料身份与吸收落点 = [external-materials.md](external-materials.md)；对照总账正本 = test-strategy 采纳
-> Note（[notes/implemented/2026-10-04-test-strategy-adoption.md](../notes/implemented/2026-10-04-test-strategy-adoption.md)）。
+> 语料身份与吸收落点 = [reference/external.md](./external.md)；对照总账正本 = test-strategy 采纳
+> Note（[notes/implemented/2026-10-04-test-strategy-adoption.md](../../notes/implemented/2026-10-04-test-strategy-adoption.md)）。
 > 本表只收语料带来的**增量**结论；与源 1–9 重复的教义不重复登记。
 
 | 语料教义 | 本仓落点 | 状态 |
 |---|---|---|
-| 证据匹配面（改动的面 ↔ 证据类型） | [guides/60 §2 任务型路由表](guides/60-dev-loop.md) + [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + 根 AGENTS §纪律常驻指针 | 照搬（增量 = 常驻化：路由表与阶梯本就分住 guides/60 §2 与 guides/62，本条只是把指针常驻进根 AGENTS§纪律） |
-| 可靠性三纪律：retry 白名单 / 等待显式状态 / 释放到静默 | [checks/AGENTS §冒烟脚本可靠性纪律](../checks/AGENTS.md) | 照搬（载体 = 冒烟脚本层） |
+| 证据匹配面（改动的面 ↔ 证据类型） | [guides/dev-loop.md §2 任务型路由表](../guides/dev-loop.md) + [guides/plugin-authoring.md §自写代码证据阶梯](../guides/plugin-authoring.md) + 根 AGENTS §纪律常驻指针 | 照搬（增量 = 常驻化：路由表与阶梯本就分住 guides/dev-loop.md §2 与 guides/plugin-authoring.md，本条只是把指针常驻进根 AGENTS§纪律） |
+| 可靠性三纪律：retry 白名单 / 等待显式状态 / 释放到静默 | [checks/AGENTS §冒烟脚本可靠性纪律](../../checks/AGENTS.md) | 照搬（载体 = 冒烟脚本层） |
 | 防假绿 verdict 契约（0 绿 / 1 红 / 2 未跑；未跑 ≠ 通过） | 真模型档脚本既有行为 → checks/AGENTS.md 契约化 + `tests/checks/shared/smoke-contract.test.mjs` 机械钉住 | 带证据适配（行为先在，语料后成文） |
-| 插件五台阶证据阶梯（导出守卫 → 行为 → 注册生命周期 → 真挂载 → 组装面） | [guides/62 §自写代码证据阶梯](guides/62-plugin-authoring.md) + `tests/pack/contract/export-shape.spec.mjs`（台阶①）+ verify 门禁 `client-effect-wrap`（台阶③） | 带证据适配（自写代码面 = 驾驶舱） |
+| 插件五台阶证据阶梯（导出守卫 → 行为 → 注册生命周期 → 真挂载 → 组装面） | [guides/plugin-authoring.md §自写代码证据阶梯](../guides/plugin-authoring.md) + `tests/pack/contract/export-shape.spec.mjs`（台阶①）+ verify 门禁 `client-effect-wrap`（台阶③） | 带证据适配（自写代码面 = 驾驶舱） |
 | registrations are effects 的 HMR 投影（dispose 即撤销贡献） | 驾驶舱 slot 注册包 effect + 门禁 `client-effect-wrap` 静态把守（正则查包裹，不判 dispose 是否真发生）；HMR 行为断言不做（迭代循环走重启）。2026-10-19 实测该门禁的盲区：`ctx.inject(..., scoped => scoped.effect(...))` 里 scoped 作用域在回调返回后失活，注册被静默撤销，门禁照绿——静态包裹证明不了生命周期正确 | 带证据适配（静态收口形态；dispose 行为面未验证，2026-10-19 撞到真失效一次，修法 = 效果挂根 ctx 而非注入作用域） |
-| fix fixtures, not normalizers（证据不许磨到跟 bug 吻合） | [tests/AGENTS「改夹具先想红」](../tests/AGENTS.md) + guides/60 金标准红线（只许 `--update-expected` 重写，不许放宽比对） | 照搬 |
-| 后缀即层 / 命名即所有权（expected-filenames 门禁强制改名） | [checks/AGENTS §依赖与分层「命名即层」](../checks/AGENTS.md)（后缀申报证据类型与档位）+ 真模型档登记制 closed set（tests/checks/shared/smoke-contract.test.mjs 对账"要求凭据的脚本恰为名单"） | 带证据适配（本仓车道 = glob + 目录形态，非多 vitest 配置） |
+| fix fixtures, not normalizers（证据不许磨到跟 bug 吻合） | [tests/AGENTS「改夹具先想红」](../../tests/AGENTS.md) + guides/dev-loop.md 金标准红线（只许 `--update-expected` 重写，不许放宽比对） | 照搬 |
+| 后缀即层 / 命名即所有权（expected-filenames 门禁强制改名） | [checks/AGENTS §依赖与分层「命名即层」](../../checks/AGENTS.md)（后缀申报证据类型与档位）+ 真模型档登记制 closed set（tests/checks/shared/smoke-contract.test.mjs 对账"要求凭据的脚本恰为名单"） | 带证据适配（本仓车道 = glob + 目录形态，非多 vitest 配置） |
 | prove-it-red 前向化到契约测试（不只门禁） | tests/AGENTS 的反证规则（新契约测试同 diff 注入回归看红再还原）+ 门禁 `guard-red-record` 机械把守「负例留证/夹具留证」块。所称「承重四文件抽检」在采纳 Note 中**不存在**（原记误引），已删 | 带证据适配（规则与门禁都在位；但「抽检」这一执行形态本仓未确立，不为无实据的做法背书） |
-| fixture 守卫先于比较（形状 corpus 层） | [checks/lib/harness/replay-scene.mjs](../checks/lib/harness/replay-scene.mjs)：比较前 fail-loud 拒绝相对路径/穿越/**symlink**/manifest 结构/角色 roster 齐整/case 唯一/**夹具路径重复**（14 条守卫）；消费测试钉语义，守卫钉形状，两层不同面 | 带证据适配（2026-10-19 复核修正：原判「不适用」与实况相反——等价物早已在该模块） |
+| fixture 守卫先于比较（形状 corpus 层） | [checks/lib/harness/replay-scene.mjs](../../checks/lib/harness/replay-scene.mjs)：比较前 fail-loud 拒绝相对路径/穿越/**symlink**/manifest 结构/角色 roster 齐整/case 唯一/**夹具路径重复**（14 条守卫）；消费测试钉语义，守卫钉形状，两层不同面 | 带证据适配（2026-10-19 复核修正：原判「不适用」与实况相反——等价物早已在该模块） |
 | 快照世代模型 / record-refresh 分叉 / 平台变体 | `sessionFormat` 钉代（replay-scene.mjs:58 强制 = 4，换代须新 `session.vN.jsonl` + 人审，snapshots/README 登记）；`--update-expected` = refresh 语义；record = 真录制（`tools/record/record-role-fixture.mjs`）；**平台变体（posixOnly/pwshOnly）不适用**（本仓单平台） | 带证据适配（世代/refresh 已落地；仅平台变体不适用——2026-10-19 复核修正原「不适用」整行） |
 | 七层宪法层 / coverage 门 / run-gates DAG / 性能基准层 / flake 八分类 | 维持五面合同与偏离登记（L0–L4 已是证据形态分层） | 不适用（理由 = 采纳 Note 输掉的方案；**重估触发**：现有 L0–L4 分层被证明不足（出现该分层接不住的真实缺陷类别）时） |
 
 <a id="source-11"></a>
 ## 源 11：_dsh_plugin_agent_ready_development 语料（二代，独立插件仓专版）
 
-> 语料身份与钉版 = [external-materials.md](external-materials.md)；对照总账正本 = [吸收审计毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md)（通读范围、已具备逐件对照表、痛点归因与输掉的方案）。本表只收**二代增量**结论；一代语料已覆盖的不重复登记。
+> 语料身份与钉版 = [reference/external.md](./external.md)；对照总账正本 = [吸收审计毕业 Note](../../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md)（通读范围、已具备逐件对照表、痛点归因与输掉的方案）。本表只收**二代增量**结论；一代语料已覆盖的不重复登记。
 
 | 二代语料增量 | 本仓落点 | 状态 |
 |---|---|---|
-| 交付判断四角色：机械检查 / 语义评审 / 批准 / 显式交互——各证明不同的东西，互不冒充 | [evaluation §完成判断四分离](evaluation.md) + [reviewing-a-delivery](../.agents/skills/reviewing-a-delivery/SKILL.md) 技能（语义自审层——agent 可自主完成的角色） | 照搬（判据固化 + 技能载体） |
+| 交付判断四角色：机械检查 / 语义评审 / 批准 / 显式交互——各证明不同的东西，互不冒充 | [evaluation §完成判断四分离](../testing.md) + [reviewing-a-delivery](../../.agents/skills/reviewing-a-delivery/SKILL.md) 技能（语义自审层——agent 可自主完成的角色） | 照搬（判据固化 + 技能载体） |
 | 完成判断公理：能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准 | evaluation §完成判断四分离（四结果 ↔ L1 挂载 / L1 行为断言 / L2 / 收尾对账+用户批准） | 照搬 |
-| 门禁自测模式（语料 verify.spec.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates.e2e](../checks/smoke/gates.e2e.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/checks/harness/verify-gates.test.mjs](../tests/checks/harness/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量，等价 fresh clone——曾有的「运行区链接目标补拷」对冲已随 BUG-016 修复移除） |
-| 验证词汇：oracle 独立预期 / real composition / semantic review | [terms.md](terms.md) 验证词汇行 | 照搬 |
-| 六误区清单（goal≠验收 / mock-only / 刷新≠接受 / 空 invariant / agent-loop / 不抄主仓治理） | 逐条散落既有登记（D6 / L1 真挂载 / tests·AGENTS fix fixtures / 本表源 1 与 alignment-ledger / 不适用登记）——不另立第二份清单（理由 = [毕业 Note](../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) 输掉的方案） | 带证据适配（散落形态：六条各自有登记载体，本条不另立第二份清单——理由见毕业 Note 输掉的方案；散落 = 需按条检索，不是免检） |
-| 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 最小开源治理 = keyless CI（[ci.yml](../.github/workflows/ci.yml)）+ 本地 pre-commit + 窄切片 + 收尾对账；Issue/PR policy、weighted approval、stacked PR、release lane 未采纳 | 带证据适配（2026-10-25 开源发布：CI 骨架落地；其余治理面的重估 = 需要外部贡献者分级审批、堆叠 PR 或自动化发布时） |
+| 门禁自测模式（语料 verify.spec.mjs：完整副本 + 真实 verifier 入口 + invalid case 真被拒才算数） | [gates.e2e](../../checks/smoke/gates.e2e.mjs)（临时副本 + 注入回归经真实 verify 入口点名报红 + 零注入对照组防断言空转）+ [tests/checks/harness/verify-gates.test.mjs](../../tests/checks/harness/verify-gates.test.mjs)（案例表 ↔ gates 数组静态对账） | 带证据适配（子进程归 smoke 道——layering 禁默认回归 spawn；副本 = tracked 全量，等价 fresh clone——曾有的「运行区链接目标补拷」对冲已随 BUG-016 修复移除） |
+| 验证词汇：oracle 独立预期 / real composition / semantic review | [reference/glossary.md](./glossary.md) 验证词汇行 | 照搬 |
+| 六误区清单（goal≠验收 / mock-only / 刷新≠接受 / 空 invariant / agent-loop / 不抄主仓治理） | 逐条散落既有登记（D6 / L1 真挂载 / tests·AGENTS fix fixtures / 本表源 1 与 alignment-ledger / 不适用登记）——不另立第二份清单（理由 = [毕业 Note](../../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) 输掉的方案） | 带证据适配（散落形态：六条各自有登记载体，本条不另立第二份清单——理由见毕业 Note 输掉的方案；散落 = 需按条检索，不是免检） |
+| 主仓治理全套（Issue/PR policy、weighted approval、stacked PR、release lane、`.github/` 执行层） | 最小开源治理 = keyless CI（[ci.yml](../../.github/workflows/ci.yml)）+ 本地 pre-commit + 窄切片 + 收尾对账；Issue/PR policy、weighted approval、stacked PR、release lane 未采纳 | 带证据适配（2026-10-25 开源发布：CI 骨架落地；其余治理面的重估 = 需要外部贡献者分级审批、堆叠 PR 或自动化发布时） |
 
 ## 重审触发路径
 
@@ -258,13 +254,13 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
   全量盘点——它在语料中不归研究显眼类；语料 `_digested/plugin-inventory/` 随新基线更新后
   一并对账，防同类盲区）。
 - `_digested/` 语料专题随新基线更新后一并对账（test-strategy 的钉法见
-  [external-materials.md](external-materials.md)）：语料自报基线 ≠ 新 pin 即该专题待更新，增量结论
+  [reference/external.md](./external.md)）：语料自报基线 ≠ 新 pin 即该专题待更新，增量结论
   按 [源 10](#source-10) 重校。
 - **本仓立卡的 vendor seam 缺口**（升 pin 时核上游是否已修——已修即撤本行，未修带证据重估）：
   会话日志逐帧 / 逐 turn flush + SIGTERM finalizer 清缓冲、至少 turn 边界强制落盘
-  （BUG-007，[vendor-wire-semantics-and-log-tail Note](../notes/implemented/2026-11-24-vendor-wire-semantics-and-log-tail.md)）；
+  （BUG-007，[vendor-wire-semantics-and-log-tail Note](../../notes/implemented/2026-11-24-vendor-wire-semantics-and-log-tail.md)）；
   boot 时对 turnOpen 会话做中断对账、补写 `turn/end` + `end-seed` 终局事件
-  （BUG-009，[goal-hitl-alignment Note](../notes/implemented/2026-11-10-goal-hitl-alignment.md)）。
+  （BUG-009，[goal-hitl-alignment Note](../../notes/implemented/2026-11-10-goal-hitl-alignment.md)）。
 
 复核结论（"无命中/改写哪几行"）连同新 tag 与日期，写进该轮「升 pin 重校」条目的毕业 Note
 ——**逐条结论本身即是重审记录**，不另建维护页（避免第二份会漂移的清单）。
@@ -273,8 +269,8 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 
 | 纪律 | 落点 | 机械把守 |
 |---|---|---|
-| [D53](decisions.md#d53) 测试文件名 = 证据车道 | [tests/AGENTS](../tests/AGENTS.md) / [checks/AGENTS](../checks/AGENTS.md) / [checks/README](../checks/README.md) | [test-lanes](../tests/checks/shared/test-lanes.test.mjs) / [smoke-registry](../tests/checks/test-infra/smoke-registry.test.mjs) / [smoke-oracle-surface](../tests/checks/test-infra/smoke-oracle-surface.test.mjs) / layering ④ |
-| [D54](decisions.md#d54) 三环四账五关 | [guides/67](guides/67-test-strategy.md) / [三环四账五关 Note](../notes/implemented/2026-11-13-test-strategy-operating-model.md) | [test-lanes](../tests/checks/shared/test-lanes.test.mjs) / [smoke-registry](../tests/checks/test-infra/smoke-registry.test.mjs) / [smoke-oracle-surface](../tests/checks/test-infra/smoke-oracle-surface.test.mjs) / [ci-jobs](../tests/checks/test-infra/ci-jobs.test.mjs) / decisions-now |
+| [D53](../decisions.md#d53) 测试文件名 = 证据车道 | [tests/AGENTS](../../tests/AGENTS.md) / [checks/AGENTS](../../checks/AGENTS.md) / [checks/README](../../checks/README.md) | [test-lanes](../../tests/checks/shared/test-lanes.test.mjs) / [smoke-registry](../../tests/checks/test-infra/smoke-registry.test.mjs) / [smoke-oracle-surface](../../tests/checks/test-infra/smoke-oracle-surface.test.mjs) / layering ④ |
+| [D54](../decisions.md#d54) 三环四账五关 | [testing.md](../testing.md) / [三环四账五关 Note](../../notes/implemented/2026-11-13-test-strategy-operating-model.md) | [test-lanes](../../tests/checks/shared/test-lanes.test.mjs) / [smoke-registry](../../tests/checks/test-infra/smoke-registry.test.mjs) / [smoke-oracle-surface](../../tests/checks/test-infra/smoke-oracle-surface.test.mjs) / [ci-jobs](../../tests/checks/test-infra/ci-jobs.test.mjs) / decisions-now |
 
 ## 维护规则
 
@@ -284,10 +280,10 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
   的现状，因此下列事件发生时须同 diff 复核相关行——① 新增/退役自写代码面（如 D18 驾驶舱
   client 插件）；② 激活或清空某个 notes 层（如 archived/ 2026-09-27 启用）；③ 新增对接面、
   生成物或夹具族（如 snapshot-replay 夹具）。**只认 vendor 换 tag 会让"本仓落点"列单边腐烂**
-  ——实测教训 = [agent-ready-absorption Note](../notes/implemented/2026-09-25-agent-ready-absorption.md)（2026-10-08 二轮复核：当时 10 处 `na`/落点已失真，`align-ledger` 只判存在性、判不出语义过期）；
+  ——实测教训 = [agent-ready-absorption Note](../../notes/implemented/2026-09-25-agent-ready-absorption.md)（2026-10-08 二轮复核：当时 10 处 `na`/落点已失真，`align-ledger` 只判存在性、判不出语义过期）；
 - ⚠️ **`不适用` 是"当时不适用"，不是豁免**：写 `不适用` 必须同时给出**可判定的失效条件**
   （"本仓无 X" 形态），由 `align-ledger` 门禁的活性断言机械复核——理由变假即红。**把
   `不适用` 当成永久免检区 = 依据静默腐烂**（同上教训）；
 - 每轮重校的**重审命中与逐条结论**写进该轮「升 pin 重校」流程记录（本表不建维护页、
-  不带版本变更史）——流程与逐轮结论 = [bumping-vendor-pin 技能](../.agents/skills/bumping-vendor-pin/SKILL.md) §3 +
-  [021rc2 Note](../notes/archived/2026-10-19-vendor-pin-bump-021rc2.md)；历史轮次见归档。
+  不带版本变更史）——流程与逐轮结论 = [bumping-vendor-pin 技能](../../.agents/skills/bumping-vendor-pin/SKILL.md) §3 +
+  [021rc2 Note](../../notes/archived/2026-10-19-vendor-pin-bump-021rc2.md)；历史轮次见归档。

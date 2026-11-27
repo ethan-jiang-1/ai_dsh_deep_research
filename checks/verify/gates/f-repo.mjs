@@ -1,7 +1,7 @@
 // f-repo.mjs — 域 F · 仓规环境：symlink、秘密、路径卫生、反证记录、门禁台账、入口链、backlog、端口、hooks。
 //
 // 从 2026-10-27 卫生轮前的单文件 verify.mjs 原样切出（判据与文案逐字未改）；共享助手住
-// ../context.mjs。改本域门禁只需读本文件——域切分 = docs/evaluation.md §L0 表的 A–F 分组。
+// ../context.mjs。改本域门禁只需读本文件——域切分 = docs/testing.md §L0 表的 A–F 分组。
 
 import { readFileSync, readdirSync, existsSync, lstatSync, readlinkSync } from 'node:fs';
 import { join, relative, sep, dirname } from 'node:path';
@@ -113,7 +113,7 @@ export function runF() {
       for (const field of missingProbeFields(fields)) missing.push(`${file} 缺「${field}」`);
     }
     if (missing.length > 0) {
-      fail(gate, `头注必填字段缺失：${missing.join('；')}——修正 = 按 docs/guides/66-probe-playbook.md 的头注协议补字段`);
+      fail(gate, `头注必填字段缺失：${missing.join('；')}——修正 = 按 docs/guides/probe-playbook.md 的头注协议补字段`);
     }
     const indexPath = join(dir, 'INDEX.generated.md');
     const expected = renderProbeIndex(entries);
@@ -263,14 +263,18 @@ export function runF() {
 // 改链结构时同 diff 更新本清单。
 {
   const gate = 'entry-chain';
-  const members = ['AGENTS.md', 'docs/00-index.md', '_backlog/issues', 'notes/proposed',
-    'docs/guides/60-dev-loop.md', 'docs/evaluation.md', 'docs/design/10-architecture.md',
-    'docs/design/20-roles.md', 'docs/design/30-methodology-mapping.md', 'docs/design/40-research-cockpit.md',
-    'docs/design/50-agent-loop-and-state.md', 'docs/design/60-intent-carriers.md',
-    'docs/guides/61-run-playbook.md',
-    'docs/guides/62-plugin-authoring.md', 'docs/AGENTS.md', 'checks/AGENTS.md', 'notes/AGENTS.md',
-    'packages/deep-research-pack/AGENTS.md', 'tests/AGENTS.md', '_backlog/AGENTS.md',
-    'probes/README.md'];
+  const members = [
+    'AGENTS.md', 'docs/README.md', 'docs/AGENTS.md', 'docs/architecture.md',
+    'docs/decisions.md', 'docs/testing.md', 'docs/policy.md',
+    'docs/contracts/presets.md', 'docs/contracts/client-ui.md', 'docs/contracts/data-model.md',
+    'docs/contracts/release.md', 'docs/contracts/roles.md', 'docs/contracts/methodology-mapping.md',
+    'docs/contracts/run-forms.md', 'docs/contracts/git-boundary.md',
+    'docs/guides/bootstrap.md', 'docs/guides/dev-loop.md', 'docs/guides/run-ops.md',
+    'docs/guides/plugin-authoring.md', 'docs/guides/probe-playbook.md',
+    'docs/reference/package-catalog.generated.md', 'docs/reference/commands.md', 'docs/reference/glossary.md',
+    'checks/AGENTS.md', 'notes/AGENTS.md', 'packages/deep-research-pack/AGENTS.md',
+    'tests/AGENTS.md', '_backlog/AGENTS.md', '_backlog/issues', 'notes/proposed', 'probes/README.md',
+  ];
   for (const rel of members) {
     if (!existsSync(join(ROOT, rel))) fail(gate, `入口链成员缺席：${rel}（正本 = AGENTS.md §入口链；改链须同 diff 更新本门禁清单）`);
   }

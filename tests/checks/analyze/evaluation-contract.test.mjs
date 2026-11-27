@@ -1,6 +1,6 @@
-// 评估合同在位性 — docs/evaluation.md 是本仓验收合同（先于框架定案），
+// 评估合同在位性 — docs/testing.md 是本仓验收合同（先于框架定案），
 // 回归层断言它存在且五个评估面齐全，防止评估标准被静默删改。
-// 负例留证 2026-10-28：把 evaluation.md 的「L4 交付面」标题改成「L4 面（改名探针）」→
+// 负例留证 2026-10-28：把 testing.md 的「L4 交付面」标题改成「L4 面（改名探针）」→
 //   `评估面缺失: L4 交付面` 红；还原 → 绿。（首次尝试只改标题后缀，断言用 includes 照旧命中，
 //   说明"探针必须打到判据本身"——改名整体替换才真的红。）
 import { test } from 'node:test';
@@ -10,10 +10,10 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-const EVAL = join(ROOT, 'docs', 'evaluation.md');
+const EVAL = join(ROOT, 'docs', 'testing.md');
 
 test('评估合同存在且五面齐全', () => {
-  assert.ok(existsSync(EVAL), 'docs/evaluation.md 不存在');
+  assert.ok(existsSync(EVAL), 'docs/testing.md 不存在');
   const text = readFileSync(EVAL, 'utf8');
   for (const face of ['L0 结构面', 'L1 挂载面', 'L2 安装面', 'L3 领域面', 'L4 交付面']) {
     assert.ok(text.includes(face), `评估面缺失: ${face}`);
@@ -80,7 +80,7 @@ const CONTRACT_COPIES = [
   ['run 模板副本', 'packages/deep-research-pack/content/templates/run/evidence-entry.md'],
   ['analyst skill 副本（执行者实际看的）', 'packages/deep-research-pack/presets/analyst/skills/evidence-extraction/SKILL.md'],
   ['analyst persona 内联副本（0.1.7 preset 行）', 'packages/deep-research-pack/presets/analyst.patch.yml'],
-  ['方法论映射（L3 载体）', 'docs/design/30-methodology-mapping.md'],
+  ['方法论映射（L3 载体）', 'docs/contracts/methodology-mapping.md'],
 ];
 
 test('证据契约八字段在各执行者副本全部在场（对账，防静默漂移；谓词分层：硬五字段定有效性、软二字段标未分级）', () => {

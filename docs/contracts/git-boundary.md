@@ -1,7 +1,6 @@
-# 63 · Git 入库边界与跨环境纪律
+# Git 入库边界与跨环境纪律
 
-> 层：指南。本页拥有“什么内容该进 git、什么不该进、跨环境怎么不互相污染”的判据。
-> 新增文件、调整 `.gitignore`、把生成物标成 tracked、或发现仓库里出现本机残留时，先按本页分类。
+> **读法**：本页拥有“什么内容该进 git、什么不该进、跨环境怎么不互相污染”的三问判据；新增文件、调整 `.gitignore` 或标记 tracked 生成物前先按本页分类。
 > 决定理由与输掉的方案 = [git-boundary-policy Note](../../notes/implemented/2026-10-25-git-boundary-policy.md)。
 
 ## 一个前提：用户装的东西 ≠ 贡献者 clone 的东西
@@ -56,7 +55,7 @@
 - **路径**：仓库内只用相对路径；脚本用 `ROOT` / `import.meta.url` 定位，不写 home、用户名、
   OS 盘符。需要展示路径时用环境变量或 `<workspace>` 占位。
 - **DSH home / 凭据**：`DSH_HOME` 默认由 `tools/env.sh` 指向 `runtime/harness-home`；多实例的
-  隔离根/profile/端口/state 变量与默认值 = [guides/65 §4](65-run-forms.md)（单一 owner）。
+  隔离根/profile/端口/state 变量与默认值 = [contracts/run-forms.md §4](./run-forms.md)（单一 owner）。
   凭据由使用者自己提供，不入库。不要假定 `~/.dsh`、全局 `dsh` 或某个已安装 profile 在场。
 - **运行时**：Node 区间与 pnpm 版本由 `package.json` 钉住；LF 由 `.gitattributes` 强制；
   macOS/Linux 差异走运行时判断（如 `process.platform`），不提交平台二进制或 `.cmd` 脚本。

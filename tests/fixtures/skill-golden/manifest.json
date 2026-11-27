@@ -11,7 +11,7 @@
     },
     {
       "path": ".agents/skills/bumping-vendor-pin/SKILL.md",
-      "sha256": "6980c12fe7b6879885a1ac181b18a5d0cd1d121e668a0ecbe3d109b7a0494e61"
+      "sha256": "54d27a52d0e695ffc5d55b0429f8a876862f28639ce6d7f4793b54408f0114e0"
     },
     {
       "path": ".agents/skills/changing-node-topology/SKILL.md",
@@ -19,11 +19,11 @@
     },
     {
       "path": ".agents/skills/changing-ui-copy/SKILL.md",
-      "sha256": "d7dd19e664af4b09db44c7d3ba0bc854213035b10c6c38f4d9b0fb2cb9189ba7"
+      "sha256": "b55058940fe3560e5a112e8d57be780e938ca16b97461f5157783889c9f44653"
     },
     {
       "path": ".agents/skills/exploratory-verification/SKILL.md",
-      "sha256": "022278d210c9ed34b3a92263b053cf5528acf5477b125823ce67f84095dacda2"
+      "sha256": "2293e43e34e1b38ec5c2e7b6af5c34dde5ae3b037fa766437502685b8963d208"
     },
     {
       "path": ".agents/skills/reproducing-a-failure/SKILL.md",
@@ -31,19 +31,19 @@
     },
     {
       "path": ".agents/skills/reviewing-a-delivery/SKILL.md",
-      "sha256": "818764df2e7c585705906a28d8a0e4a00d7a7be3653a21d29b378dab1f65c7e9"
+      "sha256": "f1fb940b228d1804d19418fd9b46c2ec8b527432eb809733dbfe53c0f7e9cb9b"
     },
     {
       "path": ".agents/skills/running-a-research-run/SKILL.md",
-      "sha256": "29030a291ccb8ee328df7ec3b8efa39ce5fcef4354850305936cff237496413c"
+      "sha256": "ee8b9b67e722f1165a3a34c55cfef597ffa52f6e089b6e4ee1a677a6a1abd37e"
     },
     {
       "path": ".agents/skills/using-a-probe/SKILL.md",
-      "sha256": "ebb0935fa7262ea8593030edab172ebdc0e63f3bdcf51b29834aaf91d1f27fd1"
+      "sha256": "0098831d44b3e2666c52596aa2127c5a46ab3e9580340f2ff53acc323f83c882"
     },
     {
       "path": ".agents/skills/writing-a-gate/SKILL.md",
-      "sha256": "fc160f6ccf96704edce9e46d299dc79dac022b9313e84b8e871cbb255d529adc"
+      "sha256": "96c8bec71e295eb056d2c7d46f25fd62f67158fba273b12956813355119718e2"
     },
     {
       "path": "packages/deep-research-pack/presets/analyst/skills/evidence-extraction/SKILL.md",

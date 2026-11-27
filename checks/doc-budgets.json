@@ -2,12 +2,12 @@
   "_note": "常驻文档 UTF-8 字节上限正本（上游 DSH 用词数 + scripts/doc-budgets.manifest.json；中文词数不可靠，物理行数会逼出单行塞字，本仓采用 UTF-8 字节作为忠实等价）。门禁 doc-budgets 强制：登记项必须存在且不超限，仓内新增 AGENTS.md 必须登记。超限处置序 = 下放 > 压缩 > 升顶（升顶须同变更登记理由——上限过低是预算 bug）。",
   "_unit": "utf8-bytes",
   "_raises": {
-    "2026-11-27-unit-migration": "物理行数预算整体迁移至 UTF-8 字节预算（消除 5/9 常驻文件顶格 100% 逼出的千字单行墙；每件留 ≥5% 余量，与上游 vendor/dsh/docs/AGENTS.md 同口径）。AGENTS.md ≤ 16 KiB（16384 B）；README.md / docs/AGENTS.md / tests/AGENTS.md ≤ 8 KiB（8192 B）；checks/AGENTS.md ≤ 7 KiB（7168 B）；notes/AGENTS.md / packages/deep-research-pack/AGENTS.md / _backlog/AGENTS.md ≤ 6 KiB（6144 B）；docs/00-index.md 暂 10 KiB（10240 B，Phase 3 升级为 docs/README.md 并收紧至 8 KiB）。"
+    "2026-11-27-unit-migration": "物理行数预算整体迁移至 UTF-8 字节预算（消除 5/9 常驻文件顶格 100% 逼出的千字单行墙；每件留 ≥5% 余量，与上游 vendor/dsh/docs/AGENTS.md 同口径）。AGENTS.md ≤ 16 KiB（16384 B）；README.md / docs/README.md / docs/AGENTS.md / tests/AGENTS.md ≤ 8 KiB（8192 B）；checks/AGENTS.md ≤ 7 KiB（7168 B）；notes/AGENTS.md / packages/deep-research-pack/AGENTS.md / _backlog/AGENTS.md ≤ 6 KiB（6144 B）。"
   },
   "AGENTS.md": 16384,
   "_backlog/AGENTS.md": 6144,
   "README.md": 8192,
-  "docs/00-index.md": 10240,
+  "docs/README.md": 8192,
   "docs/AGENTS.md": 8192,
   "checks/AGENTS.md": 7168,
   "notes/AGENTS.md": 6144,

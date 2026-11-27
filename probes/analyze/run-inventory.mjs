@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/policy.md
 // 状态：常驻
 // 一句话：run bundle 只读保留期视图（数量 / 大小 / 最老日期；不删任何东西）
 // 何时跑：清理运行区前先看有几场、多大；保留期评估

@@ -95,13 +95,13 @@ const waitForAnswer = async (sessionId) => {
 };
 
 // ── 主流程 ───────────────────────────────────────────────────────────────────
-const PROMPT = `你是入口链探针（一次只读审计，不授予实施权限）。先读根 AGENTS.md 与 docs/00-index.md，再按入口链的条件读取必要文件；不要把所有条件步骤当作普遍前置。每问恰好一行，格式为「Q<n>: <一句话答案>」：
+const PROMPT = `你是入口链探针（一次只读审计，不授予实施权限）。先读根 AGENTS.md 与 docs/README.md，再按入口链的条件读取必要文件；不要把所有条件步骤当作普遍前置。每问恰好一行，格式为「Q<n>: <一句话答案>」：
 
 Q1: 用户本轮明确授权的局部修改按什么范围执行？是否需要重复请批？
 Q2: RFC 是否是一般实施工作的普遍前置？它在哪种持久决定情况下才需要？
 Q3: 开工与收尾程序在哪个文件？`;
 
-console.log('probe: 真值——本仓不设仓级 queue 当前项，授权范围与 guides/60 是判断依据');
+console.log('probe: 真值——本仓不设仓级 queue 当前项，授权范围与 guides/dev-loop.md 是判断依据');
 // boot 前自检（RFC vendor-build-guard）：0.1.7 起启动依赖构建产物，缺失时报错隐晦——
 // 提前拦成一行 remedy。exit 2 = 环境前置缺失（与"未 source env"同档）。
 {
@@ -138,7 +138,7 @@ try {
   const q3 = /^Q3:(.+)$/m.exec(answer)?.[1] ?? '';
   verdict.push(['Q1 明确按用户授权范围执行且无需重复请批', directAuthorizationBoundaryPasses(q1)]);
   verdict.push(['Q2 RFC 仅适用于需显式评审的持久决定，不是实施普遍前置', rfcBoundaryPasses(q2)]);
-  verdict.push(['Q3 指认 guides/60（开发环）', /60|开发环|guides/i.test(q3)]);
+  verdict.push(['Q3 指认 guides/dev-loop.md（开发环）', /60|开发环|guides/i.test(q3)]);
 } finally {
   await cleanupBootedProbe(booted, PORT);
 }

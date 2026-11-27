@@ -17,7 +17,7 @@
 //
 // 选择面（2026-11-18，用户定调「日常迭代不跑重档」）：`--gate=<门禁名[,名]>` 按案例表每行已有的
 // `gate` 字段过滤；`--case=<id[,id]>` 按 id 过滤；两者同时给取交集。改哪道门禁就只跑哪道门禁的
-// 案例（日常口，量级 seconds）；**全量只在发布/nightly 跑**（分层正本 = docs/guides/60 §门禁分层）。
+// 案例（日常口，量级 seconds）；**全量只在发布/nightly 跑**（分层正本 = docs/guides/dev-loop.md §门禁分层）。
 // 选择只改「跑哪些」，不改任何案例的断言；被过滤掉的案例既不计红也不计绿（末尾自报「仅跑 N 个」）。
 //
 // 建仓面（2026-11-18）：fixture **复用**，不再一案例一克隆。K 个 worker 各持一份**已 commit** 的
@@ -176,8 +176,8 @@ async function main() {
       const withoutCases = [...gateFilter].filter((g) => !withCases.has(g));
       if (withoutCases.length > 0) {
         // 结构性不适的门禁（submodule / 本机 git config / gitignored 制品）没有常驻案例：
-        // 反证 = 一次性红录（docs/evaluation.md §L0 反证列），不是本入口能跑的。
-        console.error(`gates.e2e: --gate 选中的门禁没有注入案例：${withoutCases.map((g) => `${g}（${noCase.get(g)}）`).join('；')}——反证 = 一次性红录（docs/evaluation.md §L0）`);
+        // 反证 = 一次性红录（docs/testing.md §L0 反证列），不是本入口能跑的。
+        console.error(`gates.e2e: --gate 选中的门禁没有注入案例：${withoutCases.map((g) => `${g}（${noCase.get(g)}）`).join('；')}——反证 = 一次性红录（docs/testing.md §L0）`);
         process.exit(2);
       }
     }

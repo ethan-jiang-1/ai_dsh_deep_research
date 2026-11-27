@@ -3,7 +3,7 @@
 // 为什么存在：manual 是每轮注入的常驻面；细则下放到 content/generic/ 后，必须保证
 //  ① T0 仍在上限内；② 每个 generic 文件都被 T0 指针点名；③ 指针目标存在；④ T0 不复制
 //  generic 的正文标题（否则“下放”只是搬家，常驻面仍在）。
-// 这是 design/70 §5 的 T0 缝守卫；不证明模型真的会去 read generic（→ L1/L4）。
+// 这是 contracts/presets.md §5 的 T0 缝守卫；不证明模型真的会去 read generic（→ L1/L4）。
 //
 // 红配方：在 content/generic/ 新增 orphan.md 且 T0 不指针 → 本文件红；删 T0 的
 // state-and-recovery 指针 → 红；把 generic 的 H1 抄回 T0 → 红；T0 超下放触发 10,000 字符 → 红

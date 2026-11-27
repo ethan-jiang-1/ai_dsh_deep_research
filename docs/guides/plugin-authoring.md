@@ -1,16 +1,13 @@
-# 62 · 插件作者入口（在本仓改 DSH 插件内容）
+# 插件作者入口（在本仓改 DSH 插件内容）
 
-> 层：指南。本页是 DSH 插件作者文档 tier 的**本仓投影**——上游正本 = `vendor/dsh/`
-> 的 `docs/cordis-tutorial/`（七讲，keyless 可运行）+ `docs/user/develop/{basic,framework,practice}`
-> （插件最小定义 / 事件与服务依赖 / LLM adapter 与动态配置）+ `docs/user/develop/basic/publish.md`
-> （bundle/profile 二分）。本页只回答"在本仓改插件内容，落在哪、怎么验"。
+> 层：指南。本页是 DSH 插件作者文档 tier 的**本仓投影**——上游正本 = `vendor/dsh/` 的 `docs/cordis-tutorial/`（七讲，keyless 可运行）+ `docs/user/develop/{basic,framework,practice}` + `docs/user/develop/basic/publish.md`。本页只回答"在本仓改插件内容，落在哪、怎么验"。
 
 ## 为什么要有这一页
 
 开发本插件时，coding agent 同时读**两个仓库**：本仓（插件内容）与 `vendor/dsh/`（机制本体）。
 两边沿用同一套概念时，同样的检索模式与判断标准都成立；哪边自造词汇，agent 就要在哪边重建
 一套局部模型（仓外语料 `_agent_ready_development/repo-harness/09-plugin-author-entry.md` §4——
-钉版与路径登记 = [external-materials.md](../external-materials.md)，仓内不可解析）。
+钉版与路径登记 = [reference/external.md](../reference/external.md)，仓内不可解析）。
 本页把本仓的落点钉在那些概念上。
 
 ## 词汇（与 DSH 对齐，不允许自造同义词）
@@ -57,7 +54,7 @@ logged）——pack 行只引入**现成**能力，这项义务落在 vendor 面
 | 新增研究角色 | `packages/deep-research-pack/presets/critic/`（skill 隔离最干净） | [`.agents/skills/adding-a-research-role`](../../.agents/skills/adding-a-research-role/SKILL.md) |
 | 新增方法论 skill | `presets/lead/skills/synthesis/SKILL.md`（frontmatter `name`/`description` + 方法论正文） | 同上 |
 | 新增/修改 bundle 行 | [pack bundle](../../packages/deep-research-pack/cordis.patch.yml) → [生成器](../../tools/record/render-overlay.mjs) 渲染 overlay | `overlay-fresh` 检生成物；[boot-run](../../tools/channel/boot-run.sh) 检发布集与安装镜像 |
-| 新增机械门禁 | `checks/verify/verify.mjs` + `docs/evaluation.md` §L0 | [`.agents/skills/writing-a-gate`](../../.agents/skills/writing-a-gate/SKILL.md) |
+| 新增机械门禁 | `checks/verify/verify.mjs` + `docs/testing.md` §L0 | [`.agents/skills/writing-a-gate`](../../.agents/skills/writing-a-gate/SKILL.md) |
 | 跑一次研究 | `packages/deep-research-pack/content/templates/run/` | [`.agents/skills/running-a-research-run`](../../.agents/skills/running-a-research-run/SKILL.md) |
 
 ## 证据义务（改哪面跑什么）
@@ -72,7 +69,7 @@ AGENTS.md §命令速查）：
 | 安装形状（pack → 干净 profile → plugin add） | `node checks/smoke/release.entry.mjs`（L2） |
 | persona / skill 文本（模型可见） | 追加 `node checks/smoke/l4-lite.e2e.mjs`（真模型档） |
 | docs / AGENTS | 追加 `node probes/behavior/entry-chain-probe.mjs`（真模型档） |
-| 门禁本身 | 注入回归看红 → 还原 → 绿（流程正本 = [writing-a-gate 技能](../../.agents/skills/writing-a-gate/SKILL.md)；台账 = `docs/evaluation.md` §L0） |
+| 门禁本身 | 注入回归看红 → 还原 → 绿（流程正本 = [writing-a-gate 技能](../../.agents/skills/writing-a-gate/SKILL.md)；台账 = `docs/testing.md` §L0） |
 
 ### 自写代码的证据阶梯（驾驶舱与未来 `src/` 套件；test-strategy 语料五台阶移植）
 
@@ -90,7 +87,7 @@ AGENTS.md §命令速查）：
 ## 交付与部署形态（本包怎么送到用户手里）
 
 完整运行形态合同（M1 安装 / M2 独立开发 / M3 移交、P/H/W 归属、升级/回滚、冷启动证据）=
-[guides/65](65-run-forms.md)；本节只保留作者面的拓扑。
+[contracts/run-forms.md](../contracts/run-forms.md)；本节只保留作者面的拓扑。
 
 DSH 的规则（上游正本 = `vendor/dsh/docs/user/develop/basic/publish.md`）：**bundle 是你编写与
 分发的单位，profile 是用户启动的环境，二者互斥**。本仓据此的交付拓扑：
@@ -121,7 +118,7 @@ agent-instructions 注入，冲突时项目优先。安装步骤（用户视角�
 
 一次改动往往牵动多处；漏一处的表现是"本地对、部署错"或"静默不生效"。本表是**文件级**影响面；
 **执行程序**（必跑哪些面、生成物与检查的次序、done 判据）的唯一 owner =
-[guides/60 §2 任务型路由表](./60-dev-loop.md)。按下表一次改齐：
+[guides/dev-loop.md §2 任务型路由表](./dev-loop.md)。按下表一次改齐：
 
 | 你要做的事 | 必须一起动 | 最小证据 |
 |---|---|---|
@@ -131,7 +128,7 @@ agent-instructions 注入，冲突时项目优先。安装步骤（用户视角�
 | 改研究手册 / 模板 | 改 `packages/deep-research-pack/content/`（手册/模板）；模板路径由 `research_pack_root` 插值 | `content-shape` 门禁 + `snapshot-replay` B 层 + `l4-lite` 真模型 |
 | 加部署脚本 / bin | `package.json` 的 `files` + `bin`（当前只有只读 doctor） | `release.entry`（L2：真装一次，装完能跑） |
 | 加观察面 client 面能力 | `src/client/` + `tsconfig.client.json` 的 include + `dsh.client.inject` + keyed 字面量进 `keys.ts` | `client-load.entry`（真浏览器）+ `client-keys` 门禁 |
-| 改**现有**观察面页签（最频改动） | 页签 → 文件 → 职责的构成正本 = [design/40 §2](../design/40-research-cockpit.md)；折算住 `src/lib/`（纯函数，别在组件里堆逻辑）；新路径进 design/40 登记 | `client-load.entry`（页签可点可读；失败留 png/html/console/meta）+ `cockpit-doc-registry` / `client-keys` 门禁 |
+| 改**现有**观察面页签（最频改动） | 页签 → 文件 → 职责的构成正本 = [contracts/client-ui.md §2](../contracts/client-ui.md)；折算住 `src/lib/`（纯函数，别在组件里堆逻辑）；新路径进 contracts/client-ui.md 登记 | `client-load.entry`（页签可点可读；失败留 png/html/console/meta）+ `cockpit-doc-registry` / `client-keys` 门禁 |
 | 改 persona / skill / 手册文本（模型可见） | 同 diff 跑真模型档；运行中的 web 缓存 boot 文本，须重启通道 | `l4-lite.e2e`（真模型档） |
 | 换 vendor pin | `tools/build/vendor-build.sh` 全链重建 + 逐条重审 | [bumping-vendor-pin 技能](../../.agents/skills/bumping-vendor-pin/SKILL.md)（流程正本；历次轮次见归档） |
 | 改 profile 镜像 | 不手改——改 pack 源后跑 `bash tools/channel/boot-run.sh`：组合不完整/缺席时它重建，漂移时它 **exit 1** 并打印 `rm -rf <profile>` 补救（直接 `dsh --profile deep-research` 会静默用旧镜像） | boot-run 漂移检测（fail-loud） |
@@ -145,5 +142,5 @@ agent-instructions 注入，冲突时项目优先。安装步骤（用户视角�
   安装/升级/卸载生命周期、数据卡。这些直接决定用户能否装、能否退、数据在哪。
 - **DSH 自身的 development harness（可选继承）**：`AGENTS.md`、Agent Notes、gates、review 纪律。
   它们服务“改 DSH/本仓”的 agent；本仓选择继承是为了自持与可审计（逐行三态见
-  [discipline-map](../discipline-map.md)），不是插件发布的强制形态。
+  [discipline-map](../reference/discipline-matrix.md)），不是插件发布的强制形态。
 - **可迁移原则**：一个事实一个 owner、生成物有生成器、决定有记录；是原则，不是复制形态。

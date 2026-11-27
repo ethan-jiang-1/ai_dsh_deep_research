@@ -12,20 +12,20 @@ const read = (rel) => readFileSync(join(ROOT, rel), 'utf8')
 
 test('归档路径三处一致：archive/drt_<slug>/（2026-10-20 审计 P1-2 反证）', () => {
   const handbook = read('packages/deep-research-pack/content/manual.md')
-  const design = read('docs/design/50-agent-loop-and-state.md')
-  const guide = read('docs/guides/61-run-playbook.md')
-  for (const [rel, text] of [['packages/deep-research-pack/content/manual.md', handbook], ['docs/design/50-agent-loop-and-state.md', design], ['docs/guides/61-run-playbook.md', guide]]) {
+  const design = read('docs/contracts/data-model.md')
+  const guide = read('docs/guides/run-ops.md')
+  for (const [rel, text] of [['packages/deep-research-pack/content/manual.md', handbook], ['docs/contracts/data-model.md', design], ['docs/guides/run-ops.md', guide]]) {
     assert.ok(text.includes('archive/drt_<slug>/'), `${rel} 未写 archive/drt_<slug>/——归档目录名以盘上为准`)
   }
-  assert.ok(!/archive\/<slug>/.test(guide), 'guides/61 仍出现 archive/<slug>（盘上是 drt_<slug>）')
+  assert.ok(!/archive\/<slug>/.test(guide), 'guides/run-ops.md 仍出现 archive/<slug>（盘上是 drt_<slug>）')
 })
 
 test('开发技能清单覆盖盘上目录（2026-10-20 审计 P1-1 反证）', () => {
   const skills = readdirSync(join(ROOT, '.agents', 'skills'))
     .filter((name) => statSync(join(ROOT, '.agents', 'skills', name)).isDirectory())
   assert.ok(skills.length > 0, '防空语料：.agents/skills 零目录')
-  const guide = read('docs/guides/60-dev-loop.md')
-  for (const name of skills) assert.ok(guide.includes(name), `guides/60 未路由技能 ${name}——盘上有而文档不可发现`)
+  const guide = read('docs/guides/dev-loop.md')
+  for (const name of skills) assert.ok(guide.includes(name), `guides/dev-loop.md 未路由技能 ${name}——盘上有而文档不可发现`)
 })
 
 // 负例留证 2026-10-21：六维卫生轮 维度4 M1——本测试首跑即红：research-workspace 根的
@@ -71,15 +71,15 @@ test('根 AGENTS 布局块覆盖工作区根实体与 pack 种子（2026-10-21 �
 // 「描述 vs 渲染」没有守门，故在此钉住：COMPACT 默认态 ⇒ README 不得出现已迁走的四区词。
 // 负例留证 2026-10-27：本测试首跑即红（README:286-288 命中 四区/内置打法/我的偏好库/底线条 四词）；
 // 改 README 为摘要面 → 绿。反向：把 COMPACT 改 false 则该断言自失效（回滚态由设计文档另行描述）。
-// 构成索引的"描述即存在"（2026-10-28 Phase E）：design/40 §2 的窄索引表只写**主文件名**
+// 构成索引的"描述即存在"（2026-10-28 Phase E）：contracts/client-ui.md §2 的窄索引表只写**主文件名**
 // （完整路径在各件小节的「**文件**：」行）。索引是最常被扫的一行，主文件名漂了（改名/删除）
 // 就没有任何门禁发现——cockpit-doc-registry 只查完整路径在正本里出现过。
 // 负例留证 2026-10-28：把某行的 ResearchStatusTab.tsx 改成 ResearchStatusPane.tsx → 红。
-test('构成索引：design/40 §2 索引行点名的主文件名在盘上存在', () => {
-  const text = read('docs/design/40-research-cockpit.md')
+test('构成索引：contracts/client-ui.md §2 索引行点名的主文件名在盘上存在', () => {
+  const text = read('docs/contracts/client-ui.md')
   const lines = text.split('\n')
   const hdr = lines.findIndex((l) => l.trim().startsWith('| 件 | 文件 | 一句话 | 详情 |'))
-  assert.ok(hdr >= 0, 'design/40 §2 缺构成索引表头')
+  assert.ok(hdr >= 0, 'contracts/client-ui.md §2 缺构成索引表头')
   const rows = []
   for (let i = hdr + 2; i < lines.length && lines[i].startsWith('|'); i += 1) rows.push(lines[i])
   assert.ok(rows.length >= 10, `构成索引行数异常少（${rows.length}）——防空语料`)
@@ -99,7 +99,7 @@ test('构成索引：design/40 §2 索引行点名的主文件名在盘上存在
 })
 
 test('文档地图：docs/ 下每个 tracked .md 都被 00-index 文档地图点名（新增不登记 = 红）', () => {
-  const index = read('docs/00-index.md')
+  const index = read('docs/README.md')
   const start = index.indexOf('## 文档地图')
   const end = index.indexOf('## 决策台账')
   assert.ok(start >= 0 && end > start, '00-index 缺「## 文档地图」节——本断言的判据源消失')
@@ -107,7 +107,7 @@ test('文档地图：docs/ 下每个 tracked .md 都被 00-index 文档地图点
   const docs = readdirSync(join(ROOT, 'docs'), { recursive: true })
     .filter((f) => typeof f === 'string' && f.endsWith('.md'))
     .map((f) => f.replaceAll('\\', '/'))
-    .filter((f) => f !== '00-index.md')
+    .filter((f) => f !== 'README.md')
   assert.ok(docs.length >= 15, `防空语料：docs/ 下 .md 过少（${docs.length}）`)
   const missing = docs.filter((rel) => !map.includes(rel)).sort()
   assert.deepEqual(missing, [],
@@ -116,10 +116,10 @@ test('文档地图：docs/ 下每个 tracked .md 都被 00-index 文档地图点
 })
 
 // Fresh-agent 入口探针（2026-10-28，只读）：00-index 的"开跑前置"漏了 vendor 构建与工作区注册，
-// guides/60 的"纯文档"行漏了 entry-chain-probe 条件，AGENTS 的"最小集 1–3"没指向第 4 步。
+// guides/dev-loop.md 的"纯文档"行漏了 entry-chain-probe 条件，AGENTS 的"最小集 1–3"没指向第 4 步。
 // 这三处是 fresh agent 会照做的导航事实；措辞可改，但关键义务不能丢。
 test('入口链导航合同：开跑前置含 vendor 构建/工作区注册；纯文档行指向入口链探针；最小集指向第 4 步', () => {
-  const index = read('docs/00-index.md')
+  const index = read('docs/README.md')
   const preStart = index.indexOf('**开跑前置**')
   const preEnd = index.indexOf('**歧义裁定**')
   assert.ok(preStart >= 0 && preEnd > preStart, '00-index 缺「开跑前置」/「歧义裁定」边界')
@@ -127,16 +127,16 @@ test('入口链导航合同：开跑前置含 vendor 构建/工作区注册；�
   assert.ok(pre.includes('vendor-build.sh'), '开跑前置漏 vendor 构建——fresh clone 会在 boot 自检红')
   assert.ok(pre.includes('research-workspace') && pre.includes('已注册'), '开跑前置漏工作区注册——研究手册不会注入')
   assert.ok(pre.includes('端口空闲'), '开跑前置漏端口（3083 被占时 boot 只会 fail-loud，不会自己换口）')
-  assert.ok(pre.includes('guides/60 §2'), '开跑前置的 source 清单应指向 guides/60 §2（命令/前置唯一 owner）')
-  const guide = read('docs/guides/60-dev-loop.md')
+  assert.ok(pre.includes('guides/dev-loop.md §2'), '开跑前置的 source 清单应指向 guides/dev-loop.md §2（命令/前置唯一 owner）')
+  const guide = read('docs/guides/dev-loop.md')
   const row = guide.split('\n').find((l) => l.includes('| 纯文档 / 卫生 |'))
-  assert.ok(row !== undefined, 'guides/60 缺「纯文档 / 卫生」行')
+  assert.ok(row !== undefined, 'guides/dev-loop.md 缺「纯文档 / 卫生」行')
   assert.ok(row.includes('entry-chain-probe'), '纯文档行漏 AGENTS/入口链改动时的探针条件（§4 有、路由表没有 = 两套说法）')
   assert.ok(guide.includes('根/子树 AGENTS 或入口链'), '§4 的探针触发词与路由表不一致（docs/AGENTS vs AGENTS/入口链）')
   const agents = read('AGENTS.md')
   assert.ok(agents.includes('改仓任务的验收/收尾按第 4 步'), 'AGENTS 最小集未指向第 4 步——fresh agent 会停在 1–3')
-  assert.ok(agents.includes('口径 = guides/60 §2'), 'AGENTS 的 source 清单 owner 应指向 guides/60 §2（checks/README 只申报凭据/调用模式）')
-  const evalText = read('docs/evaluation.md')
+  assert.ok(agents.includes('口径 = guides/dev-loop.md §2'), 'AGENTS 的 source 清单 owner 应指向 guides/dev-loop.md §2（checks/README 只申报凭据/调用模式）')
+  const evalText = read('docs/testing.md')
   assert.ok(evalText.includes('node --import tsx/esm checks/smoke/client-load.entry.mjs'), 'evaluation 的 client-load 命令缺 tsx（直接 node 会在 .ts import 处失败）')
   assert.ok(!evalText.includes('`node checks/smoke/client-load.entry.mjs`'), 'evaluation 仍有不带 --import tsx/esm 的 client-load 命令')
 })
@@ -153,21 +153,21 @@ test('研究配置面板形态：COMPACT 默认态下 README 不描述已迁走�
   }
 })
 
-// 负例留证 2026-11-14：BUG-009 的回潮——guides/61 曾写「被通道重启终局化」，与卡内实测
+// 负例留证 2026-11-14：BUG-009 的回潮——guides/run-ops.md 曾写「被通道重启终局化」，与卡内实测
 //（重启前后日志一字节不变，不补 turn/end）及运行技能「无终局化补写」相抵。
 // 红配方：把 61 的句子改回「被通道重启终局化」→ 本例红。
 test('通道重启不终局化挂起 ask：61 与运行技能同判（BUG-009）', () => {
-  const guide = read('docs/guides/61-run-playbook.md')
+  const guide = read('docs/guides/run-ops.md')
   const skill = read('.agents/skills/running-a-research-run/SKILL.md')
   assert.match(skill, /无终局化补写/, '运行技能必须写「无终局化补写」——机制权威')
-  assert.doesNotMatch(guide, /被通道重启终局化/, 'guides/61 不得写「被通道重启终局化」——重启不补 turn/end')
-  assert.match(guide, /不会终局化/, 'guides/61 必须明确挂起 ask 不会因重启终局化')
+  assert.doesNotMatch(guide, /被通道重启终局化/, 'guides/run-ops.md 不得写「被通道重启终局化」——重启不补 turn/end')
+  assert.match(guide, /不会终局化/, 'guides/run-ops.md 必须明确挂起 ask 不会因重启终局化')
 })
 
 // 负例留证 2026-11-14：本测试首跑即红——检出三处真实 GFM 表格渲染断裂：
 // ① docs/decisions.md:52/55（表内遗留空行导致 D40–D55 脱离表头退化为普通段落）；
-// ② docs/design/10-architecture.md:66（表间插入正文段落导致末行脱离表头）；
-// ③ docs/discipline-map.md:190/198（表后缺空行被吞入上一表 + 二列表混入第三列被静默截断）。
+// ② docs/architecture.md:66（表间插入正文段落导致末行脱离表头）；
+// ③ docs/reference/discipline-matrix.md:190/198（表后缺空行被吞入上一表 + 二列表混入第三列被静默截断）。
 test('GFM 表格完整性：docs/ 下所有表格必须带分隔行、列数一致且表后空行收口', () => {
   const docs = readdirSync(join(ROOT, 'docs'), { recursive: true })
     .filter((f) => typeof f === 'string' && f.endsWith('.md'))
@@ -287,7 +287,7 @@ test('单向依赖守卫：docs/ 禁止链接 _backlog/_archived/ 与 _backlog/m
 test('单向依赖守卫变异矩阵：白名单放行、越界与围栏内外判别准确', () => {
   const okEntries = [
     {
-      rel: 'docs/design/40-research-cockpit.md',
+      rel: 'docs/contracts/client-ui.md',
       text: [
         '触发 = [triggers](../../_backlog/triggers.md)',
         '入口 = [README](../../_backlog/README.md) · [AGENTS](../../_backlog/AGENTS.md)',
@@ -302,7 +302,7 @@ test('单向依赖守卫变异矩阵：白名单放行、越界与围栏内外�
 
   const badEntries = [
     {
-      rel: 'docs/evaluation.md',
+      rel: 'docs/testing.md',
       text: [
         '[bug](../_backlog/_archived/fixed_bugs/BUG-001.md)',
         '[issue](../_backlog/_archived/settled_issues/2026-10-01-x.md)',
@@ -311,7 +311,7 @@ test('单向依赖守卫变异矩阵：白名单放行、越界与围栏内外�
       ].join('\n'),
     },
     {
-      rel: 'docs/guides/60-dev-loop.md',
+      rel: 'docs/guides/dev-loop.md',
       text: '[guard](../../_backlog/methods/class-level-guards.md#01-旧性质随变更继承)',
     },
   ]

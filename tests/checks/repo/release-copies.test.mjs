@@ -17,9 +17,9 @@ const pack = JSON.parse(readFileSync(join(ROOT, 'packages', 'deep-research-pack'
 const version = pack.version;
 const liveDocs = [
   'README.md',
-  'docs/00-index.md',
+  'docs/README.md',
   'docs/decisions.md',
-  'docs/guides/64-release-versioning.md',
+  'docs/contracts/release.md',
   'packages/deep-research-pack/README.md',
   'packages/deep-research-pack/README.zh.md',
   'tools/release/product-manual.md',

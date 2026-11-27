@@ -5,8 +5,8 @@ description: Use when regression is green but the new behavior's input space is 
 
 # 探索性验证：从「回归绿」到「找出静默做错的事」
 
-本技能是 **guidance**，不是 checklist。策略总图 = [guides/67](../../../docs/guides/67-test-strategy.md)；
-类级守卫形态 = [class-level-guards](../../../_backlog/methods/class-level-guards.md)；探针 = [guides/66](../../../docs/guides/66-probe-playbook.md)；
+本技能是 **guidance**，不是 checklist。策略总图 = [testing.md](../../../docs/testing.md)；
+类级守卫形态 = [class-level-guards](../../../_backlog/methods/class-level-guards.md)；探针 = [guides/probe-playbook.md](../../../docs/guides/probe-playbook.md)；
 历轮账本与覆盖地图 = [探索卡·第 0–11 轮](../../../_backlog/_archived/settled_issues/2026-11-11-exploratory-test-strategy.md)（冻结）；
 当前轮 = [命名空间搬家卡](../../../_backlog/_archived/settled_issues/2026-11-17-exploratory-namespace-move.md)（已结；批 Note = [残差修复](../../../notes/implemented/2026-11-17-namespace-move-residual-fixes.md)）。
 

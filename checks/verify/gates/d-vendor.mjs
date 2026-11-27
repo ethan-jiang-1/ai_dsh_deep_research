@@ -1,7 +1,7 @@
 // d-vendor.mjs — 域 D · vendor 对齐：submodule 只读铁律、钉身份复述、纪律台账逐源对账。
 //
 // 从 2026-10-27 卫生轮前的单文件 verify.mjs 原样切出（判据与文案逐字未改）；共享助手住
-// ../context.mjs。改本域门禁只需读本文件——域切分 = docs/evaluation.md §L0 表的 A–F 分组。
+// ../context.mjs。改本域门禁只需读本文件——域切分 = docs/testing.md §L0 表的 A–F 分组。
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -43,7 +43,7 @@ export function runD() {
 
 // ── pin-agreement（live 文件里的钉身份必须与 submodule 实际状态一致）──
 // 为什么：pin 在仓里有 14 个家，2026-09-26 清扫实测三处写错（tools/env.sh 的 tag 停在 0.1.5、
-// design/10 的层版本停在 0.1.5、alignment-ledger 的 commit 写成 639ed0153905）——而 vendor-pin
+// architecture.md 的层版本停在 0.1.5、alignment-ledger 的 commit 写成 639ed0153905）——而 vendor-pin
 // 只管 .gitmodules 一处，散文/机读面的复述无人对账。
 // 规则：① live 文件里每个 40 位 hex 串必须等于 submodule HEAD；② 每个 `dsh-v*` tag 串必须等于
 // submodule 的 tag——**唯一例外**：同一行带外部归属标记（语料/参考仓/company/外部材料）的，
@@ -68,7 +68,7 @@ export function runD() {
       // notes/ 整层豁免只对历史层（Note = 冻结快照，pin 复述是过去时，合法）；README.md 与
       // AGENTS.md 是活动指令层（目录地图 + 常设指令），捞回受检（2026-10-04 fresh-agent-doc-audit
       // 扩围：notes/README.md 曾携带 0.1.7 时代的过期 tag 而本门禁不咬——活动层复述面必须与
-      // submodule 一致；扩围反证实录 = evaluation.md 本行）。
+      // submodule 一致；扩围反证实录 = testing.md 本行）。
       // 录制会话流豁免（2026-09-27 立，2026-10-09 随夹具迁入 snapshots/replay/ 合并）：录制的
       // 会话流里含 harness 自身的版本戳（system-reminder 注入的构建身份）与录制时的本仓 commit
       // ——那是 vendor 规范化契约说的"挥发性身份"与历史证据身份，不是本仓的钉声明；钉死在
@@ -100,14 +100,14 @@ export function runD() {
   }
 }
 
-// ── align-ledger（对齐台账机读对账——docs/alignment-ledger.json 与 vendor 本体、
+// ── align-ledger（对齐台账机读对账——docs/reference/alignment-ledger.json 与 vendor 本体、
 //    与本仓落点三方核对：① 每条 source 在 vendor/dsh 真实存在（换 pin 后文件移位/删除即红
 //    = 重审触发器）；② verdict=adopted/adapted 的每处 landing 在仓内存在；③ na 必须给理由。
-//    人读视图 = docs/discipline-map.md 源 1–9；本门禁只判存在性，不判语义对错。）──
+//    人读视图 = docs/reference/discipline-matrix.md 源 1–9；本门禁只判存在性，不判语义对错。）──
 {
   const gate = 'align-ledger';
-  const manifestPath = join(ROOT, 'docs', 'alignment-ledger.json');
-  if (!existsSync(manifestPath)) fail(gate, 'docs/alignment-ledger.json 缺席——对齐台账的机读正本');
+  const manifestPath = join(ROOT, 'docs', 'reference', 'alignment-ledger.json');
+  if (!existsSync(manifestPath)) fail(gate, 'docs/reference/alignment-ledger.json 缺席——对齐台账的机读正本');
   else {
     let ledger = null;
     try { ledger = JSON.parse(readFileSync(manifestPath, 'utf8')); }
@@ -229,11 +229,11 @@ export function runD() {
   }
 }
 
-// ── discipline-na-trigger（人读表「不适用」行的免检区闭合——docs/discipline-map.md）
+// ── discipline-na-trigger（人读表「不适用」行的免检区闭合——docs/reference/discipline-matrix.md）
 //
 //    病根实证（2026-10-19 全表逐条语义重读）：discipline-map §维护规则 白纸黑字承诺
 //    「写 `不适用` 必须同时给出**可判定的失效条件**……由 `align-ledger` 门禁的活性断言
-//    机械复核——理由变假即红」。但 `align-ledger` 只读 docs/alignment-ledger.json（108 条
+//    机械复核——理由变假即红」。但 `align-ledger` 只读 docs/reference/alignment-ledger.json（108 条
 //    文件级），**从不读人读表**——那句承诺对 discipline-map 的 16 条「不适用」行根本没兑现。
 //    实测代价：源 10 有 2 行判「不适用」，而等价物早已在 checks/lib/harness/replay-scene.mjs 里
 //    （14 条比较前守卫、sessionFormat 钉代），台账记成"没做"——依据静默腐烂。
@@ -243,20 +243,20 @@ export function runD() {
 //    ——「带证据适配（……原判「不适用」与实况相反……）」这类行正文含"不适用"字样但判定不是
 //    na，全文正则会把它们误红。剥 `**` 后取前缀，是唯一稳定形态。
 //
-//    范围与防空：只读 docs/discipline-map.md 这一个 tracked 文件；解析出 0 行或 na 行数
+//    范围与防空：只读 docs/reference/discipline-matrix.md 这一个 tracked 文件；解析出 0 行或 na 行数
 //    少于 MIN_NA_ROWS 即判红（表格改版/正则失效 → 门禁静默变空集，等于不存在）。
 {
   const gate = 'discipline-na-trigger';
-  const mapPath = join(ROOT, 'docs', 'discipline-map.md');
+  const mapPath = join(ROOT, 'docs', 'reference', 'discipline-matrix.md');
   // 当前实测 16 行；留余量到 10，防"重分类使行数合理下降"时假红，又能抓住解析失效。
   const MIN_NA_ROWS = 10;
   const TRIGGER = /重估|失效条件|复活条件|引入条件|触发条件/;
-  if (!existsSync(mapPath)) fail(gate, 'docs/discipline-map.md 缺席——纪律全量枚举的人读正本');
+  if (!existsSync(mapPath)) fail(gate, 'docs/reference/discipline-matrix.md 缺席——纪律全量枚举的人读正本');
   else {
     const lines = readFileSync(mapPath, 'utf8').split('\n');
     // 表格数据行：以 | 开头、非分隔行、非表头
     const rows = lines.filter((l) => /^\|/.test(l) && !/^\|[\s\-:|]+\|$/.test(l) && !/^\|\s*DSH 做法/.test(l));
-    if (rows.length === 0) fail(gate, 'docs/discipline-map.md 未解析出任何表格数据行——表格改版或解析正则失效（防空语料）');
+    if (rows.length === 0) fail(gate, 'docs/reference/discipline-matrix.md 未解析出任何表格数据行——表格改版或解析正则失效（防空语料）');
     let naCount = 0;
     const missing = [];
     for (const row of rows) {
@@ -273,12 +273,12 @@ export function runD() {
       fail(gate, `只解析到 ${naCount} 条「不适用」行（下限 ${MIN_NA_ROWS}）——解析失效或整表被改窄（防空语料）`);
     }
     for (const m of missing) {
-      fail(gate, `${m}；修正 = 在状态列补一个可判定的重估触发（重估/失效条件/复活条件/引入条件/触发条件之一）——见 docs/discipline-map.md §维护规则「不适用是当时不适用，不是豁免」`);
+      fail(gate, `${m}；修正 = 在状态列补一个可判定的重估触发（重估/失效条件/复活条件/引入条件/触发条件之一）——见 docs/reference/discipline-matrix.md §维护规则「不适用是当时不适用，不是豁免」`);
     }
   }
 }
 
-// ── discipline-state-vocab（状态列三态值域机检——docs/discipline-map.md）
+// ── discipline-state-vocab（状态列三态值域机检——docs/reference/discipline-matrix.md）
 //
 //    病根实证（2026-10-19 全表逐条语义重读）：表头明写「每行三态」，值域 = 照搬 / 带证据适配 /
 //    不适用。实测状态列出现值域外写法（`已具备`、`前两件已具备`）。这不是措辞洁癖：`已具备`
@@ -292,15 +292,15 @@ export function runD() {
 //    属正常记述，不是状态声称；按列序判会把它们误红。
 //    **不做全文正则**（同 discipline-na-trigger：正文常引述别的状态词）。
 //
-//    范围与防空：只读 docs/discipline-map.md 一个 tracked 文件；解析出 0 张带状态列的表、
+//    范围与防空：只读 docs/reference/discipline-matrix.md 一个 tracked 文件；解析出 0 张带状态列的表、
 //    0 行状态数据行，或状态行数少于 MIN_ROWS 即判红（表格改版 → 门禁静默变空集，等于不存在）。
 {
   const gate = 'discipline-state-vocab';
-  const mapPath = join(ROOT, 'docs', 'discipline-map.md');
+  const mapPath = join(ROOT, 'docs', 'reference', 'discipline-matrix.md');
   // 当前实测 10 张状态表、80 行状态数据行；留余量到 60，防重分类合理减少时假红。
   const MIN_ROWS = 60;
   const THREE_STATES = ['照搬', '带证据适配', '不适用'];
-  if (!existsSync(mapPath)) fail(gate, 'docs/discipline-map.md 缺席——纪律全量枚举的人读正本');
+  if (!existsSync(mapPath)) fail(gate, 'docs/reference/discipline-matrix.md 缺席——纪律全量枚举的人读正本');
   else {
     const lines = readFileSync(mapPath, 'utf8').split('\n');
     let stateCount = 0;
@@ -328,12 +328,12 @@ export function runD() {
       }
     }
     if (tablesWithState === 0) {
-      fail(gate, 'docs/discipline-map.md 未解析出任何「状态」列表——表头改版或解析失效（防空语料）');
+      fail(gate, 'docs/reference/discipline-matrix.md 未解析出任何「状态」列表——表头改版或解析失效（防空语料）');
     } else if (stateCount < MIN_ROWS) {
       fail(gate, `只解析到 ${stateCount} 行状态列（下限 ${MIN_ROWS}，当前应约 80）——解析失效或整表被改窄（防空语料）`);
     }
     for (const m of offenders) {
-      fail(gate, `${m}；修正 = 状态列首词改成 照搬 / 带证据适配 / 不适用 之一（语义差别见 docs/discipline-map.md 表头：已具备暗示免于重校，带证据适配要求每次换 pin 重验）`);
+      fail(gate, `${m}；修正 = 状态列首词改成 照搬 / 带证据适配 / 不适用 之一（语义差别见 docs/reference/discipline-matrix.md 表头：已具备暗示免于重校，带证据适配要求每次换 pin 重验）`);
     }
   }
 }

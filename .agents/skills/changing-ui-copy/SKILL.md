@@ -5,7 +5,7 @@ description: Use when adding or changing any user-visible text in the deep-resea
 
 # 改界面文案：day-one 双语
 
-本技能是 **guidance，不是 checklist**。合同正本 = [design/40 §4](../../../docs/design/40-research-cockpit.md)；
+本技能是 **guidance，不是 checklist**。合同正本 = [contracts/client-ui.md §4](../../../docs/contracts/client-ui.md)；
 守卫 = `tests/cockpit/client/method-library/locales.spec.mjs`（键集/占位符/en 值/渲染）、`tests/cockpit/shared/i18n.spec.mjs`（折层
 en 零 CJK）、`tests/checks/repo/cjk-source.test.mjs`（源码中文扫描 + 允许清单）。相关技能：
 [`reviewing-a-delivery`](../reviewing-a-delivery/SKILL.md)。
@@ -22,7 +22,7 @@ en 零 CJK）、`tests/checks/repo/cjk-source.test.mjs`（源码中文扫描 + �
 | 产品内容（canonical） | 内置打法名称/摘要/四字段、推荐规则、领域示范 | 不改 canonical 表；UI 经**显示投影**取词，动作/库格式/模型 prompt 继续用 canonical |
 | 模型面 prompt | 发给 Method Editor / Lead 的内部指令 | 保持原文；放独立模型面模块（如 `coach-prompts.ts` / `operation-prompts.ts`），不进 UI 扫描面 |
 | 用户/模型内容 | 用户自建方法、研究问题、plan、终稿正文 | 不翻译，保持作者语言 |
-| 技术标识 | `question.md`、`final/`、`task_id`、`readiness`、`HITL2`、`plan-only` | 不翻译；术语按 `docs/terms.md` |
+| 技术标识 | `question.md`、`final/`、`task_id`、`readiness`、`HITL2`、`plan-only` | 不翻译；术语按 `docs/reference/glossary.md` |
 
 分类错了，后面全错：把 canonical 产品内容直接翻译会破坏 skill 表、库格式、Lead 指令和既有测试；把
 模型 prompt 搬进字典会改变模型行为。

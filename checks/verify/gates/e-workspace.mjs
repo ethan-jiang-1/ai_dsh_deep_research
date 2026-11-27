@@ -1,7 +1,7 @@
 // e-workspace.mjs — 域 E · 工作区生成物：手册/模板/种子/overlay 与版本单源。
 //
 // 从 2026-10-27 卫生轮前的单文件 verify.mjs 原样切出（判据与文案逐字未改）；共享助手住
-// ../context.mjs。改本域门禁只需读本文件——域切分 = docs/evaluation.md §L0 表的 A–F 分组。
+// ../context.mjs。改本域门禁只需读本文件——域切分 = docs/testing.md §L0 表的 A–F 分组。
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -65,7 +65,7 @@ export function runE() {
   if (!existsSync(dev)) fail(gate, 'tools/ 缺席——源码驱动目录不在位');
   else walk(dev);
   if (forbidden.length > 0)
-    fail(gate, `tools/ 下出现运行态：${forbidden.slice(0, 5).join('、')}${forbidden.length > 5 ? '…' : ''}——运行态住 runtime/ 或研究工作区（迁移/清理后再提交；见 guides/63）`);
+    fail(gate, `tools/ 下出现运行态：${forbidden.slice(0, 5).join('、')}${forbidden.length > 5 ? '…' : ''}——运行态住 runtime/ 或研究工作区（迁移/清理后再提交；见 contracts/git-boundary.md）`);
   else note(gate, 'tools/ 无运行态（harness-home / drt_* / sessions / 凭据）');
 }
 
@@ -84,7 +84,7 @@ export function runE() {
 
 // ── release-version（发布版本单一源：root 镜像 pack；tag 一致性由 release-check 在发布前查）──
 // 病根：仓库出现过 root 0.1.0 / pack 0.1.1 / tag 0.1.2 三套版本，发布时无法判断 tag 该对谁。
-// 规则正本 = docs/guides/64-release-versioning.md：发布版本 = pack version；root 必须镜像；
+// 规则正本 = docs/contracts/release.md：发布版本 = pack version；root 必须镜像；
 // tag = 同版本 annotated。CI 不假定 tag 在场，故 tag 检查归 checks/release/release-check.mjs。
 {
   const gate = 'release-version';
@@ -101,7 +101,7 @@ export function runE() {
     }
   }
   if (rootVersion !== null && packVersion !== null && rootVersion !== packVersion) {
-    fail(gate, `版本漂移：root ${rootVersion} ≠ pack ${packVersion}——发布版本以 pack 为准，root 必须镜像（规则 = docs/guides/64-release-versioning.md）`);
+    fail(gate, `版本漂移：root ${rootVersion} ≠ pack ${packVersion}——发布版本以 pack 为准，root 必须镜像（规则 = docs/contracts/release.md）`);
   }
 }
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/policy.md
 // 状态：常驻
 // 一句话：任意历史会话在真实 UI 重开并抓场景包（现在的客户端 + 当年的数据）
 // 何时跑：复看历史会话当时/现在的页面；症状还原

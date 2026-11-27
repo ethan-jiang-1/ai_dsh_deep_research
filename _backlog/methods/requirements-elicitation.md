@@ -58,7 +58,7 @@ and decisions. Follow their frontier/round protocol; pending lookups block only 
 Capture answers, attribution, alternatives and costs in the card as they settle, not at the end.
 Record only alternatives actually considered; a fixed constraint need not generate fake candidates.
 
-Override glossary/ADR defaults before running: tentative terms and choices stay on the issue. Use [docs/00-index](../../docs/00-index.md) for canonical project terminology and decisions, [design/10 architecture](../../docs/design/10-architecture.md) for system structure, and the relevant owner README or source for module terms. Update current owners only for authorized, effective facts; delivered persistent rationale follows [notes](../../notes/README.md). Do not create parallel glossary or ADR directories.
+Override glossary/ADR defaults before running: tentative terms and choices stay on the issue. Use [docs/00-index](../../docs/README.md) for canonical project terminology and decisions, [architecture.md architecture](../../docs/architecture.md) for system structure, and the relevant owner README or source for module terms. Update current owners only for authorized, effective facts; delivered persistent rationale follows [notes](../../notes/README.md). Do not create parallel glossary or ADR directories.
 
 **Done or waiting:** confirmed requirements and new unknowns are on the card. An empty ready frontier
 with pending facts/answers is waiting, not a completed interview. For evidence gaps, read

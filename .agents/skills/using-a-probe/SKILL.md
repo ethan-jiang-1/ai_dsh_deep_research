@@ -6,7 +6,7 @@ description: Use when a mechanism's contract needs evidence at a real boundary �
 # 用探针，而不是再跑一遍 E2E
 
 本技能是 **guidance**，不是 checklist。探针的单一入口 =
-[`docs/guides/66-probe-playbook.md`](../../../docs/guides/66-probe-playbook.md)；
+[`docs/guides/probe-playbook.md`](../../../docs/guides/probe-playbook.md)；
 目录与索引 = [`probes/`](../../../probes/README.md) 与
 [`probes/INDEX.generated.md`](../../../probes/INDEX.generated.md)。相关技能：
 [`reproducing-a-failure`](../reproducing-a-failure/SKILL.md)、

@@ -9,6 +9,6 @@ export function startupFailureHint(output, profile = 'unknown') {
   const text = String(output ?? '')
   if (!/incompatible|Exact-version exemption: not active/i.test(text)) return ''
   const line = text.split(/\r?\n/).reverse().find((item) => /incompatible|Exact-version exemption/i.test(item)) ?? ''
-  return `profile ${profile} 未随 pin 重钉：插件版本不兼容——先重建该 profile（tools/channel/boot-run.sh / guides/60 §2），不是主机慢。`
+  return `profile ${profile} 未随 pin 重钉：插件版本不兼容——先重建该 profile（tools/channel/boot-run.sh / guides/dev-loop.md §2），不是主机慢。`
     + (line.trim() === '' ? '' : `\n证据：${line.trim().slice(0, 240)}`)
 }

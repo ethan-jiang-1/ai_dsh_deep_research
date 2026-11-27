@@ -33,7 +33,10 @@ test('散文路径枚举：识别仓内带扩展名 token，剥反引号/围栏/
 })
 
 test('live 文档的散文路径可被枚举（BUG-204 负控）', () => {
-  const discipline = readFileSync(join(ROOT, 'docs', 'discipline-map.md'), 'utf8')
-  assert.ok(prosePathTokens(discipline).some((entry) => entry.path === 'docs/testing.md'),
-    'docs/discipline-map.md 的 vendor 简写 docs/testing.md 必须被散文枚举看到（存在性由 doc-paths 按 vendor/dsh 前缀解析）')
+  const discipline = readFileSync(join(ROOT, 'docs', 'reference', 'discipline-matrix.md'), 'utf8')
+  const paths = prosePathTokens(discipline).map((entry) => entry.path)
+  assert.ok(paths.includes('docs/testing.md'),
+    'docs/reference/discipline-matrix.md 的 docs/testing.md 必须被散文枚举看到')
+  assert.ok(paths.includes('tests/checks/shared/smoke-contract.test.mjs'),
+    'docs/reference/discipline-matrix.md 的仓内散文路径必须被散文枚举看到')
 })

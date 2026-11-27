@@ -8,7 +8,7 @@ description: Use when starting, babysitting, or resuming a deep-research run —
 本技能是 **guidance，不是 checklist**：按实际 diff 与风险选择动作，完成判据在各步末；相关技能：[`.agents/skills/adding-a-research-role`](../adding-a-research-role/SKILL.md)。
 
 run 的操作面是**文件 + 会话通道**，不是代码。启动器、观察面、交付落位的细则在
-[guides/61](../../../docs/guides/61-run-playbook.md)；本技能给顺序与判断点。
+[guides/run-ops.md](../../../docs/guides/run-ops.md)；本技能给顺序与判断点。
 
 ## 1. 开跑前
 
@@ -21,13 +21,13 @@ run 的操作面是**文件 + 会话通道**，不是代码。启动器、观察
 - 起通道：**`node tools/channel/run-driver.mjs up`**（起/复用通道 → 验浏览器面 → 打印呈交块；exit 0 = 可呈交 /
   1 = 红不得呈交 / 2 = 未跑）。它内部就是 `bash tools/channel/boot-run.sh`（幂等：组合校验 → 漂移检测 →
   boot web（`DSH_RUN_PORT`，缺省 3083）→ 仪表盘）+ `cdp-probe --open-status`。**呈交纪律 = 先自跑
-  自修（红了当场修）+ 验浏览器面全绿，才把 URL 交给用户**（正本 = guides/61 §0 启动请求的呈交纪律）。
+  自修（红了当场修）+ 验浏览器面全绿，才把 URL 交给用户**（正本 = guides/run-ops.md §0 启动请求的呈交纪律）。
   通道已在飞时 `up` 直接复用不另起；只想重验面 = `node tools/channel/run-driver.mjs probe`。
   **启动加速（边界不变）**：boot-run 默认用 vendor **构建产物** `lib/bin.js`（≈3s；`DSH_RUN_RUNTIME=source`
   退回 tsx 源码 ≈13s），仍是同一条 `dsh --profile` 启动面；`up` 对同一 pack 源 + 同一 runtime 构建的最近
   GREEN 在 30 分钟内复用（**冷启动也命中，≈10s**；命中前做 HTTP 就绪检查；`--force-probe` 强制真验），
-  缓存只存 GREEN（正本 = guides/61 §0）。
-  **冷启动按三分支走**（正本 = guides/61 §0）：通道活 + 镜像一致 → 复用（缓存 ≈1s / 首验 ≈15s）；活 + 漂移 →
+  缓存只存 GREEN（正本 = guides/run-ops.md §0）。
+  **冷启动按三分支走**（正本 = guides/run-ops.md §0）：通道活 + 镜像一致 → 复用（缓存 ≈1s / 首验 ≈15s）；活 + 漂移 →
   `up` exit 2，确认无在飞 run 后一条命令 `kill $(lsof -t -iTCP:3083 -sTCP:LISTEN) ; rm -rf
   runtime/harness-home/profiles/deep-research ; node tools/channel/run-driver.mjs up`（≈2–3 min，不是卡死）；
   通道死 → 直接 `up`。**exit 1 的红先看 checks 与最近 verdict 历史**，再用人话判据（preset 四角色 +
@@ -35,7 +35,7 @@ run 的操作面是**文件 + 会话通道**，不是代码。启动器、观察
   环境不变式：隔离 dev home（`DSH_DEV_HOME` 可换，绝不用日用 `~/.dsh`）+ 与用户安装同形的载入路径
   （CLI 建 profile → `plugin add file:<tgz>` → `dsh --profile`；差异以 tools/README parity 表为准）；
   **启动次序不得重排**：profile → plugin add（roster，成员变更必须重启）→ `dsh --profile` 起 web →
-  工作区/会话；缓存与探针只跳过重复验证，不跳过任何一步（正本 = guides/61 §0）。
+  工作区/会话；缓存与探针只跳过重复验证，不跳过任何一步（正本 = guides/run-ops.md §0）。
   **不许自创**：不手起 `dsh --profile deep-research`、不重复 `--from-default-profile`、不手写 roster、
   roster 变更不跳过重启；
   改了 pack 文本（persona/skill/手册）必须重启通道——**web 进程缓存 boot 时的文本**；

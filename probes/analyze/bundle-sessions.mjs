@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/policy.md
 // 状态：常驻
 // 一句话：bundle → 见证会话反查 + 状态摘要 + 下一步命令
 // 何时跑：诊断第一步：bundle 不记会话 id，需要拿会话 id

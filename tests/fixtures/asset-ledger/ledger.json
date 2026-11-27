@@ -8,7 +8,7 @@
       "lane": "checks",
       "class": "check-gate",
       "cost": "fast-inproc",
-      "uniqueClaim": "评估合同在位性 — docs/evaluation.md 是本仓验收合同（先于框架定案），",
+      "uniqueClaim": "评估合同在位性 — docs/testing.md 是本仓验收合同（先于框架定案），",
       "oracleType": "canonical",
       "sunset": "随门禁/台账合同退役"
     },

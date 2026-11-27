@@ -1,7 +1,7 @@
 // run 通道驱动入口契约回归（用户指令 2026-10-19："驱动插件是最常用的命令，内化固定"）。
 // 断言对象 = 仓库自控文件（keyless、纯 fs、零子进程、零网络——layering 守卫范围）。
 //
-// 为什么要有这条：启动通道的三步序（boot → 验浏览器面 → 交 URL）此前只活在 guides/61 散文里，
+// 为什么要有这条：启动通道的三步序（boot → 验浏览器面 → 交 URL）此前只活在 guides/run-ops.md 散文里，
 // 每次启动都要现场拼命令（端口/token 从 web.log 掏、探针用哪面、什么算绿全靠记性）——"承诺了
 // 动作却没有工具 = 动作不可复跑"（tools/channel/run-kickoff.mjs 头注同款教训）。`tools/channel/run-driver.mjs` 是
 // 该序的可复跑入口；本测试钉住它的**行为形状**（verdict 契约、token 来源、URL 抽取、端口回退），
@@ -157,7 +157,7 @@ test('冷启动由统一 supervisor 委托，不绕过 ownership 或镜像漂移
   assert.ok(!/boot-run-body\.sh.*runBootBody/.test(src), 'run-driver 直接调用内部 body 绕过 supervisor');
 });
 
-// 2026-10-20 审计 P0-1：README / 00-index / project-map / guides/61 各写第一条启动动作，
+// 2026-10-20 审计 P0-1：README / 00-index / project-map / guides/run-ops.md 各写第一条启动动作，
 // 其中三处仍指 boot-run（前台起、不验浏览器面、不打印呈交块），与 00-index 的 run-driver
 // 首动作分裂。这里钉"首动作一致"：不是禁止 boot-run（它是底层），而是禁止它出现在
 // "用户问怎么启动"的第一条动作位上。
@@ -172,21 +172,21 @@ test('启动首动作一致：安装行 = 手册（CLI 建 profile + tarball 装
   assert.ok(lineOf('README.md', '_dist/安装手册.md').includes('_dist/安装手册.md'), 'README 没有把安装步骤指向手册');
   // 开发入口（run-driver）住在 CONTRIBUTING；README 只留一行路由。
   assert.ok(lineOf('CONTRIBUTING.md', 'tools/channel/run-driver.mjs up').includes('run-driver.mjs up'), 'CONTRIBUTING 开发入口缺席');
-  const installRow = lineOf('docs/00-index.md', '（安装用户）');
+  const installRow = lineOf('docs/README.md', '（安装用户）');
   assert.ok(installRow.includes('安装手册'), '00-index 安装行没有把手册写成命令 owner');
   assert.ok(installRow.includes('file:'), '00-index 安装行没有把 tarball 写成当前装包入口');
-  assert.ok(lineOf('docs/00-index.md', '启动一下').includes('run-driver.mjs up'), '00-index 开发行首动作不是 run-driver');
-  const installMap = lineOf('docs/project-map.md', '| **启动安装形态（安装用户）** |');
+  assert.ok(lineOf('docs/README.md', '启动一下').includes('run-driver.mjs up'), '00-index 开发行首动作不是 run-driver');
+  const installMap = lineOf('docs/guides/run-ops.md', '| **启动安装形态（安装用户）** |');
   assert.ok(installMap.includes('安装手册'), 'project-map 安装行没有把手册写成命令 owner');
   assert.ok(installMap.includes('file:'), 'project-map 安装行没有把 tarball 写成当前装包入口');
-  assert.ok(lineOf('docs/project-map.md', '| 启动一次研究（开发通道） |').includes('run-driver.mjs up'), 'project-map 开发行首动作不是 run-driver');
-  assert.ok(lineOf('docs/guides/61-run-playbook.md', '- 启动：').includes('run-driver.mjs up'), 'guides/61 开发首动作不是 run-driver');
-  // guides/61 §0 的"启动"行不得再以 boot-run 打头（否则同一页先说 boot-run、后说 run-driver）
-  const guide = read('docs/guides/61-run-playbook.md');
+  assert.ok(lineOf('docs/guides/run-ops.md', '| 启动一次研究（开发通道） |').includes('run-driver.mjs up'), 'project-map 开发行首动作不是 run-driver');
+  assert.ok(lineOf('docs/guides/run-ops.md', '- 启动：').includes('run-driver.mjs up'), 'guides/run-ops.md 开发首动作不是 run-driver');
+  // guides/run-ops.md §0 的"启动"行不得再以 boot-run 打头（否则同一页先说 boot-run、后说 run-driver）
+  const guide = read('docs/guides/run-ops.md');
   const runStart = guide.indexOf('## 0. 开跑');
   const section = guide.slice(runStart, guide.indexOf('\n## 1.', runStart));
   assert.ok(!/\n- 启动：`bash tools\/channel\/boot-run\.sh`/.test(section),
-    'guides/61 §0 仍把 boot-run 写成启动首动作——应先 run-driver，boot-run 只作底层说明');
+    'guides/run-ops.md §0 仍把 boot-run 写成启动首动作——应先 run-driver，boot-run 只作底层说明');
 });
 
 test('BUG-327：run-driver 只经共享构造器建 probe 键，不再内联身份', () => {
@@ -248,7 +248,7 @@ test('BUG-435 接线：up 复用遇漂移先 --sync-mirror；sync 模式不取�
   assert.ok(owner.includes("'--sync-mirror'"), 'supervisor 未注册 sync 模式');
   assert.ok(owner.includes("mode !== '--drift-only' && mode !== '--sync-mirror'"),
     'sync 必须像 drift-only 一样跳过启动锁——服务生命期持有 home 锁，取锁的 sync 永远进不来');
-  // 文档合同：guides/61 §0 必须写出快路径（报错文本承诺的路径要在操作指南里有名字）
-  const guide = read('docs/guides/61-run-playbook.md');
-  assert.ok(guide.includes('--sync-mirror'), 'guides/61 未登记 --sync-mirror');
+  // 文档合同：guides/run-ops.md §0 必须写出快路径（报错文本承诺的路径要在操作指南里有名字）
+  const guide = read('docs/guides/run-ops.md');
+  assert.ok(guide.includes('--sync-mirror'), 'guides/run-ops.md 未登记 --sync-mirror');
 });

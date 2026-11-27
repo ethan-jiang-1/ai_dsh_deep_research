@@ -156,7 +156,7 @@ export function validateDecisionsLedger(text, { exists, isTracked }) {
 
 const TEXT = readFileSync(join(ROOT, 'docs', 'decisions.md'), 'utf8');
 // keyless 车道禁子进程（layering），不能问 git；「已跟踪」以入库边界近似：盘上存在且不在 gitignored 运行区
-// （入库边界 = docs/guides/63-git-boundary.md）。
+// （入库边界 = docs/contracts/git-boundary.md）。
 const REAL_FS = {
   exists: (p) => existsSync(join(ROOT, p)),
   isTracked: (p) => !/^(runtime|node_modules|vendor|_dist\/.*\.tgz)/.test(p) && !p.endsWith('.tgz'),
@@ -174,9 +174,9 @@ function rowOf(n) {
 
 test('宪法锚点 D53–D56 在册并路由到各自权威合同与 Note', () => {
   const want = {
-    53: ['guides/67-test-strategy.md', '2026-11-13-test-naming-lanes.md'],
-    54: ['guides/67-test-strategy.md', '2026-11-13-test-strategy-operating-model.md'],
-    55: ['guides/67-test-strategy.md', '2026-11-14-verification-oracle-hardening.md'],
+    53: ['testing.md', '2026-11-13-test-naming-lanes.md'],
+    54: ['testing.md', '2026-11-13-test-strategy-operating-model.md'],
+    55: ['testing.md', '2026-11-14-verification-oracle-hardening.md'],
     56: ['./AGENTS.md', '2026-11-14-decisions-routing-ledger.md'],
   };
   for (const [n, parts] of Object.entries(want)) {
@@ -186,12 +186,12 @@ test('宪法锚点 D53–D56 在册并路由到各自权威合同与 Note', () =
 });
 
 test('D53/D54 的制度词住在权威合同里（台账只路由，不复述）', () => {
-  const lanes = readFileSync(join(ROOT, 'docs/guides/67-test-strategy.md'), 'utf8');
+  const lanes = readFileSync(join(ROOT, 'docs/testing.md'), 'utf8');
   for (const token of ['*.spec.mjs', '*.e2e.mjs', '*.entry.mjs', 'tests/checks/<owner>/*.test.mjs']) {
-    assert.ok(lanes.includes(token), `guides/67 缺车道 ${token}`);
+    assert.ok(lanes.includes(token), `testing.md 缺车道 ${token}`);
   }
   for (const token of ['三环', '四账', '五关', '失败类', '最低可见层']) {
-    assert.ok(lanes.includes(token), `guides/67 缺制度词 ${token}`);
+    assert.ok(lanes.includes(token), `testing.md 缺制度词 ${token}`);
   }
 });
 

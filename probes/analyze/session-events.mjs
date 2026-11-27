@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/policy.md
 // 状态：常驻
 // 一句话：会话事件尾部：按 id/标题看「刚才发生了什么」（tool/call、turn/end 摘要）
 // 何时跑：agent 需要会话时间线；诊断第一步（除会话 id 之外的事实）

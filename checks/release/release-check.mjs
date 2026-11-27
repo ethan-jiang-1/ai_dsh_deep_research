@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // release-check.mjs — 发布/移交锚检查（只读，不联网，不写盘）。
-// 规则正本 = docs/guides/64-release-versioning.md：
+// 规则正本 = docs/contracts/release.md：
 //   发布版本 = pack version；root 镜像；tag = 同版本且必须 annotated。
 // 默认模式：版本/tag 一致性（HEAD 未打 tag 是合法的“发布前”态）。
 // --handoff：移交前把 tag 与制品配对——tag 必须指向 HEAD、工作树干净、
@@ -60,7 +60,7 @@ function main(argv = process.argv.slice(2)) {
     if (releaseProblems.length > 0) {
       console.error('release-check: FAIL')
       for (const p of releaseProblems) console.error(`  - ${p.message}`)
-      console.error('  规则 = docs/guides/64-release-versioning.md；修完重跑。')
+      console.error('  规则 = docs/contracts/release.md；修完重跑。')
       return 1
     }
     if (headTag === null) {
@@ -133,7 +133,7 @@ function main(argv = process.argv.slice(2)) {
   if (problems.length > 0) {
     console.error(`release-check ${label}: FAIL`)
     for (const p of problems) console.error(`  - [${p.code}] ${p.message}`)
-    console.error('  规则 = docs/guides/64-release-versioning.md；修完重跑。')
+    console.error('  规则 = docs/contracts/release.md；修完重跑。')
     return 1
   }
   console.log(`release-check ${label}: OK version=${version} tag=${tag} commit=${headCommit.slice(0, 7)} artifact=${tarballSha.slice(0, 12)}…`)

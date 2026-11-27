@@ -336,10 +336,10 @@ test('claim 级复核：critic claim-verdict 契约 + lead 派工纪律（覆盖
   assert.match(manual, /verdict-audit/, '手册完成判据缺 verdict-audit 覆盖门');
 });
 
-test('Team 组合 subagent one-shot 合同：team-assembly + persona + design/10 限定', () => {
+test('Team 组合 subagent one-shot 合同：team-assembly + persona + architecture.md 限定', () => {
   const team = readFileSync(join(PRESETS, 'lead', 'skills', 'team-assembly', 'SKILL.md'), 'utf8');
   const lead = readFileSync(join(PRESETS, 'lead.patch.yml'), 'utf8');
-  const design = readFileSync(join(ROOT, 'docs', 'design', '10-architecture.md'), 'utf8');
+  const design = readFileSync(join(ROOT, 'docs', 'architecture.md'), 'utf8');
   // team-assembly：namespace + one-shot + settlement + 全 run 8 槽 + 角色边界
   assert.match(team, /child \*\*不是 Team 成员\*\*/, 'team-assembly 缺 child 不是 Team 成员的 namespace 句');
   assert.match(team, /settlement notice/, 'team-assembly 缺 settlement notice 结果通道');
@@ -349,9 +349,9 @@ test('Team 组合 subagent one-shot 合同：team-assembly + persona + design/10
   // persona：模型每次请求都看得到的最强钉
   assert.match(lead, /Team 组合下 subagent 是 one-shot/, 'lead persona 缺 subagent one-shot 钉');
   assert.match(lead, /teammate 不是 Lead/, 'lead persona 缺 teammate 角色边界钉');
-  // design/10：不再把 provider continuable 写成控制面可达，也不把 teammate 写成机器边界
-  assert.match(design, /provider 可续但 Team 控制面不可达/, 'design/10 缺 one-shot 的实际语义限定');
-  assert.match(design, /root preset 的机器边界/, 'design/10 未区分 root preset 与 teammate 会话');
+  // architecture.md：不再把 provider continuable 写成控制面可达，也不把 teammate 写成机器边界
+  assert.match(design, /provider 可续但 Team 控制面不可达/, 'architecture.md 缺 one-shot 的实际语义限定');
+  assert.match(design, /root preset 的机器边界/, 'architecture.md 未区分 root preset 与 teammate 会话');
 });
 
 test('provenance hash 合同：owner = ops/Lead，不派给 analyst，不用 workflow 当计算器', () => {

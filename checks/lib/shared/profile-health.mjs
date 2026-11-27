@@ -66,7 +66,7 @@ export function profileLayerIssues({
   packDir,
 }) {
   const manifest = join(profileDir, 'package.json')
-  if (!existsSync(manifest)) return [`profile 不在场：${profileDir}——${profileName === 'deep-research' ? '先跑 tools/channel/boot-run.sh（guides/60 §2）' : `${profileName} 档已弃用，消费方改用 deep-research`}`]
+  if (!existsSync(manifest)) return [`profile 不在场：${profileDir}——${profileName === 'deep-research' ? '先跑 tools/channel/boot-run.sh（guides/dev-loop.md §2）' : `${profileName} 档已弃用，消费方改用 deep-research`}`]
   let pkg
   try { pkg = JSON.parse(readFileSync(manifest, 'utf8')) } catch (error) {
     return [`profile 清单不可解析：${manifest}（${String(error?.message ?? error)}）`]

@@ -1,9 +1,7 @@
-# 50 · Agent Loop 与状态模型（当前事实正本）
+# Agent Loop 与状态模型（当前事实正本）
 
-> 类型：reference——agent 一找就到的单一入口（体裁沿 [design/40](./40-research-cockpit.md)）。
-> 本页拥有：Agent Loop 的**组成总览**与**四类运行状态的合同**（canonical 性质、writer/reader、
-> 恢复优先级、交付判定）。节点级 I/O 与回边语义归 [NODES.md](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；
-> 人的操作步骤归 [Run 指南](../guides/61-run-playbook.md)；总览地图归 [project-map](../project-map.md)。
+> **读法**：本页是 Agent Loop **组成总览**与**四类运行状态合同**（canonical 性质、writer/reader、恢复优先级、交付判定）的唯一正本；非 owner 文档只链接，不重述状态定语。
+> 节点级 I/O 与回边语义归 [NODES.md](../../packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md)；操作步骤与排障归 [guides/run-ops.md](../guides/run-ops.md)；观察面构成归 [client-ui.md](./client-ui.md)。
 
 ## Agent Loop：谁在驱动一次研究
 
@@ -35,12 +33,12 @@ vendor `WorkspaceFileStat` 并升 pin，属上游改动。
 
 **安装侧状态不在四类内**：custom profile、team 层依赖、deep-research 设置文件（`$DSH_HOME/deep-research/settings.json`）、
 首屏的浏览器提示键属于安装/启动面，不是研究状态；合同 = pack README §Data/§Compatibility +
-[guides/65](../guides/65-run-forms.md)。用户工作区 = 任意目录（首屏选择/`DEEP_RESEARCH_WORKSPACE`）；
+[contracts/run-forms.md](./run-forms.md)。用户工作区 = 任意目录（首屏选择/`DEEP_RESEARCH_WORKSPACE`）；
 dev 实例 = `research-workspace/`。角色与审计不得把它们当研究事实读写。
 
 ## 恢复优先级
 
-断点续跑只认 run bundle 的文件事实：重跑 [run-driver](../../tools/channel/run-driver.mjs)（内部调 boot-run）→ 新开 lead 会话 → "继续 <slug>"——lead 只凭 bundle 重建上下文，不依赖聊天记忆。session log 佐证执行事件，但不充当研究事实；观察面与任务板不参与恢复判定（操作步骤 = [Run 指南 §5](../guides/61-run-playbook.md)）。
+断点续跑只认 run bundle 的文件事实：重跑 [run-driver](../../tools/channel/run-driver.mjs)（内部调 boot-run）→ 新开 lead 会话 → "继续 <slug>"——lead 只凭 bundle 重建上下文，不依赖聊天记忆。session log 佐证执行事件，但不充当研究事实；观察面与任务板不参与恢复判定（操作步骤 = [Run 指南 §5](../guides/run-ops.md)）。
 
 ## 交付判定
 

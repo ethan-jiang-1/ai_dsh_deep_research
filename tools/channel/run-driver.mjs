@@ -2,7 +2,7 @@
 // tools/channel/run-driver.mjs — run 通道**驱动入口**（启动 / 验证 / 呈交，一条命令）。
 //
 // 为什么存在（用户指令 2026-10-19："驱动插件是最常用的命令，内化固定"）：启动通道的三步序
-// （boot → 验浏览器面 → 交 URL）此前只活在 guides/61 §0 散文里，每次启动都要现场拼命令——
+// （boot → 验浏览器面 → 交 URL）此前只活在 guides/run-ops.md §0 散文里，每次启动都要现场拼命令——
 // 端口/token 从 web.log 掏、探针用哪面、什么算绿全靠记性。"承诺了动作却没有工具 = 动作不可复跑"
 // （tools/channel/run-kickoff.mjs 头注同款教训）。本入口把该序固化成可复跑的一步。
 //
@@ -12,7 +12,7 @@
 //   --require-data：要求驾驶舱已绑定 run bundle（新会话默认未绑定；未绑定在 verdict 里是显式字段）
 //   url                               打印当前通道 URL（不启动、不验面）
 //
-// 判据（= guides/61 §0 呈交纪律的机械化）：exit 0 = 可呈交（镜像一致 + 宿主侧 + 浏览器面全绿）、
+// 判据（= guides/run-ops.md §0 呈交纪律的机械化）：exit 0 = 可呈交（镜像一致 + 宿主侧 + 浏览器面全绿）、
 // 1 = 红了（不得呈交，按 verdict.failed 修）、2 = 未跑（前置缺席，如镜像漂移/未取证 / 无通道）。
 // **未跑 ≠ 通过**。复用已在飞的通道时先跑 boot-run --drift-only：通道加载的镜像 ≠ 当前 pack 源
 // 时，probe 验的是旧页面——2026-10-28 实测通道 18:47 起、pack client 02:50 重建，旧实现仍报 GREEN。
@@ -24,7 +24,7 @@
 // 通道事实的唯一来源 = runtime/smoke-workspace/web.log 的**最后一条** `dsh web: <url>` 横幅
 // （boot-run 每次 boot 以 tee 截断写该文件；旧横幅 = 旧 token，用旧的必 401）。
 //
-// 不绕漂移门（guides/61 §0.1）：起通道一律经 `bash tools/channel/boot-run.sh`，从不直起 `dsh --profile
+// 不绕漂移门（guides/run-ops.md §0.1）：起通道一律经 `bash tools/channel/boot-run.sh`，从不直起 `dsh --profile
 // research`——那会跳过 pack 漂移检测、静默用旧镜像。boot 是前台进程（脚本退出即 web 停），
 // 故 `up` 以**托管后台 job** 形态起 boot-run，本驱动的 probe 阶段独立取证。
 import { fork, spawnSync } from 'node:child_process';
@@ -351,7 +351,7 @@ if (sub === 'probe') {
     const payload = { url, ...v, driftDetail: drift.detail };
     const saved = persistVerdict('probe', payload);
     console.log(JSON.stringify(payload, null, 2));
-    console.error(`run-driver probe: NOT-RUN——通道镜像漂移/未取证（${saved.dir}）；先跑 up（纯 client/文档漂移自动同步）或按 guides/61 §0.1 重建，再验`);
+    console.error(`run-driver probe: NOT-RUN——通道镜像漂移/未取证（${saved.dir}）；先跑 up（纯 client/文档漂移自动同步）或按 guides/run-ops.md §0.1 重建，再验`);
     process.exit(2);
   }
   const shot = join(STATE_DIR, 'run-driver-probe.png');
@@ -393,7 +393,7 @@ let state = channelState();
 let drift = null;
 let syncedThisRun = false;
 if (state.alive) {
-  console.log(`run-driver: 通道已存活，复用（端口 ${state.port}，pid ${(state.pids ?? []).join(',')}）——不另起（guides/61 §0：在飞通道别另起）`);
+  console.log(`run-driver: 通道已存活，复用（端口 ${state.port}，pid ${(state.pids ?? []).join(',')}）——不另起（guides/run-ops.md §0：在飞通道别另起）`);
   // 复用不是免检：先证明通道加载的镜像 = 当前 pack 源。旧实现直接 probe，把旧页面判成当前绿。
   drift = mirrorDrift();
   if (!drift.clean) {
@@ -415,7 +415,7 @@ if (state.alive) {
     const saved = persistVerdict('up', payload);
     console.error(`run-driver: NOT-RUN——通道镜像漂移/未取证（${saved.dir}）；当前页面不是当前代码。`);
     console.error('           纯 client/文档漂移 up 已尝试原子同步；仍红 = host 侧漂移或同步失败——确认没有在飞 run 需要保活，');
-    console.error('           停通道并重建镜像（guides/61 §0.1：rm -rf profile 后重跑 boot-run），然后重跑 up。');
+    console.error('           停通道并重建镜像（guides/run-ops.md §0.1：rm -rf profile 后重跑 boot-run），然后重跑 up。');
     console.log(JSON.stringify(payload, null, 2));
     process.exit(2);
   }

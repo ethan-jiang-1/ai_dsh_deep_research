@@ -1,9 +1,6 @@
-# 60 · 开发环：条目生命周期、面选择与操作手册
+# 开发环：条目生命周期、面选择与操作手册
 
-> 层：指南（怎么操作）。流程纪律的权威在 DSH（vendor 树）与本仓决策台账
-> （D11/D20 = [00-index](../00-index.md)；依据 = [Backlog 方法论吸收
-> Note](../../notes/implemented/2026-10-09-backlog-methodology-absorption.md)——仓级队列
-> 退役、工作由用户授权 + 会话内 plan/todo 的定调记录）；本文是本仓落点。
+> 层：指南（怎么操作）。流程纪律的权威在 DSH（vendor 树）与本仓决策台账（D11/D20 = [decisions.md](../decisions.md)；依据 = [Backlog 方法论吸收 Note](../../notes/implemented/2026-10-09-backlog-methodology-absorption.md)）；本文是本仓开发闭环落点。首次克隆准备见 [bootstrap.md](./bootstrap.md)。
 
 ## 0. 条目生命周期（反馈双门）
 
@@ -23,7 +20,7 @@
 
 - 两门都是 DSH 自带机制（base bundle，零接线）；**不要发明 tasks.md**（DSH 明文否决计划
   文件："a plan directory creates a second durable home"——会话日志即计划与清单的持久真相）。
-- **验收门（TDD 式，[D23](../decisions.md#d23)）**：对已授权工作，在实施前把可判定的验收判据绑定检查方式；可机械者先立红，人工判据明确记录走查证据。验收尚不明确时，澄清是当前任务需要，不会自动阻断已授权且可独立推进的工作；证据设计复用本仓现有 owner，不另造队列。四条硬边界：①**改断言迁就实现不是修法**——断言只在行为/合同真实变化时同 diff 改（[tests/AGENTS](../../tests/AGENTS.md)）；②**未验项不得写 implemented**，被阻断检查如实注明；③**复发升格**——implemented 缺真实验证证据复发时，才考虑升为机械门禁并配负例；④证据和结论不得超出检查实际证明的范围（依据见 [external-materials.md](../external-materials.md) 与 [item-lifecycle-tdd Note](../../notes/archived/2026-10-05-item-lifecycle-tdd.md)）。
+- **验收门（TDD 式，[D23](../decisions.md#d23)）**：对已授权工作，在实施前把可判定的验收判据绑定检查方式；可机械者先立红，人工判据明确记录走查证据。验收尚不明确时，澄清是当前任务需要，不会自动阻断已授权且可独立推进的工作；证据设计复用本仓现有 owner，不另造队列。四条硬边界：①**改断言迁就实现不是修法**——断言只在行为/合同真实变化时同 diff 改（[tests/AGENTS](../../tests/AGENTS.md)）；②**未验项不得写 implemented**，被阻断检查如实注明；③**复发升格**——implemented 缺真实验证证据复发时，才考虑升为机械门禁并配负例；④证据和结论不得超出检查实际证明的范围（依据见 [reference/external.md](../reference/external.md) 与 [item-lifecycle-tdd Note](../../notes/archived/2026-10-05-item-lifecycle-tdd.md)）。
 - **修复卡证据（红→绿）**：bug 翻 `修复落地/已修` 必须写 `## 修复落地` 的 `json fix-evidence` 块（changes/red/green/guard；exit 是 oracle；红证可重放或 changes 含测试/门禁资产），且归档与代码/测试同暂存集；只翻状态/移卡 = 假修（规则 = [_backlog/bugs/README.md](../../_backlog/bugs/README.md)；工艺依据 = [缺陷修复工艺 Note](../../notes/implemented/2026-11-15-bug-fix-process-dsh-plugin.md)）。
 - 同一授权范围内直接实施、验证、自审和修复，不重复询问是否开始或继续；只有缺少必要的人类判断或范围变化时才澄清。阶段验收中的产品取舍归用户，技术证据与自主审查归 agent（[研发宪章](../../CONTRIBUTING.md#development-charter)）。
 - 工具执行许可由当前运行时的 sandbox/approval policy 单独强制，与实施授权、Plan Mode 和业务验收分开；遇到实际拒绝时按工具支持的最窄权限请求，不另发问卡重复确认，也不从仓库内任务推导对其他路径或任意操作的许可。原生机制见 `vendor/dsh/packages/interaction/user-approval/README.md`；项目指南不改变运行时策略。用户限定只改 repo 时，不以 Full access 或全局配置消除弹窗；受限检查记未跑，继续独立工作，不为同类操作反复申请升权。
@@ -34,11 +31,11 @@
 
 ### 1.1 入口链契约（按需查阅）
 
-根 [AGENTS.md](../../AGENTS.md) §入口链拥有仓级路由。收到工作后先确定用户本轮授权和目标；仅在需要澄清、查证或跨轮留存时，才按 [意图载体总图](../design/60-intent-carriers.md) 使用 backlog。
+根 [AGENTS.md](../../AGENTS.md) §入口链拥有仓级路由。收到工作后先确定用户本轮授权和目标；仅在需要澄清、查证或跨轮留存时，才按 [意图载体总图](../policy.md) 使用 backlog。
 
 | 情况 | 读什么 | 读完应知道 | 卡住怎么办 |
 |---|---|---|---|
-| 所有改仓工作 | 根 `AGENTS.md`、`docs/00-index.md` | 仓库形态、相关 owner、现行决策 | 只问仓库概况时，到此为止 |
+| 所有改仓工作 | 根 `AGENTS.md`、`docs/README.md` | 仓库形态、相关 owner、现行决策 | 只问仓库概况时，到此为止 |
 | 改文档 / 审文档 | [docs/AGENTS.md](../AGENTS.md) | 层级归属、写作规则、slop 清单、预算处置序 | 规则与当前文档冲突时先修规则，再改文档 |
 | 需澄清或查证 | 对应 [_backlog/issues/](../../_backlog/issues/README.md)、按需 methods/research | 目标、范围、已知事实、未决问题、下一步；卡到 `待落地` = 准备进开发（不是授权） | 暂停依赖未决点的判断；独立且已授权的工作照常继续 |
 | 持久决定需显式评审 | 对应 [notes/proposed/](../../notes/proposed/) RFC | 被评审的决定、备选与验收 | 不需显式评审时无需创建 RFC |
@@ -47,7 +44,7 @@
 **按工作类型分支**（证据和操作不同，不意味着必须先建卡或 RFC）：
 
 - **代码 / 卫生型** → 本页 §1.2 六步闭环 + §2 面选择表与任务型路由表 + §4 收尾；
-- **研究 run 型** → [guides/61](61-run-playbook.md)（含**硬前置**：`research-workspace` 必须已注册进
+- **研究 run 型** → [guides/run-ops.md](./run-ops.md)（含**硬前置**：`research-workspace` 必须已注册进
   DSH，会话 cwd 才落在研究工作区）+ 开发技能 `running-a-research-run`；
 - **交付收尾** → `reviewing-a-delivery`；**加/改角色** → `adding-a-research-role`；
   **加/改门禁** → `writing-a-gate`；**加/调节点轨道** → `changing-node-topology`；
@@ -72,13 +69,13 @@
 
 新增或替换 parser、机器判据、资源 ownership/lifecycle 操作，或改变这些合同、共享事实写方、生产者/消费者集合、模型能力与可见行为时，先查相关 owner、已有 Module/Interface、旧性质及其测试，再进入改动。
 
-在本次既有验收记录中说明：哪些旧性质继续成立、全部受影响的真实入口/消费者、复用公共操作或另建实现的理由，以及正常与失败/取消后的外部结果；将这些结果绑定最低可见层的正反证据。没有同类旧性质时说明查过的范围与新增承诺，类级守卫与旧性质继承见 [guides/67 §2](67-test-strategy.md#类级守卫三判据与旧性质继承) 与 [测试制度 Note](../../notes/implemented/2026-11-13-test-strategy-operating-model.md)。
+在本次既有验收记录中说明：哪些旧性质继续成立、全部受影响的真实入口/消费者、复用公共操作或另建实现的理由，以及正常与失败/取消后的外部结果；将这些结果绑定最低可见层的正反证据。没有同类旧性质时说明查过的范围与新增承诺，类级守卫与旧性质继承见 [testing.md §2](../testing.md#类级守卫三判据与旧性质继承) 与 [测试制度 Note](../../notes/implemented/2026-11-13-test-strategy-operating-model.md)。
 
 普通改名、唯一写方的闭集常量投影或保持上述语义不变的整理，沿原任务型验证即可；更名若改变解析、发现或消费者可达性，仍按语义变更处理。记录沿用当前 issue/验收说明/交付报告，不新增必填字段或独立总账；交付核对由[语义自审](../../.agents/skills/reviewing-a-delivery/SKILL.md#从什么开始)承担。
 
 ## 2. 面选择、任务型路由与全档命令（运行时入口）
 
-> 选测试证据（失败类 → 最低可见层；五关/四账）= [guides/67](67-test-strategy.md)。
+> 选测试证据（失败类 → 最低可见层；五关/四账）= [testing.md](../testing.md)。
 
 | 面 | 什么时候跑 | 命令 |
 |---|---|---|
@@ -89,32 +86,32 @@
 | L2 发布面/显示面 | 清单字段、locale/icon、市场索引、安装文档取向 | `node checks/smoke/lifecycle.entry.mjs`（market.json 过 DSH 校验器 → 装 tarball → 本包行 dump → 真启动 → `readPluginMeta` 四行显示面 → remove 回落；缺 `_dist` 产物 exit 2） |
 | L2 安装形状 | profile/安装形状/工作区相关改动 | `node checks/smoke/install-shape.entry.mjs`（原样执行手册的 CLI 装包分支：profile init → plugin add → 真启动；断言 roster 三状态、无 `did not activate`；缺前置 exit 2） |
 | L2 首启 | startup/client 恢复/首屏/StartCard 改动 | `node checks/smoke/product-boot.entry.mjs`（纯 `dsh --profile deep-research` + 真 Web + 浏览器；工作区会话、首屏、目录按钮；无模型；缺前置 exit 2） |
-| L3 领域 | 方法论/preset 内容改动 | 映射表审查（design/30 对账）+ `node --import tsx/esm --test tests/checks/analyze/evaluation-contract.test.mjs` |
+| L3 领域 | 方法论/preset 内容改动 | 映射表审查（contracts/methodology-mapping.md 对账）+ `node --import tsx/esm --test tests/checks/analyze/evaluation-contract.test.mjs` |
 | L4 交付 | 里程碑级 | `source tools/env.sh && node checks/smoke/l4-lite.e2e.mjs`（真模型档：需 `DEEPSEEK_API_KEY`，未 source 自拒）/ 完整 run（授权范围） |
 
 **source 口径**：fresh clone 首次跑 L0 前先 `source tools/env.sh`（激活 pre-commit；此后幂等）。表中标 source 的命令必须 source；`lifecycle.entry` / `install-shape.entry` / `product-boot.entry` 自行设定 home、不依赖 source；`checks/run-gates/` 的 `evidence-audit` / `run-accept` 与 `probes/analyze/` 的 `plan-card-stats` / `provider-error-stats` 需要 source（见命令块注记）。
 
-判据与负面判据（什么算"框架不合理"）见 [evaluation.md](../evaluation.md)——面与面不互抵。
+判据与负面判据（什么算"框架不合理"）见 [testing.md](../testing.md)——面与面不互抵。
 
 ### 任务型路由表（必改 → 次序 → 必跑面 → 必写 → done）
 
-本表是**执行程序**的唯一 owner（面判据 = [evaluation.md](../evaluation.md)；改 pack 的文件级影响面 =
-[guides/62 §改动影响面](62-plugin-authoring.md)——那两处是细节，不在这里复述）：
+本表是**执行程序**的唯一 owner（面判据 = [testing.md](../testing.md)；改 pack 的文件级影响面 =
+[guides/plugin-authoring.md §改动影响面](./plugin-authoring.md)——那两处是细节，不在这里复述）：
 
 | 任务型 | 同 diff 必改 | 生成物与检查次序 | 必跑面 | 必写 | done |
 |---|---|---|---|---|---|
 | 改 preset 结构（角色/工具行/roster 接线；新增 skill 文件按下行） | pack 源 `presets/` | **`render-overlay` 先于 L1**（L1 挂的是 overlay，不是 pack 源） | L0 + L1 | 行为/发布集变才写 Note | 全部 preset 真挂载绿 + 文档同步 |
 | 改 persona / skill / 手册文本（模型可见） | pack 源 + `research-workspace/` 正本 | `render-overlay` 先于 L1 → L1 → snapshot-replay B 层（CI `snapshot-replay` job 自动跑；本地 `--layers a,b` 定向；细则 = 表后脚注①）→ 重启 run 通道（web 缓存 boot 时文本） | L0 + L1 + L4-lite | 同上 | 真模型档证据 + L1 绿 + CI B 绿 |
-| **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../design/40-research-cockpit.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` + **可见文案 zh/en 键**（任何界面文本 day-one 双语，步骤 = [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)） | `pnpm build` → `client-load.entry`（改挂起显性化再跑 `client-hitl.entry`；改状态页事实/终稿目标再跑 `cockpit-truth.entry` + `cockpit-artifact-truth.entry` + `cockpit-truth-residuals.entry` + `cockpit-truth-substance.entry` + `cockpit-locale.entry`） | L0 + client-load.entry + cockpit-truth.entry + cockpit-artifact-truth.entry + cockpit-truth-residuals.entry + cockpit-truth-substance.entry + cockpit-locale.entry | 同上 | 真浏览器断言全绿 |
+| **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../contracts/client-ui.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` + **可见文案 zh/en 键**（任何界面文本 day-one 双语，步骤 = [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)） | `pnpm build` → `client-load.entry`（改挂起显性化再跑 `client-hitl.entry`；改状态页事实/终稿目标再跑 `cockpit-truth.entry` + `cockpit-artifact-truth.entry` + `cockpit-truth-residuals.entry` + `cockpit-truth-substance.entry` + `cockpit-locale.entry`） | L0 + client-load.entry + cockpit-truth.entry + cockpit-artifact-truth.entry + cockpit-truth-residuals.entry + cockpit-truth-substance.entry + cockpit-locale.entry | 同上 | 真浏览器断言全绿 |
 | 改 `src/lib/` 纯函数 / 类型面（pack 两半的编译面） | 对应 `src/lib` / `src/client` 类型位 | `pnpm typecheck` → `pnpm test`（typecheck 前置 = vendor 构建产物在场） | L0 + typecheck | 同上 | typecheck + 对应测试绿 |
 | **新增/修改机器判据**（门禁/审计/交付决定从散文里判值） | 设计卡 `## 判据形状` + 判据测试（不变量+矩阵） | 先写变异矩阵（红）→ 实现 → L0 | L0 + 判据测试 | 判据形状 + 反证 | 歧义会红 + 矩阵绿 |
-| 加 / 改机械门禁 | `context.mjs` gates 数组 + 该域 `verify/gates/<域>.mjs` + `evaluation.md` §L0 台账（案例表有增删再动 `gates.e2e.mjs`） | **注入回归红 → 还原 → 绿** → `gates.e2e --gate=<改的门禁>` | L0 + `gates.e2e --gate=<改的门禁>`（日常只跑该门禁的案例；全量 = 发布档，见下） | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + `--gate` 绿 |
+| 加 / 改机械门禁 | `context.mjs` gates 数组 + 该域 `verify/gates/<域>.mjs` + `testing.md` §L0 台账（案例表有增删再动 `gates.e2e.mjs`） | **注入回归红 → 还原 → 绿** → `gates.e2e --gate=<改的门禁>` | L0 + `gates.e2e --gate=<改的门禁>`（日常只跑该门禁的案例；全量 = 发布档，见下） | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + `--gate` 绿 |
 | 改 run 通道工具 / 审计门（run-driver / boot-run / watch-run / hitl-answer / run-dashboard / evidence-audit / node-gate / schema-scan / snapshot-replay） | 对应 `checks/` / `tools/` / `probes/` 脚本 | 启动 owner、公开入口或锁变更另跑 `node checks/smoke/channel-start.e2e.mjs`（dev-only 真进程；影响触发，不进默认回归或 nightly） | L0 + 对应 `tests/<domain>/*.spec.mjs` 契约测试必跑（用例即其反证记录） | 判据变更才写 Note | 对应契约测试及适用进程 smoke 绿 |
 | 改 checks/lib 支撑模块 / dev 基建本体（`lib/*.mjs`、env.sh、render-overlay） | 支撑模块 + 其**全部消费方**（消费面 grep：roles.mjs 的角色枚举消费方、render-overlay → `overlay-fresh`、run-state → watch-run/hitl-answer/run-dashboard） | 消费方门禁在同 diff 复跑 | L0 + lib 对应契约测试 | 判据变更才写 Note | 消费方门禁与契约测试绿 |
 | 查/加探针（真实边界单点证据） | `probes/` 头注 + `probes/INDEX.generated.md` | `node probes/_index.mjs --write` → 跑探针本体 | L0 + 目标探针（真模型档需凭据） | 头注/索引变更才写 | 索引门绿 + 探针红→绿 |
 | 改研究工作区手册 / 模板（结构性调整：模板增删 / 路径与格式修正；**手册正文文本 = 模型可见，走上行〔改 persona / skill / 手册文本〕**） | `packages/deep-research-pack/content/` | 无生成器 | L0 + `content-shape` | — | `content-shape` 绿 |
 | 改部署面（doctor / 发布集） | pack `checks/` + `package.json` 的 files/bin | — | L0 + L2 | 部署 Note | `release.entry` ALL PASS |
-| 换 vendor pin | `.gitmodules` + 运行中 dsh 的 exact 版本（兼容矩阵字段已删，见 D41） | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审（含 agent-team 合同 diff 与货架增量对账——正本 = [discipline-map §重审触发路径](../discipline-map.md)） | L0 + L1 + L2 + client-load.entry + L4-lite（0.2.0 轮实证：漏跑观察面 = client bundle 的 build-time externals 漂移漏网） | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
+| 换 vendor pin | `.gitmodules` + 运行中 dsh 的 exact 版本（兼容矩阵字段已删，见 D41） | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审（含 agent-team 合同 diff 与货架增量对账——正本 = [discipline-map §重审触发路径](../reference/discipline-matrix.md)） | L0 + L1 + L2 + client-load.entry + L4-lite（0.2.0 轮实证：漏跑观察面 = client bundle 的 build-time externals 漂移漏网） | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
 | 纯文档 / 卫生 | 文档自身 | — | L0；改动面含 AGENTS/入口链时加跑 `entry-chain-probe`（真模型档；无凭据退化为语义版人工） | 仅持久决定理由才写 | 门禁绿 |
 | **用户直派** | 按本轮授权直接执行；如需跨步排序使用会话内 todo；仅需显式评审的持久决定才建立 RFC；交付后按 notes 规则决定是否记录决定理由 | 同对应任务型 | 同对应任务型 | 同对应任务型 | 同对应任务型 |
 
@@ -212,7 +209,7 @@ CI 另跑 `run-accept.e2e` / `pack.e2e` / `doctor.e2e`；逐件命令索引 = [c
 与 RFC 出处。
 
 五条与面选择同级的纪律（前三条 = `_agent_ready_development` 吸纳，2026-09-25；后两条 = 姊妹仓
-`ai_dsh_assitant` 借入，2026-10-05，钉版见 [external-materials.md](../external-materials.md)）：
+`ai_dsh_assitant` 借入，2026-10-05，钉版见 [reference/external.md](../reference/external.md)）：
 
 - **先加载匹配的开发技能**：任务命中 `.agents/skills/` 某条 description（换 pin / 加角色 /
   写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷 / 用探针——清单 = 盘上 `.agents/skills/`）→ 先读该 `SKILL.md` 全文再动手，不从摘要猜流程；
@@ -229,37 +226,12 @@ CI 另跑 `run-accept.e2e` / `pack.e2e` / `doctor.e2e`；逐件命令索引 = [c
 
 ## 3. 开发环境
 
-### 3.0 fresh clone 一次性准备（改仓 L0 的前置）
+fresh clone 一次性准备（submodule / `pnpm install` / `source tools/env.sh` / `vendor-build.sh` / 凭据 / 端口约定）已独立成可执行教程，见 [guides/bootstrap.md](./bootstrap.md)。常用环境铁律摘要：
 
-```sh
-git clone --recurse-submodules <本仓 URL>   # 或 clone 后补：git submodule update --init vendor/dsh
-pnpm install                                # 根 workspace（devDeps 以 link:vendor/dsh 解析——vendor-links 门禁）
-source tools/env.sh && pnpm verify && pnpm test   # L0 应全绿（source 激活 pre-commit；无需 vendor 构建产物）
-```
-
-vendor 构建产物（`bash tools/build/vendor-build.sh`）是 L1/L2/run 通道/`pnpm dsh` 的前置（0.1.7 起启动依赖构建产物），L0 不需要；run 通道凭据前置见 [00-index §先分流](../00-index.md)。
-
-```sh
-source tools/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh 别名（代码面：钉 tag 源码）
-```
-
-- **双 home**：开发数据（会话/凭据/插件安装）全部进 `runtime/harness-home/`，日用 `~/.dsh`
-  不动——崩溃半径隔离；
-- **裸 dsh 拦截**：`PATH` 里的全局 dsh 随升级漂移，不作机制依据；机制核对一律走 env.sh
-  定义的 dsh（当前指向**本仓 `vendor/dsh` 钉 tag 源码**——升 pin 见根 AGENTS §DSH 源码表）；
-- **换 pin 后先构建**（0.1.7 起启动依赖构建产物）：`bash tools/build/vendor-build.sh --clean`——
-  产出逐包 `lib/types`、`lib/typert.<face>.js`（`typert-loader` 启动要求）与 client 面
-  `lib/client.js`（client-modules 组合要求）；vendor 自带 `pnpm run build` 在干净树上红在
-  tsdown 根单元，故由本仓驱动（历次固定动作与产物细节 =
-  [bumping-vendor-pin 技能](../../.agents/skills/bumping-vendor-pin/SKILL.md) §2/§4；0.2.0 轮新增的
-  node_modules 刷新 / typert emit 过滤 / typecheck 金丝雀 / host 半补建均已固化进该技能）；
-- web 观察窗：`dsh web -- --port 3084 --no-open`（3080 = 本 GUI；3081 = 已让渡外部项目，勿占；3083 = run 通道缺省）；
-- run 通道（研究 run 的正式启动面，安装域）：`bash tools/channel/boot-run.sh`（幂等：组合校验/补装
-  → boot web 3083 → 入口步骤打印）——用法全文见 [61-run-playbook](./61-run-playbook.md)。
-- 提交门禁：`source tools/env.sh` 幂等启用 pre-commit 钩子（`tools/hooks/pre-commit`：verify +
-  tests 红灯即拦 commit——"收尾必跑"的机器化，红 commit 溜进历史的教训见
-  [agent-friendly-polish Note 教训 4](../../notes/archived/2026-09-24-agent-friendly-polish.md)）；
-  应急 `--no-verify` 须在 commit message 说明跳过的面与理由。
+- **双 home + 裸 `dsh` 拦截**：`source tools/env.sh` 将 `DSH_HOME` 重定向到 `runtime/harness-home/` 并拦截全局 `dsh` 指向本仓 `vendor/dsh` 源码。
+- **换 pin 后先构建**：`bash tools/build/vendor-build.sh --clean`（全流程 = [bumping-vendor-pin 技能](../../.agents/skills/bumping-vendor-pin/SKILL.md) §2/§4）。
+- **run 通道**：`node tools/channel/run-driver.mjs up`（底层 = `bash tools/channel/boot-run.sh`），用法见 [run-ops.md](./run-ops.md)。
+- **提交门禁**：`source tools/env.sh` 幂等启用 `tools/hooks/pre-commit`（verify + tests 红灯即拦 commit，教训见 [agent-friendly-polish Note 教训 4](../../notes/archived/2026-09-24-agent-friendly-polish.md)）；应急 `--no-verify` 须在 commit message 说明跳过的面与理由。
 
 ## 4. 收尾程序（同 diff，五件）
 
@@ -287,4 +259,4 @@ source tools/env.sh        # DSH_HOME=runtime/harness-home（数据面）+ dsh �
 2. 若适用，读取问题卡、已批准 RFC 或工作记录，不假定每项工作都有这些载体；
 3. `git log`、`git status` 与工作树，确认已提交和未提交的实际进度，先解决记录与现场不一致再继续。
 
-研究 run 通道的恢复另有程序：[guides/61 §5](./61-run-playbook.md)，以 run bundle（`drt_<slug>/`）文件事实为准。
+研究 run 通道的恢复另有程序：[guides/run-ops.md §5](./run-ops.md)，以 run bundle（`drt_<slug>/`）文件事实为准。

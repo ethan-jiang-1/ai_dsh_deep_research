@@ -13,15 +13,15 @@ requirements chain instead of choosing evidence to hide the gap.
 
 ## 1. Select the existing owner
 
-Use the local owner contract: [development guide](../../docs/guides/60-dev-loop.md), [evaluation contract](../../docs/evaluation.md), relevant test/gate README, smoke entrypoint, or run-bundle contract. Route by the behavior actually being proven, not by the fact that the product uses an agent:
+Use the local owner contract: [development guide](../../docs/guides/dev-loop.md), [evaluation contract](../../docs/testing.md), relevant test/gate README, smoke entrypoint, or run-bundle contract. Route by the behavior actually being proven, not by the fact that the product uses an agent:
 
 | Plan behavior class | Existing evidence route | Proves | Does not prove |
 |---|---|---|---|
 | Deterministic code or package contract | Focused `node --test` on the owning `tests/*.spec.mjs`, then `pnpm test` | The exercised deterministic behavior and import/consumer contract | Browser installation, model quality, or user acceptance |
 | Verification rule or repository documentation shape | `pnpm verify`; when a gate changes, inject its real regression through `node checks/smoke/gates.e2e.mjs` | The registered static contract and its tested negative case | Semantic correctness of the requirement itself |
-| Preset composition or model-visible behavior | `DSH_SMOKE_REAL=1 node checks/smoke/preset.e2e.mjs` for keyless mounting; use the task-specific snapshot/replay or model probe listed in [guides/60](../../docs/guides/60-dev-loop.md) when that evidence matches | Preset loading or the declared captured behavior | General model quality, arbitrary run behavior, or user value |
+| Preset composition or model-visible behavior | `DSH_SMOKE_REAL=1 node checks/smoke/preset.e2e.mjs` for keyless mounting; use the task-specific snapshot/replay or model probe listed in [guides/dev-loop.md](../../docs/guides/dev-loop.md) when that evidence matches | Preset loading or the declared captured behavior | General model quality, arbitrary run behavior, or user value |
 | Client rendering or installation shape | Relevant `node checks/smoke/client-load.entry.mjs` or `node checks/smoke/release.entry.mjs` through the true DSH entry | Browser client loading or pack installation contract | Model quality or product acceptance |
-| Run-bundle state or evidence | Existing `checks/run-gates/` command named in [guides/61](../../docs/guides/61-run-playbook.md), against a real bundle and its recorded baseline | The exact bundle predicate exercised | Future run behavior or quality outside that bundle |
+| Run-bundle state or evidence | Existing `checks/run-gates/` command named in [guides/run-ops.md](../../docs/guides/run-ops.md), against a real bundle and its recorded baseline | The exact bundle predicate exercised | Future run behavior or quality outside that bundle |
 | Prompt-arrival investigation | Read the actual runtime request/session transcript through the task-specific probe or recorded-session source; follow the evidence owner linked from the relevant card | What reached that request | A durable regression asset; a single successful probe is not a regression suite |
 | Session or web replay | Relevant existing smoke and fixtures under [`checks/smoke/`](../../checks/README.md), only for the shapes they admit | The captured keyless session or web expectation | Unit/CLI expectations or an unimplemented session harness |
 
@@ -48,7 +48,7 @@ Before reporting such a row, take these three steps instead of inventing a bucke
 **Done:** every row either points at an existing owner, or is explicitly blocked with its reading
 protocol named and its missing owner identified.
 
-This playbook helps identify evidence before implementation and record what the selected owner actually proves. During implementation, use the current task route in [guides/60](../../docs/guides/60-dev-loop.md), not a command copied from an old plan. If existing checks do not cover a criterion, report that gap in the record that owns the work and let its authorized owner decide next steps. This method does not define note content or lifecycle.
+This playbook helps identify evidence before implementation and record what the selected owner actually proves. During implementation, use the current task route in [guides/dev-loop.md](../../docs/guides/dev-loop.md), not a command copied from an old plan. If existing checks do not cover a criterion, report that gap in the record that owns the work and let its authorized owner decide next steps. This method does not define note content or lifecycle.
 
 ## 2. Make the evidence complementary and attributable
 

@@ -1,7 +1,7 @@
 # AGENTS.md — deep-research-pack（插件内容子树）
 
 本包是**配置为主 + 研究驾驶舱（Research Cockpit——观察面 client 套件，D18 有界例外；
-另两处 = D31 抓取回退 provider、D40 启动行/内容注入；[构成正本](../../docs/design/40-research-cockpit.md)）**：
+另两处 = D31 抓取回退 provider、D40 启动行/内容注入；[构成正本](../../docs/contracts/client-ui.md)）**：
 贡献 = `cordis.patch.yml` 的 bundle 行 + `presets/<role>.patch.yml`（一条
 `@deepseek-ai/dsh-agent-preset` 行，config.plugins 内声明 persona/skills/工具行）+
 `presets/<role>/skills/` + 驾驶舱（`src/client/`，构建产物 `lib/client.js`）+
@@ -23,13 +23,13 @@ launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.m
   改前加载 [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)；
   守卫 = `tests/cockpit/client/locales/client-locale.spec.mjs`、`tests/cockpit/client/method-library/locales.spec.mjs`、
   `tests/cockpit/shared/i18n.spec.mjs`、`tests/checks/repo/cjk-source.test.mjs`；
-  合同 = [design/40 §4](../../docs/design/40-research-cockpit.md)。
+  合同 = [contracts/client-ui.md §4](../../docs/contracts/client-ui.md)。
 - 新增/修改角色走 [`.agents/skills/adding-a-research-role`](../../.agents/skills/adding-a-research-role/SKILL.md)；
 - 行引用的 `@deepseek-ai/*` 必须同时出现在 `peerDependencies`（`row-deps` 门禁）；
 - 角色清单（roster）的事实源 = 盘上 `presets/`，不要在代码里写第二份角色字面量
   （`role-list-sync` 门禁）；
 - 手册/模板是**包内容**：改 `content/`（模板路径用 `{{research_pack_root}}`），不往工作区写文件；
-  包内不得重新出现 `workspace/` 种子（`content-shape` 门禁）；新内容放哪/怎么长 = [design/70](../../docs/design/70-content-organization.md)。
+  包内不得重新出现 `workspace/` 种子（`content-shape` 门禁）；新内容放哪/怎么长 = [contracts/presets.md](../../docs/contracts/presets.md)。
 
 ## 模型可见文本（persona / skill / 手册）
 
@@ -40,7 +40,7 @@ launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.m
 
 ## 文档义务
 
-- 包 README 拥有**包级**合同（安装形态摘要/验证/配置/升级/卸载/数据/兼容）；用户逐步安装合同的 owner = 手册源（tools/release/product-manual.md），本 README 只留摘要与首装顺序（readme-shape + install-copies 校验）；行为/架构细节 = design/，发布 = guides/64；README 或发布集改变同 diff 更新；
+- 包 README 拥有**包级**合同（安装形态摘要/验证/配置/升级/卸载/数据/兼容）；用户逐步安装合同的 owner = 手册源（tools/release/product-manual.md），本 README 只留摘要与首装顺序（readme-shape + install-copies 校验）；行为/架构细节 = design/，发布 = contracts/release.md；README 或发布集改变同 diff 更新；
 - 启动/部署面（`src/startup`、`src/content`、`src/defaults`、`scripts/doctor.mjs`、`$DSH_HOME/deep-research/settings.json`）改动要跑
   `install-shape.entry` + `product-boot.entry` + `release.entry`（L2 安装/首启形状）；
 - 已知限制与延后工作放固定节 `## Known Limitations and Deferred Work`（中文名：已知限制与延后工作）。

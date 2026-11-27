@@ -6,7 +6,7 @@
 //   a-docs（md 文档卫生）· b-pack（pack 与驾驶舱）· c-notes（notes 与开发技能）·
 //   d-vendor（vendor 对齐）· e-workspace（工作区生成物）· f-repo（仓规环境）。
 // 共享助手（tracked 枚举 / gitOnce / fail-note 收集器 / 路径常量 / gates 名单）= `context.mjs`。
-// 门禁登记表（正本）= docs/evaluation.md §L0——与 `context.gates` 经门禁 gate-ledger-sync 机械
+// 门禁登记表（正本）= docs/testing.md §L0——与 `context.gates` 经门禁 gate-ledger-sync 机械
 // 对账（登记与实现漂移即红）；每条门禁的反证记录 = 表末列所指 notes/。
 //
 // 为什么要拆（维度2 实测）：单文件一格到底时，改一道门禁要读全文件（或盲改），
@@ -36,7 +36,7 @@ const only = activeOnly();
 if (only !== null) {
   const unknown = [...only].filter((g) => !gates.includes(g));
   if (unknown.length > 0) {
-    console.error(`verify: --only 里有未登记的门禁：${unknown.join(', ')}（门禁名单正本 = context.gates + docs/evaluation.md §L0）`);
+    console.error(`verify: --only 里有未登记的门禁：${unknown.join(', ')}（门禁名单正本 = context.gates + docs/testing.md §L0）`);
     process.exit(2);
   }
 }

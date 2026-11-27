@@ -3,7 +3,7 @@
 > 层：指南。探针住根 [probes/](../../probes/README.md)；本页是「是什么 / 何时用 / 怎么写 /
 > 证据与边界」的单一入口。每支探针的触发、判据与不证明归它自己的头注，本页不复制。
 >
-> 探针**不是第六个评估面**。评估五面（L0–L4）仍以 [evaluation.md](../evaluation.md) 为准；
+> 探针**不是第六个评估面**。评估五面（L0–L4）仍以 [testing.md](../testing.md) 为准；
 > 探针是 L1/L4 的证据工具——在真实边界上对单一机制做可重复实验。
 
 ## 1. 是什么
@@ -70,7 +70,7 @@ probes/
   `<mechanism>-probe.mjs`，不按 unit/integration 分。四个域 = 真模型行为 / 真浏览器 / analyze 只读取证 /
   流取证仪器；新域先问「它和现有域共享 harness 吗」，没有就新建。
 - **两类件**：`behavior/` `browser/` 是**探针**（给 PASS/FAIL）；`analyze/` 是**取证件**（只读投影，
-  不判裁决——红了只让人来看）；`stream/` 是预载仪器。面归属 = [guides/68](./68-surface-contract.md)。
+  不判裁决——红了只让人来看）；`stream/` 是预载仪器。面归属 = [policy.md](../policy.md)。
 - **头注是唯一事实源**；索引只投影（一句话/档位/何时跑/状态），不复制判据与不证明全文。
 - 索引与目录不一致 = 红。重生成：`node probes/_index.mjs --write`；校验：`--check`。
 - **勿手改** `INDEX.generated.md`；新增/改名/删除探针必须重生成。
@@ -179,7 +179,7 @@ probes/
 
 ## 9. 相关工作流
 
-- 开发环任务路由：`docs/guides/60-dev-loop.md` §2（「查/加探针」行）。
+- 开发环任务路由：`docs/guides/dev-loop.md` §2（「查/加探针」行）。
 - 复现间歇缺陷：`../../.agents/skills/reproducing-a-failure/SKILL.md` §2 透明 fetch tee。
 - 门禁写法：`../../.agents/skills/writing-a-gate/SKILL.md`。
 - 验收合同：`../evaluation.md`（五面；探针不是第六面）。

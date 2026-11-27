@@ -29,7 +29,7 @@ export const FREE_DEV_ROOTS = Object.freeze(['checks', 'tests', 'tools', 'probes
 
 /** 有自然语言歧义的开发根：只认本仓真实子目录（`release notes/` 不是路径）。 */
 export const AMBIGUOUS_DEV_ROOTS = Object.freeze({
-  docs: /^(?:design|guides|postmortem|decisions|terms|evaluation|project-map|00-index|AGENTS|external-materials|discipline-map)(?:[/.]|$)/,
+  docs: /^(?:contracts|guides|reference|assets|README|AGENTS|architecture|decisions|testing|policy|design|postmortem|terms|evaluation|project-map|00-index|external-materials|discipline-map)(?:[/.]|$)/,
   notes: /^(?:implemented|archived|proposed|rejected|README)(?:[/.]|$)/,
   runtime: /^(?:harness-home|smoke-workspace|ci-home|ci-state|build)(?:[/.]|$)/,
   vendor: /^dsh(?:[/.]|$)/,

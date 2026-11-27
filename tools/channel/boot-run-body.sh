@@ -108,7 +108,7 @@ drift_check() {
     fi
   done <<< "$shipped"
   if [ "$bad" -ne 0 ]; then
-    echo "boot-run: pack 漂移检测红——修复：bash tools/channel/boot-run.sh --sync-mirror（client/文档漂移原子同步，不重启）；host 侧漂移须停通道后 rm -rf '$PROFDIR' 重建（guides/61 §0.1）" >&2
+    echo "boot-run: pack 漂移检测红——修复：bash tools/channel/boot-run.sh --sync-mirror（client/文档漂移原子同步，不重启）；host 侧漂移须停通道后 rm -rf '$PROFDIR' 重建（guides/run-ops.md §0.1）" >&2
     return 1
   fi
   echo "boot-run: pack 漂移检测绿（运行时集 ↔ 镜像一致；跳过 $skipped 个非运行时文件）"
@@ -141,7 +141,7 @@ sync_mirror() {
       echo "boot-run: 漂移分类失败（mirror-sync exit ${rc}）——拒绝同步，fail-loud" >&2
       return 1
     fi
-    echo "boot-run: host 侧运行时文件漂移——运行进程 boot 时缓存 host 代码，就地同步不能更新加载面；停通道后 rm -rf '$PROFDIR' 重建（guides/61 §0.1）" >&2
+    echo "boot-run: host 侧运行时文件漂移——运行进程 boot 时缓存 host 代码，就地同步不能更新加载面；停通道后 rm -rf '$PROFDIR' 重建（guides/run-ops.md §0.1）" >&2
     while IFS= read -r rel; do
       [ -n "$rel" ] && echo "boot-run: 漂移——${rel}（host 侧，须重建）" >&2
     done <<< "$host_rels"
@@ -352,7 +352,7 @@ cat <<'STEPS'
 5. 仪表盘出现"⏳ 等你拍板（HITL）"横幅 = lead 在等你（HITL1/HITL2）——去 web GUI 答题
 6. HITL2 审阅（证据充分性 + 交付/补研究推荐）→ 拍板 → final/ 版本化交付 + present 声明
    中断恢复：新开 lead 会话只认 research-workspace/drt_<slug>/ 的文件事实。
-全文指南：docs/guides/61-run-playbook.md
+全文指南：docs/guides/run-ops.md
 ───────────────────────────────────────────────────────────────────
 STEPS
 

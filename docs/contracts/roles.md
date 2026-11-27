@@ -1,7 +1,7 @@
-# 20 · 角色内容：职责 owner 表、persona 要素与 skills
+# 角色内容：职责 owner 表、persona 要素与 skills
 
-> 层：设计（为什么）。角色组合行见 `packages/deep-research-pack/presets/<role>.patch.yml`（DSH 0.1.7 起的 preset 行）；
-> 方法论来源（wave 语义、gate 精神）见 [30-methodology-mapping.md](./30-methodology-mapping.md)。
+> **读法**：本页是四研究角色 + Method Editor（[D37](../decisions.md#d37)）+ worker profiles（[D47](../decisions.md#d47)）的职责边界、persona 要素与 skills 合同；角色组合行见 `packages/deep-research-pack/presets/<role>.patch.yml`。
+> 方法论来源（wave 语义、gate 精神）见 [methodology-mapping.md](./methodology-mapping.md)；总架构见 [architecture.md](../architecture.md)。
 
 ## 0. 队形总览（D2）
 
@@ -59,7 +59,7 @@ preset 只在**根会话**（直接以该角色开新会话）时生效；**dept
 每角色一个技能目录：`presets/<role>/skills/<n>/SKILL.md`，一技能一目录。**当前有哪些
 skill = 盘上目录本身**（单一事实源：`ls packages/deep-research-pack/presets/<role>/skills/`）——
 此处不复制清单：复制即缓存，加删 skill 会静默漏项。本节只说明技能面
-承载什么：**方法论条目 ↔ skill 的映射正本 = [30-methodology-mapping.md](./30-methodology-mapping.md)**
+承载什么：**方法论条目 ↔ skill 的映射正本 = [30-methodology-mapping.md](./methodology-mapping.md)**
 （L3 载体，合同随代码同 diff）；每条方法论纪律写在承载它的 SKILL.md 正文里；
 跨角色硬契约（证据 frontmatter 等）住[研究手册](../../packages/deep-research-pack/content/manual.md)。
 

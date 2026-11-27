@@ -2,14 +2,14 @@
 
 > 维护面：**judge**——装裁决入口（`verify/`、`smoke/`、`run-gates/`、`release/release-check`），
 > 不装只读投影（→ `probes/`）与导出/清理（→ `tools/`）；非面支撑：`lib/` 是维护层公共库（judge/show/operate
-> 共享，按消费者域分组）、`test/` runner、support、配置 JSON 与消费者同根。组级面表见下，逐件例外 = [surface-contract](../docs/guides/68-surface-contract.md)。
+> 共享，按消费者域分组）、`test/` runner、support、配置 JSON 与消费者同根。组级面表见下，逐件例外 = [surface-contract](../docs/policy.md)。
 >
-> 职责分组：`verify/`、`smoke/`、`test/`、`run-gates/`、`release/` + `lib/` 支撑库（show 件住 `probes/analyze/`、operate 件住 `tools/`——拆分后本目录只留 judge）；每个盘上入口一行：类 / 证明什么 / 档位。命令与前置正本 = [guides/60 §2](../docs/guides/60-dev-loop.md)；档位列申报凭据/调用模式，不替代 guides/60 的 `source` 前置；子树纪律 = [AGENTS.md](AGENTS.md)；测试资产分层 = [tests/fixtures taxonomy](../tests/fixtures/README.md)。本索引不改脚本路径与命令。
+> 职责分组：`verify/`、`smoke/`、`test/`、`run-gates/`、`release/` + `lib/` 支撑库（show 件住 `probes/analyze/`、operate 件住 `tools/`——拆分后本目录只留 judge）；每个盘上入口一行：类 / 证明什么 / 档位。命令与前置正本 = [guides/dev-loop.md §2](../docs/guides/dev-loop.md)；档位列申报凭据/调用模式，不替代 guides/dev-loop.md 的 `source` 前置；子树纪律 = [AGENTS.md](AGENTS.md)；测试资产分层 = [tests/fixtures taxonomy](../tests/fixtures/README.md)。本索引不改脚本路径与命令。
 
 ## 维护面（组级）
 
 判据 = 主要产出什么：裁决 → judge，证据 → show，持久状态 → operate；规则与逐件例外 =
-[surface-contract](../docs/guides/68-surface-contract.md)。本目录已按面拆开：show 件住 `probes/analyze/`、operate 件住 `tools/`，这里只留 judge 与非面支撑。
+[surface-contract](../docs/policy.md)。本目录已按面拆开：show 件住 `probes/analyze/`、operate 件住 `tools/`，这里只留 judge 与非面支撑。
 
 | 组 | 面 | 判定 |
 |---|---|---|
@@ -25,7 +25,7 @@
 
 | 件 | 证明什么 | 档位 | 事实来源 |
 |---|---|---|---|
-| verify.mjs | L0 入口：`--only` 配置 + 按域调用 + 汇总；门禁本体住 `verify/gates/{a-docs,b-pack,c-notes,d-vendor,e-workspace,f-repo}.mjs`，共享助手 = `verify/context.mjs` | keyless | [evaluation §L0 台账](../docs/evaluation.md) |
+| verify.mjs | L0 入口：`--only` 配置 + 按域调用 + 汇总；门禁本体住 `verify/gates/{a-docs,b-pack,c-notes,d-vendor,e-workspace,f-repo}.mjs`，共享助手 = `verify/context.mjs` | keyless | [evaluation §L0 台账](../docs/testing.md) |
 
 根面（不分组的配置与指令件）：`doc-budgets.json`（常驻文档 UTF-8 字节上限，被 doc-budgets 门禁消费，正本即自身）、`archived-note-pointers.json`（活面→notes/archived 链接的历史指针登记簿，被 archived-note-pointer 门禁消费，正本即自身）、`test-path-redirects.json`（搬家路径重定向登记簿：旧路径→新路径，被 md-links 消费，正本即自身）、`README.md`（本索引）、`AGENTS.md`（子树常设指令：新门禁流程、范围纪律、命名即层）。
 
@@ -71,7 +71,7 @@
 
 ## probes/（探针与只读取证，住根目录）
 
-探针与只读取证投影住根 [probes/](../probes/README.md)：behavior / browser / analyze 三域 + stream 仪器；指南 = [guides/66](../docs/guides/66-probe-playbook.md)，索引 = [probes/INDEX.generated.md](../probes/INDEX.generated.md)。本索引不再手枚举（头注是事实源，索引是生成物）。
+探针与只读取证投影住根 [probes/](../probes/README.md)：behavior / browser / analyze 三域 + stream 仪器；指南 = [guides/probe-playbook.md](../docs/guides/probe-playbook.md)，索引 = [probes/INDEX.generated.md](../probes/INDEX.generated.md)。本索引不再手枚举（头注是事实源，索引是生成物）。
 
 ## 分发/安装失败面 → 资产
 
@@ -98,7 +98,7 @@
 
 ## run 观察 = probes/analyze/
 
-只读投影/诊断/回放件住探针目录：[probes/analyze/](../probes/analyze/)——面 = show，逐件表 = [probes/README](../probes/README.md) 与 [guides/66](../docs/guides/66-probe-playbook.md)；本索引不再列举。
+只读投影/诊断/回放件住探针目录：[probes/analyze/](../probes/analyze/)——面 = show，逐件表 = [probes/README](../probes/README.md) 与 [guides/probe-playbook.md](../docs/guides/probe-playbook.md)；本索引不再列举。
 
 ## release/（发布前裁决）
 

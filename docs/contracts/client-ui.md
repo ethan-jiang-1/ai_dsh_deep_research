@@ -1,7 +1,7 @@
-# 40 · 研究驾驶舱（Research Cockpit）：观察面 client 套件的构成
+# 研究驾驶舱（Research Cockpit）：观察面 client 套件合同
 
 > **读法**：本页是驾驶舱**架构、出厂面白名单、数据通道、分层与防御红线**的当前合同正本；全量源码模块路径清单由 [reference/cockpit-registry.generated.md](../reference/cockpit-registry.generated.md) 自动生成（`cockpit-doc-registry` 门禁校验新鲜度）。
-> 命名分层正本 = §1（历史定夺见 [cockpit-naming 快照](../../notes/archived/2026-09-28-cockpit-naming.md)）；运行模型与四类状态 = [50](./50-agent-loop-and-state.md)。
+> 命名分层正本 = §1（历史定夺见 [cockpit-naming 快照](../../notes/archived/2026-09-28-cockpit-naming.md)）；运行模型与四类状态 = [data-model.md](./data-model.md)。
 
 ## 1. 定位与命名分层
 
@@ -117,7 +117,7 @@
 - **两条官方通道，零自建协议**：`remote.session.follow`（WebSocket journal 流）喂活动流 / HITL 谓词 / 会话绑定；`remote.workspaceFiles` 喂 bundle 渐进面（失败显性降级，不折成空态）。remote 命名空间须两级声明（`remote` + `remote.session`）。
 - **项目默认写通道（[D50](../decisions.md#d50)）**：面板 → `remote.commands.execute('/research-defaults …')` → host command 原子写 `<workspace>/research-defaults.json`。
 - **交付判据与自动打开**：终稿"已交付"只认 live 帧 `deliverables/presented`（`present` 见证），`final.md` 在场仅代表可审；`delivery-watch.ts` 只对在屏会话的 live 交付触发一次 `openResource`（`callId` 去重、焦点在输入框时不打断）。
-- **双半构建与接线**：client 半由 `exports["./client"]` ↔ `cordis.patch.yml` 的 `research-client` 行装配，构建为 cjs/browser + `window.__ModuleLoader__.load` 外壳（细节 = [guides/62](../guides/62-plugin-authoring.md)）。
+- **双半构建与接线**：client 半由 `exports["./client"]` ↔ `cordis.patch.yml` 的 `research-client` 行装配，构建为 cjs/browser + `window.__ModuleLoader__.load` 外壳（细节 = [guides/plugin-authoring.md](../guides/plugin-authoring.md)）。
 
 ## 4. 分层纪律
 
@@ -136,7 +136,7 @@
 | 真模型档 | [client-hitl.entry](../../checks/smoke/client-hitl.entry.mjs) | 活标题翻转 + 横幅 + 挂起自动展开右栏 |
 | keyless 单测 | `pnpm test` | 全部 `src/lib/` 纯件与 `src/client/` 逻辑直测 |
 
-命令与改动次序 = [guides/60 §2](../guides/60-dev-loop.md)「改驾驶舱」行；判据 = [evaluation](../evaluation.md)。
+命令与改动次序 = [guides/dev-loop.md §2](../guides/dev-loop.md)「改驾驶舱」行；判据 = [evaluation](../testing.md)。
 
 <a id="defensive-redlines"></a>
 ### 5.1 防御式与契约红线（`vendor/dsh/docs/defensive-patterns/` 本地化）

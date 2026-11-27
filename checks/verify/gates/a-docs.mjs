@@ -1,7 +1,7 @@
 // a-docs.mjs — 域 A · md 文档卫生：tracked .md 的字节 / 链接 / 锚点 / 措辞合同（门禁列表 = context.gates 的 A 域段）。
 //
 // 从 2026-10-27 卫生轮前的单文件 verify.mjs 原样切出（判据与文案逐字未改）；共享助手住
-// ../context.mjs。改本域门禁只需读本文件——域切分 = docs/evaluation.md §L0 表的 A–F 分组。
+// ../context.mjs。改本域门禁只需读本文件——域切分 = docs/testing.md §L0 表的 A–F 分组。
 
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, resolve, relative, sep } from 'node:path';
@@ -443,7 +443,7 @@ export function runA() {
 // 里成片出现"已销账 / 修订 → / 曾用 / 首版…已由…替换"——读者会据此以为旧结论仍有效。
 // 范围：live 文档（排除 notes/ 历史层与 vendor/）。豁免两处——① `docs/AGENTS.md`（它是这条规则
 // 的家，slop 清单必须能举例禁用词）；② **含本门禁名 `doc-now-only` 的行**（本门禁在
-// evaluation.md §L0 的登记行与本节注释都要点名禁用词，否则规则无从表述）。
+// testing.md §L0 的登记行与本节注释都要点名禁用词，否则规则无从表述）。
 // 防空语料：0 个文件被检查 → 红。
 {
   const gate = 'doc-now-only';
@@ -507,19 +507,24 @@ export function runA() {
   }
 }
 
-// ── surface-claims（维护面声明一致性，2026-11-17）：三个门户 README 首屏的面词 = guides/68 §4
+// ── surface-claims（维护面声明一致性，2026-11-17）：三个门户 README 首屏的面词 = docs/policy.md §3.2
 // 三根面表；只钉可稳定判真假的面词，「装什么/不装什么」散文归交付自审。──
 {
   const gate = 'surface-claims';
-  const contract = readFileSync(join(ROOT, 'docs', 'guides', '68-surface-contract.md'), 'utf8');
-  for (const [rel, face, root] of [['checks/README.md', 'judge', 'checks/'], ['probes/README.md', 'show', 'probes/'], ['tools/README.md', 'operate', 'tools/']]) {
-    const f = join(ROOT, rel);
-    if (!existsSync(f)) { fail(gate, `${rel} 缺席——维护面门户必须在盘上`); continue; }
-    const head = readFileSync(f, 'utf8').split('\n').slice(0, 12).join('\n');
-    if (!head.includes(`维护面：**${face}**`)) fail(gate, `${rel} 首屏未声明维护面 = ${face}——门户第一屏必须与 guides/68 §4 同词（面词是判据，不是文风）`);
-    const row = contract.split('\n').find((line) => line.startsWith(`| \`${root}\` |`));
-    if (!row) { fail(gate, `guides/68 §4 缺 ${root} 行——三根面表必须逐根在场`); continue; }
-    if (!row.includes(`| ${face}`)) fail(gate, `guides/68 §4 的 ${root} 面不是 ${face}：${row.slice(0, 80)}…——README 与合同页打架`);
+  const contractPath = join(ROOT, 'docs', 'policy.md');
+  if (!existsSync(contractPath)) {
+    fail(gate, 'docs/policy.md 缺席——维护面合同正本必须在盘上');
+  } else {
+    const contract = readFileSync(contractPath, 'utf8');
+    for (const [rel, face, root] of [['checks/README.md', 'judge', 'checks/'], ['probes/README.md', 'show', 'probes/'], ['tools/README.md', 'operate', 'tools/']]) {
+      const f = join(ROOT, rel);
+      if (!existsSync(f)) { fail(gate, `${rel} 缺席——维护面门户必须在盘上`); continue; }
+      const head = readFileSync(f, 'utf8').split('\n').slice(0, 12).join('\n');
+      if (!head.includes(`维护面：**${face}**`)) fail(gate, `${rel} 首屏未声明维护面 = ${face}——门户第一屏必须与 docs/policy.md §3.2 同词（面词是判据，不是文风）`);
+      const row = contract.split('\n').find((line) => line.startsWith(`| \`${root}\` |`));
+      if (!row) { fail(gate, `docs/policy.md §3.2 缺 ${root} 行——三根面表必须逐根在场`); continue; }
+      if (!row.includes(`| ${face}`)) fail(gate, `docs/policy.md §3.2 的 ${root} 面不是 ${face}：${row.slice(0, 80)}…——README 与合同页打架`);
+    }
   }
 }
 

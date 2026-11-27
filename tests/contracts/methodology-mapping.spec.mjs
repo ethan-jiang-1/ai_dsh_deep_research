@@ -33,7 +33,7 @@ function skillsOnDisk() {
 }
 
 test('L3-1：六个生命周期环节在映射表里各有落点行', () => {
-  const text = read('docs/design/30-methodology-mapping.md')
+  const text = read('docs/contracts/methodology-mapping.md')
   const stages = ['立项对齐', '广度侦察', '深度挖掘', '综合写作', '质量把关', '审阅交付']
   const rows = text.split('\n').filter((l) => l.startsWith('|'))
   assert.ok(rows.length >= 10, `映射表行数异常少（${rows.length}）——防空语料`)
@@ -42,7 +42,7 @@ test('L3-1：六个生命周期环节在映射表里各有落点行', () => {
 })
 
 test('L3-1：盘上每个角色 skill 都在映射表登记了落点（新 skill 不登记 = 红）', () => {
-  const text = read('docs/design/30-methodology-mapping.md')
+  const text = read('docs/contracts/methodology-mapping.md')
   const skills = skillsOnDisk()
   assert.ok(skills.length >= 8, `防空语料：盘上 skill 过少（${skills.length}）`)
   const missing = skills.filter((s) => !text.includes(`\`${s.name}\``) && !text.includes(s.name))
@@ -59,6 +59,6 @@ test('L3-4：信噪比三机制写在角色 skill 里（不是只写在设计文
   assert.ok(/A[–-]D/.test(scout) && scout.includes('分级'), 'scout 的 lead-mapping 缺来源质量分级（A–D）')
   assert.ok(analyst.includes('交叉验证'), 'analyst 的 evidence-extraction 缺多源交叉验证')
   assert.ok(analyst.includes('反例'), 'analyst 的 evidence-extraction 缺反例纪律')
-  const map = read('docs/design/30-methodology-mapping.md')
-  assert.ok(map.includes('信噪比'), 'design/30 未承载判据 4 的信噪比策略说明')
+  const map = read('docs/contracts/methodology-mapping.md')
+  assert.ok(map.includes('信噪比'), 'contracts/methodology-mapping.md 未承载判据 4 的信噪比策略说明')
 })

@@ -20,7 +20,7 @@ Three principles govern product and mechanism choices (user-set 2026-09-27):
 
 1. **Follow DSH, do not invent.** The pinned `vendor/dsh` source is the mechanism authority
    (read-only). Prefer an existing DSH carrier; a self-built mechanism needs evidence that no
-   carrier fits. The per-source ledger is [`docs/discipline-map.md`](docs/discipline-map.md).
+   carrier fits. The per-source ledger is [`docs/reference/discipline-matrix.md`](./docs/reference/discipline-matrix.md).
 2. **Solve autonomously, borrow from mature work.** Check how established DSH plugins solve a
    problem first (adoption is a signal); resolve what can be resolved without asking. The author's
    local reference repos are not required for public contributors.
@@ -141,9 +141,9 @@ node checks/smoke/gates.e2e.mjs
 ```
 
 For the full development loop — including which evidence tier applies to a change —
-read [`docs/guides/60-dev-loop.md`](docs/guides/60-dev-loop.md). The test-selection
-map is [`docs/project-map.md`](docs/project-map.md), and the acceptance contract is
-[`docs/evaluation.md`](docs/evaluation.md).
+read [`docs/guides/dev-loop.md`](./docs/guides/dev-loop.md). The test-selection
+map is [`docs/guides/run-ops.md`](./docs/guides/run-ops.md), and the acceptance contract is
+[`docs/testing.md`](./docs/testing.md).
 
 ## Working with a running research channel
 
@@ -165,22 +165,22 @@ outputs; the ignored paths are documented in [`.gitignore`](.gitignore).
   fetch-fallback provider, and the startup/content rows; keep new behavior inside those boundaries
   or open a decision first.
 - Evaluation has five faces (L0 structure / L1 mount / L2 install / L3 domain / L4 delivery) that do
-  not substitute for each other; see [`docs/evaluation.md`](docs/evaluation.md).
+  not substitute for each other; see [`docs/testing.md`](./docs/testing.md).
 - The iteration unit is a vertical round: thinnest end-to-end path first, then widen. Multi-step
   work is expressed in a plan and todos, not in a batch of unrelated edits.
 - Tests use `node:test` + `node:assert`; there is no test framework.
 - Changes that carry a durable decision also need a Note under `notes/` (see
   [`notes/AGENTS.md`](notes/AGENTS.md)).
 - New gates and contract tests need a failing proof before they turn green; see
-  [`docs/guides/60-dev-loop.md`](docs/guides/60-dev-loop.md) and
+  [`docs/guides/dev-loop.md`](./docs/guides/dev-loop.md) and
   [`.agents/skills/writing-a-gate`](.agents/skills/writing-a-gate/SKILL.md).
 - Keep the shipped package self-contained. Do not add repo-only links, local absolute
   paths, test fixtures, or build intermediates to `packages/deep-research-pack`.
 - Follow the git boundary and cross-environment rules in
-  [`docs/guides/63-git-boundary.md`](docs/guides/63-git-boundary.md): source/contracts/seeds
+  [`docs/contracts/git-boundary.md`](./docs/contracts/git-boundary.md): source/contracts/seeds
   are tracked; runtime state, caches, generated outputs, and machine-specific files are not.
 - Release version/tag/npm order is owned by
-  [`docs/guides/64-release-versioning.md`](docs/guides/64-release-versioning.md); run
+  [`docs/contracts/release.md`](./docs/contracts/release.md); run
   `pnpm release:check` before tagging or publishing.
 - The pre-commit hook runs `pnpm verify` and `pnpm test`; enable it with
   `source tools/env.sh` (or set `core.hooksPath=tools/hooks`).

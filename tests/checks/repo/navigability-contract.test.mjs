@@ -1,10 +1,10 @@
 // 可驾驭性契约回归（D23 判据可检验化的机械面；条目 Note = notes/implemented/2026-10-05-project-navigability-phase1.md）。
 // 断言对象 = 仓库自控文件（keyless、纯 fs、零子进程、零网络——layering 守卫范围）。
-// 覆盖：正本门（design/50 在场 + 三导航面链接 + 状态定语零重述）、导航门（任务入口矩阵九任务
+// 覆盖：正本门（contracts/data-model.md 在场 + 三导航面链接 + 状态定语零重述）、导航门（任务入口矩阵九任务
 // 全覆盖 + 矩阵链接目标在场）、资产门（scripts 职责索引 + dev 入口说明 + fixtures taxonomy
 // 覆盖全量盘上入口，且每组 fixture ≥1 真实 consumer、零孤儿）。
 // 行为门不在此文件：verify/test 全绿与"diff 无运行件路径移动"是收尾对账命令面（RFC 实施记录）。
-// 立红记录：2026-10-05 R2 首跑——design/50、入口矩阵、checks/README、tools/README、
+// 立红记录：2026-10-05 R2 首跑——contracts/data-model.md、入口矩阵、checks/README、tools/README、
 // fixtures/README 均缺席即红（红是本测试的正确起点：判据在实现前必须能失败）；
 // consumer 检查与 spot-grep 绿态出生，反证 = 注入孤儿组 / 向非 owner 注入状态定语各看红一次后还原。
 import { test } from 'node:test';
@@ -15,23 +15,23 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
-const DESIGN50 = 'docs/design/50-agent-loop-and-state.md';
-// 状态模型定语（合同词表——唯一正本 = design/50；非 owner 文档只许链接，不许重述）
+const DESIGN50 = 'docs/contracts/data-model.md';
+// 状态模型定语（合同词表——唯一正本 = contracts/data-model.md；非 owner 文档只许链接，不许重述）
 const STATE_TERMS = ['研究事实正本', '执行事件正本', '派生观察'];
 
-test('正本门：design/50 在场且承载四类状态合同', () => {
+test('正本门：contracts/data-model.md 在场且承载四类状态合同', () => {
   assert.ok(existsSync(join(ROOT, DESIGN50)), `${DESIGN50} 缺席——Agent Loop 与四类状态正本（RFC Phase 1 第 1 项）`);
   const text = read(DESIGN50);
-  for (const term of STATE_TERMS) assert.ok(text.includes(term), `design/50 缺状态合同词「${term}」`);
-  assert.ok(text.includes('恢复优先级'), 'design/50 缺恢复优先级说明');
-  assert.ok(text.includes('交付判定'), 'design/50 缺交付判定说明');
+  for (const term of STATE_TERMS) assert.ok(text.includes(term), `contracts/data-model.md 缺状态合同词「${term}」`);
+  assert.ok(text.includes('恢复优先级'), 'contracts/data-model.md 缺恢复优先级说明');
+  assert.ok(text.includes('交付判定'), 'contracts/data-model.md 缺交付判定说明');
 });
 
-test('正本门：project-map / 61 链接 design/50，NODES 指向随包状态合同载体', () => {
+test('正本门：README / run-ops 链接 contracts/data-model.md，NODES 指向随包状态合同载体', () => {
   // repo 文档断言链接形态（允许 docs/ 内或 docs/guides/ 的相对前缀）；md-links 门禁保链接可解析
-  const linkForm = /\]\((?:\.\.\/)?design\/50-agent-loop-and-state\.md\)/;
-  for (const doc of ['docs/project-map.md', 'docs/guides/61-run-playbook.md']) {
-    assert.ok(linkForm.test(read(doc)), `${doc} 未链接 design/50——分层指针缺席`);
+  const linkForm = /\]\((?:\.\.\/|\.\/)?contracts\/data-model\.md\)/;
+  for (const doc of ['docs/README.md', 'docs/guides/run-ops.md']) {
+    assert.ok(linkForm.test(read(doc)), `${doc} 未链接 contracts/data-model.md——分层指针缺席`);
   }
   // NODES.md 随 pack workspace 种子部署到用户侧，不能携带仓内相对链接（种子副本会被
   // md-links 扫描）——断言纯文本指针在场即可
@@ -39,9 +39,9 @@ test('正本门：project-map / 61 链接 design/50，NODES 指向随包状态�
 });
 
 test('导航门：任务入口矩阵逐行完整（六列非空、首选入口可执行），链接目标全部在场', () => {
-  const map = read('docs/project-map.md');
+  const map = read('docs/guides/run-ops.md');
   const s = map.indexOf('## 任务入口矩阵');
-  assert.ok(s !== -1, 'project-map.md 缺「## 任务入口矩阵」节（RFC Phase 1 第 2 项）');
+  assert.ok(s !== -1, 'guides/run-ops.md 缺「## 任务入口矩阵」节（RFC Phase 1 第 2 项）');
   const next = map.indexOf('\n## ', s + 1);
   const section = map.slice(s, next === -1 ? undefined : next);
   // 逐行结构性断言，不用关键词子集（2026-11-03 卫生审计：旧断言只查 9 个关键词，
@@ -58,7 +58,7 @@ test('导航门：任务入口矩阵逐行完整（六列非空、首选入口�
   }
   for (const m of section.matchAll(/\]\(([^)#\s]+?)(#[^)]*)?\)/g)) {
     if (m[1].startsWith('http')) continue;
-    assert.ok(existsSync(join(ROOT, 'docs', m[1])), `矩阵链接目标缺席：docs/${m[1]}——文档只指向真实文件`);
+    assert.ok(existsSync(join(ROOT, 'docs', 'guides', m[1])), `矩阵链接目标缺席：docs/guides/${m[1]}——文档只指向真实文件`);
   }
 });
 
@@ -135,14 +135,14 @@ test('正本门 spot-grep：状态合同词不在非 owner 文档重述', () => 
     const skillsDir = join(presetsDir, role.name, 'skills');
     for (const s of readdirSync(skillsDir)) skills.push(join('packages/deep-research-pack/presets', role.name, 'skills', s, 'SKILL.md'));
   }
-  const nonOwners = ['docs/project-map.md', 'docs/guides/61-run-playbook.md', 'docs/guides/60-dev-loop.md',
-    'docs/00-index.md', 'README.md', 'AGENTS.md', 'packages/deep-research-pack/README.md',
+  const nonOwners = ['docs/guides/run-ops.md', 'docs/guides/dev-loop.md', 'docs/testing.md', 'docs/policy.md', 'docs/architecture.md',
+    'docs/README.md', 'README.md', 'AGENTS.md', 'packages/deep-research-pack/README.md',
     'packages/deep-research-pack/content/manual.md', 'packages/deep-research-pack/presets/lead/skills/nodes-contract/SKILL.md', ...skills];
   for (const doc of nonOwners) {
     if (!existsSync(join(ROOT, doc))) continue;
     const text = read(doc);
     for (const term of STATE_TERMS) {
-      assert.ok(!text.includes(term), `${doc} 重述状态合同词「${term}」——唯一正本 = design/50，非 owner 改为链接`);
+      assert.ok(!text.includes(term), `${doc} 重述状态合同词「${term}」——唯一正本 = contracts/data-model.md，非 owner 改为链接`);
     }
   }
 });
@@ -150,10 +150,10 @@ test('正本门 spot-grep：状态合同词不在非 owner 文档重述', () => 
 // ── 测试资产组织契约（条目 = test-asset-organization，2026-10-05 mini RFC）──
 // 词汇桥与落家序是导航合同的一部分，与任务入口矩阵同受机械把守；立红实录见该条目实施记录。
 
-test('资产门：project-map 测试词汇对照五词全覆盖 + 反金字塔理由在场', () => {
-  const map = read('docs/project-map.md');
+test('资产门：testing.md 测试词汇对照五词全覆盖 + 反金字塔理由在场', () => {
+  const map = read('docs/testing.md');
   const s = map.indexOf('### 测试词汇对照');
-  assert.ok(s !== -1, 'project-map.md 缺「### 测试词汇对照」节（词汇桥单一入口）');
+  assert.ok(s !== -1, 'docs/testing.md 缺「### 测试词汇对照」节（词汇桥单一入口）');
   const rest = map.slice(s);
   const end = rest.slice(1).search(/\n#{2,3} /);
   const section = end === -1 ? rest : rest.slice(0, end + 1);
@@ -168,9 +168,9 @@ test('资产门：project-map 测试词汇对照五词全覆盖 + 反金字塔�
 });
 
 test('资产门：新检查落家序七步在场 + 成本一句原则 + 链接目标在场', () => {
-  const map = read('docs/project-map.md');
+  const map = read('docs/testing.md');
   const s = map.indexOf('### 新检查落家序');
-  assert.ok(s !== -1, 'project-map.md 缺「### 新检查落家序」节（新检查住哪的单一入口）');
+  assert.ok(s !== -1, 'docs/testing.md 缺「### 新检查落家序」节（新检查住哪的单一入口）');
   const rest = map.slice(s);
   const end = rest.slice(1).search(/\n#{2,3} /);
   const section = end === -1 ? rest : rest.slice(0, end + 1);

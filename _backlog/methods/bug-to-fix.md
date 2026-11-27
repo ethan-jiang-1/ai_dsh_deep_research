@@ -9,26 +9,26 @@ whenToUse: A deferred defect card exists (or a batch of them shares a root cause
 **Input:** an active bug card (`_backlog/bugs/BUG-<NNN>-<slug>.md`) with symptoms, severity and current state.
 **Output:** the fix in the tree, a `json fix-evidence` block on the card, a permanent guard at the same boundary, and the card archived as `已修` with the right disposition.
 
-The card is the package; this method is the route. The state machine, card template and authorization boundaries are owned by [bugs/README](../bugs/README.md) and [_backlog/AGENTS](../AGENTS.md); the command and evidence owners are [guides/60](../../docs/guides/60-dev-loop.md), [guides/62](../../docs/guides/62-plugin-authoring.md) and [guides/67](../../docs/guides/67-test-strategy.md). This method adds the DSH-plugin triage and the evidence standard inside those states.
+The card is the package; this method is the route. The state machine, card template and authorization boundaries are owned by [bugs/README](../bugs/README.md) and [_backlog/AGENTS](../AGENTS.md); the command and evidence owners are [guides/dev-loop.md](../../docs/guides/dev-loop.md), [guides/plugin-authoring.md](../../docs/guides/plugin-authoring.md) and [testing.md](../../docs/testing.md). This method adds the DSH-plugin triage and the evidence standard inside those states.
 
 ## 0. Why a DSH plugin bug is boundary-first
 
 A DSH plugin is composed at several surfaces: pack source, generated overlay, profile mirror, installed tarball, browser client, assembled model request, run bundle, and the read-only vendor mechanism. The same defect can be green at one boundary and red at the next. The first question is not "what is the root cause?" but "which surface owns this, and what is the lowest real boundary that can see it?" A fix proved at a lower boundary than the bug is a false green.
 
-The repo's acceptance axiom is also the bug-fix axiom: **能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准** ([evaluation §完成判断四分离](../../docs/evaluation.md)). A bug card must say which of these the fix proves, and which it does not.
+The repo's acceptance axiom is also the bug-fix axiom: **能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准** ([evaluation §完成判断四分离](../../docs/testing.md)). A bug card must say which of these the fix proves, and which it does not.
 
 ## 1. Triage: surface, boundary, authorization
 
 1. **Card or not.** Fix in the current authorization scope, or defer into a card. A deferred card is the package; an in-scope fix follows the dev loop and needs no card.
 2. **Surface.** Find the first owner in the table below. If the symptom crosses surfaces, fix the one that owns the mechanism, not the one that displays it.
-3. **Boundary.** Pick the lowest real boundary that can see the failure. Read the exact command from [guides/60 §2](../../docs/guides/60-dev-loop.md); the Lane column names the lane.
+3. **Boundary.** Pick the lowest real boundary that can see the failure. Read the exact command from [guides/dev-loop.md §2](../../docs/guides/dev-loop.md); the Lane column names the lane.
 4. **DSH invariant.** Name the invariant at stake: fail-loud, model-visible ⟺ logged, registrations are effects, plugins not loop changes, host read-only. If none applies, say so.
 5. **Authorization.** P1/P2 修理型修复 = self-authorized. P0, or a fix touching the entry chain, gates/acceptance contract, docs contract, pack public behavior or a recorded D (D-number) = `等人拍板`; record the user's release. Severity is a channel boundary, not a taste label.
 
 | Symptom surface | First owner | Lowest real boundary | Lane | Typical false green |
 |---|---|---|---|---|
 | `src/lib/` pure predicate or codec | pack source + `faces.json` | ② behavior | focused `node --test` + L0 | testing the function, not its consumer |
-| `src/client/` cockpit (slots, tabs, copy) | [design/40](../../docs/design/40-research-cockpit.md) + client source | ④ real mount + ⑤ rendering | `pnpm build` → `client-load.entry`; C layer for rendering | jsdom or a unit test as browser |
+| `src/client/` cockpit (slots, tabs, copy) | [contracts/client-ui.md](../../docs/contracts/client-ui.md) + client source | ④ real mount + ⑤ rendering | `pnpm build` → `client-load.entry`; C layer for rendering | jsdom or a unit test as browser |
 | plugin export / inject / registration | `src/index.ts`, `src/client/index.ts` | ① export + ③ registration + ④ real mount | export-shape / `client-effect-wrap` / `client-keys` + L1 | unit-testing `apply` without a mount |
 | preset row, roster, skills | `presets/<role>.patch.yml` + skills | L1 real mount | `preset.e2e` + `preset-structure` / `role-list-sync` | reading YAML as proof |
 | persona / skill / manual text | pack source + overlay + snapshot | ⑤ assembly + L4-lite | `render-overlay` → L1 → snapshot B → `l4-lite`; restart the run channel | changing the string and calling it behavior |
@@ -39,7 +39,7 @@ The repo's acceptance axiom is also the bug-fix axiom: **能加载 ≠ 有行为
 | run bundle / delivery gate | run tools + the bundle | real bundle + run gate | `run-accept` / `evidence-audit` / owning `run-gates/` | a fixture or unit test as a real run |
 | vendor behavior / mechanism | `vendor/dsh/` (read-only) | vendor source + a seam probe | read the pinned source; record the seam; do not patch vendor | editing vendor or trusting the global install |
 
-①–⑤ = the evidence staircase in [guides/62 §自写代码的证据阶梯](../../docs/guides/62-plugin-authoring.md): export shape → behavior/predicate → registration lifecycle → real mount → assembly.
+①–⑤ = the evidence staircase in [guides/plugin-authoring.md §自写代码的证据阶梯](../../docs/guides/plugin-authoring.md): export shape → behavior/predicate → registration lifecycle → real mount → assembly.
 
 The rows also map to the S0–S3 participation ladder in the same guide: S0 composition, S1 extension points, S2 capability seam, S3 vendor loop. S3 is never a local patch: record the seam and go upstream.
 

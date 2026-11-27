@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tools/hooks/pre-commit — 提交门禁：verify + keyless tests 红灯即拦 commit（fail-loud）。
-# 依据：guides/60 §4（收尾必跑）+ agent-friendly-polish Note 教训 4（红 commit 509a04b
+# 依据：guides/dev-loop.md §4（收尾必跑）+ agent-friendly-polish Note 教训 4（红 commit 509a04b
 # 溜进历史的实证——提交链必须挂在验证退出码上，不能靠 agent 记得）。
 # 启用：source tools/env.sh（幂等 git config core.hooksPath tools/hooks）或手动同款命令。
 # 应急绕过：git commit --no-verify（须在 commit message 说明跳过的面与理由）。

@@ -35,7 +35,7 @@ export function matchSimpleGlob(pathStr, pattern) {
 export const PACK = join(ROOT, 'packages', 'deep-research-pack');
 export const PRESETS = join(PACK, 'presets');
 
-// 实际门禁名集合（gate-ledger-sync 与 docs/evaluation.md §L0 登记表对账——集合比对，不序；
+// 实际门禁名集合（gate-ledger-sync 与 docs/testing.md §L0 登记表对账——集合比对，不序；
 // 新增门禁两处同步）。数组与文件块同按域分组（A–F）排序，域横幅见各节。
 export const gates = [
   'md-utf8-newline', 'md-links', 'md-anchors', 'doc-paths', 'doc-drefs', 'archived-note-pointer', 'count-free', 'doc-now-only', 'doc-budgets', 'surface-claims', 'docs-reference-fresh',

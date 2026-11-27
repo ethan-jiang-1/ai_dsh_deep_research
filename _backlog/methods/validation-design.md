@@ -42,7 +42,7 @@ repeating them. Each criterion names:
 | Evidence owner | Existing repo owner, command or artifact path, and what it can/cannot prove |
 | Human judgment | Only where taste, business value, risk, compliance or authority cannot be mechanically decided |
 
-Choose an existing local owner and command from [the development guide](../../docs/guides/60-dev-loop.md), [evaluation contract](../../docs/evaluation.md), relevant test or gate README, smoke entrypoint, or run-bundle contract. Preserve source links, versions, artifact commits and attribution for load-bearing evidence. A command finishing, a keyword being present, one happy-path example, or a passing demo is not by itself a pass condition.
+Choose an existing local owner and command from [the development guide](../../docs/guides/dev-loop.md), [evaluation contract](../../docs/testing.md), relevant test or gate README, smoke entrypoint, or run-bundle contract. Preserve source links, versions, artifact commits and attribution for load-bearing evidence. A command finishing, a keyword being present, one happy-path example, or a passing demo is not by itself a pass condition.
 
 ## 3. Keep the matrix executable and honest
 

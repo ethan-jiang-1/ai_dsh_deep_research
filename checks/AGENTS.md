@@ -1,7 +1,7 @@
 # AGENTS.md — 仓库脚本（门禁与生成器）
 
-`checks/` 拥有**检查逻辑**：`verify/verify.mjs` 是唯一 L0 聚合入口（门禁清单正本 = [docs/evaluation.md](../docs/evaluation.md) §L0 登记表，本文件不复制计数），其余是分级冒烟、run 门与 run 验收、发布前裁决与
-支撑库；run 观察住 [probes/analyze](../probes/README.md)，导出/清理住 [tools/](../tools/README.md)（[职责地图](../docs/project-map.md)）。上游对应物 = DSH `scripts/AGENTS.md` + `scripts/run-gates.ts`。
+`checks/` 拥有**检查逻辑**：`verify/verify.mjs` 是唯一 L0 聚合入口（门禁清单正本 = [docs/testing.md](../docs/testing.md) §L0 登记表，本文件不复制计数），其余是分级冒烟、run 门与 run 验收、发布前裁决与
+支撑库；run 观察住 [probes/analyze](../probes/README.md)，导出/清理住 [tools/](../tools/README.md)（[职责地图](../docs/guides/run-ops.md)）。上游对应物 = DSH `scripts/AGENTS.md` + `scripts/run-gates.ts`。
 
 ## 新增或改门禁
 
@@ -11,10 +11,10 @@
 流程与判据住在 [`.agents/skills/writing-a-gate`](../.agents/skills/writing-a-gate/SKILL.md)
 ——**先想红，再写绿**。本文件只记必须在场的事实：
 
-- `verify/context.mjs` 的 `gates` 数组与 [docs/evaluation.md](../docs/evaluation.md) §L0 登记表
+- `verify/context.mjs` 的 `gates` 数组与 [docs/testing.md](../docs/testing.md) §L0 登记表
   **两处同步**（`gate-ledger-sync` 门禁对账）；每条门禁的反证义务与记录方式 = 头行
   [writing-a-gate 技能](../.agents/skills/writing-a-gate/SKILL.md)正本，此处不复制配方。
-- **门禁自测**：改门禁逻辑必跑 `node checks/smoke/gates.e2e.mjs --gate=<改的门禁>`（**日常只跑该门禁的案例**；全量只在发布/nightly——重档不属于日常迭代，见 [guides/60 §门禁分层](../docs/guides/60-dev-loop.md)）。案例表 `CASES` 增删同 diff；`tests/checks/harness/verify-gates.test.mjs` 静态对账案例 ↔ gates 数组。
+- **门禁自测**：改门禁逻辑必跑 `node checks/smoke/gates.e2e.mjs --gate=<改的门禁>`（**日常只跑该门禁的案例**；全量只在发布/nightly——重档不属于日常迭代，见 [guides/dev-loop.md §门禁分层](../docs/guides/dev-loop.md)）。案例表 `CASES` 增删同 diff；`tests/checks/harness/verify-gates.test.mjs` 静态对账案例 ↔ gates 数组。
 - 失败信息要给出**失败对象 + 违反的规则 + 修正入口**；不确定就 fail-loud，不静默跳过。
 
 ## 范围纪律（实测教训，不是风格偏好）
@@ -52,6 +52,6 @@
 - **命名即层**（DSH 后缀选层；新增检查先命名）：`tests/**/*.spec.mjs` = 进程内 keyless（`pnpm test:spec`）、
   `tests/checks/*/*.test.mjs` = 门禁（`pnpm test:checks`）、`checks/smoke/*.e2e.mjs` = 真进程（`pnpm test:e2e`）、
   `*.entry.mjs` = 真浏览器/profile/tarball（`pnpm test:entry`）、`*.support.mjs` = 支援件不进车道；`*-probe` = 探针
-  （`probes/`，guides/66）、`*-gate`/`*-audit`/`*-scan` = run 门；`checks/lib/`、`tests/fixtures/` 在 glob 外由 consumer 消费。
+  （`probes/`，guides/probe-playbook.md）、`*-gate`/`*-audit`/`*-scan` = run 门；`checks/lib/`、`tests/fixtures/` 在 glob 外由 consumer 消费。
   独立真模型档 = closed set：要求凭据（`requireCredentials`）的 `checks/` 与 `probes/` 入口必须恰为名单
   （`tests/checks/shared/smoke-contract.test.mjs`；`withModelKey` 是条件透传不作判据）；不发现经现有会话触发模型的路径。

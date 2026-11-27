@@ -15,7 +15,7 @@
 | `count-free` | `checks/verify/gates/a-docs.mjs` | live 文档不写硬编码计数 | `count-free-hard-count`、`count-free-case-noun` |
 | `doc-now-only` | `checks/verify/gates/a-docs.mjs` | live 文档只写 now，不写变更史 | `doc-now-only-changelog-word` |
 | `doc-budgets` | `checks/verify/gates/a-docs.mjs` | 常驻文档 UTF-8 字节预算——上游 verify-doc-budgets 的中文等价物：预算由 | `doc-budgets-underscore-file` |
-| `surface-claims` | `checks/verify/gates/a-docs.mjs` | 维护面声明一致性，2026-11-17）：三个门户 README 首屏的面词 = guides/68 §4 | `surface-claims-face-drift` |
+| `surface-claims` | `checks/verify/gates/a-docs.mjs` | 维护面声明一致性，2026-11-17）：三个门户 README 首屏的面词 = docs/policy.md §3.2 | `surface-claims-face-drift` |
 | `docs-reference-fresh` | `checks/verify/gates/a-docs.mjs` | 参考生成物 package-catalog.generated.md 新鲜度与 commands.md ↔ package.json 双向校验 | `docs-reference-fresh-catalog-drift`、`docs-reference-fresh-commands-drift` |
 | `preset-structure` | `checks/verify/gates/b-pack.mjs` | 0.1.7 形态：presets/<role>.patch.yml 一条 @deepseek-ai/dsh-agent-preset | `preset-structure-field-missing`、`preset-structure-clock-missing` |
 | `pack-bundle-compat` | `checks/verify/gates/b-pack.mjs` | dsh.bundle.patch 指向真实文件；engines.dsh 覆盖当前 vendor tag | `pack-bundle-compat-preset-unlisted`、`pack-bundle-compat-engines-drift`、`pack-bundle-compat-engines-copy-drift`、`pack-bundle-compat-engines-zh-drift` |
@@ -32,7 +32,7 @@
 | `pack-manifest` | `checks/verify/gates/b-pack.mjs` | 发布清单合同：DSH 读什么、我们只写什么 | `pack-manifest-invented-key` |
 | `market-index` | `checks/verify/gates/b-pack.mjs` | 发现面：_dist/market.json 是 format 1，且与包清单同源同版本 | `market-index-staged-claim` |
 | `readme-shape` | `checks/verify/gates/b-pack.mjs` | 文档合同：DSH package-bundle + 安装手册默认路径 | `readme-shape-user-section-dev-command`、`readme-shape-no-frontmatter`、`readme-shape-no-profile-bootstrap`、`readme-shape-profile-after-plugins` 等 |
-| `release-vocab` | `checks/verify/gates/b-pack.mjs` | 现行合同文档不复活退役词 | `release-vocab-retired-term`、`release-vocab-product-embedded` |
+| `release-vocab` | `checks/verify/gates/b-pack.mjs` | 现行合同文档不复活退役词 | `release-vocab-retired-term`、`release-vocab-product-embedded`、`release-vocab-docs-moved` |
 | `note-tree` | `checks/verify/gates/c-notes.mjs` | notes/ 树形闭集与深度——DSH agent-note-tree 吸纳，2026-11-14 | `note-tree-nested-dir`、`note-tree-hidden-dir`、`note-tree-hidden-note-file`、`note-tree-unknown-lifecycle` 等 |
 | `note-format` | `checks/verify/gates/c-notes.mjs` | notes/ 决定记录骨架与状态行——DSH SDLC reference 01 | `note-format-no-status`、`note-format-no-verification`、`note-format-negated-verification`、`note-format-fenced-evidence` 等 |
 | `note-status` | `checks/verify/gates/c-notes.mjs` | notes/ 的时态与状态面——2026-09-25 用户诉求落地： | `note-status-readme-missing` |
@@ -42,9 +42,9 @@
 | `vendor-pin` | `checks/verify/gates/d-vendor.mjs` | vendor/dsh submodule 在位且钉住 dsh-v0.2.1-rc.5 = b830ec950f； | NO_CASE：断言对象 = submodule 钉身份（副本不含 submodule 内容，基线即红） |
 | `vendor-clean` | `checks/verify/gates/d-vendor.mjs` | vendor/dsh 只读铁律：零未提交改动——机制权威不许就地改 | NO_CASE：断言对象 = submodule 的 git status（副本无此仓库） |
 | `pin-agreement` | `checks/verify/gates/d-vendor.mjs` | live 文件里的钉身份必须与 submodule 实际状态一致 | NO_CASE：真串读取在 submodule 一步 fail-loud，注入的伪串永不到达扫描步 |
-| `align-ledger` | `checks/verify/gates/d-vendor.mjs` | 对齐台账机读对账——docs/alignment-ledger.json 与 vendor 本体、 | `align-ledger-na-liveness-appears`、`align-ledger-na-liveness-decorative`、`align-ledger-na-liveness-glob`、`align-ledger-na-capability-undefended` 等 |
-| `discipline-na-trigger` | `checks/verify/gates/d-vendor.mjs` | 人读表「不适用」行的免检区闭合——docs/discipline-map.md | `discipline-na-trigger-missing`、`discipline-na-trigger-rows-vanished` |
-| `discipline-state-vocab` | `checks/verify/gates/d-vendor.mjs` | 状态列三态值域机检——docs/discipline-map.md | `discipline-state-vocab-out-of-domain`、`discipline-state-vocab-rows-vanished` |
+| `align-ledger` | `checks/verify/gates/d-vendor.mjs` | 对齐台账机读对账——docs/reference/alignment-ledger.json 与 vendor 本体、 | `align-ledger-na-liveness-appears`、`align-ledger-na-liveness-decorative`、`align-ledger-na-liveness-glob`、`align-ledger-na-capability-undefended` 等 |
+| `discipline-na-trigger` | `checks/verify/gates/d-vendor.mjs` | 人读表「不适用」行的免检区闭合——docs/reference/discipline-matrix.md | `discipline-na-trigger-missing`、`discipline-na-trigger-rows-vanished` |
+| `discipline-state-vocab` | `checks/verify/gates/d-vendor.mjs` | 状态列三态值域机检——docs/reference/discipline-matrix.md | `discipline-state-vocab-out-of-domain`、`discipline-state-vocab-rows-vanished` |
 | `repo-conventions` | `checks/verify/gates/d-vendor.mjs` | 与 vendor 本体的机械约定逐条对齐——vendor 树是唯一证据源， | `repo-conventions-editorconfig-root-missing`、`repo-conventions-dev-script-path`、`repo-conventions-dev-hook-path` |
 | `vendor-links` | `checks/verify/gates/d-vendor.mjs` | vendored 解析的机械面——vendor/README.md 的 verify-vendored-links | `vendor-links-registry-version` |
 | `content-shape` | `checks/verify/gates/e-workspace.mjs` | D40：研究内容在包内，不在工作区 | `content-shape-seed-return`、`content-shape-manual-over-budget` |

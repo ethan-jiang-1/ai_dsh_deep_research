@@ -34,7 +34,7 @@ description: Use when adding, widening, or retiring a mechanical check in checks
 ## 3. 写实现并登记（同一步，三处 + 自测两处）
 
 1. `checks/verify/context.mjs` 的 `gates` 数组加项 + 在**所属域** `checks/verify/gates/<a-docs|b-pack|c-notes|d-vendor|e-workspace|f-repo>.mjs` 加实现块（块注释写设计依据与实证出处）；
-2. `docs/evaluation.md` §L0 门禁登记表：加一行（断言什么 + 反证记录），
+2. `docs/testing.md` §L0 门禁登记表：加一行（断言什么 + 反证记录），
    与 `gate-ledger-sync` 门禁对账——**两处不同步即红**；
 3. 需要新契约断言时同步 `tests/`（keyless，零依赖）。
 
@@ -49,4 +49,4 @@ description: Use when adding, widening, or retiring a mechanical check in checks
 3. 还原，再跑到全绿；
 4. 把这条红→绿实证写进登记表的"反证记录"列所指的 Note。
 
-跨面改动按 guides/60 §2 补跑：pack 行 → L1；安装形状 → L2；模型可见面 → 真模型档。
+跨面改动按 guides/dev-loop.md §2 补跑：pack 行 → L1；安装形状 → L2；模型可见面 → 真模型档。

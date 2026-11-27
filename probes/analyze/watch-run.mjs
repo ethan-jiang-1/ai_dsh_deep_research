@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/guides/68-surface-contract.md
+// 维护面：show（只读投影/诊断/取证；不判 PASS/FAIL）。规则 = docs/policy.md
 // 状态：常驻
 // 一句话：run 盯场：谓词化状态判定（HITL-PENDING / RUN-SETTLED；超时自报）
 // 何时跑：run 挂起/等 HITL/落定不明；要盯某会话状态时

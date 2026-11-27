@@ -567,127 +567,127 @@
       "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-11-02-backlog-pipeline 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
-      "source": "docs/design/10-architecture.md",
+      "source": "docs/architecture.md",
       "target": "notes/archived/2026-09-24-dsh-plugin-repo-anatomy.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-09-24-dsh-plugin-repo-anatomy 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
-      "source": "docs/design/20-roles.md",
+      "source": "docs/contracts/roles.md",
       "target": "notes/archived/2026-09-24-m2-run-mechanics.md",
       "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-m2-run-mechanics 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
-      "source": "docs/design/30-methodology-mapping.md",
+      "source": "docs/contracts/methodology-mapping.md",
       "target": "notes/archived/2026-09-24-deep-research-harness-analysis.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-09-24-deep-research-harness-analysis 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
-      "source": "docs/design/40-research-cockpit.md",
+      "source": "docs/contracts/client-ui.md",
       "target": "notes/archived/2026-09-24-ui-observability-surfaces.md",
       "reason": "§7 历史指针（演进链首环：选项推敲 + company 十二坑考古）"
     },
     {
-      "source": "docs/design/40-research-cockpit.md",
+      "source": "docs/contracts/client-ui.md",
       "target": "notes/archived/2026-09-25-research-status-ui.md",
       "reason": "§7 历史指针（UI 优先改版）"
     },
     {
-      "source": "docs/design/40-research-cockpit.md",
+      "source": "docs/contracts/client-ui.md",
       "target": "notes/archived/2026-09-26-bundle-face-wiring.md",
       "reason": "§7 历史指针（渐进面接通根因链）"
     },
     {
-      "source": "docs/design/40-research-cockpit.md",
+      "source": "docs/contracts/client-ui.md",
       "target": "notes/archived/2026-09-28-cockpit-flow-face.md",
       "reason": "§6 已知限制 G6（vendor UI 待查）的历史根因链出处"
     },
     {
-      "source": "docs/design/40-research-cockpit.md",
+      "source": "docs/contracts/client-ui.md",
       "target": "notes/archived/2026-09-28-cockpit-naming.md",
       "reason": "头部定名快照指针 + §7 历史指针（演进链末环'定名'——该节明示'为什么当初这么选'住 notes 树）"
     },
     {
-      "source": "docs/design/40-research-cockpit.md",
+      "source": "docs/contracts/client-ui.md",
       "target": "notes/archived/2026-09-28-right-pane-ux-debt.md",
       "reason": "§7 历史指针（挂起显性化 + 会话绑定）"
     },
     {
-      "source": "docs/design/40-research-cockpit.md",
+      "source": "docs/contracts/client-ui.md",
       "target": "notes/archived/2026-10-11-member-activity-first-validation.md",
       "reason": "2026-11-27 docs 解耦 _backlog 依赖：队员动态折叠区与 member-activity 粒度定夺改指既有归档 Note，不再链接 _backlog/_archived 卡"
     },
     {
-      "source": "docs/discipline-map.md",
+      "source": "docs/reference/discipline-matrix.md",
       "target": "notes/archived/2026-09-24-dsh-discipline.md",
       "reason": "头部枚举方法行的首轮清点实录指针（历史出处；现行三态正本 = 本表自身）"
     },
     {
-      "source": "docs/discipline-map.md",
+      "source": "docs/reference/discipline-matrix.md",
       "target": "notes/archived/2026-10-19-vendor-pin-bump-021rc2.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-10-19-vendor-pin-bump-021rc2 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
-      "source": "docs/evaluation.md",
+      "source": "docs/testing.md",
       "target": "notes/archived/2026-09-24-l1-l2-green.md",
       "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-l1-l2-green 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
-      "source": "docs/external-materials.md",
+      "source": "docs/reference/external.md",
       "target": "notes/archived/2026-09-24-deep-research-harness-analysis.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-09-24-deep-research-harness-analysis 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
-      "source": "docs/external-materials.md",
+      "source": "docs/reference/external.md",
       "target": "notes/archived/2026-09-24-dsh-market-scout.md",
       "reason": "外部研究材料表：DSH 插件生态行的粗扫种子指针（行内标注'冻结'，认真报告已毕业为现行的 dsh-plugin-ecosystem）"
     },
     {
-      "source": "docs/external-materials.md",
+      "source": "docs/reference/external.md",
       "target": "notes/archived/2026-09-24-dsh-plugin-repo-anatomy.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-09-24-dsh-plugin-repo-anatomy 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
-      "source": "docs/external-materials.md",
+      "source": "docs/reference/external.md",
       "target": "notes/archived/2026-09-24-ui-observability-surfaces.md",
       "reason": "外部材料表 DSH client/UI 扩展面行：琢磨稿历史指针（行内标注“已归档”）"
     },
     {
-      "source": "docs/external-materials.md",
+      "source": "docs/reference/external.md",
       "target": "notes/archived/2026-10-05-item-lifecycle-tdd.md",
       "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-05-item-lifecycle-tdd 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
-      "source": "docs/external-materials.md",
+      "source": "docs/reference/external.md",
       "target": "notes/archived/2026-10-09-company-repin-review.md",
       "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-09-company-repin-review 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
-      "source": "docs/guides/60-dev-loop.md",
+      "source": "docs/guides/dev-loop.md",
       "target": "notes/archived/2026-09-24-agent-friendly-polish.md",
       "reason": "2026-11-10 归档批次路径重定向：2026-09-24-agent-friendly-polish 由 notes/implemented/ 移入冻结层，该处引用是归档卡/研究材料的既有出处链（判据与证据仍可复核），登记为历史指针"
     },
     {
-      "source": "docs/guides/60-dev-loop.md",
+      "source": "docs/guides/dev-loop.md",
       "target": "notes/archived/2026-10-05-item-lifecycle-tdd.md",
       "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-05-item-lifecycle-tdd 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
-      "source": "docs/guides/61-run-playbook.md",
+      "source": "docs/guides/run-ops.md",
       "target": "notes/archived/2026-09-24-m2-run-mechanics.md",
       "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-09-24-m2-run-mechanics 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
-      "source": "docs/guides/61-run-playbook.md",
+      "source": "docs/guides/run-ops.md",
       "target": "notes/archived/2026-09-26-bundle-face-wiring.md",
       "reason": "会话建在别处则渐进面缺席的实测根因指针（根因链历史家；操作事实已在本页现行正文）"
     },
     {
-      "source": "docs/guides/61-run-playbook.md",
+      "source": "docs/guides/run-ops.md",
       "target": "notes/archived/2026-10-02-mcp-playwright-adoption.md",
       "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-02-mcp-playwright-adoption 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
     {
-      "source": "docs/guides/61-run-playbook.md",
+      "source": "docs/guides/run-ops.md",
       "target": "notes/archived/2026-10-18-hitl-proxy-delivery-guard.md",
       "reason": "2026-11-10 归档批次（第二批）路径重定向：2026-10-18-hitl-proxy-delivery-guard 已移入冻结层，此处为既有出处链（实现记录/门禁红证/历史叙事），登记为历史指针"
     },
@@ -699,7 +699,7 @@
     {
       "source": "notes/implemented/2026-09-24-observability-gui.md",
       "target": "notes/archived/2026-09-25-observability-completion.md",
-      "reason": "驾驶舱原初 RFC 指向余项交付快照：B-full/工具卡已由后续轮次交付（现行构成 = design/40）"
+      "reason": "驾驶舱原初 RFC 指向余项交付快照：B-full/工具卡已由后续轮次交付（现行构成 = docs/contracts/client-ui.md）"
     },
     {
       "source": "notes/implemented/2026-09-24-vendor-submodule.md",
@@ -754,7 +754,7 @@
     {
       "source": "notes/implemented/2026-10-12-research-config-tab.md",
       "target": "notes/archived/2026-09-28-cockpit-home.md",
-      "reason": "研究配置页签的“同族先例”历史指针（现行 owner = design/40）"
+      "reason": "研究配置页签的“同族先例”历史指针（现行 owner = docs/contracts/client-ui.md）"
     },
     {
       "source": "notes/implemented/2026-10-12-research-method-config.md",
@@ -849,7 +849,7 @@
     {
       "source": "_backlog/_archived/research/external-landscape/2026-11-10-landscape-style-space.md",
       "target": "notes/archived/2026-09-24-deep-research-harness-analysis.md",
-      "reason": "2026-11-10 第四遍 style 空间引用旧 harness 的 research_profile / research_style_params 作为方法源头（历史指针）；当前映射以 docs/design/30-methodology-mapping.md 为准，归档件只用于说明「验收 profile」这层曾被丢掉"
+      "reason": "2026-11-10 第四遍 style 空间引用旧 harness 的 research_profile / research_style_params 作为方法源头（历史指针）；当前映射以 docs/contracts/methodology-mapping.md 为准，归档件只用于说明「验收 profile」这层曾被丢掉"
     },
     {
       "source": "_backlog/_archived/settled_issues/2026-11-13-test-strategy-institutionalization.md",
