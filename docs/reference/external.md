@@ -2,9 +2,9 @@
 
 > 公开读者注意：下方路径是作者本地只读参考仓，不随本仓发布，也不需要克隆；钉版 commit 仍可用于身份复核。
 >
-> 本页是 [00-index](../README.md) 外部材料登记的正文层（按需查）。
+> 本页是 [docs/README.md](../README.md) 外部材料登记的正文层（按需查）。
 
-钉版纪律（`_agent_ready_development` 语料吸纳）：repo 外引用必须能以固定身份复核。本机参考仓以 `路径 @ <short sha>` 记录；复核 = `git -C <路径> log -1 --format=%H` 与下文比对，不一致即"上游已前进、结论待复核"（重审触发路径见 [discipline-map](./discipline-matrix.md#重审触发路径)）。
+钉版纪律（`_agent_ready_development` 语料吸纳）：repo 外引用必须能以固定身份复核。本机参考仓以 `路径 @ <short sha>` 记录；复核 = `git -C <路径> log -1 --format=%H` 与下文比对，不一致即"上游已前进、结论待复核"（重审触发路径见 [discipline-matrix](./discipline-matrix.md#重审触发路径)）。
 
 ## 参考仓与外部语料清单
 
@@ -37,13 +37,13 @@
 ### 6. 一代全语料 `_agent_ready_development/` @ `efdba905b2`（语料自身钉 DSH `dsh-v0.1.7-rc.1`）
 
 - **内容**：开发 harness 原理（知识归属/载体分工/参与阶梯/分层反馈/运行时查询/仓库分类学/插件作者入口；三视角 37 篇）+ 语料级门禁（锚点、目录 README、钉版外链）+ 维护页（现行语料见下文二代条目）。
-- **吸收落点**：[吸纳 Note](../../notes/implemented/2026-09-25-agent-ready-absorption.md) → `.agents/skills/`、[guides/plugin-authoring.md](../guides/plugin-authoring.md)、[discipline-map](./discipline-matrix.md) 源 6–8、[notes/README](../../notes/README.md)，新门禁 `md-anchors` / `note-status` / `dev-skill-format`。
+- **吸收落点**：[吸纳 Note](../../notes/implemented/2026-09-25-agent-ready-absorption.md) → `.agents/skills/`、[guides/plugin-authoring.md](../guides/plugin-authoring.md)、[discipline-matrix](./discipline-matrix.md) 源 6–8、[notes/README](../../notes/README.md)，新门禁 `md-anchors` / `note-status` / `dev-skill-format`。
 
 ### 7. `_digested/test-strategy/` @ `b830ec950f`（DSH 测试体系消化 16 篇，外部语料）
 
 - **内容**：catalog 基线 = `dsh-v0.2.1-rc.5`（语料 7 篇 `reverified`、9 篇仍停旧基线 `639ed01539` 的 `carried`）：思想九教义、七层证据形态、快照机制、CI 防假绿、可靠性纪律与插件测试五台阶。
-- **重议条件**：① 下次 pin bump 时必重跑；② 出现「语料结论与本仓现状冲突」实例时立即重跑；平时随 [discipline-map 重审触发路径](./discipline-matrix.md#重审触发路径) 对账。
-- **吸收落点**：[采纳 Note](../../notes/implemented/2026-10-04-test-strategy-adoption.md) → [discipline-map 源 10](./discipline-matrix.md)、[guides/plugin-authoring.md §自写代码证据阶梯](../guides/plugin-authoring.md)、[checks/AGENTS §冒烟脚本可靠性纪律](../../checks/AGENTS.md)、[tests/AGENTS](../../tests/AGENTS.md)。
+- **重议条件**：① 下次 pin bump 时必重跑；② 出现「语料结论与本仓现状冲突」实例时立即重跑；平时随 [discipline-matrix 重审触发路径](./discipline-matrix.md#重审触发路径) 对账。
+- **吸收落点**：[采纳 Note](../../notes/implemented/2026-10-04-test-strategy-adoption.md) → [discipline-matrix 源 10](./discipline-matrix.md)、[guides/plugin-authoring.md §自写代码证据阶梯](../guides/plugin-authoring.md)、[checks/AGENTS §冒烟脚本可靠性纪律](../../checks/AGENTS.md)、[tests/AGENTS](../../tests/AGENTS.md)。
 
 ### 8. `ai_dsh_assitant/` @ `7dc4ff6`（2026-10-10 钉，姊妹参考仓）
 
@@ -63,7 +63,7 @@
 ### 11. 二代语料 `_dsh_plugin_agent_ready_development/` @ `ad6f5319dc`（语料自钉 DSH `dsh-v0.2.0-rc.2`，待随现 pin 复核）
 
 - **内容**：面向独立 DSH 插件仓的三卷（`native-development-model` / `sdlc-reference` / `repo-harness`）+ 语料自测 `verify.spec.mjs`；独立插件仓开发闭环与完成判断四分离公理（能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准）。
-- **吸收落点**：[吸收审计毕业 Note](../../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) → [discipline-map 源 11](./discipline-matrix.md)、[evaluation §完成判断四分离](../testing.md)、`.agents/skills/reviewing-a-delivery`；
+- **吸收落点**：[吸收审计毕业 Note](../../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) → [discipline-matrix 源 11](./discipline-matrix.md)、[testing.md §完成判断四分离](../testing.md)、`.agents/skills/reviewing-a-delivery`；
   门禁自测 = `checks/smoke/gates.e2e.mjs` + `tests/checks/harness/verify-gates.test.mjs`；复核 = [company 钉版复核 Note](../../notes/archived/2026-10-09-company-repin-review.md)。
 
 ### 12. `deepseek-harness/_faq_on_digested/26_harness-release/`（2026-11-02 快照，外部语料）

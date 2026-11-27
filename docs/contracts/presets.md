@@ -101,5 +101,5 @@
 
 - 常驻面预算与准入规则 = [`content-shape` 门禁](../../checks/verify/gates/e-workspace.mjs)
 - 内容接线守卫 = [presets-wiring](../../tests/pack/contract/presets-wiring.spec.mjs) · [content-coverage](../../tests/pack/contract/content-coverage.spec.mjs)
-- 测试落家与证据分层 = [project-map §测试怎么选](../guides/run-ops.md) · [evaluation §L0/L3](../testing.md)
+- 测试落家与证据分层 = [testing.md §3 测试词汇与落家序](../testing.md) · [testing.md §L0/L3](../testing.md)
 - 参照仓内容宪章（只读） = `ai_dsh_company/docs/content-charter.md`

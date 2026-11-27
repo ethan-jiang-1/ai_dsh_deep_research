@@ -64,7 +64,7 @@
 
 | DSH 做法 | 本仓落点 | 状态 |
 |---|---|---|
-| Tier 分类法：一处事实一个家（docs 只写 now） | 00-index 文档地图分层原则；docs/notes/_backlog 三层分工 | 照搬 |
+| Tier 分类法：一处事实一个家（docs 只写 now） | `docs/README.md` 文档地图分层原则；docs/notes/_backlog 三层分工 | 照搬 |
 | Wordcount budgets（入口文件词数顶） | verify 门禁 `doc-budgets`（逐件 UTF-8 字节上限——vendor `verify-doc-budgets` 中文等价；上限正本 = [checks/doc-budgets.json](../../checks/doc-budgets.json)，此处不复制计数；超顶处置序 = 下放>压缩>升顶须同变更登记理由） | 带证据适配 |
 | Cross-reference with machine-checkable links, never free prose | 上游含两个机检面：链接可解析 + 禁 commit id 引用。本仓只落前者（md-links，全 tracked md 的方括号圆括号语法）；后者零对应物——正文写 commit 哈希不会被任何门禁拦。entry-chain 门禁只断言文件存在、不判指针语义，不构成兜底 | 带证据适配（语义被收窄：链接面已机检，禁 commit id 面未落；引入条件 = 出现引用 commit 而非文件/Note 的漂移时补门禁） |
 | Slop checklist（文档废话清单） | 上游是 9 条可运行审计。本仓已机械化其中至少两条：`count-free`（禁把易漂移计数写进文档）、`doc-now-only`（只写当前合同、不写历史时态）；其余条目定性吸收进行文规范 | 带证据适配（部分机械化：2 条成门禁，余为规范；不是未机械化） |
@@ -113,7 +113,7 @@ vendor 的事故复盘住在 **`docs/postmortem/`**（编号条目 + `README.md`
 | 形态 | DSH 例子 | 本仓实例 | 机器边界 |
 |---|---|---|---|
 | 手写维护 | AGENTS、docs、README、活动 Note、Skills | 全部 `docs/`、`notes/`、`AGENTS.md`、presets、skills | 结构受门禁（预算/格式/链接），内容人写 |
-| 生成 + freshness 门禁 | tool/config/persistence catalog、module-graph | `tools/record/research.overlay.yml`（门禁 `overlay-fresh`；[testing.md](../testing.md) §L0 登记为"本仓首个 tracked 生成物"）+ `_dist/安装手册.md`（门禁 `dist-manual-fresh` / `dist-manual-version`） | 改源不重生成即红（门禁机械对账） |
+| 生成 + freshness 门禁 | tool/config/persistence catalog、module-graph | `tools/record/research.overlay.yml`（`overlay-fresh`）+ `_dist/安装手册.md`（`dist-manual-fresh` / `dist-manual-version`）+ `docs/reference/{package-catalog,cockpit-registry,gates-ledger}.generated.md`（`docs-reference-fresh`） | 改源不重生成即红（门禁机械对账） |
 | 混合（生成区嵌手写页） | subsystem 页的 cordis-surface 区、type-equiv 块 | `packages/deep-research-pack/presets/<role>.patch.yml`（手写）↔ `tools/record/research.overlay.yml`（渲染生成）+ profile 镜像（同事实的第二落点）——由 `boot-run.sh` 漂移检测承担 freshness | 漂移即 fail-loud |
 | 录制（机器写、人审、封存不改） | snapshots/、archived Note、persistence releases | run bundle（`research-workspace/drt_*` 在飞 + `archive/` 已交付）——gitignored 运行区，事实由 bundle 文件承载 | 不进 L0（运行区不扫）；完整性归 run 内 critic + 观察面谓词 |
 | 投影（canonical 源的抛弃型派生物） | `website/.generated/`（vendor 站点产物，不入库） | `runtime/smoke-workspace/dashboard.html`（canonical = 会话日志 + bundle 文件） | 随时可重建；永不手改、永不入库 |
@@ -155,7 +155,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [testing.md](../testing.md)
 | 载体 | 擅长回答 | 不能替代 | 本仓实例 |
 |---|---|---|---|
 | `AGENTS.md` | 每轮必须遵守什么 | 情境化长流程、全档命令表 | 入口链、布局树、命令速查、纪律指针 |
-| `docs/` 合同面 | 系统**现在**是什么、怎么用 | 决策历史 | evaluation、discipline-map、guides 60–62 |
+| `docs/` 合同面 | 系统**现在**是什么、怎么用 | 决策历史 | `testing.md`、`reference/discipline-matrix.md`、`contracts/`、`guides/` |
 | Skill（`.agents/skills/`） | 面对某类任务怎样调查、判断、验证 | 确定性 pass/fail | 换 pin / 加角色 / 写门禁 / 跑 run / 改轨道 / 交付自审 / 复现间歇缺陷 |
 | 门禁与契约测试 | 一个可机械条件是否满足 | 意图与设计质量 | `checks/verify/verify.mjs` + `tests/` |
 | Agent Note（`notes/`） | 为什么这样决定、放弃了什么 | 当前 API 的唯一说明 | proposed（将来）/ implemented（过去）|
@@ -173,7 +173,7 @@ docs 合同 + notes 记忆 + 门禁（清单正本 = [testing.md](../testing.md)
 |---|---|---|
 | **子树 `AGENTS.md` 层**：根只放每轮常驻指令（1–3 行 + 链 home），子树专属指令放子树 `AGENTS.md`（vendor 28 份） | 六份子树 AGENTS.md（`docs/` · `checks/` · `notes/` · `packages/deep-research-pack/` · [tests/](../../tests/AGENTS.md) · [_backlog](../../_backlog/AGENTS.md)）；`entry-chain` 门禁把守成员在场 | 照搬 |
 | `docs/AGENTS.md` = 文档标准：层级归属（一个事实一个家）/ 写作规则 / slop 清单 / 预算处置序 / 机检链接 | [docs/AGENTS.md](../AGENTS.md)：tier 表、写作规则、slop 清单（中文适配）、`## 已知限制与延后工作` 节约定 | 带证据适配 |
-| 预算由 **manifest 拥有**（`scripts/doc-budgets.manifest.json`），门禁拒超限**与缺登记** | [checks/doc-budgets.json](../../checks/doc-budgets.json) + 门禁 `doc-budgets`（登记项须存在且不超限；仓内新增 AGENTS.md 未登记即红） | 带证据适配（度量词数 → 行数：CJK 词数不可靠） |
+| 预算由 **manifest 拥有**（`scripts/doc-budgets.manifest.json`），门禁拒超限**与缺登记** | [checks/doc-budgets.json](../../checks/doc-budgets.json) + 门禁 `doc-budgets`（登记项须存在且不超限；仓内新增 AGENTS.md 未登记即红） | 带证据适配（度量词数 → UTF-8 字节上限：CJK 词数不可靠且与 vendor 字节预算一致） |
 | `scripts/AGENTS.md` = 门禁写作规则（无 shell / 端口与临时路径自持有 / 只在单独运行通过的 spec 是缺陷） | [checks/AGENTS.md](../../checks/AGENTS.md)：范围（git ls-files tracked-only）、剥 `GIT_*`、端口独占、stdlib-only 分层 | 带证据适配（换成我们的实测教训） |
 | `packages/AGENTS.md` = 包级约定（插件导出形态 / 当前 owner 与需求 / 限制节） | [packages/deep-research-pack/AGENTS.md](../../packages/deep-research-pack/AGENTS.md)：三处同步、模型可见面 + 重启、roster 单一事实源、**部署义务**（发布集/种子/部署脚本变更跑 L2） | 带证据适配（配置为主 + 一个 client 面版） |
 | `.agents/notes/AGENTS.md` = Note 子树常设指令（**取代检查硬触发**） | [notes/AGENTS.md](../../notes/AGENTS.md)：写入触发 + 取代检查 + 格式与毕业；根只留指针 | 照搬 |
@@ -190,7 +190,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 |---|---|
 | `.claude/skills` symlink | **采纳**：`.claude/skills -> ../.agents/skills`（Claude 系 harness 发现同一批开发技能）；门禁 `claude-symlink` 覆盖两条 symlink |
 | `docs/glossary.md` | 已具备：`docs/reference/glossary.md`（一个概念一个 canonical term，含 DSH↔本仓对照） |
-| `docs/development.md` · `docs/testing.md` · `docs/architecture.md` · `docs/cookbook/` · `docs/subsystems/` | 已具备（改名映射）：guides/dev-loop.md · evaluation + guides/dev-loop.md §2 · architecture.md · guides/run-ops.md/62 · design/ |
+| `docs/development.md` · `docs/testing.md` · `docs/architecture.md` · `docs/cookbook/` · `docs/subsystems/` | 已具备（16 文件核心骨架对齐）：`guides/dev-loop.md` · `testing.md` · `architecture.md` · `guides/{bootstrap,run-ops,plugin-authoring}.md` · `contracts/` |
 | `docs/i18n/` · `docs/user/` · `website/` | 不适用：单语、无对外产品文档站与站点投影 |
 | `snapshots/`（session 回放 fixture） | **已具备（带证据适配）**：[snapshots/](../../snapshots/README.md) 场景证据层——研究角色场景 [场景证据层 snapshots/](../../snapshots/README.md) 的 `snapshot.json` 由 [replay-scene](../../checks/lib/harness/replay-scene.mjs) 消费并驱动 [snapshot-replay.entry](../../checks/smoke/snapshot-replay.entry.mjs)（keyless，禁 llm-deepseek + 插 vendor `dsh-llm-replay`）；纯函数夹具仍住 `tests/fixtures/`；判据见本表源 2 "Snapshot tests" 行 |
 | `benchmarks/` · `native/` · `python/` · `patches/` · `apps/` | 不适用：本仓无这些发布 lane 与运行时面 |
@@ -199,7 +199,7 @@ vendor 根部其余结构面的处置（二轮逐项登记，避免"没抄=遗�
 | `LICENSE` | **已定：MIT**（2026-10-25 开源发布；根与 pack 各一份 [LICENSE](../../LICENSE)，两处 `package.json` 均 `license: MIT`；pack `private: false` 可发布）——决定与输掉的方案 = [开源发布 Note](../../notes/implemented/2026-10-25-open-source-launch.md) |
 
 <a id="source-10"></a>
-## 源 10：_digested/test-strategy 语料（测试策略消化 16 篇；catalog 基线 = rc.5，7 篇 reverified / 9 篇 carried；见 [external-materials](./external.md)）
+## 源 10：_digested/test-strategy 语料（测试策略消化 16 篇；catalog 基线 = rc.5，7 篇 reverified / 9 篇 carried；见 [reference/external.md](./external.md)）
 
 > 语料身份与吸收落点 = [reference/external.md](./external.md)；对照总账正本 = test-strategy 采纳
 > Note（[notes/implemented/2026-10-04-test-strategy-adoption.md](../../notes/implemented/2026-10-04-test-strategy-adoption.md)）。

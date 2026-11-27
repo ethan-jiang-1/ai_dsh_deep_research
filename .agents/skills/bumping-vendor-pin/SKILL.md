@@ -7,7 +7,7 @@ description: Use when upgrading the vendored DSH pin (vendor/dsh submodule tag/c
 
 本技能是 **guidance，不是 checklist**：按实际 diff 与风险选择动作，完成判据在各步末。相关：
 [guides/dev-loop.md §2 换 vendor pin 路由行](../../../docs/guides/dev-loop.md)（必跑面正本）、
-[discipline-map §重审触发路径](../../../docs/reference/discipline-matrix.md)（逐源重审清单正本）。
+[discipline-matrix §重审触发路径](../../../docs/reference/discipline-matrix.md)（逐源重审清单正本）。
 两次实操的教训已固化进本流程；历史轮次见归档
 [017rc2](../../../notes/archived/2026-09-25-vendor-pin-bump-017rc2.md) /
 [020rc2](../../../notes/archived/2026-09-30-vendor-pin-bump-020rc2.md)（历史出处，不是现行流程）；流程缺口按"缺什么再加"补进本页。
@@ -15,8 +15,8 @@ description: Use when upgrading the vendored DSH pin (vendor/dsh submodule tag/c
 ## 1. 钉身份（四处同 diff）
 
 新 tag/commit 落四处，缺一即漂移：`.gitmodules` 正源（submodule checkout 到新 commit）→
-[AGENTS §DSH 源码表](../../../AGENTS.md)（tag @ short-sha 复述）→
-[evaluation §L0 vendor-pin 行](../../../docs/testing.md)（钉 commit 字面量——门禁对账对象）→
+[AGENTS §硬红线](../../../AGENTS.md)（tag @ short-sha 复述）→
+`checks/verify/gates/d-vendor.mjs`（`vendor-pin` 的 PIN commit 常量，改完跑 `pnpm docs:gen` 刷新 [gates-ledger.generated.md](../../../docs/reference/gates-ledger.generated.md)）→
 pack `engines.dsh` 范围（`packages/deep-research-pack/package.json`）。**版本合同只有
 `engines.dsh`**：已删除的 `dsh.compatibility.*` 不要再写回（`pack-manifest` 判自造键）。
 改完 `pnpm verify`：`vendor-pin` / `pin-agreement` / `pack-bundle-compat` 应绿——最后一个会把
@@ -29,11 +29,11 @@ build-time externals 会把新 host 半的改动静默稀释（020rc2 轮实证�
 "build-time externals drift"，根因 = 陈旧产物）。顺序铁律已固化进脚本注释（host 半补建
 先于 tsdown client），不要调整。
 
-## 3. 逐源重审（重审清单的正本在 discipline-map）
+## 3. 逐源重审（重审清单的正本在 discipline-matrix.md）
 
 按 [§重审触发路径](../../../docs/reference/discipline-matrix.md) 清单**逐条重读**我们赖以立论的 vendor
 源（根/子树 AGENTS、testing、architecture、notes 约定、skills 约定……），三态结论有变的
-更新 discipline-map 对应行。外部材料登记同步对账：钉版语料/参考仓若自钉旧 DSH 版本，
+更新 `docs/reference/discipline-matrix.md` 对应行。外部材料登记同步对账：钉版语料/参考仓若自钉旧 DSH 版本，
 其结论标记"待复核"（[reference/external.md](../../../docs/reference/external.md) 的钉版纪律）。
 
 **破坏面清单（升 pin 的交付物，不是可选项）**：新版本可能让本包的既有写法失效，而 L0 只证结构。
@@ -44,7 +44,7 @@ build-time externals 会把新 host 半的改动静默稀释（020rc2 轮实证�
   `agent-preset-registry` / 两个 UI 行）若新增 config 键，必须同 diff 重述——
   `tests/pack/contract/package-contract.spec.mjs` 的「replace 行不得丢键」会红；
 - client build-time externals / 模块表变化：跑 `client-load.entry`（020rc2 的漏网就是只跑 L0/L1）；
-- 被删除/改名的 vendor API 或 package：`discipline-map` 三态结论与 `row-deps` 会现形。
+- 被删除/改名的 vendor API 或 package：`discipline-matrix.md` 三态结论与 `row-deps` 会现形。
 
 ## 4. 全档证据（漏一档 = 有实证的漏网形态）
 

@@ -114,7 +114,7 @@ status——材料的状态就是题的状态。
 
 - **channel**：三条委派通道 = subagent / workflow / team；`goal` 是跨轮生命周期原语，不算委派通道；`todo_write` 是轮内清单。材料里「四条通道」的措辞以本节为准。
 - **wave**：deps 算出的拓扑层，不是任务；`W2.1` 是层内节点。材料里的 `W1.5/W2.5` 只是示意，**不要假设小数层合法**；验证层用整数 W + `kind=cross-check`。
-- **cell**：覆盖单位 = topic × lens（D43；`design/30` 与 `research-planning:54,63` 同口径）。depth 是 **node** 属性，不是 cell 维度；旧句 `topic × lens × depth` 已于 2026-11-11 校正。
+- **cell**：覆盖单位 = topic × lens（D43；`docs/contracts/methodology-mapping.md` 与 `research-planning:54,63` 同口径）。depth 是 **node** 属性，不是 cell 维度；旧句 `topic × lens × depth` 已于 2026-11-11 校正。
 - **lens**：一种**证据面**（同一道题从哪个面挖），是数据不是角色/persona、不是报告模板；九字段见 lens 材料，`bias`/`blind_spots` 是它与「多搜几篇」的分界。
 - **verdict**：claim 级结论 `supported|partially_supported|unsupported|unverifiable`；`unverifiable` 聚合为 `UNVERIFIED`，**不算 PASS 覆盖**。
 - **UNVERIFIED**：第三态，不是 PASS 也不是 FAIL；永不静默放行。

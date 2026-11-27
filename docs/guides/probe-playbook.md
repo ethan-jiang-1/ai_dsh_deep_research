@@ -182,4 +182,4 @@ probes/
 - 开发环任务路由：`docs/guides/dev-loop.md` §2（「查/加探针」行）。
 - 复现间歇缺陷：`../../.agents/skills/reproducing-a-failure/SKILL.md` §2 透明 fetch tee。
 - 门禁写法：`../../.agents/skills/writing-a-gate/SKILL.md`。
-- 验收合同：`../evaluation.md`（五面；探针不是第六面）。
+- 验收合同：[docs/testing.md](../testing.md)（五面；探针不是第六面）。

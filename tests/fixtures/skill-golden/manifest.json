@@ -11,11 +11,11 @@
     },
     {
       "path": ".agents/skills/bumping-vendor-pin/SKILL.md",
-      "sha256": "54d27a52d0e695ffc5d55b0429f8a876862f28639ce6d7f4793b54408f0114e0"
+      "sha256": "822713d6d23f06c73dfaf9766b5fb9a4bea8e985ad5023a71da056d05615c38a"
     },
     {
       "path": ".agents/skills/changing-node-topology/SKILL.md",
-      "sha256": "b1b62fc502312c9b3e26bc8aee0a33305caec5769ce60a0ab1ceca724f673e58"
+      "sha256": "87a8b47d0d35ce107d61652b3c58d6102d1e1ad7e225f08f991d9fe8b6e4fba7"
     },
     {
       "path": ".agents/skills/changing-ui-copy/SKILL.md",

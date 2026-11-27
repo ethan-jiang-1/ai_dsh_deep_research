@@ -112,7 +112,7 @@
 | 查/加探针（真实边界单点证据） | `probes/` 头注 + `probes/INDEX.generated.md` | `node probes/_index.mjs --write` → 跑探针本体 | L0 + 目标探针（真模型档需凭据） | 头注/索引变更才写 | 索引门绿 + 探针红→绿 |
 | 改研究工作区手册 / 模板（结构性调整：模板增删 / 路径与格式修正；**手册正文文本 = 模型可见，走上行〔改 persona / skill / 手册文本〕**） | `packages/deep-research-pack/content/` | 无生成器 | L0 + `content-shape` | — | `content-shape` 绿 |
 | 改部署面（doctor / 发布集） | pack `checks/` + `package.json` 的 files/bin | — | L0 + L2 | 部署 Note | `release.entry` ALL PASS |
-| 换 vendor pin | `.gitmodules` + 运行中 dsh 的 exact 版本（兼容矩阵字段已删，见 D41） | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审（含 agent-team 合同 diff 与货架增量对账——正本 = [discipline-map §重审触发路径](../reference/discipline-matrix.md)） | L0 + L1 + L2 + client-load.entry + L4-lite（0.2.0 轮实证：漏跑观察面 = client bundle 的 build-time externals 漂移漏网） | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
+| 换 vendor pin | `.gitmodules` + 运行中 dsh 的 exact 版本（兼容矩阵字段已删，见 D41） | `vendor-build.sh`（含 host 半补建 + 前端壳重建）→ 逐条重审（含 agent-team 合同 diff 与货架增量对账——正本 = [discipline-matrix §重审触发路径](../reference/discipline-matrix.md)） | L0 + L1 + L2 + client-load.entry + L4-lite（0.2.0 轮实证：漏跑观察面 = client bundle 的 build-time externals 漂移漏网） | 升 pin 毕业 Note（重审结论正本） | 全档绿 + 重审入 Note |
 | 纯文档 / 卫生 | 文档自身 | — | L0；改动面含 AGENTS/入口链时加跑 `entry-chain-probe`（真模型档；无凭据退化为语义版人工） | 仅持久决定理由才写 | 门禁绿 |
 | **用户直派** | 按本轮授权直接执行；如需跨步排序使用会话内 todo；仅需显式评审的持久决定才建立 RFC；交付后按 notes 规则决定是否记录决定理由 | 同对应任务型 | 同对应任务型 | 同对应任务型 | 同对应任务型 |
 

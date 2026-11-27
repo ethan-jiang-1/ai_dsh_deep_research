@@ -129,7 +129,7 @@ export function runD() {
           continue;
         }
         if (!existsSync(join(ROOT, 'vendor', 'dsh', src))) {
-          fail(gate, `${src}: vendor/dsh 里不存在（换 pin 后源文件移位/删除？重审触发——见 discipline-map §重审触发路径）`);
+          fail(gate, `${src}: vendor/dsh 里不存在（换 pin 后源文件移位/删除？重审触发——见 docs/reference/discipline-matrix.md §重审触发路径）`);
         }
         const verdict = entry.verdict;
         if (!['adopted', 'adapted', 'na'].includes(verdict)) { fail(gate, `${src}: verdict 值域外（adopted/adapted/na）`); continue; }
@@ -157,7 +157,7 @@ export function runD() {
           const hasLive = Array.isArray(live) && live.length > 0;
           const hasReReview = typeof reReview === 'string' && reReview.trim().length > 0;
           if (!hasLive && !hasReReview) {
-            fail(gate, `${src}: verdict=na 必须给 liveness（机械缺席断言——仅限"目录/文件树缺席即信号"形态）或 reReviewOn（能力面缺席的声明式人工重估触发条件）；两者皆无 = 永久免检区，见 discipline-map §维护规则`);
+            fail(gate, `${src}: verdict=na 必须给 liveness（机械缺席断言——仅限"目录/文件树缺席即信号"形态）或 reReviewOn（能力面缺席的声明式人工重估触发条件）；两者皆无 = 永久免检区，见 docs/reference/discipline-matrix.md §维护规则`);
           }
           if (hasLive) {
             for (const item of live) {
@@ -165,15 +165,15 @@ export function runD() {
                 // 防空转（自查抓获 7 处）：断言对象若**就是 vendor 源路径本身**，则它永远成立
                 // （vendor doc 本来就不会被拷贝进本仓）——看着在场、永不为真实失效而响。
                 if (item.absent === src || src.endsWith(`/${item.absent}`) || item.absent.endsWith(`/${src}`)) {
-                  fail(gate, `${src}: liveness 断言空转——"${item.absent}" 就是 vendor 源路径本身，永不会为真实失效而响；请改指本仓侧能力载体，或改用 reReviewOn——见 discipline-map §维护规则`);
+                  fail(gate, `${src}: liveness 断言空转——"${item.absent}" 就是 vendor 源路径本身，永不会为真实失效而响；请改指本仓侧能力载体，或改用 reReviewOn——见 docs/reference/discipline-matrix.md §维护规则`);
                 } else if (existsSync(join(ROOT, item.absent))) {
-                  fail(gate, `${src}: na 理由已失效——"${item.absent}" 现在存在（当初登记"本仓无此面"）→ 重估该行 verdict，见 discipline-map §维护规则`);
+                  fail(gate, `${src}: na 理由已失效——"${item.absent}" 现在存在（当初登记"本仓无此面"）→ 重估该行 verdict，见 docs/reference/discipline-matrix.md §维护规则`);
                 }
               } else if (typeof item?.globAbsent === 'string' && item.globAbsent.length > 0) {
                 const pat = item.globAbsent;
                 const hit = allFiles().find((f) => matchSimpleGlob(relative(ROOT, f), pat));
                 if (hit) {
-                  fail(gate, `${src}: na 理由已失效——glob "${pat}" 命中 ${relative(ROOT, hit)}（当初登记"本仓无此面"）→ 重估该行 verdict，见 discipline-map §维护规则`);
+                  fail(gate, `${src}: na 理由已失效——glob "${pat}" 命中 ${relative(ROOT, hit)}（当初登记"本仓无此面"）→ 重估该行 verdict，见 docs/reference/discipline-matrix.md §维护规则`);
                 }
               } else {
                 fail(gate, `${src}: liveness 项须给 absent（路径）或 globAbsent（glob）`);

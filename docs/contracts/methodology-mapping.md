@@ -89,6 +89,6 @@
 | testing.md L3 判据 | 本文落点 |
 |---|---|
 | 1. 生命周期映射完整 | §1 表的每个环节都有落点或弃用理由 |
-| 2. 角色单一职责 | 20-roles §0 owner 表 + 手册 owner 全表 |
+| 2. 角色单一职责 | [contracts/roles.md](./roles.md) §0 owner 表 + 手册 owner 全表 |
 | 3. 证据可追溯载体 | §3 证据身份链（frontmatter + 引用格式 + 狩猎） |
-| 4. 信噪比策略显式 | 20-roles §3 四道防线 |
+| 4. 信噪比策略显式 | [contracts/roles.md](./roles.md) §3 四道防线 |

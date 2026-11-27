@@ -142,5 +142,5 @@ agent-instructions 注入，冲突时项目优先。安装步骤（用户视角�
   安装/升级/卸载生命周期、数据卡。这些直接决定用户能否装、能否退、数据在哪。
 - **DSH 自身的 development harness（可选继承）**：`AGENTS.md`、Agent Notes、gates、review 纪律。
   它们服务“改 DSH/本仓”的 agent；本仓选择继承是为了自持与可审计（逐行三态见
-  [discipline-map](../reference/discipline-matrix.md)），不是插件发布的强制形态。
+  [discipline-matrix](../reference/discipline-matrix.md)），不是插件发布的强制形态。
 - **可迁移原则**：一个事实一个 owner、生成物有生成器、决定有记录；是原则，不是复制形态。
