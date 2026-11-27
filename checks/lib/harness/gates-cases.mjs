@@ -693,6 +693,10 @@ export const CASES = [
     const p = join(dir, 'AGENTS.md');
     writeFileSync(p, readFileSync(p, 'utf8').replace(/^## 入口链.*$/m, '## 探针替代标题'));
   } },
+  { id: 'entry-chain-missing-one-hop', gate: 'entry-chain', mutate: (dir) => {
+    const p = join(dir, 'AGENTS.md');
+    writeFileSync(p, readFileSync(p, 'utf8').replaceAll('(docs/architecture.md)', '(docs/README.md)'));
+  } },
   { id: 'backlog-issue-no-frontmatter', gate: 'backlog-liveness', mutate: backlogIssue(() => '# Probe\n> 状态：推敲中｜可关闭：否\n') },
   { id: 'backlog-issue-closeable', gate: 'backlog-liveness', mutate: backlogIssue((text) => text.replace('可关闭：否', '可关闭：是')) },
   { id: 'backlog-issue-orphan', gate: 'backlog-liveness', mutate: backlogIssue((text) => text, false) },

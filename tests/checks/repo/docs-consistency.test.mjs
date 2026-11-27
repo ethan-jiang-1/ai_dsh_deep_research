@@ -39,13 +39,13 @@ test('开发技能清单覆盖盘上目录（2026-10-20 审计 P1-1 反证）', 
 // 扫盘会把 keyless 回归绑到开发机现场（实测 CI 红：根实体 1 < 5）。契约以常量枚举钉住，
 // 只对 tracked 的 `drafts/` 做存在性校验——运行区不参与 L0（checks/AGENTS 范围纪律）。
 const WORKSPACE_ROOT_ENTITIES = ['method-library.md', 'drt_<slug>', 'archive/', '_abandoned/', 'drafts/']
-test('根 AGENTS 布局块覆盖工作区根实体与 pack 种子（2026-10-21 卫生轮，BUG-042）', () => {
+test('根 AGENTS 布局表覆盖工作区根实体与 pack 种子（2026-10-21 卫生轮，BUG-042）', () => {
   const agents = read('AGENTS.md')
-  const section = agents.slice(agents.indexOf('## 布局'))
-  assert.ok(section.includes('## 布局'), 'AGENTS.md 缺「## 布局」节')
-  const fence = section.match(/```[^\n]*\n([\s\S]*?)```/)
-  assert.ok(fence, 'AGENTS.md 布局节缺围栏块')
-  const layout = fence[1]
+  const start = agents.indexOf('## 布局')
+  assert.ok(start >= 0, 'AGENTS.md 缺「## 布局」节')
+  const next = agents.indexOf('\n## ', start + 1)
+  const layout = agents.slice(start, next === -1 ? undefined : next)
+  assert.ok(layout.includes('| 路径 |'), 'AGENTS.md 布局节须采用可点击 GFM 表格')
   assert.ok(WORKSPACE_ROOT_ENTITIES.length >= 5, '防空语料：工作区根实体契约过少')
   for (const name of WORKSPACE_ROOT_ENTITIES) {
     assert.ok(layout.includes(name), `根布局未点名 research-workspace/${name}——契约实体必须进布局枚举`)
@@ -56,8 +56,8 @@ test('根 AGENTS 布局块覆盖工作区根实体与 pack 种子（2026-10-21 �
   const entries = readdirSync(contentRoot).filter((n) => !n.startsWith('.'))
   assert.ok(entries.includes('manual.md'), 'content/ 缺研究手册 manual.md')
   assert.ok(entries.includes('templates'), 'content/ 缺 run 模板目录')
-  const packLine = layout.split('\n').find((l) => l.trimStart().startsWith('packages/deep-research-pack/'))
-  assert.ok(packLine, '布局块缺 packages/deep-research-pack/ 行')
+  const packLine = layout.split('\n').find((l) => l.includes('packages/deep-research-pack/'))
+  assert.ok(packLine, '布局表缺 packages/deep-research-pack/ 行')
   for (const word of ['content/', '研究手册', '模板']) {
     assert.ok(packLine.includes(word), `布局行未点名「${word}」（content/ 是随包只读内容）`)
   }
@@ -134,7 +134,17 @@ test('入口链导航合同：开跑前置含 vendor 构建/工作区注册；�
   assert.ok(row.includes('entry-chain-probe'), '纯文档行漏 AGENTS/入口链改动时的探针条件（§4 有、路由表没有 = 两套说法）')
   assert.ok(guide.includes('根/子树 AGENTS 或入口链'), '§4 的探针触发词与路由表不一致（docs/AGENTS vs AGENTS/入口链）')
   const agents = read('AGENTS.md')
-  assert.ok(agents.includes('改仓任务的验收/收尾按第 4 步'), 'AGENTS 最小集未指向第 4 步——fresh agent 会停在 1–3')
+  for (const hop of [
+    'docs/architecture.md',
+    'docs/README.md',
+    'docs/AGENTS.md',
+    'packages/deep-research-pack/AGENTS.md',
+    'docs/guides/bootstrap.md',
+    'docs/testing.md',
+    'docs/guides/dev-loop.md',
+  ]) {
+    assert.ok(agents.includes(hop), `根 AGENTS 首屏缺少 1 跳直链：${hop}`)
+  }
   assert.ok(agents.includes('口径 = guides/dev-loop.md §2'), 'AGENTS 的 source 清单 owner 应指向 guides/dev-loop.md §2（checks/README 只申报凭据/调用模式）')
   const evalText = read('docs/testing.md')
   assert.ok(evalText.includes('node --import tsx/esm checks/smoke/client-load.entry.mjs'), 'evaluation 的 client-load 命令缺 tsx（直接 node 会在 .ts import 处失败）')

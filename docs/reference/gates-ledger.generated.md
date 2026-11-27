@@ -63,7 +63,7 @@
 | `guard-red-record` | `checks/verify/gates/f-repo.mjs` | tests 面反证义务机械化——2026-10-09 卡收官 | `guard-red-record-no-record`、`guard-red-record-dangling`、`guard-red-record-conformance-no-block`、`guard-red-record-conformance-spec-no-block` |
 | `gate-ledger-sync` | `checks/verify/gates/f-repo.mjs` | docs/reference/gates-ledger.generated.md 集合与新鲜度 = context.mjs gates 数组 | `gate-ledger-sync-row` |
 | `test-placement` | `checks/verify/gates/f-repo.mjs` | BUG-191 / BUG-200 / BUG-207）：tests/ 落点全集 − 已知子集 = 空 | `test-placement-support-module`、`test-placement-support-ts`、`test-placement-unknown-subtree`、`test-placement-unknown-depth` 等 |
-| `entry-chain` | `checks/verify/gates/f-repo.mjs` | 文档链骨干存在性——正本 = 根 AGENTS.md §入口链与 §布局 | `entry-chain-member-missing`、`entry-chain-no-title` |
+| `entry-chain` | `checks/verify/gates/f-repo.mjs` | 文档链骨干存在性——正本 = 根 AGENTS.md §入口链与 §布局 | `entry-chain-member-missing`、`entry-chain-no-title`、`entry-chain-missing-one-hop` |
 | `backlog-liveness` | `checks/verify/gates/f-repo.mjs` | backlog 各池的结构与生命周期合同——规则正本 = _backlog/AGENTS.md + | `backlog-issue-no-frontmatter`、`backlog-issue-closeable`、`backlog-issue-orphan`、`backlog-bug-severity` 等 |
 | `staged-change-pairing` | `checks/verify/gates/f-repo.mjs` | D52）：暂存区里的成对变更 | NO_CASE：断言对象 = git 暂存区；gates.e2e 的注入副本不建立暂存索引，副本基线无对象 |
 | `port-exclusive` | `checks/verify/gates/f-repo.mjs` | 冒烟/探针端口独占——checks/AGENTS「端口与临时路径自持有」 | `port-exclusive-double-claim` |

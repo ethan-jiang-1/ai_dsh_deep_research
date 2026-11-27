@@ -278,8 +278,21 @@ export function runF() {
   for (const rel of members) {
     if (!existsSync(join(ROOT, rel))) fail(gate, `入口链成员缺席：${rel}（正本 = AGENTS.md §入口链；改链须同 diff 更新本门禁清单）`);
   }
-  if (existsSync(join(ROOT, 'AGENTS.md')) && !/^## 入口链/m.test(readFileSync(join(ROOT, 'AGENTS.md'), 'utf8')))
-    fail(gate, 'AGENTS.md 缺 §入口链 标题——入口链定义的家');
+  if (existsSync(join(ROOT, 'AGENTS.md'))) {
+    const agentsText = readFileSync(join(ROOT, 'AGENTS.md'), 'utf8');
+    if (!/^## 入口链/m.test(agentsText)) {
+      fail(gate, 'AGENTS.md 缺 §入口链 标题——入口链定义的家');
+    }
+    const oneHopTargets = [
+      'docs/architecture.md', 'docs/README.md', 'docs/AGENTS.md',
+      'packages/deep-research-pack/AGENTS.md', 'docs/guides/bootstrap.md', 'docs/testing.md',
+    ];
+    for (const target of oneHopTargets) {
+      if (!agentsText.includes(`(${target})`)) {
+        fail(gate, `AGENTS.md 缺 1 跳直链 (${target})——fresh agent 必须从根首屏 1 跳直达核心入口`);
+      }
+    }
+  }
 }
 
 // ── backlog-liveness（backlog 各池的结构与生命周期合同——规则正本 = _backlog/AGENTS.md +

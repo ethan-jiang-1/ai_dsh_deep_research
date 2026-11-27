@@ -90,8 +90,8 @@ description: Use when preparing delivery, when a cross-surface diff (pack, docs,
    run 状态必须来自 `runStateOf` 单点而非各自重算。
    查：新增的缓存/回显/replay 面，其值是否取自唯一的权威成功点。
 8. **byte/size limit 覆盖 wrapper 与 metadata 后的最终结果**：上限按**字节**不按字符，
-   且要算上包装层与元数据。本仓实例（CJK 语境高发）：`doc-budgets` 用**行数**而非词数
-   ——正因 "CJK 词数不可靠"（`checks/doc-budgets.json` §_note）；反过来，
+   且要算上包装层与元数据。本仓实例（CJK 语境高发）：`doc-budgets` 用 **UTF-8 字节**而非词数
+   或物理行数——避免 CJK 词数不可靠或行数顶格逼出千字单行（`checks/doc-budgets.json` §_note）；
    凡是按字符数设限的地方，CJK 下字节数会超。
    查：新增/改动的上限断言是否覆盖了 wrapper 与 metadata 之后的结果。
 
