@@ -63,6 +63,7 @@
 | <a id="d56"></a>D56 | **决策台账纯路由化（一处事实一个家）**：台账只存 ≤100 字结论 + 活载体路由；参数归 docs/ 合同，理由归 notes/ | [docs/AGENTS](./AGENTS.md) · [Note](../notes/implemented/2026-11-14-decisions-routing-ledger.md) |
 | <a id="d57"></a>D57 | **维护面三分 = judge / show / operate**：判据 = 主要产出什么；judge 住 `checks/`、show 住 `probes/`、operate 住 `tools/` | [policy](./policy.md) · [Note](../notes/implemented/2026-11-16-maintenance-surface-taxonomy.md) |
 | <a id="d58"></a>D58 | **根名统一 = checks / probes / tools**（三仓承诺方向的本仓落地）：先纯化后统一；tests = oracle、配置 = 非面 | [policy](./policy.md) · [Note](../notes/implemented/2026-11-16-surface-root-unification.md) |
+| <a id="d59"></a>D59 | **文档架构对齐 DSH 16 文件核心骨架**：零数字前缀、最大 2 层、UTF-8 字节预算、3 份生成参考物与根 AGENTS 1 跳直链 | [docs/README](./README.md) · [docs/AGENTS](./AGENTS.md) · [Note](../notes/implemented/2026-11-27-docs-standard-alignment.md) |
 
 ## 已退役
 

@@ -123,7 +123,8 @@
 
 - **折算进 `src/lib` 纯函数 + keyless 单测；组件薄渲染**（全量 `src/lib/` 列表见 [cockpit-registry.generated.md](../reference/cockpit-registry.generated.md)）。
 - **keyed 字面量单一正本** `keys.ts`（`client-keys` 门禁把守）；全部注册包裹 `scoped.effect`（`client-effect-wrap` 把守）；样式颜色严守 `--dsw-alias-*` 令牌（`client-tokens` 把守）。
-- **界面文案 day-one 双语**：任何用户可见文本必须同时有 zh/en——chrome 住 `src/client/locales/{zh,en}.ts`，折层住 `{zh,en}-fold.ts`，驾驶舱扩展住 `{zh,en}-cockpit.ts`；canonical 内容不动，UI 经 `builtin-display.ts` 投影取词；模型面 prompt 不翻译。守卫 = `tests/cockpit/client/builtin-display.spec.mjs`、`tests/cockpit/client/locales/client-locale.spec.mjs`、`tests/cockpit/client/method-library/locales.spec.mjs`、`tests/cockpit/shared/i18n.spec.mjs`、`tests/checks/repo/cjk-source.test.mjs`；步骤 = [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)。
+- **界面文案 day-one 双语**：任何用户可见文本必须同时有 zh/en——chrome 住 `src/client/locales/{zh,en}.ts`，折层住 `{zh,en}-fold.ts`，驾驶舱扩展住 `{zh,en}-cockpit.ts`；canonical 内容不动，UI 经 `builtin-display.ts` 投影取词；模型面 prompt 不翻译。
+  守卫 = `tests/cockpit/client/builtin-display.spec.mjs`、`tests/cockpit/client/locales/client-locale.spec.mjs`、`tests/cockpit/client/method-library/locales.spec.mjs`、`tests/cockpit/shared/i18n.spec.mjs`、`tests/checks/repo/cjk-source.test.mjs`；步骤 = [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)。
 - **默认语言 = 中文（[D49](../decisions.md#d49)）**：bundle patch 钉 `locale.preference: zh`，用户可在 profile patch 切 English。
 - **页签自带滚动口**：vendor `.tabBody` 为定高 `overflow: hidden`，页签根必须 `flex: 1; minHeight: 0` + 内容区 `overflowY: auto`。
 - **会话绑定与发现单源**：三位置发现（根 / `archive/` / `_abandoned/`，[D28](../decisions.md#d28)）唯一实现 = `src/lib/run/run-context.ts`（`run-context-single-source` 把守）；写强读弱 + `binding-trust.ts` 抑制立项预检错绑。
@@ -159,4 +160,6 @@
 
 ## 7. 演进链（指针，不是设计合同）
 
-选型与输掉的方案住 `notes/`：[ui-observability-surfaces](../../notes/archived/2026-09-24-ui-observability-surfaces.md) → [observability-gui](../../notes/implemented/2026-09-24-observability-gui.md) → [research-status-ui](../../notes/archived/2026-09-25-research-status-ui.md) → [bundle-face-wiring](../../notes/archived/2026-09-26-bundle-face-wiring.md) → [right-pane-ux-debt](../../notes/archived/2026-09-28-right-pane-ux-debt.md) → [cockpit-naming](../../notes/archived/2026-09-28-cockpit-naming.md) → [cockpit-ux-ui-native-upgrade](../../notes/implemented/2026-11-26-cockpit-ux-ui-native-upgrade.md)。
+选型与输掉的方案住 `notes/`：
+[ui-observability-surfaces](../../notes/archived/2026-09-24-ui-observability-surfaces.md) → [observability-gui](../../notes/implemented/2026-09-24-observability-gui.md) → [research-status-ui](../../notes/archived/2026-09-25-research-status-ui.md) → [bundle-face-wiring](../../notes/archived/2026-09-26-bundle-face-wiring.md)
+→ [right-pane-ux-debt](../../notes/archived/2026-09-28-right-pane-ux-debt.md) → [cockpit-naming](../../notes/archived/2026-09-28-cockpit-naming.md) → [cockpit-ux-ui-native-upgrade](../../notes/implemented/2026-11-26-cockpit-ux-ui-native-upgrade.md)。

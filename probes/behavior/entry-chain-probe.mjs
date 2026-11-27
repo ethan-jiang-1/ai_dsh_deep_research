@@ -138,7 +138,7 @@ try {
   const q3 = /^Q3:(.+)$/m.exec(answer)?.[1] ?? '';
   verdict.push(['Q1 明确按用户授权范围执行且无需重复请批', directAuthorizationBoundaryPasses(q1)]);
   verdict.push(['Q2 RFC 仅适用于需显式评审的持久决定，不是实施普遍前置', rfcBoundaryPasses(q2)]);
-  verdict.push(['Q3 指认 guides/dev-loop.md（开发环）', /60|开发环|guides/i.test(q3)]);
+  verdict.push(['Q3 指认 guides/dev-loop.md（开发环）', /dev-loop|开发环|guides/i.test(q3)]);
 } finally {
   await cleanupBootedProbe(booted, PORT);
 }

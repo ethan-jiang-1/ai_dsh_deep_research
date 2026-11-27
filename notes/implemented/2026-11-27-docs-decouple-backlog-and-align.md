@@ -1,6 +1,7 @@
 # docs/ 依赖解耦、实盘校准与分层地图重构
 
 > 状态：implemented
+> 历史注记：本篇「输掉的方案」中延后外置的 `40-research-cockpit.md` 注册表与 `60-intent-carriers.md` 搬迁，以及全仓 `docs/` 去数字前缀对齐 16 文件核心骨架，已由 [2026-11-27-docs-standard-alignment.md](./2026-11-27-docs-standard-alignment.md)（D59）完成并部分取代；本篇确立的 `docs/` → `_backlog/` 单向依赖边界与防回潮守卫继续生效。
 
 ## 决定
 

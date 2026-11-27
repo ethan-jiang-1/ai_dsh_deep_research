@@ -81,8 +81,8 @@ status——材料的状态就是题的状态。
 | 路径 | 为什么 |
 |---|---|
 | `AGENTS.md` | 布局、命令、纪律、入口链 |
-| `docs/design/20-roles.md` | 四角色职责与产物 |
-| `docs/design/30-methodology-mapping.md` | wave 语义、证据四层、gate 精神 |
+| `docs/contracts/roles.md` | 四角色职责与产物 |
+| `docs/contracts/methodology-mapping.md` | wave 语义、证据四层、gate 精神 |
 | `packages/deep-research-pack/presets/lead.patch.yml` | persona、工具面、content 注入 |
 | `packages/deep-research-pack/presets/scout.patch.yml` / `analyst.patch.yml` / `critic.patch.yml` | 各角色工具面（有无 subagent/bash/写） |
 | `packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md` | 现行组队矩阵 + 队友读 skill 的补偿 |
@@ -142,7 +142,7 @@ status——材料的状态就是题的状态。
 - **workflow 失败/上限**：`AGENT_CAP` 默认 1000、`ITEM_CAP` 默认 4096、并发槽 FIFO、无整体 elapsed deadline；child 失败 → 该项 `null`；`WorkflowError` fatal 杀脚本；无 durable 图、无中途 HITL。锚点 = `_digested/delegation-and-orchestration/delegation-primitives/01-scripted-workflow-and-sandboxed-fan-out.md` §失败语义/§PTC 进程模型 + `vendor/dsh/packages/workflow/workflow-ptc/src/runtime.ts`。
 - **plan kind 合法值**：`broad-scan | deep-dive | cross-check | synthesis | review | gate`；子节点可用 `search | fetch`。**lifecycle**：`active | retired | merged_into:<id> | superseded_by:<id>`。**图版本**：头部 `图版本：vN`，每次重写递增；重写前把旧版复制到 `plan/v<旧版本>.md`；重写记录写同一版本号。锚点 = `presets/lead/skills/research-planning/SKILL.md` §0/§1/§6 + `content/templates/run/plan.md`。
 - **run 门**：`scripts/run-gates/schema-scan.mjs`（plan 在场级）、`node-gate.mjs`（节点判据）、`evidence-audit.mjs`（URL/摘录）、`path-hygiene.mjs`；L0 = `scripts/verify/verify.mjs`。**已实测**（2026-11-10 keyless fixture）：evidence 加 `lens` 不改 evidence-audit 硬五字段判定（额外键被 `splitFrontmatter` 收下但不判）；topics 加 `lenses:` 不改 schema-scan（只查在场）。实施后在新 run 复核一次。
-- **驾驶舱读取面**：`docs/design/40-research-cockpit.md` + `packages/deep-research-pack/src/lib/plan-index.ts` / `plan-graph.ts`；当前只读 plan/task，**不读 evidence/topics frontmatter**——覆盖矩阵 v1 由 critic/Lead 填在 review 表，cockpit 接入是后续工作。
+- **驾驶舱读取面**：`docs/contracts/client-ui.md` + `packages/deep-research-pack/src/lib/plan/plan-index.ts` / `plan-graph.ts`；当前只读 plan/task，**不读 evidence/topics frontmatter**——覆盖矩阵 v1 由 critic/Lead 填在 review 表，cockpit 接入是后续工作。
 - **lens 目录（已建，D43）**：`packages/deep-research-pack/content/lenses/<id>.md`（8 条）；路径用 `{{research_pack_root}}/content/lenses/`（`src/content/index.ts:52-70`）。workflow child 是否继承该 context 仍按 D45 的 brief 内联兜底。
 - **method-editor / method-library 条目模型**：`presets/method-editor/skills/method-interview/SKILL.md`、`presets/method-editor.patch.yml`；四字段条目见 `research-workspace/method-library.md`。不新增第五字段 = 不改 method-interview 的输出契约。
 
@@ -160,7 +160,7 @@ status——材料的状态就是题的状态。
 - `/Users/bowhead/ai_dsh_company/_backlog/issues/2026-11-10-materiality-and-trace-decision.md`
 - `/Users/bowhead/ai_dsh_company/_backlog/_archive/settled_issues/2026-11-10-docs-layer-restructure.md`
 - `/Users/bowhead/ai_dsh_company/_backlog/_archive/settled_issues/2026-11-10-docs-dsh-alignment.md`
-- 注：以上绝对路径是作者本机；公开读者用仓内 `docs/external-materials.md` 的登记替代。
+- 注：以上绝对路径是作者本机；公开读者用仓内 `docs/reference/external.md` 的登记替代。
 
 ### 8. fresh context 协议
 
@@ -192,7 +192,7 @@ status——材料的状态就是题的状态。
 
 - **收**：服务活跃卡、值得保留的调研材料——推敲时攒的、被卡引用的、喂毕业判断的；半成品合法。
 - **不收**：抛弃型草稿（按 [AGENTS.md](../../AGENTS.md) 留在树外）；价值越过所有卡的留存型参考
-  （留存语义归 docs 索引——[00-index §外部研究材料](../../docs/00-index.md)）。
+  （留存语义归 docs 索引——[docs/README.md](../../docs/README.md) 与 [reference/external.md](../../docs/reference/external.md)）。
 
 ## 维护
 

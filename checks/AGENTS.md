@@ -1,6 +1,6 @@
 # AGENTS.md — 仓库脚本（门禁与生成器）
 
-`checks/` 拥有**检查逻辑**：`verify/verify.mjs` 是唯一 L0 聚合入口（门禁清单正本 = [docs/testing.md](../docs/testing.md) §L0 登记表，本文件不复制计数），其余是分级冒烟、run 门与 run 验收、发布前裁决与
+`checks/` 拥有**检查逻辑**：`verify/verify.mjs` 是唯一 L0 聚合入口（门禁自动台账 = [gates-ledger.generated.md](../docs/reference/gates-ledger.generated.md)，本文件不复制计数），其余是分级冒烟、run 门与 run 验收、发布前裁决与
 支撑库；run 观察住 [probes/analyze](../probes/README.md)，导出/清理住 [tools/](../tools/README.md)（[职责地图](../docs/guides/run-ops.md)）。上游对应物 = DSH `scripts/AGENTS.md` + `scripts/run-gates.ts`。
 
 ## 新增或改门禁
@@ -11,8 +11,8 @@
 流程与判据住在 [`.agents/skills/writing-a-gate`](../.agents/skills/writing-a-gate/SKILL.md)
 ——**先想红，再写绿**。本文件只记必须在场的事实：
 
-- `verify/context.mjs` 的 `gates` 数组与 [docs/testing.md](../docs/testing.md) §L0 登记表
-  **两处同步**（`gate-ledger-sync` 门禁对账）；每条门禁的反证义务与记录方式 = 头行
+- `verify/context.mjs` 的 `gates` 数组与 [gates-ledger.generated.md](../docs/reference/gates-ledger.generated.md)
+  **两处同步**（运行 `pnpm docs:gen` 刷新，`gate-ledger-sync` 门禁对账）；每条门禁的反证义务与记录方式 = 头行
   [writing-a-gate 技能](../.agents/skills/writing-a-gate/SKILL.md)正本，此处不复制配方。
 - **门禁自测**：改门禁逻辑必跑 `node checks/smoke/gates.e2e.mjs --gate=<改的门禁>`（**日常只跑该门禁的案例**；全量只在发布/nightly——重档不属于日常迭代，见 [guides/dev-loop.md §门禁分层](../docs/guides/dev-loop.md)）。案例表 `CASES` 增删同 diff；`tests/checks/harness/verify-gates.test.mjs` 静态对账案例 ↔ gates 数组。
 - 失败信息要给出**失败对象 + 违反的规则 + 修正入口**；不确定就 fail-loud，不静默跳过。
@@ -45,7 +45,7 @@
 ## 依赖与分层
 
 - 不引入测试框架；确定性/门禁支撑尽量用 Node 标准库，浏览器 smoke 使用 Playwright，运行脚本可调用本仓或 DSH 模块。
-- 模型调用须显式申报：独立真模型档见根 [AGENTS §密钥](../AGENTS.md)，CDP `--ask` 按会话档位；
+- 模型调用须显式申报：独立真模型档见根 [AGENTS §硬红线](../AGENTS.md)，CDP `--ask` 按会话档位；
   默认回归禁模型/浏览器/网络/子进程，静态守卫范围与执行路径审查见 [tests/AGENTS](../tests/AGENTS.md)。
 - 投影类脚本（`run-dashboard.mjs`）只读 canonical 会话日志与 bundle 文件，但会写抛弃型 HTML 投影；
   HTML 永不入库、永不手改。

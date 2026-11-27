@@ -63,7 +63,8 @@
 ### 11. 二代语料 `_dsh_plugin_agent_ready_development/` @ `ad6f5319dc`（语料自钉 DSH `dsh-v0.2.0-rc.2`，待随现 pin 复核）
 
 - **内容**：面向独立 DSH 插件仓的三卷（`native-development-model` / `sdlc-reference` / `repo-harness`）+ 语料自测 `verify.spec.mjs`；独立插件仓开发闭环与完成判断四分离公理（能加载 ≠ 有行为证据 ≠ 能安装 ≠ 已获交付批准）。
-- **吸收落点**：[吸收审计毕业 Note](../../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) → [discipline-map 源 11](./discipline-matrix.md)、[evaluation §完成判断四分离](../testing.md)、`.agents/skills/reviewing-a-delivery`、`checks/smoke/gates.e2e.mjs` + `tests/checks/harness/verify-gates.test.mjs`；复核 = [company 钉版复核 Note](../../notes/archived/2026-10-09-company-repin-review.md)。
+- **吸收落点**：[吸收审计毕业 Note](../../notes/implemented/2026-10-07-dsh-plugin-corpus-absorption.md) → [discipline-map 源 11](./discipline-matrix.md)、[evaluation §完成判断四分离](../testing.md)、`.agents/skills/reviewing-a-delivery`；
+  门禁自测 = `checks/smoke/gates.e2e.mjs` + `tests/checks/harness/verify-gates.test.mjs`；复核 = [company 钉版复核 Note](../../notes/archived/2026-10-09-company-repin-review.md)。
 
 ### 12. `deepseek-harness/_faq_on_digested/26_harness-release/`（2026-11-02 快照，外部语料）
 

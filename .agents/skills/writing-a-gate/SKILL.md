@@ -34,13 +34,13 @@ description: Use when adding, widening, or retiring a mechanical check in checks
 ## 3. 写实现并登记（同一步，三处 + 自测两处）
 
 1. `checks/verify/context.mjs` 的 `gates` 数组加项 + 在**所属域** `checks/verify/gates/<a-docs|b-pack|c-notes|d-vendor|e-workspace|f-repo>.mjs` 加实现块（块注释写设计依据与实证出处）；
-2. `docs/testing.md` §L0 门禁登记表：加一行（断言什么 + 反证记录），
-   与 `gate-ledger-sync` 门禁对账——**两处不同步即红**；
+2. 运行 `pnpm docs:gen` 刷新自动台账 `docs/reference/gates-ledger.generated.md`，
+   与 `gate-ledger-sync` 门禁对账——**两处不同步即红**（禁止手改 `.generated.md`）；
 3. 需要新契约断言时同步 `tests/`（keyless，零依赖）。
 
 门禁逻辑有增删时另有两处随行：`checks/lib/harness/gates-cases.mjs` 的案例表 `CASES`（注入案例
-增删同 diff）与 `tests/checks/harness/verify-gates.test.mjs`（案例 ↔ gates 数组静态对账）；改完必跑
-`node checks/smoke/gates.e2e.mjs`（[checks/AGENTS.md](../../../checks/AGENTS.md)）。
+增删同 diff）与 `tests/checks/harness/verify-gates.test.mjs`（案例 ↔ gates 数组静态对账）；日常改完必跑
+`node checks/smoke/gates.e2e.mjs --gate=<name>`（全量留给发布/nightly，见 [checks/AGENTS.md](../../../checks/AGENTS.md)）。
 
 ## 4. 反证（完成判据）
 

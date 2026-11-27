@@ -32,7 +32,8 @@
   - `pnpm lint`（standalone oxlint 检查 pack `src/`）与 `pnpm test:vendor`（vendor 源码契约，fresh clone 可跑）；
   - `pnpm typecheck`（pack 双半类型面 + `tsconfig.scripts.json` 脚本域；pack 半需要 vendor 构建产物）；
   - 改门禁时可 `--only=<gate[,gate]>` 并跑 `node checks/smoke/gates.e2e.mjs --gate=<name>`（收尾仍须全量）；
-  - 改驾驶舱（client 面，[D18](./decisions.md#d18)）加跑 `node --import tsx/esm checks/smoke/client-load.entry.mjs`（CI 加 `--seed tests/fixtures/client-load-home`；失败留 `runtime/smoke-workspace/client-load-*`；无交付目标 = exit 2 SKIP，主机不健康 = exit 2 NOT-RUN，未跑 ≠ 通过）；事实/终稿目标改动加跑 `cockpit-truth*.entry` 与 `cockpit-locale.entry`（路由正本 = [guides/dev-loop.md §2](./guides/dev-loop.md)）。
+  - 改驾驶舱（client 面，[D18](./decisions.md#d18)）加跑 `node --import tsx/esm checks/smoke/client-load.entry.mjs`（CI 加 `--seed tests/fixtures/client-load-home`；失败留 `runtime/smoke-workspace/client-load-*`；无交付目标 = exit 2 SKIP，主机不健康 = exit 2 NOT-RUN，未跑 ≠ 通过）；
+    事实/终稿目标改动加跑 `cockpit-truth*.entry` 与 `cockpit-locale.entry`（路由正本 = [guides/dev-loop.md §2](./guides/dev-loop.md)）。
 - **门禁自动台账与反证口径**：全量门禁与自测覆盖自动生成于 [reference/gates-ledger.generated.md](./reference/gates-ledger.generated.md)（由 `gate-ledger-sync` 对账）。常驻反证 = [gates-cases.mjs](../checks/lib/harness/gates-cases.mjs) 的 `CASES`；结构性不适门禁列于 `NO_CASE_GATES`，由 `tests/checks/harness/verify-gates.test.mjs` 反向对账。
 - **契约回归索引（`pnpm test` 守卫族，全量映射见 [tests/INDEX.generated.md](../tests/INDEX.generated.md)）**：
   - **文档与台账**：`decisions-now`、`docs-consistency`、`docs-reference`、`navigability-contract`、`readme-manual-commands`、`release-copies`、`install-copies`；
@@ -106,7 +107,8 @@
 | 判据 | 交付门、审计、验收决定 | **红**，并给出可执行的改法 | 「取最后一个 / 取最像的 / 关键词命中即算」 |
 | 投影 | 驾驶舱、仪表盘、回放 | 显式 `unknown` / `unreadable` | 显示一个看起来合理的值 |
 
-权威输入 = 结构化事实（canonical JSON、会话事件、文件事实，交付终局权威 = `review/readiness.json`）；散文仅作交叉核对，不一致 = 红。不猜、不增兼容分支（既有断代见 [D33](./decisions.md#d33)）；变异矩阵与不变量测试住 `tests/contracts/verdict-conformance.spec.mjs`（[verdict-shape Note](../notes/implemented/2026-11-13-verdict-shape.md) + [workflow-substance-gates Note](../notes/implemented/2026-11-13-workflow-substance-gates.md)）。
+权威输入 = 结构化事实（canonical JSON、会话事件、文件事实，交付终局权威 = `review/readiness.json`）；散文仅作交叉核对，不一致 = 红。
+不猜、不增兼容分支（既有断代见 [D33](./decisions.md#d33)）；变异矩阵与不变量测试住 `tests/contracts/verdict-conformance.spec.mjs`（[verdict-shape Note](../notes/implemented/2026-11-13-verdict-shape.md) + [workflow-substance-gates Note](../notes/implemented/2026-11-13-workflow-substance-gates.md)）。
 
 ---
 
@@ -195,7 +197,8 @@
 
 ### 测试 owner 轴
 
-`tests/run/<owner>/` 与 `tests/checks/<owner>/` 均与 `checks/lib/<owner>/` 同名（跨切证据住 `shared/`，无 import 门禁测试住 `repo/`；镜像契约 = [test-owner-mirror](../tests/checks/shared/test-owner-mirror.test.mjs)）。pack 侧：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`，`src/client/<sub>/` ↔ `tests/cockpit/client/<sub>/`，`src/<surface>/` ↔ `tests/pack/<surface>/`，包级合同住 `tests/pack/contract/`，跨面产品合同住 `tests/contracts/`，pack 脚本住 `tests/pack/scripts/`（[pack-mirror](../tests/checks/shared/pack-mirror.test.mjs)）。
+`tests/run/<owner>/` 与 `tests/checks/<owner>/` 均与 `checks/lib/<owner>/` 同名（跨切证据住 `shared/`，无 import 门禁测试住 `repo/`；镜像契约 = [test-owner-mirror](../tests/checks/shared/test-owner-mirror.test.mjs)）。
+pack 侧：`src/lib/<domain>/` ↔ `tests/cockpit/lib/<domain>/`，`src/client/<sub>/` ↔ `tests/cockpit/client/<sub>/`，`src/<surface>/` ↔ `tests/pack/<surface>/`，包级合同住 `tests/pack/contract/`，跨面产品合同住 `tests/contracts/`，pack 脚本住 `tests/pack/scripts/`（[pack-mirror](../tests/checks/shared/pack-mirror.test.mjs)）。
 
 ### 新检查落家序（加一个检查时按序找家，单一入口）
 

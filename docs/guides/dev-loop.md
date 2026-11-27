@@ -20,7 +20,8 @@
 
 - 两门都是 DSH 自带机制（base bundle，零接线）；**不要发明 tasks.md**（DSH 明文否决计划
   文件："a plan directory creates a second durable home"——会话日志即计划与清单的持久真相）。
-- **验收门（TDD 式，[D23](../decisions.md#d23)）**：对已授权工作，在实施前把可判定的验收判据绑定检查方式；可机械者先立红，人工判据明确记录走查证据。验收尚不明确时，澄清是当前任务需要，不会自动阻断已授权且可独立推进的工作；证据设计复用本仓现有 owner，不另造队列。四条硬边界：①**改断言迁就实现不是修法**——断言只在行为/合同真实变化时同 diff 改（[tests/AGENTS](../../tests/AGENTS.md)）；②**未验项不得写 implemented**，被阻断检查如实注明；③**复发升格**——implemented 缺真实验证证据复发时，才考虑升为机械门禁并配负例；④证据和结论不得超出检查实际证明的范围（依据见 [reference/external.md](../reference/external.md) 与 [item-lifecycle-tdd Note](../../notes/archived/2026-10-05-item-lifecycle-tdd.md)）。
+- **验收门（TDD 式，[D23](../decisions.md#d23)）**：对已授权工作，在实施前把可判定的验收判据绑定检查方式；可机械者先立红，人工判据明确记录走查证据。验收尚不明确时，澄清是当前任务需要，不会自动阻断已授权且可独立推进的工作；证据设计复用本仓现有 owner，不另造队列。
+  四条硬边界：①**改断言迁就实现不是修法**——断言只在行为/合同真实变化时同 diff 改（[tests/AGENTS](../../tests/AGENTS.md)）；②**未验项不得写 implemented**，被阻断检查如实注明；③**复发升格**——implemented 缺真实验证证据复发时，才考虑升为机械门禁并配负例；④证据和结论不得超出检查实际证明的范围（依据见 [reference/external.md](../reference/external.md) 与 [item-lifecycle-tdd Note](../../notes/archived/2026-10-05-item-lifecycle-tdd.md)）。
 - **修复卡证据（红→绿）**：bug 翻 `修复落地/已修` 必须写 `## 修复落地` 的 `json fix-evidence` 块（changes/red/green/guard；exit 是 oracle；红证可重放或 changes 含测试/门禁资产），且归档与代码/测试同暂存集；只翻状态/移卡 = 假修（规则 = [_backlog/bugs/README.md](../../_backlog/bugs/README.md)；工艺依据 = [缺陷修复工艺 Note](../../notes/implemented/2026-11-15-bug-fix-process-dsh-plugin.md)）。
 - 同一授权范围内直接实施、验证、自审和修复，不重复询问是否开始或继续；只有缺少必要的人类判断或范围变化时才澄清。阶段验收中的产品取舍归用户，技术证据与自主审查归 agent（[研发宪章](../../CONTRIBUTING.md#development-charter)）。
 - 工具执行许可由当前运行时的 sandbox/approval policy 单独强制，与实施授权、Plan Mode 和业务验收分开；遇到实际拒绝时按工具支持的最窄权限请求，不另发问卡重复确认，也不从仓库内任务推导对其他路径或任意操作的许可。原生机制见 `vendor/dsh/packages/interaction/user-approval/README.md`；项目指南不改变运行时策略。用户限定只改 repo 时，不以 Full access 或全局配置消除弹窗；受限检查记未跑，继续独立工作，不为同类操作反复申请升权。
@@ -47,7 +48,7 @@
 - **研究 run 型** → [guides/run-ops.md](./run-ops.md)（含**硬前置**：`research-workspace` 必须已注册进
   DSH，会话 cwd 才落在研究工作区）+ 开发技能 `running-a-research-run`；
 - **交付收尾** → `reviewing-a-delivery`；**加/改角色** → `adding-a-research-role`；
-  **加/改门禁** → `writing-a-gate`；**加/调节点轨道** → `changing-node-topology`；
+  **加/改门禁** → [writing-a-gate](../../.agents/skills/writing-a-gate/SKILL.md)；**加/调节点轨道** → `changing-node-topology`；
   **归档/删除/合并 Note** → `archiving-a-note`；
   **换 vendor pin** → `bumping-vendor-pin`；**间歇/环境依赖缺陷** → `reproducing-a-failure`；
   **已建缺陷卡** → [_backlog/bugs/README.md](../../_backlog/bugs/README.md)（表面/边界 → 证据 → 红绿；工艺依据 = [缺陷修复工艺 Note](../../notes/implemented/2026-11-15-bug-fix-process-dsh-plugin.md)）；
@@ -105,7 +106,7 @@
 | **改驾驶舱**（观察面 client 面——`src/client/` 套件，[构成正本](../contracts/client-ui.md)） | `src/client/` + tsconfig include + `dsh.client.inject` + keyed 字面量进 `keys.ts` + **可见文案 zh/en 键**（任何界面文本 day-one 双语，步骤 = [changing-ui-copy](../../.agents/skills/changing-ui-copy/SKILL.md)） | `pnpm build` → `client-load.entry`（改挂起显性化再跑 `client-hitl.entry`；改状态页事实/终稿目标再跑 `cockpit-truth.entry` + `cockpit-artifact-truth.entry` + `cockpit-truth-residuals.entry` + `cockpit-truth-substance.entry` + `cockpit-locale.entry`） | L0 + client-load.entry + cockpit-truth.entry + cockpit-artifact-truth.entry + cockpit-truth-residuals.entry + cockpit-truth-substance.entry + cockpit-locale.entry | 同上 | 真浏览器断言全绿 |
 | 改 `src/lib/` 纯函数 / 类型面（pack 两半的编译面） | 对应 `src/lib` / `src/client` 类型位 | `pnpm typecheck` → `pnpm test`（typecheck 前置 = vendor 构建产物在场） | L0 + typecheck | 同上 | typecheck + 对应测试绿 |
 | **新增/修改机器判据**（门禁/审计/交付决定从散文里判值） | 设计卡 `## 判据形状` + 判据测试（不变量+矩阵） | 先写变异矩阵（红）→ 实现 → L0 | L0 + 判据测试 | 判据形状 + 反证 | 歧义会红 + 矩阵绿 |
-| 加 / 改机械门禁 | `context.mjs` gates 数组 + 该域 `verify/gates/<域>.mjs` + `testing.md` §L0 台账（案例表有增删再动 `gates.e2e.mjs`） | **注入回归红 → 还原 → 绿** → `gates.e2e --gate=<改的门禁>` | L0 + `gates.e2e --gate=<改的门禁>`（日常只跑该门禁的案例；全量 = 发布档，见下） | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + `--gate` 绿 |
+| 加 / 改机械门禁（步骤 = [writing-a-gate](../../.agents/skills/writing-a-gate/SKILL.md)） | `context.mjs` gates 数组 + 该域 `verify/gates/<域>.mjs` + `pnpm docs:gen` 刷新 `gates-ledger.generated.md`（案例表有增删再动 `gates-cases.mjs`） | **注入回归红 → 还原 → 绿** → `gates.e2e --gate=<改的门禁>` | L0 + `gates.e2e --gate=<改的门禁>`（日常只跑该门禁的案例；全量 = 发布档，见下） | 带反证记录 | 红证实跑 + `gate-ledger-sync` 绿 + `--gate` 绿 |
 | 改 run 通道工具 / 审计门（run-driver / boot-run / watch-run / hitl-answer / run-dashboard / evidence-audit / node-gate / schema-scan / snapshot-replay） | 对应 `checks/` / `tools/` / `probes/` 脚本 | 启动 owner、公开入口或锁变更另跑 `node checks/smoke/channel-start.e2e.mjs`（dev-only 真进程；影响触发，不进默认回归或 nightly） | L0 + 对应 `tests/<domain>/*.spec.mjs` 契约测试必跑（用例即其反证记录） | 判据变更才写 Note | 对应契约测试及适用进程 smoke 绿 |
 | 改 checks/lib 支撑模块 / dev 基建本体（`lib/*.mjs`、env.sh、render-overlay） | 支撑模块 + 其**全部消费方**（消费面 grep：roles.mjs 的角色枚举消费方、render-overlay → `overlay-fresh`、run-state → watch-run/hitl-answer/run-dashboard） | 消费方门禁在同 diff 复跑 | L0 + lib 对应契约测试 | 判据变更才写 Note | 消费方门禁与契约测试绿 |
 | 查/加探针（真实边界单点证据） | `probes/` 头注 + `probes/INDEX.generated.md` | `node probes/_index.mjs --write` → 跑探针本体 | L0 + 目标探针（真模型档需凭据） | 头注/索引变更才写 | 索引门绿 + 探针红→绿 |
@@ -175,7 +176,7 @@ node probes/behavior/method-library-probe.mjs  # 偏好库可发现性三问（�
 node checks/smoke/l4-lite.e2e.mjs        # L4-lite 真模型冒烟（真模型档，需凭据：全角色响应 + scout web_search 调用）
 node checks/smoke/team-preflight.e2e.mjs # team 机制预检（真模型档，需凭据：spawn_teammate 组队 + 成员组合画像 + company D18 one-shot worker 探针）
 node tools/channel/run-driver.mjs up          # **run 通道驱动入口（常用）**：起/复用通道（复用先验安装镜像=当前 pack 源）+ 验浏览器面 + 呈交块（exit 0 可呈交/1 红/2 未跑；镜像漂移/未取证 = 2）；--bootstrap 先跑冷启动前置；--profile/DSH_RUN_STATE_DIR 支持多实例；probe = 只验已起通道（同样先验镜像）；url = 打印当前 URL
-bash tools/channel/boot-run.sh                  # run 通道底层启动面：自检→组合检查/必要补装→漂移门；仪表盘后台观察、web 前台 3083；用法 = 61（驱动入口内部调它）
+bash tools/channel/boot-run.sh                  # run 通道底层启动面：自检→组合检查/必要补装→漂移门；仪表盘后台观察、web 前台 3083；用法 = guides/run-ops.md（驱动入口内部调它）
 node probes/analyze/stream-diagnostics.mjs --recent N   # 流失败归因诊断（尝试时间线/失败密度/provider 实名；出问题第一步）
 node --import tsx/esm probes/analyze/run-dashboard.mjs --latest --out <html>   # run 只读投影（多场扫描 + 步骤条 + HITL 等待横幅；--watch 持续再生成）
 node probes/analyze/plan-card-stats.mjs   # 计划确认卡字数跨场分布（keyless，须先 source；升硬门前置 = 连续多场 ≤200 字达标）
@@ -205,7 +206,7 @@ node packages/deep-research-pack/scripts/doctor.mjs --workspace <dir>   # 只读
 
 CI 另跑 `run-accept.e2e` / `pack.e2e` / `doctor.e2e`；逐件命令索引 = [checks/README](../../checks/README.md)（本块是操作入口，不是全量清单）。
 
-档位词汇（keyless / 真模型档）与密钥定义 = [AGENTS.md §密钥](../../AGENTS.md)；脚本头注各带设计依据
+档位词汇（keyless / 真模型档）与密钥定义 = [AGENTS.md §硬红线](../../AGENTS.md)；脚本头注各带设计依据
 与 RFC 出处。
 
 五条与面选择同级的纪律（前三条 = `_agent_ready_development` 吸纳，2026-09-25；后两条 = 姊妹仓
@@ -246,7 +247,7 @@ fresh clone 一次性准备（submodule / `pnpm install` / `source tools/env.sh`
 ## 5. 密钥
 
 - 独立真模型档 = `tests/checks/shared/smoke-contract.test.mjs` 的 REAL_MODEL 闭集（成员以测试为准；`tools/record/record-role-fixture.mjs` 是单独录制工具，完整 run 属 L4）；手动 CI 通道 = `.github/workflows/model-smoke.yml`（`workflow_dispatch`；缺 secret 由脚本 preflight exit 2 硬失败；不进 PR）。
-  调用凭据可在开发 home 配置（根 [AGENTS §密钥](../../AGENTS.md)）。CDP `--ask` 按当前会话档位；
+  调用凭据可在开发 home 配置（根 [AGENTS §硬红线](../../AGENTS.md)）。CDP `--ask` 按当前会话档位；
   永不提交密钥；
 - L1 真挂载无模型调用、无凭据可跑；L2 安装验收无模型调用并使用 `--install-only`，默认 doctor 仍检查凭据在场；
 - web 搜索无需独立 key（D9 实证）：与 chat 同一把 `DEEPSEEK_API_KEY`。

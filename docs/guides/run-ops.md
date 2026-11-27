@@ -26,7 +26,7 @@
 ## 0. 开跑（一次性准备 + 每次启动）
 
 - 凭据：真 run 需要模型——`runtime/harness-home/.credentials.yaml` 配一次
-  `DEEPSEEK_API_KEY`（见 [AGENTS.md §密钥](../../AGENTS.md)；boot 本身 keyless）。
+  `DEEPSEEK_API_KEY`（见 [AGENTS.md §硬红线](../../AGENTS.md)；boot 本身 keyless）。
   启动横幅出来后自查一步：`grep -q DEEPSEEK runtime/harness-home/.credentials.yaml`——
   boot 不查凭据，缺了要到 lead 首次调模型才炸（启动成功 ≠ 能跑研究）；
 - 启动：`node tools/channel/run-driver.mjs up`（起/复用通道 → 验浏览器面 → 打印呈交块；冷启动 fork
