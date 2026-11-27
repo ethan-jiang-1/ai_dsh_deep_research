@@ -218,10 +218,10 @@ client 行。团队可视化行（`ui-agent-team`）归团队机制层，不在�
 ## 延伸阅读
 
 - [安装与使用手册](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/_dist/%E5%AE%89%E8%A3%85%E6%89%8B%E5%86%8C.md)
-- [运行形态合同](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/65-run-forms.md)
-- [插件作者入口](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/62-plugin-authoring.md)
-- [研究驾驶舱设计](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/design/40-research-cockpit.md)
-- [发布与版本](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/64-release-versioning.md)
+- [运行形态合同](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/contracts/run-forms.md)
+- [插件作者入口](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/plugin-authoring.md)
+- [研究驾驶舱设计](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/contracts/client-ui.md)
+- [发布与版本](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/contracts/release.md)
 
 ## 模型体验
 
@@ -251,7 +251,7 @@ client 行。团队可视化行（`ui-agent-team`）归团队机制层，不在�
 
 #### KV 缓存影响
 
-persona、手册、skill 描述、工具 schema 在同一包版本内稳定（KV 友好前缀）；每步 time-context 读数追加而非替换。手册占 Lead 消息 token 约一半 = T0 常驻成本；内容生长与瘦身复议归 design/70。
+persona、手册、skill 描述、工具 schema 在同一包版本内稳定（KV 友好前缀）；每步 time-context 读数追加而非替换。手册占 Lead 消息 token 约一半 = T0 常驻成本；内容生长与瘦身复议归 presets/内容合同。
 
 ## 已知限制与延后工作
 
@@ -274,9 +274,9 @@ persona、手册、skill 描述、工具 schema 在同一包版本内稳定（KV
 <details>
 <summary>维护者的工作上下文 —— 点击展开</summary>
 
-以下是仓内文档，不是本包说明：[插件作者入口](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/62-plugin-authoring.md)、
+以下是仓内文档，不是本包说明：[插件作者入口](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/plugin-authoring.md)、
 [新增一个研究角色](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/.agents/skills/adding-a-research-role/SKILL.md)、
-[发布与版本](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/guides/64-release-versioning.md)。
+[发布与版本](https://github.com/ethan-jiang-1/ai_dsh_deep_research/blob/master/docs/contracts/release.md)。
 上面的安装步骤才是已验证的路径；包内容由 `pnpm build` 与 `npm pack` 生成。
 
 </details>

@@ -145,6 +145,5 @@ Backlog 不是实施前置门，RFC 不是普遍实施要求；未裁决的推�
 ## 已知限制与延后工作
 
 - **旧根名与旧 `docs/` 路径只活在 redirect 账本**：冻结层旧链接经 `checks/test-path-redirects.json` 解析（链式，append-only）；老 clone 的 `core.hooksPath` 需重 `source tools/env.sh` 幂等恢复（`hooks-active` 门禁点名未激活态）。
-- **pack 打包输入面内的少量旧文档注释与外链延后到下次 pack 升版**：`packages/deep-research-pack/{README.md,README.zh.md,cordis.patch.yml,src/**}` 属已发布 `0.3.7` tarball 的 `PACK_INPUTS`（改它会改变同版本工件 sha256 并触发 `dist-freshness`），其注释/GitHub 链接/停摆横幅里的旧路径引用随下一次 pack 版本变更同 diff 更新（[triggers](../_backlog/triggers.md)）。
 - **合同桶不改名**：`tests/pack/contract/` 与 `tests/contracts/` 的二分规则见 [tests/AGENTS](../tests/AGENTS.md)；延后到下一次 pack 版本变更（[triggers](../_backlog/triggers.md)）。
 - **`client-load.entry` 1366 行**：phase-oriented 浏览器 E2E；拆分登记在 `script-file-size` 例外与 [triggers](../_backlog/triggers.md)。

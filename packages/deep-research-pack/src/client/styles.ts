@@ -4,7 +4,7 @@
 // 卸载时随 refcount 归零移除——此前是无标记的裸 <style>，跨插件归属不可见、卸载后残留
 // 选择器仍在页面上生效。作用域仍是"整页匹配 vendor 稳定钩子"（问卡/方法库不在本插件容器内，
 // 没有更近的共同祖先）；fail-soft：vendor 删钩子时规则只是不再命中。
-// 移除条件登记在 design/40 §已知限制与延后工作。
+// 移除条件：vendor 卡头自带换行/最小宽后移除。
 
 const MARKER = 'data-dsh-deep-research'
 let installed = 0

@@ -100,7 +100,7 @@
     #    同一 id（vendor 的 agent-team-profile 层 patch），本包再 insert =
     #    同行双插入（2026-11-03 审计 D7-1 实证）。本包不再声明；装态由团队层提供。──
     # ── 本包自己的 client 面（D18 有界例外；另一处 = D31 抓取回退 provider）：
-    #    host 半是空壳，浏览器半注册研究驾驶舱页签（清单 = design/40 §2，不在此手抄）。
+    #    host 半是空壳，浏览器半注册研究驾驶舱页签（清单由 lib/client.js 提供，不在此手抄）。
     #    行的 name 就是本包名（company-pack 同款）——host 侧加载 lib/index.js（空壳），
     #    浏览器侧经 exports["./client"] 取 lib/client.js（ModuleLoader 外壳）。──
     # ── 产品内容注入行（D40）：把包内 content/manual.md 以 runtime context 注入每个 agent；

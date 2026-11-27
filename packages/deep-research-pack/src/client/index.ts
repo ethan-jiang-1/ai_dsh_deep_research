@@ -156,7 +156,7 @@ export function apply(ctx: ClientContext): void {
     // 于是标题塌到 min-content（实测宽 24px、高 946px = 一字一行）。稳定钩子 = 组件根的
     // `data-question-key`（不是哈希类名）。规则只在窄列生效：卡头允许换行 + 标题给 14em 弹性基准，
     // 宽列仍是一行。**fail-soft**：vendor 若删该钩子，规则只是不再命中，不会影响其它组件。
-    // 移除条件：vendor 卡头自带换行/最小宽后删除本 effect（登记在 design/40 §已知限制与延后工作）。
+    // 移除条件：vendor 卡头自带换行/最小宽后删除本 effect（驾驶舱已知限制）。
     scoped.effect(() => installQuestionCardNarrowFix(), 'deep-research-pack: question card narrow-column fix')
 
     // 研究通道品牌（用户定调 2026-10-13：虎鲸 Orca）——宿主侧栏 brand.mark / brand.name 两槽的
@@ -198,7 +198,7 @@ export function apply(ctx: ClientContext): void {
     }), 'deep-research-pack: research-config tab type')
 
     // 「研究图谱」页签（2026-10-21 A0）：依赖形状 + worker 层 + 异常注意力；只读 + 让 Lead 调整。
-    // 不是第二个任务板——任务 CRUD 仍归 ui-agent-team（design/40 §6 边界）。
+    // 不是第二个任务板——任务 CRUD 仍归 ui-agent-team（驾驶舱只读边界）。
     scoped.effect(() => scoped.sidebarRightTabs.register({
       id: RESEARCH_GRAPH_TAB_KEY,
       kind: RESEARCH_GRAPH_TAB_KIND,

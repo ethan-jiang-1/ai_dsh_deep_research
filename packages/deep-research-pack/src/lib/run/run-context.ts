@@ -13,7 +13,7 @@
  *   - 读策略是一张表：canonical 文本/JSON 工件读到 eof（有页上限），plan 800 行，其余按默认行上限；
  *   - 到 eof 的翻页有页数上限；触顶返回 `truncated: true`，绝不静默短读。
  *
- * 当前读策略（与 design/40 的驾驶舱边界同步）：
+ * 当前读策略（与驾驶舱读面边界同步）：
  *   question.md / leads.md / findings.md / topics.md / protocol.json / evidence/*.md /
  *   review.md / review/readiness.json / review/claims.json / review/verdicts-rN.json /
  *   claims.json / verdicts.json / delivered.json / final.md / final/vN.md / final/readable*.md
