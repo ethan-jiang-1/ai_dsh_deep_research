@@ -297,6 +297,7 @@ export function apply(ctx: ClientContext): void {
           chooseWorkspace,
           openSession,
           openSessionFinal,
+          openHub: () => { openHubTab('runs') },
         }
       },
     }, StartCard)), 'deep-research-pack: start card')

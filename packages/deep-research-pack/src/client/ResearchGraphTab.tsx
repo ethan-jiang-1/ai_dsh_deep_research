@@ -28,8 +28,10 @@
  */
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
+import type { InputActions } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { countText } from '../lib/shared/i18n.ts'
 import type { TeamMemberProjection, TeamProjection, TeamTaskView } from '@deepseek-ai/dsh-experimental-agent-team/client'
+import { formatPlanNodeMention } from '../lib/events/research-references.ts'
 import {
   DEFAULT_ATTENTION_THRESHOLDS,
   attentionOf,
@@ -129,6 +131,8 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     return bind({ refresh: retry })
   }, [tabInfo, retry])
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [insertedId, setInsertedId] = useState<string | null>(null)
+  const inputActions = (props as { inputActions?: InputActions }).inputActions
 
   // journal → 本会话可信绑定的 run bundle（只用于 plan 基址；不折活动流）。
   // read 弱绑定在立项/挂起期不可信（binding-trust 单一政策）；write 命中后才显示 plan。
@@ -260,6 +264,17 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     })
   }
 
+  // 一键填入 `@drt_<slug>/W#.#` 到对话草稿，不自动发送（D18 只读边界）。
+  const insertReference = (node: GraphNodeView): void => {
+    if (inputActions === undefined) return
+    const text = boundSlug !== null ? formatPlanNodeMention(boundSlug, node.id) : node.id
+    const payload = `${text} `
+    const span = inputActions.captureInsertion()
+    if (!inputActions.insertText(payload, span)) inputActions.setDraft(payload)
+    setInsertedId(node.id)
+    setTimeout(() => { setInsertedId((current) => current === node.id ? null : current) }, 1800)
+  }
+
   // 有边/无边两条渲染分支共用同一张卡；此前两处逐字重复，改一处忘另一处会分叉。
   const renderNodeCard = (node: GraphNodeView) => (
     <NodeCard
@@ -269,6 +284,8 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       onToggle={() => { setExpandedId(expandedId === node.id ? null : node.id) }}
       copied={copiedId === node.id}
       onCopy={() => { copyReference(node) }}
+      inserted={insertedId === node.id}
+      {...(inputActions !== undefined ? { onInsertRef: () => { insertReference(node) } } : {})}
       {...(node.member !== undefined ? { onOpenOwner: () => { openOwner(node.member as TeamMemberProjection) } } : {})}
       children={node.planNode !== undefined ? childrenByParent.get(node.planNode.id) ?? [] : []}
       childStateOf={(childId) => (teamReady ? planNodeStateOf(mappingIndex.mapping.get(childId), undefined, undefined, props.t) : projectionPendingState(props.t))}

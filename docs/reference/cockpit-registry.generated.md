@@ -149,5 +149,5 @@
 | `src/lib/shared/text-fold.ts` | text-fold.ts —— 文本呈现口径的共享纯函数（2026-10-18 收敛）。 |
 | `src/lib/workspace/research-defaults.ts` | research-defaults — workspace 级「项目研究默认」的共享纯件（host + client 同一份）。 |
 | `src/lib/workspace/runs-catalog.ts` | runs-catalog.ts —— 工作区 Research Hub 的纯折算（run 档案三位置扫描 + 内置 8 透镜表）。 |
-| `src/lib/workspace/start-card.ts` | start-card — 产品首屏起步卡的纯判据（D38）。 |
+| `src/lib/workspace/start-card.ts` | start-card — 意图优先首屏起步卡的纯判据（D38 演进）。 |
 | `src/lib/workspace/workspace-title.ts` | workspace-title.ts — 产品工作区标题的单一正本（client 过滤与 host 登记共用）。 |

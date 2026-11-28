@@ -45,6 +45,45 @@
   border-bottom: 0.5px solid var(--dsw-alias-border-l1);
 }
 
+.panelCompact {
+  gap: 8px;
+  padding: 0;
+  border-bottom: none;
+}
+
+.verticalStack {
+  display: grid;
+  gap: 9px;
+}
+
+.compactGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 18px;
+  align-items: center;
+}
+
+@media (max-width: 920px) {
+  .compactGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.subtitleInline {
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subRowCompact {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+}
+
 .headerRow {
   display: flex;
   align-items: center;

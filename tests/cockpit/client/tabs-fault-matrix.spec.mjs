@@ -135,12 +135,12 @@ test('ResearchStatusTab 恶意 RunSource 故障矩阵：全 7 类畸形/缺失�
 
       if (artifact === 'bundle') {
         assert.match(html, /研究状态读取失败/, `${label}: bundle 故障必须显性报错`)
-        assert.doesNotMatch(html, /✅ 已交付/, `${label}: bundle 故障禁止出现已交付`)
+        assert.equal(container.querySelector('[data-testid="status-delivered-badge"]'), null, `${label}: bundle 故障禁止出现已交付`)
       } else if (artifact === 'question.md' && fault !== 'missing') {
         assert.doesNotMatch(html, /分析全球 AI 算力定价趋势与约束/, `${label}: 问题损坏时不该渲染正常问题正文`)
         assert.match(html, /研究问题为空|研究问题读取失败|研究问题正文为空/, `${label}: 必须提示问题缺陷`)
       } else if (artifact === 'delivered.json' && fault !== 'missing') {
-        assert.doesNotMatch(html, /✅ 已交付/, `${label}: 坏回执不得伪造已交付`)
+        assert.equal(container.querySelector('[data-testid="status-delivered-badge"]'), null, `${label}: 坏回执不得伪造已交付`)
         assert.match(html, /交付回执不合法|交付回执读取失败/, `${label}: 坏回执必须显性报警`)
       } else if ((artifact === 'review.md' || artifact === 'review/readiness.json') && ['unreadable', 'empty', 'invalid-json', 'conflict'].includes(fault)) {
         assert.match(html, /审查未定|审查未给结论|审查文件读取失败/, `${label}: 审查故障禁止假冒 PASS`)
@@ -698,12 +698,13 @@ test('BUG-424 状态：回执声明的终稿版本不在场 → 不宣布已交�
   // 正控：版本在场 → 宣布已交付
   const ok = renderStatus(1)
   await flushUi(act)
-  assert.match(ok.container.textContent ?? '', new RegExp(zh.statusDelivered), '版本在场时应宣布已交付')
+  assert.ok(ok.container.querySelector('[data-testid="status-delivered-badge"]'), '版本在场时应宣布已交付')
+  assert.match(ok.container.querySelector('[data-testid="status-delivered-badge"]')?.textContent ?? '', new RegExp(zh.statusDelivered))
   ok.unmount()
   // 反控：声明版本缺席 → 不得宣布已交付，且要显性告警
   const dangling = renderStatus(9)
   await flushUi(act)
   const text = dangling.container.textContent ?? ''
-  assert.doesNotMatch(text, new RegExp(zh.statusDelivered), '声明版本不在场时不得宣布已交付')
+  assert.equal(dangling.container.querySelector('[data-testid="status-delivered-badge"]'), null, '声明版本不在场时不得宣布已交付')
   assert.match(text, /回执|交付回执/, '必须显性说明回执与盘上不符')
 })

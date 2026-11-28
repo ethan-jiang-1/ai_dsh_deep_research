@@ -18,13 +18,15 @@ import { AUTHORITY_LABEL, FAMILY_LABEL, RECENCY_LABEL, SHAPE_LABEL } from './lab
 import { SelectMenu } from './SelectMenu.tsx'
 import css from './defaults.module.css'
 
-/** 面板 props：由 ResearchConfigTab 注入。 */
+/** 面板 props：由 ResearchConfigTab 或 ResearchHubPanel 注入。 */
 export interface DefaultsPanelProps {
   readonly sessionId: SessionId
   readonly store: DefaultsStore
   readonly t: PackTranslate
   /** 点击「方法库 ›」跳转到研究工作台方法库页签；缺席时不渲染可点入口（BUG-452）。 */
   readonly onOpenMethodLibrary?: () => void
+  /** 宽屏双列紧凑排版（供全局研究工作台顶部使用）。 */
+  readonly layout?: 'vertical' | 'compact'
 }
 
 function sourcePatch(
@@ -58,7 +60,8 @@ function receiptOf(state: DefaultsSnapshot, t: PackTranslate): { tone: 'ok' | 'w
  * @param props - session + store + t。
  * @returns 面板。
  */
-export function DefaultsPanel({ sessionId, store, t, onOpenMethodLibrary }: DefaultsPanelProps): ReactNode {
+export function DefaultsPanel({ sessionId, store, t, onOpenMethodLibrary, layout = 'vertical' }: DefaultsPanelProps): ReactNode {
+  const compact = layout === 'compact'
   const state = useDefaults(store, sessionId)
   const [audience, setAudience] = useState(state.value.output?.audience ?? '')
   const [confirmClear, setConfirmClear] = useState(false)
@@ -109,13 +112,19 @@ export function DefaultsPanel({ sessionId, store, t, onOpenMethodLibrary }: Defa
         : t('defaultsMethodFollow', { name: state.methodDefault })
 
   return (
-    <section data-testid="defaults-panel" data-defaults-revision={state.revision} data-defaults-pending={busy} className={css.panel}>
+    <section
+      data-testid="defaults-panel"
+      data-defaults-revision={state.revision}
+      data-defaults-pending={busy}
+      className={`${css.panel}${compact ? ` ${css.panelCompact}` : ''}`}
+    >
       <div className={css.headerRow}>
         <strong className={css.title}>{t('defaultsTitle')}</strong>
         <Tag tone="info">{t('defaultsBadge')}</Tag>
+        {compact && <span className={css.subtitleInline}>{t('defaultsSubtitle')}</span>}
         <span className={css.revision}>v{state.revision}</span>
       </div>
-      <div className={css.subtitle}>{t('defaultsSubtitle')}</div>
+      {!compact && <div className={css.subtitle}>{t('defaultsSubtitle')}</div>}
 
       {problems.length > 0 ? (
         <div role="alert" className={css.bannerError}>
@@ -128,150 +137,152 @@ export function DefaultsPanel({ sessionId, store, t, onOpenMethodLibrary }: Defa
         </div>
       ) : null}
 
-      <div className={css.row}>
-        <span className={css.label}>{t('defaultsMethod')}</span>
-        <div className={css.rowFlex}>
-          <span data-testid="defaults-method" className={css.methodText}>{methodText}</span>
-          {onOpenMethodLibrary !== undefined && (
-            <button
-              type="button"
-              data-testid="defaults-method-library-link"
-              className={css.methodLink}
-              title={t('defaultsMethodHint')}
-              onClick={onOpenMethodLibrary}
-            >
-              {t('defaultsMethodLibraryLink')}
-            </button>
-          )}
+      <div className={compact ? css.compactGrid : css.verticalStack}>
+        <div className={css.row}>
+          <span className={css.label}>{t('defaultsMethod')}</span>
+          <div className={css.rowFlex}>
+            <span data-testid="defaults-method" className={css.methodText}>{methodText}</span>
+            {onOpenMethodLibrary !== undefined && (
+              <button
+                type="button"
+                data-testid="defaults-method-library-link"
+                className={css.methodLink}
+                title={t('defaultsMethodHint')}
+                onClick={onOpenMethodLibrary}
+              >
+                {t('defaultsMethodLibraryLink')}
+              </button>
+            )}
+          </div>
+          {!compact && <><span /><span className={css.hint}>{t('defaultsMethodHint')}</span></>}
         </div>
-        <span /><span className={css.hint}>{t('defaultsMethodHint')}</span>
-      </div>
 
-      <div className={css.row}>
-        <span className={css.label}>{t('defaultsDepth')}</span>
-        <SelectMenu
-          testId="defaults-depth"
-          ariaLabel={t('defaultsDepth')}
-          value={state.value.effort ?? 'auto'}
-          disabled={busy}
-          options={[
-            { value: 'auto', label: t('defaultsDepthAuto') },
-            { value: 'quick', label: t('defaultsDepthQuick') },
-            { value: 'standard', label: t('defaultsDepthStandard') },
-            { value: 'deep', label: t('defaultsDepthDeep') },
-          ]}
-          onChange={(value) => {
-            if (value === 'auto') unset(['effort'])
-            else apply({ effort: value as EffortBand })
-          }}
-        />
-        <span /><span className={css.hint}>{t('defaultsDepthHint')}</span>
-      </div>
-
-      <div className={css.row}>
-        <span className={css.label}>{t('defaultsOutput')}</span>
-        <div className={css.rowFlex}>
+        <div className={css.row}>
+          <span className={css.label}>{t('defaultsDepth')}</span>
           <SelectMenu
-            testId="defaults-output-shape"
-            ariaLabel={t('defaultsOutput')}
-            value={shape ?? 'auto'}
+            testId="defaults-depth"
+            ariaLabel={t('defaultsDepth')}
+            value={state.value.effort ?? 'auto'}
             disabled={busy}
-            className={css.controlFixed}
             options={[
-              { value: 'auto', label: t('defaultsShapeAuto') },
-              ...OUTPUT_SHAPES.map((item) => ({ value: item, label: t(SHAPE_LABEL[item]) })),
+              { value: 'auto', label: t('defaultsDepthAuto') },
+              { value: 'quick', label: t('defaultsDepthQuick') },
+              { value: 'standard', label: t('defaultsDepthStandard') },
+              { value: 'deep', label: t('defaultsDepthDeep') },
             ]}
             onChange={(value) => {
-              if (value === 'auto') {
-                if (output?.audience === undefined) unset(['output'])
-                else apply({ output: { audience: output.audience } })
-                return
-              }
-              apply({ output: { shape: value as OutputShape, ...output?.audience === undefined ? {} : { audience: output.audience } } })
+              if (value === 'auto') unset(['effort'])
+              else apply({ effort: value as EffortBand })
             }}
           />
-          <span className={css.labelNowrap}>{t('defaultsAudience')}</span>
-          <Input
-            data-testid="defaults-audience"
-            aria-label={t('defaultsAudience')}
-            placeholder={t('defaultsAudiencePlaceholder')}
-            value={audience}
+          {!compact && <><span /><span className={css.hint}>{t('defaultsDepthHint')}</span></>}
+        </div>
+
+        <div className={css.row}>
+          <span className={css.label}>{t('defaultsOutput')}</span>
+          <div className={css.rowFlex}>
+            <SelectMenu
+              testId="defaults-output-shape"
+              ariaLabel={t('defaultsOutput')}
+              value={shape ?? 'auto'}
+              disabled={busy}
+              className={css.controlFixed}
+              options={[
+                { value: 'auto', label: t('defaultsShapeAuto') },
+                ...OUTPUT_SHAPES.map((item) => ({ value: item, label: t(SHAPE_LABEL[item]) })),
+              ]}
+              onChange={(value) => {
+                if (value === 'auto') {
+                  if (output?.audience === undefined) unset(['output'])
+                  else apply({ output: { audience: output.audience } })
+                  return
+                }
+                apply({ output: { shape: value as OutputShape, ...output?.audience === undefined ? {} : { audience: output.audience } } })
+              }}
+            />
+            <span className={css.labelNowrap}>{t('defaultsAudience')}</span>
+            <Input
+              data-testid="defaults-audience"
+              aria-label={t('defaultsAudience')}
+              placeholder={t('defaultsAudiencePlaceholder')}
+              value={audience}
+              disabled={busy}
+              maxLength={200}
+              onChange={(event) => setAudience(event.currentTarget.value)}
+              onBlur={commitAudience}
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter') return
+                event.preventDefault()
+                event.currentTarget.blur()
+              }}
+              className={css.controlGrow ?? ''}
+            />
+          </div>
+        </div>
+
+        <div className={css.row}>
+          <span className={css.label}>{t('defaultsSource')}</span>
+          <div className={css.rowWrap}>
+            {SOURCE_FAMILIES.map((family) => {
+              const selected = families.includes(family)
+              return (
+                <Pill
+                  key={family}
+                  active={selected}
+                  data-testid={`defaults-source-${family}`}
+                  aria-pressed={selected}
+                  aria-label={t(FAMILY_LABEL[family])}
+                  disabled={busy}
+                  onClick={() => changeFamilies(family)}
+                >
+                  {t(FAMILY_LABEL[family])}
+                </Pill>
+              )
+            })}
+            <Button
+              variant="ghost"
+              size="sm"
+              data-testid="defaults-source-auto"
+              disabled={busy}
+              onClick={() => unset(['source'])}
+            >
+              {t('defaultsSourceAuto')}
+            </Button>
+          </div>
+        </div>
+
+        <div className={compact ? css.subRowCompact : css.subRow}>
+          <span className={css.label}>{t('defaultsAuthority')}</span>
+          <SelectMenu
+            testId="defaults-authority"
+            ariaLabel={t('defaultsAuthority')}
+            value={authority ?? 'auto'}
             disabled={busy}
-            maxLength={200}
-            onChange={(event) => setAudience(event.currentTarget.value)}
-            onBlur={commitAudience}
-            onKeyDown={(event) => {
-              if (event.key !== 'Enter') return
-              event.preventDefault()
-              event.currentTarget.blur()
+            className={css.controlAuthority}
+            options={[
+              { value: 'auto', label: t('defaultsAuthorityAuto') },
+              ...AUTHORITIES.map((item) => ({ value: item, label: t(AUTHORITY_LABEL[item]) })),
+            ]}
+            onChange={(value) => {
+              applySource(families.length === 0 ? undefined : families, value === 'auto' ? undefined : value as Authority, recency)
             }}
-            className={css.controlGrow ?? ''}
+          />
+          <span className={css.labelSpaced}>{t('defaultsRecency')}</span>
+          <SelectMenu
+            testId="defaults-recency"
+            ariaLabel={t('defaultsRecency')}
+            value={recency ?? 'auto'}
+            disabled={busy}
+            className={css.controlGrow}
+            options={[
+              { value: 'auto', label: t('defaultsRecencyAuto') },
+              ...RECENCIES.map((item) => ({ value: item, label: t(RECENCY_LABEL[item]) })),
+            ]}
+            onChange={(value) => {
+              applySource(families.length === 0 ? undefined : families, authority, value === 'auto' ? undefined : value as Recency)
+            }}
           />
         </div>
-      </div>
-
-      <div className={css.row}>
-        <span className={css.label}>{t('defaultsSource')}</span>
-        <div className={css.rowWrap}>
-          {SOURCE_FAMILIES.map((family) => {
-            const selected = families.includes(family)
-            return (
-              <Pill
-                key={family}
-                active={selected}
-                data-testid={`defaults-source-${family}`}
-                aria-pressed={selected}
-                aria-label={t(FAMILY_LABEL[family])}
-                disabled={busy}
-                onClick={() => changeFamilies(family)}
-              >
-                {t(FAMILY_LABEL[family])}
-              </Pill>
-            )
-          })}
-          <Button
-            variant="ghost"
-            size="sm"
-            data-testid="defaults-source-auto"
-            disabled={busy}
-            onClick={() => unset(['source'])}
-          >
-            {t('defaultsSourceAuto')}
-          </Button>
-        </div>
-      </div>
-
-      <div className={css.subRow}>
-        <span className={css.label}>{t('defaultsAuthority')}</span>
-        <SelectMenu
-          testId="defaults-authority"
-          ariaLabel={t('defaultsAuthority')}
-          value={authority ?? 'auto'}
-          disabled={busy}
-          className={css.controlAuthority}
-          options={[
-            { value: 'auto', label: t('defaultsAuthorityAuto') },
-            ...AUTHORITIES.map((item) => ({ value: item, label: t(AUTHORITY_LABEL[item]) })),
-          ]}
-          onChange={(value) => {
-            applySource(families.length === 0 ? undefined : families, value === 'auto' ? undefined : value as Authority, recency)
-          }}
-        />
-        <span className={css.labelSpaced}>{t('defaultsRecency')}</span>
-        <SelectMenu
-          testId="defaults-recency"
-          ariaLabel={t('defaultsRecency')}
-          value={recency ?? 'auto'}
-          disabled={busy}
-          className={css.controlGrow}
-          options={[
-            { value: 'auto', label: t('defaultsRecencyAuto') },
-            ...RECENCIES.map((item) => ({ value: item, label: t(RECENCY_LABEL[item]) })),
-          ]}
-          onChange={(value) => {
-            applySource(families.length === 0 ? undefined : families, authority, value === 'auto' ? undefined : value as Recency)
-          }}
-        />
       </div>
 
       {receipt !== null ? (
@@ -301,10 +312,12 @@ export function DefaultsPanel({ sessionId, store, t, onOpenMethodLibrary }: Defa
         </Button>
         <span className={css.footerSave}>{t('defaultsFooterSave')}</span>
       </div>
-      <div className={css.footerNotes}>
-        <span>{t('defaultsFooterAuto')}</span>
-        <span>{t('defaultsFooterScope')}</span>
-      </div>
+      {!compact && (
+        <div className={css.footerNotes}>
+          <span>{t('defaultsFooterAuto')}</span>
+          <span>{t('defaultsFooterScope')}</span>
+        </div>
+      )}
     </section>
   )
 }

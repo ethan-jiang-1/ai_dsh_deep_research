@@ -150,3 +150,26 @@ test('X5 已绑定有效工作区时不再渲染冗余大号工作区选择框�
     rtl.cleanup()
   }
 })
+
+test('R4 回访工作区已有 drt_* 且冷启动投影未水合时，StartCard 保持可见并提供工作台档案直达条', async () => {
+  const rtl = await loadRtl()
+  let hubOpened = 0
+  const { container } = rtl.render(createElement(StartCard, propsOf({
+    workspaceTitle: 'WS-Return',
+    workspacePath: '/tmp/ws-return',
+    listDir: async () => [{ name: 'drt_a' }, { name: 'drt_b' }, { name: 'method-library.md' }],
+    openHub: () => { hubOpened += 1 },
+  })))
+  try {
+    await rtl.waitFor(() => {
+      if (container.querySelector('[data-testid=deep-research-start-workspace-runs]') === null) throw new Error('wait workspace runs')
+    })
+    assert.ok(container.querySelector('[data-testid=deep-research-start-template-landscape]'), '回访工作区空白新会话也应展示意图起题卡')
+    const strip = container.querySelector('[data-testid=deep-research-start-workspace-runs]')
+    assert.match(strip?.textContent ?? '', /2/)
+    rtl.fireEvent.click(strip.querySelector('button'))
+    assert.equal(hubOpened, 1)
+  } finally {
+    rtl.cleanup()
+  }
+})

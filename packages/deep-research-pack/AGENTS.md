@@ -13,6 +13,7 @@ launcher/scaffold，没有自定义安装器**。包级当前合同在 [README.m
 
 ## 改这个包时
 
+- **`vendor/dsh/` 只读铁律**：严禁修改 `vendor/dsh/` 任何文件（`vendor-clean` / `vendor-pin` 门禁把守）；所有能力与体验均在本包内通过 DSH 官方扩展点组合完成，遇到宿主边界则可逆降级并记入上游反馈，不写宿主内部 DOM hack。
 - **两处一致**（pack 源 = 唯一真源）：① `tools/record/research.overlay.yml` 由
   `node tools/record/render-overlay.mjs` **从 pack 渲染**（门禁 `overlay-fresh` 对账，勿手改）；
   ② `runtime/harness-home/profiles/deep-research/`（run 通道镜像）随 `boot-run.sh` 同步，

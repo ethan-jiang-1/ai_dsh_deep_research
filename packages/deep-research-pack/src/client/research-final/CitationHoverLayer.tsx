@@ -221,11 +221,18 @@ export function CitationHoverLayer(props: CitationHoverLayerProps): ReactNode {
               size="sm"
               data-testid="citation-hover-open-split"
               onClick={() => {
-                onOpenSplit(anchor.relPath)
-                if (onInspectInStudio !== undefined) onInspectInStudio(anchor.relPath)
+                if (onInspectInStudio !== undefined) {
+                  onInspectInStudio(anchor.relPath)
+                  clearTimers()
+                  activeRelRef.current = null
+                  setAnchor(null)
+                  setEntry(null)
+                } else {
+                  onOpenSplit(anchor.relPath)
+                }
               }}
             >
-              {t('finalCitationOpenSplit')}
+              {onInspectInStudio !== undefined ? t('finalCitationPinStudio') : t('finalCitationOpenSplit')}
             </Button>
             {entry.summary.sourceUrl !== null && (
               <a

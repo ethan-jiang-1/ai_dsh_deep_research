@@ -97,6 +97,37 @@
   overflow-wrap: anywhere;
 }
 
+/* 利用 DSH MarkdownText 暴露的 md-table-wide 钩子：窄栏支持显式横滚不裁切，全屏精读自适应列宽折行 */
+.body :global(.md-table-wide) {
+  overflow-x: auto;
+  padding-bottom: 0;
+}
+
+.studioProse :global(.md-table-wide) table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: auto;
+}
+
+.studioProse :global(.md-table-wide) th,
+.studioProse :global(.md-table-wide) td {
+  min-width: 0;
+  max-width: none;
+  padding: 8px 10px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.studioProse :global(.md-table-wide) th:first-child,
+.studioProse :global(.md-table-wide) td:first-child {
+  white-space: nowrap;
+}
+
+.studioProse :global(.md-table-wide) table code {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .truncated {
   margin-top: 12px;
   font-size: 11.5px;
@@ -185,6 +216,21 @@
 
 .splitReviewBtn {
   flex-shrink: 0;
+}
+
+.splitReviewLabel {
+  white-space: nowrap;
+}
+
+@container (max-width: 680px) {
+  .toolbar {
+    gap: 5px;
+    padding: 6px 10px 7px;
+  }
+
+  .splitReviewLabel {
+    display: none;
+  }
 }
 
 .tocDetails {
@@ -375,7 +421,7 @@
 }
 
 .studioProse {
-  max-width: 72ch;
+  max-width: 78ch;
   margin: 0 auto;
   width: 100%;
 }

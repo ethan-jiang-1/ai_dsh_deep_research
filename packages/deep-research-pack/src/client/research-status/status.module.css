@@ -163,6 +163,9 @@
 }
 
 .delivered {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: var(--dsw-alias-state-success-primary);
   font-weight: 600;
 }
@@ -433,6 +436,12 @@
   color: var(--dsw-alias-label-tertiary);
 }
 
+.radarClickHint {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
 .radarTags {
   display: flex;
   flex-wrap: wrap;
@@ -487,15 +496,18 @@
   min-height: 24px;
   padding: 2px 6px;
   border: none;
+  border-radius: var(--dsw-radius-xs);
   background: transparent;
   color: var(--dsw-alias-state-success-primary);
   font-weight: 600;
   font-size: 11.5px;
   cursor: pointer;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
 }
 
 .matrixHitBtn:hover {
   background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dsw-alias-state-success-primary) 42%, transparent);
 }
 
 .matrixMiss {
@@ -615,4 +627,11 @@
 .radarEvidenceMeta {
   font-size: 11px;
   color: var(--dsw-alias-label-tertiary);
+}
+
+/* Reserve trailing space so dockkit's active-tab close button & right fade mask never obscure pending status text. */
+.tabTitlePending {
+  display: inline-flex;
+  align-items: center;
+  padding-right: 30px;
 }

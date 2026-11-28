@@ -165,18 +165,29 @@ export function RunsView({
             const copyState = copyFeedback?.path === run.rootPath ? copyFeedback.state : 'idle'
             const match = sessionMatches?.[run.rootPath]
             const ownedSessionId = match?.kind === 'owned' ? match.sessionId : null
+            const matchedProj = match?.kind === 'owned' ? match.projection : null
             const isOrphan = sessionMatches !== undefined && match?.kind !== 'owned'
             const isActiveRun = run.status === 'in_progress'
+            const isHitlPending = isActiveRun && matchedProj?.phase === 'hitl_pending'
+            const badgeTone = isHitlPending ? 'warning' : statusToneOf(run.status)
+            const badgeLabel = isHitlPending
+              ? (matchedProj.hitlKind === 'hitl1'
+                ? t('hubStatusHitl1')
+                : matchedProj.hitlKind === 'hitl2'
+                  ? t('hubStatusHitl2')
+                  : t('hubStatusHitl'))
+              : statusLabelOf(run.status, t)
             return (
               <article
                 key={run.rootPath}
                 className={css.card}
                 data-hub-run-slug={run.slug}
                 data-hub-run-ownership={ownedSessionId !== null ? 'owned' : isOrphan ? 'orphan' : 'unknown'}
+                data-hub-run-phase={matchedProj?.phase ?? run.status}
               >
                 <div className={css.cardTop}>
-                  <div className={css.cardTitle}>{run.title}</div>
-                  <Tag tone={statusToneOf(run.status)}>{statusLabelOf(run.status, t)}</Tag>
+                  <div className={css.cardTitle} title={run.title}>{run.title}</div>
+                  <Tag tone={badgeTone}>{badgeLabel}</Tag>
                 </div>
                 <div className={css.cardPath}>{run.rootPath}</div>
                 <div className={css.badgeRow}>

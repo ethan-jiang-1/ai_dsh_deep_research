@@ -453,7 +453,7 @@ export async function dismissPreviewNotice(page) {
 // 否则 i18n 一改就假红。正文内容不在本表内（研究面板文案仍以中文为主）。
 export const TAB_TEXT = {
   status: /研究状态|Research Status/,
-  statusPending: /研究状态 · ⏳ 等你拍板|Research Status · ⏳ Waiting for you/,
+  statusPending: /(?:研究)?状态 · (?:⏳ 等你拍板|待拍板)|(?:Research Status · ⏳ Waiting for you|Status · (?:Needs input|Input))/,
   config: /研究配置|Research Config/,
   graph: /研究图谱|Research Graph/,
   final: /终稿|Final report/,

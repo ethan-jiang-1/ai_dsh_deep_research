@@ -1508,7 +1508,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "start-card — 产品首屏起步卡纯判据：有用户消息 / 有 drt_* 就收起，否则显示。",
+      "uniqueClaim": "start-card — 意图优先首屏起步卡纯判据（D38 演进）：有用户消息即收起，空白新会话（含已有 drt_* 工作区）展示。",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },

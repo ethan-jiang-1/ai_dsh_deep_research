@@ -52,24 +52,24 @@ test('BUG-451 buildStartResearchOptions：使用 vendor DraftInitializationOptio
 // `sidebarRight: no session surface is mounted` 并被静默吞掉；且已收起的右栏必须确保展开。
 // 红配方：删除 startup.ts openResourceWhenMounted 或移除重试 / toggleExpanded 逻辑 → 本例红。
 test('BUG-459 openResourceWhenMounted：等待会话右栏重挂后打开资源，并在收起时展开右栏', async () => {
-  let mounted = false
+  let attempts = 0
   let expanded = false
   const opened = []
   let errors = 0
   const cancel = openResourceWhenMounted(
     {
       openResource(addr) {
-        if (!mounted) throw new Error('sidebarRight: no session surface is mounted')
+        attempts += 1
+        if (attempts < 3) throw new Error('sidebarRight: no session surface is mounted')
         opened.push(addr)
       },
       isExpanded: () => expanded,
       toggleExpanded: () => { expanded = true },
     },
     'dsh-resource://file/session/s1/archive/drt_a/final/readable-v1.md',
-    { intervalMs: 5, maxAttempts: 10, onError: () => { errors += 1 } },
+    { intervalMs: 5, maxAttempts: 20, onError: () => { errors += 1 } },
   )
-  setTimeout(() => { mounted = true }, 12)
-  await new Promise((r) => setTimeout(r, 60))
+  await new Promise((r) => setTimeout(r, 80))
   cancel()
   assert.deepEqual(opened, ['dsh-resource://file/session/s1/archive/drt_a/final/readable-v1.md'])
   assert.equal(expanded, true, '原本收起的右栏必须被展开')

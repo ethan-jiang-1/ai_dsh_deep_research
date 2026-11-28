@@ -69,7 +69,7 @@
 
 - **Host `researchRun` 投影**：`src/index.ts` 通过 `ctx.inject(['sessionProjections'], ...)` + `scoped.effect` 注册纯增量状态机（`src/lib/events/research-projection.ts`），从已提交会话日志确定性折算 `slug / phase / hitlKind / deliveredPath / updatedAt`，零额外写盘、零按行 N+1 订阅。
 - **左栏活队列**：`ResearchSessionRow.tsx` 消费 `useSessions` 投影数据，挂载 `sidebar.session.row.leading`（HITL 琥珀提醒点 / 进行中活跃态 / 已交付完成标；非研究会话零渲染）、`sidebar.session.row.hover`（悬停绑定与阶段摘要）及 `sidebar.workspaces.session.menu.item`（已交付会话右键直开终稿）。
-- **状态页签与活标题**：`ResearchStatusTab.tsx` 并行扫描 bundle 工件（`useStatusFeed.ts`），与 `ResearchHeaderPill`（`session.header.actions` + `HoverCard`）、`ResearchMilestoneCard`（`chat.turnTail`，并在同回合存在原生 `ui-deliverables` 交付卡时自动降噪去重）及图谱页签经 `session-stream-store.ts` 按 `sessionId` refcount 复用单路 `follow` 流。HITL 挂起时页签名翻为「研究状态 · ⏳ 等你拍板」。
+- **状态页签与活标题**：`ResearchStatusTab.tsx` 并行扫描 bundle 工件（`useStatusFeed.ts`），与 `ResearchHeaderPill`（`session.header.actions` + `HoverCard`）、`ResearchMilestoneCard`（`chat.turnTail`，并在同回合存在原生 `ui-deliverables` 交付卡时自动降噪去重）及图谱页签经 `session-stream-store.ts` 按 `sessionId` refcount 复用单路 `follow` 流。HITL 挂起时页签名翻为简短的「状态 · 待拍板」（带右侧安全留白避开活跃页签关闭钮）。
 - **纯状态机与读面**：异步状态收口到 `status-state.ts`（`reduceStatusFeed` / `collectStatusNotices`）；工件读取统一经 `artifact-read.ts` 输出五态（`ok` / `absent` / `unreadable` / `empty` / `invalid`），杜绝把读失败或空文件折成「正常缺失 / 0 份」。
 
 <a id="cockpit-4"></a>
@@ -93,7 +93,7 @@
 <a id="cockpit-8"></a>
 ### 2.5 研究图谱页签
 
-- `ResearchGraphTab.tsx` + `DagMap.tsx`（CSS Modules + `--dsw-*` 语义令牌）把顶层 `plan.md` 节点与 `agentTeam` 任务画成只读交互式 SVG DAG，节点卡展示子问题摘要与负责角色标识，并在 `sidebar.fullscreen` 下自适应展开宽画布；支持点击高亮上下游依存边、展开复合子节点、复制 `drt_<slug>/W3.1` 引用及 `plan/vN` 版本轨 diff（`plan-diff.ts`）。
+- `ResearchGraphTab.tsx` + `DagMap.tsx`（CSS Modules + `--dsw-*` 语义令牌）把顶层 `plan.md` 节点与 `agentTeam` 任务画成只读交互式 SVG DAG，节点卡展示子问题摘要与负责角色标识，并在 `sidebar.fullscreen` 下自适应展开宽画布；支持点击高亮上下游依存边、展开复合子节点、一键「插入 @ 引用」预填草稿（[D18](../decisions.md#d18) 不自动发送）、复制 `drt_<slug>/W3.1` 引用及 `plan/vN` 版本轨 diff（`plan-diff.ts`）。
 - 映射四态（`mapped` / `unmapped` / `stale` / `plan-only`）由 `graph-model.ts` 折算：未映射节点明确显示「状态未知」，绝不假称「未执行」；无依赖边时只显示任务快照并说明原因。
 
 <a id="cockpit-9"></a>
@@ -101,7 +101,7 @@
 
 - `ResearchFinalTab.tsx` 认领 `drt_<slug>/` 终稿地址族（`final.md`、`final/vN.md`、`final/readable*.md`，由 `final-target.ts` 严格过滤），顶部合并为单条工具栏 `FinalToolbar.tsx`（左：`SegmentedControl` 切换 **读者版 / 审计版 / 核查清单** + 版本切换 `Menu`；右：目录开关、分屏审阅、全屏切换）。
 - **全屏三栏精读**：监听 `useTabInfo().sidebar.fullscreen`，常规窄栏保持单列清爽；全屏且宽视口下自动展开「左常驻滚动同步 `FinalToc` + 中舒适列宽正文 + 右 `StudioInspectorPane`（证据卡/Critic 核查对照）」。
-- **150ms 悬停溯源与风险筛选**：经内存 `citation-linkify.ts`（不改磁盘 `final*.md`）与 `CitationHoverLayer.tsx`（共享 `HoverCardGroup` + 有界 LRU 缓存 `evidence-preview.ts`），悬停或聚焦 `[来源: evidence/xx.md]` 150ms 即可预览质量等级、信源层级、站点图标与摘录前 3 行，并支持「分屏打开」或直访外链（读取异常按五态显性提示并支持重试）；`ClaimsAuditView.tsx` 顶部提供可点击筛选 `Pill`（全部 / 仅看风险 / 已支持）。
+- **150ms 悬停溯源与风险筛选**：经内存 `citation-linkify.ts`（不改磁盘 `final*.md`）与 `CitationHoverLayer.tsx`（共享 `HoverCardGroup` + 有界 LRU 缓存 `evidence-preview.ts`），悬停或聚焦 `[来源: evidence/xx.md]` 150ms 即可预览质量等级、信源层级、站点图标与摘录前 3 行，并支持全屏下「在右侧固定打开」（直切右栏 `StudioInspectorPane` 证据速览）/ 常规侧栏下「分屏打开」或直访外链（读取异常按五态显性提示并支持重试）；`ClaimsAuditView.tsx` 顶部提供可点击筛选 `Pill`（全部 / 仅看风险 / 已支持）。
 - 页脚 `FinalFollowupFooter` 从「下一版优先项」生成点击预填按钮（经 `inputActions.insertText` 不自动发送），守住 [D18](../decisions.md#d18) 只读边界。
 
 <a id="cockpit-10"></a><a id="cockpit-13"></a><a id="cockpit-14"></a><a id="cockpit-15"></a><a id="cockpit-16"></a>
@@ -114,7 +114,7 @@
 ### 2.8 意图首屏与启动工作区恢复（[D40](../decisions.md#d40)）
 
 - `HeroResearchOptions.tsx` 挂在 `conversation.hero.options`，在空白会话角色选择栏右侧同行提供「方法 / 视角 / 工作台」轻量触发胶囊。
-- `StartCard.tsx` 挂在 `conversation.input.dock`，仅在 blank Session、无用户消息且工作区根无 `drt_*` 时展示一行副标题、带题型标签的起题灵感卡（点击 `inputActions.insertText`）与最近 Run 快捷续接条；会话已绑定有效研究工作区时不再重复渲染大号工作区路径框，未绑定时突出引导目录选择。
+- `StartCard.tsx` 挂在 `conversation.input.dock`，在空白新会话（尚未发送用户消息，无论工作区是否已有历史 `drt_*`）展示极简副标题、带题型标签的起题灵感卡（点击 `inputActions.insertText`）与最近 Run 快捷续接条（冷启动未水合时显示磁盘档案数与工作台直达链接）；会话已绑定有效研究工作区时不再重复渲染大号工作区路径框，未绑定时突出引导目录选择。
 - `startup.ts` 在挂载后按「已保存 `workspaceId` → 唯一 `Deep Research — ` 标题」恢复研究工作区并切到对应 Lead 会话。
 
 ## 3. 数据通道与接线

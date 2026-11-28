@@ -144,10 +144,10 @@
 | method-library | `method-library/method-library-source` | `tests/cockpit/lib/method-library/method-library-read.spec.mjs`<br>`tests/cockpit/lib/method-library/run-source-picker.spec.mjs` |
 | method-library | `method-library/method-library-write` | `tests/cockpit/lib/method-library/library-fold.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-codec.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs`<br>`tests/cockpit/lib/method-library/method-library-write.spec.mjs` |
 | method-library | `method-library/method-of-question` | `tests/cockpit/lib/method-library/method-of-question.spec.mjs` |
-| plan | `plan/graph-model` | `tests/cockpit/lib/plan/graph-model.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
+| plan | `plan/graph-model` | `tests/cockpit/lib/plan/graph-model.spec.mjs`<br>`tests/cockpit/lib/run/showcase-fixture.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | plan | `plan/plan-diff` | `tests/cockpit/lib/plan/plan-diff.spec.mjs`<br>`tests/cockpit/lib/plan/plan-mdast.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | plan | `plan/plan-graph` | `tests/cockpit/lib/plan/plan-graph.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
-| plan | `plan/plan-index` | `tests/cockpit/lib/plan/graph-model.spec.mjs`<br>`tests/cockpit/lib/plan/plan-diff.spec.mjs`<br>`tests/cockpit/lib/plan/plan-index.spec.mjs`<br>`tests/cockpit/lib/plan/plan-mdast.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/skill-parser-contract.spec.mjs` |
+| plan | `plan/plan-index` | `tests/cockpit/lib/plan/graph-model.spec.mjs`<br>`tests/cockpit/lib/plan/plan-diff.spec.mjs`<br>`tests/cockpit/lib/plan/plan-index.spec.mjs`<br>`tests/cockpit/lib/plan/plan-mdast.spec.mjs`<br>`tests/cockpit/lib/run/showcase-fixture.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/skill-parser-contract.spec.mjs` |
 | review | `review/review-readiness` | `tests/contracts/markdown-mask-conformance.spec.mjs`<br>`tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/contracts/verdict-conformance.spec.mjs`<br>`tests/run/gates/readiness-declaration.spec.mjs`<br>`tests/run/gates/review-readiness-property.spec.mjs`<br>`tests/run/gates/review-readiness.spec.mjs`<br>`tests/run/gates/run-context.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs`<br>`tests/run/harness/run-accept-fixture.spec.mjs` |
 | run | `run/artifact-content` | `tests/cockpit/lib/run/artifact-content.spec.mjs`<br>`tests/cockpit/lib/run/run-property.spec.mjs` |
 | run | `run/artifact-read` | `tests/cockpit/lib/run/artifact-read.spec.mjs` |
@@ -166,7 +166,7 @@
 | run | `run/rerun-triage` | `tests/cockpit/client/final-evidence.spec.mjs`<br>`tests/cockpit/lib/run/rerun-triage.spec.mjs`<br>`tests/cockpit/lib/run/showcase-fixture.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/rerun-triage-contract.spec.mjs` |
 | run | `run/run-context` | `tests/cockpit/client/run-source-browser.spec.mjs`<br>`tests/cockpit/lib/run/artifact-read.spec.mjs`<br>`tests/run/gates/run-context-node.spec.mjs`<br>`tests/run/gates/run-context.spec.mjs` |
 | run | `run/run-fold` | `tests/cockpit/client/research-status/protocol-radar.spec.mjs`<br>`tests/cockpit/lib/run/run-property.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/gates/final-version.spec.mjs`<br>`tests/run/shared/run-fold.spec.mjs` |
-| run | `run/run-version` | `tests/cockpit/lib/run/run-version.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/present-version-conformance.spec.mjs` |
+| run | `run/run-version` | `tests/cockpit/lib/run/run-version.spec.mjs`<br>`tests/cockpit/lib/run/showcase-fixture.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/contracts/present-version-conformance.spec.mjs` |
 | shared | `shared/config-tables` | `tests/cockpit/client/builtin-display.spec.mjs`<br>`tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/lib/method-library/library-fold.spec.mjs` |
 | shared | `shared/error-detail` | `tests/cockpit/lib/shared/error-detail.spec.mjs` |
 | shared | `shared/i18n` | `tests/cockpit/client/builtin-display.spec.mjs`<br>`tests/cockpit/lib/events/research-references.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
@@ -231,7 +231,7 @@
 | research-graph | `research-graph/graph-state` | `tests/cockpit/client/research-graph/graph-state.spec.mjs`<br>`tests/cockpit/client/research-graph/state-note.spec.mjs` |
 | research-graph | `research-graph/GraphNotices` | `tests/cockpit/client/research-graph/graph-notices.spec.mjs` |
 | research-graph | `research-graph/GraphVersionRail` | — |
-| research-graph | `research-graph/NodeCard` | — |
+| research-graph | `research-graph/NodeCard` | `tests/cockpit/client/research-graph/graph-notices.spec.mjs` |
 | research-graph | `research-graph/state-note` | `tests/cockpit/client/research-graph/state-note.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs` |
 | research-graph | `research-graph/styles` | — |
 | research-graph | `research-graph/types` | — |

@@ -39,6 +39,8 @@ export function NodeCard(props: {
   readonly onToggle: () => void
   readonly copied: boolean
   readonly onCopy: () => void
+  readonly inserted?: boolean
+  readonly onInsertRef?: () => void
   readonly onOpenOwner?: () => void
   readonly children: readonly PlanNode[]
   readonly childStateOf: (childId: string) => GraphNodeState
@@ -48,7 +50,7 @@ export function NodeCard(props: {
   readonly boundSlug: string | null
   readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
-  const { node, expanded, onToggle, copied, onCopy, onOpenOwner, children: childNodes, childStateOf, leadSessionId, useSessions, useSessionStatus, boundSlug, t } = props
+  const { node, expanded, onToggle, copied, onCopy, inserted = false, onInsertRef, onOpenOwner, children: childNodes, childStateOf, leadSessionId, useSessions, useSessionStatus, boundSlug, t } = props
     const task = node.task
     const planNode = node.planNode
     const member = node.member
@@ -112,6 +114,14 @@ export function NodeCard(props: {
               {onOpenOwner !== undefined && member !== undefined && member.id !== leadSessionId
                 && member.phase !== 'failed' && member.phase !== 'provisioning' && (
                 <button type="button" className={styles.actionButton} onClick={() => { onOpenOwner?.() }}>{t('graphOpenOwner')}</button>
+              )}
+              {onInsertRef !== undefined && (
+                <button
+                  type="button"
+                  className={styles.actionButton}
+                  data-testid="graph-insert-ref"
+                  onClick={onInsertRef}
+                >{inserted ? t('graphInsertedRef') : t('graphInsertRef')}</button>
               )}
               <button
                 type="button"

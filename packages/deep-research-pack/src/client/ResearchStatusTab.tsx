@@ -280,13 +280,20 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
           ) : (
             <span className={css.evidenceMetric}>{countText(props.t, face.evidenceCount, 'statusEvidenceCountOne', 'statusEvidenceCountOther')}</span>
           )}
+          {' '}
           {receiptIssue !== null && (
             <span className={css.warnText}>
               {props.t(receiptIssue)}
               <button type="button" onClick={retry} className={css.retryLink}>{props.t('retry')}</button>
             </span>
           )}
-          {delivery !== null && <span className={css.delivered}>{props.t('statusDelivered')}</span>}
+          {delivery !== null && (
+            <span className={css.delivered} data-testid="status-delivered-badge">
+              <StateDot state="done" size={8} />
+              {' '}
+              <span>{props.t('statusDelivered')}</span>
+            </span>
+          )}
           {delivery === null && receiptIssue === null && <span className={css.mutedInline}>{props.t('statusFinalAfterDelivery')}</span>}
           {planIssueKey !== null && (
             <span className={css.planUnknown}>{props.t('statusPlanVersionUnknown')}</span>
@@ -436,5 +443,7 @@ export function ResearchStatusTitle(props: PropsRuntime<'sidebar.right.pane.tab.
     })()
     return () => { controller.abort() }
   }, [sessionId, follow])
-  return hitl.pending ? props.labels.pending : props.labels.idle
+  return hitl.pending
+    ? <span className={css.tabTitlePending}>{props.labels.pending}</span>
+    : props.labels.idle
 }

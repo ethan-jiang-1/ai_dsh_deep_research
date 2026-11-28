@@ -85,10 +85,11 @@ export function FinalToolbar(props: FinalToolbarProps): ReactNode {
           variant="ghost"
           size="sm"
           className={css.splitReviewBtn ?? ''}
+          aria-label={t('finalSplitReview')}
           onClick={onOpenSplitStatus}
         >
           <IconCompareSplitOutlineRegular size={14} />
-          <span>{t('finalSplitReview')}</span>
+          <span className={css.splitReviewLabel}>{t('finalSplitReview')}</span>
         </Button>
       </Tooltip>
       {onToggleFullscreen !== undefined && (

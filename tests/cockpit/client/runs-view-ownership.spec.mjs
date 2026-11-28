@@ -50,7 +50,7 @@ test('ResearchHubPanel：进行中归属 Run 切会话开状态；已交付归�
   const rtl = await loadRtl()
   const trace = []
   const sessionsState = {
-    ids: ['s-current', 's-active-owner', 's-done-owner'],
+    ids: ['s-current', 's-active-owner', 's-hitl-owner', 's-done-owner'],
     byId: {
       's-current': { id: 's-current', cwd: '/ws/research', updatedAt: 500 },
       's-active-owner': {
@@ -59,6 +59,14 @@ test('ResearchHubPanel：进行中归属 Run 切会话开状态；已交付归�
         updatedAt: 400,
         projectionValues: {
           researchRun: { schemaVersion: 1, slug: 'active-topic', phase: 'running', hitlKind: null, deliveredPath: null, updatedAt: 400 },
+        },
+      },
+      's-hitl-owner': {
+        id: 's-hitl-owner',
+        cwd: '/ws/research',
+        updatedAt: 350,
+        projectionValues: {
+          researchRun: { schemaVersion: 1, slug: 'hitl-topic', phase: 'hitl_pending', hitlKind: 'hitl1', deliveredPath: null, updatedAt: 350 },
         },
       },
       's-done-owner': {
@@ -75,6 +83,9 @@ test('ResearchHubPanel：进行中归属 Run 切会话开状态；已交付归�
   const source = makeRunSource({
     'drt_active-topic': {
       'question.md': '# Q\n正在推进的课题\n',
+    },
+    'drt_hitl-topic': {
+      'question.md': '# Q\n等待立项拍板的课题\n',
     },
     'drt_done-topic': {
       'question.md': '# Q\n已交付的课题\n',
@@ -115,6 +126,10 @@ test('ResearchHubPanel：进行中归属 Run 切会话开状态；已交付归�
       ['backToChat'],
       ['openStatus'],
     ])
+
+    const hitlCard = container.querySelector('[data-hub-run-slug="hitl-topic"]')
+    assert.equal(hitlCard?.getAttribute('data-hub-run-phase'), 'hitl_pending')
+    assert.match(hitlCard?.textContent ?? '', /立项待拍板/, 'HITL1 挂起 Run 卡片应升级为琥珀立项待拍板标签')
 
     const doneCard = container.querySelector('[data-hub-run-slug="done-topic"]')
     assert.equal(doneCard?.getAttribute('data-hub-run-ownership'), 'owned')

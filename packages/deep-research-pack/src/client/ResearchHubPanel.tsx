@@ -227,16 +227,15 @@ export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
           )}
           {tab === 'lenses' && (
             <>
+              {activeSessionId !== null && defaultsStore !== undefined && (
+                <section className={css.defaultsSection} data-testid="hub-lenses-defaults" aria-label={t('hubDefaultsSectionTitle')}>
+                  <DefaultsPanel sessionId={activeSessionId} store={defaultsStore} t={t} layout="compact" onOpenMethodLibrary={() => { setTab('methods') }} />
+                </section>
+              )}
               <LensesView
                 onDraftWithLens={(prompt) => { startResearch(prompt) }}
                 t={t}
               />
-              {activeSessionId !== null && defaultsStore !== undefined && (
-                <section className={css.defaultsSection} data-testid="hub-lenses-defaults">
-                  <h2 className={css.defaultsTitle}>{t('hubDefaultsSectionTitle')}</h2>
-                  <DefaultsPanel sessionId={activeSessionId} store={defaultsStore} t={t} onOpenMethodLibrary={() => { setTab('methods') }} />
-                </section>
-              )}
             </>
           )}
         </div>

@@ -175,6 +175,28 @@ opened: 2026-11-28
 
 ---
 
+### R4 · 对照 North Star 原型精修收口与 D38 演进（2026-11-28 实景逐页对账收口）
+
+- **背景与 Owner 裁决**：R0–R3 落地后对照 [prototype-north-star.html](../research/cockpit-ux-v2/prototype-north-star.html) 逐页真浏览器实景对账，确认核心交互已到达 ~80%–90%，同时识别出 5 组本仓可控的高体感落差与 3 条 DSH 宿主平台边界（U8–U10）。按本仓治理口径，不拆零散 bug 卡、不另起新 issue，直接在本卡追加 R4 收口，严格遵守 `vendor/dsh/` 只读铁律（零修改 `vendor/dsh/`，零宿主 DOM hack）。
+- **具体改造**：
+  1. **R4.1 S1 意图首屏复活（D38 演进）与去套娃外框**：
+     - 演进 `src/lib/workspace/start-card.ts`：`shouldShowStartCard` 改为仅在当前会话已有用户消息时收起（空白新会话即使工作区已有 `drt_*` 也继续展示意图起题卡与「继续最近研究」快捷续接条；若冷启动会话投影尚未水合且工作区已有磁盘 `drt_*`，展示轻量「在研究工作台查看全部档案」入口，零 N+1 `follow`）；
+     - 精简 `StartCard.tsx` / `StartCard.module.css`：移除重复外层容器盒与重复大号标题，与 Hero 轻量选配区自然衔接；同步更新 `start-card` 单测与 `docs/contracts/client-ui.md`。
+  2. **R4.2 S2 状态页与 S5 Hub 降噪精致化**：
+     - 状态页：移除 `statusDelivered` 中的绿色 `✅` emoji（改用原语 `<StateDot state="done" />` 搭配文本）；缩短 `tabStatusPending` 防止窄侧栏被关闭按钮裁切（同步更新 `web-ui-nav.mjs` `TAB_TEXT.statusPending`）；为 `QualityRadar` 命中格增加清晰可点视觉提示与引导文案；
+     - Hub `RunsView`：消费已有 `sessionMatches[run.rootPath]` 的 `hitl_pending` 投影，将待拍板研究卡片右上角标签由灰色「进行中」升格为琥珀色「立项待拍板 / 待你审阅」；卡片标题加 2 行截断保持网格等高；
+     - Hub `研究透镜`：将「工作区项目默认」提至透镜页顶部紧凑展示（避免压在 8 张大卡底端截断）；清理面向用户的透镜文案中的内部编号（`P1/P2/P6/P8` 等），中英双语同步。
+  3. **R4.3 S3 终稿精读排版修复与 S4 图谱净面/一键引用**：
+     - 终稿页签：在 `ResearchFinalTab.module.css` 内利用 DSH 文档化 `md-table-wide` 钩子修复全屏三栏与侧栏内宽表右列截断问题（全屏 `studioProse` 内自适应列宽与代码折行，窄侧栏支持显式横向滚动不裁切）；收紧窄侧栏 `FinalToolbar` 防止 `过程 →` 单独换到第二行；全屏态悬停卡按钮直切右侧「证据速览」不再多开冗余分屏；
+     - 研究图谱与示范夹具：升级 `tests/fixtures/showcase-home/.../plan.md` 为规范 `图版本：v1`、`W1.1 / W2.1 / W2.2 / W3.1 / W4.1` 与 `task_id = plan-only`，消除示范状态页的 `plan 版本未声明` 与图谱页顶部的两条黄色告警条；在图谱选中 `NodeCard` 新增「插入 `@` 引用」按钮（走 `inputActions.insertText` 预填草稿，守住 D18）；
+     - 上游反馈账本与子目录红线内化：向 `2026-11-28-dsh-upstream-feedback.md` 补录 **U8–U10**（冷会话列表未水合 `未命名` / 切会话默认右栏 Tab / Composer placeholder）并修正 U4 锚点；核查 `packages/deep-research-pack/AGENTS.md` 强化 `vendor/dsh/` 只读铁律提示。
+- **局部验收**：
+  - `pnpm build && pnpm docs:gen && node tools/record/render-overlay.mjs && pnpm typecheck && pnpm lint && pnpm verify && pnpm test && pnpm release:check` 全绿（`vendor-pin` / `vendor-clean` 零变动）；
+  - L1 `preset.e2e`、L2 `pack.e2e` / `release.entry --install-only` / `product-boot`、`demo-showcase --check` 与真浏览器全套件（`client-load`、`cockpit-locale`、`cockpit-truth*`）全绿；
+  - 重采全页面真浏览器截图（`runtime/scenes/ux-v2-r4-after/`）逐张核验无截断、无溢出、无噪音告警，并刷新 `docs/assets/readme-first-screen.png`。
+
+---
+
 ## 判据形状
 
 - **权威事实**：

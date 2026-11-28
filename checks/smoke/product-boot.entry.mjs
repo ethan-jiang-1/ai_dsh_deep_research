@@ -177,7 +177,7 @@ try {
   check('首屏有 Orca 品牌', body.includes('Orca'))
   check('首屏有 Lead preset（Deep Research Lead）', body.includes('Deep Research Lead'))
   check('首屏有工作区标题', body.includes('Deep Research — ws'))
-  check('首屏有起步卡（标题与意图副标题）', body.includes('一支多角色研究团队') && body.includes('多角色协同检索'))
+  check('首屏有起步卡（意图副标题在场且无重复外框大标题）', body.includes('多角色协同检索') && !body.includes('一支多角色研究团队'))
 
   const storagePath = join(sandbox.home, 'storages', 'workspace.json')
   check('workspace.json 在场', existsSync(storagePath))

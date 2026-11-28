@@ -157,3 +157,14 @@ test('ResearchToolCard：web_search / spawn_teammate 渲染结构化富语义展
   fireEvent.click(jumpBtn)
   assert.deepEqual(jumped, [['lead-1', 'member-scout-1']])
 })
+
+test('R4 终稿三栏宽表折行规则与窄侧栏工具栏收敛', async () => {
+  const { readFileSync } = await import('node:fs')
+  const { fileURLToPath } = await import('node:url')
+  const finalCss = readFileSync(
+    fileURLToPath(new URL('../../../packages/deep-research-pack/src/client/ResearchFinalTab.module.css', import.meta.url)),
+    'utf8',
+  )
+  assert.match(finalCss, /\.studioProse\s+:global\(\.md-table-wide\)\s+table/, '全屏精读台应对 md-table-wide 表格设置自适应折行')
+  assert.match(finalCss, /\.splitReviewLabel\s*\{/, '窄侧栏工具栏应通过 splitReviewLabel 响应式收敛防止折行')
+})

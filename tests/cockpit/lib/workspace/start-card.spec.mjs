@@ -1,11 +1,11 @@
-// start-card — 产品首屏起步卡纯判据：有用户消息 / 有 drt_* 就收起，否则显示。
-// 反证：删掉 userMessage 短路 / 删掉 drt_ 前缀判断 → 本文件红。
+// start-card — 意图优先首屏起步卡纯判据（D38 演进）：有用户消息即收起，空白新会话（含已有 drt_* 工作区）展示。
+// 反证：删掉 userMessage 短路 / 破坏 countWorkspaceRuns 前缀判定 → 本文件红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { shouldShowStartCard } from '../../../../packages/deep-research-pack/src/lib/workspace/start-card.ts'
+import { countWorkspaceRuns, shouldShowStartCard } from '../../../../packages/deep-research-pack/src/lib/workspace/start-card.ts'
 
 // 2026-11-02 首启实测：StartCard 以空路径列工作区根，workspaceFiles.list 判
 // gateway/bad-request 并打 console.error，run-driver 的 console-clean 因此红。
@@ -17,21 +17,19 @@ test('StartCard 列工作区根用 "."（空路径会被 workspaceFiles 拒）',
   assert.match(source, /listDir\(sessionId, '\.'/, 'StartCard 没有用 "." 列工作区根')
 })
 
-test('blank 工作区 + 无用户消息 → 显示', () => {
+test('blank 新会话（无用户消息）→ 显示（空工作区与已有 drt_* 回访工作区均显示意图卡）', () => {
   assert.equal(shouldShowStartCard({ hasUserMessage: false, entries: [] }), true)
   assert.equal(shouldShowStartCard({ hasUserMessage: false, entries: [{ name: 'AGENTS.md' }, { name: 'templates' }] }), true)
+  assert.equal(shouldShowStartCard({ hasUserMessage: false, entries: [{ name: 'drt_probe' }] }), true)
+  assert.equal(shouldShowStartCard({ hasUserMessage: false, entries: [{ name: 'AGENTS.md' }, { name: 'drt_x' }] }), true)
 })
 
-test('有 drt_* → 收起', () => {
-  assert.equal(shouldShowStartCard({ hasUserMessage: false, entries: [{ name: 'drt_probe' }] }), false)
-  assert.equal(shouldShowStartCard({ hasUserMessage: false, entries: [{ name: 'AGENTS.md' }, { name: 'drt_x' }] }), false)
-})
-
-test('有用户消息 → 收起（即使还没有 run）', () => {
+test('有用户消息 → 收起（无论工作区是否已有 run）', () => {
   assert.equal(shouldShowStartCard({ hasUserMessage: true, entries: [] }), false)
   assert.equal(shouldShowStartCard({ hasUserMessage: true, entries: [{ name: 'drt_x' }] }), false)
 })
 
-test('非 drt_ 前缀不误伤（draft/ 不是 run bundle）', () => {
-  assert.equal(shouldShowStartCard({ hasUserMessage: false, entries: [{ name: 'drafts' }, { name: 'drtish.md' }] }), true)
+test('countWorkspaceRuns 只计 drt_ 前缀（不误伤 drafts / drtish.md）', () => {
+  assert.equal(countWorkspaceRuns([{ name: 'drafts' }, { name: 'drtish.md' }]), 0)
+  assert.equal(countWorkspaceRuns([{ name: 'drt_a' }, { name: 'AGENTS.md' }, { name: 'drt_b' }]), 2)
 })

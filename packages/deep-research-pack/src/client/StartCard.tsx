@@ -11,7 +11,7 @@ import { Button, StateDot, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { InputActions } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { shouldShowStartCard } from '../lib/workspace/start-card.ts'
+import { countWorkspaceRuns, shouldShowStartCard } from '../lib/workspace/start-card.ts'
 import { errorDetailOf } from '../lib/shared/error-detail.ts'
 import {
   selectSessionResearchProjection,
@@ -31,6 +31,7 @@ export interface StartCardInjected {
   chooseWorkspace: () => Promise<void>
   openSession?: (sessionId: SessionId) => void
   openSessionFinal?: (sessionId: SessionId, path: string) => void
+  openHub?: () => void
 }
 
 /** Dock 组件的完整 props。 */
@@ -87,7 +88,7 @@ function useEmptySessions<T>(selector: (state: ResearchSessionsSnapshotLike) => 
 export function StartCard(props: StartCardProps): ReactElement | null {
   const {
     sessionId, workspacePath, listDir, hasUserMessage, chooseWorkspace,
-    openSession, openSessionFinal, t,
+    openSession, openSessionFinal, openHub, t,
   } = props
   const inputActions = (props as { inputActions?: InputActions }).inputActions
   const useSessionsHook = (props as {
@@ -95,6 +96,7 @@ export function StartCard(props: StartCardProps): ReactElement | null {
   }).useSessions ?? useEmptySessions
   const sessionsSnap = useSessionsHook((state) => state)
   const [visible, setVisible] = useState<'loading' | 'show' | 'hide'>('loading')
+  const [diskRunCount, setDiskRunCount] = useState(0)
   const [choosing, setChoosing] = useState(false)
   const [chooseError, setChooseError] = useState<string | null>(null)
   /** 目录选择请求代次：切会话/重复点击后，旧 promise 的结算不得改写当前 UI（BUG-409）。 */
@@ -113,10 +115,14 @@ export function StartCard(props: StartCardProps): ReactElement | null {
         // workspaceFiles.list 拒绝空路径（gateway/bad-request）；`''` = 工作区根，映射成 `.`。
         const entries = userMessage ? [] : await listDir(sessionId, '.', controller.signal)
         if (cancelled) return
+        setDiskRunCount(countWorkspaceRuns(entries))
         setVisible(shouldShowStartCard({ hasUserMessage: userMessage, entries }) ? 'show' : 'hide')
       } catch {
         /* @silent-catch: workspace/session unreachable is not a start-card blocker */
-        if (!cancelled) setVisible('show')
+        if (!cancelled) {
+          setDiskRunCount(0)
+          setVisible('show')
+        }
       }
     })()
     return () => {
@@ -162,13 +168,7 @@ export function StartCard(props: StartCardProps): ReactElement | null {
 
   return (
     <section data-testid="deep-research-start" aria-label={t('startAria')} className={css.root}>
-      <div className={css.header}>
-        <div className={css.titleGroup}>
-          <span className={css.title}>{t('startTitle')}</span>
-          <span className={css.subtitle}>{t('startSubtitle')}</span>
-        </div>
-        <Tag tone="info">{t('startTeamBadge')}</Tag>
-      </div>
+      <div className={css.subtitle}>{t('startSubtitle')}</div>
 
       {/* 仅在尚未绑定有效工作区时突出引导目录选择；已绑定工作区直接由 DSH Hero 选择器承载 */}
       {!hasValidWorkspace && (
@@ -222,9 +222,9 @@ export function StartCard(props: StartCardProps): ReactElement | null {
         })}
       </div>
 
-      {recentRuns.length > 0 && (
+      {recentRuns.length > 0 ? (
         <div className={css.recentStrip} data-testid="deep-research-start-recent">
-          <div className={css.recentLabel}>{t('startRecentRunsLabel')}</div>
+          <span className={css.recentLabel}>{t('startRecentRunsLabel')}</span>
           <div className={css.recentList}>
             {recentRuns.map((item) => {
               const deliveredPath = item.projection.deliveredPath
@@ -257,7 +257,20 @@ export function StartCard(props: StartCardProps): ReactElement | null {
             })}
           </div>
         </div>
-      )}
+      ) : diskRunCount > 0 && openHub !== undefined ? (
+        <div className={css.recentStrip} data-testid="deep-research-start-workspace-runs">
+          <span className={css.recentLabel}>
+            {t('startWorkspaceRunsSummary', { count: String(diskRunCount) })}
+          </span>
+          <button
+            type="button"
+            className={css.recentHubLink}
+            onClick={openHub}
+          >
+            {t('startOpenHubAction')}
+          </button>
+        </div>
+      ) : null}
     </section>
   )
 }

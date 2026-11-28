@@ -8,7 +8,9 @@ import assert from 'node:assert/strict'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { GraphNotices } from '../../../../packages/deep-research-pack/src/client/research-graph/GraphNotices.tsx'
+import { NodeCard } from '../../../../packages/deep-research-pack/src/client/research-graph/NodeCard.tsx'
 import { en, zh } from '../../../../packages/deep-research-pack/src/client/locales.ts'
+import { loadRtl } from '../../client-dom-helpers.mjs'
 
 const interpolate = (table) => (key, params = {}) => String(table[key]).replace(/\{([A-Za-z0-9_]+)\}/g, (all, name) => (name in params ? String(params[name]) : all))
 const tZh = interpolate(zh)
@@ -27,4 +29,41 @@ test('坏表诊断：中英静态渲染且英文零 CJK', () => {
   const enHtml = renderToStaticMarkup(createElement(GraphNotices, props(tEn)))
   assert.match(enHtml, /Node table cannot be decoded/)
   assert.doesNotMatch(enHtml, /[\u4e00-\u9fa5]/)
+})
+
+test('R4 NodeCard 展开态渲染「插入 @ 引用」按钮并触发回调（不自动提交）', async () => {
+  const rtl = await loadRtl()
+  const inserted = []
+  try {
+    const { container } = rtl.render(createElement(NodeCard, {
+      node: {
+        id: 'W2.1',
+        label: 'deep-dive',
+        subject: '深挖 Host 投影',
+        ownerName: 'analyst-1',
+        status: 'unplanned',
+        blockedBy: ['W1.1'],
+        state: { text: 'plan-only', icon: '○', color: 'var(--dsw-alias-label-secondary)' },
+      },
+      expanded: true,
+      onToggle: () => {},
+      copied: false,
+      onCopy: () => {},
+      inserted: false,
+      onInsertRef: () => { inserted.push('@drt_demo/W2.1 ') },
+      children: [],
+      childStateOf: () => ({ text: 'plan-only', icon: '○', color: 'var(--dsw-alias-label-secondary)' }),
+      leadSessionId: 'lead-1',
+      useSessions: (selector) => selector({ byId: {}, projectionsBySession: {} }),
+      useSessionStatus: (selector) => selector(new Map()),
+      boundSlug: 'demo',
+      t: tZh,
+    }))
+    const insertBtn = container.querySelector('[data-testid="graph-insert-ref"]')
+    assert.ok(insertBtn !== null, '展开的图谱节点卡应渲染「插入 @ 引用」按钮')
+    rtl.fireEvent.click(insertBtn)
+    assert.deepEqual(inserted, ['@drt_demo/W2.1 '])
+  } finally {
+    rtl.cleanup()
+  }
 })

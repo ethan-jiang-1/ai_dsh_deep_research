@@ -75,6 +75,9 @@ export function QualityRadar(props: {
         <Tag tone={matrix.state === 'ok' ? 'neutral' : 'warning'}>
           {countText(t, matrix.uniquePublishers, 'statusRadarPublishersOne', 'statusRadarPublishersOther')}
         </Tag>
+        {hasMatrix && onOpenEvidence !== undefined && selectedCell === null && (
+          <span className={css.radarClickHint}>{t('statusRadarClickHint')}</span>
+        )}
         {(matrix.state === 'partial' || matrix.state === 'unreadable') && (
           <Button variant="ghost" size="sm" onClick={onRetry}>{t('retry')}</Button>
         )}

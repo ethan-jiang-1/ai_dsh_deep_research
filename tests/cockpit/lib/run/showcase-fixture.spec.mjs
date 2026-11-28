@@ -14,6 +14,9 @@ import { decodeClaims, decodeVerdicts, joinClaimsVerdicts } from '../../../../pa
 import { decodeProtocol } from '../../../../packages/deep-research-pack/src/lib/run/protocol-fold.ts'
 import { parseTopicsLenses, parseEvidenceMeta } from '../../../../packages/deep-research-pack/src/lib/run/evidence-matrix.ts'
 import { extractNextVersionPriorities } from '../../../../packages/deep-research-pack/src/lib/run/rerun-triage.ts'
+import { planIndex, planIssuesOf } from '../../../../packages/deep-research-pack/src/lib/plan/plan-index.ts'
+import { coverageOf, coverageWarningOf, planMappingOf } from '../../../../packages/deep-research-pack/src/lib/plan/graph-model.ts'
+import { runVersionFaceOf } from '../../../../packages/deep-research-pack/src/lib/run/run-version.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..')
 const FIXTURE = join(ROOT, 'tests', 'fixtures', 'showcase-home')
@@ -93,4 +96,24 @@ test('showcase-home 终稿与归档：目录/引用链/下一版优先项完整�
   }
   assert.ok(existsSync(join(ARCHIVE_BUNDLE, 'delivered.json')), '缺少只读归档样本 delivered.json')
   assert.ok(existsSync(join(ARCHIVE_BUNDLE, 'final', 'readable-v1.md')), '缺少只读归档样本 readable-v1.md')
+})
+
+test('showcase-home plan.md：图版本明确声明 v1、采用 W<wave>.<index> 层级编号且 plan-only 零告警', () => {
+  const planRaw = readFileSync(join(DELIVERED_BUNDLE, 'plan.md'), 'utf8')
+  const idx = planIndex(planRaw)
+  assert.equal(idx.version, 'v1', 'plan.md 应声明图版本 v1')
+  assert.equal(idx.topLevel.length, 5)
+  assert.deepEqual(planIssuesOf(idx), [], '示范 plan.md 不应触发任何结构告警（如旧 flat W）')
+  const mapping = planMappingOf(idx, [])
+  const coverage = coverageOf(idx, [], mapping)
+  assert.equal(coverageWarningOf(coverage), null, '示范 plan.md 标记 plan-only 后不应触发映射缺口告警')
+  const vFace = runVersionFaceOf({
+    planText: planRaw,
+    finalFileNames: ['v1.md', 'readable-v1.md'],
+    delivered: true,
+    deliveredVersion: 1,
+    draftPresent: true,
+  })
+  assert.equal(vFace.currentPlanVersion, 1)
+  assert.doesNotMatch(vFace.label, /plan 版本未声明/)
 })

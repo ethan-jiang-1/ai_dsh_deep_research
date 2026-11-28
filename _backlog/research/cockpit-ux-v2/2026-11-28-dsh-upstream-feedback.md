@@ -1,6 +1,6 @@
 ---
 topic: dsh-upstream-feedback
-intent: 沉淀 R0–R2 零修改 vendor/dsh 实践中遇到的真实平台缺口（U1–U7）、当前可逆降级边界与可复用的上游扩展点提案
+intent: 沉淀 R0–R4 零修改 vendor/dsh 实践中遇到的真实平台缺口（U1–U10）、当前可逆降级边界与可复用的上游扩展点提案
 ---
 
 # DSH 平台上游反馈账本（Upstream Feedback Ledger）
@@ -13,11 +13,14 @@ intent: 沉淀 R0–R2 零修改 vendor/dsh 实践中遇到的真实平台缺口
 | **U1** | `ask_user_question` 交互卡在窄列（如 768px 视口或半宽分屏）下卡头长文案横向溢出 | `packages/deep-research-pack/src/client/index.ts`（针对 `[data-question-key]` 的局部换行兜底） | 本仓保留最小作用域换行兜底，不覆写宿主外层布局 | 建议上游问卡标题容器默认 `min-width: 0; overflow-wrap: anywhere`，出厂即适配窄列 |
 | **U2** | 快速切换会话时，右栏已有打开的自定义页签偶发滞留上一会话数据帧或未自动重挂载 | `packages/deep-research-pack/src/client/research-status/useStatusFeed.ts`（显式 `reset-session` reducer）与 `docs/contracts/client-ui.md` §6 | 本仓在每个数据 hook 内监听 `sessionId` 变化原子重置状态并中止旧 `AbortController` | 建议上游 `sidebar.right.tab` 生命周期增加 `sessionScope: 'reset' | 'keep'` 选项或向 tab 回调推送 `onSessionChange` 钩子 |
 | **U3** | `@deepseek-ai/dsh-experimental-tool-agent-team` 缺少 per-preset 细粒度开关，启用团队层后与 profile 整体绑定 | `packages/deep-research-pack/cordis.patch.yml`、`packages/deep-research-pack/presets/*.patch.yml` | 本仓通过角色提示词、窄工具白名单与 `isolate` 非角色 worker profile 控制工具暴露面 | 建议上游允许在 `agent-preset` 工具策略层声明对 experimental 团队工具的按角色放行/屏蔽，避免角色间误触 |
-| **U4** | `MarkdownDelegate` 未提供自定义链接悬停预览或 link-renderer 扩展槽，行内 `[来源: evidence/xx.md]` 悬停卡需在渲染容器外包事件委托层 | `packages/deep-research-pack/src/client/research-final/CitationHoverLayer.tsx` + `packages/deep-research-pack/src/lib/run/citation-linkify.ts` | 本仓在终稿容器外包裹共享 `HoverCardGroup` 与指针/焦点委托捕获 `a[href^="research-evidence:"]`，不侵入 Markdown 内部 DOM | 建议上游 `MarkdownDelegate` 暴露 `onLinkHover` / `renderLink` 或自定义 scheme interceptor 钩子，便于插件以一等公民实现文档内悬停卡片 |
+| **U4** | `MarkdownDelegate` 未提供自定义链接悬停预览或 link-renderer 扩展槽，行内 `[来源: evidence/xx.md]` 悬停卡需在渲染容器外包事件委托层 | `packages/deep-research-pack/src/client/research-final/CitationHoverLayer.tsx` + `packages/deep-research-pack/src/lib/run/citation-linkify.ts` | 本仓在终稿容器外包裹事件委托层捕获 `MarkdownFileLink` 渲染的 `button[title*="evidence/"]`，不侵入 Markdown 内部 DOM | 建议上游 `MarkdownDelegate` 暴露 `onLinkHover` / `renderLink` 或自定义 scheme interceptor 钩子，便于插件以一等公民实现文档内悬停卡片 |
 | **U5** | `@deepseek-ai/dsh-client-ui-primitives` 中部分原语（如 `SegmentedControl`、`DisclosureRow`、`Pill`）未统一透传 `data-testid` / `aria-*` 属性到交互根节点 | `packages/deep-research-pack/src/client/research-final/FinalToolbar.tsx`、`ClaimsAuditView.tsx`、`checks/smoke/client-load-final.support.mjs` | 本仓对需要稳定自动化定位的原语在业务外层加语义容器或按 WAI-ARIA `role="tab"` / `role="button"` 定位 | 建议上游对全部交互型 `ui-primitives` 统一透传 `data-*` 与 `aria-*` 属性并写入原语契约测试 |
 | **U6** | 缺少官方「无底部 Composer 主视图（composerless main view）」声明协议，嵌入式专职 Agent 交互（如 Method Editor）无法作为纯净主 tab 挂载 | `packages/deep-research-pack/src/client/ResearchHubPanel.tsx`、`MethodLibraryView.tsx`（R0 退役原 `:has(...)` 隐藏补丁，收口至全局 Hub + `shell.overlay` Portal） | 本仓彻底拔除 `:has(...)` 全局 CSS hack，统一改走 `sidebar.panellist` + `main` 全局面板与 `shell.overlay` 悬浮窗 | 建议上游 `conversation.view` 注册项支持 `composer: 'hidden' | 'default'` 声明式属性，让非对话主视图合法隐藏外层输入框 |
 | **U7** | `ui-input-trigger` 的 `@` 弹出选择后 token 消费范围与自定义格式化缺少显式光标回调，且 `dsh-client-shortcuts` Web 安全键位保留表需人工试探避让浏览器默认组合键 | `packages/deep-research-pack/src/client/research-triggers.tsx`、`packages/deep-research-pack/src/client/research-shortcuts.ts`、`tests/cockpit/client/research-commands-shortcuts.spec.mjs` | 本仓实测复用 `normalizeBinding` / `bindingIssue` / `isWebBindingAllowed` 锁死 `Primary+Shift+{U,G,D}` 并以 keyless 单测回归防冲突 | 建议上游导出官方 Web 保留快捷键清单及 `ui-input-trigger` `formatToken` / 选后焦点控制 API，降低插件作者踩坑成本 |
+| **U8** | 冷启动未点开的历史 `.zstd` 会话在 `session/list` 中尚未回写元数据缓存时，左栏显示「未命名」且 `projectionsBySession` / `projectionValues` 为空，直到首次点开会话才水合标题与研究状态灯 | `packages/deep-research-pack/src/client/ResearchSessionRow.tsx`、`ResearchHubPanel.tsx`、`StartCard.tsx`（冷启动示范实测） | 本仓绝不在左栏并发开 `remote.session.follow` 制造 N+1 风暴；冷启动态下在 `StartCard` 提供磁盘 `drt_*` 计数与「在研究工作台查看」直达条，待会话水合后自动升格精准状态灯与快捷续接 | 建议上游 Host 在 `session/list` 冷索引扫描阶段同步回填 `session/title` 与已注册的 `sessionProjections` 快照，使历史会话冷启动即带完整标题与投影值 |
+| **U9** | 切换历史会话（尤其是 `hitl_pending` 待拍板会话）时，插件无法声明默认激活的右栏自定义 Tab，右栏仍回落到宿主通用「开始（Guide）」引导页 | `packages/deep-research-pack/src/client/index.ts`、`ResearchStatusTab.tsx`（历史 HITL 会话切入实测） | 本仓通过顶栏琥珀胶囊（`ResearchHeaderPill`）与 `Primary+Shift+U` 全局快捷键一键直达「研究状态」，不绕过宿主右栏状态机写 DOM 点击 hack | 建议上游 `sidebar.right` 或 `agent-preset` 扩展支持声明默认激活页签策略（如按 `sessionProjections` 条件在切入会话时优先展开指定插件页签） |
+| **U10** | 会话输入框（Composer）占位提示文案固定为通用编程壳文案（「描述你想要构建的内容…」），插件无法按垂直场景定制 placeholder | `packages/deep-research-pack/src/client/StartCard.tsx`、`HeroResearchOptions.tsx` | 本仓在 `conversation.input.dock` 放置极简意图起题卡与副标题引导研究提问，不触碰宿主输入框 DOM | 建议上游在 `conversation.input` 配置或 `agent-preset` client 元数据中开放 `placeholder` 覆盖槽，便于垂直插件完成全场景语境闭环 |
 
 ## 后续跟进节奏
 
-- 每次执行 `bumping-vendor-pin` 升级 DSH 子模块基线时，逐条复核 **U1–U7**：上游已修复/提供原生 Seam 的条目优先切换并删除本仓对应降级层，同步更新本表状态。
+- 每次执行 `bumping-vendor-pin` 升级 DSH 子模块基线时，逐条复核 **U1–U10**：上游已修复/提供原生 Seam 的条目优先切换并删除本仓对应降级层，同步更新本表状态。

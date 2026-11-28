@@ -158,6 +158,10 @@
   line-height: 1.4;
   color: var(--dsw-alias-label-primary);
   word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .cardPath {
@@ -208,9 +212,11 @@
 }
 
 .defaultsSection {
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 0.5px solid var(--dsw-alias-border-l2);
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border-radius: var(--dsw-radius-md);
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-2);
   display: grid;
   gap: 8px;
 }
