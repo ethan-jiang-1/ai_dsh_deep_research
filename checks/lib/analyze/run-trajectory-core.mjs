@@ -92,6 +92,16 @@ function safeParseJson(raw) {
   }
 }
 
+/** @param {string} name @param {Record<string, any>} args @returns {string | null} */
+function skillLoadedFromCall(name, args) {
+  if (name === 'skill' && typeof args.name === 'string' && args.name.trim() !== '') return args.name.trim()
+  if (name === 'read') {
+    const m = /\/skills\/([^/]+)\/SKILL\.md$/i.exec(String(args.file_path ?? args.path ?? ''))
+    if (m) return m[1]
+  }
+  return null
+}
+
 /** @param {any} content @returns {string} */
 function contentText(content) {
   if (typeof content === 'string') return content
@@ -107,26 +117,10 @@ export function summarizeSession(input) {
   const { sessionId, events, missing = false } = input
   if (missing) {
     return {
-      sessionId,
-      parentSession: null,
-      role: 'unknown',
-      label: null,
-      delegationDepth: 1,
-      turns: 0,
-      steps: 0,
-      createdAt: null,
-      lastEventAt: null,
-      wallClockMs: 0,
-      toolCalls: 0,
-      toolErrors: 0,
-      inTok: 0,
-      outTok: 0,
-      cacheReadTok: 0,
-      cacheHitRate: 0,
-      maxContext: 0,
-      loadedSkills: /** @type {string[]} */ ([]),
-      goalCompleted: false,
-      missing: true,
+      sessionId, parentSession: null, role: 'unknown', label: null, delegationDepth: 1,
+      turns: 0, steps: 0, createdAt: null, lastEventAt: null, wallClockMs: 0,
+      toolCalls: 0, toolErrors: 0, inTok: 0, outTok: 0, cacheReadTok: 0, cacheHitRate: 0,
+      maxContext: 0, loadedSkills: /** @type {string[]} */ ([]), goalCompleted: false, missing: true,
     }
   }
 
@@ -177,10 +171,8 @@ export function summarizeSession(input) {
       goalCompleted = true
     } else if (ev.type === 'tool/call') {
       toolCalls += 1
-      if (ev.data?.name === 'skill') {
-        const parsed = safeParseJson(ev.data.arguments)
-        if (typeof parsed.name === 'string' && parsed.name.trim() !== '') loadedSkills.add(parsed.name.trim())
-      }
+      const sk = skillLoadedFromCall(String(ev.data?.name ?? ''), safeParseJson(ev.data?.arguments))
+      if (sk !== null) loadedSkills.add(sk)
     } else if (ev.type === 'tool/result') {
       const txt = contentText(ev.data?.message?.content)
       if (ev.data?.isError === true || /^Error:/i.test(txt)) toolErrors += 1
@@ -205,26 +197,10 @@ export function summarizeSession(input) {
   const wallClockMs = createdAt !== null && lastEventAt !== null && lastEventAt >= createdAt ? lastEventAt - createdAt : 0
 
   return {
-    sessionId,
-    parentSession,
-    role,
-    label,
-    delegationDepth,
-    turns,
-    steps,
-    createdAt,
-    lastEventAt,
-    wallClockMs,
-    toolCalls,
-    toolErrors,
-    inTok,
-    outTok,
-    cacheReadTok,
-    cacheHitRate,
-    maxContext,
-    loadedSkills: [...loadedSkills],
-    goalCompleted,
-    missing: false,
+    sessionId, parentSession, role, label, delegationDepth,
+    turns, steps, createdAt, lastEventAt, wallClockMs,
+    toolCalls, toolErrors, inTok, outTok, cacheReadTok, cacheHitRate,
+    maxContext, loadedSkills: [...loadedSkills], goalCompleted, missing: false,
   }
 }
 
@@ -241,8 +217,10 @@ export function summarizeSession(input) {
 export function detectTrajectorySmells({ sessions, rootSessionId, bundleFacts = null, localTimeoutMs = 10_000 }) {
   /** @type {TrajectorySmell[]} */
   const smells = []
+  /** @type {Map<string, { subject: string, status: string, revision: number }>} */
+  const nativeTasks = new Map()
   /** @type {Map<string, { subject: string, status: string }>} */
-  const tasks = new Map()
+  const toolTasks = new Map()
   let taskCounter = 0
   let rootGoalCompleted = false
 
@@ -262,44 +240,57 @@ export function detectTrajectorySmells({ sessions, rootSessionId, bundleFacts = 
     const loadedSkills = new Set()
     /** @type {Map<string, { name: string, args: Record<string, any>, time: number | null, step: number | undefined }>} */
     const callsById = new Map()
-    /** @type {Map<number, number>} */
+    /** @type {Map<string, { step: number, count: number }>} */
     const subagentsPerStep = new Map()
     /** @type {Set<string>} */
-    const writtenKinds = new Set()
+    const missingSkillKinds = new Set()
     /** @type {string[]} */
     const rootFinalTexts = []
 
     for (const ev of s.events) {
       if (!ev || typeof ev !== 'object') continue
       if (isRoot && ev.type === 'goal/change' && ev.data?.operation === 'complete') rootGoalCompleted = true
+      if (ev.type === 'team/task' && typeof ev.data?.task?.id === 'string') {
+        const t = ev.data.task
+        const rev = typeof t.revision === 'number' ? t.revision : 0
+        const prev = nativeTasks.get(t.id)
+        if (!prev || rev >= prev.revision) {
+          nativeTasks.set(t.id, { subject: String(t.subject ?? t.id), status: String(t.status ?? 'pending'), revision: rev })
+        }
+      }
 
       if (ev.type === 'tool/call') {
         const name = String(ev.data?.name ?? '')
         const args = safeParseJson(ev.data?.arguments)
+        const turn = typeof ev.data?.turn === 'number' ? ev.data.turn : 0
         const step = typeof ev.data?.step === 'number' ? ev.data.step : undefined
         const callId = typeof ev.data?.callId === 'string' ? ev.data.callId : ''
         if (callId !== '') callsById.set(callId, { name, args, time: typeof ev.time === 'number' ? ev.time : null, step })
 
-        if (name === 'skill' && typeof args.name === 'string') loadedSkills.add(args.name.trim())
+        const sk = skillLoadedFromCall(name, args)
+        if (sk !== null) loadedSkills.add(sk)
         if (name === 'subagent' && step !== undefined) {
-          subagentsPerStep.set(step, (subagentsPerStep.get(step) ?? 0) + 1)
+          const k = `${turn}:${step}`
+          const prev = subagentsPerStep.get(k)
+          subagentsPerStep.set(k, { step, count: (prev?.count ?? 0) + 1 })
         }
         if (name === 'write' || name === 'edit') {
           const fp = String(args.file_path ?? args.path ?? '')
-          if (/(?:^|\/)(?:findings|final)\.md$/.test(fp)) writtenKinds.add('synthesis')
-          if (/(?:^|\/)evidence\/[^/]+\.md$/.test(fp)) writtenKinds.add('evidence')
-          if (/(?:^|\/)review\.md$/.test(fp)) writtenKinds.add('review')
-          if (/(?:^|\/)leads\.md$/.test(fp)) writtenKinds.add('leads')
+          if (isRoot && /(?:^|\/)(?:findings|final)\.md$/.test(fp) && !loadedSkills.has('synthesis')) missingSkillKinds.add('synthesis')
+          if (!isRoot && /(?:^|\/)evidence\/[^/]+\.md$/.test(fp) && !loadedSkills.has('evidence-extraction')) missingSkillKinds.add('evidence')
+          if (!isRoot && /(?:^|\/)review\.md$/.test(fp) && !loadedSkills.has('adversarial-review')) missingSkillKinds.add('review')
+          if (!isRoot && /(?:^|\/)leads\.md$/.test(fp) && !loadedSkills.has('lead-mapping')) missingSkillKinds.add('leads')
         }
         if (name === 'team_task_create') {
           taskCounter += 1
           const tid = `task-${taskCounter}`
-          tasks.set(tid, { subject: String(args.subject ?? tid), status: 'pending' })
+          toolTasks.set(tid, { subject: String(args.subject ?? tid), status: 'pending' })
         } else if (name === 'team_task_update' && typeof args.task_id === 'string') {
-          const prev = tasks.get(args.task_id) ?? { subject: args.task_id, status: 'pending' }
+          const prev = toolTasks.get(args.task_id) ?? { subject: args.task_id, status: 'pending' }
           if (args.action === 'claim' || args.action === 'reassign') prev.status = 'in_progress'
           else if (args.action === 'complete') prev.status = 'completed'
-          tasks.set(args.task_id, prev)
+          else if (args.action === 'cancel') prev.status = 'cancelled'
+          toolTasks.set(args.task_id, prev)
         } else if (isRoot && name === 'ask_user_question') {
           const qs = Array.isArray(args.questions) ? args.questions : []
           for (const q of qs) if (typeof q?.question === 'string') rootFinalTexts.push(q.question)
@@ -354,22 +345,14 @@ export function detectTrajectorySmells({ sessions, rootSessionId, bundleFacts = 
       }
     }
 
-    // 1) Skill 漏载检查
-    if (isRoot && writtenKinds.has('synthesis') && !loadedSkills.has('synthesis')) {
-      smells.push({ code: 'missing-skill', severity: 'error', sessionId: s.sessionId, detail: 'Lead 写入 findings.md/final.md 前未加载 synthesis skill' })
-    }
-    if (!isRoot && writtenKinds.has('evidence') && !loadedSkills.has('evidence-extraction')) {
-      smells.push({ code: 'missing-skill', severity: 'warn', sessionId: s.sessionId, detail: '子会话写入 evidence/*.md 前未加载 evidence-extraction skill' })
-    }
-    if (!isRoot && writtenKinds.has('review') && !loadedSkills.has('adversarial-review')) {
-      smells.push({ code: 'missing-skill', severity: 'warn', sessionId: s.sessionId, detail: '子会话写入 review.md 前未加载 adversarial-review skill' })
-    }
-    if (!isRoot && writtenKinds.has('leads') && !loadedSkills.has('lead-mapping')) {
-      smells.push({ code: 'missing-skill', severity: 'warn', sessionId: s.sessionId, detail: '子会话写入 leads.md 前未加载 lead-mapping skill' })
-    }
+    // 1) Skill 漏载检查（写盘前必须已加载 skill 或 read 对应 SKILL.md）
+    if (missingSkillKinds.has('synthesis')) smells.push({ code: 'missing-skill', severity: 'error', sessionId: s.sessionId, detail: 'Lead 写入 findings.md/final.md 前未加载 synthesis skill' })
+    if (missingSkillKinds.has('evidence')) smells.push({ code: 'missing-skill', severity: 'warn', sessionId: s.sessionId, detail: '子会话写入 evidence/*.md 前未加载 evidence-extraction skill' })
+    if (missingSkillKinds.has('review')) smells.push({ code: 'missing-skill', severity: 'warn', sessionId: s.sessionId, detail: '子会话写入 review.md 前未加载 adversarial-review skill' })
+    if (missingSkillKinds.has('leads')) smells.push({ code: 'missing-skill', severity: 'warn', sessionId: s.sessionId, detail: '子会话写入 leads.md 前未加载 lead-mapping skill' })
 
-    // 3a) subagent 同 step 并行派发
-    for (const [step, count] of subagentsPerStep.entries()) {
+    // 3a) subagent 同 (turn, step) 并行派发
+    for (const { step, count } of subagentsPerStep.values()) {
       if (count >= 2) {
         smells.push({ code: 'orchestration-drift', severity: 'warn', sessionId: s.sessionId, step, detail: `同 step 并发派发 ${count} 个 subagent（违反串行逐批等待约定）` })
       }
@@ -410,9 +393,10 @@ export function detectTrajectorySmells({ sessions, rootSessionId, bundleFacts = 
     }
   }
 
-  // 3b) goal 完成但仍有未闭合 team_task
+  // 3b) goal 完成但仍有未闭合 team_task（优先认原生 team/task 事件权威终态）
   if (rootGoalCompleted) {
-    const unclosed = [...tasks.entries()].filter(([, t]) => t.status !== 'completed')
+    const authoritativeTasks = nativeTasks.size > 0 ? nativeTasks : toolTasks
+    const unclosed = [...authoritativeTasks.entries()].filter(([, t]) => !/^(?:completed|cancelled|canceled)$/.test(t.status))
     if (unclosed.length > 0) {
       smells.push({
         code: 'orchestration-drift',

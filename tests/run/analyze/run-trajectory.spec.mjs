@@ -141,3 +141,36 @@ test('discoverExplicitChildSessionIds 仅认原生 subagent/catalog 与 team/mem
   assert.deepEqual(discoverExplicitChildSessionIds(events, ROOT_ID), [CHILD_ID, teamChild])
   assert.deepEqual(discoverReferencedSessionIds(events, ROOT_ID), [CHILD_ID, teamChild, webUuid])
 })
+
+test('实跑盲区回归：read SKILL.md 回退、跨 turn 同 step subagent 不误报、原生 team/task 权威状态优先', () => {
+  const report = analyzeTrajectory({
+    rootSessionId: ROOT_ID,
+    sessions: [
+      {
+        sessionId: ROOT_ID,
+        events: [
+          { type: 'session', id: ROOT_ID, createdAt: 1000, agentPreset: 'lead', delegationDepth: 0 },
+          // Turn 1 step 2 与 Turn 2 step 2 各派 1 个 subagent — 跨 turn 同 step 不应误报并发
+          { type: 'tool/call', time: 1010, data: { turn: 1, step: 2, callId: 's1', name: 'subagent', arguments: '{}' } },
+          { type: 'tool/call', time: 1020, data: { turn: 2, step: 2, callId: 's2', name: 'subagent', arguments: '{}' } },
+          // 原生 team/task 权威终态：task-1 completed、task-2 cancelled → 均为已闭合，即使工具调用里没有 update
+          { type: 'team/task', time: 1030, data: { task: { id: 'task-1', revision: 1, subject: 'W1', status: 'pending' } } },
+          { type: 'team/task', time: 1040, data: { task: { id: 'task-1', revision: 2, subject: 'W1', status: 'completed' } } },
+          { type: 'team/task', time: 1050, data: { task: { id: 'task-2', revision: 1, subject: 'W2', status: 'cancelled' } } },
+          { type: 'goal/change', time: 1060, data: { operation: 'complete' } },
+        ],
+      },
+      {
+        sessionId: CHILD_ID,
+        events: [
+          { type: 'session', id: CHILD_ID, parentSession: ROOT_ID, createdAt: 1010, agentPreset: 'lead', delegationDepth: 1 },
+          // 通过 read SKILL.md 回退加载 lead-mapping，再写 leads.md — 不应误报 missing-skill
+          { type: 'tool/call', time: 1015, data: { turn: 1, step: 1, callId: 'r1', name: 'read', arguments: JSON.stringify({ file_path: '/pkg/presets/scout/skills/lead-mapping/SKILL.md' }) } },
+          { type: 'tool/call', time: 1025, data: { turn: 1, step: 2, callId: 'w1', name: 'write', arguments: JSON.stringify({ file_path: 'drt_demo/leads.md' }) } },
+        ],
+      },
+    ],
+  })
+  assert.deepEqual(report.sessions[1].loadedSkills, ['lead-mapping'])
+  assert.equal(report.smells.length, 0, `不应误报 Smells，实际=${JSON.stringify(report.smells)}`)
+})
