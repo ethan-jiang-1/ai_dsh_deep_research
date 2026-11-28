@@ -164,7 +164,12 @@ try {
     await page.getByText('Deep Research Lead', { exact: false }).first().waitFor({ timeout: 30_000 })
     // 起步卡判据是异步的（hasUserMessage + listDir）；等显式 testid，不抢读 body。
     await page.locator('[data-testid="deep-research-start"]').waitFor({ timeout: 30_000 })
+    const heroOptionsVisible = await page.locator('[data-testid="deep-research-hero-options"]').isVisible().catch(() => false)
+    const templateCount = await page.locator('[data-testid^="deep-research-start-template-"]').count().catch(() => 0)
+    const redundantWsPrompt = await page.locator('[data-testid="deep-research-workspace-prompt"]').count().catch(() => 0)
     body = (await page.locator('body').innerText()).replace(/\n+/g, ' | ')
+    check('首屏 Hero 右侧选配胶囊在场（conversation.hero.options）', heroOptionsVisible)
+    check('首屏意图起步卡展示起题灵感卡且已绑定工作区无冗余路径框', templateCount >= 6 && redundantWsPrompt === 0, `templates=${templateCount} redundantWs=${redundantWsPrompt}`)
   } finally {
     await browser.close()
   }
@@ -172,9 +177,7 @@ try {
   check('首屏有 Orca 品牌', body.includes('Orca'))
   check('首屏有 Lead preset（Deep Research Lead）', body.includes('Deep Research Lead'))
   check('首屏有工作区标题', body.includes('Deep Research — ws'))
-  check('首屏有起步卡（标题）', body.includes('一支多角色研究团队'))
-  check('首屏有起步卡（当前工作区）', body.includes('当前工作区'))
-  check('首屏有起步卡（三步/选项目）', body.includes('直接问一个研究问题') && body.includes('选择项目目录'))
+  check('首屏有起步卡（标题与意图副标题）', body.includes('一支多角色研究团队') && body.includes('多角色协同检索'))
 
   const storagePath = join(sandbox.home, 'storages', 'workspace.json')
   check('workspace.json 在场', existsSync(storagePath))

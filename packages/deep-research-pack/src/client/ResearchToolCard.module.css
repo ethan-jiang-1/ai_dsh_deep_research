@@ -7,16 +7,43 @@
   color: var(--dsw-alias-label-primary);
 }
 
-.argsPre {
+.webWrap {
+  padding: 4px 0 6px;
+}
+
+.delegationBox {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 6px;
+  padding: 8px 10px;
+  border-radius: var(--dsw-radius-xs);
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  background: var(--dsw-alias-bg-layer-2);
+}
+
+.delegationHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.delegationGoal {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.fallbackText {
   margin: 4px 0 6px;
   padding: 6px 8px;
   border-radius: var(--dsw-radius-xs);
   background: var(--dsw-alias-bg-layer-2);
   color: var(--dsw-alias-label-secondary);
-  font-size: 11px;
-  line-height: 1.45;
+  font-size: 11.5px;
+  line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
-  max-height: 140px;
+  max-height: 160px;
   overflow: auto;
 }

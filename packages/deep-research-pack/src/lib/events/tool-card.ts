@@ -1,6 +1,6 @@
 /**
- * 工具卡的共享纯逻辑（研究语义工具卡 S2；company lib/tool-card.ts 同款移植——
- * 卡片 = call/result 切片的纯函数，keyless 单测直接断言，不读活状态可回放）。
+ * 工具卡的共享纯逻辑（研究语义工具卡 S2 + R2.3 富语义结果折算）。
+ * 卡片 = call/result 切片的纯函数，keyless 单测直接断言，不读活状态可回放。
  */
 
 import { argsObjectOf, normalizeQueries } from './journal-wire.ts'
@@ -9,10 +9,6 @@ import { translateZh, type PackTranslate } from '../shared/i18n.ts'
 /**
  * vendor 崩溃恢复的合成 `tool/result` 错误码（正本 = DSH session 包的 repair 模块
  * `openTurnClosers`；同值由 `@deepseek-ai/dsh-session` 导出）。
- *
- * 为什么在 pack 里写字面量而不是 import：本件住在 **client 面**（faces.json），把 host 侧
- * session 包的值导入会进浏览器 bundle；wire 值本身是稳定契约，故本地常量 + 单测与 vendor
- * 导出逐值对账（单测守卫）——漂移即红。
  */
 export const TOOL_OUTCOME_UNKNOWN = 'TOOL_OUTCOME_UNKNOWN'
 export const TOOL_NOT_STARTED = 'TOOL_NOT_STARTED'
@@ -21,49 +17,65 @@ export const TOOL_NOT_STARTED = 'TOOL_NOT_STARTED'
 type CardState = 'running' | 'ok' | 'error' | 'stopped'
 
 /** 卡片入参的最小形状（wire 上入参是 JSON 字符串，流式期间可能是截断前缀）。 */
-interface ToolCardArgs {
+export interface ToolCardArgs {
   readonly name?: unknown
   readonly description?: unknown
   readonly prompt?: unknown
-  /** web_search 的入参是 queries 数组（vendor tool-web search schema 权威形状——非 query 单串）。 */
   readonly queries?: unknown
-  /** web_fetch 的入参是 url 字符串（vendor tool-web fetch schema 权威形状）。 */
   readonly url?: unknown
-  /** subagent 可选角色名。 */
   readonly subagent_type?: unknown
-}  // 协调类工具（team_task_*/wait_agent/list_agents/send_message）不进对话流——无卡片需求（2026-09-27 实测）
+}
+
+export interface ToolWebSourceItem {
+  readonly url: string
+  readonly title?: string
+  readonly snippet?: string
+  readonly publishedAt?: string
+}
+
+export type ToolCardRichBody =
+  | {
+    readonly kind: 'web-search'
+    readonly answer?: string
+    readonly sources: readonly ToolWebSourceItem[]
+    readonly truncated: boolean
+    readonly queries: readonly string[]
+  }
+  | {
+    readonly kind: 'web-fetch'
+    readonly url: string
+    readonly statusCode: number
+    readonly truncated: boolean
+  }
+  | {
+    readonly kind: 'delegation'
+    readonly mode: 'teammate' | 'worker'
+    readonly roleName: string
+    readonly waveHint: string | null
+    readonly goalSummary: string
+  }
+  | {
+    readonly kind: 'fallback'
+    readonly text: string
+  }
 
 /** 从 call/result 切片推导卡片状态（settled 前 running；interrupted → stopped）。 */
 export function cardStateOf(block: object): CardState {
   if (!('kind' in block)) return 'running'
   const b = block as { kind?: unknown; error?: { code?: unknown }; isError?: boolean }
-  // vendor 的中断语义走 repair.ts 的两个具体码（+ 历史兼容 'interrupted'）；「未知」不得写成「失败」（BUG-431）。
   if (b.error?.code === TOOL_OUTCOME_UNKNOWN || b.error?.code === TOOL_NOT_STARTED || b.error?.code === 'interrupted') return 'stopped'
   return b.isError ? 'error' : 'ok'
 }
 
-/** 解析入参 JSON；截断前缀 → null（调用方回退原文）。
- *  解析核 = journal-wire.argsObjectOf（共享正本）；本件哨兵 = null 且**拒数组**（卡片入参
- *  是对象形态——数组进卡片标题取字段全是 undefined，按原实现拒之）。 */
+/** 解析入参 JSON；截断前缀 → null（调用方回退原文）。 */
 export function parseArgsObject(argsRaw: string): ToolCardArgs | null {
   const obj = argsObjectOf(argsRaw)
   return obj !== null && !Array.isArray(obj) ? (obj as ToolCardArgs) : null
 }
 
-/** 转义后的 JSON 字符串字面量（`\"` / `\\` 等），用于从截断前缀里取字段。 */
 const JSON_STRING_BODY = String.raw`((?:[^"\\]|\\.)*)`
 
-/**
- * 从**流式截断前缀**里尽力取一个字符串字段（BUG-411）。
- *
- * `parseArgsObject` 对截断前缀按设计返回 null（调用方回退原文）；但卡片在运行窗口里必须
- * 陈述「正在做什么」，把「读不到」折成某个具体语义就是说谎（例如把 set 显示成 clear）。
- * 本函数只做一件事：若 `"key": "value"` 的字面片段已经到达，就返回解码后的值；否则 null。
- * 值里的转义按 JSON 规则解码；非法转义 → null（宁可说未知，不拼半截）。
- * @param argsRaw - 流式入参原文（可能是任意前缀）。
- * @param key - 字段名（ASCII 键）。
- * @returns 字段字符串（可能为空串）或 null。
- */
+/** 从流式截断前缀里尽力取一个字符串字段（BUG-411）。 */
 export function stringFieldOfArgsRaw(argsRaw: string, key: string): string | null {
   if (typeof argsRaw !== 'string' || argsRaw === '') return null
   const pattern = new RegExp(`"${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"\\s*:\\s*"${JSON_STRING_BODY}"`)
@@ -110,7 +122,177 @@ export function cardTitleOf(toolName: string, args: ToolCardArgs | null, argsRaw
         ? t('toolCardSubagent')
         : t('toolCardSubagentDetail', { detail: summary.slice(0, 60) })
     }
-
   }
   return `${toolName} ${argsRaw.slice(0, 40)}`
+}
+
+function parseMetaSources(raw: unknown): readonly ToolWebSourceItem[] | null {
+  if (!Array.isArray(raw)) return null
+  const out: ToolWebSourceItem[] = []
+  for (const item of raw) {
+    if (typeof item !== 'object' || item === null || Array.isArray(item)) continue
+    const rec = item as Record<string, unknown>
+    if (typeof rec.url !== 'string' || rec.url.trim() === '') continue
+    out.push({
+      url: rec.url.trim(),
+      ...(typeof rec.title === 'string' && rec.title.trim() !== '' ? { title: rec.title.trim() } : {}),
+      ...(typeof rec.snippet === 'string' && rec.snippet.trim() !== '' ? { snippet: rec.snippet.trim() } : {}),
+      ...(typeof rec.publishedAt === 'string' && rec.publishedAt.trim() !== '' ? { publishedAt: rec.publishedAt.trim() } : {}),
+    })
+  }
+  return out
+}
+
+function extractResultText(block: object): string {
+  if (!('content' in block)) return ''
+  const content = (block as { readonly content?: unknown }).content
+  if (typeof content === 'string') return content.trim()
+  if (!Array.isArray(content)) return ''
+  const parts: string[] = []
+  for (const part of content) {
+    if (typeof part === 'string' && part.trim() !== '') parts.push(part.trim())
+    else if (typeof part === 'object' && part !== null && 'text' in part && typeof (part as { text?: unknown }).text === 'string') {
+      const txt = ((part as { text: string }).text).trim()
+      if (txt !== '') parts.push(txt)
+    }
+  }
+  return parts.join('\n').trim()
+}
+
+function parseFallbackWebSources(text: string): readonly ToolWebSourceItem[] {
+  if (text === '') return []
+  const sources: ToolWebSourceItem[] = []
+  const seen = new Set<string>()
+  // 支持 `[title](https://...)` 或裸 `https://...` 行提取
+  for (const match of text.matchAll(/\[([^\]\n]{1,140})\]\((https?:\/\/[^\s)]+)\)/g)) {
+    const title = match[1]?.trim()
+    const url = match[2]?.trim()
+    if (url !== undefined && !seen.has(url)) {
+      seen.add(url)
+      sources.push({ url, ...(title !== undefined && title !== '' ? { title } : {}) })
+      if (sources.length >= 12) return sources
+    }
+  }
+  if (sources.length > 0) return sources
+  for (const match of text.matchAll(/https?:\/\/[^\s<>)"'`]+/g)) {
+    const url = match[0].replace(/[.,;:!?]+$/, '')
+    if (!seen.has(url)) {
+      seen.add(url)
+      sources.push({ url })
+      if (sources.length >= 12) return sources
+    }
+  }
+  return sources
+}
+
+function cleanGoalLines(raw: string): string {
+  const lines = raw
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l !== '')
+    .slice(0, 3)
+  const joined = lines.join(' ')
+  return joined.length > 260 ? `${joined.slice(0, 259)}…` : joined
+}
+
+function detectWaveHint(roleName: string, goalText: string): string | null {
+  const combined = `${roleName} ${goalText}`
+  if (/research-wave/i.test(combined)) return 'research-wave'
+  const wave = /\b(W[1-9]\d*(?:\.[1-9]\d*)*)\b/.exec(combined)
+  if (wave?.[1] !== undefined) return wave[1]
+  if (/\bcritic\b|核查|审查/i.test(combined)) return 'critic'
+  return null
+}
+
+/**
+ * 推导研究语义工具卡的展开体模型（优先消费 DSH 规范 `block.meta`，缺失或错误时安全降级）。
+ */
+export function toolResultBodyOf(
+  toolName: string,
+  block: object,
+  args: ToolCardArgs | null,
+  argsRaw: string,
+): ToolCardRichBody | null {
+  const settled = 'kind' in block
+  const rec = block as { readonly isError?: boolean; readonly meta?: unknown; readonly error?: { readonly message?: unknown } }
+  const meta = typeof rec.meta === 'object' && rec.meta !== null && !Array.isArray(rec.meta)
+    ? (rec.meta as Record<string, unknown>)
+    : null
+
+  if (settled && rec.isError === true) {
+    const errMsg = typeof rec.error?.message === 'string' && rec.error.message.trim() !== ''
+      ? rec.error.message.trim()
+      : extractResultText(block)
+    return errMsg !== '' ? { kind: 'fallback', text: errMsg.slice(0, 400) } : null
+  }
+
+  if (toolName === 'web_search') {
+    const queries = args !== null ? normalizeQueries(args.queries) : []
+    if (settled && meta !== null) {
+      const sources = parseMetaSources(meta.sources)
+      if (sources !== null) {
+        return {
+          kind: 'web-search',
+          ...(typeof meta.answer === 'string' && meta.answer.trim() !== '' ? { answer: meta.answer.trim() } : {}),
+          sources,
+          truncated: meta.truncated === true,
+          queries,
+        }
+      }
+    }
+    if (settled) {
+      const text = extractResultText(block)
+      const parsed = parseFallbackWebSources(text)
+      if (parsed.length > 0) {
+        return { kind: 'web-search', sources: parsed, truncated: false, queries }
+      }
+      if (text !== '') return { kind: 'fallback', text: text.slice(0, 400) }
+    }
+    if (queries.length > 0) {
+      return { kind: 'fallback', text: queries.join(' · ') }
+    }
+    return null
+  }
+
+  if (toolName === 'web_fetch') {
+    const argUrl = typeof args?.url === 'string' ? args.url.trim() : ''
+    if (settled && meta !== null && typeof meta.url === 'string' && typeof meta.statusCode === 'number') {
+      return {
+        kind: 'web-fetch',
+        url: meta.url,
+        statusCode: meta.statusCode,
+        truncated: meta.truncated === true,
+      }
+    }
+    if (settled && argUrl !== '') {
+      return { kind: 'web-fetch', url: argUrl, statusCode: 200, truncated: false }
+    }
+    if (argUrl !== '') return { kind: 'fallback', text: argUrl }
+    return null
+  }
+
+  if (toolName === 'spawn_teammate' || toolName === 'subagent') {
+    const mode = toolName === 'spawn_teammate' ? 'teammate' : 'worker'
+    const roleRaw = toolName === 'spawn_teammate'
+      ? (typeof args?.name === 'string' ? args.name.trim() : '')
+      : (typeof args?.subagent_type === 'string' && args.subagent_type.trim() !== ''
+        ? args.subagent_type.trim()
+        : (typeof args?.name === 'string' ? args.name.trim() : ''))
+    const goalRaw = typeof args?.description === 'string' && args.description.trim() !== ''
+      ? args.description.trim()
+      : (typeof args?.prompt === 'string' ? args.prompt.trim() : '')
+    if (roleRaw !== '' || goalRaw !== '') {
+      const roleName = roleRaw !== '' ? roleRaw : (mode === 'teammate' ? 'teammate' : 'worker')
+      return {
+        kind: 'delegation',
+        mode,
+        roleName,
+        waveHint: detectWaveHint(roleName, goalRaw),
+        goalSummary: cleanGoalLines(goalRaw),
+      }
+    }
+  }
+
+  const fallback = argsRaw.trim()
+  return fallback !== '' ? { kind: 'fallback', text: fallback.slice(0, 400) } : null
 }

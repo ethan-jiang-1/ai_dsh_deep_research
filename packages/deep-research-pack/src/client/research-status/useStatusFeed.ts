@@ -180,51 +180,71 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         }
         const view = opened.value
         const names = view.names
-        const evidenceDir = names.has('evidence') ? await view.list('evidence', { signal }) : null
+        const [
+          evidenceDir,
+          topicsArt,
+          protocolArt,
+          finalDir,
+          leadsArt,
+          findingsArt,
+          receiptArt,
+          planArt,
+          planDir,
+          reviewArt,
+          readinessArt,
+          questionArt,
+          finalArt,
+        ] = await Promise.all([
+          names.has('evidence') ? view.list('evidence', { signal }) : Promise.resolve(null),
+          names.has('topics.md') ? readArtifact(view, 'topics.md', { signal }) : Promise.resolve({ state: 'absent' as const, text: null }),
+          names.has('protocol.json')
+            ? readProtocolContract(view, signal)
+            : Promise.resolve({ state: 'absent' as const, text: null, value: null }),
+          names.has('final') ? view.list('final', { signal }) : Promise.resolve(null),
+          readArtifact(view, 'leads.md', { signal }),
+          readArtifact(view, 'findings.md', { signal }),
+          readArtifact(view, 'delivered.json', { signal, decoder: decodeDeliveredReceipt }),
+          readArtifact(view, 'plan.md', { signal }),
+          names.has('plan') ? view.list('plan', { signal }) : Promise.resolve(null),
+          readArtifact(view, 'review.md', { signal }),
+          readArtifact(view, 'review/readiness.json', { signal, decoder: (_raw, rawText) => parseReadinessDeclaration(rawText) }),
+          readArtifact(view, 'question.md', { signal }),
+          readArtifact(view, 'final.md', { signal }),
+        ])
         if (stopped) return
         const evidenceState = readStateOf(evidenceDir)
         const evidenceEntries = evidenceState === 'ok' && evidenceDir !== null && evidenceDir.ok
           ? evidenceDir.value.filter((entry) => entry.type === 'file' && entry.name.endsWith('.md'))
           : []
         const evidenceFailedLog = evidenceEntries.some((entry) => entry.name === '_failed.md')
+        const cardEntries = evidenceEntries.filter((item) => isEvidenceCardName(item.name))
+        const cardReads = await Promise.all(
+          cardEntries.map(async (entry) => ({
+            entry,
+            card: await readArtifact(view, `evidence/${entry.name}`, { signal }),
+          })),
+        )
+        if (stopped) return
         let evidenceCount = 0
         let evidenceEmptyCount = 0
         let evidenceUnreadableCount = 0
         const evidenceSamples: EvidenceCardSample[] = []
-        for (const entry of evidenceEntries.filter((item) => isEvidenceCardName(item.name))) {
-          const card = await readArtifact(view, `evidence/${entry.name}`, { signal })
-          if (stopped) return
+        for (const { entry, card } of cardReads) {
           evidenceSamples.push({ name: entry.name, state: card.state, text: card.text })
           if (card.state === 'ok' && card.text !== null && isEvidenceCard(card.text)) evidenceCount += 1
           else if (card.state === 'unreadable' || card.state === 'invalid') evidenceUnreadableCount += 1
           else evidenceEmptyCount += 1
         }
-        const topicsArt = names.has('topics.md') ? await readArtifact(view, 'topics.md', { signal }) : { state: 'absent' as const, text: null }
-        if (stopped) return
-        const protocolArt = names.has('protocol.json')
-          ? await readProtocolContract(view, signal)
-          : { state: 'absent' as const, text: null, value: null }
-        if (stopped) return
         const evidenceMatrix = foldEvidenceMatrix({
           topicsState: topicsArt.state,
           topicsText: topicsArt.text,
           evidenceState,
           cards: evidenceSamples,
         })
-        const finalDir = names.has('final') ? await view.list('final', { signal }) : null
-        if (stopped) return
         const finalState = readStateOf(finalDir)
         const finalFileNames = finalDir !== null && finalDir.ok
           ? finalDir.value.filter((entry) => entry.type === 'file').map((entry) => entry.name)
           : []
-        const leadsArt = await readArtifact(view, 'leads.md', { signal })
-        if (stopped) return
-        const findingsArt = await readArtifact(view, 'findings.md', { signal })
-        if (stopped) return
-        // 回执（持久事实）：统一工件读取 + 边界解码器；只有 ok 才尝试 deliveryFromReceipt（invalid/empty/unreadable
-        // 不冒充缺席，出「回执读取失败/不合法」提示）。
-        const receiptArt = await readArtifact(view, 'delivered.json', { signal, decoder: decodeDeliveredReceipt })
-        if (stopped) return
         // 回执的「声称」必须用盘上在场事实核对（BUG-424）：声明了 final/vN 而该版本不在场，
         // 不得宣布已交付——回执只能自证「曾这样写」，不能自证「文件还在」。
         const declaredVersion = receiptArt.state === 'ok' ? receiptDeclaredVersionOf(receiptArt.value) : null
@@ -233,24 +253,11 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           ? deliveryFromReceipt(receiptArt.value, boundSlug)
           : null
         const versions = latestRunVersion(finalFileNames)
-        // 版本面事实：plan 头/重写记录 + plan/ 快照清单（rerun 版本轨的数据源，折算住 run-version）。
-        const planArt = await readArtifact(view, 'plan.md', { signal })
-        if (stopped) return
         const planText = planArt.state === 'ok' ? planArt.text : null
-        const planDir = names.has('plan') ? await view.list('plan', { signal }) : null
-        if (stopped) return
         const planSnapshotNames = planDir !== null && planDir.ok
           ? planDir.value.filter((entry) => entry.type === 'file').map((entry) => entry.name)
           : []
-        // review 终局 readiness（业务摘要审查态的数据源）：判定规则收在 pack lib
-        // `review-readiness.terminalReadiness`——只认**行首**判定行、取最后一条。run-context
-        // 的 review 策略是读到 eof：终局判定在文末，固定行窗会读到中段旧 FAIL（BUG-036 同族）。
-        const reviewArt = await readArtifact(view, 'review.md', { signal })
-        if (stopped) return
         const reviewText = reviewArt.state === 'ok' ? reviewArt.text : null
-        // 终局 readiness 与门禁同源（D51）：声明件优先（边界 Decoder 验证 schema + 重复键），散文只做副本。
-        const readinessArt = await readArtifact(view, 'review/readiness.json', { signal, decoder: (_raw, rawText) => parseReadinessDeclaration(rawText) })
-        if (stopped) return
         const declarationText = readinessArt.state === 'ok' ? readinessArt.text : null
         const reading = readinessOfSources({ reviewText, declarationText, hasReviewDir: names.has('review') })
         // 结论未定：空/读失败的 review 或 readiness 声明；或 readiness 的 missing/invalid/mismatch/ambiguous。
@@ -268,8 +275,6 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
               return assertNever(nextReviewVerdict)
           }
         })()
-        const questionArt = await readArtifact(view, 'question.md', { signal })
-        if (stopped) return
         const questionText = questionArt.state === 'ok' ? questionArt.text : null
         const questionBody = questionBodyLineOf(questionText)
         const raw = questionBody
@@ -278,8 +283,6 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
         const questionIssue = artifactBodyIssueOf(questionArt.state, questionBody !== null)
         const leadsBody = leadsArt.state === 'ok' && hasBodyText(leadsArt.text)
         const findingsBody = findingsArt.state === 'ok' && hasBodyText(findingsArt.text)
-        const finalArt = await readArtifact(view, 'final.md', { signal })
-        if (stopped) return
         const finalBody = finalArt.state === 'ok' && hasBodyText(finalArt.text)
         const leadsIssue = artifactBodyIssueOf(leadsArt.state, leadsBody)
         const findingsIssue = artifactBodyIssueOf(findingsArt.state, findingsBody)
@@ -338,6 +341,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
             questionText,
             finalFileNames,
             hasFinal: finalBody,
+            runDir: view.dir,
             protocol: { state: protocolArt.state, contract: protocolArt.value },
             evidenceMatrix,
           },

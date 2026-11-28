@@ -1,5 +1,5 @@
-// TrackRail.tsx — 「研究状态」页签的流程轨道（②）：◆立项确认 + 主轨 + ◆交付审阅 + 交付，
-// 使用 ui-primitives StateDot(appearance="step") 与自适应换行步进轨。
+// TrackRail.tsx — 「研究状态」页签的紧凑流程轨道：◆立项确认 + 主轨 + ◆交付审阅 + 交付。
+// 使用 ui-primitives StateDot(appearance="step") 与克制中性发丝线；rerun 语义图例收口为按需展开项。
 import type { ReactNode } from 'react'
 import { StateDot, Tag, type StateDotState } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
@@ -82,11 +82,15 @@ export function TrackRail(props: {
         ))}
       </div>
       {loopOn && (
-        <div className={css.rerunLoop}>
-          {t('trackRerunLegend', { version: faceVersions !== null && faceVersions >= 2 ? t('trackRerunSuffix', { version: String(faceVersions) }) : '' })}
-        </div>
+        <details className={css.rerunDetails} data-testid="track-rerun-legend">
+          <summary className={css.rerunSummary}>
+            {t('trackRerunToggle', { version: faceVersions !== null && faceVersions >= 2 ? t('trackRerunSuffix', { version: String(faceVersions) }) : '' })}
+          </summary>
+          <div className={css.rerunLegendBody}>
+            {t('trackRerunLegend', { version: faceVersions !== null && faceVersions >= 2 ? t('trackRerunSuffix', { version: String(faceVersions) }) : '' })}
+          </div>
+        </details>
       )}
-      {hasFace && <div className={css.trackLegend}>{t('trackLegend')}</div>}
     </div>
   )
 }

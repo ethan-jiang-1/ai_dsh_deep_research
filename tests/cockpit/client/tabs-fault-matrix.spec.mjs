@@ -195,8 +195,8 @@ test('ResearchFinalTab（CSS 模块）：读者/审计切换、降级通知条�
   assert.match(container.textContent ?? '', /三分钟看懂核心结论/)
   assert.match(container.textContent ?? '', /读者版 · v1/)
 
-  // 切换到审计版
-  const toAudit = screen.getByRole('button', { name: /看审计版/ })
+  // 切换到审计版（合一单工具栏通过 SegmentedControl role="tab" 切换）
+  const toAudit = screen.getByRole('tab', { name: /审计版/ })
   fireEvent.click(toAudit)
   await flushUi(act)
   assert.match(container.textContent ?? '', /第一版正式交付审计全文/)
@@ -587,8 +587,8 @@ test('BUG-404 终稿：审计版重读后 watcher 仍盯审计版（不被硬编
   await flushUi(act)
   // 前置：有读者版时默认看读者版（通用地址回退到最高版读者版）。
   assert.match(container.textContent ?? '', /读者版正文 r1/)
-  // 切到审计版（按钮文案带版本号：`看审计版 v1`）。
-  fireEvent.click([...container.querySelectorAll('button')].find((b) => (b.textContent ?? '').startsWith(zh.viewAudit)))
+  // 切到审计版（合一单工具栏 SegmentedControl role="tab"）。
+  fireEvent.click([...container.querySelectorAll('[role="tab"]')].find((b) => (b.textContent ?? '').includes(zh.finalTabAudit)))
   await flushUi(act)
   assert.match(container.textContent ?? '', /审计正文 v-a1/)
   assert.doesNotMatch(container.textContent ?? '', /读者版正文 r1/)

@@ -225,7 +225,12 @@ async function main() {
       const page = await freshPage(browser, base, booted.token)
       try {
         await openSessionById(page, SESSION_ID, SESSION_TITLE)
-        await page.waitForTimeout(2_000)
+        await page.waitForTimeout(1_500)
+        const hubBtn = page.getByRole('button', { name: /Research Hub|研究工作台/ }).first()
+        if (await hubBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+          await hubBtn.click({ force: true }).catch(() => {})
+          await page.waitForTimeout(1_200)
+        }
         const data = await page.evaluate(() => [...document.querySelectorAll('[role="tab"], button, span, div')]
           .filter((el) => el.getClientRects().length > 0)
           .map((el) => {
@@ -236,7 +241,7 @@ async function main() {
           .filter((x) => /^(Method library|Method Library|Methods|方法库)$/i.test(x.text)))
         const full = data.some((x) => /^(Method library|Method Library|Methods|方法库)$/i.test(x.text))
         const clipped = data.some((x) => x.clientWidth > 0 && x.scrollWidth > x.clientWidth + 1 && /hidden|clip/.test(x.overflow + x.textOverflow))
-        check('S30 en 主 tab 完整可读', full && !clipped, JSON.stringify(data.slice(0, 3)))
+        check('S30 en 工作台 Methods tab 完整可读', full && !clipped, JSON.stringify(data.slice(0, 3)))
       } finally { await page.context().close().catch(() => {}) }
     }
   } finally {

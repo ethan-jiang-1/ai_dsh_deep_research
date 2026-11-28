@@ -743,6 +743,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/final-studio-r2.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "final-studio-r2.spec.mjs — R2 学术全屏三栏精读台、Claim 风险过滤与富语义工具卡组件回归。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/final-tab-patterns.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -843,6 +853,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/research-commands-shortcuts.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "research-commands-shortcuts.spec.mjs — R2.2 Composer `/` 命令、`@` 研究引用与全局快捷键直测回归。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/research-config-source.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -933,12 +953,32 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/research-session-row.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "research-session-row.spec.mjs — 左栏会话行研究状态标、悬停摘要、菜单项与 HeroOptions 渲染回归。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/research-status/protocol-radar.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "protocol-radar.spec.mjs — 状态契约卡（ProtocolCard）与证据质量雷达（QualityRadar）静态渲染回归。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/research-status/radar-interactive.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "radar-interactive.spec.mjs — 质量雷达点击下钻证据卡微列表与缺口格 Tooltip 交互回归。",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
@@ -993,6 +1033,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/client/runs-view-ownership.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "runs-view-ownership.spec.mjs — ResearchHubPanel 会话归属联动端到端回归：进会话、切所属会话开终稿与孤立归档不串台。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/client/session-follow.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -1018,7 +1068,7 @@
       "lane": "spec",
       "class": "unit-pure",
       "cost": "fast-inproc",
-      "uniqueClaim": "起步卡的会话级瞬态与失败详情（BUG-409 / BUG-410）。",
+      "uniqueClaim": "起步卡的会话级瞬态、失败详情、已绑定工作区瘦身与最近研究续接（BUG-409 / BUG-410 / X5）。",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
@@ -1050,6 +1100,26 @@
       "cost": "fast-inproc",
       "uniqueClaim": "workspace-files.spec.mjs — workspaceFiles 读闭包的降级合同（2026-11-03 P4 拆分）。",
       "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/events/research-projection.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "research-projection.spec.mjs — Host sessionProjections 纯增量折算与 Hub 会话归属反查单测。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/events/research-references.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "parseResearchRefToken：识别证据卡与计划节点，拒绝路径穿越与 _failed.md",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {
@@ -1293,6 +1363,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/cockpit/lib/run/evidence-preview.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "extractEvidencePreview：解析 8 字段元数据、安全 URL 与去标记 3 行正文摘录",
+      "oracleType": "self-referential",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/cockpit/lib/run/health.spec.mjs",
       "domain": "cockpit",
       "lane": "spec",
@@ -1349,6 +1429,16 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "tests/cockpit/lib/run/run-version.spec.mjs —— rerun 版本面的 keyless 契约。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/lib/run/showcase-fixture.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "showcase-home 会话日志：Host researchRun 投影分别产出 delivered 与 hitl_pending 双态",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },

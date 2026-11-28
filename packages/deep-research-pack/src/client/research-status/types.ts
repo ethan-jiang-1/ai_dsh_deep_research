@@ -34,6 +34,10 @@ export interface ResearchStatusTabInjected {
   readonly revealStatusTab: () => void
   /** 终稿门：按会话 + 终稿相对路径打开「终稿」页签（文件地址；同地址幂等，已开则聚焦）。 */
   readonly openFinal: (sessionId: SessionId, path: string) => void
+  /** 证据卡门：从质量雷达点击直达对应证据卡页签。 */
+  readonly openEvidence?: (sessionId: SessionId, runDir: string, cardFile: string) => void
+  /** 队员直达：从队员动态行一键切入队员子会话。 */
+  readonly openMember?: (leadSessionId: SessionId, memberId: SessionId) => void
 }
 
 /** 活标题注入面：只需要 journal 流（挂起谓词）——标题不读文件、不开面。 */
@@ -73,6 +77,8 @@ export interface BundleFace {
   readonly questionText: string | null
   readonly finalFileNames: readonly string[]
   readonly hasFinal: boolean
+  /** 当前扫描命中的 run 目录相对路径（含根 / archive / _abandoned 桶前缀，供证据卡跳转）。 */
+  readonly runDir?: string | null
   readonly protocol?: ProtocolFace
   readonly evidenceMatrix?: EvidenceMatrix
 }

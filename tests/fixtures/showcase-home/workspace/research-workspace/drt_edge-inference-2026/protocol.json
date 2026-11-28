@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "version": 1,
+  "status": "draft",
+  "created": "2026-11-28T09:50:00+08:00",
+  "approved_at": null,
+  "approval_basis": null,
+  "method": {
+    "id": "方案比较",
+    "kind": "preset",
+    "library_name": null,
+    "library_fields_sha256": null,
+    "fields": {
+      "source": "官方推理引擎仓库基准与可复现脚本优先",
+      "verify": "严格区分 Apple Silicon 与 x86 硬件口径",
+      "report": "多维延迟、吞吐、内存峰值对比矩阵",
+      "limit": "缺乏统一硬件条件下不做绝对排行榜"
+    },
+    "adjustments": []
+  },
+  "source_scope": {
+    "families": ["official", "web"],
+    "domains": [],
+    "exclude_domains": [],
+    "recency": "12m",
+    "language": ["zh", "en"],
+    "authority": "primary"
+  },
+  "effort": {
+    "band": "standard",
+    "band_v": 1,
+    "nodes_max": 8,
+    "cells_max": 9,
+    "waves_max": 3,
+    "allowed_depths": ["L1", "L2"]
+  },
+  "output": {
+    "shape": "full_report",
+    "sections": ["决策结论", "引擎对比", "硬件口径", "边界与风险"],
+    "length": { "min": 1200, "max": 1800, "unit": "words" },
+    "format": "md",
+    "audience": "本地桌面 AI 插件选型团队"
+  },
+  "gates": {
+    "hitl1": "protocol_projection",
+    "hitl2": "review",
+    "evidence_threshold": "B",
+    "critic": "both",
+    "claim_verification": "on"
+  },
+  "deviations": []
+}

@@ -46,12 +46,18 @@ function pathOfToolArgs(argsRaw: string): string | null {
   return typeof candidate === 'string' && candidate.trim() !== '' ? candidate.trim() : null
 }
 
-/** 从 Turn 结尾提取里程碑列表（只在存在里程碑时返回非空数组）。 */
+/** 从 Turn 结尾提取里程碑列表（若同回合原生 ui-deliverables 已渲染终稿交付卡，则对 delivered 行去重）。 */
 export function selectResearchMilestones(owner: { readonly turn: TurnLocation; readonly seq: number }): readonly ResearchMilestone[] {
   const data = owner.turn.data.get(RESEARCH_TURN_DATA_KEY)
   if (data === undefined) return []
   const cutoff = owner.turn.end?.seq ?? owner.seq
-  return data.milestones.filter((m) => m.seq <= cutoff)
+  const nativeDeliverables = owner.turn.data.get('deliverables' as never) as
+    | { readonly presented?: readonly { readonly seq?: number; readonly path?: unknown }[] }
+    | undefined
+  const nativePresentedFinal = (nativeDeliverables?.presented ?? []).some(
+    (file) => typeof file.seq === 'number' && file.seq <= cutoff && finalPathOf(file.path) !== null,
+  )
+  return data.milestones.filter((m) => m.seq <= cutoff && !(nativePresentedFinal && m.kind === 'delivered'))
 }
 
 /** Turn 级研究里程碑累积器 Definition。 */

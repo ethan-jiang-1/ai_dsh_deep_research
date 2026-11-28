@@ -83,6 +83,9 @@
 - `@deepseek-ai/dsh-client-ui-renderer`
 - `@deepseek-ai/dsh-client-ui-session`
 - `@deepseek-ai/dsh-client-ui-conversation`
+- `@deepseek-ai/dsh-client-ui-commands`
+- `@deepseek-ai/dsh-client-ui-input-trigger`
+- `@deepseek-ai/dsh-client-shortcuts`
 - `@deepseek-ai/dsh-client-ui-sidebar`
 - `@deepseek-ai/dsh-client-ui-sidebar-right`
 - `@deepseek-ai/dsh-client-ui-workspace`
@@ -117,7 +120,6 @@
 | `RESEARCH_DEFAULTS_BUTTON_ID` | `'deep-research-defaults'` |
 | `RESEARCH_TOOLVIEW_SLOT` | `'tool.call.toolview'` |
 | `RESEARCH_TOOL_KEYS` | `['spawn_teammate', 'web_search', 'web_fetch', 'subagent']` |
-| `METHOD_LIBRARY_VIEW` | `'conversation.view'` |
 | `METHOD_COACH_PORTAL` | `'shell.overlay'` |
 | `METHOD_COACH_PORTAL_ID` | `'deep-research-pack/method-coach-portal'` |
 | `METHOD_COACH_CHAT` | `'method.coach.chat'` |
@@ -134,3 +136,21 @@
 | `RESEARCH_HUB_PANEL_ID` | `'deep-research-hub'` |
 | `RESEARCH_TAB_MENU_ITEM_SLOT` | `'sidebar.right.tab.menu.item'` |
 | `RESEARCH_TAB_MENU_HUB_ID` | `'deep-research-open-hub'` |
+| `RESEARCH_SESSION_ROW_LEADING_SLOT` | `'sidebar.session.row.leading'` |
+| `RESEARCH_SESSION_ROW_LEADING_ID` | `'deep-research-pack/session-row-leading'` |
+| `RESEARCH_SESSION_ROW_HOVER_SLOT` | `'sidebar.session.row.hover'` |
+| `RESEARCH_SESSION_ROW_HOVER_ID` | `'deep-research-pack/session-row-hover'` |
+| `RESEARCH_SESSION_MENU_ITEM_SLOT` | `'sidebar.workspaces.session.menu.item'` |
+| `RESEARCH_SESSION_MENU_OPEN_FINAL_ID` | `'deep-research-pack/session-open-final'` |
+| `RESEARCH_HERO_OPTIONS_SLOT` | `'conversation.hero.options'` |
+| `RESEARCH_HERO_OPTIONS_ID` | `'deep-research-pack/hero-options'` |
+| `RESEARCH_CMD_DEFAULTS` | `'research-defaults'` |
+| `RESEARCH_CMD_LENS` | `'lens'` |
+| `RESEARCH_CMD_METHOD` | `'method'` |
+| `RESEARCH_CMD_HUB` | `'hub'` |
+| `RESEARCH_TRIGGER_SOURCE` | `'research'` |
+| `RESEARCH_USER_TEXT_NODE_SLOT` | `'conversation.user.text.node'` |
+| `RESEARCH_USER_TEXT_NODE_KEY` | `'researchRef'` |
+| `RESEARCH_SHORTCUT_STATUS` | `'deepResearch.status'` |
+| `RESEARCH_SHORTCUT_GRAPH` | `'deepResearch.graph'` |
+| `RESEARCH_SHORTCUT_HUB` | `'deepResearch.hub'` |

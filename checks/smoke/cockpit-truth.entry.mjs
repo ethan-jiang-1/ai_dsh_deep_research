@@ -154,7 +154,8 @@ async function openStatus(page) {
     const tab = page.locator('[data-sidebar-right-guide-entry="research-status"]').first()
     if (await tab.count().catch(() => 0) > 0) await tab.click({ force: true }).catch(() => {})
     await page.waitForTimeout(1_200)
-    if (await page.locator('[data-research-face]').count().catch(() => 0) > 0) break
+    const faceAttr = await page.locator('[data-research-face]').first().getAttribute('data-research-face').catch(() => null)
+    if (faceAttr !== null && faceAttr !== 'unknown') break
   }
   return page.evaluate(() => {
     const face = document.querySelector('[data-research-face]')

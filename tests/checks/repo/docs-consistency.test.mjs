@@ -151,15 +151,13 @@ test('入口链导航合同：开跑前置含 vendor 构建/工作区注册；�
   assert.ok(!evalText.includes('`node checks/smoke/client-load.entry.mjs`'), 'evaluation 仍有不带 --import tsx/esm 的 client-load 命令')
 })
 
-test('研究配置面板形态：COMPACT 默认态下 README 不描述已迁走的管理四区（2026-10-27 卫生轮）', () => {
-  // 2026-11-03 G-13 拆分：COMPACT 开关随取数状态移入 useConfigFeed（页签体只消费返回值）。
-  const feed = read('packages/deep-research-pack/src/client/research-config/useConfigFeed.ts')
-  const compact = /const COMPACT = true/.test(feed)
-  assert.ok(/const COMPACT = (true|false)/.test(feed), 'useConfigFeed.ts 缺 COMPACT 开关——本断言的判据源消失')
-  if (!compact) return // 回滚态：管理块渲染中，README 的四区描述与之一致，不再断言
+test('研究配置面板形态：旧四区管理分支已清零，README 不描述已迁走的管理四区（2026-10-27 卫生轮 / R0 收口）', () => {
+  assert.equal(existsSync(join(ROOT, 'packages/deep-research-pack/src/client/research-config/LegacyManagementPane.tsx')), false, 'LegacyManagementPane.tsx 已彻底退役，不得回流')
+  const config = read('packages/deep-research-pack/src/client/ResearchConfigTab.tsx')
+  assert.doesNotMatch(config, /\bCOMPACT\b/, 'ResearchConfigTab.tsx 不得保留 COMPACT 死开关')
   const readme = read('packages/deep-research-pack/README.md')
   for (const term of ['四区', '内置打法', '我的偏好库', '底线条']) {
-    assert.ok(!readme.includes(term), `COMPACT=true（四区不渲染）但 pack README 仍写「${term}」——发布物与源码不同事；同步为摘要面或改 COMPACT 前先改 README`)
+    assert.ok(!readme.includes(term), `四区已迁出侧栏但 pack README 仍写「${term}」——发布物与源码不同事`)
   }
 })
 

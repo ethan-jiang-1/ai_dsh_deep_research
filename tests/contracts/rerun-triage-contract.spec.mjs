@@ -81,14 +81,14 @@ test('L1 词表：skill 七类说法 / 四种手段 / 五条纪律，且被 pers
   assert.match(read(PERSONA), /rerun-triage/, 'persona 未指向 rerun-triage skill（交付前/后不满都说明书）')
 })
 
-test('L3 只读出口：两组件共用 src/lib 常量，且不引入动作按钮', () => {
+test('L3 只读出口：终稿页尾引用 src/lib 常量（状态页不重复），且不引入动作按钮', () => {
   const lib = 'packages/deep-research-pack/src/lib/run/rerun-triage.ts'
   assert.ok(existsSync(join(ROOT, lib)), 'rerun-triage 文案常量模块不存在')
-  for (const rel of ['packages/deep-research-pack/src/client/ResearchStatusTab.tsx', 'packages/deep-research-pack/src/client/ResearchFinalTab.tsx']) {
-    const c = read(rel)
-    assert.ok(c.includes("lib/run/rerun-triage.ts"), `${rel} 未引用共享常量`)
-    assert.ok(c.includes('rerunTriageRowsOf(props.t)'), `${rel} 未走 locale 取词（BUG-055：英文界面不得回退中文）`)
-  }
+  const finalTab = read('packages/deep-research-pack/src/client/ResearchFinalTab.tsx')
+  assert.ok(finalTab.includes("lib/run/rerun-triage.ts"), 'ResearchFinalTab.tsx 未引用共享常量')
+  assert.ok(finalTab.includes('rerunTriageRowsOf(props.t)'), 'ResearchFinalTab.tsx 未走 locale 取词（BUG-055：英文界面不得回退中文）')
+  const statusTab = read('packages/deep-research-pack/src/client/ResearchStatusTab.tsx')
+  assert.equal(statusTab.includes('rerunTriageRowsOf'), false, 'ResearchStatusTab.tsx 不再重复渲染三种改法折叠块（收口于终稿页尾）')
   assert.match(RERUN_TRIAGE_TITLE, /三种改法/, '常量缺折叠块标题')
   assert.ok(RERUN_TRIAGE_ROWS.some((row) => row.copy.includes('这份')), '常量缺可复制的一句话')
   assert.match(RERUN_TRIAGE_HINT, /照抄/, '常量缺使用提示')

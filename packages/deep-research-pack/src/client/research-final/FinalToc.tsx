@@ -1,147 +1,102 @@
-import type { ReactNode, RefObject } from 'react'
+import { useEffect, useMemo, useState, type ReactNode, type RefObject } from 'react'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
+import { activeTocHeadingIndex, extractTocHeadings, type TocHeading } from '../../lib/run/evidence-preview.ts'
 import css from '../ResearchFinalTab.module.css'
 
-interface TocHeading {
-  readonly level: number
-  readonly text: string
+function locateHeadingElement(root: HTMLElement, headings: readonly TocHeading[], heading: TocHeading, index: number): HTMLElement | undefined {
+  const normalize = (s: string): string => s.replace(/\s+/g, ' ').trim()
+  const targetText = normalize(heading.text)
+  const nodes = [...root.querySelectorAll<HTMLElement>('h1, h2, h3')]
+  const nthSame = headings
+    .slice(0, index + 1)
+    .filter((item) => item.level === heading.level && normalize(item.text) === targetText)
+    .length - 1
+  const byIndex = nodes[index]
+  const sameLevelAndText = nodes.filter(
+    (el) => el.tagName === `H${heading.level}` && normalize(el.textContent ?? '') === targetText,
+  )
+  return (byIndex !== undefined && byIndex.tagName === `H${heading.level}` && normalize(byIndex.textContent ?? '') === targetText)
+    ? byIndex
+    : sameLevelAndText[nthSame] ?? nodes.find((el) => normalize(el.textContent ?? '') === targetText)
 }
 
-const FENCE_RE = /^\s{0,3}(`{3,}|~{3,})/
-const HEADING_RE = /^(#{1,3})\s+(.+)$/
-
-function findMatchingBracket(raw: string, openIndex: number): number {
-  let depth = 0
-  for (let i = openIndex; i < raw.length; i += 1) {
-    const ch = raw[i]
-    if (ch === '\\') {
-      i += 1
-      continue
-    }
-    if (ch === '[') depth += 1
-    else if (ch === ']') {
-      depth -= 1
-      if (depth === 0) return i
-    }
-  }
-  return -1
-}
-
-function findMatchingParen(raw: string, openIndex: number): number {
-  let depth = 0
-  let inAngle = false
-  for (let i = openIndex; i < raw.length; i += 1) {
-    const ch = raw[i]
-    if (ch === '\\') {
-      i += 1
-      continue
-    }
-    if (ch === '<' && depth === 1) {
-      inAngle = true
-      continue
-    }
-    if (ch === '>' && inAngle) {
-      inAngle = false
-      continue
-    }
-    if (inAngle) continue
-    if (ch === '(') depth += 1
-    else if (ch === ')') {
-      depth -= 1
-      if (depth === 0) return i
-    }
-  }
-  return -1
-}
-
-function stripMarkdownLinks(raw: string): string {
-  let out = ''
-  let i = 0
-  while (i < raw.length) {
-    const isImage = raw[i] === '!' && raw[i + 1] === '['
-    const bracketStart = isImage ? i + 1 : raw[i] === '[' ? i : -1
-    if (bracketStart !== -1) {
-      const bracketEnd = findMatchingBracket(raw, bracketStart)
-      if (bracketEnd !== -1 && raw[bracketEnd + 1] === '(') {
-        const parenEnd = findMatchingParen(raw, bracketEnd + 1)
-        if (parenEnd !== -1) {
-          out += stripMarkdownLinks(raw.slice(bracketStart + 1, bracketEnd))
-          i = parenEnd + 1
-          continue
-        }
-      }
-    }
-    out += raw[i]
-    i += 1
-  }
-  return out
-}
-
-/**
- * 剥离标题中的行内 Markdown 语法（图片/含嵌套括号链接/引用链接/粗斜体/反引号/转义），
- * 使章节目录文案与正文渲染后的 `h1/h2/h3.textContent` 一致（BUG-453、BUG-458）。
- */
-function stripMarkdownInline(raw: string): string {
-  return stripMarkdownLinks(raw)
-    .replace(/\[([^\]]+)\]\[[^\]]*\]/g, '$1')
-    .replace(/\\([\\`*_{}[\]()#+\-.!])/g, '$1')
-    .replace(/[*`~]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-function extractTocHeadings(markdown: string): readonly TocHeading[] {
-  const headings: TocHeading[] = []
-  let fenceChar: string | null = null
-  for (const line of markdown.split(/\r?\n/)) {
-    const f = FENCE_RE.exec(line)
-    if (f?.[1] !== undefined) {
-      fenceChar = fenceChar === null ? (f[1][0] ?? null) : (f[1][0] === fenceChar ? null : fenceChar)
-      continue
-    }
-    if (fenceChar !== null) continue
-    const m = HEADING_RE.exec(line.trim())
-    if (m?.[1] !== undefined && m[2] !== undefined) {
-      const text = stripMarkdownInline(m[2])
-      if (text !== '') headings.push({ level: m[1].length, text })
-    }
-  }
-  return headings
-}
-
-/** 轻量可折叠章节目录：列出终稿 H1–H3 章节骨架，点击滚动定位到对应正文标题（BUG-445）。 */
+/** 章节目录：常规侧栏呈折叠大纲，全屏精读台呈左侧常驻 Sticky 大纲并同步高亮当前章节。 */
 export function FinalToc(props: {
   readonly markdown: string
   readonly bodyRef?: RefObject<HTMLDivElement | null>
+  readonly mode?: 'collapsible' | 'sticky'
+  readonly open?: boolean
+  readonly onToggleOpen?: (next: boolean) => void
   readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
-  const headings = extractTocHeadings(props.markdown)
+  const { markdown, bodyRef, mode = 'collapsible', open, onToggleOpen, t } = props
+  const headings = useMemo(() => extractTocHeadings(markdown), [markdown])
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  useEffect(() => {
+    setActiveIndex(0)
+  }, [markdown])
+
+  useEffect(() => {
+    if (mode !== 'sticky') return undefined
+    const scroller = bodyRef?.current
+    if (scroller === null || scroller === undefined || headings.length < 2) return undefined
+    const updateActive = () => {
+      const containerTop = scroller.getBoundingClientRect().top
+      const nodes = [...scroller.querySelectorAll<HTMLElement>('h1, h2, h3')]
+      if (nodes.length === 0) return
+      const offsets = headings.map((h, idx) => {
+        const el = locateHeadingElement(scroller, headings, h, idx)
+        return el !== undefined ? el.getBoundingClientRect().top - containerTop : Number.POSITIVE_INFINITY
+      })
+      setActiveIndex(activeTocHeadingIndex(offsets, 56))
+    }
+    updateActive()
+    scroller.addEventListener('scroll', updateActive, { passive: true })
+    return () => { scroller.removeEventListener('scroll', updateActive) }
+  }, [mode, bodyRef, headings])
+
   if (headings.length < 2) return null
 
   const jumpToHeading = (heading: TocHeading, index: number): void => {
-    const root = props.bodyRef?.current
+    const root = bodyRef?.current
     if (root === null || root === undefined) return
-    const normalize = (s: string): string => s.replace(/\s+/g, ' ').trim()
-    const targetText = normalize(heading.text)
-    const nodes = [...root.querySelectorAll<HTMLElement>('h1, h2, h3')]
-    const nthSame = headings
-      .slice(0, index + 1)
-      .filter((item) => item.level === heading.level && normalize(item.text) === targetText)
-      .length - 1
-    const byIndex = nodes[index]
-    const sameLevelAndText = nodes.filter(
-      (el) => el.tagName === `H${heading.level}` && normalize(el.textContent ?? '') === targetText,
-    )
-    const target = (byIndex !== undefined && byIndex.tagName === `H${heading.level}` && normalize(byIndex.textContent ?? '') === targetText)
-      ? byIndex
-      : sameLevelAndText[nthSame] ?? nodes.find((el) => normalize(el.textContent ?? '') === targetText)
+    const target = locateHeadingElement(root, headings, heading, index)
+    setActiveIndex(index)
     target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  if (mode === 'sticky') {
+    return (
+      <nav className={css.studioToc} aria-label={t('finalTocTitle', { count: String(headings.length) })} data-testid="final-studio-toc">
+        <div className={css.studioTocTitle}>{t('finalTocTitle', { count: String(headings.length) })}</div>
+        <div className={css.tocList}>
+          {headings.map((h, i) => (
+            <button
+              type="button"
+              key={`${i}:${h.text}`}
+              data-toc-active={i === activeIndex ? 'true' : undefined}
+              className={`${h.level >= 2 ? css.tocSubItem : css.tocItem}${i === activeIndex ? ` ${css.tocItemActive}` : ''}`}
+              onClick={() => { jumpToHeading(h, i) }}
+            >
+              {h.text}
+            </button>
+          ))}
+        </div>
+      </nav>
+    )
+  }
+
   return (
-    <details className={css.tocDetails}>
+    <details
+      className={css.tocDetails}
+      {...(open !== undefined ? { open } : {})}
+      onToggle={(event) => {
+        if (onToggleOpen !== undefined) onToggleOpen((event.currentTarget as HTMLDetailsElement).open)
+      }}
+    >
       <summary className={css.tocSummary}>
-        {props.t('finalTocTitle', { count: String(headings.length) })}
+        {t('finalTocTitle', { count: String(headings.length) })}
       </summary>
       <div className={css.tocList}>
         {headings.map((h, i) => (

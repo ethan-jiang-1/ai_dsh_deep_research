@@ -344,7 +344,6 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   return (
     <div
       data-method-library=""
-      data-method-library-edit={mode !== 'read' ? '' : undefined}
       data-method-draft-revision={draftRevision}
       className={css.root}
     >

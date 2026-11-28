@@ -2,14 +2,16 @@
 
 把一个问题交给一支会互相核查的研究小队：Lead 拆题，Scout 找来源，Analyst 深读，Critic 挑错，交付一份每条关键结论都标了出处的报告。它装在 DeepSeek Harness（DSH）里；研究产物直接写进你选的项目文件夹。
 
-![打开后：选工作区与 Deep Research Lead；右栏是研究状态 / 配置 / 图谱入口](docs/assets/readme-first-screen.png)
+![打开后：意图优先首屏、左栏研究状态标与右栏阶段聚焦驾驶舱](docs/assets/readme-first-screen.png)
 
 ## 你会得到什么
 
 - **四个角色分工**：Lead 拆题与综合，Scout 找来源，Analyst 读材料，Critic 挑错；复杂题自动组队。
-- **可核查的报告**：关键结论带 `[来源: evidence/xx.md]`；Critic 先查证据链，审阅不通过不交付。
-- **看得见的进度**：右栏「研究状态」显示流程轨道、活动流与等你决定的挂起问题；交付后在「终稿」读读者版。
-- **产物在你的项目里**：`drt_<slug>/`（问题、证据、报告、审阅）、`archive/`，以及跨 run 复用的方法库。
+- **全屏三栏精读与悬停溯源**：关键结论带 `[来源: evidence/xx.md]`，悬停 150ms 秒看证据等级与摘录；全屏自动展开「左目录 + 中正文 + 右证据/Critic 核查对照」，支持风险筛选。
+- **全域状态与指令流**：左栏会话自带实时研究状态标，右栏按阶段聚焦并支持点击质量雷达格直钻证据卡；输入框原生支持 `/lens`、`/method`、`/research-defaults`、`/hub` 与 `@` 证据/计划引用胶囊。
+- **产物在你的项目里**：`drt_<slug>/`（问题、证据、报告、审阅）、`archive/`，以及通过左侧全局「研究工作台」统一管理的 Runs、方法库与研究透镜。
+
+> **想先 3 分钟零 Key 体验完整界面？** 在源码仓完成 `pnpm install`、`bash tools/build/vendor-build.sh` 与 `pnpm build` 后直接运行 `pnpm demo`，无需 API Key 即可体验完整示范工作台；全部 DSH 原生能力对照见 [DSH 标杆示范导览](docs/guides/dsh-showcase.md)。
 
 ## 5 分钟装好
 
@@ -35,7 +37,7 @@ dsh --profile deep-research
 > `bash tools/build/vendor-build.sh` → `node tools/release/export-dist.mjs`，再按手册装 `_dist/` 新生成的 tgz；
 > 完整命令、profile 与团队层安装 = [CONTRIBUTING §From source to first run](CONTRIBUTING.md#from-source-to-first-run)。
 
-装好的标志：Plugins 页 → **Installed plugins** 出现「深度研究 / Deep Research」（市场入口在 npm 发布后才出现）。打开一个会话后，右栏有「研究状态 / 研究配置 / 研究图谱」（终稿在交付后自动出现），主界面有「方法库」。更新插件后要重启 profile（Ctrl-C 停掉，再跑 `dsh --profile deep-research`）。
+装好的标志：Plugins 页 → **Installed plugins** 出现「深度研究 / Deep Research」（市场入口在 npm 发布后才出现）。打开一个会话后，左栏会话带实时研究状态标，右栏有「研究状态 / 研究配置 / 研究图谱」（终稿在交付后自动出现），左侧有全局「研究工作台」（档案 / 方法库 / 研究透镜）。更新插件后要重启 profile（Ctrl-C 停掉，再跑 `dsh --profile deep-research`）。
 
 ![Plugins 页里的 Deep Research](docs/assets/readme-plugins.png)
 

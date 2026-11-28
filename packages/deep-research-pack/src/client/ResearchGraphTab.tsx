@@ -109,9 +109,10 @@ function formatClock(ms: number): string {
  * @param props - 槽标准 props + 注入面（readFile / openOwner）。
  */
 export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
-  const tabInfo = typeof (props as { useTabInfo?: () => { tab?: { actions?: { bindCommands?: (c: { refresh: () => void }) => () => void } } } }).useTabInfo === 'function'
-    ? (props as { useTabInfo: () => { tab?: { actions?: { bindCommands?: (c: { refresh: () => void }) => () => void } } } }).useTabInfo()
+  const tabInfo = typeof (props as { useTabInfo?: () => { sidebar?: { fullscreen?: boolean }; tab?: { actions?: { bindCommands?: (c: { refresh: () => void }) => () => void } } } }).useTabInfo === 'function'
+    ? (props as { useTabInfo: () => { sidebar?: { fullscreen?: boolean }; tab?: { actions?: { bindCommands?: (c: { refresh: () => void }) => () => void } } } }).useTabInfo()
     : undefined
+  const isFullscreen = tabInfo?.sidebar?.fullscreen === true
   // 当前会话若是 teammate，读 Lead 的团队投影（TeamAction 同款；队员自己的投影没有整队视图）。
   const leadSessionId = props.useSession((snapshot) => snapshot.subagent?.address.parentSessionId) ?? props.sessionId
   const team: TeamProjection | undefined = props.useSessions((state) => state.projectionsBySession[leadSessionId]?.values.agentTeam)
@@ -286,9 +287,9 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       <div className={styles.tabHeader}>
         <strong className={styles.tabTitle}>{props.t('graphHeader')}</strong>
         <span className={styles.readonlyBadge}>{props.t('graphReadonly')}</span>
-        {boundSlug !== null && <span className={styles.mutedSlug}>run drt_{shortLabel(boundSlug, 32)}</span>}
+        {boundSlug !== null && <span className={styles.mutedSlug}>{props.t('graphRunSlug', { slug: shortLabel(boundSlug, 32) })}</span>}
         <span className={styles.mutedLine}>
-          {hasPlan ? `${props.t('graphPlanLoaded', { version: '' })} ${String(topPlanNodes.length)} ${topPlanNodes.length === 1 ? 'top-level' : 'top-level'}${planNodes.length !== topPlanNodes.length ? ` / ${String(planNodes.length)} nodes` : ''} · ` : ''}{countText(props.t, counts.total, 'graphTeamTasksOne', 'graphTeamTasksOther', { done: String(counts.done) })}
+          {hasPlan ? `${props.t('graphPlanLoaded', { version: '' }).trim()} ${countText(props.t, topPlanNodes.length, 'graphTopLevelOne', 'graphTopLevelOther')}${planNodes.length !== topPlanNodes.length ? ` / ${countText(props.t, planNodes.length, 'graphPlanNodesTotalOne', 'graphPlanNodesTotalOther')}` : ''} · ` : ''}{countText(props.t, counts.total, 'graphTeamTasksOne', 'graphTeamTasksOther', { done: String(counts.done) })}
         </span>
         {counts.running > 0 && <span className={`${styles.runningText} ${styles.mutedLine}`}>● {props.t('graphRunning', { count: String(counts.running) })}</span>}
         {counts.ready > 0 && <span className={`${styles.warnText} ${styles.mutedLine}`}>○ {props.t('graphReady', { count: String(counts.ready) })}</span>}
@@ -378,7 +379,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         const selectedNode = expandedId !== null ? graphNodes.find((n) => n.id === expandedId) ?? null : null
         return (
           <>
-            <DagMap nodes={graphNodes} selectedId={expandedId} childCounts={childCounts} onSelect={setExpandedId} t={props.t} />
+            <DagMap nodes={graphNodes} selectedId={expandedId} childCounts={childCounts} fullscreen={isFullscreen} onSelect={setExpandedId} t={props.t} />
             <div className={styles.edgesHint}>
               {props.t('graphEdgesHint')}
             </div>
@@ -401,7 +402,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
             {waves.map((wave) => (
               <section key={wave.level} className={styles.selectedNodeSection}>
                 <div className={styles.waveTitle}>
-                  WAVE {wave.level + 1}{wave.tasks.length > 1 ? props.t('parallelCount', { count: String(wave.tasks.length) }) : ''}
+                  {props.t('graphWaveTitle', { index: String(wave.level + 1) })}{wave.tasks.length > 1 ? props.t('parallelCount', { count: String(wave.tasks.length) }) : ''}
                 </div>
                 {wave.tasks.map((node) => renderNodeCard(node))}
               </section>

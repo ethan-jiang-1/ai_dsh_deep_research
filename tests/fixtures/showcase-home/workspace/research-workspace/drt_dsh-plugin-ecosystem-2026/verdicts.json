@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "round": 1,
+  "verdicts": [
+    {
+      "claim_id": "C1",
+      "verdict": "supported",
+      "quote": "通过 cordis.patch.yml 的 disabled: true 与 isolate 隔离域，外部组合包可在不修改宿主内核的前提下精准裁剪出厂面板并装配多角色预设",
+      "reason": "一手源码契约与真浏览器装配验证完全一致。",
+      "rechecked_urls": ["https://github.com/deepseek-ai/dsh"],
+      "source_tier_ok": true
+    },
+    {
+      "claim_id": "C2",
+      "verdict": "supported",
+      "quote": "冷启动经 projectionValues、热态经 projectionsBySession 推送，零额外 follow 订阅",
+      "reason": "Host sessionProjections 契约与浏览器双读路径核实一致。",
+      "rechecked_urls": ["https://docs.deepseek.com/harness/session-projections"],
+      "source_tier_ok": true
+    },
+    {
+      "claim_id": "C3",
+      "verdict": "supported",
+      "quote": "全局选择器压盖宿主输入框会在宿主调整 DOM 层级时大面积失效",
+      "reason": "对抗复盘与仓内升级经验交叉印证。",
+      "rechecked_urls": ["https://engineering.example.org/postmortems/plugin-css-fragility"],
+      "source_tier_ok": true
+    },
+    {
+      "claim_id": "C4",
+      "verdict": "supported",
+      "quote": "独立上下文角色 + 结构化 claims × verdicts 对账可显著压低自我确认偏差",
+      "reason": "学术一手综述明确支撑。",
+      "rechecked_urls": ["https://arxiv.org/abs/2605.01234"],
+      "source_tier_ok": true
+    },
+    {
+      "claim_id": "C5",
+      "verdict": "partial",
+      "quote": "单份长报告往返次数降低约 70%，但超大规模工作区内存基准尚待补充",
+      "reason": "常规规模量化结论成立，超百卡规模属未覆盖边界，已显性标注。",
+      "rechecked_urls": ["https://benchmarks.example.org/agent-ux-latency-2026"],
+      "source_tier_ok": true
+    }
+  ]
+}

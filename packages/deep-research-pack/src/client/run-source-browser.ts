@@ -59,8 +59,9 @@ function entryOf(raw: unknown): Entry | null {
  * @param sessionId - 当前会话（workspaceFiles 的授权单位）。
  * @returns `RunSource`（list/read/version）。
  */
-export function browserRunSource(files: WorkspaceFilesLike, sessionId: SessionId): RunSource {
+export function browserRunSource(files: WorkspaceFilesLike, sessionId: SessionId, root?: string): RunSource {
   return {
+    ...(typeof root === 'string' && root.trim() !== '' ? { root } : {}),
     async list(dir, opts) {
       // workspaceFiles.list 拒绝空路径（gateway/bad-request）；`''` = 工作区根，映射成 `.`。
       const target = dir === '' ? '.' : dir

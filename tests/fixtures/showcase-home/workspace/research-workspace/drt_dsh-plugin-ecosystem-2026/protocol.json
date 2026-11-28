@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "version": 1,
+  "status": "approved",
+  "created": "2026-11-28T09:10:00+08:00",
+  "approved_at": "2026-11-28T09:15:00+08:00",
+  "approval_basis": "HITL1 确认：架构评估 + 独立 Critic 核查",
+  "method": {
+    "id": "方案比较",
+    "kind": "preset",
+    "library_name": "开源生态架构对比",
+    "library_fields_sha256": null,
+    "fields": {
+      "source": "一手源码契约、官方文档与架构复盘优先，补充量化基准与对抗反例",
+      "verify": "每项关键结论交叉核验一手来源，显性标注未测边界",
+      "report": "读者版一页执行摘要 + 审计版全量章节与逐句证据链",
+      "limit": "不在缺乏统一基准条件下对超百卡规模做绝对性能承诺"
+    },
+    "adjustments": ["补充 Profile 层零改包代码生态叠加分析"]
+  },
+  "source_scope": {
+    "families": ["official", "academic", "practitioner"],
+    "domains": [],
+    "exclude_domains": [],
+    "recency": "12m",
+    "language": ["zh", "en"],
+    "authority": "primary"
+  },
+  "effort": {
+    "band": "deep",
+    "band_v": 1,
+    "nodes_max": 8,
+    "cells_max": 12,
+    "waves_max": 4,
+    "allowed_depths": ["L1", "L2"]
+  },
+  "output": {
+    "shape": "full_report",
+    "sections": ["执行摘要", "零改内核组合机制", "全域状态投影", "精读与核查闭环", "生态可组合性"],
+    "length": { "min": 1400, "max": 2600, "unit": "words" },
+    "format": "md",
+    "audience": "架构师与研发负责人"
+  },
+  "gates": {
+    "hitl1": "protocol_projection",
+    "hitl2": "review",
+    "evidence_threshold": "B",
+    "critic": "both",
+    "claim_verification": "on"
+  },
+  "deviations": []
+}

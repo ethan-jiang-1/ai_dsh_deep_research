@@ -20,6 +20,7 @@
 | `pnpm typecheck` | pack 半需 vendor 构建产物 | 运行 `tsc -b packages/deep-research-pack` + `tsc -p tsconfig.scripts.json`（含脚本 `checkJs`） |
 | `pnpm release:check` | keyless（只读） | 发布/移交锚检查（`node checks/release/release-check.mjs`；支持 `--handoff` / `--receiver`） |
 | `pnpm dsh` | 需 vendor 构建产物 | 直接从钉版 `vendor/dsh` 源码运行机制基线 CLI（等价 `tools/env.sh` 的 `dsh` 函数） |
+| `pnpm demo` | keyless（需 `pnpm build` + vendor 产物） | 零 API Key 启动隔离示范工作台（`tools/channel/demo-showcase.mjs`；支持 `--check` / `--no-open` / `--port`） |
 | `pnpm docs:gen` | keyless | 重生成 `docs/reference/{package-catalog,cockpit-registry,gates-ledger}.generated.md` |
 | `pnpm docs:check` | keyless（只读） | 校验三份 `docs/reference/*.generated.md` 新鲜度及本页与 `package.json` 的双向同步 |
 

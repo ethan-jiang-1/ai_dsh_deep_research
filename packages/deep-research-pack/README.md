@@ -121,10 +121,8 @@ dsh --profile deep-research --no-open --port 0
 
 `--dump-config` must show the row ids listed above, and stderr must not contain
 `patch: entry "…" not found`. A real start must print a `dsh web:` token URL without
-`did not activate` or `ERR_MODULE_NOT_FOUND`. In the UI, the package appears as “Deep Research”
-with a header status pill, right-sidebar Status (track rail, contract & quality radar), Config,
-Graph (interactive DAG), Final Report (reader/audit/claims & citation split view), and Evidence Card tabs,
-plus the global Research Hub (Runs, Methods, Lenses).
+`did not activate` or `ERR_MODULE_NOT_FOUND`. In the UI, the package appears as “Deep Research” with
+left-sidebar live badges (Host `researchRun` projection), header pill, intent-first start cards, right-sidebar Status (focus hero & interactive radar), Config, Graph (fullscreen DAG), Final Report (3-column studio, 150ms citation hover, risk filter), Evidence Card, Composer `/` & `@` flows, rich tool cards, and the global Research Hub (Runs, Methods, Lenses).
 
 ### Configure
 

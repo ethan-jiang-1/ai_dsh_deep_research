@@ -67,7 +67,8 @@ export function ResearchHeaderPill(props: ResearchHeaderPillProps): ReactNode {
 
   const trust = bindingTrust(events)
   const hitl = foldHitlPending(events)
-  const delivery = latestFinalDelivery(events)
+  const cwd = sessionId === undefined ? undefined : runSource?.(sessionId).root
+  const delivery = latestFinalDelivery(events, cwd)
   const failure = streamFailureOf(events)
   const slug = trust.kind === 'bound' || trust.kind === 'suppressed' ? trust.slug : null
 

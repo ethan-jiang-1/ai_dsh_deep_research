@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
@@ -6,6 +6,11 @@ import { Button, IconSearchOutlineRegular, SegmentedTabs } from '@deepseek-ai/ds
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { scanRunsCatalog, type RunCatalogResult } from '../lib/workspace/runs-catalog.ts'
 import type { RunSource } from '../lib/run/run-context.ts'
+import {
+  resolveRunSessionMatch,
+  type ResearchSessionsSnapshotLike,
+  type RunSessionMatch,
+} from '../lib/events/research-projection.ts'
 import { MethodLibraryView, type MethodLibraryInjected, type MethodLibraryViewProps } from './MethodLibraryView.tsx'
 import { DefaultsPanel } from './defaults/DefaultsPanel.tsx'
 import type { DefaultsStore } from './defaults/store.ts'
@@ -28,6 +33,8 @@ export interface ResearchHubInjected {
   readonly methodLibrary: MethodLibraryInjected
   readonly defaultsStore?: DefaultsStore
   readonly requestedTab?: HubTabRequest
+  readonly openSession?: (sessionId: SessionId) => void
+  readonly openStatus?: () => void
   readonly openFinal: (sessionId: SessionId, path: string) => void
   readonly backToChat: () => void
   readonly startResearch: (prompt?: string) => void
@@ -43,10 +50,14 @@ export function ResearchHubIcon({ size }: PropsRuntime<'sidebar.panellist'>): Re
 
 /**
  * 全局「研究工作台（Research Hub）」main keyed 面板：
- * 聚合当前工作区 `drt_*` 研究档案、方法库（摆脱空白会话限制）与 8 条研究透镜。
+ * 聚合当前工作区 `drt_*` 研究档案、方法库与 8 条研究透镜；
+ * 档案卡通过 Host `researchRun` 投影精确关联所属会话，彻底避免跨会话打开终稿串台。
  */
 export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
-  const { t, useSessions, runSource, methodLibrary, defaultsStore, requestedTab, openFinal, backToChat, startResearch, readStoredSessionId } = props
+  const {
+    t, useSessions, runSource, methodLibrary, defaultsStore, requestedTab,
+    openSession, openStatus, openFinal, backToChat, startResearch, readStoredSessionId,
+  } = props
   const sessions = useSessions((state) => state)
   const storedId = readStoredSessionId?.() ?? null
   const activeSessionId: SessionId | null = (() => {
@@ -61,6 +72,7 @@ export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
     }
     return null
   })()
+  const activeWorkspaceCwd = activeSessionId !== null ? (sessions.byId[activeSessionId]?.cwd ?? null) : null
 
   const [tab, setTab] = useState<HubTab>(() => {
     const req = requestedTab?.get() ?? null
@@ -118,6 +130,20 @@ export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
     )
     return () => { controller.abort() }
   }, [activeSessionId, runSource, refreshTick])
+
+  const sessionMatchByRootPath = useMemo(() => {
+    const map: Record<string, RunSessionMatch> = {}
+    const snapshot = sessions as unknown as ResearchSessionsSnapshotLike
+    for (const run of catalog.runs) {
+      map[run.rootPath] = resolveRunSessionMatch({
+        slug: run.slug,
+        workspaceCwd: activeWorkspaceCwd,
+        activeSessionId,
+        sessions: snapshot,
+      })
+    }
+    return map
+  }, [catalog.runs, sessions, activeWorkspaceCwd, activeSessionId])
 
   const tabItems: [
     { value: HubTab; label: string; id: string; panelId: string },
@@ -181,11 +207,19 @@ export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
               hasSession={activeSessionId !== null}
               loading={loading}
               result={catalog}
+              sessionMatches={sessionMatchByRootPath}
               onRefresh={reloadRuns}
-              onOpenFinal={(finalPath) => {
-                if (activeSessionId === null) return
+              onEnterSession={(targetSessionId) => {
+                openSession?.(targetSessionId)
                 backToChat()
-                openFinal(activeSessionId, finalPath)
+                openStatus?.()
+              }}
+              onOpenFinal={(finalPath, ownerSessionId) => {
+                const targetSessionId = ownerSessionId ?? activeSessionId
+                if (targetSessionId === null) return
+                if (ownerSessionId !== null) openSession?.(ownerSessionId)
+                backToChat()
+                openFinal(targetSessionId, finalPath)
               }}
               onStartResearch={() => { startResearch() }}
               t={t}

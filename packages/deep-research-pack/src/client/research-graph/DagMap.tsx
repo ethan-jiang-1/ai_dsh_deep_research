@@ -1,8 +1,4 @@
-// DagMap.tsx — 研究图谱的 DAG 小图（纯展示：吃 GraphNodeView[]，画 SVG，回调选中）。
-//
-// 从 ResearchGraphTab.tsx 原样切出（2026-10-27 卫生轮 维度2）：自包含的展示件（几何常量 +
-// 两个纯格式化 + SVG 渲染），此前埋在 560 行的页签体文件里；`research-graph/` 子目录一度只装
-// types.ts。切出后页签体只留数据装配与布局，DAG 的几何/交互改动只读本文件。
+// DagMap.tsx — 研究图谱的 DAG 小图（纯展示：吃 GraphNodeView[]，画 SVG，回调选中；支持全屏宽画布舒展）。
 import type { ReactNode } from 'react'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { wavesOf } from '../../lib/plan/plan-graph.ts'
@@ -10,56 +6,50 @@ import type { GraphNodeView } from './types.ts'
 import { shortLabel } from './format.ts'
 import styles from './graph.module.css'
 
-/** DAG 小图的固定几何（SVG 坐标；side panel 窄，节点只放 id + 短标签）。 */
-const NODE_W = 108
-const NODE_H = 32
-const NODE_GAP_X = 12
-const LEVEL_GAP_Y = 28
-const MAP_PAD = 8
-
+const COMPACT_GEOM = { w: 146, h: 44, gapX: 12, gapY: 28, pad: 8, summaryChars: 16, ownerChars: 11 } as const
+const WIDE_GEOM = { w: 212, h: 54, gapX: 20, gapY: 36, pad: 12, summaryChars: 26, ownerChars: 16 } as const
 
 interface DagMapProps {
   readonly nodes: readonly GraphNodeView[]
   readonly selectedId: string | null
   readonly childCounts: ReadonlyMap<string, number>
+  readonly fullscreen?: boolean
   readonly onSelect: (id: string) => void
   readonly t: TranslateNS<'deepResearchPack'>
 }
 
-
-/** 节点填充/描边（状态色只做左侧条 + 小圆点；卡片背景保持中性，避免整屏花）。 */
 function fillOf(node: GraphNodeView): string {
   if (node.status === 'completed') return 'var(--dsw-alias-state-success-tertiary)'
   if (node.status === 'in_progress') return 'var(--dsw-alias-state-business-tertiary)'
-  if (node.status === 'unplanned') return 'var(--dsw-alias-bg-layer-1)'
   return 'var(--dsw-alias-bg-layer-1)'
 }
 
 /**
- * 顶部 DAG 小图：按 `wavesOf` 分层；同层节点横排；边从 blocker 底边到 dependent 顶边。
- * 没有边时不渲染（父级明确说“没有可画的 DAG”，不画假图）。
+ * 顶部 DAG 小图：按 `wavesOf` 分层；同层节点横排；展示节点 ID、负责角色与子问题短摘要，
+ * 并在 `fullscreen` 态自适应展开宽画布。
  */
-export function DagMap({ nodes, selectedId, childCounts, onSelect, t }: DagMapProps): ReactNode {
+export function DagMap({ nodes, selectedId, childCounts, fullscreen = false, onSelect, t }: DagMapProps): ReactNode {
   const waves = wavesOf(nodes)
   if (waves.length === 0) return null
+  const geom = fullscreen ? WIDE_GEOM : COMPACT_GEOM
   const pos = new Map<string, { x: number; y: number }>()
   let maxRow = 1
   waves.forEach((wave, row) => {
     maxRow = Math.max(maxRow, wave.tasks.length)
     wave.tasks.forEach((node, index) => {
       pos.set(node.id, {
-        x: MAP_PAD + index * (NODE_W + NODE_GAP_X),
-        y: MAP_PAD + row * (NODE_H + LEVEL_GAP_Y),
+        x: geom.pad + index * (geom.w + geom.gapX),
+        y: geom.pad + row * (geom.h + geom.gapY),
       })
     })
   })
-  const width = MAP_PAD * 2 + maxRow * NODE_W + Math.max(0, maxRow - 1) * NODE_GAP_X
-  const height = MAP_PAD * 2 + waves.length * NODE_H + Math.max(0, waves.length - 1) * LEVEL_GAP_Y
+  const width = geom.pad * 2 + maxRow * geom.w + Math.max(0, maxRow - 1) * geom.gapX
+  const height = geom.pad * 2 + waves.length * geom.h + Math.max(0, waves.length - 1) * geom.gapY
   const known = new Set(nodes.map((node) => node.id))
   return (
-    <div className={styles.dagWrap}>
+    <div className={styles.dagWrap} data-dag-mode={fullscreen ? 'wide' : 'compact'}>
       <svg
-        width={Math.max(300, width)}
+        width={Math.max(fullscreen ? 640 : 320, width)}
         height={height}
         viewBox={`0 0 ${String(width)} ${String(height)}`}
         role="img"
@@ -82,9 +72,9 @@ export function DagMap({ nodes, selectedId, childCounts, onSelect, t }: DagMapPr
             if (from === undefined || to === undefined) return null
             const adjacent = selectedId !== null && (dep === selectedId || node.id === selectedId)
             const dimmed = selectedId !== null && !adjacent
-            const x1 = from.x + NODE_W / 2
-            const y1 = from.y + NODE_H
-            const x2 = to.x + NODE_W / 2
+            const x1 = from.x + geom.w / 2
+            const y1 = from.y + geom.h
+            const x2 = to.x + geom.w / 2
             const y2 = to.y
             const mid = (y1 + y2) / 2
             return (
@@ -103,13 +93,15 @@ export function DagMap({ nodes, selectedId, childCounts, onSelect, t }: DagMapPr
           const point = pos.get(node.id)
           if (point === undefined) return null
           const selected = node.id === selectedId
+          const summaryText = shortLabel(node.subject !== '' ? node.subject : node.label, geom.summaryChars)
+          const ownerBadge = node.ownerName !== undefined ? shortLabel(node.ownerName, geom.ownerChars) : null
           return (
             <g
               key={node.id}
               transform={`translate(${String(point.x)},${String(point.y)})`}
               role="button"
               tabIndex={0}
-              aria-label={`${node.id} ${node.label} ${node.state.text}`}
+              aria-label={`${node.id} ${summaryText} ${node.state.text}`}
               className={styles.dagNode}
               onClick={() => { onSelect(node.id) }}
               onKeyDown={(event) => {
@@ -119,21 +111,28 @@ export function DagMap({ nodes, selectedId, childCounts, onSelect, t }: DagMapPr
                 }
               }}
             >
-              <title>{t('graphNodeTitle', { id: node.id, label: node.label, owner: node.ownerName ?? t('graphUnassignedOwner'), state: node.state.text })}</title>
+              <title>{t('graphNodeTitle', { id: node.id, label: node.subject !== '' ? node.subject : node.label, owner: node.ownerName ?? t('graphUnassignedOwner'), state: node.state.text })}</title>
               <rect
-                width={NODE_W}
-                height={NODE_H}
-                rx={6}
+                width={geom.w}
+                height={geom.h}
+                rx={7}
                 fill={fillOf(node)}
                 stroke={selected ? 'var(--dsw-alias-brand-primary)' : 'var(--dsw-alias-border-l2)'}
                 strokeWidth={selected ? 2 : 1}
                 opacity={node.status === 'unplanned' ? 0.75 : 1}
               />
-              <text x={8} y={13} fontSize={10} fontWeight={600} fill="var(--dsw-alias-label-primary)">{node.id}</text>
-              <text x={8} y={25} fontSize={9} fill="var(--dsw-alias-label-secondary)">{shortLabel(node.label)}</text>
-              <circle cx={NODE_W - 10} cy={10} r={3} fill={node.state.color} />
+              <circle cx={11} cy={13} r={3.2} fill={node.state.color} />
+              <text x={19} y={16} fontSize={10.5} fontWeight={600} fill="var(--dsw-alias-label-primary)">{node.id}</text>
+              {ownerBadge !== null && (
+                <text x={geom.w - 8} y={16} textAnchor="end" fontSize={9} fill="var(--dsw-alias-label-tertiary)">
+                  {ownerBadge}
+                </text>
+              )}
+              <text x={10} y={fullscreen ? 36 : 31} fontSize={fullscreen ? 10.5 : 9.5} fill="var(--dsw-alias-label-secondary)">
+                {summaryText}
+              </text>
               {(childCounts.get(node.id) ?? 0) > 0 && (
-                <text x={NODE_W - 8} y={28} textAnchor="end" fontSize={8} fill="var(--dsw-alias-brand-primary)">
+                <text x={geom.w - 8} y={geom.h - 6} textAnchor="end" fontSize={8.5} fontWeight={600} fill="var(--dsw-alias-brand-primary)">
                   +{String(childCounts.get(node.id))}
                 </text>
               )}

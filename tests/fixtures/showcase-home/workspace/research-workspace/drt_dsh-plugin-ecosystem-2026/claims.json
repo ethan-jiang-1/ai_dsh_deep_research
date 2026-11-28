@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "finalRef": 1,
+  "claims": [
+    {
+      "id": "C1",
+      "text": "DSH 声明式 bundle patch 可在零改内核前提下裁剪非研究面板并装配多角色预设与隔离 worker。",
+      "critical": true,
+      "topics": ["T1_插件组合内核"],
+      "evidence": ["evidence/e1-cordis-plugin-seam.md"],
+      "urls": ["https://github.com/deepseek-ai/dsh"]
+    },
+    {
+      "id": "C2",
+      "text": "Host sessionProjections 增量折叠可在零 N+1 WebSocket 订阅前提下驱动左栏状态灯与 Hub 精准会话反查。",
+      "critical": true,
+      "topics": ["T2_状态投影与观测"],
+      "evidence": ["evidence/e2-session-projection-wire.md"],
+      "urls": ["https://docs.deepseek.com/harness/session-projections"]
+    },
+    {
+      "id": "C3",
+      "text": "全局 :has(...) CSS 隐藏宿主输入框属于高脆性反模式，应由原生 main 面板或 portal 替代。",
+      "critical": false,
+      "topics": ["T1_插件组合内核"],
+      "evidence": ["evidence/e3-adversarial-dom-hacks.md"],
+      "urls": ["https://engineering.example.org/postmortems/plugin-css-fragility"]
+    },
+    {
+      "id": "C4",
+      "text": "独立 Critic 角色拆分 claims.json 与 verdicts.json 可显著压低自我确认偏差，且缺失 verdict 必须显性标为 UNVERIFIED。",
+      "critical": true,
+      "topics": ["T3_人机交互与溯源"],
+      "evidence": ["evidence/e5-composability-profile.md"],
+      "urls": ["https://arxiv.org/abs/2605.01234"]
+    },
+    {
+      "id": "C5",
+      "text": "并行工件扫描配合 150ms 悬停溯源可将单份长报告人工复核往返次数降低约 70%，但超百张证据卡规模的内存开销尚待实测。",
+      "critical": false,
+      "topics": ["T2_状态投影与观测", "T3_人机交互与溯源"],
+      "evidence": ["evidence/e4-eval-latency-quant.md"],
+      "urls": ["https://benchmarks.example.org/agent-ux-latency-2026"]
+    },
+    {
+      "id": "C6",
+      "text": "第三方 profile 叠加 schedule-bundle 后在跨时区定时追踪任务中的稳定性表现仍需额外长期压测。",
+      "critical": false,
+      "topics": ["T1_插件组合内核"],
+      "evidence": ["evidence/e1-cordis-plugin-seam.md"],
+      "urls": []
+    }
+  ]
+}

@@ -18,7 +18,8 @@
 | `src/client/defaults/SelectMenu.tsx` | SelectMenu.tsx — 项目默认面板下拉控件，使用 DSH 原生 Menu 原语替换原生 <select>。 |
 | `src/client/defaults/store.ts` | client/defaults/store — 项目研究默认的按 session 读/写状态（按钮与面板共用同一份）。 |
 | `src/client/delivery-watch.ts` | delivery-watch.ts — 交付监听：live present 指向终稿 → 打开终稿页签。 |
-| `src/client/index.ts` | 浏览器半 = **研究驾驶舱（Research Cockpit）** —— 观察面 client 套件的唯一入口（2026-09-28 |
+| `src/client/HeroResearchOptions.tsx` | HeroResearchOptions.tsx —— 空白会话 Hero 控件行右侧快捷选配胶囊（conversation.hero.options）。 |
+| `src/client/index.ts` | 浏览器半 = **研究驾驶舱（Research Cockpit）** —— 观察面 client 套件的唯一装配入口。 |
 | `src/client/keys.ts` | 观察面 client 的 keyed 常量（唯一正本）。 |
 | `src/client/lead-prompt.ts` | lead-prompt.ts — 管理指令发送（D25 期 1）：steer 优先、失败降级 queue，两态如实回执。 |
 | `src/client/locales.ts` | locales.ts — cockpit UI 字典的稳定入口：zh 拥有键集，en 逐键对齐；本文件只做再导出。 |
@@ -41,14 +42,18 @@
 | `src/client/method-library/views.tsx` | method-library/views.tsx — 方法库的详情、来源选择、摘要、访谈/表单表面。 |
 | `src/client/MethodLibraryToolCard.tsx` | 方法库写库工具卡：method_library_upsert / method_library_remove / method_library_set_default |
 | `src/client/MethodLibraryView.tsx` | 主界面「方法库」tab（2026-10-21 方法库管理计划 Phase 1/2）。 |
+| `src/client/research-commands.ts` | research-commands.ts —— Composer 原生 / 研究指令流（ctx.commandUi）。 |
 | `src/client/research-config/config-model.ts` | config-model.ts — 研究配置页签的常量与详情态（从 ResearchConfigTab.tsx 拆出，2026-11-03 审计 P4）。 |
-| `src/client/research-config/LegacyManagementPane.tsx` | LegacyManagementPane.tsx — 「研究配置」页签的**四区旧管理面**（D25 回滚分支）。 |
 | `src/client/research-config/section-labels.ts` | section-labels.ts — 四字段标签的 UI 取词（file-format 标签住 library-fold / config-tables； |
 | `src/client/research-config/useConfigFeed.ts` | useConfigFeed — 「研究配置」页签的取数与折算（2026-11-03 审计 G-13：492 行页签体拆分）。 |
+| `src/client/research-final/CitationHoverLayer.tsx` | CitationHoverLayer.tsx —— 终稿正文行内 [来源: evidence/*.md] 150ms 悬停溯源浮卡。 |
 | `src/client/research-final/ClaimsAuditView.tsx` | — |
 | `src/client/research-final/FinalFollowupFooter.tsx` | FinalFollowupFooter.tsx — 终稿底部的只读续研引导： |
 | `src/client/research-final/FinalToc.tsx` | — |
-| `src/client/research-graph/DagMap.tsx` | DagMap.tsx — 研究图谱的 DAG 小图（纯展示：吃 GraphNodeView[]，画 SVG，回调选中）。 |
+| `src/client/research-final/FinalToolbar.tsx` | FinalToolbar.tsx —— 终稿页签合一单条工具栏（左：视图分段 + 版本状态；右：目录 / 分屏 / 全屏 / 过程）。 |
+| `src/client/research-final/StudioInspectorPane.tsx` | StudioInspectorPane.tsx —— 全屏三栏精读台右侧常驻对照栏（证据卡速览 / Critic 核查清单）。 |
+| `src/client/research-final/useEvidencePreview.ts` | useEvidencePreview.ts —— 终稿行内悬停与全屏右栏对照共用的证据卡懒加载与 LRU 缓存 hook。 |
+| `src/client/research-graph/DagMap.tsx` | DagMap.tsx — 研究图谱的 DAG 小图（纯展示：吃 GraphNodeView[]，画 SVG，回调选中；支持全屏宽画布舒展）。 |
 | `src/client/research-graph/format.ts` | research-graph/format.ts — 「研究图谱」的纯格式化件（无 DOM、无投影）。 |
 | `src/client/research-graph/graph-state.ts` | graph-state.ts — 「研究图谱」页签纯状态机（从 useGraphFeed 抽出，不碰 React/IO）。 |
 | `src/client/research-graph/GraphNotices.tsx` | GraphNotices.tsx — 「研究图谱」的两条只读提示带（plan 结构提示 / 需要你注意）。 |
@@ -61,28 +66,31 @@
 | `src/client/research-graph/WorkerChips.tsx` | WorkerChips.tsx — 一个队员的 worker chips（subagentCatalog 投影 → 二层 worker 的 label/mode/忙闲）。 |
 | `src/client/research-hub/LensesView.tsx` | — |
 | `src/client/research-hub/RunsView.tsx` | — |
+| `src/client/research-shortcuts.ts` | research-shortcuts.ts —— 跨平台研究工作台快捷键注册（ctx.shortcuts）。 |
 | `src/client/research-status/ProtocolCard.tsx` | HITL1 研究契约摘要卡：展示 protocol.json 解码后的研究方法、信源范围、深度预算与质量门槛； |
-| `src/client/research-status/QualityRadar.tsx` | 质量雷达：topics.md × evidence/*.md 的 Topic × Lens 覆盖矩阵、Quality A–D 与 source_tier 分布条。 |
+| `src/client/research-status/QualityRadar.tsx` | — |
 | `src/client/research-status/status-state.ts` | status-state.ts — 「研究状态」页签纯状态机与通知列表派生（从 useStatusFeed / ResearchStatusTab 抽出）。 |
-| `src/client/research-status/TrackRail.tsx` | TrackRail.tsx — 「研究状态」页签的流程轨道（②）：◆立项确认 + 主轨 + ◆交付审阅 + 交付， |
+| `src/client/research-status/TrackRail.tsx` | TrackRail.tsx — 「研究状态」页签的紧凑流程轨道：◆立项确认 + 主轨 + ◆交付审阅 + 交付。 |
 | `src/client/research-status/types.ts` | types.ts — research-status client 半的领域类型（journal 帧投影、follow 目标、页签注入面）。 |
 | `src/client/research-status/useMemberActivity.ts` | useMemberActivity.ts — 订阅队员 journal 流并折算每人动态摘要的 React hook（client 半）。 |
 | `src/client/research-status/useStatusFeed.ts` | useStatusFeed.ts —— 「研究状态」页签的**数据装配**（journal follow / bundle 扫描 / 绑定可信性 / |
+| `src/client/research-triggers.tsx` | research-triggers.tsx —— Composer @ 研究上下文触发源 + 已发送消息 ReferenceChip 渲染器。 |
 | `src/client/research-turn.ts` | research-turn.ts —— Turn 级研究里程碑投影（uiConversation.events Definition + selector）。 |
-| `src/client/ResearchConfigTab.tsx` | 「研究配置」页签体（2026-10-21 管理迁移后）。 |
+| `src/client/ResearchConfigTab.tsx` | 「研究配置」页签体。 |
 | `src/client/ResearchEvidenceTab.tsx` | ResearchEvidenceTab — 证据卡专属阅读页签（认领 drt_<slug>/evidence/*.md）。 |
-| `src/client/ResearchFinalTab.tsx` | 「终稿」页签体（issue 2026-10-19-final-tab-in-sidebar；读者版 = 2026-10-23 reader-final）。 |
+| `src/client/ResearchFinalTab.tsx` | 「终稿」页签体（学术/投研级单栏 & 全屏三栏精读台）。 |
 | `src/client/ResearchGraphTab.tsx` | 「研究图谱」页签体（2026-10-21 UX 重做）：**只读观察面**，不是任务板、也不是操作台。 |
 | `src/client/ResearchHeaderPill.tsx` | ResearchHeaderPill — 会话顶栏研究状态胶囊（conversation.session.header.actions）。 |
 | `src/client/ResearchHubPanel.tsx` | — |
 | `src/client/ResearchMilestoneCard.tsx` | ResearchMilestoneCard — 对话流回合尾研究里程碑卡（conversation.chat.turnTail）。 |
-| `src/client/ResearchStatusTab.tsx` | 「研究状态」页签体（UI 优先版：把界面弄对——RFC research-status-ui）。 |
+| `src/client/ResearchSessionRow.tsx` | ResearchSessionRow.tsx —— 左栏会话行的三处原生槽位 occupant，消费 Host researchRun 投影。 |
+| `src/client/ResearchStatusTab.tsx` | 「研究状态」页签体（阶段自适应 3 层驾驶舱）。 |
 | `src/client/ResearchTabMenuItem.tsx` | ResearchTabMenuItem.tsx — 右栏研究页签动作菜单尾部项（sidebar.right.tab.menu.item）： |
-| `src/client/ResearchToolCard.tsx` | 研究语义工具卡（S2）：把 spawn_teammate（组队动作）、web_search（检索动作）、 |
+| `src/client/ResearchToolCard.tsx` | 研究语义工具卡（S2 + R2.3 富语义升级）： |
 | `src/client/run-source-browser.ts` | run-source-browser.ts —— RunSource 的浏览器适配器（run-context 的 client 半）。 |
 | `src/client/session-follow.ts` | session-follow.ts — journal follow 的装配层（wire 帧 → 观察面领域帧）。 |
 | `src/client/session-stream-store.ts` | session-stream-store.ts —— 按 sessionId 引用计数复用单条 remote.session.follow 流。 |
-| `src/client/StartCard.tsx` | StartCard — 产品首屏起步卡（D38）：用户打开 blank Session 时，告诉他这是什么、从哪开始、 |
+| `src/client/StartCard.tsx` | StartCard — 意图优先首屏起步卡（D38 / X5）： |
 | `src/client/startup.ts` | client/startup — 首屏工作区记忆与选择的纯谓词（D40）。 |
 | `src/client/styles.ts` | styles.ts — 驾驶舱注入的两段页面级样式（从 client/index.ts 拆出，2026-11-03 审计 P4）。 |
 | `src/client/workspace-boot.ts` | workspace-boot.ts — 启动期工作区选择/恢复（首屏 onboarding + 记忆恢复）。 |
@@ -96,8 +104,10 @@
 | `src/lib/events/hitl-fold.ts` | HITL 挂起折算（纯函数，keyless 单测面）。 |
 | `src/lib/events/journal-wire.ts` | journal-wire.ts —— journal wire 事件的入参/正文解析共享核（零依赖叶模块）。 |
 | `src/lib/events/member-activity.ts` | member-activity.ts —— 队员 journal 事件 → 队员动作行（纯函数，keyless 单测）。 |
+| `src/lib/events/research-projection.ts` | research-projection.ts —— Host sessionProjections 与 Browser 消费方共用的纯增量研究态势投影。 |
+| `src/lib/events/research-references.ts` | research-references.ts —— Composer / 命令参数模型与 @ 研究引用编解码/匹配纯函数。 |
 | `src/lib/events/stream-failure.ts` | 流畸形死亡折算（BUG-023 修复①）：journal 事件 → 「上一回合死于上游流畸形」谓词。 |
-| `src/lib/events/tool-card.ts` | 工具卡的共享纯逻辑（研究语义工具卡 S2；company lib/tool-card.ts 同款移植—— |
+| `src/lib/events/tool-card.ts` | 工具卡的共享纯逻辑（研究语义工具卡 S2 + R2.3 富语义结果折算）。 |
 | `src/lib/method-library/library-fold.ts` | 方法库折算（D25 期 1 + detail-ux 期 1.5）：method-library.md 文本 → 偏好条目 + 管理指令文本。 |
 | `src/lib/method-library/method-draft.ts` | method-draft 解析（D37 阶段 3）：从方法编辑的 assistant 消息里取**最后一个** method-draft |
 | `src/lib/method-library/method-library-commands.ts` | — |
@@ -123,6 +133,7 @@
 | `src/lib/run/claims-verdicts.ts` | claims-verdicts.ts —— claims.json + verdicts.json 联合解码与核查清单折算（纯函数）。 |
 | `src/lib/run/evidence-card.ts` | evidence-card.ts —— 单张证据卡解析 + 右栏扩展地址认领谓词（纯函数）。 |
 | `src/lib/run/evidence-matrix.ts` | evidence-matrix.ts —— topics.md × evidence/*.md 的 Topic×Lens 覆盖矩阵与质量统计（纯函数）。 |
+| `src/lib/run/evidence-preview.ts` | evidence-preview.ts —— 终稿精读台纯折算（证据卡悬停摘录、有界缓存、Claim 风险筛选、TOC 标题解析）。 |
 | `src/lib/run/final-target.ts` | final-target.ts —— 「终稿」观察面的纯折算（keyless 单测；组件只画）。 |
 | `src/lib/run/health.ts` | health.ts — run 停摆的派生判据（BUG-348）：只从会话事件算，不写任何文件。 |
 | `src/lib/run/protocol-fold.ts` | protocol-fold.ts —— HITL1 结构化研究契约（protocol.json）解码与读取（纯函数 + readArtifact）。 |

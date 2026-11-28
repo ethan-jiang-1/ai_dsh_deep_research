@@ -1,7 +1,7 @@
 // tool-card 回归 — 研究语义卡标题折算（keyless；wire 权威形状 = queries 数组，录制流实证）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cardTitleOf, parseArgsObject, cardStateOf, stringFieldOfArgsRaw, TOOL_NOT_STARTED, TOOL_OUTCOME_UNKNOWN } from '../../../packages/deep-research-pack/src/lib/events/tool-card.ts';
+import { cardTitleOf, parseArgsObject, cardStateOf, stringFieldOfArgsRaw, toolResultBodyOf, TOOL_NOT_STARTED, TOOL_OUTCOME_UNKNOWN } from '../../../packages/deep-research-pack/src/lib/events/tool-card.ts';
 
 test('web_search 卡标题：queries 数组 → 检索：词表（· 连接，60 字截断）', () => {
   const args = parseArgsObject('{"queries":["DSH harness","DeepSeek plugin"]}');
@@ -83,4 +83,67 @@ test('BUG-431：vendor 的崩溃恢复码 → stopped（结果未知，不是失
   assert.equal(cardStateOf({}), 'running')
   // 历史兼容：旧码 'interrupted' 仍判 stopped（不因换码丢历史）。
   assert.equal(cardStateOf({ kind: 'tool-result', isError: true, error: { code: 'interrupted' } }), 'stopped')
+})
+
+test('toolResultBodyOf：web_search / web_fetch 消费规范 block.meta 并优雅回退', () => {
+  const searchMetaBlock = {
+    kind: 'tool-result',
+    isError: false,
+    meta: {
+      answer: 'P5 consists of China, France, Russia, UK, and US.',
+      sources: [{ url: 'https://www.un.org/securitycouncil', title: 'UN Security Council', snippet: 'Permanent members' }],
+      truncated: false,
+    },
+  }
+  const searchBody = toolResultBodyOf('web_search', searchMetaBlock, parseArgsObject('{"queries":["UNSC P5"]}'), '')
+  assert.equal(searchBody?.kind, 'web-search')
+  assert.equal(searchBody.sources.length, 1)
+  assert.equal(searchBody.sources[0]?.url, 'https://www.un.org/securitycouncil')
+
+  const fallbackSearch = toolResultBodyOf('web_search', {
+    kind: 'tool-result',
+    isError: false,
+    content: [{ text: 'Found [Official Charter](https://www.un.org/charter)' }],
+  }, parseArgsObject('{"queries":["UN Charter"]}'), '')
+  assert.equal(fallbackSearch?.kind, 'web-search')
+  assert.equal(fallbackSearch.sources[0]?.title, 'Official Charter')
+
+  const fetchBody = toolResultBodyOf('web_fetch', {
+    kind: 'tool-result',
+    isError: false,
+    meta: { url: 'https://docs.example.com/spec', statusCode: 200, truncated: true },
+  }, parseArgsObject('{"url":"https://docs.example.com/spec"}'), '')
+  assert.deepEqual(fetchBody, {
+    kind: 'web-fetch',
+    url: 'https://docs.example.com/spec',
+    statusCode: 200,
+    truncated: true,
+  })
+
+  const errBody = toolResultBodyOf('web_fetch', {
+    kind: 'tool-result',
+    isError: true,
+    error: { message: 'HTTP 503 upstream timeout' },
+  }, parseArgsObject('{"url":"https://docs.example.com/spec"}'), '')
+  assert.deepEqual(errBody, { kind: 'fallback', text: 'HTTP 503 upstream timeout' })
+})
+
+test('toolResultBodyOf：spawn_teammate / subagent 解析角色、波次标记与目标摘要', () => {
+  const teamBody = toolResultBodyOf('spawn_teammate', { kind: 'tool-result', isError: false }, parseArgsObject(JSON.stringify({
+    name: 'critic-1',
+    description: '核查 W2.1 主张证据链',
+  })), '')
+  assert.equal(teamBody?.kind, 'delegation')
+  assert.equal(teamBody.mode, 'teammate')
+  assert.equal(teamBody.roleName, 'critic-1')
+  assert.equal(teamBody.waveHint, 'W2.1')
+  assert.match(teamBody.goalSummary, /核查 W2\.1/)
+
+  const waveBody = toolResultBodyOf('subagent', { kind: 'tool-result', isError: false }, parseArgsObject(JSON.stringify({
+    subagent_type: 'research-wave',
+    prompt: 'Execute wave 2 fanout across 4 topics\nReturn JSON receipts',
+  })), '')
+  assert.equal(waveBody?.kind, 'delegation')
+  assert.equal(waveBody.mode, 'worker')
+  assert.equal(waveBody.waveHint, 'research-wave')
 })

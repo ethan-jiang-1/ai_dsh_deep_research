@@ -37,6 +37,10 @@ export interface EvidenceMatrix {
   readonly lenses: readonly string[]
   /** matrix[topicId][lensId] = matched valid card count */
   readonly cells: Readonly<Record<string, Readonly<Record<string, number>>>>
+  /** matrix[topicId][lensId] = matched evidence metadata list for radar click drilldown */
+  readonly cellCards?: Readonly<Record<string, Readonly<Record<string, readonly EvidenceMeta[]>>>>
+  /** All parsed evidence cards in deterministic scan order. */
+  readonly cards?: readonly EvidenceMeta[]
   readonly validCards: number
   readonly invalidCards: number
   readonly emptyCards: number
@@ -228,16 +232,28 @@ export function foldEvidenceMatrix(input: {
 
   const lenses = [...lensSet].sort()
   const cells: Record<string, Record<string, number>> = {}
+  const cellCards: Record<string, Record<string, EvidenceMeta[]>> = {}
   for (const topic of topics) {
     const row: Record<string, number> = {}
-    for (const lens of lenses) row[lens] = 0
+    const cardRow: Record<string, EvidenceMeta[]> = {}
+    for (const lens of lenses) {
+      row[lens] = 0
+      cardRow[lens] = []
+    }
     cells[topic.id] = row
+    cellCards[topic.id] = cardRow
   }
   for (const meta of metas) {
     if (meta.lens === null) continue
     for (const topicId of meta.supports) {
       const row = cells[topicId]
+      const cardRow = cellCards[topicId]
       if (row !== undefined) row[meta.lens] = (row[meta.lens] ?? 0) + 1
+      if (cardRow !== undefined) {
+        const list = cardRow[meta.lens]
+        if (list !== undefined) list.push(meta)
+        else cardRow[meta.lens] = [meta]
+      }
     }
   }
 
@@ -257,6 +273,8 @@ export function foldEvidenceMatrix(input: {
     topics,
     lenses,
     cells,
+    cellCards,
+    cards: metas,
     validCards,
     invalidCards,
     emptyCards,

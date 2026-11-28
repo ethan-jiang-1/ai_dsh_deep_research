@@ -143,20 +143,12 @@ test('BUG-069 内置内容的显示位必须经 builtin-display（定向源面�
   assert.doesNotMatch(sourceView, /\{entry\.name\}<\/button>/, '内置候选项不得直接渲染 canonical name')
   assert.doesNotMatch(sourceView, /\{selectedBuiltin\.(name|sections)/, '内置预览不得直接渲染 canonical name/sections')
 
-  // ③ 研究配置页签：卡片/菜单/详情/推荐规则/领域示范的显示位走投影；动作载荷仍 canonical。
+  // ③ 研究配置页签：选择器内置项与本次采用显示走投影；指令载荷仍用 canonical。
   const config = read('client/ResearchConfigTab.tsx')
-  assert.match(config, /const createFromBuiltin = \(name: string\): void =>/, '基于内置建草稿必须收口到 createFromBuiltin（显示投影一处）')
-  assert.match(config, /displayPatternsOf\(method, props\.t\)/, '推荐规则必须走 displayPatternsOf')
-  assert.match(config, /displaySectionsOf\(detail\.name, props\.t\)/, '详情读态四字段必须走显示投影')
-  assert.match(config, /displaySummaryOf\(name, props\.t\)/, '内置卡片摘要必须走显示投影')
-  assert.match(config, /sourceName: builtin\.name/, 'create 的 sourceName 必须保持 canonical')
-  assert.match(config, /instructionOf\('use-now', name\)/, '面板动作指令仍用 canonical name')
-
-  // ④ 旧管理面：领域示范与推荐规则说明位的显示投影。
-  const legacy = read('client/research-config/LegacyManagementPane.tsx')
-  assert.match(legacy, /const demo = displayDemoOf\(t\)/, '领域示范读显示投影')
-  assert.match(legacy, /displayNameOf\(r\.method, t\)/, '推荐规则说明位中的打法名走显示投影')
-  assert.doesNotMatch(legacy, /DEMO_ENTRY/, '旧管理面不得再直接渲染 canonical DEMO_ENTRY')
+  assert.match(config, /displayNameOf\(b\.name, props\.t\)/, '研究配置内置选择器必须走 displayNameOf')
+  assert.match(config, /displayNameOf\(adoption\.adopted, props\.t\)/, '本次采用方法名必须走 displayNameOf')
+  assert.match(config, /instructionOf\('use-now', b\.name\)/, '面板动作指令仍用 canonical name')
+  assert.equal(existsSync(join(SRC, 'client/research-config/LegacyManagementPane.tsx')), false, '已退役的 LegacyManagementPane.tsx 不得残留')
 
   // ⑤ 草稿预填：显示副本进草稿，选择仍留 canonical（喂模型面）。
   const draftState = read('client/method-library/useDraftState.ts')

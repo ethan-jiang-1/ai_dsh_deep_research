@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "slug": "drt_dsh-plugin-ecosystem-2026",
+  "acceptedAt": "2026-11-28T10:15:00.000Z",
+  "sessions": "$DSH_HOME/sessions",
+  "gate": { "status": "PASS", "exit": 0 },
+  "audit": { "critical": 0, "sha256": "showcase-audit-digest" },
+  "final": { "version": 1, "sha256": "showcase-final-v1-digest" },
+  "readable": { "version": 1, "sha256": "showcase-readable-v1-digest" },
+  "present": {
+    "path": "drt_dsh-plugin-ecosystem-2026/final/readable-v1.md",
+    "callId": "call_showcase_present_01",
+    "version": 1
+  },
+  "witness": { "sessions": ["session-showcase-lead-0001"] }
+}

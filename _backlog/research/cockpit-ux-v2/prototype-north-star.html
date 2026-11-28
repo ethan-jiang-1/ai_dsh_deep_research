@@ -1,0 +1,2661 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-xray="off">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orca Deep Research for DSH — North Star UX/UI 设计意图原型</title>
+<style>
+/* ============================================================================
+ * DSH-native Design Tokens (derived from vendor/dsh ui-theme aliases)
+ * Light & Dark parity · 0.5px hairlines · restrained neutral elevation
+ * ============================================================================ */
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --bg-shell: #f6f7f9;
+  --bg-canvas: #ffffff;
+  --bg-layer-2: #f8f9fb;
+  --bg-layer-3: #f1f3f7;
+  --bg-hover: rgba(15, 23, 42, 0.045);
+  --bg-active: rgba(15, 23, 42, 0.075);
+  --bg-overlay: rgba(255, 255, 255, 0.96);
+
+  --border-l1: rgba(15, 23, 42, 0.06);
+  --border-l2: rgba(15, 23, 42, 0.10);
+  --border-l3: rgba(15, 23, 42, 0.15);
+
+  --ink-1: #0f172a;
+  --ink-2: #475569;
+  --ink-3: #64748b;
+  --ink-4: #94a3b8;
+  --ink-inv: #ffffff;
+
+  --brand-fill: #0f172a;
+  --brand-ink: #ffffff;
+
+  --blue: #3b6fe8;
+  --blue-soft: rgba(59, 111, 232, 0.10);
+  --blue-border: rgba(59, 111, 232, 0.28);
+
+  --green: #16a34a;
+  --green-soft: rgba(22, 163, 74, 0.11);
+  --green-border: rgba(22, 163, 74, 0.28);
+
+  --amber: #d97706;
+  --amber-soft: rgba(217, 119, 6, 0.12);
+  --amber-border: rgba(217, 119, 6, 0.32);
+
+  --red: #dc2626;
+  --red-soft: rgba(220, 38, 38, 0.10);
+  --red-border: rgba(220, 38, 38, 0.28);
+
+  --purple: #7c3aed;
+  --purple-soft: rgba(124, 58, 237, 0.11);
+  --purple-border: rgba(124, 58, 237, 0.32);
+
+  --shadow-soft: 0 0 0 0.5px rgba(15, 23, 42, 0.08), 0 4px 16px rgba(15, 23, 42, 0.05);
+  --shadow-panel: 0 0 0 0.5px rgba(15, 23, 42, 0.10), 0 12px 32px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.04);
+  --shadow-modal: 0 0 0 0.5px rgba(15, 23, 42, 0.12), 0 24px 64px rgba(15, 23, 42, 0.18);
+
+  --r-xs: 5px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-pill: 999px;
+}
+
+[data-theme="dark"] {
+  --bg-shell: #111317;
+  --bg-canvas: #16191f;
+  --bg-layer-2: #1c2028;
+  --bg-layer-3: #232833;
+  --bg-hover: rgba(248, 250, 252, 0.055);
+  --bg-active: rgba(248, 250, 252, 0.10);
+  --bg-overlay: rgba(24, 28, 36, 0.97);
+
+  --border-l1: rgba(248, 250, 252, 0.06);
+  --border-l2: rgba(248, 250, 252, 0.11);
+  --border-l3: rgba(248, 250, 252, 0.18);
+
+  --ink-1: #f1f5f9;
+  --ink-2: #cbd5e1;
+  --ink-3: #94a3b8;
+  --ink-4: #64748b;
+  --ink-inv: #0f172a;
+
+  --brand-fill: #f1f5f9;
+  --brand-ink: #0f172a;
+
+  --blue: #60a5fa;
+  --blue-soft: rgba(96, 165, 250, 0.15);
+  --blue-border: rgba(96, 165, 250, 0.35);
+
+  --green: #4ade80;
+  --green-soft: rgba(74, 222, 128, 0.14);
+  --green-border: rgba(74, 222, 128, 0.32);
+
+  --amber: #fbbf24;
+  --amber-soft: rgba(251, 191, 36, 0.14);
+  --amber-border: rgba(251, 191, 36, 0.34);
+
+  --red: #f87171;
+  --red-soft: rgba(248, 113, 113, 0.14);
+  --red-border: rgba(248, 113, 113, 0.34);
+
+  --purple: #a78bfa;
+  --purple-soft: rgba(167, 139, 250, 0.16);
+  --purple-border: rgba(167, 139, 250, 0.36);
+
+  --shadow-soft: 0 0 0 0.5px rgba(255, 255, 255, 0.10), 0 4px 18px rgba(0, 0, 0, 0.35);
+  --shadow-panel: 0 0 0 0.5px rgba(255, 255, 255, 0.12), 0 16px 38px rgba(0, 0, 0, 0.50);
+  --shadow-modal: 0 0 0 0.5px rgba(255, 255, 255, 0.15), 0 28px 72px rgba(0, 0, 0, 0.65);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; height: 100%; overflow: hidden;
+  font-family: var(--font-sans); font-size: 13.5px; line-height: 1.55;
+  color: var(--ink-1); background: var(--bg-shell);
+  -webkit-font-smoothing: antialiased;
+}
+button, input, textarea, select {
+  font-family: inherit; font-size: inherit; color: inherit;
+}
+button { cursor: pointer; border: none; background: transparent; padding: 0; }
+button:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--blue); outline-offset: 1px;
+}
+
+/* ============================================================================
+ * Prototype North Star Director Bar (top strip)
+ * ============================================================================ */
+.proto-root {
+  display: flex; flex-direction: column; height: 100vh; width: 100vw;
+  background: var(--bg-shell);
+}
+.proto-bar {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 7px 14px;
+  background: var(--bg-layer-2);
+  border-bottom: 0.5px solid var(--border-l2);
+  z-index: 40;
+}
+.proto-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.03em;
+  color: var(--purple); background: var(--purple-soft);
+  border: 0.5px solid var(--purple-border);
+  padding: 2px 8px; border-radius: var(--r-pill);
+  white-space: nowrap;
+}
+.proto-scenarios {
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  flex: 1 1 auto; min-width: 0;
+}
+.proto-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: var(--r-pill);
+  font-size: 12px; font-weight: 500; color: var(--ink-2);
+  border: 0.5px solid transparent;
+  transition: background 140ms var(--ease), color 140ms var(--ease), border-color 140ms var(--ease);
+  white-space: nowrap;
+}
+.proto-pill:hover { background: var(--bg-hover); color: var(--ink-1); }
+.proto-pill.active {
+  background: var(--bg-canvas); color: var(--ink-1);
+  border-color: var(--border-l3); box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.proto-controls {
+  display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+}
+.proto-toggle {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 9px; border-radius: var(--r-sm);
+  font-size: 11.5px; font-weight: 500; color: var(--ink-2);
+  border: 0.5px solid var(--border-l2); background: var(--bg-canvas);
+  transition: all 140ms var(--ease);
+}
+.proto-toggle:hover { border-color: var(--border-l3); color: var(--ink-1); }
+.proto-toggle.on {
+  color: var(--purple); background: var(--purple-soft); border-color: var(--purple-border);
+}
+.proto-vp-group {
+  display: inline-flex; border: 0.5px solid var(--border-l2);
+  border-radius: var(--r-sm); overflow: hidden; background: var(--bg-canvas);
+}
+.proto-vp-btn {
+  padding: 4px 7px; font-size: 11px; color: var(--ink-3);
+  border-right: 0.5px solid var(--border-l1);
+}
+.proto-vp-btn:last-child { border-right: none; }
+.proto-vp-btn.active { background: var(--bg-active); color: var(--ink-1); font-weight: 600; }
+
+/* Viewport stage wrapper */
+.stage-wrap {
+  flex: 1 1 auto; min-height: 0;
+  display: flex; justify-content: center; align-items: stretch;
+  overflow: hidden; position: relative;
+  background: var(--bg-layer-3);
+}
+.app-shell {
+  display: flex; width: 100%; height: 100%;
+  background: var(--bg-canvas);
+  transition: width 220ms var(--ease);
+  overflow: hidden; position: relative;
+}
+.app-shell[data-vp="1280"] { width: min(1280px, 100%); box-shadow: var(--shadow-modal); }
+.app-shell[data-vp="768"] { width: min(768px, 100%); box-shadow: var(--shadow-modal); }
+
+/* ============================================================================
+ * X-Ray DSH Seam Anatomy Overlay (toggled via [data-xray="on"])
+ * ============================================================================ */
+[data-seam] { position: relative; }
+[data-xray="on"] [data-seam] {
+  outline: 1px dashed var(--purple-border);
+  outline-offset: -1px;
+}
+[data-xray="on"] [data-seam]::after {
+  content: attr(data-seam);
+  position: absolute; top: -11px; right: 6px; z-index: 25;
+  font-family: var(--font-mono); font-size: 9.5px; font-weight: 600; line-height: 1.25;
+  color: var(--purple); background: var(--bg-overlay);
+  border: 0.5px solid var(--purple-border);
+  padding: 1px 6px; border-radius: var(--r-xs);
+  pointer-events: none; white-space: nowrap;
+  max-width: calc(100% - 12px); overflow: hidden; text-overflow: ellipsis;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.14);
+}
+[data-xray="on"] [data-seam-pos="bl"]::after { top: auto; bottom: 26px; right: auto; left: 6px; }
+[data-xray="on"] [data-seam-pos="tl"]::after { top: -11px; right: auto; left: 6px; }
+
+/* ============================================================================
+ * Left Sidebar (DSH sidebar.brand + sidebar.panellist + sidebar.session.row)
+ * ============================================================================ */
+.left-rail {
+  width: 248px; flex: 0 0 248px;
+  display: flex; flex-direction: column;
+  background: var(--bg-shell);
+  border-right: 0.5px solid var(--border-l2);
+  padding: 12px 10px;
+  overflow: hidden;
+}
+.app-shell[data-vp="768"] .left-rail {
+  width: 56px; flex: 0 0 56px; padding: 10px 6px; align-items: center;
+}
+.app-shell[data-vp="768"] .left-rail .hide-narrow { display: none !important; }
+
+.brand-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 6px 10px;
+}
+.brand-lockup { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
+.orca-mark { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: var(--ink-1); }
+
+.new-chat-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 7px 10px; margin-bottom: 10px;
+  border-radius: var(--r-sm); background: var(--bg-canvas);
+  border: 0.5px solid var(--border-l2);
+  font-size: 13px; font-weight: 500; color: var(--ink-1);
+  transition: background 140ms var(--ease), border-color 140ms var(--ease);
+}
+.new-chat-btn:hover { background: var(--bg-layer-2); border-color: var(--border-l3); }
+
+.nav-section { display: flex; flex-direction: column; gap: 2px; margin-bottom: 14px; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%; padding: 7px 9px; border-radius: var(--r-sm);
+  font-size: 13px; color: var(--ink-2); text-align: left;
+  transition: background 120ms var(--ease), color 120ms var(--ease);
+}
+.nav-item:hover { background: var(--bg-hover); color: var(--ink-1); }
+.nav-item.active { background: var(--bg-active); color: var(--ink-1); font-weight: 500; }
+.nav-badge {
+  margin-left: auto; font-size: 10.5px; font-weight: 600;
+  padding: 1px 6px; border-radius: var(--r-pill);
+  background: var(--bg-layer-3); color: var(--ink-3);
+}
+
+.ws-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 8px 6px; font-size: 11.5px; color: var(--ink-3); font-weight: 500;
+}
+.ws-folder {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 8px; font-size: 12.5px; font-weight: 500; color: var(--ink-2);
+}
+.session-list {
+  flex: 1 1 auto; overflow-y: auto; display: flex; flex-direction: column; gap: 2px;
+}
+.session-row {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 7px 9px; border-radius: var(--r-sm);
+  text-align: left; position: relative;
+  transition: background 120ms var(--ease);
+}
+.session-row:hover { background: var(--bg-hover); }
+.session-row.active { background: var(--bg-active); }
+.session-row .s-title {
+  flex: 1 1 auto; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 12.8px; color: var(--ink-1);
+}
+.session-row .s-time { font-size: 11px; color: var(--ink-4); flex-shrink: 0; }
+.session-row .s-hover-tip {
+  display: none; position: absolute; left: 8px; right: 8px; bottom: -26px; z-index: 20;
+  padding: 3px 8px; border-radius: var(--r-xs);
+  background: var(--bg-overlay); box-shadow: var(--shadow-panel);
+  font-size: 11px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  pointer-events: none;
+}
+.session-row:hover .s-hover-tip { display: block; }
+
+/* State dots */
+.dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; display: inline-block;
+}
+.dot-green { background: var(--green); }
+.dot-amber { background: var(--amber); box-shadow: 0 0 0 3px var(--amber-soft); animation: pulse-amber 2s infinite; }
+.dot-blue { background: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); animation: pulse-blue 1.8s infinite; }
+.dot-muted { background: var(--ink-4); }
+@keyframes pulse-amber {
+  0%, 100% { box-shadow: 0 0 0 2px var(--amber-soft); }
+  50% { box-shadow: 0 0 0 5px transparent; }
+}
+@keyframes pulse-blue {
+  0%, 100% { box-shadow: 0 0 0 2px var(--blue-soft); }
+  50% { box-shadow: 0 0 0 5px transparent; }
+}
+
+.left-footer {
+  padding-top: 8px; border-top: 0.5px solid var(--border-l1);
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 11.5px; color: var(--ink-3);
+}
+
+/* ============================================================================
+ * Center Main Column (Chat OR Global Research Hub)
+ * ============================================================================ */
+.center-col {
+  flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;
+  background: var(--bg-canvas); position: relative; overflow: hidden;
+}
+.chat-header {
+  flex: 0 0 48px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 18px; border-bottom: 0.5px solid var(--border-l1);
+  gap: 10px;
+}
+.chat-title-wrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.chat-title {
+  font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.header-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: var(--r-pill);
+  font-size: 12px; font-weight: 500;
+  border: 0.5px solid var(--border-l2); background: var(--bg-layer-2);
+  transition: all 140ms var(--ease);
+}
+.header-pill:hover { border-color: var(--border-l3); }
+.header-pill.delivered { color: var(--green); background: var(--green-soft); border-color: var(--green-border); }
+.header-pill.hitl { color: var(--amber); background: var(--amber-soft); border-color: var(--amber-border); }
+.header-pill.running { color: var(--blue); background: var(--blue-soft); border-color: var(--blue-border); }
+
+.header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  height: 28px; padding: 0 8px; border-radius: var(--r-sm);
+  color: var(--ink-2); font-size: 12px; font-weight: 500;
+  transition: background 120ms var(--ease), color 120ms var(--ease);
+}
+.icon-btn:hover { background: var(--bg-hover); color: var(--ink-1); }
+.icon-btn.active { background: var(--bg-active); color: var(--ink-1); }
+
+/* Chat scroll body */
+.chat-scroll {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  padding: 20px 24px 16px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+/* S1 Start Hero (Intent-first) */
+.hero-wrap {
+  margin: auto; width: 100%; max-width: 720px;
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  padding: 12px 0 24px;
+}
+.hero-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 24px; font-weight: 600; letter-spacing: -0.015em;
+}
+.hero-sub { font-size: 13px; color: var(--ink-3); margin-top: -10px; }
+.hero-meta-bar {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; flex-wrap: wrap;
+}
+.hero-left-selects, .hero-right-opts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.chip-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: var(--r-sm);
+  font-size: 12.2px; font-weight: 500; color: var(--ink-2);
+  border: 0.5px solid var(--border-l2); background: var(--bg-canvas);
+  transition: all 130ms var(--ease);
+}
+.chip-btn:hover { background: var(--bg-layer-2); color: var(--ink-1); border-color: var(--border-l3); }
+.chip-btn.accent { color: var(--blue); background: var(--blue-soft); border-color: var(--blue-border); }
+
+/* Starter intent cards */
+.starter-grid {
+  width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
+}
+.app-shell[data-vp="768"] .starter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.starter-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  padding: 12px 13px; border-radius: var(--r-md); text-align: left;
+  background: var(--bg-layer-2); border: 0.5px solid var(--border-l2);
+  transition: all 150ms var(--ease);
+}
+.starter-card:hover {
+  background: var(--bg-canvas); border-color: var(--border-l3);
+  transform: translateY(-1px); box-shadow: var(--shadow-soft);
+}
+.starter-tag {
+  font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: var(--r-pill);
+  color: var(--blue); background: var(--blue-soft);
+}
+.starter-title { font-size: 12.8px; font-weight: 500; color: var(--ink-1); line-height: 1.4; }
+.starter-hint { font-size: 11.5px; color: var(--ink-3); line-height: 1.4; }
+
+.recent-strip {
+  width: 100%; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px 12px; border-radius: var(--r-md);
+  background: var(--bg-layer-2); border: 0.5px solid var(--border-l1);
+  font-size: 12px; color: var(--ink-3);
+}
+.recent-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: var(--r-pill);
+  background: var(--bg-canvas); border: 0.5px solid var(--border-l2);
+  color: var(--ink-1); font-size: 12px; font-weight: 500;
+}
+.recent-pill:hover { border-color: var(--border-l3); }
+
+/* Chat messages */
+.msg-user {
+  align-self: flex-end; max-width: 82%;
+  padding: 10px 14px; border-radius: 14px 14px 4px 14px;
+  background: var(--blue-soft); border: 0.5px solid var(--blue-border);
+  color: var(--ink-1); font-size: 13.5px; line-height: 1.6;
+}
+.msg-assistant {
+  align-self: flex-start; width: 100%; max-width: 720px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.msg-prose { font-size: 13.5px; line-height: 1.65; color: var(--ink-1); }
+.msg-prose p { margin: 0 0 8px; }
+.msg-prose p:last-child { margin-bottom: 0; }
+.msg-prose ul { margin: 4px 0 0 18px; padding: 0; }
+.msg-prose li { margin-bottom: 4px; }
+
+/* ReferenceChip inside user message */
+.ref-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 1px 7px; margin: 0 2px; border-radius: var(--r-xs);
+  font-family: var(--font-mono); font-size: 11.5px; font-weight: 500;
+  color: var(--blue); background: var(--bg-canvas);
+  border: 0.5px solid var(--blue-border); vertical-align: baseline;
+  transition: all 120ms var(--ease);
+}
+.ref-chip:hover { background: var(--blue-soft); }
+
+/* Rich Tool Cards (<WebBlock> & Delegation) */
+.tool-card {
+  border-radius: var(--r-md); border: 0.5px solid var(--border-l2);
+  background: var(--bg-layer-2); overflow: hidden;
+}
+.tool-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; width: 100%; text-align: left;
+  font-size: 12.5px; font-weight: 500; color: var(--ink-1);
+}
+.tool-head:hover { background: var(--bg-hover); }
+.tool-body {
+  padding: 8px 12px 10px; border-top: 0.5px solid var(--border-l1);
+  display: flex; flex-direction: column; gap: 7px;
+  background: var(--bg-canvas);
+}
+.web-source-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 8px; border-radius: var(--r-sm);
+  background: var(--bg-layer-2); border: 0.5px solid var(--border-l1);
+}
+.domain-badge {
+  width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: var(--blue); background: var(--blue-soft);
+}
+.web-source-title { font-size: 12.2px; font-weight: 500; color: var(--blue); }
+.web-source-snip { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+
+.deleg-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 12.2px;
+}
+.tag-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 1px 7px; border-radius: var(--r-pill);
+  font-size: 11px; font-weight: 500;
+  background: var(--bg-layer-3); color: var(--ink-2);
+}
+.tag-pill.green { color: var(--green); background: var(--green-soft); }
+.tag-pill.amber { color: var(--amber); background: var(--amber-soft); }
+.tag-pill.blue { color: var(--blue); background: var(--blue-soft); }
+.tag-pill.red { color: var(--red); background: var(--red-soft); }
+
+/* HITL1 interactive question card */
+.hitl-card {
+  border-radius: var(--r-md); border: 1px solid var(--amber-border);
+  background: var(--bg-canvas); padding: 14px 16px;
+  box-shadow: var(--shadow-soft);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.hitl-q-title { font-size: 13px; font-weight: 600; color: var(--ink-1); margin-bottom: 6px; }
+.hitl-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.hitl-opt {
+  padding: 9px 11px; border-radius: var(--r-sm); text-align: left;
+  border: 0.5px solid var(--border-l2); background: var(--bg-layer-2);
+  transition: all 130ms var(--ease);
+}
+.hitl-opt:hover { border-color: var(--border-l3); }
+.hitl-opt.selected {
+  border-color: var(--blue); background: var(--blue-soft);
+}
+.hitl-opt-lbl { font-size: 12.5px; font-weight: 600; color: var(--ink-1); }
+.hitl-opt-desc { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+
+/* Deliverable file card */
+.deliv-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 13px; border-radius: var(--r-md);
+  border: 0.5px solid var(--border-l2); background: var(--bg-layer-2);
+  transition: all 130ms var(--ease); cursor: pointer;
+}
+.deliv-card:hover { background: var(--bg-canvas); border-color: var(--border-l3); box-shadow: var(--shadow-soft); }
+
+/* Primary / Secondary buttons */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 6px 13px; border-radius: var(--r-sm);
+  background: var(--brand-fill); color: var(--brand-ink);
+  font-size: 12.5px; font-weight: 500;
+  transition: opacity 130ms var(--ease);
+}
+.btn-primary:hover { opacity: 0.88; }
+.btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 5px 10px; border-radius: var(--r-sm);
+  border: 0.5px solid var(--border-l2); background: var(--bg-canvas);
+  color: var(--ink-2); font-size: 12px; font-weight: 500;
+}
+.btn-ghost:hover { border-color: var(--border-l3); color: var(--ink-1); background: var(--bg-layer-2); }
+
+/* ============================================================================
+ * Composer (with live / slash commands & @ evidence/plan trigger popup!)
+ * ============================================================================ */
+.composer-area {
+  flex: 0 0 auto; padding: 10px 20px 16px;
+  position: relative;
+}
+.composer-box {
+  max-width: 720px; margin: 0 auto;
+  border-radius: var(--r-lg); background: var(--bg-canvas);
+  box-shadow: var(--shadow-soft);
+  padding: 10px 12px 8px;
+  display: flex; flex-direction: column; gap: 8px;
+  position: relative;
+}
+.composer-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.composer-input {
+  width: 100%; min-height: 36px; max-height: 110px; resize: none;
+  border: none; background: transparent; outline: none;
+  font-size: 13.5px; line-height: 1.5; color: var(--ink-1);
+}
+.composer-input::placeholder { color: var(--ink-4); }
+.composer-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+}
+.composer-left { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.send-btn {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--blue); color: #ffffff;
+  transition: opacity 130ms var(--ease);
+}
+.send-btn:hover { opacity: 0.9; }
+
+/* Slash / At Trigger Popup */
+.trigger-popup {
+  position: absolute; left: 0; right: 0; bottom: calc(100% + 8px); z-index: 35;
+  border-radius: var(--r-md); background: var(--bg-overlay);
+  box-shadow: var(--shadow-panel); padding: 6px;
+  max-height: 270px; overflow-y: auto;
+  backdrop-filter: blur(12px);
+}
+.popup-group-lbl {
+  font-size: 10.5px; font-weight: 600; color: var(--ink-4);
+  padding: 4px 8px; letter-spacing: 0.03em;
+}
+.popup-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; padding: 7px 9px; border-radius: var(--r-sm); text-align: left;
+  transition: background 100ms var(--ease);
+}
+.popup-item:hover, .popup-item.focused { background: var(--bg-hover); }
+.popup-item-main { display: flex; flex-direction: column; min-width: 0; }
+.popup-item-title { font-size: 12.8px; font-weight: 500; color: var(--ink-1); }
+.popup-item-sub { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.popup-kbd { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-4); flex-shrink: 0; }
+
+/* ============================================================================
+ * Right Sidebar (Status / Graph / Final / Evidence + Fullscreen 3-Column Studio)
+ * ============================================================================ */
+.right-pane {
+  width: 470px; flex: 0 0 470px;
+  display: flex; flex-direction: column;
+  border-left: 0.5px solid var(--border-l2);
+  background: var(--bg-canvas);
+  overflow: hidden; position: relative;
+}
+.app-shell[data-vp="1280"] .right-pane { width: 420px; flex: 0 0 420px; }
+.app-shell[data-vp="768"] .right-pane { width: 320px; flex: 0 0 320px; }
+.right-pane.fullscreen {
+  position: absolute; inset: 0; width: 100% !important; flex: 1 1 auto !important;
+  z-index: 30; border-left: none;
+}
+.right-pane.hidden { display: none; }
+
+.right-tabs {
+  flex: 0 0 44px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 10px; border-bottom: 0.5px solid var(--border-l1);
+  background: var(--bg-layer-2);
+}
+.tab-strip { display: flex; align-items: center; gap: 3px; overflow-x: auto; }
+.rtab {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: var(--r-sm);
+  font-size: 12.5px; font-weight: 500; color: var(--ink-3);
+  white-space: nowrap;
+}
+.rtab:hover { color: var(--ink-1); background: var(--bg-hover); }
+.rtab.active { color: var(--ink-1); background: var(--bg-canvas); box-shadow: 0 0 0 0.5px var(--border-l2); }
+
+.right-body {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  padding: 14px 16px 20px; display: flex; flex-direction: column; gap: 14px;
+}
+
+/* Status Tab: 3-layer Focus Hero + Interactive Radar + Vector Activity */
+.focus-hero {
+  border-radius: var(--r-md); padding: 13px 14px;
+  background: var(--bg-layer-2); border: 0.5px solid var(--border-l2);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.focus-hero.hitl { border-color: var(--amber-border); background: var(--amber-soft); }
+.focus-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.focus-q { font-size: 13.5px; font-weight: 600; color: var(--ink-1); line-height: 1.45; }
+.focus-sub { font-size: 12px; color: var(--ink-2); }
+
+/* Compact Track Rail */
+.track-rail {
+  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+}
+.step-node {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: var(--r-pill);
+  font-size: 11.2px; font-weight: 500;
+  background: var(--bg-canvas); border: 0.5px solid var(--border-l2); color: var(--ink-3);
+}
+.step-node.done { color: var(--green); background: var(--green-soft); border-color: var(--green-border); }
+.step-node.current { color: var(--blue); background: var(--blue-soft); border-color: var(--blue-border); font-weight: 600; }
+.step-node.reentry { border-style: dashed; border-width: 1px; }
+
+/* Card box */
+.card-box {
+  border-radius: var(--r-md); border: 0.5px solid var(--border-l2);
+  background: var(--bg-canvas); padding: 12px 13px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.card-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 12.5px; font-weight: 600; color: var(--ink-1);
+}
+.meta-kv { font-size: 12px; color: var(--ink-2); display: flex; flex-direction: column; gap: 3px; }
+
+/* Interactive QualityRadar Table */
+.radar-table {
+  width: 100%; border-collapse: separate; border-spacing: 4px;
+  font-size: 11.5px;
+}
+.radar-table th {
+  text-align: center; font-weight: 500; color: var(--ink-3); padding: 3px 2px;
+}
+.radar-table th:first-child { text-align: left; }
+.radar-cell {
+  width: 100%; height: 28px; border-radius: var(--r-xs);
+  font-weight: 600; font-size: 11.8px;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 110ms var(--ease), box-shadow 110ms var(--ease);
+}
+.radar-cell.hit {
+  background: var(--green-soft); color: var(--green); border: 0.5px solid var(--green-border);
+}
+.radar-cell.hit:hover, .radar-cell.hit.selected {
+  transform: scale(1.04); box-shadow: 0 0 0 1.5px var(--green);
+}
+.radar-cell.gap {
+  background: var(--amber-soft); color: var(--amber); border: 0.5px solid var(--amber-border);
+}
+.radar-cell.na {
+  background: var(--bg-layer-2); color: var(--ink-4); border: 0.5px solid var(--border-l1); cursor: default;
+}
+.radar-drawer {
+  margin-top: 6px; padding: 9px 10px; border-radius: var(--r-sm);
+  background: var(--bg-layer-2); border: 0.5px solid var(--border-l2);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.radar-ev-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 6px 8px; border-radius: var(--r-xs); text-align: left;
+  background: var(--bg-canvas); border: 0.5px solid var(--border-l1);
+}
+.radar-ev-btn:hover { border-color: var(--blue-border); }
+
+/* Vector Activity Stream */
+.act-list { display: flex; flex-direction: column; gap: 6px; }
+.act-row {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 12.2px; color: var(--ink-2);
+}
+.act-icon { color: var(--ink-3); margin-top: 2px; flex-shrink: 0; }
+
+/* ============================================================================
+ * Final Report Reading Studio (Single Toolbar + 3-Col Fullscreen + 150ms HoverCard)
+ * ============================================================================ */
+.final-toolbar {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px 14px; border-bottom: 0.5px solid var(--border-l1);
+  background: var(--bg-canvas);
+}
+.seg-ctrl {
+  display: inline-flex; padding: 2px; border-radius: var(--r-sm);
+  background: var(--bg-layer-3); gap: 2px;
+}
+.seg-btn {
+  padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--ink-2);
+}
+.seg-btn.active {
+  background: var(--bg-canvas); color: var(--ink-1);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+.final-studio {
+  flex: 1 1 auto; min-height: 0; display: grid;
+  grid-template-columns: 1fr; overflow: hidden;
+}
+.right-pane.fullscreen .final-studio.three-col {
+  grid-template-columns: 220px minmax(0, 1fr) 340px;
+}
+.app-shell[data-vp="768"] .right-pane.fullscreen .final-studio.three-col {
+  grid-template-columns: 1fr;
+}
+
+.studio-toc {
+  border-right: 0.5px solid var(--border-l1); background: var(--bg-layer-2);
+  padding: 16px 12px; overflow-y: auto; display: none; flex-direction: column; gap: 4px;
+}
+.right-pane.fullscreen .final-studio.three-col .studio-toc { display: flex; }
+.app-shell[data-vp="768"] .right-pane.fullscreen .final-studio.three-col .studio-toc { display: none; }
+.toc-link {
+  text-align: left; padding: 5px 8px; border-radius: var(--r-xs);
+  font-size: 12.2px; color: var(--ink-2); line-height: 1.4;
+}
+.toc-link:hover { background: var(--bg-hover); color: var(--ink-1); }
+.toc-link.active { background: var(--bg-active); color: var(--ink-1); font-weight: 600; }
+.toc-link.h3 { padding-left: 18px; font-size: 11.8px; color: var(--ink-3); }
+
+.studio-main {
+  overflow-y: auto; padding: 22px 26px 36px;
+}
+.studio-prose {
+  max-width: 72ch; margin: 0 auto;
+  font-size: 14px; line-height: 1.75; color: var(--ink-1);
+}
+.studio-prose h1 { font-size: 21px; line-height: 1.3; margin: 0 0 12px; letter-spacing: -0.01em; }
+.studio-prose h2 { font-size: 16px; margin: 22px 0 8px; padding-top: 6px; border-top: 0.5px solid var(--border-l1); }
+.studio-prose h3 { font-size: 14px; margin: 14px 0 6px; }
+.studio-prose blockquote {
+  margin: 12px 0; padding: 10px 14px; border-left: 2.5px solid var(--blue);
+  background: var(--bg-layer-2); border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  font-size: 13px; color: var(--ink-2);
+}
+.studio-prose table {
+  width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12.5px;
+}
+.studio-prose th, .studio-prose td {
+  padding: 7px 10px; border-bottom: 0.5px solid var(--border-l2); text-align: left;
+}
+.studio-prose th { font-weight: 600; color: var(--ink-2); background: var(--bg-layer-2); }
+
+.cite-link {
+  display: inline-flex; align-items: center; gap: 3px;
+  color: var(--blue); font-weight: 500; font-size: 12.5px;
+  text-decoration: none; border-bottom: 1px dotted transparent;
+  padding: 0 2px; border-radius: 3px;
+}
+.cite-link:hover { border-bottom-color: var(--blue); background: var(--blue-soft); }
+
+/* Studio Right Inspector Pane */
+.studio-inspector {
+  border-left: 0.5px solid var(--border-l1); background: var(--bg-layer-2);
+  padding: 14px; overflow-y: auto; display: none; flex-direction: column; gap: 10px;
+}
+.right-pane.fullscreen .final-studio.three-col .studio-inspector { display: flex; }
+.app-shell[data-vp="768"] .right-pane.fullscreen .final-studio.three-col .studio-inspector { display: none; }
+
+/* Claim cards */
+.claim-card {
+  padding: 11px 12px; border-radius: var(--r-md);
+  background: var(--bg-canvas); border: 0.5px solid var(--border-l2);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.claim-quote {
+  padding-left: 9px; border-left: 2px solid var(--border-l3);
+  font-size: 11.8px; color: var(--ink-3);
+}
+
+/* Followup footer */
+.followup-box {
+  margin-top: 24px; padding: 14px; border-radius: var(--r-md);
+  background: var(--bg-layer-2); border: 0.5px solid var(--border-l2);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.followup-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 7px 10px; border-radius: var(--r-sm); background: var(--bg-canvas);
+  border: 0.5px solid var(--border-l1); font-size: 12.5px;
+}
+
+/* 150ms Citation HoverCard (floating) */
+.hover-card {
+  position: fixed; z-index: 60; width: 340px; max-width: calc(100vw - 24px);
+  border-radius: var(--r-md); background: var(--bg-overlay);
+  box-shadow: var(--shadow-panel); padding: 12px 14px;
+  display: none; flex-direction: column; gap: 8px;
+  backdrop-filter: blur(14px);
+}
+.hover-card.visible { display: flex; }
+
+/* ============================================================================
+ * Research Graph DAG
+ * ============================================================================ */
+.dag-canvas {
+  border-radius: var(--r-md); border: 0.5px solid var(--border-l2);
+  background: var(--bg-layer-2); padding: 14px; overflow-x: auto;
+}
+.dag-svg { width: 100%; min-width: 380px; height: auto; display: block; }
+.dag-node { cursor: pointer; }
+.dag-node rect {
+  fill: var(--bg-canvas); stroke: var(--border-l2); stroke-width: 1; rx: 8;
+  transition: stroke 120ms var(--ease);
+}
+.dag-node:hover rect, .dag-node.selected rect { stroke: var(--blue); stroke-width: 1.6; }
+.dag-node.related rect { stroke: var(--green); stroke-width: 1.4; }
+.dag-edge { fill: none; stroke: var(--border-l3); stroke-width: 1.3; }
+.dag-edge.highlight { stroke: var(--blue); stroke-width: 2; }
+
+/* ============================================================================
+ * Global Research Hub Panel (S5) + Method Editor Overlay Portal
+ * ============================================================================ */
+.hub-wrap {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  padding: 24px 28px; display: flex; flex-direction: column; gap: 18px;
+}
+.hub-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+.run-card {
+  padding: 15px 16px; border-radius: var(--r-md);
+  background: var(--bg-canvas); border: 0.5px solid var(--border-l2);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.run-card:hover { border-color: var(--border-l3); box-shadow: var(--shadow-soft); }
+.run-card-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: auto; padding-top: 4px; }
+
+/* Method Editor shell.overlay Portal Modal */
+.portal-backdrop {
+  position: fixed; inset: 0; z-index: 70;
+  background: rgba(15, 23, 42, 0.42);
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.portal-backdrop.open { display: flex; }
+.portal-modal {
+  width: min(860px, 95vw); height: min(580px, 86vh);
+  border-radius: var(--r-lg); background: var(--bg-canvas);
+  box-shadow: var(--shadow-modal); overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.portal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 0.5px solid var(--border-l2);
+  background: var(--bg-layer-2);
+}
+.portal-split {
+  flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 1fr 1fr;
+}
+.portal-chat {
+  border-right: 0.5px solid var(--border-l2); padding: 14px;
+  display: flex; flex-direction: column; gap: 10px; overflow-y: auto;
+}
+.portal-draft {
+  padding: 14px; background: var(--bg-layer-2);
+  display: flex; flex-direction: column; gap: 10px; overflow-y: auto;
+}
+.field-lbl { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-bottom: 3px; }
+.field-box {
+  padding: 8px 10px; border-radius: var(--r-sm); background: var(--bg-canvas);
+  border: 0.5px solid var(--border-l2); font-size: 12.2px; color: var(--ink-1);
+}
+
+/* Design Intent & Live State Drawer (right-bottom floating sheet) */
+.intent-drawer {
+  position: fixed; right: 16px; bottom: 16px; z-index: 65;
+  width: min(440px, calc(100vw - 32px)); max-height: 76vh;
+  border-radius: var(--r-lg); background: var(--bg-overlay);
+  box-shadow: var(--shadow-modal); overflow: hidden;
+  display: none; flex-direction: column;
+}
+.intent-drawer.open { display: flex; }
+.intent-body { padding: 14px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; font-size: 12.2px; }
+.state-pre {
+  margin: 0; padding: 9px 11px; border-radius: var(--r-sm);
+  background: var(--bg-layer-3); font-family: var(--font-mono); font-size: 11px;
+  line-height: 1.5; overflow-x: auto; color: var(--ink-1);
+}
+
+/* Toast notification */
+.toast {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 80;
+  padding: 8px 14px; border-radius: var(--r-pill);
+  background: var(--brand-fill); color: var(--brand-ink);
+  font-size: 12.2px; font-weight: 500; box-shadow: var(--shadow-panel);
+  opacity: 0; pointer-events: none; transition: opacity 180ms var(--ease);
+}
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="proto-root">
+  <!-- ========================================================================
+       Top Prototype Director Bar (NOT part of production UI)
+       ======================================================================== -->
+  <header class="proto-bar" aria-label="North Star Prototype Controls">
+    <span class="proto-tag" title="Throwaway interactive design-intent prototype">
+      NORTH STAR 原型 · 设计意图
+    </span>
+    <nav class="proto-scenarios" id="scenarioBar"></nav>
+    <div class="proto-controls">
+      <button type="button" class="proto-toggle" id="btnXray" title="叠加显示每个区域对应的 DSH 原生 Seam 与理想态/现状边界">
+        X-Ray · DSH Seam
+      </button>
+      <button type="button" class="proto-toggle" id="btnTheme">暗色</button>
+      <div class="proto-vp-group" role="group" aria-label="视口宽度仿真">
+        <button type="button" class="proto-vp-btn active" data-vp-set="1440">1440</button>
+        <button type="button" class="proto-vp-btn" data-vp-set="1280">1280</button>
+        <button type="button" class="proto-vp-btn" data-vp-set="768">768</button>
+      </div>
+      <button type="button" class="proto-toggle" id="btnIntent">意图与状态机</button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       Interactive DSH Workbench Shell
+       ======================================================================== -->
+  <div class="stage-wrap">
+    <div class="app-shell" id="appShell" data-vp="1440">
+      <!-- Left Rail -->
+      <aside class="left-rail" data-seam="sidebar.brand + panellist + sessionProjections" data-seam-pos="bl">
+        <div class="brand-row">
+          <div class="brand-lockup">
+            <span class="orca-mark" aria-hidden="true">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 12.5c-2.2 0-3.4-1.2-4.6-2.9C15.1 7.7 13.5 5 11.4 3c-.3 2.5-.1 4.5-1.1 5.8-1.4 1.7-4 2.4-7.3 3.7 3.2 1.2 6.2 1.7 8.4 3.5 1.4 1.1 2.2 2.8 2.8 5 .8-2.2 1.4-4 2.7-5.3 1.2-1.2 2.5-2 4.1-3.2Z"/>
+              </svg>
+            </span>
+            <span class="hide-narrow">Orca 深度搜索</span>
+          </div>
+        </div>
+        <button type="button" class="new-chat-btn" id="btnNewSession">
+          <span>＋</span><span class="hide-narrow">新研究会话</span>
+        </button>
+
+        <div class="nav-section">
+          <button type="button" class="nav-item" id="navHub">
+            <span>⌕</span>
+            <span class="hide-narrow">研究工作台</span>
+            <span class="nav-badge hide-narrow">3</span>
+          </button>
+          <button type="button" class="nav-item" id="navPlugins">
+            <span>❖</span>
+            <span class="hide-narrow">插件组合</span>
+            <span class="nav-badge hide-narrow">DSH</span>
+          </button>
+        </div>
+
+        <div class="ws-header hide-narrow">
+          <span>工作区与活队列</span>
+          <span title="Host sessionProjections 零 N+1 订阅">实时投影</span>
+        </div>
+        <div class="ws-folder hide-narrow">
+          <span>📁</span><span>research-workspace</span>
+        </div>
+        <div class="session-list" id="sessionList"></div>
+
+        <div class="left-footer hide-narrow">
+          <span>⌘⇧D 工作台 · ⌘⇧U 状态</span>
+        </div>
+      </aside>
+
+      <!-- Center Main Area (Chat OR Global Hub) -->
+      <main class="center-col" id="centerCol"></main>
+
+      <!-- Right Sidebar (Status / Graph / Final / Evidence; supports Fullscreen 3-Col Studio) -->
+      <aside class="right-pane" id="rightPane"></aside>
+    </div>
+  </div>
+</div>
+
+<!-- 150ms Citation HoverCard (DSH HoverCardGroup North Star) -->
+<div class="hover-card" id="hoverCard" role="tooltip"></div>
+
+<!-- S5 Method Editor shell.overlay Portal -->
+<div class="portal-backdrop" id="methodPortal" role="dialog" aria-modal="true" aria-label="Method Editor 专职对话">
+  <div class="portal-modal" data-seam="shell.overlay Portal + Method Editor Preset (零 :has() hack)">
+    <div class="portal-head">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="dot dot-blue"></span>
+        <strong>Method Editor · 专职方法提炼对话</strong>
+        <span class="tag-pill">独立第 5 Preset · 窄权 Host 工具写盘</span>
+      </div>
+      <button type="button" class="btn-ghost" id="btnClosePortal">关闭 (Esc)</button>
+    </div>
+    <div class="portal-split">
+      <div class="portal-chat">
+        <div class="msg-assistant">
+          <div class="msg-prose" style="font-size:12.6px;">
+            <p>我是独立的 <strong>Method Editor</strong>（仅持有 <code>method_library_upsert / set_default / remove</code> 三枚窄权工具，绝不污染研究主会话上下文）。</p>
+            <p>已根据你的偏好起草「<strong>开源生态架构对比</strong>」四字段规范，确认后点击右侧「安全落盘」，将经由串行操作队列回读校验写入 <code>method-library.md</code>。</p>
+          </div>
+        </div>
+        <div class="msg-user" style="font-size:12.5px;">把反例检索比重调高，并要求明确标注「超大规模未实测边界」。</div>
+        <div class="msg-assistant">
+          <div class="msg-prose" style="font-size:12.6px;">
+            <p>已更新草稿 <strong>revision #2</strong>，右侧四字段已同步预览（未落盘前不会修改磁盘）。</p>
+          </div>
+        </div>
+      </div>
+      <div class="portal-draft">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <strong>方法草稿 · 开源生态架构对比</strong>
+          <span class="tag-pill blue" id="portalRevBadge">草稿 rev #2</span>
+        </div>
+        <div>
+          <div class="field-lbl">1. 找来源（Source）</div>
+          <div class="field-box">一手源码契约、官方文档与架构复盘优先，补充量化基准与至少 2 条对抗反例。</div>
+        </div>
+        <div>
+          <div class="field-lbl">2. 怎么核实（Verify）</div>
+          <div class="field-box">关键结论交叉核验一手源，独立 Critic 拆盘产出 verdicts.json，未核查项显性标 UNVERIFIED。</div>
+        </div>
+        <div>
+          <div class="field-lbl">3. 报告怎么写（Report）</div>
+          <div class="field-box">读者版一页执行摘要 + 审计版逐句证据链引用；文末列「下一版优先项」供一键续研。</div>
+        </div>
+        <div>
+          <div class="field-lbl">4. 不承诺（Limit）</div>
+          <div class="field-box">缺乏统一压测条件时，明确标注超大规模与跨时区稳定性边界，不做绝对排名。</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px;">
+          <span style="font-size:11.5px;color:var(--ink-3);" id="portalStatusText">状态：等待用户显式确认写盘</span>
+          <button type="button" class="btn-primary" id="btnSaveMethod">确认安全落盘</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Design Intent & Live State Inspector Drawer -->
+<aside class="intent-drawer" id="intentDrawer" aria-label="设计意图与纯状态机实时视图">
+  <div class="portal-head">
+    <strong>设计意图说明书 & 实时状态机</strong>
+    <button type="button" class="btn-ghost" id="btnCloseIntent">收起</button>
+  </div>
+  <div class="intent-body" id="intentBody"></div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================================
+ * PART 1 · PURE PORTABLE DOMAIN DATA & STATE MACHINE (ZERO DOM DEPENDENCIES)
+ * Mirrors the exact Orca Deep Research architecture:
+ *   - Host `researchRun` Session Projection
+ *   - ArtifactState five-state honesty (ok / absent / unreadable / empty / invalid)
+ *   - D17 (harness read-only) & D18 (draft prefill only, never auto-send)
+ * ============================================================================ */
+const DOMAIN = {
+  sessions: [
+    {
+      id: 'sess-delivered',
+      title: 'DSH 插件组合架构与研究工作台评估',
+      slug: 'dsh-plugin-ecosystem-2026',
+      time: '10 分钟前',
+      projection: {
+        schemaVersion: 1,
+        slug: 'dsh-plugin-ecosystem-2026',
+        phase: 'delivered',
+        hitlKind: null,
+        deliveredPath: 'drt_dsh-plugin-ecosystem-2026/final/readable-v1.md',
+      },
+      question: '请系统评估以插件组合（Everything is a Plugin）为核心的 Agent Harness 架构在复杂深度研究任务中的工程优势、边界条件与常见反模式。',
+    },
+    {
+      id: 'sess-running',
+      title: '2026 开源多智能体评测框架横评',
+      slug: 'agent-eval-harness-2026',
+      time: '刚刚',
+      projection: {
+        schemaVersion: 1,
+        slug: 'agent-eval-harness-2026',
+        phase: 'running',
+        hitlKind: null,
+        deliveredPath: null,
+      },
+      question: '横向评估 2026 年主流多智能体评测框架在防污染、可复现性与长周期任务成本上的工程取舍。',
+    },
+    {
+      id: 'sess-hitl',
+      title: '端侧推理引擎延迟与内存对比',
+      slug: 'edge-inference-2026',
+      time: '2 小时前',
+      projection: {
+        schemaVersion: 1,
+        slug: 'edge-inference-2026',
+        phase: 'hitl_pending',
+        hitlKind: 'hitl1',
+        deliveredPath: null,
+      },
+      question: '对比 2026 年主流端侧推理引擎（llama.cpp / MLX / ONNX Runtime GenAI）在 7B–14B 量化模型上的首字延迟与内存占用。',
+    },
+  ],
+
+  starters: [
+    { tag: '全景', title: '领域格局与玩家分层', hint: '先铺地图再钻一手官方定价与能力边界', prompt: '请用「领域地图」方法梳理 2026 年企业级 AI Agent 编排平台的核心分层、代表架构与采用门槛，重点引用一手官方文档与真实落地复盘。' },
+    { tag: '对比', title: '技术方案多维对比', hint: '对齐硬件与口径，拒绝无基准排行榜', prompt: '请用「方案比较」方法对比 llama.cpp、MLX 与 ONNX Runtime GenAI 在 Apple Silicon 与 x86 端侧的延迟、内存与生态成本。' },
+    { tag: '尽调', title: '开源项目工程尽调', hint: '源码契约 + 反例检索 + 维护健康度', prompt: '请对 DeepSeek Harness（DSH）插件生态做工程尽调：评估零改内核扩展性、升级脆弱点与典型反模式。' },
+    { tag: '核查', title: '单点主张正反核查', hint: '独立 Critic 逐条出具四态判定', prompt: '请核查主张：「多 Agent 拆盘 Critic 核查能把长报告事实错误率压低 50% 以上」，给出正反一手证据与边界判定。' },
+    { tag: '量化', title: '成本与延迟基准拆解', hint: '显性区分实测口径与未覆盖区间', prompt: '请拆解深度研究任务中「串行单 Agent」与「PTC 批量扇出 + Agent Teams」在 Token 消耗与端到端延迟上的量化差异。' },
+    { tag: '信号', title: '趋势演进与风险信号', hint: '按时间线追踪标准收敛与分叉点', prompt: '请按时间线梳理 2025–2026 年 Agent 客户端扩展协议（MCP / ACP / Cordis Slot）的演进脉络与收敛信号。' },
+  ],
+
+  evidence: {
+    'evidence/e1-cordis-plugin-seam.md': {
+      id: 'e1',
+      path: 'evidence/e1-cordis-plugin-seam.md',
+      title: 'DSH Cordis 插件组合与白名单裁剪机制',
+      quality: 'A',
+      tier: 'primary',
+      publisher: 'github.com',
+      url: 'https://github.com/deepseek-ai/dsh',
+      topic: 'T1',
+      lens: 'official',
+      retrievedAt: '2026-11-28',
+      excerpt: [
+        '通过 cordis.patch.yml 的 disabled: true 与 isolate 隔离域，外部组合包可在不修改宿主内核的前提下精准裁剪非研究出厂面板。',
+        '全部前端扩展点（侧栏、工具卡、命令、触发器、快捷键）均包裹 scoped.effect，卸载与热重载时自动收回贡献。',
+        '隔离域硬限制非角色 worker profile 的工具暴露面，避免研究子任务越权。',
+      ],
+    },
+    'evidence/e2-session-projection-wire.md': {
+      id: 'e2',
+      path: 'evidence/e2-session-projection-wire.md',
+      title: 'Host sessionProjections 确定性增量折叠契约',
+      quality: 'A',
+      tier: 'primary',
+      publisher: 'docs.deepseek.com',
+      url: 'https://docs.deepseek.com/harness/session-projections',
+      topic: 'T2',
+      lens: 'official',
+      retrievedAt: '2026-11-28',
+      excerpt: [
+        'Host 侧注册纯增量状态机，从已提交 v4 会话日志确定性折算 slug / phase / hitlKind / deliveredPath。',
+        '冷启动经会话列表元数据直出，热态经单条推送增量刷新，彻底杜绝侧栏按行并发 follow 订阅风暴。',
+        '配合 workspace cwd 精确匹配，Hub 打开终稿前自动切回所属会话，杜绝跨会话串台。',
+      ],
+    },
+    'evidence/e3-adversarial-dom-hacks.md': {
+      id: 'e3',
+      path: 'evidence/e3-adversarial-dom-hacks.md',
+      title: '对抗复盘：侵入式 CSS Hack 与跨会话状态串台事故',
+      quality: 'B',
+      tier: 'secondary',
+      publisher: 'engineering.example.org',
+      url: 'https://engineering.example.org/postmortems/plugin-css-fragility',
+      topic: 'T1',
+      lens: 'adversarial',
+      retrievedAt: '2026-11-28',
+      excerpt: [
+        '利用全局 :has(...) 选择器强行隐藏宿主输入框属于高脆性反模式，在宿主小版本重构 DOM 层级时大面积失效。',
+        '正确解法为统一收敛至宿主原生 main 全局面板与 shell.overlay Portal，并在上游反馈账本登记缺口。',
+      ],
+    },
+    'evidence/e4-eval-latency-quant.md': {
+      id: 'e4',
+      path: 'evidence/e4-eval-latency-quant.md',
+      title: '量化对照：并行工件扫描与 150ms 悬停溯源的复核耗时评估',
+      quality: 'B',
+      tier: 'secondary',
+      publisher: 'benchmarks.example.org',
+      url: 'https://benchmarks.example.org/agent-ux-latency-2026',
+      topic: 'T2',
+      lens: 'quant',
+      retrievedAt: '2026-11-28',
+      excerpt: [
+        'Promise.all 并行工件读盘配合 150ms 行内证据悬停预览，将单份长报告人工核验切屏往返降低约 70%。',
+        '边界说明：超百张证据卡规模下的浏览器端长期内存占用仍待独立压测，不作无条件承诺。',
+      ],
+    },
+    'evidence/e5-composability-profile.md': {
+      id: 'e5',
+      path: 'evidence/e5-composability-profile.md',
+      title: '学术综述：独立 Critic 主张核查与证据链可追溯性设计',
+      quality: 'A',
+      tier: 'primary',
+      publisher: 'arxiv.org',
+      url: 'https://arxiv.org/abs/2605.01234',
+      topic: 'T3',
+      lens: 'academic',
+      retrievedAt: '2026-11-28',
+      excerpt: [
+        '将报告主张（claims.json）与独立 Critic 核查判定（verdicts.json）拆盘隔离上下文，可显著压低自我确认偏差。',
+        '缺失 verdict 的主张必须强制标为 UNVERIFIED，配合核心研究包零外置依赖实现 Profile 层自由生态叠加。',
+      ],
+    },
+  },
+
+  radar: {
+    lenses: [
+      { id: 'academic', label: '学术与方法', blindHint: '检查是否有同行评审综述或方法论基准支撑' },
+      { id: 'adversarial', label: '反例与证伪', blindHint: '专门检索失败复盘、反例与边界限制，防确认偏差' },
+      { id: 'official', label: '官方口径', blindHint: '核实一手源码契约、官方文档与公告口径' },
+      { id: 'quant', label: '数字与口径', blindHint: '核实延迟/成本量化数据及其样本规模口径' },
+    ],
+    rows: [
+      { topic: 'T1', label: 'T1 · 插件组合内核', cells: { academic: ['evidence/e5-composability-profile.md'], adversarial: ['evidence/e3-adversarial-dom-hacks.md'], official: ['evidence/e1-cordis-plugin-seam.md'], quant: null } },
+      { topic: 'T2', label: 'T2 · 状态投影观测', cells: { academic: null, adversarial: ['evidence/e3-adversarial-dom-hacks.md'], official: ['evidence/e2-session-projection-wire.md'], quant: ['evidence/e4-eval-latency-quant.md'] } },
+      { topic: 'T3', label: 'T3 · 精读与核查', cells: { academic: ['evidence/e5-composability-profile.md'], adversarial: null, official: [], quant: ['evidence/e4-eval-latency-quant.md'] } },
+    ],
+  },
+
+  claims: [
+    { id: 'C1', status: 'supported', critical: true, text: 'DSH 声明式 bundle patch 可在零改内核前提下裁剪非研究面板并装配多角色预设与隔离 worker。', reason: '一手源码契约与真浏览器装配验证完全一致。', quote: '通过 cordis.patch.yml 的 disabled: true 与 isolate 隔离域，外部组合包可在不修改宿主内核的前提下精准裁剪出厂面板。', evidence: 'evidence/e1-cordis-plugin-seam.md' },
+    { id: 'C2', status: 'supported', critical: true, text: 'Host sessionProjections 增量折叠可在零 N+1 订阅前提下驱动左栏状态标与 Hub 精准会话反查。', reason: 'Host 投影契约与客户端双读路径核实一致。', quote: '冷启动经会话列表元数据直出，热态经单条推送增量刷新，零按行 follow 风暴。', evidence: 'evidence/e2-session-projection-wire.md' },
+    { id: 'C3', status: 'supported', critical: false, text: '全局 :has(...) CSS 隐藏宿主输入框属于高脆性反模式，应由原生 main 面板或 portal 替代。', reason: '对抗复盘与仓内升级经验交叉印证。', quote: '全局选择器压盖宿主输入框会在宿主调整 DOM 层级时大面积失效。', evidence: 'evidence/e3-adversarial-dom-hacks.md' },
+    { id: 'C4', status: 'supported', critical: true, text: '独立 Critic 拆分 claims.json 与 verdicts.json 可显著压低自我确认偏差，缺失 verdict 必标 UNVERIFIED。', reason: '学术一手综述明确支撑。', quote: '独立上下文角色 + 结构化 claims × verdicts 对账可显著压低自我确认偏差。', evidence: 'evidence/e5-composability-profile.md' },
+    { id: 'C5', status: 'partial', critical: false, text: '并行工件扫描配合 150ms 悬停溯源可将长报告人工复核往返次数降低约 70%，但超百张证据卡内存开销待实测。', reason: '常规规模量化结论成立，超百卡规模属未覆盖边界，已显性标注。', quote: '单份长报告往返次数降低约 70%，但超大规模工作区内存基准尚待补充。', evidence: 'evidence/e4-eval-latency-quant.md' },
+    { id: 'C6', status: 'UNVERIFIED', critical: false, text: '第三方 profile 叠加 schedule-bundle 后在跨时区定时追踪任务中的长期稳定性仍需额外压测。', reason: 'Critic 未找到实测记录，强制保留 UNVERIFIED 警示。', quote: '', evidence: 'evidence/e1-cordis-plugin-seam.md' },
+  ],
+
+  dag: {
+    nodes: [
+      { id: 'W1', role: 'scout-1', status: 'done', title: '盘点 Cordis/DSH 组合层与反模式', x: 165, y: 18, deps: [], output: 'leads.md' },
+      { id: 'W2.1', role: 'analyst-1', status: 'done', title: '深挖 Host sessionProjections 契约', x: 40, y: 112, deps: ['W1'], output: 'evidence/e2-session-projection-wire.md' },
+      { id: 'W2.2', role: 'research-wave', status: 'done', title: '批量扇出：反例复盘与量化延迟', x: 285, y: 112, deps: ['W1'], output: 'evidence/e3..e4' },
+      { id: 'W3', role: 'lead', status: 'done', title: '综合对比架构取舍与生态可组合性', x: 165, y: 206, deps: ['W2.1', 'W2.2'], output: 'findings.md, final.md' },
+      { id: 'W4', role: 'critic-1', status: 'done', title: '独立 Critic 逐条核查 claims × verdicts', x: 165, y: 300, deps: ['W3'], output: 'review.md, verdicts.json' },
+    ],
+  },
+
+  slashCommands: [
+    { cmd: '/lens', title: '研究透镜 · 批判与专业视角', sub: '模糊筛选 8 条内置研究透镜（反例 / 量化 / 一手源 / 时间线…）并填入草稿', insert: '请补充「反例与证伪」视角：重点检索失败案例、边界条件与反驳证据。' },
+    { cmd: '/method', title: '研究方法 · 工作区库与内置打法', sub: '速选「开源生态架构对比」「方案比较」「主张核查」等方法约束', insert: '本次研究采用方法「开源生态架构对比」：一手源码优先、显性标注未测边界。' },
+    { cmd: '/research-defaults', title: '项目默认 · 可视化设定深度与输出', sub: '修改 <workspace>/research-defaults.json（depth / output / source）', action: 'open-defaults' },
+    { cmd: '/hub', title: '打开研究工作台（⌘⇧D）', sub: '统一管理 Run 档案、方法库与研究透镜', action: 'open-hub' },
+  ],
+
+  atReferences: [
+    { group: '证据卡（evidence/*.md）', label: 'e1-cordis-plugin-seam.md', sub: 'A · primary · Cordis 白名单裁剪与 isolate', token: 'evidence/e1-cordis-plugin-seam.md' },
+    { group: '证据卡（evidence/*.md）', label: 'e2-session-projection-wire.md', sub: 'A · primary · Host sessionProjections 契约', token: 'evidence/e2-session-projection-wire.md' },
+    { group: '证据卡（evidence/*.md）', label: 'e4-eval-latency-quant.md', sub: 'B · secondary · 并行扫描与 150ms 悬停量化', token: 'evidence/e4-eval-latency-quant.md' },
+    { group: '计划节点（plan.md）', label: 'W2.1 · Host 投影契约', sub: 'analyst-1 · done', token: 'drt_dsh-plugin-ecosystem-2026/W2.1' },
+    { group: '计划节点（plan.md）', label: 'W4 · Critic 独立核查', sub: 'critic-1 · done', token: 'drt_dsh-plugin-ecosystem-2026/W4' },
+  ],
+
+  hubRuns: [
+    {
+      slug: 'drt_dsh-plugin-ecosystem-2026',
+      title: 'DSH 插件组合架构与研究工作台评估',
+      status: 'delivered',
+      evidenceCount: 5,
+      sessionId: 'sess-delivered',
+      badges: ['读者版 v1', '审计版 v1', 'Critic PASS'],
+      ownership: 'owned',
+    },
+    {
+      slug: 'drt_agent-eval-harness-2026',
+      title: '2026 开源多智能体评测框架横评',
+      status: 'running',
+      evidenceCount: 3,
+      sessionId: 'sess-running',
+      badges: ['Wave 2 进行中', '3 队员活跃'],
+      ownership: 'owned',
+    },
+    {
+      slug: 'drt_edge-inference-2026',
+      title: '端侧推理引擎延迟与内存对比',
+      status: 'hitl_pending',
+      evidenceCount: 0,
+      sessionId: 'sess-hitl',
+      badges: ['HITL1 待拍板', '方案比较'],
+      ownership: 'owned',
+    },
+    {
+      slug: 'archive/drt_agentic-eval-benchmarks',
+      title: '2026 开源 Agentic 评测基准污染风险分析',
+      status: 'delivered',
+      evidenceCount: 6,
+      sessionId: null,
+      badges: ['读者版 v1', '只读归档（无本地会话）'],
+      ownership: 'orphan',
+    },
+  ],
+};
+
+const SCENARIOS = [
+  { id: 's1-start', label: 'S1 意图首屏' },
+  { id: 's2-hitl', label: 'S2a 立项拍板' },
+  { id: 's2-running', label: 'S2b 推进与雷达' },
+  { id: 's3-studio', label: 'S3 三栏精读台' },
+  { id: 's4-graph-cmd', label: 'S4 图谱与 /@ 流' },
+  { id: 's5-hub', label: 'S5 全局工作台' },
+];
+
+function createInitialState() {
+  return {
+    scenario: 's3-studio',
+    theme: 'light',
+    xray: false,
+    viewport: '1440',
+    intentOpen: false,
+
+    mainView: 'chat', // 'chat' | 'hub'
+    hubTab: 'runs', // 'runs' | 'methods' | 'lenses'
+    activeSessionId: 'sess-delivered', // null = blank new session
+
+    rightOpen: true,
+    rightFullscreen: true,
+    rightTab: 'final', // 'status' | 'graph' | 'final' | 'evidence'
+
+    finalMode: 'reader', // 'reader' | 'audit' | 'claims'
+    inspectorTab: 'claims', // 'claims' | 'evidence'
+    claimFilter: 'all', // 'all' | 'risk' | 'supported'
+    activeHeading: 'h-summary',
+    activeEvidencePath: 'evidence/e1-cordis-plugin-seam.md',
+
+    selectedRadarCell: { topic: 'T1', lens: 'official' },
+    selectedDagNode: 'W2.1',
+    hitlSelection: { type: 'comparison', hw: 'dual' },
+    hitlSubmitted: false,
+
+    composerDraft: '',
+    composerChips: [],
+    triggerMode: null, // null | 'slash' | 'at'
+    defaultsSummary: '方法 开源生态架构对比',
+    methodPortalOpen: false,
+    methodSaved: false,
+    lastAction: 'INIT(s3-studio)',
+  };
+}
+
+function reduce(state, action) {
+  switch (action.type) {
+    case 'LOAD_SCENARIO': {
+      const base = { ...state, scenario: action.id, triggerMode: null, lastAction: `LOAD_SCENARIO(${action.id})` };
+      if (action.id === 's1-start') {
+        return { ...base, mainView: 'chat', activeSessionId: null, rightOpen: false, rightFullscreen: false, composerDraft: '', composerChips: [] };
+      }
+      if (action.id === 's2-hitl') {
+        return { ...base, mainView: 'chat', activeSessionId: 'sess-hitl', rightOpen: true, rightFullscreen: false, rightTab: 'status', hitlSubmitted: false };
+      }
+      if (action.id === 's2-running') {
+        return { ...base, mainView: 'chat', activeSessionId: 'sess-running', rightOpen: true, rightFullscreen: false, rightTab: 'status', selectedRadarCell: { topic: 'T1', lens: 'official' } };
+      }
+      if (action.id === 's3-studio') {
+        return { ...base, mainView: 'chat', activeSessionId: 'sess-delivered', rightOpen: true, rightFullscreen: true, rightTab: 'final', finalMode: 'reader', inspectorTab: 'claims', claimFilter: 'all' };
+      }
+      if (action.id === 's4-graph-cmd') {
+        return { ...base, mainView: 'chat', activeSessionId: 'sess-delivered', rightOpen: true, rightFullscreen: false, rightTab: 'graph', selectedDagNode: 'W2.1', composerDraft: '/lens', triggerMode: 'slash' };
+      }
+      if (action.id === 's5-hub') {
+        return { ...base, mainView: 'hub', hubTab: 'runs', rightOpen: false, rightFullscreen: false };
+      }
+      return base;
+    }
+    case 'SET_THEME': return { ...state, theme: action.theme, lastAction: `SET_THEME(${action.theme})` };
+    case 'TOGGLE_XRAY': return { ...state, xray: !state.xray, lastAction: `TOGGLE_XRAY(${!state.xray})` };
+    case 'SET_VP': return { ...state, viewport: action.vp, lastAction: `SET_VP(${action.vp})` };
+    case 'TOGGLE_INTENT': return { ...state, intentOpen: !state.intentOpen };
+    case 'OPEN_SESSION': return {
+      ...state,
+      mainView: 'chat',
+      activeSessionId: action.id,
+      rightOpen: action.openRight ?? true,
+      rightTab: action.tab ?? 'status',
+      rightFullscreen: action.fullscreen ?? false,
+      lastAction: `OPEN_SESSION(${action.id ?? 'blank'})`,
+    };
+    case 'OPEN_HUB': return { ...state, mainView: 'hub', hubTab: action.tab ?? state.hubTab, rightOpen: false, rightFullscreen: false, lastAction: `OPEN_HUB(${action.tab ?? state.hubTab})` };
+    case 'SET_RIGHT_TAB': return { ...state, rightOpen: true, rightTab: action.tab, rightFullscreen: action.tab === 'final' ? state.rightFullscreen : false, lastAction: `SET_RIGHT_TAB(${action.tab})` };
+    case 'TOGGLE_RIGHT': return { ...state, rightOpen: !state.rightOpen, rightFullscreen: false, lastAction: `TOGGLE_RIGHT(${!state.rightOpen})` };
+    case 'TOGGLE_FULLSCREEN': return { ...state, rightOpen: true, rightFullscreen: !state.rightFullscreen, lastAction: `TOGGLE_FULLSCREEN(${!state.rightFullscreen})` };
+    case 'SET_FINAL_MODE': return { ...state, finalMode: action.mode, lastAction: `SET_FINAL_MODE(${action.mode})` };
+    case 'SET_INSPECTOR_TAB': return { ...state, inspectorTab: action.tab, lastAction: `SET_INSPECTOR_TAB(${action.tab})` };
+    case 'SET_CLAIM_FILTER': return { ...state, claimFilter: action.filter, lastAction: `SET_CLAIM_FILTER(${action.filter})` };
+    case 'SET_HEADING': return { ...state, activeHeading: action.id, lastAction: `JUMP_HEADING(${action.id})` };
+    case 'OPEN_EVIDENCE': return {
+      ...state,
+      activeEvidencePath: action.path,
+      rightOpen: true,
+      rightTab: state.rightFullscreen && state.rightTab === 'final' ? 'final' : 'evidence',
+      inspectorTab: 'evidence',
+      lastAction: `OPEN_EVIDENCE(${action.path})`,
+    };
+    case 'SELECT_RADAR': return { ...state, selectedRadarCell: { topic: action.topic, lens: action.lens }, lastAction: `SELECT_RADAR(${action.topic}×${action.lens})` };
+    case 'SELECT_DAG': return { ...state, selectedDagNode: action.id, lastAction: `SELECT_DAG(${action.id})` };
+    case 'PICK_HITL': return { ...state, hitlSelection: { ...state.hitlSelection, [action.key]: action.val }, lastAction: `PICK_HITL(${action.key}=${action.val})` };
+    case 'SUBMIT_HITL': return { ...state, hitlSubmitted: true, activeSessionId: 'sess-running', rightTab: 'status', scenario: 's2-running', lastAction: 'SUBMIT_HITL1 → RUNNING' };
+    case 'SET_DRAFT': {
+      const val = action.text;
+      let trig = null;
+      if (val.startsWith('/')) trig = 'slash';
+      else if (/(?:^|\s)@[^\s]*$/.test(val)) trig = 'at';
+      return { ...state, composerDraft: val, triggerMode: trig, lastAction: `SET_DRAFT(len=${val.length})` };
+    }
+    case 'PREFILL_DRAFT': return {
+      ...state,
+      mainView: 'chat',
+      rightFullscreen: false,
+      composerDraft: action.text,
+      triggerMode: null,
+      lastAction: 'PREFILL_DRAFT(D18 no auto-send)',
+    };
+    case 'ADD_REF_CHIP': {
+      const cleaned = state.composerDraft.replace(/@[^\s]*$/, '').trimEnd();
+      const exists = state.composerChips.includes(action.token);
+      return {
+        ...state,
+        composerDraft: cleaned,
+        composerChips: exists ? state.composerChips : [...state.composerChips, action.token],
+        triggerMode: null,
+        lastAction: `ADD_REF_CHIP(${action.token})`,
+      };
+    }
+    case 'REMOVE_REF_CHIP': return {
+      ...state,
+      composerChips: state.composerChips.filter((c) => c !== action.token),
+      lastAction: `REMOVE_REF_CHIP(${action.token})`,
+    };
+    case 'CLOSE_TRIGGER': return { ...state, triggerMode: null };
+    case 'SET_PORTAL': return { ...state, methodPortalOpen: action.open, lastAction: `METHOD_EDITOR_PORTAL(${action.open})` };
+    case 'SAVE_METHOD': return { ...state, methodSaved: true, defaultsSummary: '方法 开源生态架构对比 · 已落盘', lastAction: 'METHOD_LIBRARY_UPSERT(verified)' };
+    case 'OPEN_HUB_RUN': {
+      if (action.ownership === 'orphan') {
+        return {
+          ...state,
+          mainView: 'chat',
+          rightOpen: true,
+          rightTab: 'final',
+          rightFullscreen: true,
+          finalMode: 'reader',
+          lastAction: 'OPEN_ORPHAN_ARCHIVE(read-only, no session hijack)',
+        };
+      }
+      return {
+        ...state,
+        mainView: 'chat',
+        activeSessionId: action.sessionId,
+        rightOpen: true,
+        rightTab: action.openFinal ? 'final' : 'status',
+        rightFullscreen: action.openFinal ? true : false,
+        lastAction: `HUB_OWNED_SWITCH(${action.sessionId} → ${action.openFinal ? 'final' : 'status'})`,
+      };
+    }
+    default: return state;
+  }
+}
+
+/* ============================================================================
+ * PART 2 · THIN REACTIVE VIEW RENDERER
+ * ============================================================================ */
+let state = createInitialState();
+let toastTimer = null;
+let hoverTimer = null;
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+function dispatch(action) {
+  state = reduce(state, action);
+  render();
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function activeSession() {
+  return DOMAIN.sessions.find((s) => s.id === state.activeSessionId) ?? null;
+}
+
+function dotClassFor(phase) {
+  if (phase === 'delivered') return 'dot-green';
+  if (phase === 'hitl_pending') return 'dot-amber';
+  if (phase === 'running') return 'dot-blue';
+  return 'dot-muted';
+}
+
+function phaseLabelFor(phase) {
+  if (phase === 'delivered') return '已交付';
+  if (phase === 'hitl_pending') return '待拍板 (HITL1)';
+  if (phase === 'running') return '深度推进中 · Wave 2';
+  return '未开始';
+}
+
+/* ---------- Top Prototype Bar & Shell Attributes ---------- */
+function renderChrome() {
+  document.documentElement.dataset.theme = state.theme;
+  document.documentElement.dataset.xray = state.xray ? 'on' : 'off';
+  document.getElementById('appShell').dataset.vp = state.viewport;
+
+  document.getElementById('scenarioBar').innerHTML = SCENARIOS.map((s) => `
+    <button type="button" class="proto-pill ${state.scenario === s.id ? 'active' : ''}" data-act="scenario" data-id="${s.id}">
+      ${esc(s.label)}
+    </button>
+  `).join('');
+
+  const btnXray = document.getElementById('btnXray');
+  btnXray.classList.toggle('on', state.xray);
+  document.getElementById('btnTheme').textContent = state.theme === 'light' ? '暗色主题' : '亮色主题';
+  document.getElementById('btnIntent').classList.toggle('on', state.intentOpen);
+
+  document.querySelectorAll('[data-vp-set]').forEach((b) => {
+    b.classList.toggle('active', b.dataset.vpSet === state.viewport);
+  });
+
+  document.getElementById('navHub').classList.toggle('active', state.mainView === 'hub');
+
+  // Left sidebar session rows with Host sessionProjections badges
+  document.getElementById('sessionList').innerHTML = DOMAIN.sessions.map((s) => `
+    <button type="button" class="session-row ${state.mainView === 'chat' && state.activeSessionId === s.id ? 'active' : ''}" data-act="open-session" data-id="${s.id}">
+      <span class="dot ${dotClassFor(s.projection.phase)}" title="${esc(phaseLabelFor(s.projection.phase))}"></span>
+      <span class="s-title hide-narrow">${esc(s.title)}</span>
+      <span class="s-time hide-narrow">${esc(s.time)}</span>
+      <span class="s-hover-tip">drt_${esc(s.slug)} · ${esc(phaseLabelFor(s.projection.phase))}</span>
+    </button>
+  `).join('');
+}
+
+/* ---------- Center Column: Chat OR Global Research Hub ---------- */
+function renderComposer(placeholder) {
+  const showPopup = state.triggerMode === 'slash' || state.triggerMode === 'at';
+  let popupHtml = '';
+  if (state.triggerMode === 'slash') {
+    const q = state.composerDraft.slice(1).toLowerCase();
+    const list = DOMAIN.slashCommands.filter((c) => c.cmd.slice(1).includes(q) || c.title.toLowerCase().includes(q));
+    popupHtml = `
+      <div class="trigger-popup" data-seam="ctx.commandUi (斜杠命令弹窗)">
+        <div class="popup-group-lbl">深度研究指令 · Slash Commands</div>
+        ${list.map((c, idx) => `
+          <button type="button" class="popup-item ${idx === 0 ? 'focused' : ''}" data-act="pick-slash" data-cmd="${esc(c.cmd)}">
+            <div class="popup-item-main">
+              <span class="popup-item-title">${esc(c.cmd)} · ${esc(c.title)}</span>
+              <span class="popup-item-sub">${esc(c.sub)}</span>
+            </div>
+            <span class="popup-kbd">Enter</span>
+          </button>
+        `).join('') || '<div class="popup-group-lbl">无匹配指令</div>'}
+      </div>`;
+  } else if (state.triggerMode === 'at') {
+    popupHtml = `
+      <div class="trigger-popup" data-seam="ui-input-trigger (@ 证据与计划节点补全)">
+        <div class="popup-group-lbl">当前 Run 引用 · 证据卡与计划节点</div>
+        ${DOMAIN.atReferences.map((r, idx) => `
+          <button type="button" class="popup-item ${idx === 0 ? 'focused' : ''}" data-act="pick-at" data-token="${esc(r.token)}">
+            <div class="popup-item-main">
+              <span class="popup-item-title">@${esc(r.label)}</span>
+              <span class="popup-item-sub">${esc(r.group)} · ${esc(r.sub)}</span>
+            </div>
+            <span class="popup-kbd">胶囊</span>
+          </button>
+        `).join('')}
+      </div>`;
+  }
+
+  return `
+    <div class="composer-area">
+      <div class="composer-box" data-seam="conversation.input + commandUi + ui-input-trigger" data-seam-pos="bl">
+        ${popupHtml}
+        ${state.composerChips.length > 0 ? `
+          <div class="composer-chips">
+            ${state.composerChips.map((tok) => `
+              <span class="ref-chip">
+                <span>📎 ${esc(tok.split('/').pop())}</span>
+                <button type="button" data-act="rm-chip" data-token="${esc(tok)}" aria-label="移除引用" style="margin-left:2px;color:var(--ink-3);">×</button>
+              </span>
+            `).join('')}
+          </div>` : ''}
+        <textarea class="composer-input" id="composerInput" rows="2" placeholder="${esc(placeholder)}">${esc(state.composerDraft)}</textarea>
+        <div class="composer-bar">
+          <div class="composer-left">
+            <button type="button" class="chip-btn" data-act="quick-slash" title="体验 /lens /method 命令弹窗">/ 指令</button>
+            <button type="button" class="chip-btn" data-act="quick-at" title="体验 @ 证据卡/计划节点引用胶囊">@ 引用</button>
+            <button type="button" class="chip-btn accent" data-act="open-hub-lenses">⚙ 研究默认：${esc(state.defaultsSummary)}</button>
+          </div>
+          <button type="button" class="send-btn" data-act="send-draft" title="模拟发送（遵循 D18 仅草稿不调模型）">↑</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderCenter() {
+  const el = document.getElementById('centerCol');
+  if (state.mainView === 'hub') {
+    el.innerHTML = renderHubPanel();
+    return;
+  }
+
+  const sess = activeSession();
+
+  // S1 Blank Session: Intent-first Start Screen
+  if (sess === null) {
+    el.innerHTML = `
+      <div class="chat-header">
+        <div class="chat-title-wrap">
+          <span class="chat-title">新研究会话</span>
+          <span class="tag-pill">白名单裁剪：无 Trajectory / 无 Terminal</span>
+        </div>
+        <div class="header-actions">
+          <button type="button" class="icon-btn" data-act="open-hub">研究工作台</button>
+        </div>
+      </div>
+      <div class="chat-scroll">
+        <div class="hero-wrap">
+          <div class="hero-brand" data-seam="conversation.hero.brand.mark">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 12.5c-2.2 0-3.4-1.2-4.6-2.9C15.1 7.7 13.5 5 11.4 3c-.3 2.5-.1 4.5-1.1 5.8-1.4 1.7-4 2.4-7.3 3.7 3.2 1.2 6.2 1.7 8.4 3.5 1.4 1.1 2.2 2.8 2.8 5 .8-2.2 1.4-4 2.7-5.3 1.2-1.2 2.5-2 4.1-3.2Z"/>
+            </svg>
+            <span>探索未至之境</span>
+            <span class="tag-pill blue">Deep Research</span>
+          </div>
+          <div class="hero-sub">说出你的研究问题；Lead 拆题、Scout 找源、Analyst 深读、Critic 独立核查。</div>
+
+          <div class="hero-meta-bar">
+            <div class="hero-left-selects">
+              <span class="chip-btn">📁 research-workspace ▾</span>
+              <span class="chip-btn"><strong>Deep Research Lead</strong> ▾</span>
+            </div>
+            <div class="hero-right-opts" data-seam="conversation.hero.options">
+              <button type="button" class="chip-btn" data-act="open-hub-methods">☰ 方法</button>
+              <button type="button" class="chip-btn" data-act="quick-slash">&lt;/&gt; 视角</button>
+              <button type="button" class="chip-btn" data-act="open-hub">▦ 工作台</button>
+            </div>
+          </div>
+
+          <div class="starter-grid" data-seam="conversation.input.dock (StartCard 意图起题卡)">
+            ${DOMAIN.starters.map((st, idx) => `
+              <button type="button" class="starter-card" data-act="pick-starter" data-idx="${idx}">
+                <span class="starter-tag">${esc(st.tag)}</span>
+                <span class="starter-title">${esc(st.title)}</span>
+                <span class="starter-hint">${esc(st.hint)}</span>
+              </button>
+            `).join('')}
+          </div>
+
+          <div class="recent-strip">
+            <span>最近研究快捷续接：</span>
+            <button type="button" class="recent-pill" data-act="open-session" data-id="sess-delivered">
+              <span class="dot dot-green"></span>DSH 插件组合架构评估 · 读终稿
+            </button>
+            <button type="button" class="recent-pill" data-act="open-session" data-id="sess-hitl">
+              <span class="dot dot-amber"></span>端侧推理引擎对比 · 待立项拍板
+            </button>
+          </div>
+        </div>
+      </div>
+      ${renderComposer('说出你的研究问题；敲 / 选透镜或方法，敲 @ 引用证据卡…')}
+    `;
+    return;
+  }
+
+  // Active Session Header
+  const pillCls = sess.projection.phase === 'delivered' ? 'delivered' : sess.projection.phase === 'hitl_pending' ? 'hitl' : 'running';
+  let threadHtml = '';
+
+  if (sess.id === 'sess-hitl') {
+    threadHtml = `
+      <div class="msg-user">${esc(sess.question)}</div>
+      <div class="msg-assistant">
+        <div class="msg-prose">
+          <p>已为本题建好契约草案 <code>drt_edge-inference-2026/protocol.json</code>。开跑前请确认两项立项口径（点击下方选项后点「确认立项并开跑」即可实时体验阶段切换）：</p>
+        </div>
+        <div class="hitl-card" data-seam="ask_user_question (HITL1 停靠卡)">
+          <div>
+            <div class="hitl-q-title">1. 研究类型与深度</div>
+            <div class="hitl-opts">
+              <button type="button" class="hitl-opt ${state.hitlSelection.type === 'comparison' ? 'selected' : ''}" data-act="pick-hitl" data-key="type" data-val="comparison">
+                <div class="hitl-opt-lbl">方案比较 (Recommended)</div>
+                <div class="hitl-opt-desc">对齐硬件口径，比较延迟、吞吐、内存峰值与生态成本。</div>
+              </button>
+              <button type="button" class="hitl-opt ${state.hitlSelection.type === 'quick' ? 'selected' : ''}" data-act="pick-hitl" data-key="type" data-val="quick">
+                <div class="hitl-opt-lbl">快速事实核查</div>
+                <div class="hitl-opt-desc">仅摘录官方公开数据，不展开多引擎细粒度对比。</div>
+              </button>
+            </div>
+          </div>
+          <div>
+            <div class="hitl-q-title">2. 硬件口径范围</div>
+            <div class="hitl-opts">
+              <button type="button" class="hitl-opt ${state.hitlSelection.hw === 'dual' ? 'selected' : ''}" data-act="pick-hitl" data-key="hw" data-val="dual">
+                <div class="hitl-opt-lbl">Apple Silicon + x86 CPU 双线</div>
+                <div class="hitl-opt-desc">同时覆盖 macOS Metal/MLX 与跨平台 CPU 推理。</div>
+              </button>
+              <button type="button" class="hitl-opt ${state.hitlSelection.hw === 'apple' ? 'selected' : ''}" data-act="pick-hitl" data-key="hw" data-val="apple">
+                <div class="hitl-opt-lbl">仅 Apple Silicon 统一内存</div>
+                <div class="hitl-opt-desc">深度聚焦 M3/M4 统一内存带宽与功耗表现。</div>
+              </button>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;">
+            <button type="button" class="btn-primary" data-act="submit-hitl">确认立项并开跑 →</button>
+          </div>
+        </div>
+      </div>`;
+  } else if (sess.id === 'sess-running') {
+    threadHtml = `
+      <div class="msg-user">${esc(sess.question)}</div>
+      <div class="msg-assistant">
+        <div class="msg-prose"><p>立项已锁定（<code>protocol.json · approved v1</code>）。已并行派发 Scout 侦察与 Analyst 深挖，正在执行 <strong>Wave 2 · 透镜扇出</strong>：</p></div>
+        <div class="tool-card" data-seam="chat.toolCall · WebBlock (web_search)">
+          <div class="tool-head">
+            <span>🔍</span>
+            <span>检索 · DeepSeek Harness cordis bundle patch · sessionProjections</span>
+            <span class="tag-pill green" style="margin-left:auto;">3 条一手源</span>
+          </div>
+          <div class="tool-body">
+            <div class="web-source-item">
+              <span class="domain-badge">GH</span>
+              <div>
+                <div class="web-source-title">DeepSeek Harness — Declarative Cordis Bundle Architecture</div>
+                <div class="web-source-snip">Plugins compose via cordis.patch.yml with disabled flags, scoped.effect lifecycles, and isolated worker profiles.</div>
+              </div>
+            </div>
+            <div class="web-source-item">
+              <span class="domain-badge">DS</span>
+              <div>
+                <div class="web-source-title">Host sessionProjections Wire Contract</div>
+                <div class="web-source-snip">Deterministic incremental fold over committed v4 session logs; zero N+1 follow subscriptions.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tool-card" data-seam="chat.toolCall · Delegation (spawn_teammate / research-wave)">
+          <div class="tool-head">
+            <span>👥</span>
+            <span>并行组队 · 3 个角色正在运行</span>
+            <span class="tag-pill blue" style="margin-left:auto;">Wave 2</span>
+          </div>
+          <div class="tool-body">
+            <div class="deleg-row">
+              <span><span class="dot dot-green"></span> <strong>scout-1</strong> · W1 广度侦察与反例搜集</span>
+              <span class="tag-pill green">已完成</span>
+            </div>
+            <div class="deleg-row">
+              <span><span class="dot dot-blue"></span> <strong>analyst-1</strong> · W2.1 深度核查 Host 投影与延迟口径</span>
+              <span class="tag-pill blue">执行中</span>
+            </div>
+            <div class="deleg-row">
+              <span><span class="dot dot-blue"></span> <strong>research-wave</strong> · W2.2 批量透镜扇出（isolate worker）</span>
+              <span class="tag-pill blue">执行中</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  } else {
+    threadHtml = `
+      <div class="msg-user">
+        请重点核对
+        <button type="button" class="ref-chip" data-act="open-graph-node" data-node="W2.1" data-seam="conversation.user.text.node (ReferenceChip)">⊞ W2.1</button>
+        和
+        <button type="button" class="ref-chip" data-act="open-evidence" data-path="evidence/e2-session-projection-wire.md">📄 e2-session-projection-wire.md</button>
+        的投影契约，由独立 Critic 完成终局核查并交付读者版与审计版报告。
+      </div>
+      <div class="msg-assistant">
+        <div class="msg-prose">
+          <p><strong>交付完成（<code>drt_dsh-plugin-ecosystem-2026</code> · v1）</strong></p>
+          <ul>
+            <li><strong>审阅结论</strong>：独立 Critic 终局 <strong>PASS</strong>（Critical=0 / Major=0；4 条完全支持、1 条部分支持标注超百卡边界、1 条待实测）。</li>
+            <li><strong>精读建议</strong>：点击下方报告卡或在右栏切换「全屏三栏精读」，悬停正文任意 <code>[来源: ...]</code> 即可 150ms 溯源。</li>
+          </ul>
+        </div>
+        <div class="deliv-card" data-act="open-final-studio" data-seam="ui-deliverables (去重后唯一交付卡)">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="domain-badge" style="width:28px;height:28px;font-size:11px;">MD</span>
+            <div>
+              <div style="font-weight:600;font-size:13px;">readable-v1.md · 读者版终稿</div>
+              <div style="font-size:11.8px;color:var(--ink-3);">一页执行摘要、机制对照与诚实边界 · 支持全屏三栏精读</div>
+            </div>
+          </div>
+          <span class="btn-primary">沉浸精读 →</span>
+        </div>
+        <div class="deliv-card" data-act="open-final-audit">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="domain-badge" style="width:28px;height:28px;font-size:11px;">V1</span>
+            <div>
+              <div style="font-weight:600;font-size:13px;">v1.md · 审计版终稿</div>
+              <div style="font-size:11.8px;color:var(--ink-3);">全量章节、逐句证据链引用与 6 条 Critic 主张核查对照</div>
+            </div>
+          </div>
+          <span class="btn-ghost">查看审计版</span>
+        </div>
+      </div>`;
+  }
+
+  el.innerHTML = `
+    <div class="chat-header">
+      <div class="chat-title-wrap">
+        <span class="chat-title">${esc(sess.title)}</span>
+        <button type="button" class="header-pill ${pillCls}" data-act="toggle-status" data-seam="session.header.actions">
+          <span class="dot ${dotClassFor(sess.projection.phase)}"></span>
+          <span>${esc(phaseLabelFor(sess.projection.phase))}</span>
+        </button>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="icon-btn ${state.rightOpen && state.rightTab === 'status' ? 'active' : ''}" data-act="set-rtab" data-tab="status">状态</button>
+        <button type="button" class="icon-btn ${state.rightOpen && state.rightTab === 'graph' ? 'active' : ''}" data-act="set-rtab" data-tab="graph">图谱</button>
+        ${sess.projection.deliveredPath ? `<button type="button" class="icon-btn ${state.rightOpen && state.rightTab === 'final' ? 'active' : ''}" data-act="set-rtab" data-tab="final">终稿</button>` : ''}
+        <button type="button" class="icon-btn" data-act="toggle-right" title="展开/收起右栏">${state.rightOpen ? '⇥' : '⇤'}</button>
+      </div>
+    </div>
+    <div class="chat-scroll">${threadHtml}</div>
+    ${renderComposer('追问或补充指示；敲 / 选研究指令，敲 @ 插入证据卡或计划节点胶囊…')}
+  `;
+}
+
+/* ---------- S5 Global Research Hub Panel ---------- */
+function renderHubPanel() {
+  let body = '';
+  if (state.hubTab === 'runs') {
+    body = `
+      <div class="hub-grid" data-seam="RunsView · Host researchRun 归属精确反查">
+        ${DOMAIN.hubRuns.map((r) => `
+          <div class="run-card">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+              <strong style="font-size:13.5px;line-height:1.4;">${esc(r.title)}</strong>
+              <span class="tag-pill ${r.status === 'delivered' ? 'green' : r.status === 'hitl_pending' ? 'amber' : 'blue'}">${esc(phaseLabelFor(r.status))}</span>
+            </div>
+            <div style="font-family:var(--font-mono);font-size:11.5px;color:var(--ink-3);">${esc(r.slug)}</div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <span class="tag-pill">证据 ${r.evidenceCount} 份</span>
+              ${r.badges.map((b) => `<span class="tag-pill ${b.includes('只读') ? 'amber' : ''}">${esc(b)}</span>`).join('')}
+            </div>
+            <div class="run-card-actions">
+              ${r.status === 'delivered' ? `<button type="button" class="btn-primary" data-act="hub-open-run" data-sid="${r.sessionId ?? ''}" data-own="${r.ownership}" data-final="1">${r.ownership === 'orphan' ? '只读打开归档终稿' : '切所属会话开终稿'}</button>` : ''}
+              ${r.sessionId ? `<button type="button" class="btn-ghost" data-act="hub-open-run" data-sid="${r.sessionId}" data-own="${r.ownership}" data-final="0">${r.status === 'delivered' ? '查看所属会话' : '进入研究会话 →'}</button>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>`;
+  } else if (state.hubTab === 'methods') {
+    body = `
+      <div class="hub-grid" data-seam="MethodLibraryView · 唯一全局入口（无重复 tab）">
+        <div class="run-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong>开源生态架构对比</strong>
+            <span class="tag-pill blue">默认方法</span>
+          </div>
+          <div style="font-size:12.2px;color:var(--ink-2);">一手源码契约 + 反例检索 + 独立 Critic 核查；显性标注未测边界。</div>
+          <div class="run-card-actions">
+            <button type="button" class="btn-primary" data-act="open-method-portal">用 Method Editor 精修</button>
+          </div>
+        </div>
+        <div class="run-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong>方案比较（内置参考）</strong>
+            <span class="tag-pill">只读内置</span>
+          </div>
+          <div style="font-size:12.2px;color:var(--ink-2);">对齐硬件/版本/时间窗统一口径，输出对比轴、取舍矩阵与风险边界。</div>
+          <div class="run-card-actions">
+            <button type="button" class="btn-ghost" data-act="open-method-portal">基于此派生新方法</button>
+          </div>
+        </div>
+        <div class="run-card" style="border-style:dashed;justify-content:center;align-items:center;min-height:140px;">
+          <button type="button" class="btn-primary" data-act="open-method-portal">＋ 拉起 Method Editor 新建方法</button>
+          <span style="font-size:11.5px;color:var(--ink-3);">以 shell.overlay Portal 隔离打开，零 CSS hack</span>
+        </div>
+      </div>`;
+  } else {
+    body = `
+      <div class="card-box" data-seam="DefaultsPanel (/research-defaults host command)">
+        <div class="card-head">
+          <span>工作区项目默认（research-defaults.json）</span>
+          <span class="tag-pill blue">仅作用于下一场 HITL1 推荐</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <span class="chip-btn accent">深度：深度档 (deep)</span>
+          <span class="chip-btn accent">输出：读者版 + 审计版</span>
+          <span class="chip-btn accent">信源：官方一手 + 学术优先</span>
+        </div>
+      </div>
+      <div class="hub-grid">
+        ${DOMAIN.radar.lenses.map((l) => `
+          <div class="run-card">
+            <strong>${esc(l.label)}</strong>
+            <div style="font-size:12.2px;color:var(--ink-2);">${esc(l.blindHint)}</div>
+            <div class="run-card-actions">
+              <button type="button" class="btn-ghost" data-act="prefill-lens" data-label="${esc(l.label)}">一键预填该视角</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>`;
+  }
+
+  return `
+    <div class="hub-wrap" data-seam="sidebar.panellist + main (ResearchHubPanel)">
+      <div class="hub-top">
+        <div>
+          <div style="font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px;">
+            <span>Orca 研究工作台</span>
+            <span class="tag-pill">全局统一入口</span>
+          </div>
+          <div style="font-size:12.5px;color:var(--ink-3);margin-top:2px;">按工作区统一管理全部研究档案、方法库与研究透镜（零跨会话串台）。</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn-ghost" data-act="open-session" data-id="sess-delivered">返回对话</button>
+          <button type="button" class="btn-primary" data-act="open-session" data-id="">＋ 发起新研究</button>
+        </div>
+      </div>
+      <div class="seg-ctrl" style="align-self:flex-start;">
+        <button type="button" class="seg-btn ${state.hubTab === 'runs' ? 'active' : ''}" data-act="hub-tab" data-tab="runs">Run 档案 (4)</button>
+        <button type="button" class="seg-btn ${state.hubTab === 'methods' ? 'active' : ''}" data-act="hub-tab" data-tab="methods">方法库</button>
+        <button type="button" class="seg-btn ${state.hubTab === 'lenses' ? 'active' : ''}" data-act="hub-tab" data-tab="lenses">研究透镜与默认</button>
+      </div>
+      ${body}
+    </div>`;
+}
+
+/* ---------- Right Sidebar (Status / Graph / Final / Evidence) ---------- */
+function renderRightPane() {
+  const el = document.getElementById('rightPane');
+  if (!state.rightOpen) {
+    el.className = 'right-pane hidden';
+    el.innerHTML = '';
+    return;
+  }
+  const sess = activeSession() ?? DOMAIN.sessions[0];
+  el.className = `right-pane ${state.rightFullscreen ? 'fullscreen' : ''}`;
+
+  const tabsHtml = `
+    <div class="right-tabs">
+      <div class="tab-strip">
+        <button type="button" class="rtab ${state.rightTab === 'status' ? 'active' : ''}" data-act="set-rtab" data-tab="status">
+          ${sess.projection.phase === 'hitl_pending' ? '研究状态 · ⏳ 等你拍板' : '研究状态'}
+        </button>
+        <button type="button" class="rtab ${state.rightTab === 'graph' ? 'active' : ''}" data-act="set-rtab" data-tab="graph">研究图谱</button>
+        <button type="button" class="rtab ${state.rightTab === 'final' ? 'active' : ''}" data-act="set-rtab" data-tab="final">终稿</button>
+        <button type="button" class="rtab ${state.rightTab === 'evidence' ? 'active' : ''}" data-act="set-rtab" data-tab="evidence">证据卡</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <button type="button" class="icon-btn" data-act="toggle-fs" title="全屏 / 还原">${state.rightFullscreen ? '⤡ 还原' : '⤢ 全屏'}</button>
+        <button type="button" class="icon-btn" data-act="toggle-right" title="关闭右栏">×</button>
+      </div>
+    </div>`;
+
+  if (state.rightTab === 'status') {
+    el.innerHTML = tabsHtml + renderStatusBody(sess);
+  } else if (state.rightTab === 'graph') {
+    el.innerHTML = tabsHtml + renderGraphBody();
+  } else if (state.rightTab === 'evidence') {
+    el.innerHTML = tabsHtml + renderEvidenceBody();
+  } else {
+    el.innerHTML = tabsHtml + renderFinalBody();
+  }
+}
+
+function renderStatusBody(sess) {
+  const phase = sess.projection.phase;
+  const isHitl = phase === 'hitl_pending';
+  const isDelivered = phase === 'delivered';
+
+  // Interactive radar drilldown drawer
+  const selRow = DOMAIN.radar.rows.find((r) => r.topic === state.selectedRadarCell.topic) ?? DOMAIN.radar.rows[0];
+  const selLens = DOMAIN.radar.lenses.find((l) => l.id === state.selectedRadarCell.lens) ?? DOMAIN.radar.lenses[2];
+  const cellPaths = selRow.cells[selLens.id];
+
+  let drawerHtml = '';
+  if (Array.isArray(cellPaths) && cellPaths.length > 0) {
+    drawerHtml = `
+      <div class="radar-drawer">
+        <div style="font-size:11.5px;color:var(--ink-3);font-weight:600;">
+          已选格：${esc(selRow.topic)} × ${esc(selLens.label)}（${cellPaths.length} 张证据卡，点击直达）
+        </div>
+        ${cellPaths.map((p) => {
+          const ev = DOMAIN.evidence[p];
+          return `
+            <button type="button" class="radar-ev-btn" data-act="open-evidence" data-path="${esc(p)}">
+              <div style="min-width:0;">
+                <div style="font-size:12.2px;font-weight:500;color:var(--ink-1);">${esc(ev.title)}</div>
+                <div style="font-size:11px;color:var(--ink-3);">${esc(ev.publisher)} · ${esc(ev.tier)}</div>
+              </div>
+              <span class="tag-pill green">${esc(ev.quality)}</span>
+            </button>`;
+        }).join('')}
+      </div>`;
+  } else if (Array.isArray(cellPaths) && cellPaths.length === 0) {
+    drawerHtml = `
+      <div class="radar-drawer" style="border-color:var(--amber-border);background:var(--amber-soft);">
+        <div style="font-size:12px;color:var(--amber);font-weight:600;">盲区提示 · ${esc(selRow.topic)} × ${esc(selLens.label)}（当前 0 份）</div>
+        <div style="font-size:11.8px;color:var(--ink-2);">${esc(selLens.blindHint)}</div>
+      </div>`;
+  }
+
+  return `
+    <div class="right-body" data-seam="sidebar.right.tab (ResearchStatusTab 3 层焦点)">
+      <!-- Layer 1: Phase-Adaptive Focus Hero -->
+      <div class="focus-hero ${isHitl ? 'hitl' : ''}">
+        <div class="focus-hero-top">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="tag-pill ${isDelivered ? 'green' : isHitl ? 'amber' : 'blue'}">${esc(phaseLabelFor(phase))}</span>
+            <span style="font-size:11.5px;color:var(--ink-3);">drt_${esc(sess.slug)}</span>
+          </div>
+          ${isDelivered ? `<button type="button" class="btn-primary" data-act="open-final-studio">沉浸精读终稿 →</button>` : ''}
+        </div>
+        <div class="focus-q">${esc(sess.question)}</div>
+        <div class="focus-sub">
+          ${isHitl
+            ? '⏳ 等待你在左侧 HITL1 问卡确认研究类型与硬件口径，确认后立即组建小队开跑。'
+            : isDelivered
+              ? 'Critic 终局 PASS（Critical=0 / Major=0），读者版与审计版均已交付；需要续研请在终稿页尾一键预填。'
+              : '正在执行 Wave 2 深度挖掘（analyst-1 + research-wave 活跃），已沉淀有效证据 5 份。'}
+        </div>
+        <div class="track-rail">
+          <span class="step-node ${isHitl ? 'current' : 'done'}">◆ 立项确认</span>
+          <span class="step-node ${isHitl ? '' : 'done'}">组队</span>
+          <span class="step-node ${isHitl ? '' : 'done'}">侦察</span>
+          <span class="step-node ${isDelivered ? 'done reentry' : !isHitl ? 'current reentry' : ''}">挖掘 ↻</span>
+          <span class="step-node ${isDelivered ? 'done' : ''}">综合</span>
+          <span class="step-node ${isDelivered ? 'done' : ''}">审查</span>
+          <span class="step-node ${isDelivered ? 'done' : ''}">◆ 交付</span>
+        </div>
+      </div>
+
+      <!-- Protocol Contract -->
+      <div class="card-box">
+        <div class="card-head">
+          <span>研究契约（protocol.json）</span>
+          <span class="tag-pill ${isHitl ? 'amber' : 'green'}">${isHitl ? 'draft · 待确认' : 'approved · v1'}</span>
+        </div>
+        <div class="meta-kv">
+          <div>方法：方案比较（开源生态架构对比） · 深度：deep（≤ 8 节点）</div>
+          <div>信源：official · academic · practitioner · primary 优先 · 12m</div>
+          <div>质量门：证据 ≥ B · 独立 Critic 核查 · claims × verdicts 强对账</div>
+        </div>
+      </div>
+
+      <!-- Layer 2: Interactive QualityRadar -->
+      ${!isHitl ? `
+      <div class="card-box" data-seam="QualityRadar (点击格直钻证据卡)">
+        <div class="card-head">
+          <span>证据质量雷达 · Topic × Lens</span>
+          <span style="font-size:11.5px;font-weight:500;color:var(--ink-3);">5 独立域名 · A:3 B:2</span>
+        </div>
+        <table class="radar-table">
+          <thead>
+            <tr>
+              <th>Topic</th>
+              ${DOMAIN.radar.lenses.map((l) => `<th>${esc(l.label)}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${DOMAIN.radar.rows.map((r) => `
+              <tr>
+                <td style="font-weight:600;color:var(--ink-1);">${esc(r.topic)}</td>
+                ${DOMAIN.radar.lenses.map((l) => {
+                  const arr = r.cells[l.id];
+                  const sel = state.selectedRadarCell.topic === r.topic && state.selectedRadarCell.lens === l.id;
+                  if (arr === null) return `<td><span class="radar-cell na">·</span></td>`;
+                  if (arr.length === 0) return `<td><button type="button" class="radar-cell gap ${sel ? 'selected' : ''}" data-act="select-radar" data-topic="${r.topic}" data-lens="${l.id}" title="${esc(l.blindHint)}">0</button></td>`;
+                  return `<td><button type="button" class="radar-cell hit ${sel ? 'selected' : ''}" data-act="select-radar" data-topic="${r.topic}" data-lens="${l.id}">${arr.length}</button></td>`;
+                }).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        ${drawerHtml}
+      </div>` : ''}
+
+      <!-- Layer 3: Vector Activity Stream -->
+      <div class="card-box">
+        <div class="card-head">
+          <span>研究动态流（矢量分组）</span>
+          <span class="tag-pill">零原始事件名</span>
+        </div>
+        <div class="act-list">
+          <div class="act-row"><span class="act-icon">⌕</span><span>检索一手架构源与 sessionProjections 契约（命中 3 源）</span></div>
+          <div class="act-row"><span class="act-icon">⊞</span><span>派出 scout-1 / analyst-1 / research-wave 并行取证</span></div>
+          <div class="act-row"><span class="act-icon">✓</span><span>独立 Critic 完成 6 条主张对账，签发终局 PASS</span></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ---------- S3 Academic Reading Studio (Final Tab) ---------- */
+function renderFinalBody() {
+  const riskCount = DOMAIN.claims.filter((c) => c.status !== 'supported').length;
+  const filteredClaims = DOMAIN.claims.filter((c) => {
+    if (state.claimFilter === 'risk') return c.status !== 'supported';
+    if (state.claimFilter === 'supported') return c.status === 'supported';
+    return true;
+  });
+
+  const toolbar = `
+    <div class="final-toolbar" data-seam="FinalToolbar (合一单条工具栏)">
+      <div class="seg-ctrl" role="tablist">
+        <button type="button" class="seg-btn ${state.finalMode === 'reader' ? 'active' : ''}" data-act="final-mode" data-mode="reader">读者版</button>
+        <button type="button" class="seg-btn ${state.finalMode === 'audit' ? 'active' : ''}" data-act="final-mode" data-mode="audit">审计版</button>
+        <button type="button" class="seg-btn ${state.finalMode === 'claims' ? 'active' : ''}" data-act="final-mode" data-mode="claims">核查清单 (${DOMAIN.claims.length})</button>
+      </div>
+      <span style="font-size:12px;color:var(--ink-3);">${state.finalMode === 'audit' ? '审计版 · v1' : '读者版 · v1'}</span>
+      <span style="flex:1"></span>
+      <button type="button" class="btn-ghost" data-act="set-rtab" data-tab="status">过程 →</button>
+      <button type="button" class="btn-ghost" data-act="toggle-fs" data-seam="useTabInfo().sidebar.fullscreen">
+        ${state.rightFullscreen ? '⤡ 退出全屏' : '⤢ 全屏三栏'}
+      </button>
+    </div>`;
+
+  // Full Claims-only mode
+  if (state.finalMode === 'claims') {
+    return toolbar + `
+      <div class="right-body" style="max-width:860px;margin:0 auto;width:100%;">
+        ${renderClaimsList(filteredClaims, riskCount)}
+        ${renderFollowupFooter()}
+      </div>`;
+  }
+
+  const cite = (path, label) => `<a href="#cite" class="cite-link" data-cite="${esc(path)}">📄 来源: ${esc(label)}</a>`;
+
+  const tocItems = [
+    { id: 'h-summary', label: '一句话结论', cls: '' },
+    { id: 'h-matrix', label: '核心机制速览', cls: '' },
+    { id: 'h-why', label: '为什么前台极简与示范不冲突', cls: '' },
+    { id: 'h-user', label: '1. 面向研究用户', cls: 'h3' },
+    { id: 'h-arch', label: '2. 面向架构与插件作者', cls: 'h3' },
+    { id: 'h-limits', label: '诚实边界与未覆盖项', cls: '' },
+    { id: 'h-next', label: '下一版优先项', cls: '' },
+  ];
+
+  const ev = DOMAIN.evidence[state.activeEvidencePath] ?? Object.values(DOMAIN.evidence)[0];
+
+  return toolbar + `
+    <div class="final-studio ${state.rightFullscreen ? 'three-col' : ''}" data-seam="sidebar.fullscreen 三栏精读布局">
+      <!-- Left Sticky TOC -->
+      <nav class="studio-toc" aria-label="章节目录">
+        <div style="font-size:11.5px;font-weight:600;color:var(--ink-3);padding:0 8px 6px;">章节目录 (${tocItems.length})</div>
+        ${tocItems.map((it) => `
+          <button type="button" class="toc-link ${it.cls} ${state.activeHeading === it.id ? 'active' : ''}" data-act="jump-heading" data-id="${it.id}">
+            ${esc(it.label)}
+          </button>
+        `).join('')}
+      </nav>
+
+      <!-- Center Comfortable Reading Column (hover any citation for 150ms!) -->
+      <article class="studio-main">
+        <div class="studio-prose">
+          <h1>DSH 插件化垂直研究工作台评估（${state.finalMode === 'audit' ? '审计版 v1' : '读者版 v1'}）</h1>
+          <blockquote>
+            核心结论：在不修改宿主内核的前提下，DSH 的声明式插件组合 + Host <code>sessionProjections</code> + 独立 Critic 核查架构，足以长出前台极简、后台可审计的深度研究工作台。
+          </blockquote>
+
+          <h2 id="h-summary">一句话结论</h2>
+          <p>
+            通过<strong>白名单裁剪 + Host 增量投影 + 全屏三栏溯源 + 独立 Critic 核查</strong>四条主轴，外部插件包既能屏蔽通用编程壳噪音、把报告复核切屏往返降低约 70%，又能完整保留 DSH 原生扩展点纪律与生态可组合性
+            ${cite('evidence/e1-cordis-plugin-seam.md', 'e1-cordis-plugin-seam.md')}
+            ${cite('evidence/e4-eval-latency-quant.md', 'e4-eval-latency-quant.md')}。
+            <span style="font-size:12px;color:var(--ink-3);">（试着把鼠标悬停在蓝色来源链接上 150ms，或点击在右侧固定查看！）</span>
+          </p>
+
+          <h2 id="h-matrix">核心机制速览</h2>
+          <table>
+            <thead><tr><th>维度</th><th>推荐原生做法</th><th>规避的反模式</th><th>关键依据</th></tr></thead>
+            <tbody>
+              <tr><td>出厂面裁剪</td><td><code>cordis.patch.yml</code> 声明 <code>disabled: true</code></td><td>全局 <code>:has(...)</code> 隐藏宿主输入框</td><td>${cite('evidence/e1-cordis-plugin-seam.md', 'e1')} ${cite('evidence/e3-adversarial-dom-hacks.md', 'e3')}</td></tr>
+              <tr><td>跨会话态势</td><td>Host <code>sessionProjections</code> 增量折叠</td><td>侧栏按行并发开 follow 连接</td><td>${cite('evidence/e2-session-projection-wire.md', 'e2')}</td></tr>
+              <tr><td>报告可信度</td><td>独立 Critic 拆盘 <code>claims × verdicts</code></td><td>同上下文自写自审、缺失静默跳过</td><td>${cite('evidence/e5-composability-profile.md', 'e5')}</td></tr>
+              <tr><td>精读体验</td><td><code>sidebar.fullscreen</code> 三栏 + 150ms 悬停</td><td>反复切标签页手工核验原文</td><td>${cite('evidence/e4-eval-latency-quant.md', 'e4')}</td></tr>
+            </tbody>
+          </table>
+
+          <h2 id="h-why">为什么「前台极简」与「原教旨示范」不冲突</h2>
+          <h3 id="h-user">1. 面向研究用户：去工程噪音、直达判断</h3>
+          <p>
+            研究用户在首屏只看到意图起题卡与轻量选配，不需要理解底层插件拓扑；在左栏一眼识别「待拍板」与「已交付」会话；全屏终稿自动展开三栏对照，无需跳出正文即可完成核查
+            ${cite('evidence/e2-session-projection-wire.md', 'e2-session-projection-wire.md')}。
+          </p>
+          <h3 id="h-arch">2. 面向架构与插件作者：零 hack 参考实现</h3>
+          <p>
+            点击顶栏 <strong>X-Ray · DSH Seam</strong> 即可透视每个界面区块背后的 DSH 原生扩展点。遇到平台缺口不写脆性 hack，而是记入上游反馈账本并采用可逆降级
+            ${cite('evidence/e3-adversarial-dom-hacks.md', 'e3-adversarial-dom-hacks.md')}。
+          </p>
+
+          <h2 id="h-limits">诚实边界与未覆盖项</h2>
+          <ul>
+            <li><strong>大规模证据内存上限（C5 部分支持）</strong>：超百张证据卡工作区的长期内存开销仍待专项基准实测 ${cite('evidence/e4-eval-latency-quant.md', 'e4')}。</li>
+            <li><strong>第三方定时追踪组合（C6 UNVERIFIED）</strong>：Profile 层叠加 <code>schedule-bundle</code> 的跨时区长期稳定性尚未端到端压测 ${cite('evidence/e1-cordis-plugin-seam.md', 'e1')}。</li>
+          </ul>
+
+          <div id="h-next">${renderFollowupFooter()}</div>
+        </div>
+      </article>
+
+      <!-- Right Docked Inspector (Claims Audit OR Evidence Quick Card) -->
+      <aside class="studio-inspector" data-seam="StudioInspectorPane (核查 / 证据对照)">
+        <div class="seg-ctrl" style="align-self:stretch;">
+          <button type="button" class="seg-btn ${state.inspectorTab === 'claims' ? 'active' : ''}" style="flex:1;" data-act="insp-tab" data-tab="claims">核查清单 (${DOMAIN.claims.length})</button>
+          <button type="button" class="seg-btn ${state.inspectorTab === 'evidence' ? 'active' : ''}" style="flex:1;" data-act="insp-tab" data-tab="evidence">证据速览</button>
+        </div>
+        ${state.inspectorTab === 'claims' ? renderClaimsList(filteredClaims, riskCount) : renderEvidenceCardContent(ev)}
+      </aside>
+    </div>`;
+}
+
+function renderClaimsList(rows, riskCount) {
+  const supportedCount = DOMAIN.claims.length - riskCount;
+  return `
+    <div style="display:flex;gap:6px;flex-wrap:wrap;" data-seam="ClaimsAuditView 风险过滤 Pill">
+      <button type="button" class="chip-btn ${state.claimFilter === 'all' ? 'accent' : ''}" data-act="claim-filter" data-filter="all">全部 (${DOMAIN.claims.length})</button>
+      <button type="button" class="chip-btn ${state.claimFilter === 'risk' ? 'accent' : ''}" data-act="claim-filter" data-filter="risk">存疑 / 未核查 (${riskCount})</button>
+      <button type="button" class="chip-btn ${state.claimFilter === 'supported' ? 'accent' : ''}" data-act="claim-filter" data-filter="supported">已支持 (${supportedCount})</button>
+    </div>
+    ${rows.map((c) => `
+      <div class="claim-card">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <strong>${esc(c.id)}</strong>
+          <span class="tag-pill ${c.status === 'supported' ? 'green' : c.status === 'partial' ? 'amber' : 'red'}">
+            ${c.status === 'supported' ? '支持' : c.status === 'partial' ? '部分支持' : 'UNVERIFIED'}
+          </span>
+          ${c.critical ? '<span class="tag-pill blue">关键</span>' : ''}
+        </div>
+        <div style="font-size:12.4px;color:var(--ink-1);line-height:1.5;">${esc(c.text)}</div>
+        <div style="font-size:11.6px;color:var(--ink-3);">${esc(c.reason)}</div>
+        ${c.quote ? `<div class="claim-quote">${esc(c.quote)}</div>` : ''}
+        <button type="button" class="cite-link" style="align-self:flex-start;" data-act="open-evidence" data-path="${esc(c.evidence)}">
+          📄 ${esc(c.evidence)}
+        </button>
+      </div>
+    `).join('')}`;
+}
+
+function renderFollowupFooter() {
+  const items = [
+    '补充超百张证据卡工作区在浏览器端的内存与加载延迟实测基准，收口 C5 边界',
+    '在真实 profile 中验证叠加 schedule-bundle 执行跨时区周期研究追踪的稳定性，核实 C6',
+    '对比 workflow-ptc 批量扇出与纯 Agent Teams 在中大型课题上的 Token 成本曲线',
+  ];
+  return `
+    <div class="followup-box" data-seam="FinalFollowupFooter (D18 预填不自动发送)">
+      <div style="font-size:12.5px;font-weight:600;color:var(--ink-1);">下一版优先项（点击一键填入草稿，不自动发送）</div>
+      ${items.map((it) => `
+        <div class="followup-row">
+          <span>${esc(it)}</span>
+          <button type="button" class="btn-ghost" style="flex-shrink:0;" data-act="prefill-followup" data-text="${esc(it)}">填入草稿</button>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+function renderEvidenceCardContent(ev) {
+  return `
+    <div class="card-box">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <span class="tag-pill green">质量 ${esc(ev.quality)}</span>
+        <span class="tag-pill blue">${esc(ev.tier)}</span>
+        <span class="tag-pill">${esc(ev.topic)} · ${esc(ev.lens)}</span>
+      </div>
+      <strong style="font-size:13.5px;line-height:1.45;">${esc(ev.title)}</strong>
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);">${esc(ev.publisher)} · 抓取于 ${esc(ev.retrievedAt)}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+        ${ev.excerpt.map((line) => `<div style="font-size:12.4px;color:var(--ink-2);line-height:1.55;">• ${esc(line)}</div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button type="button" class="btn-ghost" data-act="copy-ref" data-token="${esc(ev.path)}">复制引用路径</button>
+        <button type="button" class="btn-primary" data-act="add-chip-direct" data-token="${esc(ev.path)}">以 @ 胶囊插入追问</button>
+      </div>
+    </div>`;
+}
+
+function renderEvidenceBody() {
+  const ev = DOMAIN.evidence[state.activeEvidencePath] ?? Object.values(DOMAIN.evidence)[0];
+  return `
+    <div class="right-body" data-seam="ResearchEvidenceTab (8 字段与五态读面)">
+      ${renderEvidenceCardContent(ev)}
+      <div class="card-box">
+        <div class="card-head"><span>切换本场其他证据卡（5 份）</span></div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          ${Object.values(DOMAIN.evidence).map((item) => `
+            <button type="button" class="radar-ev-btn" data-act="open-evidence" data-path="${esc(item.path)}">
+              <span style="font-size:12px;color:var(--ink-1);">${esc(item.title)}</span>
+              <span class="tag-pill ${item.quality === 'A' ? 'green' : 'blue'}">${esc(item.quality)}</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ---------- S4 Research Graph DAG ---------- */
+function renderGraphBody() {
+  const sel = DOMAIN.dag.nodes.find((n) => n.id === state.selectedDagNode) ?? DOMAIN.dag.nodes[1];
+  const relatedIds = new Set([sel.id, ...sel.deps]);
+  for (const n of DOMAIN.dag.nodes) {
+    if (n.deps.includes(sel.id)) relatedIds.add(n.id);
+  }
+  const nodeW = 190; const nodeH = 56;
+  const byId = Object.fromEntries(DOMAIN.dag.nodes.map((n) => [n.id, n]));
+
+  const edges = [];
+  for (const n of DOMAIN.dag.nodes) {
+    for (const depId of n.deps) {
+      const from = byId[depId];
+      if (!from) continue;
+      const x1 = from.x + nodeW / 2; const y1 = from.y + nodeH;
+      const x2 = n.x + nodeW / 2; const y2 = n.y;
+      const hi = depId === sel.id || n.id === sel.id;
+      const midY = (y1 + y2) / 2;
+      edges.push(`<path class="dag-edge ${hi ? 'highlight' : ''}" d="M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}" />`);
+    }
+  }
+
+  return `
+    <div class="right-body" data-seam="ResearchGraphTab + DagMap (可点击依存高亮)">
+      <div class="card-head">
+        <span>研究执行图谱（plan.md × Agent Teams）</span>
+        <span class="tag-pill green">5/5 节点已完成</span>
+      </div>
+      <div class="dag-canvas">
+        <svg class="dag-svg" viewBox="0 0 510 374">
+          ${edges.join('')}
+          ${DOMAIN.dag.nodes.map((n) => {
+            const cls = n.id === sel.id ? 'selected' : relatedIds.has(n.id) ? 'related' : '';
+            return `
+              <g class="dag-node ${cls}" data-act="select-dag" data-id="${n.id}" transform="translate(${n.x}, ${n.y})">
+                <rect width="${nodeW}" height="${nodeH}" />
+                <circle cx="14" cy="18" r="4" fill="var(--green)" />
+                <text x="24" y="21" font-size="11.5" font-weight="700" fill="var(--ink-1)">${esc(n.id)}</text>
+                <text x="${nodeW - 10}" y="21" text-anchor="end" font-size="10.5" fill="var(--ink-3)">${esc(n.role)}</text>
+                <text x="12" y="42" font-size="11" fill="var(--ink-2)">${esc(n.title.slice(0, 15))}${n.title.length > 15 ? '…' : ''}</text>
+              </g>`;
+          }).join('')}
+        </svg>
+      </div>
+      <div class="card-box">
+        <div class="card-head">
+          <span>节点详情 · ${esc(sel.id)}（${esc(sel.role)}）</span>
+          <button type="button" class="btn-ghost" data-act="add-chip-direct" data-token="drt_dsh-plugin-ecosystem-2026/${esc(sel.id)}">插入 @ 胶囊</button>
+        </div>
+        <div class="meta-kv">
+          <div>子问题：${esc(sel.title)}</div>
+          <div>依赖：${sel.deps.length ? sel.deps.join(', ') : '无（顶层起点）'} · 产出：<code>${esc(sel.output)}</code></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ---------- Portal & Design Intent Drawer ---------- */
+function renderModals() {
+  document.getElementById('methodPortal').classList.toggle('open', state.methodPortalOpen);
+  document.getElementById('portalRevBadge').textContent = state.methodSaved ? '已校验落盘 · v2' : '草稿 rev #2';
+  document.getElementById('portalStatusText').textContent = state.methodSaved
+    ? '状态：method_library_upsert 落盘成功并完成回读对账'
+    : '状态：等待用户显式确认写盘';
+
+  const drawer = document.getElementById('intentDrawer');
+  drawer.classList.toggle('open', state.intentOpen);
+  if (state.intentOpen) {
+    document.getElementById('intentBody').innerHTML = `
+      <div>
+        <strong>核心设计北极星（两类观众、同一份实现）</strong>
+        <p style="margin:6px 0 0;color:var(--ink-2);">
+          ① <strong>研究用户</strong>：前台零编程壳噪音、阶段自适应聚焦、全屏三栏学术精读 + 150ms 悬停溯源、<code>/</code> 与 <code>@</code> 原生指令流。<br/>
+          ② <strong>DSH 架构观众</strong>：开启顶栏 <strong>X-Ray · DSH Seam</strong> 即可看到每一块 UI 对应的官方扩展点，零修改 <code>vendor/dsh</code>、零 <code>:has()</code> DOM hack。
+        </p>
+      </div>
+      <div>
+        <strong>当前实现 (v2) vs 北极星理想态差异（供下阶段继续打磨）</strong>
+        <ul style="margin:6px 0 0 16px;padding:0;color:var(--ink-2);">
+          <li><strong>冷启动左栏全量状态标</strong>：当前受 DSH 列表缓存策略限制，未打开过的冷会话首屏标题/徽标需首次打开后预热（见上游反馈 U2 关联机制）；北极星态期望冷启动零点击即全亮。</li>
+          <li><strong>悬停溯源原语化</strong>：当前在容器外委托捕获链接事件；北极星态期望上游 <code>MarkdownDelegate</code> 暴露一等 <code>onLinkHover</code> 钩子（见上游反馈 U4）。</li>
+          <li><strong>无 Composer 主视图</strong>：当前通过全局 Hub + <code>shell.overlay</code> Portal 规避 hack；北极星态期望上游提供 <code>composer: 'hidden'</code> 声明协议（见上游反馈 U6）。</li>
+        </ul>
+      </div>
+      <div>
+        <strong>实时状态机快照（每次交互自动更新）</strong>
+        <pre class="state-pre">${esc(JSON.stringify({
+          lastAction: state.lastAction,
+          scenario: state.scenario,
+          mainView: state.mainView,
+          activeSessionId: state.activeSessionId,
+          right: { open: state.rightOpen, tab: state.rightTab, fullscreen: state.rightFullscreen },
+          final: { mode: state.finalMode, inspector: state.inspectorTab, claimFilter: state.claimFilter },
+          composer: { draftLen: state.composerDraft.length, chips: state.composerChips, trigger: state.triggerMode },
+        }, null, 2))}</pre>
+      </div>`;
+  }
+}
+
+function render() {
+  renderChrome();
+  renderCenter();
+  renderRightPane();
+  renderModals();
+}
+
+/* ============================================================================
+ * PART 3 · EVENT DELEGATION, 150MS HOVER CARD & GLOBAL SHORTCUTS
+ * ============================================================================ */
+function hideHoverCard() {
+  clearTimeout(hoverTimer);
+  document.getElementById('hoverCard').classList.remove('visible');
+}
+
+function showHoverCardFor(linkEl) {
+  const path = linkEl.dataset.cite;
+  const ev = DOMAIN.evidence[path];
+  if (!ev) return;
+  const card = document.getElementById('hoverCard');
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+      <div style="display:flex;align-items:center;gap:5px;">
+        <span class="tag-pill green">等级 ${esc(ev.quality)}</span>
+        <span class="tag-pill blue">${esc(ev.tier)}</span>
+      </div>
+      <span style="font-family:var(--font-mono);font-size:10.5px;color:var(--ink-3);">${esc(ev.publisher)}</span>
+    </div>
+    <strong style="font-size:13px;line-height:1.4;">${esc(ev.title)}</strong>
+    <div style="font-size:11.8px;color:var(--ink-2);line-height:1.5;">${esc(ev.excerpt[0])}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:4px;border-top:0.5px solid var(--border-l1);">
+      <span style="font-size:10.8px;color:var(--ink-3);">150ms HoverCard · 缓存命中</span>
+      <button type="button" class="btn-primary" style="padding:3px 9px;font-size:11.5px;" data-act="open-evidence" data-path="${esc(path)}">在右侧固定打开</button>
+    </div>`;
+  const r = linkEl.getBoundingClientRect();
+  const left = Math.min(Math.max(12, r.left), window.innerWidth - 356);
+  const top = r.bottom + 8 + 180 > window.innerHeight ? Math.max(12, r.top - 175) : r.bottom + 8;
+  card.style.left = `${left}px`;
+  card.style.top = `${top}px`;
+  card.classList.add('visible');
+}
+
+document.addEventListener('mouseover', (e) => {
+  const link = e.target.closest?.('[data-cite]');
+  if (link) {
+    clearTimeout(hoverTimer);
+    hoverTimer = setTimeout(() => showHoverCardFor(link), 150);
+    return;
+  }
+  if (!e.target.closest?.('#hoverCard')) {
+    clearTimeout(hoverTimer);
+    hoverTimer = setTimeout(hideHoverCard, 220);
+  }
+});
+
+document.addEventListener('click', (e) => {
+  const cite = e.target.closest?.('[data-cite]');
+  if (cite) {
+    e.preventDefault();
+    hideHoverCard();
+    dispatch({ type: 'OPEN_EVIDENCE', path: cite.dataset.cite });
+    return;
+  }
+
+  const target = e.target.closest?.('[data-act], [data-vp-set]');
+  if (!target) return;
+
+  if (target.dataset.vpSet) {
+    dispatch({ type: 'SET_VP', vp: target.dataset.vpSet });
+    return;
+  }
+
+  const act = target.dataset.act;
+  if (act === 'scenario') dispatch({ type: 'LOAD_SCENARIO', id: target.dataset.id });
+  else if (act === 'open-session') dispatch({ type: 'OPEN_SESSION', id: target.dataset.id || null, openRight: Boolean(target.dataset.id) });
+  else if (act === 'open-hub') dispatch({ type: 'OPEN_HUB', tab: 'runs' });
+  else if (act === 'open-hub-methods') dispatch({ type: 'OPEN_HUB', tab: 'methods' });
+  else if (act === 'open-hub-lenses') dispatch({ type: 'OPEN_HUB', tab: 'lenses' });
+  else if (act === 'hub-tab') dispatch({ type: 'OPEN_HUB', tab: target.dataset.tab });
+  else if (act === 'set-rtab') dispatch({ type: 'SET_RIGHT_TAB', tab: target.dataset.tab });
+  else if (act === 'toggle-right') dispatch({ type: 'TOGGLE_RIGHT' });
+  else if (act === 'toggle-status') dispatch({ type: 'SET_RIGHT_TAB', tab: 'status' });
+  else if (act === 'toggle-fs') dispatch({ type: 'TOGGLE_FULLSCREEN' });
+  else if (act === 'final-mode') dispatch({ type: 'SET_FINAL_MODE', mode: target.dataset.mode });
+  else if (act === 'insp-tab') dispatch({ type: 'SET_INSPECTOR_TAB', tab: target.dataset.tab });
+  else if (act === 'claim-filter') dispatch({ type: 'SET_CLAIM_FILTER', filter: target.dataset.filter });
+  else if (act === 'jump-heading') {
+    dispatch({ type: 'SET_HEADING', id: target.dataset.id });
+    document.getElementById(target.dataset.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  else if (act === 'open-evidence') { hideHoverCard(); dispatch({ type: 'OPEN_EVIDENCE', path: target.dataset.path }); }
+  else if (act === 'open-final-studio') dispatch({ type: 'OPEN_SESSION', id: 'sess-delivered', openRight: true, tab: 'final', fullscreen: true });
+  else if (act === 'open-final-audit') {
+    dispatch({ type: 'OPEN_SESSION', id: 'sess-delivered', openRight: true, tab: 'final', fullscreen: true });
+    dispatch({ type: 'SET_FINAL_MODE', mode: 'audit' });
+  }
+  else if (act === 'open-graph-node') {
+    dispatch({ type: 'SET_RIGHT_TAB', tab: 'graph' });
+    dispatch({ type: 'SELECT_DAG', id: target.dataset.node });
+  }
+  else if (act === 'select-radar') dispatch({ type: 'SELECT_RADAR', topic: target.dataset.topic, lens: target.dataset.lens });
+  else if (act === 'select-dag') dispatch({ type: 'SELECT_DAG', id: target.dataset.id });
+  else if (act === 'pick-hitl') dispatch({ type: 'PICK_HITL', key: target.dataset.key, val: target.dataset.val });
+  else if (act === 'submit-hitl') {
+    dispatch({ type: 'SUBMIT_HITL' });
+    showToast('已确认立项契约 → 自动流转至 Wave 2 深度推进');
+  }
+  else if (act === 'pick-starter') {
+    const st = DOMAIN.starters[Number(target.dataset.idx)];
+    if (st) {
+      dispatch({ type: 'PREFILL_DRAFT', text: st.prompt });
+      showToast('已填入起题草稿（D18：仅预填，等你确认发送）');
+    }
+  }
+  else if (act === 'prefill-followup') {
+    dispatch({ type: 'PREFILL_DRAFT', text: `请围绕以下下一版优先项补充研究并更新报告：${target.dataset.text}` });
+    showToast('已一键预填续研草稿（不自动发送）');
+  }
+  else if (act === 'prefill-lens') {
+    dispatch({ type: 'PREFILL_DRAFT', text: `请启用「${target.dataset.label}」透镜补充核查并标注证据来源。` });
+    showToast(`已预填「${target.dataset.label}」视角要求`);
+  }
+  else if (act === 'quick-slash') {
+    dispatch({ type: 'SET_DRAFT', text: '/' });
+    document.getElementById('composerInput')?.focus();
+  }
+  else if (act === 'quick-at') {
+    const prefix = state.composerDraft ? `${state.composerDraft.trimEnd()} @` : '@';
+    dispatch({ type: 'SET_DRAFT', text: prefix });
+    document.getElementById('composerInput')?.focus();
+  }
+  else if (act === 'pick-slash') {
+    const item = DOMAIN.slashCommands.find((c) => c.cmd === target.dataset.cmd);
+    if (!item) return;
+    if (item.action === 'open-hub') dispatch({ type: 'OPEN_HUB', tab: 'runs' });
+    else if (item.action === 'open-defaults') dispatch({ type: 'OPEN_HUB', tab: 'lenses' });
+    else {
+      dispatch({ type: 'PREFILL_DRAFT', text: item.insert });
+      showToast(`已通过 ${item.cmd} 填入结构化草稿`);
+    }
+  }
+  else if (act === 'pick-at' || act === 'add-chip-direct') {
+    dispatch({ type: 'ADD_REF_CHIP', token: target.dataset.token });
+    showToast(`已插入原子引用胶囊：${target.dataset.token.split('/').pop()}`);
+  }
+  else if (act === 'rm-chip') dispatch({ type: 'REMOVE_REF_CHIP', token: target.dataset.token });
+  else if (act === 'send-draft') {
+    showToast('原型演示态：遵循 D18 零自动调用模型；可在真实环境运行 pnpm demo 体验完整工作台');
+  }
+  else if (act === 'open-method-portal') dispatch({ type: 'SET_PORTAL', open: true });
+  else if (act === 'hub-open-run') {
+    const own = target.dataset.own;
+    dispatch({
+      type: 'OPEN_HUB_RUN',
+      sessionId: target.dataset.sid || null,
+      ownership: own,
+      openFinal: target.dataset.final === '1',
+    });
+    showToast(own === 'orphan' ? '无本地会话：已以只读归档安全打开，不篡改当前会话' : '已自动切回所属研究会话（零跨会话串台）');
+  }
+  else if (act === 'copy-ref') showToast(`已复制引用路径：${target.dataset.token}`);
+});
+
+document.addEventListener('input', (e) => {
+  if (e.target?.id === 'composerInput') {
+    const val = e.target.value;
+    const prevTrig = state.triggerMode;
+    state = reduce(state, { type: 'SET_DRAFT', text: val });
+    if (state.triggerMode !== prevTrig || state.triggerMode === 'slash') {
+      const pos = e.target.selectionStart;
+      render();
+      const input = document.getElementById('composerInput');
+      if (input) { input.focus(); input.setSelectionRange(pos, pos); }
+    } else if (state.intentOpen) {
+      renderModals();
+    }
+  }
+});
+
+// Direct static header controls
+document.getElementById('btnXray').addEventListener('click', () => {
+  dispatch({ type: 'TOGGLE_XRAY' });
+  showToast(state.xray ? 'X-Ray 已开启：透视全部 DSH 原生 Seam 落点' : 'X-Ray 已关闭：回归纯净研究用户视角');
+});
+document.getElementById('btnTheme').addEventListener('click', () => {
+  dispatch({ type: 'SET_THEME', theme: state.theme === 'light' ? 'dark' : 'light' });
+});
+document.getElementById('btnIntent').addEventListener('click', () => dispatch({ type: 'TOGGLE_INTENT' }));
+document.getElementById('btnCloseIntent').addEventListener('click', () => dispatch({ type: 'TOGGLE_INTENT' }));
+document.getElementById('btnNewSession').addEventListener('click', () => dispatch({ type: 'LOAD_SCENARIO', id: 's1-start' }));
+document.getElementById('navHub').addEventListener('click', () => dispatch({ type: 'OPEN_HUB', tab: 'runs' }));
+document.getElementById('navPlugins').addEventListener('click', () => showToast('DSH Plugins：dsh-deep-research-pack + agent-team-profile（零外置依赖）'));
+document.getElementById('btnClosePortal').addEventListener('click', () => dispatch({ type: 'SET_PORTAL', open: false }));
+document.getElementById('btnSaveMethod').addEventListener('click', () => {
+  dispatch({ type: 'SAVE_METHOD' });
+  showToast('method_library_upsert 写盘完成并经串行队列回读确认');
+});
+document.getElementById('methodPortal').addEventListener('click', (e) => {
+  if (e.target.id === 'methodPortal') dispatch({ type: 'SET_PORTAL', open: false });
+});
+
+// Global shortcuts matching R2.2 research-shortcuts.ts (Primary+Shift+{U,G,D})
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (state.methodPortalOpen) dispatch({ type: 'SET_PORTAL', open: false });
+    else if (state.triggerMode) dispatch({ type: 'CLOSE_TRIGGER' });
+    else if (state.intentOpen) dispatch({ type: 'TOGGLE_INTENT' });
+    return;
+  }
+  if ((e.metaKey || e.ctrlKey) && e.shiftKey) {
+    const k = e.key.toUpperCase();
+    if (k === 'U') { e.preventDefault(); dispatch({ type: 'SET_RIGHT_TAB', tab: 'status' }); showToast('快捷键 ⌘⇧U → 研究状态'); }
+    else if (k === 'G') { e.preventDefault(); dispatch({ type: 'SET_RIGHT_TAB', tab: 'graph' }); showToast('快捷键 ⌘⇧G → 研究图谱'); }
+    else if (k === 'D') { e.preventDefault(); dispatch({ type: 'OPEN_HUB', tab: 'runs' }); showToast('快捷键 ⌘⇧D → 研究工作台'); }
+  }
+});
+
+// Initial mount
+render();
+</script>
+</body>
+</html>

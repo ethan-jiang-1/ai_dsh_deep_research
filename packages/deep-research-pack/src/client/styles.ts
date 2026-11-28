@@ -32,19 +32,13 @@ export function installQuestionCardNarrowFix(): () => void {
   return () => { style.remove(); release() }
 }
 
-/** 方法库编辑态：隐藏外层 composer（只对外层问卡让位）、隐藏思考/skill 行、三栏各自滚动。 */
-export function installCoachComposerStyles(): () => void {
+/** 方法编辑 portal 样式：在方法编辑会话内隐藏模型思考预览与 skill 工具行，保持问答聚焦。 */
+export function installMethodCoachPortalStyles(): () => void {
   const style = document.createElement('style')
-  style.setAttribute(MARKER, 'method-library-coach-composer')
+  style.setAttribute(MARKER, 'method-coach-portal')
   style.textContent = [
-    `html[${MARKER}] [data-conversation-scroll]:has([data-method-library-edit]):not(:has(> [data-composer-seat] [data-question-key])) > [data-composer-seat]{display:none}`,
-    /* 方法编辑只露一问一答：不显示模型思考行与 skill 工具行（"用户不困惑" #3/#8）。 */
     `html[${MARKER}] [data-method-coach-portal] [data-preview]{display:none !important}`,
     `html[${MARKER}] [data-method-coach-portal] [data-tool="skill"]{display:none !important}`,
-    /* 三栏各自滚动：整页/view 不滚（page 填满 tab，列内滚动）。 */
-    `html[${MARKER}] [data-method-library]{height:100%;overflow:hidden}`,
-    `html[${MARKER}] [data-method-library] > div{min-height:0}`,
-    `html[${MARKER}] [data-method-library] [data-method-coach-host]{min-height:0;overflow:hidden}`,
   ].join('\n')
   acquire()
   document.head.appendChild(style)

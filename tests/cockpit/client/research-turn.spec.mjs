@@ -47,7 +47,7 @@ test('ResearchMilestoneCard：无里程碑返回 null；有交付里程碑渲染
       turn: 2,
       end: { seq: 10 },
       data: {
-        get: () => ({ milestones: [{ kind: 'delivered', path: 'drt_x/final/v1.md', seq: 5 }] }),
+        get: (key) => (key === 'deep-research-milestone' ? { milestones: [{ kind: 'delivered', path: 'drt_x/final/v1.md', seq: 5 }] } : undefined),
       },
     },
     seq: 10,
@@ -58,6 +58,68 @@ test('ResearchMilestoneCard：无里程碑返回 null；有交付里程碑渲染
   }))
   assert.match(html, /研究报告已正式交付/)
   assert.match(html, /阅读终稿/)
+  assert.match(html, /已交付/, '里程碑标签必须使用本地化中文，不得裸露 delivered')
+  assert.doesNotMatch(html, />delivered</, '中文界面不得裸露内部英文枚举 delivered')
+})
+
+test('ResearchMilestoneCard：同回合已有原生 ui-deliverables 终稿交付卡时自动去重 delivered 行，但保留 protocol/review', () => {
+  const onlyDelivered = renderToStaticMarkup(createElement(ResearchMilestoneCard, {
+    sessionId: 's1',
+    turn: {
+      turn: 4,
+      end: { seq: 12 },
+      data: {
+        get: (key) => {
+          if (key === 'deep-research-milestone') {
+            return { milestones: [{ kind: 'delivered', path: 'drt_x/final/readable-v1.md', seq: 8 }] }
+          }
+          if (key === 'deliverables') {
+            return { produced: [], presented: [{ seq: 8, index: 0, path: 'drt_x/final/readable-v1.md' }] }
+          }
+          return undefined
+        },
+      },
+    },
+    seq: 12,
+    openFile: () => {},
+    openStatus: () => {},
+    openFinal: () => {},
+    t: tZh,
+  }))
+  assert.equal(onlyDelivered, '', '已有原生 ui-deliverables 交付卡时不再重复渲染 delivered 横条')
+
+  const withReview = renderToStaticMarkup(createElement(ResearchMilestoneCard, {
+    sessionId: 's1',
+    turn: {
+      turn: 4,
+      end: { seq: 12 },
+      data: {
+        get: (key) => {
+          if (key === 'deep-research-milestone') {
+            return {
+              milestones: [
+                { kind: 'review', path: 'drt_x/review.md', seq: 6 },
+                { kind: 'delivered', path: 'drt_x/final/readable-v1.md', seq: 8 },
+              ],
+            }
+          }
+          if (key === 'deliverables') {
+            return { produced: [], presented: [{ seq: 8, index: 0, path: 'drt_x/final/readable-v1.md' }] }
+          }
+          return undefined
+        },
+      },
+    },
+    seq: 12,
+    openFile: () => {},
+    openStatus: () => {},
+    openFinal: () => {},
+    t: tZh,
+  }))
+  assert.match(withReview, /已完成对抗审查/)
+  assert.match(withReview, /审查/)
+  assert.doesNotMatch(withReview, /研究报告已正式交付/)
+  assert.doesNotMatch(withReview, />review</)
 })
 
 // 负例留证 2026-11-27：BUG-440——deliverables/presented 同时包含主本与读者版多文件时，

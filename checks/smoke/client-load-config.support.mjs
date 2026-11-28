@@ -46,8 +46,10 @@ export async function pass4ConfigTabPhase(env) {
   const text = await paneTextOf(page)
   const i = tabTitleIndex(text, 'config'); const seg = text.slice(i < 0 ? 0 : i)
   step(seg.includes('本次研究'), '研究配置页签体：本次研究摘要在场')
-  step(seg.includes('方法库') && (seg.includes('顶部') || seg.includes('tab')),
-    '研究配置页签体：方法库入口指到主界面 tab')
+  step(seg.includes('方法库') && (seg.includes('工作台') || seg.includes('Hub')),
+    '研究配置页签体：方法库入口指到全局研究工作台')
+  const openLibBtn = page.getByTestId('config-open-method-library').first()
+  step(await openLibBtn.isVisible().catch(() => false), '研究配置页签体：提供直达工作台方法库按钮')
   const legacy = ['我的偏好库', '内置打法（只读）', '领域示范（只读）', '改动的回执会显示在这里']
   const leaked = legacy.filter((marker) => seg.includes(marker))
   step(leaked.length === 0, '研究配置页签体：管理/内置/示范/回执已移出侧栏',
@@ -124,13 +126,24 @@ export async function pass3dDefaultsPhase(env) {
     await item.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {})
     await item.click({ timeout: 5_000 }).catch(() => {})
   }
+  // store refresh 是异步的：文件先落盘、按钮后更新；给标签一个有界等待，别把时序当红。
+  const waitButton = async (pattern, timeoutMs = 6_000) => {
+    const deadline = Date.now() + timeoutMs
+    let text = ''
+    while (Date.now() < deadline) {
+      text = (await button.innerText().catch(() => '')) || ''
+      if (pattern.test(text)) return text
+      await new Promise((resolve) => setTimeout(resolve, 150))
+    }
+    return text
+  }
   const depth = page.getByTestId('defaults-depth').first()
   await pickMenuOption(depth, /^深度档$|^Deep$/)
   const saved = await waitForDefaults(file, (value) => value.effort === 'deep' && value.revision === 1)
   const afterText = (await panel.innerText().catch(() => '')) || ''
   step(saved !== null, '项目默认：改深度 → 文件 effort=deep / revision=1', saved === null ? `未落盘；面板=${afterText.slice(-220).replace(/\s+/g, ' ')}` : `revision=${saved.revision}`)
   if (saved === null) return
-  const labelAfter = (await button.innerText().catch(() => '')) || ''
+  const labelAfter = await waitButton(/已设 1 项|1 set/)
   step(/已设 1 项|1 set/.test(labelAfter), '项目默认：按钮文案随写入变化', labelAfter)
 
   await pickMenuOption(depth, /^自动|^Auto/)
@@ -156,17 +169,6 @@ export async function pass3dDefaultsPhase(env) {
   await official.click().catch(() => {})
   const sourced = await waitForDefaults(file, (value) => value.source?.families?.includes('official') === true && value.revision === 5)
   step(sourced !== null, '项目默认：点来源家族 → source.families 含 official / revision=5', sourced === null ? '未落盘' : `revision=${sourced.revision}`)
-  // store refresh 是异步的：文件先落盘、按钮后更新；给标签一个有界等待，别把时序当红。
-  const waitButton = async (pattern, timeoutMs = 6_000) => {
-    const deadline = Date.now() + timeoutMs
-    let text = ''
-    while (Date.now() < deadline) {
-      text = (await button.innerText().catch(() => '')) || ''
-      if (pattern.test(text)) return text
-      await new Promise((resolve) => setTimeout(resolve, 150))
-    }
-    return text
-  }
   const labelSourced = await waitButton(/已设 2 项|2 set/)
   step(/已设 2 项|2 set/.test(labelSourced), '项目默认：按钮文案随输出+来源变化（已设 2 项）', labelSourced)
 }

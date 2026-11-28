@@ -21,12 +21,14 @@ export interface DeliveryWatchDeps {
   }
   /** 焦点元素（测试注入；缺省 = document.activeElement）。 */
   readonly activeElement?: () => Element | null
+  /** 会话工作区根路径（用于绝对路径 present 校验，防跨工作区串台）。 */
+  readonly cwdOf?: (sessionId: SessionId) => string | undefined
   /** 失败日志出口（缺省 console.error）。 */
   readonly onError?: (message: string) => void
 }
 
 /** 建监听并启动；返回 disposer（退订 + abort 当前流）。 */
-export function watchDelivery({ follow, openFinal, mounted, activeElement, onError }: DeliveryWatchDeps): () => void {
+export function watchDelivery({ follow, openFinal, mounted, activeElement, cwdOf, onError }: DeliveryWatchDeps): () => void {
   const opened = new Set<string>()
   let followed: SessionId | undefined
   let controller: AbortController | undefined
@@ -44,7 +46,7 @@ export function watchDelivery({ follow, openFinal, mounted, activeElement, onErr
       try {
         for await (const frame of follow(sessionId, next.signal)) {
           if (frame.kind !== 'event') continue
-          const delivery = latestFinalDelivery([frame.event])
+          const delivery = latestFinalDelivery([frame.event], cwdOf?.(sessionId))
           if (delivery === null) continue
           if (!shouldOpenFinal(delivery, opened, sessionId, focusedInEditor())) continue
           opened.add(`${sessionId}:${delivery.callId}`)

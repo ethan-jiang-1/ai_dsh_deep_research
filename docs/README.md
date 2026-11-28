@@ -24,6 +24,7 @@
 | 问题 / 目标 | 直达入口 |
 |---|---|
 | 刚 clone，装依赖 / 构 vendor / 激活 hooks | [guides/bootstrap.md](./guides/bootstrap.md) |
+| 3 分钟零 Key 示范体验与 DSH 能力全景解剖 | [guides/dsh-showcase.md](./guides/dsh-showcase.md) |
 | 看总分层、组合面、Agent Teams 与工具面 | [architecture.md](./architecture.md) |
 | 改 `presets/`、`content/` 或角色职责 | [contracts/presets.md](./contracts/presets.md) · [contracts/roles.md](./contracts/roles.md) |
 | 改驾驶舱 Web UI、`src/client/` 或 `src/lib/` | [contracts/client-ui.md](./contracts/client-ui.md) · [cockpit-registry](./reference/cockpit-registry.generated.md) |
@@ -66,6 +67,7 @@
 | [guides/dev-loop.md](./guides/dev-loop.md) | 反馈双门、六步闭环、门禁分层、任务路由与命令 |
 | [guides/run-ops.md](./guides/run-ops.md) | 任务矩阵、run-driver、HITL、恢复与排障 |
 | [guides/plugin-authoring.md](./guides/plugin-authoring.md) | DSH 词汇、S0–S3 阶梯、证据阶梯与影响面 |
+| [guides/dsh-showcase.md](./guides/dsh-showcase.md) | 零 Key 示范通道（`pnpm demo`）、DSH Seam 全景对照与 profile 可组合性 |
 | [guides/probe-playbook.md](./guides/probe-playbook.md) | 真实边界探针定义、何时用与头注协议 |
 
 ### 4. 纯查表与自动生成参考（`reference/`）

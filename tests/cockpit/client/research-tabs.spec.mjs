@@ -71,6 +71,9 @@ test('研究图谱：有依赖边时画 DAG 并折叠全量节点列表，仅点
   const html = renderToStaticMarkup(createElement(ResearchGraphTab, edgeProps))
   assert.match(html, /data-testid="graph-all-nodes"/, '有边时全量节点列表默认折叠进 details')
   assert.doesNotMatch(html, /data-testid="graph-selected-node"/, '未点击节点前不展开聚焦详情卡')
+  assert.match(html, /第 1 波次/, '中文界面波次标题必须本地化')
+  assert.doesNotMatch(html, /\bWAVE\s+1\b/, '中文界面不得残留硬编码 WAVE 英文标题')
+  assert.doesNotMatch(html, /\btop-level\b/, '中文界面不得残留硬编码 top-level')
 })
 
 test('ResearchTabMenuItem：仅研究类页签渲染「打开研究工作台」，点击调用 openHub 与 dismiss', async () => {

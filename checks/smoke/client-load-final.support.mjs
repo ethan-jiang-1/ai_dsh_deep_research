@@ -148,9 +148,34 @@ export async function pass5FinalDeliveryPhase(env) {
       return { ok: overflows && scroller.scrollTop > 0, why: `sh=${scroller.scrollHeight} ch=${scroller.clientHeight} top=${scroller.scrollTop}` }
     })
     step(scrollProbe.ok, '终稿页签自带滚动口（长正文可滚、不被裁）', scrollProbe.why)
-    // 证据引用点开分屏（M4）：点击终稿正文的 [来源: evidence/...] → 右栏打开「证据卡」分屏页签
+    // R2.1 合一工具栏 + 全屏三栏精读台（Sticky TOC + 正文 + 右侧对照栏）
+    const singleToolbar = await page.locator('[data-testid="final-toolbar"]').first().isVisible().catch(() => false)
+    step(singleToolbar, 'R2.1 终稿页签渲染单条合一工具栏')
+    const fsToggle = page.locator('[data-testid="final-fullscreen-toggle"]').first()
+    if (await fsToggle.isVisible().catch(() => false)) {
+      await fsToggle.click({ timeout: 5_000 }).catch(() => {})
+      await wait(800)
+      const studioState = await page.evaluate(() => ({
+        layout: document.querySelector('[data-final-layout]')?.getAttribute('data-final-layout') ?? null,
+        hasToc: document.querySelector('[data-testid="final-studio-toc"]') !== null,
+        hasInspector: document.querySelector('[data-testid="final-studio-inspector"]') !== null,
+      }))
+      step(studioState.layout === 'studio' && studioState.hasInspector,
+        'R2.1 终稿全屏自动展开三栏精读台（Sticky TOC + 对照栏）',
+        JSON.stringify(studioState))
+      await fsToggle.click({ timeout: 5_000 }).catch(() => {})
+      await wait(600)
+    }
+    // 证据引用悬停预览（150ms）与点开分屏（M4 + R2.1）：
     const evBtn = page.locator('button[title*="evidence/"]').first()
     if (await evBtn.isVisible().catch(() => false)) {
+      await evBtn.hover({ timeout: 5_000 }).catch(() => {})
+      let hoverVisible = false
+      for (let i = 0; i < 6 && !hoverVisible; i++) {
+        await wait(150)
+        hoverVisible = await page.locator('[data-testid="citation-hover-card"]').first().isVisible().catch(() => false)
+      }
+      step(hoverVisible, 'R2.1 行内证据引用 150ms 悬停弹出溯源预览卡')
       await evBtn.click({ timeout: 5_000 }).catch(() => {})
       let evTabOk = false
       for (let i = 0; i < 10 && !evTabOk; i++) {
@@ -162,37 +187,43 @@ export async function pass5FinalDeliveryPhase(env) {
     } else {
       skipped.push('终稿引用分屏：当前终稿无 evidence/ 引用按钮')
     }
-    // 状态页 ⑤ 同款折叠块（同一交付目标会话；与终稿页脚共用 src/lib/rerun-triage 文案）
+    // R2.2 Composer 原生 `/` 研究命令菜单实证（`/lens` 由 ctx.commandUi 注册）
+    const composer = page.locator('[contenteditable="true"], textarea').first()
+    if (await composer.isVisible().catch(() => false)) {
+      await composer.click({ timeout: 4_000 }).catch(() => {})
+      await page.keyboard.type('/lens')
+      await wait(800)
+      const menuHit = await page.evaluate(() => /研究透镜|Research lens/i.test(document.body.innerText))
+      step(menuHit, 'R2.2 Composer 键入 /lens 唤出原生 DSH 斜杠命令菜单')
+      await page.keyboard.press('Escape').catch(() => {})
+      await page.keyboard.press('Meta+A').catch(() => {})
+      await page.keyboard.press('Backspace').catch(() => {})
+    }
+    // 状态页 Focus Hero：已交付后聚焦「读终稿」主 CTA，不再重复渲染三种改法折叠块（统一收口在终稿页尾）
     const statusChip = page.getByRole('tab', { name: TAB_TEXT.status }).first()
     if (await statusChip.isVisible().catch(() => false)) {
       await statusChip.click({ timeout: 5_000 }).catch(() => {})
-      // 切页签后等**显式内容**（状态页的停靠点/交付态）再判——固定读一次会读到终稿页旧 DOM。
       let statusPane = ''
       for (let i = 0; i < 8; i++) {
         statusPane = await paneTextOf(page)
         if (statusPane.includes('停靠点已过') || statusPane.includes('已交付')) break
         await wait(800)
       }
-      // ⑤ 的折叠块只在「本会话 present 见证在窗内」时渲染（交付态=事件，不是 final 在场）。
-      // 冷会话的 present 可能已滑出尾窗 → 如实 SKIP，不把"这窗口没交付态"记成渲染缺陷。
       if (!statusPane.includes('已交付')) {
-        skipped.push('状态页 ⑤ 折叠块：交付目标会话的 present 不在尾窗（⑤ 无「已交付」）')
+        skipped.push('状态页焦点卡：交付目标会话的 present 不在尾窗（无「已交付」）')
       } else {
-        // 等显式状态（2026-10-28 归因）：⑤ 的折叠块在「已交付」之后一拍才渲染，单次 isVisible
-        // 会把这一拍读成"缺折叠块"。轮询上限 10s，再判。
-        let statusFold = null
-        for (let waited = 0; waited < 10_000; waited += 500) {
-          const candidate = page.getByText(/还不满意？三种改法|Not satisfied\? Three ways to change it/).first()
-          if (await candidate.isVisible().catch(() => false)) { statusFold = candidate; break }
-          await wait(500)
+        let heroBtnVisible = false
+        for (let waited = 0; waited < 6_000 && !heroBtnVisible; waited += 400) {
+          heroBtnVisible = await page.locator('[data-testid="status-hero-open-final"]').first().isVisible().catch(() => false)
+          if (!heroBtnVisible) await wait(400)
         }
-        if (statusFold !== null) await statusFold.click({ timeout: 3_000 }).catch(() => {})
-        const statusText = statusFold !== null ? await paneTextOf(page) : ''
-        step(statusFold !== null && statusText.includes('补研究') && statusText.includes('这份太浅'),
-          '状态页 ⑤：已交付后的三种改法折叠块（与终稿页脚同源文案）', statusFold !== null ? 'fold expanded' : '缺折叠块')
+        const dupTriage = await page.locator('[data-research-face]').getByText(/还不满意？三种改法|Not satisfied\? Three ways to change it/).count().catch(() => 0)
+        step(heroBtnVisible && dupTriage === 0,
+          '状态页焦点卡：已交付显示主 CTA 且无重复三种改法（统一收口在终稿页尾）',
+          `heroBtn=${heroBtnVisible} dupTriage=${dupTriage}`)
       }
     } else {
-      skipped.push('状态页 ⑤ 折叠块：交付目标会话无研究状态 tab')
+      skipped.push('状态页焦点卡：交付目标会话无研究状态 tab')
     }
   } else {
     // 前置未建立 ≠ 断言红：候选窗/时序不保证 UI 这一窗里有交付门。显式 SKIP 并让脚本

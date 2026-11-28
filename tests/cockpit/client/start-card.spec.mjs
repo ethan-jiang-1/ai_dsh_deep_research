@@ -1,7 +1,4 @@
-// 起步卡的会话级瞬态与失败详情（BUG-409 / BUG-410）。
-//
-// 为什么住 client/ 根层：判据对象是 `src/client/StartCard.tsx`（根组件），只有真渲染才看得见
-// 按钮 `disabled`、错误条与切会话后的残留。
+// 起步卡的会话级瞬态、失败详情、已绑定工作区瘦身与最近研究续接（BUG-409 / BUG-410 / X5）。
 //
 // 负例留证 2026-11-24：
 //   BUG-409——`choosing` / `chooseError` 不随 `sessionId` 复位：挂起的目录选择器把新会话的按钮
@@ -19,8 +16,8 @@ const t = makeTranslator(zh)
 
 const propsOf = (overrides = {}) => ({
   sessionId: 's1',
-  workspaceTitle: 'WS1',
-  workspacePath: '/tmp/ws1',
+  workspaceTitle: null,
+  workspacePath: null,
   listDir: async () => [],
   hasUserMessage: async () => false,
   chooseWorkspace: async () => {},
@@ -87,25 +84,68 @@ test('BUG-410 非 Error 拒绝值：错误详情携带真实原因，不是字�
   rtl.cleanup()
 })
 
-test('起步卡研究题型模板：点击只填入草稿，绝不自动提交', async () => {
+test('X5 已绑定有效工作区时不再渲染冗余大号工作区选择框，且展示 6 张起题灵感卡与最近 Run 续接', async () => {
   const rtl = await loadRtl()
   const inserted = []
   let submitted = 0
+  const openedSessions = []
+  const openedFinals = []
   const inputActions = {
     captureInsertion: () => ({ start: 0, end: 0, revision: 1 }),
     insertText: (text) => { inserted.push(text); return true },
     setDraft: (text) => { inserted.push(`draft:${text}`) },
     submit: () => { submitted += 1 },
   }
-  const { container } = rtl.render(createElement(StartCard, propsOf({ inputActions })))
+  const sessionsState = {
+    ids: ['s1', 's-active', 's-delivered'],
+    byId: {
+      s1: { id: 's1', cwd: '/tmp/ws1' },
+      's-active': {
+        id: 's-active',
+        cwd: '/tmp/ws1',
+        title: 'AI 芯片格局研究',
+        projectionValues: {
+          researchRun: { schemaVersion: 1, slug: 'ai-chips', phase: 'running', hitlKind: null, deliveredPath: null, updatedAt: 200 },
+        },
+      },
+      's-delivered': {
+        id: 's-delivered',
+        cwd: '/tmp/ws1',
+        title: '安理会五常研究',
+        projectionValues: {
+          researchRun: { schemaVersion: 1, slug: 'un-sc', phase: 'delivered', hitlKind: null, deliveredPath: 'drt_un-sc/final/readable-v1.md', updatedAt: 150 },
+        },
+      },
+    },
+    projectionsBySession: {},
+  }
+  const { container } = rtl.render(createElement(StartCard, propsOf({
+    workspaceTitle: 'WS1',
+    workspacePath: '/tmp/ws1',
+    inputActions,
+    useSessions: (selector) => selector(sessionsState),
+    openSession: (sid) => { openedSessions.push(sid) },
+    openSessionFinal: (sid, p) => { openedFinals.push([sid, p]) },
+  })))
   try {
     await rtl.waitFor(() => {
       if (container.querySelector('[data-testid=deep-research-start-template-landscape]') === null) throw new Error('wait template')
     })
+    assert.equal(chooseButton(container), null, '已绑定工作区时不应重复显示选择工作区按钮')
+    assert.ok(container.querySelector('[data-testid=deep-research-start-template-diligence]'), '应包含尽调灵感卡')
+    assert.ok(container.querySelector('[data-testid=deep-research-start-template-timeline]'), '应包含演化灵感卡')
+
     rtl.fireEvent.click(container.querySelector('[data-testid=deep-research-start-template-landscape]'))
     assert.equal(inserted.length, 1, '点击模板按钮必须写入草稿')
     assert.equal(inserted[0], zh.startTplLandscapePrompt)
     assert.equal(submitted, 0, '点击模板按钮绝不得自动提交')
+
+    const recent = container.querySelector('[data-testid=deep-research-start-recent]')
+    assert.ok(recent, '应渲染最近研究快捷续接条')
+    rtl.fireEvent.click(recent.querySelector('[data-recent-slug="ai-chips"]'))
+    rtl.fireEvent.click(recent.querySelector('[data-recent-slug="un-sc"]'))
+    assert.deepEqual(openedSessions, ['s-active'])
+    assert.deepEqual(openedFinals, [['s-delivered', 'drt_un-sc/final/readable-v1.md']])
   } finally {
     rtl.cleanup()
   }

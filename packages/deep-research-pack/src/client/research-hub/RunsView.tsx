@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Button, IconSearchOutlineRegular, Input, Pill, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
+import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
   filterRunsCatalog,
   preferredFinalPathOf,
@@ -8,6 +9,7 @@ import {
   type RunCatalogResult,
   type RunLocation,
 } from '../../lib/workspace/runs-catalog.ts'
+import type { RunSessionMatch } from '../../lib/events/research-projection.ts'
 import css from './hub.module.css'
 
 type LocationFilter = 'all' | RunLocation
@@ -16,8 +18,10 @@ export interface RunsViewProps extends PropsLocale<'deepResearchPack'> {
   readonly hasSession: boolean
   readonly loading: boolean
   readonly result: RunCatalogResult
+  readonly sessionMatches?: Readonly<Record<string, RunSessionMatch | undefined>>
   readonly onRefresh: () => void
-  readonly onOpenFinal: (finalPath: string) => void
+  readonly onEnterSession?: (sessionId: SessionId) => void
+  readonly onOpenFinal: (finalPath: string, ownerSessionId: SessionId | null) => void
   readonly onStartResearch: () => void
 }
 
@@ -56,7 +60,9 @@ export function RunsView({
   hasSession,
   loading,
   result,
+  sessionMatches,
   onRefresh,
+  onEnterSession,
   onOpenFinal,
   onStartResearch,
   t,
@@ -157,8 +163,17 @@ export function RunsView({
           {visible.map((run) => {
             const finalPath = preferredFinalPathOf(run)
             const copyState = copyFeedback?.path === run.rootPath ? copyFeedback.state : 'idle'
+            const match = sessionMatches?.[run.rootPath]
+            const ownedSessionId = match?.kind === 'owned' ? match.sessionId : null
+            const isOrphan = sessionMatches !== undefined && match?.kind !== 'owned'
+            const isActiveRun = run.status === 'in_progress'
             return (
-              <article key={run.rootPath} className={css.card}>
+              <article
+                key={run.rootPath}
+                className={css.card}
+                data-hub-run-slug={run.slug}
+                data-hub-run-ownership={ownedSessionId !== null ? 'owned' : isOrphan ? 'orphan' : 'unknown'}
+              >
                 <div className={css.cardTop}>
                   <div className={css.cardTitle}>{run.title}</div>
                   <Tag tone={statusToneOf(run.status)}>{statusLabelOf(run.status, t)}</Tag>
@@ -176,14 +191,42 @@ export function RunsView({
                   {run.latestFinalVersion !== null && (
                     <Tag tone="neutral">{t('hubVersionBadge', { version: String(run.latestFinalVersion) })}</Tag>
                   )}
+                  {isOrphan && (
+                    <span data-testid="hub-orphan-badge"><Tag tone="outline">{t('hubReadonlyArchive')}</Tag></span>
+                  )}
                 </div>
                 {run.error !== undefined && (
                   <div className={css.errorBox}>{run.error}</div>
                 )}
                 <div className={css.cardFooter}>
+                  {isActiveRun && ownedSessionId !== null && onEnterSession !== undefined && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      data-testid="hub-enter-session"
+                      onClick={() => { onEnterSession(ownedSessionId) }}
+                    >
+                      {t('hubEnterSession')}
+                    </Button>
+                  )}
                   {finalPath !== null && (
-                    <Button variant="primary" size="sm" onClick={() => { onOpenFinal(finalPath) }}>
+                    <Button
+                      variant={isActiveRun && ownedSessionId !== null ? 'outline' : 'primary'}
+                      size="sm"
+                      data-testid="hub-open-final"
+                      onClick={() => { onOpenFinal(finalPath, ownedSessionId) }}
+                    >
                       {t('hubOpenFinal')}
+                    </Button>
+                  )}
+                  {!isActiveRun && ownedSessionId !== null && onEnterSession !== undefined && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      data-testid="hub-open-session"
+                      onClick={() => { onEnterSession(ownedSessionId) }}
+                    >
+                      {t('hubOpenSession')}
                     </Button>
                   )}
                   <Button

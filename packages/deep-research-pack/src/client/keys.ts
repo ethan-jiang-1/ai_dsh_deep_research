@@ -75,9 +75,6 @@ export const RESEARCH_TOOLVIEW_SLOT = 'tool.call.toolview'
  *  门禁 client-keys 规则③④⑤把守单一正本）。新增研究语义工具卡时在族尾追加 wire 名。 */
 export const RESEARCH_TOOL_KEYS = ['spawn_teammate', 'web_search', 'web_fetch', 'subagent'] as const
 
-/** 主界面「方法库」tab 的 conversation.view 槽名（Chat/Trajectory 同排）。 */
-export const METHOD_LIBRARY_VIEW = 'conversation.view' as const
-
 /** 方法编辑对话：根级 portal 宿主座位（shell.overlay；会话树在 main 之外，DOM teleport 进页内右栏）。 */
 export const METHOD_COACH_PORTAL = 'shell.overlay'
 
@@ -113,3 +110,31 @@ export const RESEARCH_HUB_PANEL_ID = 'deep-research-hub'
 /** 右栏页签更多菜单项槽位与入口 id。 */
 export const RESEARCH_TAB_MENU_ITEM_SLOT = 'sidebar.right.tab.menu.item'
 export const RESEARCH_TAB_MENU_HUB_ID = 'deep-research-open-hub'
+
+/** 左栏会话行研究状态标、悬停摘要与行菜单快捷项（消费 Host `researchRun` 投影）。 */
+export const RESEARCH_SESSION_ROW_LEADING_SLOT = 'sidebar.session.row.leading'
+export const RESEARCH_SESSION_ROW_LEADING_ID = 'deep-research-pack/session-row-leading'
+export const RESEARCH_SESSION_ROW_HOVER_SLOT = 'sidebar.session.row.hover'
+export const RESEARCH_SESSION_ROW_HOVER_ID = 'deep-research-pack/session-row-hover'
+export const RESEARCH_SESSION_MENU_ITEM_SLOT = 'sidebar.workspaces.session.menu.item'
+export const RESEARCH_SESSION_MENU_OPEN_FINAL_ID = 'deep-research-pack/session-open-final'
+
+/** 空白会话 Hero 控件行右侧快捷选配胶囊槽位。 */
+export const RESEARCH_HERO_OPTIONS_SLOT = 'conversation.hero.options'
+export const RESEARCH_HERO_OPTIONS_ID = 'deep-research-pack/hero-options'
+
+/** Composer `/` 研究命令名（装饰 Host `research-defaults` + 三个客户端研究指令）。 */
+export const RESEARCH_CMD_DEFAULTS = 'research-defaults'
+export const RESEARCH_CMD_LENS = 'lens'
+export const RESEARCH_CMD_METHOD = 'method'
+export const RESEARCH_CMD_HUB = 'hub'
+
+/** Composer `@` 研究上下文触发源名与已发送消息用户文本节点槽/键。 */
+export const RESEARCH_TRIGGER_SOURCE = 'research'
+export const RESEARCH_USER_TEXT_NODE_SLOT = 'conversation.user.text.node'
+export const RESEARCH_USER_TEXT_NODE_KEY = 'researchRef'
+
+/** 跨平台全局快捷键 ID（遵循 DSH `a.b` 命名格式）。 */
+export const RESEARCH_SHORTCUT_STATUS = 'deepResearch.status'
+export const RESEARCH_SHORTCUT_GRAPH = 'deepResearch.graph'
+export const RESEARCH_SHORTCUT_HUB = 'deepResearch.hub'

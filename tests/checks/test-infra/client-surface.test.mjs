@@ -32,6 +32,7 @@ const CLIENT_SMOKE_ONLY = {
   'method-library/useDraftState': 'React hook：需要 DOM/React harness；当前由 client-load 真浏览器覆盖',
   'method-library/useLibraryData': 'React hook：需要 DOM/React harness；当前由 client-load 真浏览器覆盖',
   'method-library/useOperationQueue': 'React hook：需要 DOM/React harness；当前由 client-load 真浏览器覆盖',
+  'research-final/useEvidencePreview': 'React hook：需要 DOM/React harness；纯缓存/解析逻辑归 src/lib/run/evidence-preview.ts 直测，组件交互归 final-studio-r2 与真浏览器覆盖',
 }
 
 const TSX_SMOKE_ONLY = '所有 .tsx 组件归真浏览器装配面（client-load.entry）；组件逻辑抽到 src/lib 或 src/client 纯件后由本契约接管'

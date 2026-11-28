@@ -3520,6 +3520,11 @@
       "from": "docs/design",
       "to": "docs/README.md",
       "reason": "2026-11-27 docs/ 对齐 DSH 统一 16 文件核心骨架（design/ 目录拆分为 architecture.md + contracts/ + policy.md，统一由 docs/README.md 索引）"
+    },
+    {
+      "from": "packages/deep-research-pack/src/client/research-config/LegacyManagementPane.tsx",
+      "to": "packages/deep-research-pack/src/client/ResearchConfigTab.tsx",
+      "reason": "2026-11-28 R0 收口：退役 COMPACT=false 旧四区管理回滚分支，管理入口统一收敛至全局 ResearchHubPanel"
     }
   ]
 }

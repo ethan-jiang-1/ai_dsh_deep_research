@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "readiness": "PASS",
+  "conditional": false,
+  "round": 1,
+  "at": "2026-11-28T10:00:00+08:00",
+  "counts": {
+    "critical": 0,
+    "major": 0,
+    "minor": 2,
+    "unverified": 1,
+    "rechecked_urls": 5
+  }
+}

@@ -13,7 +13,7 @@ import { readArtifact } from '../../lib/run/artifact-read.ts'
 import { foldMethodAdoption, type MethodAdoption } from '../../lib/method-library/method-of-question.ts'
 import { assistantReplyAfter, libraryDiff, receiptOf, type LibraryDiff } from '../../lib/run/receipt-fold.ts'
 import type { PackTranslate } from '../../lib/shared/i18n.ts'
-import { LIBRARY_PATH, type DetailState } from './config-model.ts'
+import { LIBRARY_PATH } from './config-model.ts'
 import type { FollowTarget, JournalFrame } from '../ResearchStatusTab.tsx'
 import type { DefaultsStore } from '../defaults/store.ts'
 import type { MethodLibraryReadResult } from '../../lib/method-library/method-library-read.ts'
@@ -47,9 +47,6 @@ export const isReloadCurrent = (epoch: FeedEpoch, sid: SessionId, seq: number): 
 
 export function useConfigFeed(props: ConfigFeedInput) {
   const [entries, setEntries] = useState<readonly LibraryEntry[] | null>(null)
-  const [detail, setDetail] = useState<DetailState | null>(null)
-  const [menuFor, setMenuFor] = useState<string | null>(null)
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [switchOpen, setSwitchOpen] = useState(false)
   const [sending, setSending] = useState(false)
   // 回执三态：base = 发送结果 + 对账基准；diff / replied 分别由回读与 journal 流补上。
@@ -60,8 +57,6 @@ export function useConfigFeed(props: ConfigFeedInput) {
   const [events, setEvents] = useState<readonly unknown[]>([])
   /** 库读四态：loading（首读中）／ok／absent（文件不在＝新工作区正常空态）／unreadable（在而读不回）。 */
   const [libraryRead, setLibraryRead] = useState<'loading' | 'ok' | 'absent' | 'unreadable'>('loading')
-  // 2026-10-21 方法库迁移：侧栏只留本次研究摘要 + 入口；管理/编辑在主界面 conversation.view。
-  const COMPACT = true
 
   const { sessionId, readLibrary, follow, runSource } = props
   const repliedMarker = useRef(0)
@@ -107,9 +102,6 @@ export function useConfigFeed(props: ConfigFeedInput) {
     setReceiptBase(null)
     setReceiptDiff(null)
     setReplied(false)
-    setDetail(null)
-    setMenuFor(null)
-    setConfirmDelete(null)
     setSwitchOpen(false)
     setSending(false)
     setEvents([])
@@ -246,7 +238,6 @@ export function useConfigFeed(props: ConfigFeedInput) {
   }
 
   return {
-    COMPACT, entries, detail, setDetail, menuFor, setMenuFor, confirmDelete, setConfirmDelete,
-    switchOpen, setSwitchOpen, sending, receipt, send, adoption, retryAdoption, libraryRead, reload,
+    entries, switchOpen, setSwitchOpen, sending, receipt, send, adoption, retryAdoption, libraryRead, reload,
   }
 }

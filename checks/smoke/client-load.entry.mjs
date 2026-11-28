@@ -741,7 +741,8 @@ async function pass1BoundFacePhase() {
         // 并在块就绪后刷新**同一快照**（seg/uiFace）供后续断言使用。理由 = 浏览器渲染边界（checks/AGENTS
         // 的重试白名单）。⚠ 不是掩盖产品错态：产品侧数百 ms–数秒内自愈，等的是"自愈后的稳定态"；
         // 若摘要块**始终**不渲染，本等待耗尽后断言照红（有界 20×1s）。
-        for (let i = 0; i < 20 && !seg.includes('🎯'); i++) {
+        const heroReady = async () => (await page.locator('[data-testid="research-focus-hero"]').count().catch(() => 0)) > 0
+        for (let i = 0; i < 20 && !(await heroReady()); i++) {
           await wait(1_000)
           const t = await paneTextOf(page)
           seg = segFrom(t, 'status')
@@ -751,8 +752,12 @@ async function pass1BoundFacePhase() {
         {
           const t = await paneTextOf(page)
           const settled = segFrom(t, 'status')
-          if (settled.includes('🎯')) { seg = settled; uiFace = parseUiFace(seg, await faceRowText()) }
+          if (await heroReady()) { seg = settled; uiFace = parseUiFace(seg, await faceRowText()) }
         }
+        const focusPhase = await page.locator('[data-testid="research-focus-hero"]').first().getAttribute('data-focus-phase').catch(() => null)
+        step(focusPhase !== null && focusPhase !== '', '阶段自适应态势焦点卡（Focus Hero）在场', `phase=${focusPhase ?? '缺席'}`)
+        const rowMarkPhase = await page.locator('[data-research-row-phase]').first().getAttribute('data-research-row-phase').catch(() => null)
+        step(rowMarkPhase !== null && rowMarkPhase !== '', '左栏会话行 Host researchRun 投影状态标在场（sidebar.session.row.leading）', `rowPhase=${rowMarkPhase ?? '缺席'}`)
         const stepsOk = ['立项', '组队', '侦察', '挖掘', '综合', '审查', '交付'].every((x) => seg.includes(x))
         step(stepsOk, '步骤条真数据（流程轨道七步 = 定义流程——本会话绑定的 bundle）')
         // 顶栏研究进度胶囊（M5：`conversation.session.header.actions`）在场且非空
@@ -801,26 +806,31 @@ async function pass1BoundFacePhase() {
         step(delivOk, '交付态 = present 见证（门②）而非 final.md 在场',
           diskSide.delivered ? `present → ✅ 已交付 · 读终稿（${diskSide.delivery.path}）`
             : `无 present → 只显示承诺行（final.md 在场=${diskSide.deliveredFile}）`)
-        // 交付后只读出口（rerun 不满转接卡）：已交付才渲染折叠块；展开后三行用户语言 + 后果 + 话术
-        // 必须与 src/lib/rerun-triage 同源（文案常量 = 单一正本，组件只画）。
+        // 已交付态：焦点卡提供主 CTA「打开终稿」，三种改法统一收口在终稿页尾（状态页不再重复渲染）
         if (diskSide.delivered) {
-          const triageSummary = page.getByText(/还不满意？三种改法|Not satisfied\? Three ways to change it/).first()
-          const triageVisible = await triageSummary.isVisible().catch(() => false)
-          if (triageVisible) await triageSummary.click({ timeout: 3_000 }).catch(() => {})
-          const bodyText = triageVisible ? await paneTextOf(page) : ''
-          step(triageVisible && bodyText.includes('补研究') && bodyText.includes('这份太浅') && bodyText.includes('版本不变'),
-            '交付后只读出口：三种改法折叠块（用户语言 + 版本后果 + 可复制话术；D18 只读）',
-            triageVisible ? 'fold expanded' : '缺折叠块')
+          const heroOpenFinal = await page.locator('[data-testid="status-hero-open-final"]').first().isVisible().catch(() => false)
+          const dupTriageCount = await page.locator('[data-research-face]').getByText(/还不满意？三种改法|Not satisfied\? Three ways to change it/).count().catch(() => 0)
+          step(heroOpenFinal && dupTriageCount === 0,
+            '已交付焦点卡主 CTA「读终稿」在场且状态页不再重复渲染三种改法（统一收口在终稿页尾）',
+            `heroBtn=${heroOpenFinal} dupTriage=${dupTriageCount}`)
         }
         // 锚点入轨断言（RFC cockpit-flow-face）：轨道渲染 + 诚实线计数与盘侧文件事实对账
         const railOk = seg.includes('◆立项确认') && seg.includes('◆交付审阅')
         step(railOk, '流程轨道渲染（◆立项确认 + ◆交付审阅在场）')
-        // ↻ 回边盘侧真值（BUG-003 合流）：直调 hitl-fold.deriveAnchors（UI 同一函数）取
-        // 交付审阅锚态——旧手抄公式（delivered ∨ tailAskPending）停留在 BUG-002 前的
-        // 「一律记交付审阅」旧启发式，mid-flow 挂起被误判为回边应亮，废。
+        // ↻ 回边盘侧真值（BUG-003 合流）：默认折叠为克制触发行，展开后含 NODES 三分图例
+        const rerunDetails = page.locator('[data-testid="track-rerun-legend"]').first()
+        const rerunDetailsVisible = await rerunDetails.isVisible().catch(() => false)
+        let rerunExpandedText = ''
+        if (rerunDetailsVisible) {
+          await rerunDetails.locator('summary').click({ timeout: 3_000 }).catch(() => {})
+          await wait(150)
+          rerunExpandedText = await rerunDetails.innerText().catch(() => '')
+        }
         const rerunLabels = ['补研究 = 同 bundle 回挖掘、final/ vN+1', '表述修订 = 原位改、版本不变', '结构性重构 = 另起新 bundle']
-        const rerunLabelsVisible = rerunLabels.every((label) => seg.includes(label))
-        step(loopExpected === seg.includes('↻ rerun 图例（非执行记录）') && (!loopExpected || rerunLabelsVisible), '↻ rerun 三分图例 = NODES 合同（图例不证明执行；v2+ 文件版本才是证据扩张凭据）', `loopOn=${loopExpected} labelsVisible=${rerunLabelsVisible}（anchor-2=${String(diskAnchors[1]?.state)} tailAskPending=${boundSession.tailAskPending}）`)
+        const rerunLabelsVisible = rerunLabels.every((label) => rerunExpandedText.includes(label))
+        step(loopExpected === rerunDetailsVisible && (!loopExpected || (rerunExpandedText.includes('↻ rerun 图例（非执行记录）') && rerunLabelsVisible)),
+          '↻ rerun 三分图例 = NODES 合同（默认收起零噪音，展开即见三分口径）',
+          `loopOn=${loopExpected} visible=${rerunDetailsVisible} labelsVisible=${rerunLabelsVisible}（anchor-2=${String(diskAnchors[1]?.state)} tailAskPending=${boundSession.tailAskPending}）`)
         if (anchorBound && diskAnchors.some((a) => a.state === 'passed')) {
           // 停靠点诚实线（BUG-003 同族收口）：passed 计数 = diskAnchors（lib 同一函数）——
           // pending 覆盖 passed 的 re-open 语义（BUG-002）在此与 UI 天然一致；旧
@@ -871,8 +881,8 @@ async function pass1BoundFacePhase() {
         ]
         const briefMissing = briefLines.filter((line) => !seg.includes(line))
         const goalOk = expectedBrief.goalKnown
-          ? faceNow.questionLine !== null && seg.includes(`🎯 ${faceNow.questionLine.slice(0, 12)}`)
-          : seg.includes('🎯 尚未确认')
+          ? faceNow.questionLine !== null && seg.includes(faceNow.questionLine.slice(0, 12))
+          : seg.includes('尚未确认')
         step(goalOk && briefMissing.length === 0,
           '业务摘要层 = 盘侧 brief-fold 真值（五问逐行对账）',
           briefMissing.length === 0
@@ -943,8 +953,8 @@ async function pass2UnboundNegativePhase() {
       step(!seg2.includes('队员动态'), '未绑定会话：队员动态不渲染（无团队负例）')
       // ⓪ 摘要层 fail-soft 负例（③-a 互补态）：无 bundle 绑定时 goal 必须如实「尚未确认」，
       // 不生成替代目标、不借用别家 run 的问题行（brief-fold 的 unbound 分支）。
-      step(seg2.includes('🎯 尚未确认'), '未绑定会话：摘要层如实「尚未确认」（不生成替代目标）',
-        (seg2.match(/🎯 [^\n]{0,24}/) ?? ['（未找到 🎯 行）'])[0])
+      step(seg2.includes('尚未确认'), '未绑定会话：摘要层如实「尚未确认」（不生成替代目标）',
+        seg2.slice(0, 80).replace(/\s+/g, ' '))
       // 互补案例（子卡① ①-1／①-6）：未绑定会话上「本次研究」区必须走**无 run** 态——给入口、
       // 不借用别家 run 的方法名、不回落默认打法（单测覆盖五态，这里钉真浏览器上的那一态）。
       if (await openGuideCapsule(page, 6_000, 6_000, 2_500)) {
@@ -1039,7 +1049,8 @@ async function pass3ActivityStreamPhase() {
     }
     await openPane(page)
     const paneText = await paneTextOf(page)
-    const paneOk = TAB_TEXT.status.test(paneText) && /(?:🔍|👥|💬|📦)/u.test(paneText)
+    const humanRows = await page.locator('[data-research-face] [data-activity-row]').count().catch(() => 0)
+    const paneOk = TAB_TEXT.status.test(paneText) && humanRows >= 1
     step(paneOk, '页签体渲染（keyed 槽体挂对 key + follow 通道接通）')
     // 流畸形死亡恢复指引（BUG-023 修复①）：盘侧 streamFailureOf 真值 ↔ UI 横幅对账——
     // 末位回合死于上游流失败且无新回合接手才显示；用真实死亡会话（如渐进面探针会话）作正例。
@@ -1068,8 +1079,7 @@ async function pass3ActivityStreamPhase() {
       step(paneText.includes('上游模型流连续异常') === hintExpected,
         '流失败恢复指引 = 盘侧 streamFailureOf 真值（死亡会话显示、存活会话不显示）', `expected=${hintExpected}`)
     }
-    const humanRows = (paneText.match(/🔍|👥|💬|📦/gu) ?? []).length
-    // 行数与**本会话自己的**折算对账（数据无关断言）。两次实红家谱：① 2026-10-12——≥3
+    // 行数与**本会话自己的**折算对账（数据无关断言；已由矢量图标行 `[data-activity-row]` 替代原始 emoji）。
     // 旧地板把快答型会话形状（lead journal 天然 2 行）误当断言对象，改「≥1 + 与盘侧折算
     // 一致」；② 2026-10-13——盘侧期望折**全量日志**（25 行）而 UI 按 vendor follow 开窗
     // 快照折算（16 行；616 事件、切点 288）——对账对象错位，期望改按 clientHistoryWindowOf
@@ -1139,7 +1149,7 @@ async function pass3bGraphTabPhase() {
   }
 }
 
-/** pass-3c：主界面「方法库」tab。keyless 浏览器断言 A′ 两列、摘要/访谈/表单切换与来源选择；不发送模型 prompt。 */
+/** pass-3c：全局「研究工作台 → 方法库」。keyless 浏览器断言统一入口无重复 conversation.view tab，A′ 两列、摘要/访谈/表单切换与来源选择；不发送模型 prompt。 */
 async function pass3cMethodLibraryPhase() {
   await awaitAppReady(page, 5_000)
   const initialViewport = page.viewportSize() ?? { width: 1280, height: 720 }
@@ -1149,32 +1159,29 @@ async function pass3cMethodLibraryPhase() {
     const box = root.getBoundingClientRect()
     return root.scrollWidth <= root.clientWidth + 1 && box.right <= window.innerWidth + 1
   })
-  // 等显式状态，不拿"读一次没看见"当结论（2026-10-28 归因：失败现场保存时 tab 已在 DOM
-  // 里（role=tab），说明断言时刻只是还没挂载完——单次 isVisible 把挂载时序当成了注册回归）。
-  const tabVisibleSoon = async (windowMs) => {
-    for (let waited = 0; waited < windowMs; waited += 500) {
-      // Tab title is locale-owned; accept the English and Chinese locale labels.
-      const t = page.getByRole('tab', { name: /^(方法库|Method library)$/i }).first()
-      if (await t.isVisible().catch(() => false)) return t
-      await wait(500)
-    }
-    return null
+  const duplicateConvTab = await page.getByRole('tab', { name: /^(方法库|Method library|Methods)$/i }).count().catch(() => 0)
+  step(duplicateConvTab === 0, '主对话顶栏不再重复挂载「方法库」tab（统一收敛至全局研究工作台）', `count=${duplicateConvTab}`)
+
+  const hubBtn = page.getByRole('button', { name: /研究工作台|Research Hub/ }).first()
+  const hubVisible = await hubBtn.isVisible({ timeout: 10_000 }).catch(() => false)
+  step(hubVisible, '左栏全局「研究工作台」入口在场（方法库统一宿主）')
+  if (!hubVisible) return
+  await hubBtn.click({ timeout: 5_000 }).catch(() => {})
+  const hubPanel = page.locator('[data-testid="deep-research-hub"]').first()
+  const hubMounted = await hubPanel.waitFor({ state: 'visible', timeout: 8_000 }).then(() => true).catch(() => false)
+  if (!hubMounted) {
+    step(false, '全局研究工作台未能打开')
+    return
   }
-  let tab = await tabVisibleSoon(10_000)
-  if (tab === null) {
-    // 兜底一次 reload：会话切换后第三 tab 的 conversation.view 偶发未随首屏挂载。
-    await page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {})
-    await awaitAppReady(page, 5_000)
-    tab = await tabVisibleSoon(10_000)
-  }
-  const visible = tab !== null
-  step(visible, '「方法库」主界面 tab 在场（conversation.view 注册成功）')
+  const tab = hubPanel.getByRole('tab', { name: /^(方法库|Methods|Method library)$/i }).first()
+  const visible = await tab.isVisible({ timeout: 5_000 }).catch(() => false)
+  step(visible, '研究工作台「方法库」页签在场')
   if (!visible) return
   await tab.click({ timeout: 5_000 }).catch(() => {})
-  await wait(3_000)
+  await wait(2_000)
   const text = await paneTextOf(page)
   const body = text.includes('本工作区共享') && text.includes('我的库') && text.includes('内置参考') && text.includes('新建')
-  step(body, '方法库 tab 渲染（我的库 / 内置参考 / 新建）', body ? '' : text.slice(0, 220).replace(/\s+/g, ' '))
+  step(body, '方法库工作台渲染（我的库 / 内置参考 / 新建）', body ? '' : text.slice(0, 220).replace(/\s+/g, ' '))
   if (!body) return
   // 列表行点击必须到 detail（2026-10-21 实测：左侧栏透明拖拽柄在 x=406 覆盖方法库左列，
   // 行中心命中拖拽柄；修复 = aside 提升 stacking context。该断言先于编辑，防止回归）。
@@ -1323,6 +1330,11 @@ async function pass3cMethodLibraryPhase() {
       step(projected, '内置详情开始动作带入选定来源')
     }
   }
+  const backBtn = page.getByRole('button', { name: /返回对话|Back to chat/ }).first()
+  if (await backBtn.isVisible().catch(() => false)) {
+    await backBtn.click({ timeout: 5_000 }).catch(() => {})
+    await wait(500)
+  }
 }
 
 /** pass-5：终稿页签端到端（issue 2026-10-19）——独立目标 = dev home 里已交付的冷会话。
@@ -1372,6 +1384,9 @@ try {
     }
     step(hubVisible, '全局「研究工作台」主面板打开（main keyed panel）')
     if (hubVisible) {
+      await wait(1_200)
+      const ownedCards = await hubPanel.locator('[data-hub-run-ownership="owned"]').count().catch(() => 0)
+      step(ownedCards >= 1, '工作台 Runs 档案卡通过 Host researchRun 投影精确关联所属会话（零跨会话串台）', `owned=${ownedCards}`)
       await page.getByRole('tab', { name: /研究透镜|Lenses/ }).first().click({ timeout: 5_000 }).catch(() => {})
       await wait(400)
       const hubTextLenses = await hubPanel.innerText().catch(() => '')

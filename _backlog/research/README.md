@@ -182,7 +182,7 @@ status——材料的状态就是题的状态。
 
 ## 索引
 
-（当前无活跃研究题。）
+- [cockpit-ux-v2/](cockpit-ux-v2/README.md) — 研究驾驶舱 UX/UI 二期深水区重塑与 DSH 原生能力深度挖掘（2026-11-28）
 
 最近归档 = [研究驾驶舱 UX/UI 重塑与 DSH 能力充分利用](../_archived/research/cockpit-ux-ui/README.md)（2026-11-26）。
 

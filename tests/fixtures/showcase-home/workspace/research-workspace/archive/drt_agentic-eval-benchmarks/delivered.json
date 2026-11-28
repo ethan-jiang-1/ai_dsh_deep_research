@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "slug": "drt_agentic-eval-benchmarks",
+  "acceptedAt": "2026-11-20T09:00:00.000Z",
+  "sessions": "$DSH_HOME/sessions",
+  "gate": { "status": "PASS", "exit": 0 },
+  "audit": { "critical": 0, "sha256": "archive-eval-audit" },
+  "final": { "version": 1, "sha256": "archive-eval-final-v1" },
+  "readable": { "version": 1, "sha256": "archive-eval-readable-v1" },
+  "present": {
+    "path": "archive/drt_agentic-eval-benchmarks/final/readable-v1.md",
+    "callId": "call_archive_present_01",
+    "version": 1
+  },
+  "witness": { "sessions": [] }
+}

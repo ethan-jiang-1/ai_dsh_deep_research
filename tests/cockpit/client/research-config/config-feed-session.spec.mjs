@@ -19,7 +19,7 @@ test('BUG-086 reload epoch：旧 session 或旧序号都不算当前', () => {
 test('BUG-086 / BUG-108 接线：readLibrary 全量读 + 切会话复位交互态', () => {
   const source = readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/research-config/useConfigFeed.ts'), 'utf8')
   assert.match(source, /(?:props\.)?readLibrary\(sid, LIBRARY_PATH/, '配置页签必须走分页 readLibrary')
-  for (const line of ['setReceiptBase(null)', 'setReceiptDiff(null)', 'setReplied(false)', 'setDetail(null)', 'setMenuFor(null)', 'setConfirmDelete(null)', 'setSwitchOpen(false)', 'setSending(false)']) {
+  for (const line of ['setReceiptBase(null)', 'setReceiptDiff(null)', 'setReplied(false)', 'setSwitchOpen(false)', 'setSending(false)']) {
     assert.ok(source.includes(line), `切会话必须复位 ${line}`)
   }
   assert.match(source, /isReloadCurrent\(epochRef\.current, sid, seq\)/, 'await 后必须有 epoch 守卫')

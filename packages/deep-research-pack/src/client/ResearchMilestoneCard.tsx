@@ -25,6 +25,14 @@ function milestoneTitleKey(kind: ResearchMilestoneKind): 'milestoneProtocolTitle
   }
 }
 
+function milestoneTagKey(kind: ResearchMilestoneKind): 'milestoneTagProtocol' | 'milestoneTagReview' | 'milestoneTagDelivered' {
+  switch (kind) {
+    case 'protocol': return 'milestoneTagProtocol'
+    case 'review': return 'milestoneTagReview'
+    case 'delivered': return 'milestoneTagDelivered'
+  }
+}
+
 export function ResearchMilestoneCard(props: ResearchMilestoneCardProps): ReactNode {
   const milestones = selectResearchMilestones(props)
   if (milestones.length === 0) return null
@@ -35,7 +43,7 @@ export function ResearchMilestoneCard(props: ResearchMilestoneCardProps): ReactN
           <div className={css.left}>
             <StateDot state="done" size={10} />
             <span>{props.t(milestoneTitleKey(m.kind))}</span>
-            <Tag tone="outline">{m.kind}</Tag>
+            <Tag tone="outline">{props.t(milestoneTagKey(m.kind))}</Tag>
           </div>
           <div className={css.actions}>
             {m.kind === 'delivered' && props.sessionId !== undefined ? (
