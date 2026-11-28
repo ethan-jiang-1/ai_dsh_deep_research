@@ -6,7 +6,7 @@
 
 | 卡 | 状态 | 一句话 |
 |---|---|---|
-| [2026-11-28-cockpit-ux-v2-and-dsh-showcase.md](2026-11-28-cockpit-ux-v2-and-dsh-showcase.md) | 待落地 | 研究驾驶舱二期 UX/UI 深水区重塑与 DSH 标杆示范工程（R0–R3 Goal-Driven 实施卡） |
+| （当前无活跃 issue） | — | — |
 
 已结卡见 [_archived/settled_issues](../_archived/settled_issues/README.md)。
 

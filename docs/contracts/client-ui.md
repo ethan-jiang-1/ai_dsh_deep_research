@@ -168,4 +168,4 @@
 
 选型与输掉的方案住 `notes/`：
 [ui-observability-surfaces](../../notes/archived/2026-09-24-ui-observability-surfaces.md) → [observability-gui](../../notes/implemented/2026-09-24-observability-gui.md) → [research-status-ui](../../notes/archived/2026-09-25-research-status-ui.md) → [bundle-face-wiring](../../notes/archived/2026-09-26-bundle-face-wiring.md)
-→ [right-pane-ux-debt](../../notes/archived/2026-09-28-right-pane-ux-debt.md) → [cockpit-naming](../../notes/archived/2026-09-28-cockpit-naming.md) → [cockpit-ux-ui-native-upgrade](../../notes/implemented/2026-11-26-cockpit-ux-ui-native-upgrade.md)。
+→ [right-pane-ux-debt](../../notes/archived/2026-09-28-right-pane-ux-debt.md) → [cockpit-naming](../../notes/archived/2026-09-28-cockpit-naming.md) → [cockpit-ux-ui-native-upgrade](../../notes/implemented/2026-11-26-cockpit-ux-ui-native-upgrade.md) → [cockpit-ux-v2-and-dsh-showcase](../../notes/implemented/2026-11-28-cockpit-ux-v2-and-dsh-showcase.md)。

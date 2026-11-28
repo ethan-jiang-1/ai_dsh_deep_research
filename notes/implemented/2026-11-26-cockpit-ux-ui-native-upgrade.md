@@ -1,6 +1,7 @@
 # 研究驾驶舱基于 DSH 原生能力的 UX/UI 全面升级（M1–M7）
 
 > 状态：implemented
+> 历史注记：二期 UX/UI 与示范工程（R0–R4）部分取代本篇 M2/M3/M6 的若干过渡决定（退役 `conversation.view` 重复方法库入口与 `installCoachComposerStyles` `:has(...)` 补丁，接入 Host `sessionProjections` 驱动左栏状态标与 Hub 会话防串台，并演进首屏 `StartCard`、三层状态页、全屏三栏终稿与 Composer `/`·`@` 指令流）；现行决策见 [2026-11-28-cockpit-ux-v2-and-dsh-showcase](./2026-11-28-cockpit-ux-v2-and-dsh-showcase.md) 与 [docs/contracts/client-ui.md](../../docs/contracts/client-ui.md)。
 >
 > 前序基线：[observability-gui](./2026-09-24-observability-gui.md)（D18 观察面 client 套件初代成立；现行构成见 [40-research-cockpit](../../docs/design/40-research-cockpit.md)）
 > 需求来源：[2026-11-26-cockpit-ux-ui-native-upgrade](../../_backlog/_archived/settled_issues/2026-11-26-cockpit-ux-ui-native-upgrade.md)（调研：[cockpit-ux-ui](../../_backlog/_archived/research/cockpit-ux-ui/README.md)）

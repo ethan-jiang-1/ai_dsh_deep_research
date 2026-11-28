@@ -9,15 +9,15 @@ intent: 剖析 M1–M7 之后仍存的六大结构性 UX/UI 瓶颈，映射 DSH 
 
 ### 1.1 仓库核心定位
 
-本仓（`ai_dsh_deep_research`）是运行在 DeepSeek Harness（DSH）之上的**可核查多角色深度研究系统**，唯一交付包为 [packages/deep-research-pack](../../../packages/deep-research-pack/AGENTS.md)：
+本仓（`ai_dsh_deep_research`）是运行在 DeepSeek Harness（DSH）之上的**可核查多角色深度研究系统**，唯一交付包为 [packages/deep-research-pack](../../../../packages/deep-research-pack/AGENTS.md)：
 
-- **核心公式**：`研究报告 = harness(run bundle)`（[docs/architecture.md](../../../docs/architecture.md)）。`harness` 只读无状态（4 个研究角色 `Lead / Scout / Analyst / Critic` + 第 5 角色 `Method Editor` + 2 个 worker profile，走 DSH Agent Teams + subagent 协作）；每次研究的全部过程与结论沉淀在用户工作区 `<workspace>/drt_<slug>/` 中。
+- **核心公式**：`研究报告 = harness(run bundle)`（[docs/architecture.md](../../../../docs/architecture.md)）。`harness` 只读无状态（4 个研究角色 `Lead / Scout / Analyst / Critic` + 第 5 角色 `Method Editor` + 2 个 worker profile，走 DSH Agent Teams + subagent 协作）；每次研究的全部过程与结论沉淀在用户工作区 `<workspace>/drt_<slug>/` 中。
 - **产品核心价值**：用户抛出一个复杂问题，经过 **HITL1（立项与研究契约确认）→ 多角色多视角（Topic × Lens）取证与交叉核查 → Critic 逐条 Claim 挑刺 → HITL2（审阅与定稿交付）**，拿到一份「每条关键结论都有出处可查、反证与未知边界诚实标注」的报告。
-- **驾驶舱（Research Cockpit）的职责**：因为深度研究耗时长、中间自主轮次多、且有两个关键的人机拍板点（HITL1/HITL2），用户在 DSH Web 界面里需要一个**“平时安心放手、瞄一眼知全局、拍板时信息齐备、交付后沉浸精读与溯源”**的界面层（[docs/contracts/client-ui.md](../../../docs/contracts/client-ui.md)）。
+- **驾驶舱（Research Cockpit）的职责**：因为深度研究耗时长、中间自主轮次多、且有两个关键的人机拍板点（HITL1/HITL2），用户在 DSH Web 界面里需要一个**“平时安心放手、瞄一眼知全局、拍板时信息齐备、交付后沉浸精读与溯源”**的界面层（[docs/contracts/client-ui.md](../../../../docs/contracts/client-ui.md)）。
 
 ### 1.2 为什么第一轮 UX/UI 升级（M1–M7）“还没有彻底解决问题”？
 
-2026-11-26 完成的第一轮升级（[2026-11-26-cockpit-ux-ui-native-upgrade](../../../notes/implemented/2026-11-26-cockpit-ux-ui-native-upgrade.md) 及后续三轮修补）本质上完成的是 **L0 设计系统合规与功能补齐**：
+2026-11-26 完成的第一轮升级（[2026-11-26-cockpit-ux-ui-native-upgrade](../../../../notes/implemented/2026-11-26-cockpit-ux-ui-native-upgrade.md) 及后续三轮修补）本质上完成的是 **L0 设计系统合规与功能补齐**：
 
 - **已解决的问题**：接入 `lightningcss` CSS Modules、消灭幽灵 `--dsh-*` 与硬编码颜色、建立 `client-tokens` 门禁、替换原生 `<select>` 为 `Menu`、新增 `ProtocolCard` / `QualityRadar` / `ClaimsAuditView` / `ResearchEvidenceTab` / `ResearchHeaderPill` / `ResearchMilestoneCard` / `ResearchHubPanel`。
 - **尚未解决的根本矛盾**：第一轮是在**原有的“工程师调试台”信息架构上做原位替换和区块叠加**——不仅没有做减法与心流重组，反而因为新加了契约卡、质量雷达、顶栏胶囊、里程碑卡、全局 Hub，导致**界面元素更密、入口重复、状态静态堆叠、会话与研究档案脱节**。同时，DSH 作为开发环境最精华的 **Host 会话投影、Lexical 结构化输入触发器（`/` 与 `@`）、富输出卡片（`SearchBlock`/`WebBlock`/`LinkIconMedium`）与行内引用芯片** 几乎仍是空白。
@@ -28,7 +28,7 @@ intent: 剖析 M1–M7 之后仍存的六大结构性 UX/UI 瓶颈，映射 DSH 
 
 ### 问题 1：首屏心智割裂——“说明书横幅叠在通用代码壳上”
 
-- **现状现场**（见 [docs/assets/readme-first-screen.png](../../../docs/assets/readme-first-screen.png) 与 [StartCard.tsx](../../../packages/deep-research-pack/src/client/StartCard.tsx)）：
+- **现状现场**（见 [docs/assets/readme-first-screen.png](../../../../docs/assets/readme-first-screen.png) 与 [StartCard.tsx](../../../../packages/deep-research-pack/src/client/StartCard.tsx)）：
   1. 中央 `EmptyHero` 标题仍是通用编程壳的 `Into the Unknown`，下方已经有 DSH 原生工作区选择器（`research-workspace`）和角色选择器（`Deep Research Lead`）；
   2. 紧接着 `conversation.input.dock` 里的 `StartCard` 又在输入框上方撑开一大块卡片：**再次重复显示当前工作区路径与「选择项目目录」按钮** + 三行操作说明书文案 + 4 个朴素框线按钮 + 两行凭据/目录小字提示；
   3. 右栏默认停留在 `Start` 引导页，竖排 5 张大号工具入口卡（状态 / 配置 / 图谱 / 文件 / 更多），而在尚未发消息的空白会话点开「研究状态」或「研究图谱」，看到的只是“尚未绑定 run”的空面板。
@@ -36,7 +36,7 @@ intent: 剖析 M1–M7 之后仍存的六大结构性 UX/UI 瓶颈，映射 DSH 
 
 ### 问题 2：右栏「研究状态」是 10 段静态垂直堆砌，缺乏阶段主次与可交互性
 
-- **现状现场**（[ResearchStatusTab.tsx](../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) + [status.module.css](../../../packages/deep-research-pack/src/client/research-status/status.module.css)）：
+- **现状现场**（[ResearchStatusTab.tsx](../../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx) + [status.module.css](../../../../packages/deep-research-pack/src/client/research-status/status.module.css)）：
   在 360px–440px 宽的右栏里，组件不区分当前处于「立项期 / 挖掘期 / 审阅期 / 已交付」，自上而下平铺了多达 **10 层区块**：
   1. 警告/流失败/停摆横幅；
   2. 常驻浅绿底色的 `briefCard`（五问文字块——即使还在立项或遇到警告也铺着 `state-success` 绿底，视觉语义冲突且与下方轨道/契约信息重复）；
@@ -44,7 +44,7 @@ intent: 剖析 M1–M7 之后仍存的六大结构性 UX/UI 瓶颈，映射 DSH 
   4. `ProtocolCard`（研究契约键值对）；
   5. `decisionsLine`（决策次数提示）；
   6. `evidenceBar`（裸文字 + 原生下划线 `<button>` 混排）；
-  7. `QualityRadar`（[QualityRadar.tsx](../../../packages/deep-research-pack/src/client/research-status/QualityRadar.tsx)：一张静态 HTML `<table>`，列头直接暴露窄列易挤爆的透镜名，单元格只写 `1 / 0 / ·`——**既不能点击 `0` 查看缺口说明，也不能点击数字筛选/打开对应证据卡**）；
+  7. `QualityRadar`（[QualityRadar.tsx](../../../../packages/deep-research-pack/src/client/research-status/QualityRadar.tsx)：一张静态 HTML `<table>`，列头直接暴露窄列易挤爆的透镜名，单元格只写 `1 / 0 / ·`——**既不能点击 `0` 查看缺口说明，也不能点击数字筛选/打开对应证据卡**）；
   8. 原生 `<details>` 折叠的「还不满意？三种改法」（与终稿底部 `FinalFollowupFooter` 完全重复）；
   9. `activityList`（所有历史动作挤在一个扁平列表，用 `🔍/👥/💬` emoji 硬拼，无阶段分组、无信源域名图标、不可点击跳转产物）；
   10. `membersSection`（队员折叠行，同样用 `🔍3 · 🌐2` emoji 拼接）。
@@ -52,7 +52,7 @@ intent: 剖析 M1–M7 之后仍存的六大结构性 UX/UI 瓶颈，映射 DSH 
 
 ### 问题 3：Session（左栏会话）与 Run Bundle（`drt_<slug>`）断联——全局工作台成了“半截子目录”
 
-- **现状现场**（[ResearchHubPanel.tsx](../../../packages/deep-research-pack/src/client/ResearchHubPanel.tsx) 与 [RunsView.tsx](../../../packages/deep-research-pack/src/client/research-hub/RunsView.tsx)）：
+- **现状现场**（[ResearchHubPanel.tsx](../../../../packages/deep-research-pack/src/client/ResearchHubPanel.tsx) 与 [RunsView.tsx](../../../../packages/deep-research-pack/src/client/research-hub/RunsView.tsx)）：
   1. **左栏会话列表无研究态感知**：左栏列出 10 条历史会话时，用户完全看不出哪条会话正在后台跑波次、哪条正卡在 `⏳ 等你拍板`、哪条已经 `✓ 已交付`。
   2. **Research Hub 的 `RunsView` 无法跳回所属会话**：
      - 对于 `in_progress`（进行中）的研究档案，`preferredFinalPathOf(run)` 为 `null`，卡片底部**没有任何主操作按钮**（只能点「复制路径」），用户无法从工作台一键切进那场正在跑的研究会话！
@@ -62,8 +62,8 @@ intent: 剖析 M1–M7 之后仍存的六大结构性 UX/UI 瓶颈，映射 DSH 
 
 - **现状现场**：用户想控制“这场研究怎么跑”，需要在 4 个位置来回找：
   1. 输入框左下角 `DefaultsButton`（只反映 `depth/output/source` + 默认方法名，点击跳右栏「研究配置」）；
-  2. 右栏 [ResearchConfigTab.tsx](../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx)（摆着 `DefaultsPanel` + 本次采用的方法 + 一块纯提示框叫用户去点顶部「方法库」tab；且文件内仍残留约 250 行 `COMPACT=false` 的 `LegacyManagementPane` / `detailModal` 不可达历史代码）；
-  3. 会话顶栏 `conversation.view` 的「方法库」tab（为了压住底部的聊天输入框，被迫在 [styles.ts](../../../packages/deep-research-pack/src/client/styles.ts) 注入 `html[data-dsh-deep-research] [data-conversation-scroll]:has([data-method-library-edit])...` 全局 CSS 隐藏补丁）；
+  2. 右栏 [ResearchConfigTab.tsx](../../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx)（摆着 `DefaultsPanel` + 本次采用的方法 + 一块纯提示框叫用户去点顶部「方法库」tab；且文件内仍残留约 250 行 `COMPACT=false` 的 `LegacyManagementPane` / `detailModal` 不可达历史代码）；
+  3. 会话顶栏 `conversation.view` 的「方法库」tab（为了压住底部的聊天输入框，被迫在 [styles.ts](../../../../packages/deep-research-pack/src/client/styles.ts) 注入 `html[data-dsh-deep-research] [data-conversation-scroll]:has([data-method-library-edit])...` 全局 CSS 隐藏补丁）；
   4. 左侧全局 `ResearchHubPanel` 里的「方法库」tab 与「研究透镜」tab（后者底部**又嵌了一遍** `DefaultsPanel`）。
 - **体验后果**：`Defaults`（默认参数）、`Method`（整场打法偏好）、`Lens`（单题取证视角）三者在后端契约上正交清晰，但在 UI 上缺乏统一的「开题前轻量选配 + 工作台集中管理」动线。
 
@@ -77,15 +77,15 @@ intent: 剖析 M1–M7 之后仍存的六大结构性 UX/UI 瓶颈，映射 DSH 
 
 ### 问题 6：对话流工具卡、里程碑卡、终稿阅读与图谱的精细度短板
 
-1. **工具卡展开是裸 JSON 参数截断**（[ResearchToolCard.tsx](../../../packages/deep-research-pack/src/client/ResearchToolCard.tsx)）：点击展开 `web_search` / `web_fetch` / `spawn_teammate` / `subagent` 时，直接 `<pre>{previewDetail.slice(0, 600)}</pre>` 吐出未格式化的原始 JSON 字符串，既不展示检索命中的网页列表/域名图标（DSH `ui-primitives` 现成有 `SearchBlock`、`WebBlock`、`LinkIconMedium`），也不支持从 `spawn_teammate` 工具卡一键点进该队员的子会话观察。
-2. **回合尾里程碑卡存在双语漏网与交付卡重复**（[ResearchMilestoneCard.tsx](../../../packages/deep-research-pack/src/client/ResearchMilestoneCard.tsx)）：
+1. **工具卡展开是裸 JSON 参数截断**（[ResearchToolCard.tsx](../../../../packages/deep-research-pack/src/client/ResearchToolCard.tsx)）：点击展开 `web_search` / `web_fetch` / `spawn_teammate` / `subagent` 时，直接 `<pre>{previewDetail.slice(0, 600)}</pre>` 吐出未格式化的原始 JSON 字符串，既不展示检索命中的网页列表/域名图标（DSH `ui-primitives` 现成有 `SearchBlock`、`WebBlock`、`LinkIconMedium`），也不支持从 `spawn_teammate` 工具卡一键点进该队员的子会话观察。
+2. **回合尾里程碑卡存在双语漏网与交付卡重复**（[ResearchMilestoneCard.tsx](../../../../packages/deep-research-pack/src/client/ResearchMilestoneCard.tsx)）：
    - `<Tag tone="outline">{m.kind}</Tag>` 直接把内部枚举字面量 `'protocol' | 'review' | 'delivered'` 裸渲染到中文界面；
    - 在交付回合，DSH 原生 `ui-deliverables` 已经在 `conversation.chat.turnTail` 渲染了精美的 `present` 交付文件卡，紧接着 `ResearchMilestoneCard` 又渲染一条「已交付研究报告」横条，视觉重复。
-3. **终稿精读缺少“悬停即看证据”与双栏导航协同**（[ResearchFinalTab.tsx](../../../packages/deep-research-pack/src/client/ResearchFinalTab.tsx)）：
+3. **终稿精读缺少“悬停即看证据”与双栏导航协同**（[ResearchFinalTab.tsx](../../../../packages/deep-research-pack/src/client/ResearchFinalTab.tsx)）：
    - 顶部同时存在 `.strip`（带旧文字切换链接 `看审计版 / 看读者版 / 过程`）与 `.controlsBar`（`SegmentedControl` `读者版 / 审计版 / 核查清单` + `分屏审阅`），**两栏职责重叠，吃掉宝贵的纵向阅读视口**；
    - 正文点击 `[来源: evidence/xx.md]` 虽能分屏打开 `ResearchEvidenceTab`，但**缺少悬停 `HoverCard`（配合 `HoverCardGroup`）轻量预览**：读者每核对一处引用都得触发分屏切换，缺乏“指哪看哪（显示信源等级 A/B、发布域名图标、核心摘录、一键打开原网页/固定分屏）”的丝滑感；
    - `ClaimsAuditView` 缺少按状态筛选（如一键只看 `部分支持 / 未核查 / 反证`），当报告有 20+ 条 claim 时难以快速聚焦风险点。
-4. **研究图谱可读性弱且存在英文硬编码残留**（[ResearchGraphTab.tsx](../../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) + [DagMap.tsx](../../../packages/deep-research-pack/src/client/research-graph/DagMap.tsx)）：
+4. **研究图谱可读性弱且存在英文硬编码残留**（[ResearchGraphTab.tsx](../../../../packages/deep-research-pack/src/client/ResearchGraphTab.tsx) + [DagMap.tsx](../../../../packages/deep-research-pack/src/client/research-graph/DagMap.tsx)）：
    - 头部硬编码了 `'top-level'`、`'nodes'`、`WAVE ${wave.level + 1}` 等未本地化文本；
    - `DagMap` 节点固定 `108×32px`，只画 `W1.1` + `broad-scan`（节点类型），完全看不出这个节点**在查什么子问题、由哪个角色负责**，且在右栏宽屏/全屏（`fullscreen`）模式下不会自适应舒展。
 
