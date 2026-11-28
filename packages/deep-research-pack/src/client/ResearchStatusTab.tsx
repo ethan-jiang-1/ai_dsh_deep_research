@@ -9,7 +9,7 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import {
   Button,
   DisclosureRow,
@@ -162,6 +162,8 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const activeMembers = members.filter((m) => m.phase === 'active')
   const runDir = face?.runDir ?? (trust.kind === 'bound' ? `drt_${trust.slug}` : null)
   const reviewDraftPath = face !== null && face.hasFinal && runDir !== null ? `${runDir}/final.md` : null
+  const showReviewFinal = focusPhase === 'hitl2' && reviewDraftPath !== null && props.sessionId !== undefined
+  const showOpenFinal = !showReviewFinal && delivery !== null && props.sessionId !== undefined
 
   return (
     <div
@@ -209,17 +211,7 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
             )}
           </div>
           <div className={css.focusCta}>
-            {delivery !== null && props.sessionId !== undefined && (
-              <Button
-                variant="primary"
-                size="sm"
-                data-testid="status-hero-open-final"
-                onClick={() => { props.openFinal(props.sessionId as NonNullable<typeof props.sessionId>, delivery.path) }}
-              >
-                {props.t('statusOpenFinal')}
-              </Button>
-            )}
-            {delivery === null && focusPhase === 'hitl2' && reviewDraftPath !== null && props.sessionId !== undefined && (
+            {showReviewFinal && (
               <Button
                 variant="primary"
                 size="sm"
@@ -227,6 +219,16 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
                 onClick={() => { props.openFinal(props.sessionId as NonNullable<typeof props.sessionId>, reviewDraftPath) }}
               >
                 {props.t('statusReviewFinal')}
+              </Button>
+            )}
+            {showOpenFinal && (
+              <Button
+                variant="primary"
+                size="sm"
+                data-testid="status-hero-open-final"
+                onClick={() => { props.openFinal(props.sessionId as NonNullable<typeof props.sessionId>, delivery.path) }}
+              >
+                {props.t('statusOpenFinal')}
               </Button>
             )}
           </div>
@@ -370,34 +372,31 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
                   title={m.name}
                   collapsedContent={(
                     <span className={css.memberCounters}>
-                      <TextShimmer active={running}>
-                        <span className={css.memberCounterGroup}>
-                          <span className={css.memberCounter}><IconSearchOutlineRegular size={11} />{searchCount}</span>
-                          <span className={css.memberCounter}><IconGlobeOutlineRegular size={11} />{fetchCount}</span>
-                          {errorCount > 0 && (
-                            <span className={`${css.memberCounter} ${css.memberCounterWarn}`}>
-                              <IconWarningOutlineRegular size={11} />{errorCount}
-                            </span>
-                          )}
-                        </span>
-                      </TextShimmer>
-                      {props.sessionId !== undefined && props.openMember !== undefined && (
-                        <button
-                          type="button"
-                          className={css.memberJumpBtn}
-                          data-testid="status-open-member"
-                          title={props.t('statusOpenMemberSession', { name: m.name })}
-                          aria-label={props.t('statusOpenMemberSession', { name: m.name })}
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            props.openMember?.(props.sessionId as NonNullable<typeof props.sessionId>, m.id)
-                          }}
-                        >
-                          <IconRightUpOutlineRegular size={12} />
-                        </button>
-                      )}
+                      <span className={css.memberCounterGroup}>
+                        <span className={css.memberCounter}><IconSearchOutlineRegular size={11} />{searchCount}</span>
+                        <span className={css.memberCounter}><IconGlobeOutlineRegular size={11} />{fetchCount}</span>
+                        {errorCount > 0 && (
+                          <span className={`${css.memberCounter} ${css.memberCounterWarn}`}>
+                            <IconWarningOutlineRegular size={11} />{errorCount}
+                          </span>
+                        )}
+                      </span>
                     </span>
                   )}
+                  headerAccessory={props.sessionId !== undefined && props.openMember !== undefined ? (
+                    <button
+                      type="button"
+                      className={css.memberJumpBtn}
+                      data-testid="status-open-member"
+                      title={props.t('statusOpenMemberSession', { name: m.name })}
+                      aria-label={props.t('statusOpenMemberSession', { name: m.name })}
+                      onClick={() => {
+                        props.openMember?.(props.sessionId as NonNullable<typeof props.sessionId>, m.id)
+                      }}
+                    >
+                      <IconRightUpOutlineRegular size={12} />
+                    </button>
+                  ) : undefined}
                   keepContentWhenOpen
                   open={isOpen}
                   expandable
@@ -425,10 +424,13 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
 }
 
 /** 活标题（HITL 挂起时"研究状态 · ⏳ 等你拍板"）——共享 journal 流折算。 */
-export function ResearchStatusTitle(props: PropsRuntime<'sidebar.right.pane.tab.title'> & ResearchStatusTitleInjected): ReactNode {
+export function ResearchStatusTitle(
+  props: PropsRuntime<'sidebar.right.pane.tab.title'> & Partial<PropsLocale<'deepResearchPack'>> & ResearchStatusTitleInjected,
+): ReactNode {
   const [hitl, setHitl] = useState<HitlState>({ pending: false, since: undefined })
   const { sessionId, follow } = props
   useEffect(() => {
+    setHitl({ pending: false, since: undefined })
     if (sessionId === undefined) return
     const controller = new AbortController()
     void (async () => {
@@ -443,7 +445,9 @@ export function ResearchStatusTitle(props: PropsRuntime<'sidebar.right.pane.tab.
     })()
     return () => { controller.abort() }
   }, [sessionId, follow])
+  const idleLabel = props.t !== undefined ? props.t('tabStatus') : (props.labels?.idle ?? '')
+  const pendingLabel = props.t !== undefined ? props.t('tabStatusPending') : (props.labels?.pending ?? '')
   return hitl.pending
-    ? <span className={css.tabTitlePending}>{props.labels.pending}</span>
-    : props.labels.idle
+    ? <span className={css.tabTitlePending}>{pendingLabel}</span>
+    : idleLabel
 }

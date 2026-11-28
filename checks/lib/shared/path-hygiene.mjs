@@ -8,6 +8,21 @@ import { realpathSync } from 'node:fs'
 import { basename, isAbsolute, resolve, sep } from 'node:path'
 
 const HOME_PATH = /(?:^|[\s"'(（:：])(?:\/Users\/|\/home\/|[A-Za-z]:\\Users\\)/
+const EVIDENCE_FILE_RE = /(?:^|\/)evidence\/[^/]+\.md$/
+
+/**
+ * 对 `evidence/*.md` 屏蔽 `## 原文摘录` 节内的 `>` 外部引文行（保留行号，不改变非引文行），
+ * 解除与 evidence-audit 逐字摘录契约的 Catch-22（BUG-483）；frontmatter / 解读节 / 其它文件全量保留。
+ */
+export function stripEvidenceVerbatimQuotes(filePath, text) {
+  const raw = String(text ?? '')
+  if (!EVIDENCE_FILE_RE.test(String(filePath ?? '').replace(/\\/g, '/'))) return raw
+  let inQuoteSec = false
+  return raw.split('\n').map((line) => {
+    if (/^##\s/.test(line)) { inQuoteSec = /^##\s*原文摘录/.test(line); return line }
+    return inQuoteSec && /^\s*>/.test(line) ? '' : line
+  }).join('\n')
+}
 
 /** 返回 [{ line, text }]；行号 1-based。 */
 export function findHomePaths(text) {
@@ -16,9 +31,9 @@ export function findHomePaths(text) {
   ))
 }
 
-/** 扫描 { path, text } 列表，返回带路径的 findings。 */
+/** 扫描 { path, text } 列表，返回带路径的 findings（豁免 evidence/*.md `## 原文摘录` 外部引文行）。 */
 export function scanHomePaths(entries) {
-  return entries.flatMap(({ path, text }) => findHomePaths(text).map((finding) => ({ path, ...finding })))
+  return entries.flatMap(({ path, text }) => findHomePaths(stripEvidenceVerbatimQuotes(path, text)).map((finding) => ({ path, ...finding })))
 }
 
 /**

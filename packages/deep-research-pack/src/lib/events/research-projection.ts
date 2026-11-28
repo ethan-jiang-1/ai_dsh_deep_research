@@ -7,7 +7,7 @@
  * Browser 侧 `useSessions` 经 `selectSessionResearchProjection` 直接读取，零 N+1 follow 风暴。
  */
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { argsObjectOf } from './journal-wire.ts'
+import { argsObjectOf, TOOL_PATH_FIELDS, WRITE_TOOLS } from './journal-wire.ts'
 
 export const RESEARCH_RUN_PROJECTION_KEY = 'researchRun' as const
 
@@ -45,8 +45,7 @@ declare module '@deepseek-ai/dsh-session-projection/types' {
   }
 }
 
-const WRITE_TOOLS = new Set(['write', 'edit', 'multiedit'])
-const PATH_FIELDS = ['file_path', 'path', 'paths', 'filePath', 'file'] as const
+const PATH_FIELDS = TOOL_PATH_FIELDS
 const RUN_SLUG_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/
 const TIMED_PENDING_RE = /"pending"\s*:\s*true/
 const FINAL_FAMILY_RELATIVE_RE = /^(?:archive\/|_abandoned\/)?drt_[\w.-]+\/(?:final\.md|final\/(?:v[1-9]\d{0,5}\.md|readable(?:-v[1-9]\d{0,5})?\.md))$/
@@ -229,16 +228,20 @@ export function applyResearchRunEvent(
     const writeSlug = slug !== null && WRITE_TOOLS.has(name) ? slug : state.writeSlug
     const readSlug = slug !== null && !WRITE_TOOLS.has(name) && state.writeSlug === null ? slug : state.readSlug
     const kickoffSeen = state.kickoffSeen || kickoffAdd
+    const switchedWriteSlug = writeSlug !== null && writeSlug !== state.writeSlug
+    const deliveredPath = switchedWriteSlug ? null : state.deliveredPath
     if (
       writeSlug === state.writeSlug
       && readSlug === state.readSlug
       && kickoffSeen === state.kickoffSeen
+      && deliveredPath === state.deliveredPath
     ) return state
     return {
       ...state,
       writeSlug,
       readSlug,
       kickoffSeen,
+      deliveredPath,
       updatedAt: ts,
     }
   }

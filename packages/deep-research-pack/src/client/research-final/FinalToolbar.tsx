@@ -24,6 +24,7 @@ export interface FinalToolbarProps {
   readonly stateWarn: boolean
   readonly draftToggleLabel: string | null
   readonly isFullscreen: boolean
+  readonly showTocToggle?: boolean
   readonly onChangeView: (next: 'reader' | 'audit' | 'draft' | 'claims') => void
   readonly onToggleDraft: () => void
   readonly onToggleToc: () => void
@@ -36,9 +37,10 @@ export interface FinalToolbarProps {
 export function FinalToolbar(props: FinalToolbarProps): ReactNode {
   const {
     displayedPath, view, showingReader, hasReader, hasAudit, claimsCount,
-    stateText, stateWarn, draftToggleLabel, isFullscreen,
+    stateText, stateWarn, draftToggleLabel, isFullscreen, showTocToggle,
     onChangeView, onToggleDraft, onToggleToc, onOpenSplitStatus, onOpenProcess, onToggleFullscreen, t,
   } = props
+  const tocToggleVisible = showTocToggle ?? (!isFullscreen && view !== 'claims')
   return (
     <div className={css.toolbar} title={displayedPath} data-testid="final-toolbar">
       <div className={css.segmentedWrap}>
@@ -67,7 +69,7 @@ export function FinalToolbar(props: FinalToolbarProps): ReactNode {
         </button>
       )}
       <span className={css.stripSpacer} />
-      {!isFullscreen && view !== 'claims' && (
+      {tocToggleVisible && (
         <Tooltip label={t('finalTocToggle')} side="bottom">
           <Button
             variant="ghost"

@@ -38,3 +38,35 @@ test('reduceGraphFeed：绑定重试 / plan 失败与未绑定复位 / 快照五
   const retried = reduceGraphFeed(state, { kind: 'plan-retry' })
   assert.equal(retried.retryTick, state.retryTick + 1)
 })
+
+// 负例留证 2026-11-28：BUG-478——plan-missing / plan-truncated / plan-error 未收口 graphView 与
+// showSnapshotPlan 导致界面陷入 vnull 死锁，且缺 reset-session 导致切会话沿用耗尽的 followAttempt。
+// 红配方：去掉这三个分支对 graphView/showSnapshotPlan 的清零或删除 reset-session → 本例红。
+test('BUG-478：plan 异常分支自动复位 diff/旧图视图，reset-session 清零 followAttempt', () => {
+  let base = reduceGraphFeed(INITIAL_GRAPH_FEED_STATE, { kind: 'bind-slug', slug: 'alpha' })
+  base = reduceGraphFeed(base, { kind: 'follow-retry' })
+  base = reduceGraphFeed(base, { kind: 'follow-retry' })
+  base = reduceGraphFeed(base, { kind: 'follow-retry' })
+  base = reduceGraphFeed(base, { kind: 'set-graph-view', value: 'diff' })
+  base = reduceGraphFeed(base, { kind: 'set-show-snapshot', value: true })
+  base = reduceGraphFeed(base, { kind: 'snapshot-loading' })
+  assert.equal(base.followAttempt, 3)
+
+  for (const action of [
+    { kind: 'plan-missing' },
+    { kind: 'plan-truncated', loadedAt: 456 },
+    { kind: 'plan-error' },
+  ]) {
+    const next = reduceGraphFeed(base, action)
+    assert.equal(next.graphView, 'current', `${action.kind} 必须退回 current 视图防 vnull 死锁`)
+    assert.equal(next.showSnapshotPlan, false, `${action.kind} 必须关闭旧图快照面板`)
+    assert.equal(next.snapshotState, 'idle', `${action.kind} 必须重置 snapshotState`)
+    assert.equal(next.snapshotPlan, null)
+  }
+
+  const reset = reduceGraphFeed(base, { kind: 'reset-session' })
+  assert.equal(reset.followAttempt, 0, 'reset-session 必须清零 followAttempt')
+  assert.equal(reset.graphView, 'current')
+  assert.equal(reset.showSnapshotPlan, false)
+  assert.equal(reset.boundSlug, null)
+})

@@ -66,3 +66,93 @@ test('BUG-418 错误详情不带 `Error: ` 前缀（errorDetailOf 收口）', as
     rtl.cleanup()
   }
 })
+
+// 负例留证 2026-11-28：BUG-480——startInterview 在 { ok: false, uncertain: true } 或 reject 时错误置
+// started=true 永久锁死「访谈已开始」按钮，无法重试。
+// 红配方：把 setStarted 改回 `result.ok || result.uncertain === true` 或在 catch 里 `setStarted(true)`。
+test('BUG-480 startInterview 返回 { ok: false, uncertain: true } 或 reject 时保持未开始态且按钮可重试', async () => {
+  const rtl = await loadRtl()
+  let attempt = 0
+  const { container } = rtl.render(createElement(MethodCoachPanel, baseProps({
+    ensure: async () => ({ id: 'coach-retry', reference: reference() }),
+    onStartInterview: async () => {
+      attempt += 1
+      if (attempt === 1) return { ok: false, detail: 'transient timeout', uncertain: true }
+      if (attempt === 2) throw new Error('network offline')
+      return { ok: true }
+    },
+  })))
+  try {
+    await rtl.waitFor(() => {
+      if (container.querySelector('[data-method-coach-start]') === null) throw new Error('wait btn')
+    })
+    const startBtn = () => container.querySelector('[data-method-coach-start]')
+
+    rtl.fireEvent.click(startBtn())
+    await rtl.waitFor(() => {
+      if (!(container.textContent ?? '').includes('transient timeout')) throw new Error('wait err 1')
+    })
+    assert.equal(startBtn().disabled, false, 'uncertain 失败后按钮不得锁死')
+    assert.equal(startBtn().textContent, zh.startInterview, 'uncertain 失败后仍应显示「开始访谈」')
+    assert.doesNotMatch(container.textContent ?? '', new RegExp(zh.operationUnknown.slice(0, 8)), '访谈失败不得显示写盘 operationUnknown')
+
+    rtl.fireEvent.click(startBtn())
+    await rtl.waitFor(() => {
+      if (!(container.textContent ?? '').includes('network offline')) throw new Error('wait err 2')
+    })
+    assert.equal(startBtn().disabled, false, 'reject 后按钮不得锁死')
+    assert.equal(startBtn().textContent, zh.startInterview)
+    assert.doesNotMatch(container.textContent ?? '', /Error: network offline/)
+
+    rtl.fireEvent.click(startBtn())
+    await rtl.waitFor(() => {
+      if (startBtn().textContent !== zh.interviewStarted) throw new Error('wait started')
+    })
+    assert.equal(startBtn().disabled, true, '仅 result.ok === true 后才置 started')
+  } finally {
+    rtl.cleanup()
+  }
+})
+
+// 负例留证 2026-11-28：BUG-481——MethodCoachPanel 滚底 MutationObserver 仅在挂载时查一次
+// [data-conversation-scroll]，Portal 异步传送节点后永不挂载监听、对话流永不自动滚底。
+// 红配方：去掉 host 的 MutationObserver 仅保留单次 querySelector。
+test('BUG-481 MethodCoachPanel：Portal 异步插入 [data-conversation-scroll] 后自动挂滚底并跟随新内容', async () => {
+  const rtl = await loadRtl()
+  const { container } = rtl.render(createElement(MethodCoachPanel, baseProps({
+    ensure: async () => ({ id: 'coach-scroll', reference: reference() }),
+  })))
+  try {
+    await rtl.waitFor(() => {
+      if (container.querySelector('[data-method-coach-start]') === null) throw new Error('wait coach')
+    })
+    const host = container.querySelector('[data-method-coach-host]')
+    assert.ok(host !== null)
+
+    // 模拟 Portal 在组件首帧之后异步传送滚动容器。
+    const scrollEl = document.createElement('div')
+    scrollEl.setAttribute('data-conversation-scroll', '')
+    let currentHeight = 420
+    Object.defineProperty(scrollEl, 'scrollHeight', { configurable: true, get: () => currentHeight })
+    Object.defineProperty(scrollEl, 'clientHeight', { configurable: true, get: () => 120 })
+    scrollEl.scrollTop = 0
+    host.appendChild(scrollEl)
+
+    await rtl.waitFor(() => {
+      if (scrollEl.scrollTop !== 420) throw new Error(`expected scrollTop=420, got ${scrollEl.scrollTop}`)
+    })
+    assert.equal(scrollEl.scrollTop, 420, 'Portal 异步插入滚动容器后应立刻滚到底部')
+
+    // 模拟新消息到来：内容变更且 scrollHeight 增长，应继续自动贴底。
+    currentHeight = 680
+    const msg = document.createElement('p')
+    msg.textContent = 'new coach turn'
+    scrollEl.appendChild(msg)
+    await rtl.waitFor(() => {
+      if (scrollEl.scrollTop !== 680) throw new Error(`expected scrollTop=680, got ${scrollEl.scrollTop}`)
+    })
+    assert.equal(scrollEl.scrollTop, 680, '新消息追加后应自动滚到底部')
+  } finally {
+    rtl.cleanup()
+  }
+})

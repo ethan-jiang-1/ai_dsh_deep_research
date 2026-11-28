@@ -11,7 +11,12 @@ import { Button, StateDot, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { InputActions } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import { countWorkspaceRuns, shouldShowStartCard } from '../lib/workspace/start-card.ts'
+import {
+  countWorkspaceRuns,
+  isSessionBlankForStartCard,
+  shouldShowStartCard,
+  type StartCardSessionFacts,
+} from '../lib/workspace/start-card.ts'
 import { errorDetailOf } from '../lib/shared/error-detail.ts'
 import {
   selectSessionResearchProjection,
@@ -20,6 +25,16 @@ import {
 } from '../lib/events/research-projection.ts'
 import { RESEARCH_TOOL_KEYS } from './keys.ts'
 import css from './StartCard.module.css'
+
+/** `conversation.input.dock` 运行时由 DSH 注入的 SessionSnapshot 子集。 */
+interface StartCardSessionSnapshotLike {
+  readonly blank: boolean
+  readonly promptAttempted: boolean
+  readonly running: boolean
+  readonly openState?: 'cold' | 'loading' | 'open' | 'error'
+  readonly pendingSubmissions?: readonly unknown[]
+  readonly subagent?: unknown
+}
 
 /** 注入面：会话身份、当前工作区、只读文件列表与一次性消息探测。 */
 export interface StartCardInjected {
@@ -52,10 +67,20 @@ interface RecentRunItem {
   readonly projection: ResearchRunProjection
 }
 
-function fillComposerDraft(actions: InputActions | undefined, text: string): void {
+function fillComposerDraft(
+  actions: InputActions | undefined,
+  text: string,
+  lastTemplateRef: { current: string | null },
+): void {
   if (actions === undefined) return
+  if (lastTemplateRef.current !== null) {
+    actions.setDraft(text)
+    lastTemplateRef.current = text
+    return
+  }
   const span = actions.captureInsertion()
   if (!actions.insertText(text, span)) actions.setDraft(text)
+  lastTemplateRef.current = text
 }
 
 function normalizePath(path: string | null | undefined): string | null {
@@ -77,8 +102,25 @@ const EMPTY_SESSIONS_SNAPSHOT: ResearchSessionsSnapshotLike = {
   projectionsBySession: {},
 }
 
+const EMPTY_ACTIVE_TARGETS: ReadonlySet<string> = new Set()
+
 function useEmptySessions<T>(selector: (state: ResearchSessionsSnapshotLike) => T): T {
   return selector(EMPTY_SESSIONS_SNAPSHOT)
+}
+
+function useEmptyConversation<T>(selector: (state: { readonly activeTargets: ReadonlySet<string> }) => T): T {
+  return selector({ activeTargets: EMPTY_ACTIVE_TARGETS })
+}
+
+function useAbsentSession<T>(selector: (state: StartCardSessionSnapshotLike | undefined) => T): T {
+  return selector(undefined)
+}
+
+interface StartCardProbeState {
+  readonly sessionId: SessionId
+  readonly status: 'loading' | 'ready'
+  readonly hasUserMessage: boolean
+  readonly diskRunCount: number
 }
 
 /**
@@ -91,22 +133,70 @@ export function StartCard(props: StartCardProps): ReactElement | null {
     openSession, openSessionFinal, openHub, t,
   } = props
   const inputActions = (props as { inputActions?: InputActions }).inputActions
+  const propSession = (props as { readonly session?: StartCardSessionSnapshotLike }).session
+  const useSessionHook = (props as {
+    readonly useSession?: <T>(selector: (state: StartCardSessionSnapshotLike | undefined) => T) => T
+  }).useSession ?? useAbsentSession
+  const liveSession = useSessionHook((state) => state) ?? propSession
+  const useConversationHook = (props as {
+    readonly useConversation?: <T>(selector: (state: { readonly activeTargets: ReadonlySet<string> }) => T) => T
+  }).useConversation ?? useEmptyConversation
+  const hasActiveConversationTarget = useConversationHook((state) => state.activeTargets.size > 0)
   const useSessionsHook = (props as {
     useSessions?: <T>(selector: (state: ResearchSessionsSnapshotLike) => T) => T
   }).useSessions ?? useEmptySessions
   const sessionsSnap = useSessionsHook((state) => state)
-  const [visible, setVisible] = useState<'loading' | 'show' | 'hide'>('loading')
-  const [diskRunCount, setDiskRunCount] = useState(0)
+
+  const currentSessionRow = sessionsSnap.byId[sessionId] as { readonly blank?: boolean } | undefined
+  const summaryBlank = typeof currentSessionRow?.blank === 'boolean' ? currentSessionRow.blank : undefined
+  const currentProjection = selectSessionResearchProjection(sessionsSnap, sessionId)
+  const hasResearchRunActivity = currentProjection !== null && currentProjection.phase !== 'idle'
+
+  const sessionFacts: StartCardSessionFacts | undefined = liveSession !== undefined
+    ? {
+        blank: liveSession.blank,
+        promptAttempted: liveSession.promptAttempted,
+        running: liveSession.running,
+        ...(liveSession.openState === undefined ? {} : { openState: liveSession.openState }),
+        pendingSubmissionCount: liveSession.pendingSubmissions?.length ?? 0,
+        hasActiveConversationTarget,
+        isSubagent: liveSession.subagent !== null && liveSession.subagent !== undefined,
+        ...(summaryBlank === undefined ? {} : { summaryBlank }),
+        hasResearchRunActivity,
+      }
+    : (hasActiveConversationTarget || summaryBlank === false || hasResearchRunActivity)
+      ? {
+          blank: summaryBlank !== false,
+          promptAttempted: false,
+          running: false,
+          hasActiveConversationTarget,
+          ...(summaryBlank === undefined ? {} : { summaryBlank }),
+          hasResearchRunActivity,
+        }
+      : undefined
+
+  // DSH 原生会话/对话态已证明非空白（含同会话点击发送的首帧）→ 同步收起，且不再发起无谓探测。
+  const liveAllowed = sessionFacts === undefined || isSessionBlankForStartCard(sessionFacts)
+
+  const [probe, setProbe] = useState<StartCardProbeState>({
+    sessionId,
+    status: 'loading',
+    hasUserMessage: false,
+    diskRunCount: 0,
+  })
   const [choosing, setChoosing] = useState(false)
   const [chooseError, setChooseError] = useState<string | null>(null)
   /** 目录选择请求代次：切会话/重复点击后，旧 promise 的结算不得改写当前 UI（BUG-409）。 */
   const chooseTokenRef = useRef(0)
+  const lastTemplateRef = useRef<string | null>(null)
   useEffect(() => {
     chooseTokenRef.current += 1
+    lastTemplateRef.current = null
     setChoosing(false)
     setChooseError(null)
   }, [sessionId])
   useEffect(() => {
+    if (!liveAllowed) return
     const controller = new AbortController()
     let cancelled = false
     void (async () => {
@@ -115,13 +205,21 @@ export function StartCard(props: StartCardProps): ReactElement | null {
         // workspaceFiles.list 拒绝空路径（gateway/bad-request）；`''` = 工作区根，映射成 `.`。
         const entries = userMessage ? [] : await listDir(sessionId, '.', controller.signal)
         if (cancelled) return
-        setDiskRunCount(countWorkspaceRuns(entries))
-        setVisible(shouldShowStartCard({ hasUserMessage: userMessage, entries }) ? 'show' : 'hide')
+        setProbe({
+          sessionId,
+          status: 'ready',
+          hasUserMessage: userMessage,
+          diskRunCount: countWorkspaceRuns(entries),
+        })
       } catch {
         /* @silent-catch: workspace/session unreachable is not a start-card blocker */
         if (!cancelled) {
-          setDiskRunCount(0)
-          setVisible('show')
+          setProbe({
+            sessionId,
+            status: 'ready',
+            hasUserMessage: false,
+            diskRunCount: 0,
+          })
         }
       }
     })()
@@ -129,7 +227,7 @@ export function StartCard(props: StartCardProps): ReactElement | null {
       cancelled = true
       controller.abort()
     }
-  }, [sessionId, listDir, hasUserMessage])
+  }, [sessionId, liveAllowed, listDir, hasUserMessage])
 
   const recentRuns: readonly RecentRunItem[] = useMemo(() => {
     if (sessionsSnap === null) return []
@@ -163,7 +261,16 @@ export function StartCard(props: StartCardProps): ReactElement | null {
     return items.slice(0, 2)
   }, [sessionsSnap, sessionId, workspacePath])
 
-  if (visible !== 'show') return null
+  const currentProbe = probe.sessionId === sessionId ? probe : null
+  const isVisible = liveAllowed
+    && currentProbe !== null
+    && currentProbe.status === 'ready'
+    && shouldShowStartCard({
+      hasUserMessage: currentProbe.hasUserMessage,
+      ...(sessionFacts === undefined ? {} : { session: sessionFacts }),
+    })
+  if (!isVisible) return null
+  const diskRunCount = currentProbe.diskRunCount
   const hasValidWorkspace = normalizePath(workspacePath) !== null
 
   return (
@@ -210,7 +317,7 @@ export function StartCard(props: StartCardProps): ReactElement | null {
               className={css.intentCard}
               data-testid={`deep-research-start-template-${tpl.id}`}
               disabled={inputActions === undefined}
-              onClick={() => fillComposerDraft(inputActions, promptText)}
+              onClick={() => fillComposerDraft(inputActions, promptText, lastTemplateRef)}
             >
               <div className={css.intentTop}>
                 <span className={css.intentTitle}>{t(tpl.titleKey)}</span>

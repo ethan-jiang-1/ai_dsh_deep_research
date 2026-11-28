@@ -29,6 +29,33 @@ test('有用户消息 → 收起（无论工作区是否已有 run）', () => {
   assert.equal(shouldShowStartCard({ hasUserMessage: true, entries: [{ name: 'drt_x' }] }), false)
 })
 
+test('DSH 原生会话态：同一会话首条发送/运行中/已有活跃目标/非空白/子会话/研究进行中均立刻收起', () => {
+  const blankSession = {
+    blank: true,
+    promptAttempted: false,
+    running: false,
+    openState: 'open',
+    pendingSubmissionCount: 0,
+    hasActiveConversationTarget: false,
+    isSubagent: false,
+  }
+  assert.equal(shouldShowStartCard({ hasUserMessage: false, session: blankSession }), true)
+  // 首帧点击发送：promptAttempted 同步翻 true，即便 blank 尚未落盘也必须立刻收起
+  assert.equal(shouldShowStartCard({ hasUserMessage: false, session: { ...blankSession, promptAttempted: true } }), false)
+  assert.equal(shouldShowStartCard({ hasUserMessage: false, session: { ...blankSession, pendingSubmissionCount: 1 } }), false)
+  // 对话已启动/运行中/有历史
+  assert.equal(shouldShowStartCard({ hasUserMessage: false, session: { ...blankSession, running: true } }), false)
+  assert.equal(shouldShowStartCard({ hasUserMessage: false, session: { ...blankSession, blank: false } }), false)
+  assert.equal(shouldShowStartCard({ hasUserMessage: false, session: { ...blankSession, hasActiveConversationTarget: true } }), false)
+  assert.equal(shouldShowStartCard({ hasUserMessage: false, session: { ...blankSession, summaryBlank: false } }), false)
+  assert.equal(shouldShowStartCard({ hasUserMessage: false, session: { ...blankSession, hasResearchRunActivity: true } }), false)
+  assert.equal(shouldShowStartCard({ hasUserMessage: false, session: { ...blankSession, isSubagent: true } }), false)
+  // 历史回放未决态（settling）：openState=loading 且 summaryBlank 非 true 时不得闪现
+  assert.equal(shouldShowStartCard({ hasUserMessage: false, session: { ...blankSession, openState: 'loading' } }), false)
+  // 列表摘要已证明空白：loading 期间免闪烁直接显示
+  assert.equal(shouldShowStartCard({ hasUserMessage: false, session: { ...blankSession, openState: 'loading', summaryBlank: true } }), true)
+})
+
 test('countWorkspaceRuns 只计 drt_ 前缀（不误伤 drafts / drtish.md）', () => {
   assert.equal(countWorkspaceRuns([{ name: 'drafts' }, { name: 'drtish.md' }]), 0)
   assert.equal(countWorkspaceRuns([{ name: 'drt_a' }, { name: 'AGENTS.md' }, { name: 'drt_b' }]), 2)

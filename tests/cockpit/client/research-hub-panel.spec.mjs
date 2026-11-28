@@ -254,7 +254,13 @@ test('BUG-459 ResearchHubPanel：点击归档「打开终稿」先回对话再�
     fileURLToPath(new URL('../../../packages/deep-research-pack/src/client/index.ts', import.meta.url)),
     'utf8',
   )
-  assert.match(indexSrc, /openResourceWhenMounted\(/, 'index.ts openFinal 必须通过 openResourceWhenMounted 等待挂载并展开右栏')
+  const navSrc = readFileSync(
+    fileURLToPath(new URL('../../../packages/deep-research-pack/src/client/rightbar-nav.ts', import.meta.url)),
+    'utf8',
+  )
+  assert.match(indexSrc, /createRightbarNav\(/, 'index.ts 必须通过 createRightbarNav 装配右栏导航闭包')
+  assert.match(navSrc, /openResourceWhenMounted\(/, 'rightbar-nav.ts openFinal 必须通过 openResourceWhenMounted 等待挂载并展开右栏')
+  assert.match(navSrc, /expectedSessionId/, 'rightbar-nav.ts 跨会话打开必须校验 expectedSessionId 防止串台')
 
   const run = makeMaliciousRunSource({
     tree: {
@@ -336,5 +342,88 @@ test('BUG-461 RunsView：剪贴板被拒或缺失时不得假绿显示「已复�
   } finally {
     if (origClipboard !== undefined) Object.defineProperty(navigator, 'clipboard', origClipboard)
     else delete navigator.clipboard
+  }
+})
+
+// 负例留证 2026-11-28：BUG-480——在方法库有未保存草稿或正在保存时，点击 Hub 其他页签或「返回对话」直接卸载
+// MethodLibraryView，完全绕过 confirmDiscard 与 pendingOperationRef。
+// 红配方：去掉 ResearchHubPanel 的 registerLeaveGuard 检查与拦截。
+test('BUG-480 ResearchHubPanel：方法库有未保存草稿时切页签/返回对话须经确认，保存中时拦截并提示 hubMethodSavingBlocked', async () => {
+  const LIB = '## Alpha（2026-11-28，用户）\n- 找来源: a\n- 怎么核实: b\n- 报告怎么写: c\n- 不承诺: d\n'
+  let holdSave = null
+  let backCount = 0
+  const run = makeMaliciousRunSource({ tree: {} })
+  const methodLibrary = {
+    readLibrary: async () => ({ kind: 'ok', text: LIB, path: 'method-library.md' }),
+    ensureCoach: async () => ({ id: 'coach-hub-480', reference: { ready: Promise.resolve(), release: () => {} } }),
+    sendCoach: async () => await new Promise((resolve) => { holdSave = resolve }),
+    watchCoach: async (_id, signal, _onEvent, onReady) => {
+      onReady()
+      await new Promise((resolve) => signal.addEventListener('abort', resolve, { once: true }))
+    },
+    listDir: async () => [],
+    readPreview: async () => ({ kind: 'absent', path: '' }),
+  }
+  const origConfirm = window.confirm
+  const confirmCalls = []
+  let confirmAnswer = false
+  window.confirm = (msg) => { confirmCalls.push(msg); return confirmAnswer }
+  try {
+    const panel = render(createElement(ResearchHubPanel, {
+      t: tZh,
+      useSessions: ONE_SESSION,
+      runSource: () => run.source,
+      methodLibrary,
+      openFinal: () => {},
+      backToChat: () => { backCount += 1 },
+      startResearch: () => {},
+    }))
+    await flushUi(act)
+
+    // 切到方法库 -> 新建 -> 从零开始 -> 检查表单 -> 填名称产生未保存草稿
+    fireEvent.click(panel.getByRole('tab', { name: zh.hubTabMethods }))
+    await flushUi(act)
+    fireEvent.click(panel.container.querySelector('[data-method-new]'))
+    await flushUi(act)
+    fireEvent.click(panel.getByRole('button', { name: zh.startFromScratch }))
+    await flushUi(act)
+    fireEvent.click(panel.getByRole('tab', { name: zh.formCheck }))
+    await flushUi(act)
+    fireEvent.change(panel.container.querySelector('[data-field="name"] input'), { target: { value: 'UnsavedDraft' } })
+    await flushUi(act)
+
+    // 用户取消确认 -> 留在本页签，不触发 backToChat
+    confirmAnswer = false
+    fireEvent.click(panel.getByRole('tab', { name: zh.hubTabRuns }))
+    assert.equal(confirmCalls.length, 1, '脏草稿切页签必须触发 window.confirm')
+    assert.equal(confirmCalls[0], zh.discardUnsaved)
+    assert.ok(panel.container.querySelector('#hub-panel-methods') !== null, '拒绝放弃草稿时必须留在方法库页签')
+
+    fireEvent.click(panel.getByText(zh.hubBackToChat))
+    assert.equal(confirmCalls.length, 2, '脏草稿点击返回对话必须触发 window.confirm')
+    assert.equal(backCount, 0, '拒绝放弃草稿时不得调用 backToChat')
+
+    // 用户确认放弃 -> 成功切走
+    confirmAnswer = true
+    fireEvent.click(panel.getByRole('tab', { name: zh.hubTabRuns }))
+    assert.ok(panel.container.querySelector('#hub-panel-runs') !== null, '确认放弃后应切换到 Run 档案')
+
+    // 回到方法库，触发一个在途写盘（setDefault），期间切页签与返回对话均被硬拦截并提示 hubMethodSavingBlocked
+    fireEvent.click(panel.getByRole('tab', { name: zh.hubTabMethods }))
+    await flushUi(act)
+    const setDefaultBtn = [...panel.container.querySelectorAll('button')].find((b) => b.textContent === zh.setDefault)
+    assert.ok(setDefaultBtn !== undefined)
+    fireEvent.click(setDefaultBtn)
+    await flushUi(act)
+
+    fireEvent.click(panel.getByRole('tab', { name: zh.hubTabLenses }))
+    assert.ok(panel.container.querySelector('#hub-panel-methods') !== null, '写盘进行中切页签必须被阻断')
+    assert.match(panel.container.textContent ?? '', new RegExp(zh.hubMethodSavingBlocked), '必须展示保存中禁止切换提示')
+
+    fireEvent.click(panel.getByText(zh.hubBackToChat))
+    assert.equal(backCount, 0, '写盘进行中点击返回对话必须被阻断')
+    holdSave?.({ ok: false, detail: 'cleanup' })
+  } finally {
+    window.confirm = origConfirm
   }
 })

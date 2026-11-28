@@ -6,7 +6,7 @@ import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { RESEARCH_TOOL_KEYS } from '../keys.ts'
 import type { RunSource } from '../../lib/run/run-context.ts'
-import type { RunStep } from '../../lib/run/run-fold.ts'
+import type { RunStep, RunStepInputs } from '../../lib/run/run-fold.ts'
 import type { ProtocolFace } from '../../lib/run/protocol-fold.ts'
 import type { EvidenceMatrix } from '../../lib/run/evidence-matrix.ts'
 
@@ -43,8 +43,8 @@ export interface ResearchStatusTabInjected {
 /** 活标题注入面：只需要 journal 流（挂起谓词）——标题不读文件、不开面。 */
 export interface ResearchStatusTitleInjected {
   readonly follow: (target: FollowTarget, signal: AbortSignal) => AsyncGenerator<JournalFrame>
-  /** 页签标题文案（locale 注入；挂起态与空闲态分开）。 */
-  readonly labels: { readonly idle: string; readonly pending: string }
+  /** 可选静态文案兜底（测试直传用；生产态走 slot locale 注入的 `props.t`）。 */
+  readonly labels?: { readonly idle: string; readonly pending: string }
 }
 
 /** 槽标准 props + 注入面。 */
@@ -65,6 +65,8 @@ export interface BundleFace {
   /** 工作稿 final.md 的内容问题（空/读失败）——与 final/ 目录读失败分开记（BUG-389）。 */
   readonly finalBodyIssue: 'empty' | 'unreadable' | 'body-empty' | null
   readonly steps: readonly RunStep[]
+  /** 原始步骤信号（供渲染层按当前 `t` 响应式投影步骤文案，避免切语言触发重扫）。 */
+  readonly stepInputs?: RunStepInputs
   readonly evidenceCount: number
   readonly delivered: boolean
   /** final/ 中最高 vN.md 编号——≥2 即有证据扩张 rerun 记账。 */

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type {} from '@deepseek-ai/dsh-client-ui-sidebar/client'
 import type {} from '@deepseek-ai/dsh-client-ui-session/client'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
@@ -12,6 +12,7 @@ import {
   type RunSessionMatch,
 } from '../lib/events/research-projection.ts'
 import { MethodLibraryView, type MethodLibraryInjected, type MethodLibraryViewProps } from './MethodLibraryView.tsx'
+import type { MethodLibraryLeaveStatus } from './method-library/model.ts'
 import { DefaultsPanel } from './defaults/DefaultsPanel.tsx'
 import type { DefaultsStore } from './defaults/store.ts'
 import { OrcaMark } from './BrandMark.tsx'
@@ -34,7 +35,7 @@ export interface ResearchHubInjected {
   readonly defaultsStore?: DefaultsStore
   readonly requestedTab?: HubTabRequest
   readonly openSession?: (sessionId: SessionId) => void
-  readonly openStatus?: () => void
+  readonly openStatus?: (expectedSessionId?: SessionId) => void
   readonly openFinal: (sessionId: SessionId, path: string) => void
   readonly backToChat: () => void
   readonly startResearch: (prompt?: string) => void
@@ -85,6 +86,40 @@ export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
   const [loading, setLoading] = useState(false)
   const [catalog, setCatalog] = useState<RunCatalogResult>({ runs: [], dirErrors: [] })
   const [refreshTick, setRefreshTick] = useState(0)
+  const [guardNotice, setGuardNotice] = useState<string | null>(null)
+  const methodLeaveGuardRef = useRef<(() => MethodLibraryLeaveStatus) | null>(null)
+  const registerMethodLeaveGuard = useCallback((guard: (() => MethodLibraryLeaveStatus) | null): void => {
+    methodLeaveGuardRef.current = guard
+  }, [])
+  const canLeaveMethods = useCallback((): boolean => {
+    if (tab !== 'methods') return true
+    const status = methodLeaveGuardRef.current?.() ?? 'allow'
+    if (status === 'blocked-saving') {
+      setGuardNotice(t('hubMethodSavingBlocked'))
+      return false
+    }
+    if (status === 'confirm-discard') {
+      const ok = typeof window === 'undefined' ? true : window.confirm(t('discardUnsaved'))
+      if (!ok) return false
+    }
+    setGuardNotice(null)
+    return true
+  }, [tab, t])
+  const canLeaveMethodsRef = useRef(canLeaveMethods)
+  canLeaveMethodsRef.current = canLeaveMethods
+  const handleTabChange = useCallback((next: HubTab): void => {
+    if (next === tab) return
+    if (!canLeaveMethods()) return
+    setTab(next)
+  }, [tab, canLeaveMethods])
+  const handleBackToChat = useCallback((): void => {
+    if (!canLeaveMethods()) return
+    backToChat()
+  }, [canLeaveMethods, backToChat])
+  const handleStartResearch = useCallback((prompt?: string): void => {
+    if (!canLeaveMethods()) return
+    startResearch(prompt)
+  }, [canLeaveMethods, startResearch])
 
   useEffect(() => {
     if (requestedTab === undefined) return undefined
@@ -92,7 +127,7 @@ export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
       const next = requestedTab.get()
       if (next !== null) {
         requestedTab.clear()
-        setTab(next)
+        if (next === 'methods' || canLeaveMethodsRef.current()) setTab(next)
       }
     }
     consume()
@@ -165,8 +200,8 @@ export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
           </div>
         </div>
         <div className={css.actions}>
-          <Button variant="outline" size="sm" onClick={backToChat}>{t('hubBackToChat')}</Button>
-          <Button variant="primary" size="sm" onClick={() => { startResearch() }}>{t('hubNewResearch')}</Button>
+          <Button variant="outline" size="sm" onClick={handleBackToChat}>{t('hubBackToChat')}</Button>
+          <Button variant="primary" size="sm" onClick={() => { handleStartResearch() }}>{t('hubNewResearch')}</Button>
         </div>
       </header>
 
@@ -174,23 +209,29 @@ export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
         <SegmentedTabs
           items={tabItems}
           value={tab}
-          onChange={setTab}
+          onChange={handleTabChange}
           label={t('hubTitle')}
           className={css.tabsControl}
         />
       </div>
 
+      {guardNotice !== null && (
+        <div role="status" aria-live="polite" data-testid="hub-leave-guard-notice" className={css.errorBox}>
+          {guardNotice}
+        </div>
+      )}
+
       {tab === 'methods' ? (
         <div id="hub-panel-methods" role="tabpanel" aria-labelledby="hub-tab-methods" className={css.methodsBody}>
           {activeSessionId !== null ? (
             <MethodLibraryView
-              {...({ ...props, sessionId: activeSessionId, ...methodLibrary } as unknown as MethodLibraryViewProps)}
+              {...({ ...props, sessionId: activeSessionId, ...methodLibrary, registerLeaveGuard: registerMethodLeaveGuard } as unknown as MethodLibraryViewProps)}
             />
           ) : (
             <div className={css.panelBody}>
               <div className={css.emptyState}>
                 <div>{t('hubMethodsNeedSession')}</div>
-                <Button variant="primary" size="sm" onClick={() => { startResearch() }}>{t('hubNewResearch')}</Button>
+                <Button variant="primary" size="sm" onClick={() => { handleStartResearch() }}>{t('hubNewResearch')}</Button>
               </div>
             </div>
           )}
@@ -212,7 +253,7 @@ export function ResearchHubPanel(props: ResearchHubPanelProps): ReactNode {
               onEnterSession={(targetSessionId) => {
                 openSession?.(targetSessionId)
                 backToChat()
-                openStatus?.()
+                openStatus?.(targetSessionId)
               }}
               onOpenFinal={(finalPath, ownerSessionId) => {
                 const targetSessionId = ownerSessionId ?? activeSessionId

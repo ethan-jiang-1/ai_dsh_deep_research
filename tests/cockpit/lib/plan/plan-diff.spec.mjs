@@ -90,3 +90,27 @@ test('fail-soft：两侧缺失都不 throw', () => {
   assert.equal(empty.summary, '两侧都没有节点')
   assert.equal(planDiffOf(null, planIndex(fixture('plan.md'))).added.length, 2)
 });
+
+// 负例留证 2026-11-28：BUG-478——planDiffOf 曾用 successorsOf().find(...) 只认一拆多的首个后继，
+// 把其余后继（W3.3）误报为 +新增。红配方：把 plan-diff.ts 里的 .filter 改回 .find → 本例红。
+test('BUG-478：一拆多 superseded_by: W3.2, W3.3 全部记入 aliases 且不误报新增', () => {
+  const before = planOf([
+    '| W1.1 | — | active | broad-scan | 扫源 | scout | — | leads.md | 齐 | 1 | L1 | task-1 |',
+    '| W3.1 | — | active | deep-dive | 原节点 | analyst | W1.1 | evidence/a.md | 齐 | 1 | L1 | task-2 |',
+  ])
+  const after = planOf([
+    '| W1.1 | — | active | broad-scan | 扫源 | scout | — | leads.md | 齐 | 1 | L1 | task-1 |',
+    '| W3.1 | — | superseded_by: W3.2, W3.3 | deep-dive | 原节点 | analyst | W1.1 | evidence/a.md | 齐 | 1 | L1 | task-2 |',
+    '| W3.2 | — | active | deep-dive | 拆分前段 | analyst | W1.1 | evidence/a1.md | 齐 | 1 | L1 | task-3 |',
+    '| W3.3 | — | active | deep-dive | 拆分后段 | analyst | W1.1 | evidence/a2.md | 齐 | 1 | L1 | task-4 |',
+  ])
+  const diff = planDiffOf(before, after)
+  assert.deepEqual(diff.aliases, [
+    { from: 'W3.1', to: 'W3.2' },
+    { from: 'W3.1', to: 'W3.3' },
+  ])
+  assert.deepEqual(diff.added, [], '一拆多的全部后继都不应误报为新增')
+  assert.deepEqual(diff.removed, [])
+  assert.deepEqual(diff.kept, ['W1.1'])
+  assert.equal(diff.summary, '1 保留 / 2 重编号')
+});

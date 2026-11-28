@@ -180,7 +180,7 @@
 | lib/channel/profile-guard.mjs | run-driver、profile-guard.test | run-driver 的非默认 profile 守卫：默认 profile 放行，其余 fail-loud（显式 `--allow-stale-profile` 才继续） |
 | lib/gates/findings-core.mjs | evidence-audit-core、node-gate-run-gates、protocol-core、review-contract、findings-contract.spec、template-contract.spec、topics-contract.spec、topics-parsing.spec、skill-parser-contract.spec、text-encoding-equivalence.spec | findings gap 四态 / lenses / lens_gaps 差集 / scope_role 闭集 |
 | lib/gates/review-contract.mjs | node-gate-delivery-gate、review-contract.spec | review 覆盖表（topic × lens）+ CRITICAL 与 readiness 交叉 |
-| lib/gates/plan-gate.mjs | node-gate-contracts.spec、node-gate-core、plan-gate.spec、skill-parser-contract.spec、text-encoding-equivalence.spec | plan 图硬结构（环/悬空/重号/自依赖）+ owner/kind/lifecycle/剩余工作/版本快照 |
+| lib/gates/plan-gate.mjs | node-gate-contracts.spec、node-gate-core、plan-gate.spec、skill-parser-contract.spec、template-contract.spec、text-encoding-equivalence.spec | plan 图硬结构（环/悬空/重号/自依赖）+ owner/kind/lifecycle/剩余工作/版本快照 |
 | lib/harness/role-picker.mjs | client-load.entry、role-picker.test | 角色选择器纯判据：四研究角色连续相邻 + Method Editor（D37）；逐角色 C 归场景级 |
 | lib/repo/pack-deps.mjs | package-contract.spec、pack.e2e、pack-deps.test | 发布物依赖闭包 = peers：require/动态 import()/.d.ts import 正向、死 peer 反向（host-row 显式 allowlist）、DSH-tag peer 范围 = engines.dsh |
 | lib/repo/publish-manifest.mjs | export-dist、pack.e2e、publish-manifest.test | 发布 manifest 收口：剥离 devDependencies/scripts + workspace 协议检查 |
@@ -202,7 +202,7 @@
 | lib/harness/replay-network-offline.cjs | snapshot-replay.entry | 回放 A 层离线闸 preload：非 loopback DNS(lookup/resolve*)/connect 立即失败；只作用于 dsh 主进程（BUG-064/067） |
 | lib/harness/replay-network-offline-policy.cjs | replay-network-offline.spec | 离线闸纯判据（isLoopback/isDshMain；无 node:net 依赖，测试可直引） |
 | lib/harness/port-reclaim.mjs | client-load.entry、cockpit-truth.entry、cockpit-artifact-truth.entry、cockpit-truth-residuals.entry、cockpit-truth-substance.entry、cockpit-locale.entry、cold-start.entry、data.entry、defaults-probe、discipline-probe、entry-chain-probe、method-library-probe、preset.e2e、product-boot.entry、release.entry、rerun-triage-probe、wave-execution-probe、workspace-isolation.entry、snapshot-replay.entry | 端口收割执行器与探针端口准备/整组清理（按端口杀 + 三轮验证释放 + 占口回落空闲端口，BUG-136） |
-| lib/shared/path-hygiene.mjs | node-gate-session-gates、path-hygiene、path-hygiene.spec、run-accept、run-receipt | 本机 home 路径纯文本检测（Unix/macOS/Windows 前缀；行号）+ `portableBundlePath`（bundle 内绝对路径 → `drt_<slug>/…` 可移植标签；bundle 外 → null） |
+| lib/shared/path-hygiene.mjs | node-gate-session-gates、path-hygiene、path-hygiene.spec、run-accept、run-receipt、schema-scan-core | 本机 home 路径纯文本检测（Unix/macOS/Windows 前缀；行号；豁免 evidence 原文摘录块）+ `portableBundlePath`（bundle 内绝对路径 → `drt_<slug>/…` 可移植标签；bundle 外 → null） |
 | lib/shared/secret-scan.mjs | run-accept、secret-scan、secret-scan.spec | 高置信凭据形态检测（sk-/ghp_/AKIA/PRIVATE KEY/Bearer）；只报 path/line/kind，不回显原文 |
 | lib/test-infra/selftest-library.mjs | library-fold.spec | 「研究配置」面板/library-fold 自测例库单一正本：12 形态条目（四字段/部分/空值/旧格式/混居/重名/空条目/杂项行/续行/缩进），两处共用防形态漂移 |
 | lib/test-infra/method-presets.mjs | library-fold.spec、method-presets.spec | research-brief skill「方法预设」表的唯一解析入口（表头/行列数/防空集 fail-loud）——内置名单不再各写一份手写副本 |

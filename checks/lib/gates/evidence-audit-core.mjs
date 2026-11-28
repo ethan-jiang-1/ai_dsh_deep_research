@@ -87,12 +87,42 @@ const hostsOf = (text) => {
   }
   return out
 }
-/** 规范化（CJK 安全）：去全部空白 + markdown 强调符 + 小写。 */
+/** 剥除内联 HTML 标签与 Markdown 行内超链接目标（保留锚文本；不误伤 `128K<Token` 类比较符）。 */
+const stripHtmlAndLinks = (s) => String(s ?? '')
+  .replace(/<\/?[A-Za-z][A-Za-z0-9-]*(?:\s+[^<>]*)?\/?>/g, '')
+  .replace(/\[([^\]]+)\]\((?:https?:\/\/|\/\/|\/)[^)\s]+\)/g, '$1')
+
+/** 剥除财经/门户页注入的括号行内链接徽章（如 `([688256-CN](https://...))`），仅用于网页语料辅助视图。 */
+const PAREN_LINK_RE = /\(\s*\[[^\]]+\]\((?:https?:\/\/|\/\/|\/)[^)\s]+\)\s*\)/g
+
+/** 规范化（CJK 安全）：先剥 HTML/Markdown 行内超链接目标，再去全部空白 + markdown 强调符 + 小写。 */
 // 去空白 + markdown 语法符（强调/引用/标题/列表/表格分隔 `|`）+ **引号/书名号类装饰符** +
 // **反斜杠转义**。引号与转义都是实测补的：59 条逐字摘录只因卡片用 `"…"` 包住原文被判失败；
 // 第四场 run 又有 33+ 条只因 `128K\<Token≤256K`（卡片把 `<` 转义成 `\<` 防止被当 HTML 标签、
 // 来源页无转义）整条失配——判据是"文字是否来自来源"，不是"装饰与转义是否一致"。
-export const normalize = (s) => s.replace(/[\\\s>*_`#·•|"'“”‘’「」『』]+/gu, '').toLowerCase()
+export const normalize = (s) => stripHtmlAndLinks(s).replace(/[\\\s>*_`#·•|"'“”‘’「」『』]+/gu, '').toLowerCase()
+
+/** 从 tool/result 的 message.content 提取纯文本（避免 JSON.stringify 转义污染 HTML/spill 解析）。 */
+const contentTextOf = (content) => typeof content === 'string'
+  ? content
+  : Array.isArray(content)
+    ? content.map((p) => (p && typeof p === 'object' && typeof p.text === 'string' ? p.text : JSON.stringify(p))).join('\n')
+    : JSON.stringify(content ?? '')
+
+/** 规范化 spill 路径（抹平 macOS `/private/var/` 与 `/var/` 等价前缀）。 */
+const canonicalSpillPath = (p) => String(p ?? '').trim().replace(/^\/private(\/(?:var|tmp)\/)/, '$1')
+
+/** 从 DSH spill-policy 提示提取已登记 spill 路径（正本 = vendor/dsh spill-policy/src/notice.ts）。 */
+const extractSpillPaths = (text) => [...String(text ?? '').matchAll(/Full formatted result stored at:\s*(.+?)\.(?:\s+(?:Use read|Read\b|[^\n)]*\))|\))/g)]
+  .map((m) => canonicalSpillPath(m[1])).filter(Boolean)
+
+/** 从 read/grep tool/call 的 arguments 提取目标路径；解析失败返回 null。 */
+function targetPathOf(rawArgs) {
+  let args = rawArgs
+  if (typeof args === 'string') { try { args = JSON.parse(args) } catch { return null } }
+  const p = args && typeof args === 'object' ? (args.path ?? args.file_path) : null
+  return typeof p === 'string' && p.trim() !== '' ? canonicalSpillPath(p) : null
+}
 const stripTrailing = (u) => u.replace(/\/+$/, '')
 /** 声称 URL → host（含端口）；非法 URL 返回 null（不 throw、不猜）。 */
 const hostOf = (u) => { try { return new URL(u).host } catch { return null } }
@@ -152,6 +182,9 @@ export function buildCorpus(root, slug = null, readLog = skipUnreadableLogReader
         windowFiles += 1
         const callName = new Map()
         const callUrl = new Map()
+        const callReadTarget = new Map()
+        const spillPaths = new Set()
+        const isSpillReaderTool = (name) => name === 'read' || name === 'grep'
         for (const line of text.split('\n')) {
           if (!line.includes('"type":"tool/')) continue
           let e
@@ -167,6 +200,9 @@ export function buildCorpus(root, slug = null, readLog = skipUnreadableLogReader
               const us = urlsOf(payload)
               for (const u of us) webUrls.add(u)
               if (name === 'web_fetch' && us.length > 0) callUrl.set(e.data.callId, us[0])
+            } else if (isSpillReaderTool(name)) {
+              const target = targetPathOf(e.data?.arguments)
+              if (target !== null) callReadTarget.set(e.data?.callId, target)
             }
             continue
           }
@@ -174,21 +210,29 @@ export function buildCorpus(root, slug = null, readLog = skipUnreadableLogReader
           const id = e.data?.message?.toolCallId ?? e.data?.toolCallId
           const name = callName.get(id)
           const mcp = isMcpTool(name)
-          if (!isFetchTool(name) && !mcp) continue
+          const readTarget = isSpillReaderTool(name) ? callReadTarget.get(id) : undefined
+          const spillHit = readTarget !== undefined && spillPaths.has(readTarget)
+          if (!isFetchTool(name) && !mcp && !spillHit) continue
           retrievalEvents += 1
           for (const u of urlsOf(payload)) webUrls.add(u)
           // 裸域名只从**结果**（外部内容）里抽：调用参数是 agent 自撰文本，不作证
           for (const h of hostsOf(payload)) bareHosts.add(h)
-          const body = JSON.stringify(e.data?.message?.content ?? '')
+          const rawBody = contentTextOf(e.data?.message?.content ?? '')
+          for (const sp of extractSpillPaths(rawBody)) spillPaths.add(sp)
           if (name === 'web_fetch') {
             const target = callUrl.get(id)
             if (target !== undefined) {
-              if (/^\[\{"type":"text","text":"Error:/.test(body)) fetchFailed.add(target)
-              else if (body.includes('Fetched ')) fetchedOk.add(target)
+              if (/^Error:/.test(rawBody.trimStart())) fetchFailed.add(target)
+              else if (rawBody.includes('Fetched ')) fetchedOk.add(target)
             }
           }
           // 分片存储（不要 join 成一个大字符串——历史上 RangeError: Invalid string length 就是这么来的）
-          webChunks.push(normalize(body.slice(0, 4 * 1024 * 1024)))
+          const clipped = rawBody.slice(0, 4 * 1024 * 1024)
+          webChunks.push(normalize(clipped))
+          if (PAREN_LINK_RE.test(clipped)) {
+            PAREN_LINK_RE.lastIndex = 0
+            webChunks.push(normalize(clipped.replace(PAREN_LINK_RE, '')))
+          }
         }
       }
     }
@@ -382,6 +426,20 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = skipUnreadableL
     const use = sh.filter((_, i) => i % step === 0)
     return use.filter(inWeb).length / use.length
   }
+  const ELLIPSIS_SPLIT_RE = /\[\s*(?:…|\.{3})\s*\]|…|\.{3}/
+  const quoteCoverage = (rawQuote) => {
+    if (!ELLIPSIS_SPLIT_RE.test(rawQuote)) return coverage(normalize(rawQuote))
+    const segments = rawQuote.split(ELLIPSIS_SPLIT_RE).map((part) => normalize(part)).filter((seg) => seg.length >= 4)
+    if (segments.length < 2 || !segments.some((seg) => seg.length >= 8)) return coverage(normalize(rawQuote))
+    let weighted = 0
+    let totalLen = 0
+    for (const seg of segments) {
+      const score = seg.length >= 8 ? coverage(seg) : (webText.includes(seg) ? 1 : 0)
+      weighted += score * seg.length
+      totalLen += seg.length
+    }
+    return totalLen === 0 ? 0 : weighted / totalLen
+  }
   let quoteOk = 0
   let quoteTotal = 0
   let quoteComposite = 0
@@ -391,8 +449,7 @@ export function auditBundle(bundleDir, sessionsRoot, { readLog = skipUnreadableL
     shortQuotes += rec.shortQuotes.length
     for (const q of rec.quotes) {
       quoteTotal += 1
-      const n = normalize(q)
-      const cov = coverage(n)
+      const cov = quoteCoverage(q)
       if (cov >= 0.95) { quoteOk += 1; continue }
       if (cov >= 0.6) {
         quoteComposite += 1

@@ -120,6 +120,7 @@ export interface MethodCoachPanelProps {
   readonly onCoach?: (id: SessionId) => void
   readonly onError?: (cause: unknown) => void
   readonly onStartInterview: (coachId: SessionId) => Promise<{ readonly ok: boolean; readonly detail?: string; readonly uncertain?: boolean }>
+  readonly onInterviewStarted?: (started: boolean) => void
   readonly title: string
   readonly startLabel: string
   readonly readyLabel: string
@@ -134,7 +135,7 @@ export interface MethodCoachPanelProps {
  * @param props - 当前会话、draft key 与 ensure/start 注入。
  */
 export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
-  const { sessionId, draftKey, ensure, onCoach, onError, onStartInterview, visible, title, startLabel, readyLabel, pendingLabel, startedLabel, t } = props
+  const { sessionId, draftKey, ensure, onCoach, onError, onStartInterview, onInterviewStarted, visible, title, startLabel, readyLabel, pendingLabel, startedLabel, t } = props
   const [coach, setCoach] = useState<{ id: SessionId; reference: CoachSessionReference } | null>(null)
   const [host, setHost] = useState<HTMLElement | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -142,25 +143,47 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
   const [startBusy, setStartBusy] = useState(false)
 
   // 标准聊天行为：对话区自身滚动、自动贴底跟随最新；用户上翻时暂停，回到底部恢复。
+  // Portal 异步插入 [data-conversation-scroll]，通过 host MutationObserver 等待后挂滚底（BUG-481）。
   useEffect(() => {
-    if (host === null) return
-    const scroll = host.querySelector<HTMLElement>('[data-conversation-scroll]')
-    if (scroll === null) return
+    if (host === null) return undefined
+    let scrollEl: HTMLElement | null = null
     let stuck = true
+    let contentObserver: MutationObserver | null = null
     const onScroll = (): void => {
-      stuck = scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight < 48
+      if (scrollEl === null) return
+      stuck = scrollEl.scrollHeight - scrollEl.scrollTop - scrollEl.clientHeight < 48
     }
-    const observer = new MutationObserver(() => {
-      if (stuck) scroll.scrollTop = scroll.scrollHeight
+    const detach = (): void => {
+      contentObserver?.disconnect()
+      contentObserver = null
+      scrollEl?.removeEventListener('scroll', onScroll)
+      scrollEl = null
+    }
+    const attach = (el: HTMLElement): void => {
+      if (scrollEl === el) return
+      detach()
+      scrollEl = el
+      stuck = true
+      contentObserver = new MutationObserver(() => {
+        if (stuck && scrollEl !== null) scrollEl.scrollTop = scrollEl.scrollHeight
+      })
+      contentObserver.observe(el, { childList: true, subtree: true, characterData: true })
+      el.addEventListener('scroll', onScroll, { passive: true })
+      el.scrollTop = el.scrollHeight
+    }
+    const initial = host.querySelector<HTMLElement>('[data-conversation-scroll]')
+    if (initial !== null) attach(initial)
+    const hostObserver = new MutationObserver(() => {
+      const next = host.querySelector<HTMLElement>('[data-conversation-scroll]')
+      if (next !== null) attach(next)
+      else if (scrollEl !== null) detach()
     })
-    observer.observe(scroll, { childList: true, subtree: true, characterData: true })
-    scroll.addEventListener('scroll', onScroll, { passive: true })
-    scroll.scrollTop = scroll.scrollHeight
+    hostObserver.observe(host, { childList: true, subtree: true })
     return () => {
-      observer.disconnect()
-      scroll.removeEventListener('scroll', onScroll)
+      hostObserver.disconnect()
+      detach()
     }
-  }, [host])
+  }, [host, coach?.id])
 
   useEffect(() => {
     let cancelled = false
@@ -215,11 +238,14 @@ export function MethodCoachPanel(props: MethodCoachPanelProps): ReactNode {
     setStartBusy(true)
     setError(null)
     void onStartInterview(coach.id).then((result) => {
-      setStarted(result.ok || result.uncertain === true)
-      if (!result.ok) setError(result.detail ?? 'prompt rejected')
+      if (result.ok) {
+        setStarted(true)
+        onInterviewStarted?.(true)
+      } else {
+        setError(result.detail ?? 'prompt rejected')
+      }
     }).catch((cause: unknown) => {
-      setStarted(true)
-      setError(String(cause))
+      setError(errorDetailOf(cause))
     }).finally(() => { setStartBusy(false) })
   }
 

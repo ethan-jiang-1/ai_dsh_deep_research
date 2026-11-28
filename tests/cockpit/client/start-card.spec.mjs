@@ -140,6 +140,10 @@ test('X5 已绑定有效工作区时不再渲染冗余大号工作区选择框�
     assert.equal(inserted[0], zh.startTplLandscapePrompt)
     assert.equal(submitted, 0, '点击模板按钮绝不得自动提交')
 
+    // BUG-479：连续点击第二张灵感卡应替换草稿，避免两条完整模板被无分隔拼在一起
+    rtl.fireEvent.click(container.querySelector('[data-testid=deep-research-start-template-diligence]'))
+    assert.equal(inserted[1], `draft:${zh.startTplDiligencePrompt}`, '连续点击不同起题模板卡应通过 setDraft 替换而非拼接')
+
     const recent = container.querySelector('[data-testid=deep-research-start-recent]')
     assert.ok(recent, '应渲染最近研究快捷续接条')
     rtl.fireEvent.click(recent.querySelector('[data-recent-slug="ai-chips"]'))
@@ -169,6 +173,106 @@ test('R4 回访工作区已有 drt_* 且冷启动投影未水合时，StartCard 
     assert.match(strip?.textContent ?? '', /2/)
     rtl.fireEvent.click(strip.querySelector('button'))
     assert.equal(hubOpened, 1)
+  } finally {
+    rtl.cleanup()
+  }
+})
+
+test('同会话启动对话后（sessionId 不变）：StartCard 随 DSH session/conversation 态同步收起', async () => {
+  const rtl = await loadRtl()
+  let hasUserCalls = 0
+  const blankSession = {
+    sessionId: 's-live',
+    blank: true,
+    promptAttempted: false,
+    running: false,
+    awaitingFirstTurn: false,
+    pendingSubmissions: [],
+    openState: 'open',
+    subagent: null,
+  }
+  const makeConversationHook = (active) => (selector) => selector({
+    activeTargets: active ? new Set(['chat']) : new Set(),
+  })
+  const { container, rerender } = rtl.render(createElement(StartCard, propsOf({
+    sessionId: 's-live',
+    workspacePath: '/tmp/ws1',
+    session: blankSession,
+    useConversation: makeConversationHook(false),
+    hasUserMessage: async () => { hasUserCalls += 1; return false },
+  })))
+  try {
+    await rtl.waitFor(() => {
+      if (container.querySelector('[data-testid=deep-research-start]') === null) throw new Error('wait visible')
+    })
+    assert.equal(hasUserCalls, 1)
+
+    // 1. 用户在当前空白会话发送首条消息：promptAttempted 同步翻 true，sessionId 保持 s-live
+    rerender(createElement(StartCard, propsOf({
+      sessionId: 's-live',
+      workspacePath: '/tmp/ws1',
+      session: { ...blankSession, promptAttempted: true, pendingSubmissions: [{ requestId: 'r1' }] },
+      useConversation: makeConversationHook(false),
+      hasUserMessage: async () => false,
+    })))
+    assert.equal(container.querySelector('[data-testid=deep-research-start]') === null, true, '首条发送后 StartCard 必须同步消失')
+
+    // 2. Agent 运行中且会话非空白、已有对话目标
+    rerender(createElement(StartCard, propsOf({
+      sessionId: 's-live',
+      workspacePath: '/tmp/ws1',
+      session: { ...blankSession, blank: false, promptAttempted: true, running: true },
+      useConversation: makeConversationHook(true),
+      hasUserMessage: async () => false,
+    })))
+    assert.equal(container.querySelector('[data-testid=deep-research-start]') === null, true, '运行中对话不得残留 StartCard')
+  } finally {
+    rtl.cleanup()
+  }
+})
+
+test('切到非空白会话或子会话时：即使 hasUserMessage 挂起/异常也不得闪现 StartCard', async () => {
+  const rtl = await loadRtl()
+  const never = new Promise(() => {})
+  const blankSession = {
+    sessionId: 's-blank',
+    blank: true,
+    promptAttempted: false,
+    running: false,
+    awaitingFirstTurn: false,
+    pendingSubmissions: [],
+    openState: 'open',
+    subagent: null,
+  }
+  const { container, rerender } = rtl.render(createElement(StartCard, propsOf({
+    sessionId: 's-blank',
+    workspacePath: '/tmp/ws1',
+    session: blankSession,
+  })))
+  try {
+    await rtl.waitFor(() => {
+      if (container.querySelector('[data-testid=deep-research-start]') === null) throw new Error('wait blank')
+    })
+
+    // 切到仍在 loading 的非空白会话，且 hasUserMessage 永不结算 → 不得残留上一会话的 StartCard
+    rerender(createElement(StartCard, propsOf({
+      sessionId: 's-active',
+      workspacePath: '/tmp/ws1',
+      session: { ...blankSession, sessionId: 's-active', blank: false, openState: 'loading' },
+      hasUserMessage: () => never,
+      listDir: () => Promise.reject(new Error('network down')),
+    })))
+    assert.equal(container.querySelector('[data-testid=deep-research-start]') === null, true, '切到非空白会话不得残留上一会话 StartCard')
+
+    // 切到 subagent 子会话 → 永远不显示 StartCard
+    rerender(createElement(StartCard, propsOf({
+      sessionId: 's-sub',
+      workspacePath: '/tmp/ws1',
+      session: { ...blankSession, sessionId: 's-sub', subagent: { address: { kind: 'subagent' } } },
+      hasUserMessage: async () => false,
+    })))
+    await rtl.act(async () => {})
+    assert.equal(container.querySelector('[data-testid=deep-research-start]') === null, true, '子会话不得显示 StartCard')
   } finally {
     rtl.cleanup()
   }

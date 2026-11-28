@@ -46,10 +46,33 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
   padding: 10px 12px 32px;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   align-content: start;
+}
+
+.body :global(.md-table-wide) {
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 0;
+}
+
+.body :global(.md-table-wide) table {
+  width: 100%;
+  max-width: 100%;
+  table-layout: auto;
+}
+
+.body :global(.md-table-wide) th,
+.body :global(.md-table-wide) td {
+  min-width: 0;
+  max-width: none;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .questionsBox {

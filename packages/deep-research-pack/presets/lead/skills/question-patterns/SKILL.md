@@ -181,6 +181,7 @@ drt_zhipu-api-pricing（**跨 run 复现 4 次**——本库最早的自证模�
 
 全文 = 研究手册里的 `research_pack_root` 变量的值 + `/content/lenses/<id>.md`（按需 read，不预载）；
 本表只做选择索引。lens 是证据面，不是角色/persona，也不决定报告骨架（骨架归方法预设）。
+**边界提醒**：`protocol.json` 的 `source_scope.families`（来源族，含 `web` / `local`）**不是** `content/lenses/*.md` 透镜——`web` 与 `local` 没有对应的透镜文件，按需读取透镜只允许从下表 8 枚内置 id 选择，禁止读 `content/lenses/web.md` 或 `local.md`。
 
 | id | 面 | 一句话 | 首选配对 |
 |---|---|---|---|

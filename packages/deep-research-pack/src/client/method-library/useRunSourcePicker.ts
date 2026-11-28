@@ -33,14 +33,34 @@ export function useRunSourcePicker(deps: RunSourcePickerDeps) {
   const [selectedRunSource, setSelectedRunSource] = useState<RunSourceCandidate | null>(null)
   const [selectedRunLoading, setSelectedRunLoading] = useState(false)
   const sourceReadControllerRef = useRef<AbortController | null>(null)
+  const pendingRunNameRef = useRef<string | null>(null)
 
-  /** 取消当前 run 读取（不改变已落地的选择）。
-   *  **必须同时清空 ref**（BUG-398）：只 abort 不清引用时，被取消那次读取的续体仍满足
+  /** 静默中止当前 run 读取（不写取消态；用于 reset/切换/卸载清理，BUG-398）。
+   *  **必须同时清空 ref**：只 abort 不清引用时，被取消那次读取的续体仍满足
    *  `sourceReadControllerRef.current === controller` 的代际守卫，会在 reset 之后把
    *  `idle`/`null` 覆写成 `cancelled`。 */
   const abortRunRead = (): void => {
     sourceReadControllerRef.current?.abort()
     sourceReadControllerRef.current = null
+    pendingRunNameRef.current = null
+  }
+
+  /** 用户主动点击「取消」：先中止在途请求并清代际 ref，再显式把 loading 态落成 cancelled（BUG-481）。 */
+  const cancelRunRead = (): void => {
+    const pendingName = pendingRunNameRef.current
+    abortRunRead()
+    setRunState((current) => (current === 'loading' ? 'cancelled' : current))
+    setSelectedRunLoading(false)
+    if (pendingName !== null) {
+      setSelectedRunSource({
+        name: pendingName,
+        finalPath: `${pendingName}/final/v1.md`,
+        question: { kind: 'cancelled' },
+        deliverable: { kind: 'cancelled' },
+        eligible: false,
+        status: t('sourceCancelled'),
+      })
+    }
   }
 
   /** 卸载即中止（同上）：组件走了不该再回写任何状态。 */
@@ -97,6 +117,7 @@ export function useRunSourcePicker(deps: RunSourcePickerDeps) {
     sourceReadControllerRef.current?.abort()
     const controller = new AbortController()
     sourceReadControllerRef.current = controller
+    pendingRunNameRef.current = name
     setSelectedRunLoading(true)
     setSelectedRunSource(null)
     void (async () => {
@@ -158,10 +179,12 @@ export function useRunSourcePicker(deps: RunSourcePickerDeps) {
         : !hasFinal || !hasDeliverableContent
           ? t('runNoFinal')
           : eligible ? t('eligibleRun') : t('runNotCompleted')
+      pendingRunNameRef.current = null
       setSelectedRunSource({ name, finalPath, question, deliverable, eligible, status })
       setSelectedRunLoading(false)
     })().catch((cause: unknown) => {
       if (sourceReadControllerRef.current !== controller || controller.signal.aborted) return
+      pendingRunNameRef.current = null
       setSelectedRunSource({
         name,
         finalPath: `${name}/final/v1.md`,
@@ -176,7 +199,7 @@ export function useRunSourcePicker(deps: RunSourcePickerDeps) {
 
   return {
     runNames, runState, selectedRunSource, selectedRunLoading,
-    loadRunNames, selectRunSource, abort: abortRunRead, reset: resetRunPicker,
+    loadRunNames, selectRunSource, abort: abortRunRead, cancelRunRead, reset: resetRunPicker,
     // 组件里非读取路径的选择/清空（`startRunSource` 选中候选；新建、切换、重选来源清空）。
     // 读取路径仍只走 `selectRunSource`，这里暴露 setter 是为了让这些调用点逐字不动。
     setSelectedRunSource, setSelectedRunLoading,

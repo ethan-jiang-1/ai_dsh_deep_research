@@ -85,7 +85,7 @@ export const researchReferenceRule: UserTextRule<'researchRef'> = {
 
 export interface ResearchRefChipInjected {
   readonly openEvidence: (sessionId: SessionId, runDir: string, cardFile: string) => void
-  readonly openGraph: () => void
+  readonly openGraph: (nodeId?: string) => void
 }
 
 type ResearchRefChipProps = UserTextNodeProps<'researchRef'>
@@ -94,13 +94,13 @@ type ResearchRefChipProps = UserTextNodeProps<'researchRef'>
 
 /** 已发送消息中的研究引用胶囊（点击直达证据卡或研究图谱，复制/编辑保留原文）。 */
 export function ResearchRefChip({ node, raw, interactive, sessionId, openEvidence, openGraph }: ResearchRefChipProps): ReactNode {
-  const { kind, slug, label, cardName } = node.data
+  const { kind, slug, label, cardName, nodeId } = node.data
   const activate = () => {
     if (kind === 'evidence' && cardName !== undefined && sessionId !== undefined) {
       openEvidence(sessionId, `drt_${slug}`, cardName)
       return
     }
-    openGraph()
+    openGraph(nodeId)
   }
   return (
     <ReferenceChip
@@ -116,7 +116,7 @@ export interface ResearchTriggersDeps {
   readonly t: PropsLocale<'deepResearchPack'>['t']
   readonly runSource: (sessionId: SessionId) => RunSource
   readonly openEvidence: (sessionId: SessionId, runDir: string, cardFile: string) => void
-  readonly openGraph: () => void
+  readonly openGraph: (nodeId?: string) => void
 }
 
 interface ParsedPickValue {
@@ -199,6 +199,7 @@ export function registerResearchTriggers(ctx: ClientContext, deps: ResearchTrigg
             .slice(0, 10)
           for (const node of nodes) {
             const mention = formatPlanNodeMention(slug, node.id)
+            if (parseResearchRefToken(mention) === null) continue
             const desc = (node.question ?? node.output ?? '').trim()
             out.push({
               name: mention,
@@ -233,7 +234,7 @@ export function registerResearchTriggers(ctx: ClientContext, deps: ResearchTrigg
           openEvidence(session.sessionId, `drt_${parsed.slug}`, parsed.cardName)
           return true
         }
-        openGraph()
+        openGraph(parsed.nodeId)
         return true
       },
       codec: {

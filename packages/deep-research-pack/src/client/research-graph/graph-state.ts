@@ -44,6 +44,7 @@ export const INITIAL_GRAPH_FEED_STATE: GraphFeedState = {
 }
 
 export type GraphFeedAction =
+  | { readonly kind: 'reset-session' }
   | { readonly kind: 'follow-start' }
   | { readonly kind: 'bind-slug'; readonly slug: string | null }
   | { readonly kind: 'follow-error'; readonly message: string }
@@ -74,6 +75,8 @@ export type GraphFeedAction =
 /** 研究图谱数据面的唯一纯转移函数。 */
 export function reduceGraphFeed(state: GraphFeedState, action: GraphFeedAction): GraphFeedState {
   switch (action.kind) {
+    case 'reset-session':
+      return { ...INITIAL_GRAPH_FEED_STATE }
     case 'follow-start':
       return { ...state, boundSlug: null, followError: null }
     case 'bind-slug':
@@ -90,6 +93,7 @@ export function reduceGraphFeed(state: GraphFeedState, action: GraphFeedAction):
         planLoadedAt: null,
         planVersion: null,
         snapshots: [],
+        snapshotsState: 'absent',
         graphView: 'current',
         snapshotPlan: null,
         snapshotState: 'idle',
@@ -106,6 +110,10 @@ export function reduceGraphFeed(state: GraphFeedState, action: GraphFeedAction):
         planVersion: null,
         snapshots: [],
         snapshotsState: 'absent',
+        graphView: 'current',
+        snapshotPlan: null,
+        snapshotState: 'idle',
+        showSnapshotPlan: false,
         planState: 'truncated',
         planLoadedAt: action.loadedAt,
       }
@@ -117,12 +125,30 @@ export function reduceGraphFeed(state: GraphFeedState, action: GraphFeedAction):
         planVersion: null,
         snapshots: [],
         snapshotsState: 'absent',
+        graphView: 'current',
+        snapshotPlan: null,
+        snapshotState: 'idle',
+        showSnapshotPlan: false,
         planState: 'missing',
         planLoadedAt: null,
       }
     case 'plan-error':
-      return { ...state, plan: null, planText: null, planState: 'error', planLoadedAt: null }
-    case 'plan-ready':
+      return {
+        ...state,
+        plan: null,
+        planText: null,
+        planVersion: null,
+        snapshots: [],
+        snapshotsState: 'absent',
+        graphView: 'current',
+        snapshotPlan: null,
+        snapshotState: 'idle',
+        showSnapshotPlan: false,
+        planState: 'error',
+        planLoadedAt: null,
+      }
+    case 'plan-ready': {
+      const hasSnapshots = action.snapshots.length > 0
       return {
         ...state,
         plan: action.plan,
@@ -130,9 +156,11 @@ export function reduceGraphFeed(state: GraphFeedState, action: GraphFeedAction):
         planVersion: action.planVersion,
         snapshots: action.snapshots,
         snapshotsState: action.snapshotsState,
+        ...(hasSnapshots ? {} : { graphView: 'current' as const, showSnapshotPlan: false, snapshotPlan: null, snapshotState: 'idle' as const }),
         planState: 'ready',
         planLoadedAt: action.loadedAt,
       }
+    }
     case 'plan-retry':
       return { ...state, retryTick: state.retryTick + 1 }
     case 'set-graph-view':

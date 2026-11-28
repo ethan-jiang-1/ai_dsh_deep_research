@@ -49,7 +49,11 @@ export function MethodLibraryToolCard(props: MethodLibraryToolCardProps): ReactN
       ? props.t(defaultAction === 'set' ? 'toolDefaultSetRunning' : defaultAction === 'clear' ? 'toolDefaultClearRunning' : 'toolDefaultRunning')
       : props.t('toolSaveRunning')
     : state === 'ok' ? removing ? props.t('toolRemoveDone', { name: target }) : defaulting
-      ? props.t(defaultAction === 'set' ? 'toolDefaultSetDone' : 'toolDefaultClearDone', { name: nameField })
+      ? defaultAction === 'set'
+        ? props.t('toolDefaultSetDone', { name: nameField || props.t('methodEntries') })
+        : defaultAction === 'clear'
+          ? props.t('toolDefaultClearDone')
+          : props.t('toolDefaultDone')
       : props.t('toolSaveDone', { name: target })
     : state === 'stopped'
       ? props.t('toolOutcomeUnknown')

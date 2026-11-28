@@ -12,15 +12,107 @@ import { join } from 'node:path'
 import { contractEpochOf, runSchemaOf, runType } from './schema-scan-core.mjs'
 import { finalVersionsIn } from '../shared/final-version.mjs'
 import { READABLE_CONTRACT_DATE, PRE_CONTRACT_NOTE, isPreContract } from '../shared/node-gate-contracts.mjs'
+import { maskMarkdownLines } from '../../../packages/deep-research-pack/src/lib/shared/markdown-mask.ts'
 
 /** 读者版六节（顺序即阅读顺序；机械判据只认这六个二级标题）。 */
 const READER_SECTIONS = ['结论', '为什么', '这对你意味着什么', '什么会改变这个结论', '目前不能判断', '依据与延伸']
+
+/** CRITICAL 驳回全称/绝对断言时需回查的限定突破词闭集（BUG-468）。 */
+const ABSOLUTE_MARKERS = ['唯一', '从未', '绝无', '全部采用', '100%']
+const NEGATED_PREFIX_RE = /(?:并非|不是|不再是|并不是|远非|绝非|并不|从未说|未称|不构成)$/
 
 /** 读者版硬顶：1–3 页目标下的机械上限（中文字符 + 行）。 */
 export const READER_CHAR_CAP = 4500
 const READER_LINE_CAP = 180
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+const normPhrase = (s) => String(s ?? '').replace(/[\s*_`「」『』“”"']+/gu, '').toLowerCase()
+
+/** 提取 markdown 中某个 `## <heading>` 节正文（到下一个 `## ` 为止）。 */
+function sectionBodyOf(text, heading) {
+  const lines = String(text ?? '').split('\n')
+  const re = new RegExp(`^##\\s*${escapeRe(heading)}\\s*$`)
+  const at = lines.findIndex((line) => re.test(line))
+  if (at === -1) return ''
+  const out = []
+  for (let i = at + 1; i < lines.length; i += 1) {
+    if (/^##\s+/.test(lines[i])) break
+    out.push(lines[i])
+  }
+  return out.join('\n')
+}
+
+/**
+ * 从 review.md 所有轮次的 CRITICAL 节提取「已被驳回且 canonical 已删去」的原句与限定突破词（BUG-468）。
+ * 仅对 review.md 点名且 canonical 确实已删去的表述生效，避免对合法限定语误报。
+ */
+function criticalRelapseIssues(bundleDir, readerText, canonicalText, rel) {
+  const reviewPath = join(bundleDir, 'review.md')
+  if (!existsSync(reviewPath)) return []
+  const reviewText = readFileSync(reviewPath, 'utf8')
+  const masked = maskMarkdownLines(reviewText)
+  const critItems = []
+  let activeLevel = 0
+  let curItem = null
+  for (const line of masked) {
+    const heading = /^(#{1,6})\s+(.+)$/.exec(line)
+    if (heading !== null) {
+      if (curItem !== null) { critItems.push(curItem); curItem = null }
+      const level = heading[1].length
+      const title = heading[2].replace(/\*\*|__|`/g, '').trim()
+      if (level >= 2 && level <= 4 && /^(?:\d+\.\s*)?CRITICAL\b/i.test(title)) {
+        activeLevel = level
+        continue
+      }
+      if (activeLevel > 0 && level <= activeLevel) activeLevel = 0
+      continue
+    }
+    if (activeLevel === 0) continue
+    if (/^\s*[-*]\s*(?:\*\*)?C\d+\b/.test(line)) {
+      if (curItem !== null) critItems.push(curItem)
+      curItem = line
+    } else if (curItem !== null && line.trim() !== '') {
+      curItem += ` ${line.trim()}`
+    }
+  }
+  if (curItem !== null) critItems.push(curItem)
+  if (critItems.length === 0) return []
+
+  const canonicalNorm = normPhrase(canonicalText)
+  const canonicalOpening = String(canonicalText ?? '').split('\n').filter((l) => l.trim() !== '').slice(0, 40).join('\n')
+  const readerNorm = normPhrase(readerText)
+  const readerConclusion = sectionBodyOf(readerText, '结论')
+  const issues = []
+  const flaggedPhrases = new Set()
+  const flaggedMarkers = new Set()
+
+  for (const item of critItems) {
+    const quotes = [...item.matchAll(/[「“]([^」”]{4,120})[」”]/g)].map((m) => m[1].trim())
+    for (const phrase of quotes) {
+      const pNorm = normPhrase(phrase)
+      if (pNorm.length < 6 || canonicalNorm.includes(pNorm)) continue
+      if (readerNorm.includes(pNorm) && !flaggedPhrases.has(pNorm)) {
+        flaggedPhrases.add(pNorm)
+        issues.push(`${rel} 复现了 review.md CRITICAL 已驳回且 canonical 已删去的表述「${phrase.slice(0, 40)}」`)
+      }
+      for (const marker of ABSOLUTE_MARKERS) {
+        if (!phrase.includes(marker) || flaggedMarkers.has(marker)) continue
+        if (canonicalOpening.includes(marker)) continue
+        let idx = readerConclusion.indexOf(marker)
+        while (idx !== -1) {
+          const before = readerConclusion.slice(Math.max(0, idx - 6), idx)
+          if (!NEGATED_PREFIX_RE.test(before)) {
+            flaggedMarkers.add(marker)
+            issues.push(`${rel} 的「## 结论」复现了 review.md CRITICAL 已驳回且 canonical 首屏已删去的限定突破词「${marker}」（读者版不得退回被驳回的全称断言）`)
+            break
+          }
+          idx = readerConclusion.indexOf(marker, idx + marker.length)
+        }
+      }
+    }
+  }
+  return issues
+}
 
 /** final/ 下最高 vN；没有 = null（版本判据 = pack `finalVersionOf`，不收 v0）。 */
 function highestFinalVersion(bundleDir) {
@@ -92,9 +184,10 @@ export function readerGate(bundleDir, opts = {}) {
       problems.push(`${rel} 链接不可解析：${target}（相对 reader 所在 final/ 解析）`)
     }
   }
+  const canonicalText = readFileSync(join(bundleDir, 'final', `v${version}.md`), 'utf8')
+  problems.push(...criticalRelapseIssues(bundleDir, text, canonicalText, rel))
   if (problems.length > 0) return { status: 'RED', detail: problems.join('；') }
   // 数字子集只 WARN：中文排版/区间写法会产生假红；语义归人工
-  const canonicalText = readFileSync(join(bundleDir, 'final', `v${version}.md`), 'utf8')
   const canonicalNumbers = numericTokens(canonicalText)
   const extra = [...numericTokens(text)].filter((n) => !canonicalNumbers.has(n))
   const warn = extra.length === 0 ? '' : `；⚠ 读者版含 canonical 未出现的数字：${extra.slice(0, 8).join('、')}（人工核对是否新增）`

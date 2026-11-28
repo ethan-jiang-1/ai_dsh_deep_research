@@ -829,3 +829,50 @@ test('BUG-403 protocol-audit CLI 复用 core 的条目解析，不再内联影�
   assert.match(source, /methodLibraryEntryOf/, 'CLI 必须调用 core 的条目解析')
   assert.doesNotMatch(source, /if \(foundLibrary !== null\)/, 'undefined 仍被折成 null（BUG-307 分支死代码）')
 })
+
+// 负例留证 2026-11-28：BUG-484——checkFinalSections 仅精确匹配 5 键 H2（带序号/括注的 `## 1. 判决（首屏）`、
+// `## 8. 覆盖与不可判` 误红），且已记入 deviations 的 C 级例外仍被 evidence-threshold 硬红。
+// 红配方：把 checkFinalSections 改回精确 `headings.has(expected)` 或去掉 deviations 例外降级 → 本例红。
+test('BUG-484：checkFinalSections 支持编号/括注与语义别名对齐，且已记 deviations 的证据门槛例外降级为 warning', async () => {
+  const { checkFinalSections, checkEvidenceThreshold } = await import('../../../checks/lib/gates/protocol-audit-core.mjs')
+  const protocol = baseProtocol({
+    output: {
+      ...baseProtocol().output,
+      sections: ['decision', '产品线与变化', 'risks', 'coverage'],
+    },
+  })
+  const numberedFinal = [
+    '# 报告',
+    '',
+    '## 1. 判决（首屏）',
+    '',
+    '## 2. 产品线与变化（近 12 个月）',
+    '',
+    '## 3. 落地条件与风险',
+    '',
+    '## 8. 覆盖与不可判',
+  ].join('\n')
+  assert.deepEqual(checkFinalSections(protocol, numberedFinal), [], '编号+括注+语义别名 H2 应匹配通过')
+
+  // 负控：确实缺失章节仍必须 RED
+  const missingFinal = '# 报告\n\n## 1. 判决（首屏）\n'
+  const missingRes = checkFinalSections(protocol, missingFinal)
+  assert.ok(missingRes.some((f) => f.code === 'final-sections' && f.message.includes('产品线与变化')))
+
+  // deviations 显式记录接受 C 级例外 → 降为 warning；未记 deviations → 仍 RED
+  const protoWithDev = baseProtocol({
+    gates: { ...baseProtocol().gates, evidence_threshold: 'B' },
+    deviations: ['接受 evidence/t3-d.md（quality=C）作为 C9 唯一源，已标单源待破'],
+  })
+  const waived = checkEvidenceThreshold(protoWithDev, [{ file: 'evidence/t3-d.md', quality: 'C' }], 'other', ['evidence/t3-d.md'])
+  assert.equal(waived.some((f) => f.level === 'red'), false, 'deviations 已记例外不应硬红')
+  assert.ok(waived.some((f) => f.level === 'warning' && f.code === 'evidence-threshold'))
+
+  const unwaived = checkEvidenceThreshold(
+    baseProtocol({ gates: { ...baseProtocol().gates, evidence_threshold: 'B' }, deviations: [] }),
+    [{ file: 'evidence/t3-d.md', quality: 'C' }],
+    'other',
+    ['evidence/t3-d.md'],
+  )
+  assert.ok(unwaived.some((f) => f.level === 'red' && f.code === 'evidence-threshold'), '未记 deviations 仍必须 RED')
+})

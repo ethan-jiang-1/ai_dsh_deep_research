@@ -8,8 +8,9 @@ import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { foldHitlPending } from '../lib/events/hitl-fold.ts'
 import { bindingTrust } from '../lib/run/binding-trust.ts'
-import { latestFinalDelivery } from '../lib/run/final-target.ts'
+import { decodeDeliveredReceipt, deliveryFromReceipt, latestFinalDelivery } from '../lib/run/final-target.ts'
 import { openRun, type RunSource } from '../lib/run/run-context.ts'
+import { readArtifact } from '../lib/run/artifact-read.ts'
 import { streamFailureOf } from '../lib/events/stream-failure.ts'
 import type { Follow } from './session-follow.ts'
 import css from './ResearchHeaderPill.module.css'
@@ -76,16 +77,27 @@ export function ResearchHeaderPill(props: ResearchHeaderPillProps): ReactNode {
     setDiskDelivered(null)
     if (sessionId === undefined || slug === null || delivery !== null || runSource === undefined) return undefined
     const controller = new AbortController()
-    void openRun(runSource(sessionId), slug, { signal: controller.signal }).then(
-      (opened) => {
+    void (async () => {
+      try {
+        const opened = await openRun(runSource(sessionId), slug, { signal: controller.signal })
         if (controller.signal.aborted || !opened.ok) return
         const hasReceipt = opened.value.entries.some((e) => e.name === 'delivered.json' && e.type === 'file')
-        if (hasReceipt) setDiskDelivered(`${opened.value.dir}/final.md`)
-      },
-      () => {
+        if (!hasReceipt) return
+        const fallbackPath = `${opened.value.dir}/final.md`
+        const art = await readArtifact(opened.value, 'delivered.json', { signal: controller.signal, decoder: decodeDeliveredReceipt })
+        if (controller.signal.aborted) return
+        if (art.state === 'ok') {
+          const fromReceipt = deliveryFromReceipt(art.value, slug)
+          if (fromReceipt !== null) {
+            setDiskDelivered(fromReceipt.path)
+            return
+          }
+        }
+        setDiskDelivered(fallbackPath)
+      } catch {
         /* @silent-catch: disk receipt check for pill badge fails soft */
-      },
-    )
+      }
+    })()
     return () => { controller.abort() }
   }, [sessionId, slug, delivery, runSource])
 

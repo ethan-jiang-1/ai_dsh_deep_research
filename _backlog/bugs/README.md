@@ -18,8 +18,40 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
+| （空） | — | — | 全部活跃缺陷已于 2026-11-28 收口归档 |
 
 ## 最近归档
+
+（2026-11-28 驾驶舱双端 Wire 契约与交互健壮性修复批〔13 张，470–482〕，批 Note = [2026-11-28-cockpit-wire-contracts-and-ux-fixes](../../notes/implemented/2026-11-28-cockpit-wire-contracts-and-ux-fixes.md)：
+[470](../_archived/fixed_bugs/BUG-470-research-defaults-popup-set-payload-mismatch-silent-fail.md) /research-defaults 弹窗补 {patch,expectedRevision}、修真 authority 枚举、显性报错与冷会话预热；
+[471](../_archived/fixed_bugs/BUG-471-cross-session-open-final-status-race-and-openmember-address.md) 统一 whenSessionMounted(expectedSessionId) 与 buildMemberSessionTarget(parentSessionId)；
+[472](../_archived/fixed_bugs/BUG-472-final-fullscreen-breaks-citation-hover-and-narrow-studio-dead-clicks.md) 终稿 callback ref 重绑悬停卡、容器宽 studioActive 单一真值与高卡翻转收起；
+[473](../_archived/fixed_bugs/BUG-473-final-studio-async-races-cache-pollution-and-toc-freeze.md) 终稿 loadEpoch/inspectToken/sessionEpoch 代次隔离与 FinalToc 跳过 Infinity/滚底高亮；
+[474](../_archived/fixed_bugs/BUG-474-research-turn-wrong-write-tool-names-never-triggers.md) research-turn 共享真实 DSH WRITE_TOOLS/TOOL_PATH_FIELDS 并校 drt_ 路径边界；
+[475](../_archived/fixed_bugs/BUG-475-status-tab-member-btn-title-locale-freeze-and-feed-t-dep.md) 状态页队员钮迁 headerAccessory、活标题响应式 locale+复位、流 effect 脱离 t 依赖；
+[476](../_archived/fixed_bugs/BUG-476-defaults-panel-blur-write-source-auto-selectmenu-and-config-tab.md) DefaultsPanel 失焦脏判/跨会话复位/信源自动仅清 families、SelectMenu 布局与配置页显性读错；
+[477](../_archived/fixed_bugs/BUG-477-dagmap-cjk-overflow-global-marker-ids-and-narrow-wide-mode.md) DagMap 实例唯一 marker/clipPath 与 CJK 双宽截断，ResearchGraphTab 复位选中态与窄屏紧凑；
+[478](../_archived/fixed_bugs/BUG-478-graph-child-state-vnull-trap-plan-diff-and-state-note.md) 图谱子节点真状态投影、缺图复位防 vnull、快照 try/catch、planDiff 一拆多与 state-note 校正；
+[479](../_archived/fixed_bugs/BUG-479-cross-surface-draft-prefill-and-at-reference-roundtrip-breaks.md) 修复透镜 append 与当前工作区优先、图谱禁回退 setDraft、@W# 透传 nodeId 与全屏预填退全屏；
+[480](../_archived/fixed_bugs/BUG-480-method-library-spurious-llm-turns-tab-loss-and-interview-lock.md) 方法库手改仅访谈态同步、Hub 切页签守卫在途写盘与草稿、访谈失败保持可重试；
+[481](../_archived/fixed_bugs/BUG-481-method-library-cancel-deadlock-esc-autoscroll-and-toolcard.md) 修复取消读取卡死 loading、摘要页取消/Esc、Portal 滚底监听、新建防抢选与工具卡三态；
+[482](../_archived/fixed_bugs/BUG-482-runsview-hitl2-gated-and-narrow-panel-layout-overflows.md) 解除 RunsView HITL2 门禁、新 slug 清旧交付、HeaderPill 读真回执与多面板容器响应式防溢。
+）
+
+（2026-11-28 真实长 Run 门禁准确度与模板契约修复批〔12 张，463–469 / 483–487〕，批 Note = [2026-11-28-run-fidelity-and-gate-accuracy-fixes](../../notes/implemented/2026-11-28-run-fidelity-and-gate-accuracy-fixes.md)：
+[463](../_archived/fixed_bugs/BUG-463-claims-verdicts-drops-earlier-batch-files.md) 多批 verdicts*.json 升序合并与真模板对齐；
+[464](../_archived/fixed_bugs/BUG-464-review-contract-false-red-on-table-major-and-bold-waiver.md) review-contract 覆盖表首列、当轮 CRITICAL 节与加粗豁免对齐；
+[465](../_archived/fixed_bugs/BUG-465-plan-template-suggests-check-kind-and-lead-skips-backfill.md) plan.md 模板对齐 PLAN_KINDS 闭集并强化 task_id/剩余工作回填；
+[466](../_archived/fixed_bugs/BUG-466-evidence-audit-misses-web-fetch-spills-and-inline-noise.md) evidence-audit 追踪 web_fetch spill、剥 HTML/行内链接与省略号分段；
+[467](../_archived/fixed_bugs/BUG-467-leads-gate-single-line-only-and-findings-contract-bypass.md) leadsGate 支持多行缩进支持来源，强化 findings.md 格式与核查护栏；
+[468](../_archived/fixed_bugs/BUG-468-reader-final-reintroduces-critic-rejected-claim.md) readerGate 回查已闭合 CRITICAL 驳回表述/限定词防读者版复发；
+[469](../_archived/fixed_bugs/BUG-469-long-run-compliance-drift-math-sections-and-batch-fetch.md) 补齐长 run 逐条点数、列表 API 禁替单页抓取、末节与时间戳技能护栏；
+[483](../_archived/fixed_bugs/BUG-483-schema-scan-and-path-hygiene-catch22-on-evidence-quotes.md) path-hygiene/schema-scan 豁免 evidence/*.md 原文摘录块并收窄 /media/ 正则；
+[484](../_archived/fixed_bugs/BUG-484-protocol-audit-section-mapping-and-lead-projection-drift.md) protocol-audit 放宽终稿节编号/别名映射并降级已记 deviations 证据门槛例外；
+[485](../_archived/fixed_bugs/BUG-485-verdict-audit-not-verbatim-and-minified-template-trap.md) verdict-audit 剥除 child 围栏与零宽空格并接受等价 JSON 缩进差异；
+[486](../_archived/fixed_bugs/BUG-486-protocol-web-family-confused-with-missing-web-lens.md) question-patterns 显式分隔 source_scope.families（web/local）与 content/lenses/*.md；
+[487](../_archived/fixed_bugs/BUG-487-coverage-gate-xcheck-fanout-conflict-and-final-counts.md) review-contract 支持已脚注声明跨行 xcheck 卡独占计数，补全交付前盘面点数护栏。
+）
 
 （2026-11-27 第三轮 UX/UI 盲区修复批〔5 张，458–462〕，批 Note = [2026-11-27-cockpit-ux-ui-round3-fixes](../../notes/implemented/2026-11-27-cockpit-ux-ui-round3-fixes.md)：
 [458](../_archived/fixed_bugs/BUG-458-final-toc-truncates-markdown-links-with-nested-parens.md) 平衡括号链接剥离；

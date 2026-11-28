@@ -29,6 +29,8 @@ export interface ResearchGraphInjected {
   readonly follow: (sessionId: SessionId, signal: AbortSignal) => AsyncIterable<GraphJournalFrame>
   /** 打开队员会话的观察面（可选；缺省时不渲染「打开负责人」）。 */
   readonly openOwner?: (sessionId: SessionId, childSessionId: SessionId) => void
+  /** 退出/切换右栏全屏（可选；全屏态插入草稿引用时自动退出以露出输入框）。 */
+  readonly toggleFullscreen?: () => void
 }
 
 /** 槽标准 props + 注入面。 */

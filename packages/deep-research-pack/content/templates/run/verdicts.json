@@ -3,10 +3,16 @@
   "round": 1,
   "batches": [
     {
-      "session": "<critic child 的 sessionId（subagent 工具结果里的 childId）>",
+      "session": "<第 1 批 critic child 的 sessionId（subagent 工具结果里的 childId）>",
       "preset": "critic",
       "depth": 1,
-      "raw": "[{\"claim_id\":\"C1\",\"verdict\":\"supported\",\"quote\":\"<原文里支持/反驳的那一句>\",\"reason\":\"<一句话>\",\"rechecked_urls\":[\"https://example.com/rechecked-source\"],\"source_tier_ok\":true}]"
+      "raw": "[{\"claim_id\":\"C1\",\"verdict\":\"supported\",\"quote\":\"<原文里支持/反驳的那一句>\",\"reason\":\"<一句话>\",\"rechecked_urls\":[\"https://example.com/rechecked-source-1\"],\"source_tier_ok\":true}]"
+    },
+    {
+      "session": "<第 2 批 critic child 的 sessionId（同一审查轮次多批合写进同一个 verdicts-r1.json，不拆写成 verdicts-r2.json）>",
+      "preset": "critic",
+      "depth": 1,
+      "raw": "[{\"claim_id\":\"C2\",\"verdict\":\"supported\",\"quote\":\"<原文里支持/反驳的那一句>\",\"reason\":\"<一句话>\",\"rechecked_urls\":[\"https://example.com/rechecked-source-2\"],\"source_tier_ok\":true}]"
     }
   ],
   "verdicts": [
@@ -16,7 +22,16 @@
       "verdict": "supported",
       "quote": "<原文里支持/反驳的那一句>",
       "reason": "<一句话>",
-      "rechecked_urls": ["https://example.com/rechecked-source"],
+      "rechecked_urls": ["https://example.com/rechecked-source-1"],
+      "source_tier_ok": true
+    },
+    {
+      "claim_id": "C2",
+      "batch": 1,
+      "verdict": "supported",
+      "quote": "<原文里支持/反驳的那一句>",
+      "reason": "<一句话>",
+      "rechecked_urls": ["https://example.com/rechecked-source-2"],
       "source_tier_ok": true
     }
   ]

@@ -68,7 +68,7 @@ export type StatusFeedAction =
   | {
     readonly kind: 'journal-frame'
     readonly events: readonly unknown[]
-    readonly rows: readonly ActivityRow[]
+    readonly rows?: readonly ActivityRow[]
     readonly hitl: HitlState
     readonly trust: BindingTrust
   }
@@ -99,7 +99,7 @@ export function reduceStatusFeed(state: StatusFeedState, action: StatusFeedActio
         ...state,
         journalEvents: action.events,
         journalSeen: true,
-        rows: action.rows,
+        rows: action.rows ?? state.rows,
         hitl: action.hitl,
         trust: trustKey(action.trust) === trustKey(state.trust) ? state.trust : action.trust,
       }

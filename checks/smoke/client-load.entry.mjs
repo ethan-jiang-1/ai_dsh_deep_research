@@ -668,6 +668,8 @@ async function pass1BoundFacePhase() {
         : `${openNote === '' ? '' : `${openNote}；`}marker 未命中：${JSON.stringify(markerNeedle)}`)
     if (opened) {
       await wait(4_000)
+      const startCardCountOnActive = await page.locator('[data-testid="deep-research-start"]').count().catch(() => -1)
+      step(startCardCountOnActive === 0, '已启动/历史会话不渲染首屏 StartCard（互补案例）', `count=${startCardCountOnActive}`)
       const capOk = await openPane(page)
       step(capOk, '「研究状态」guide 胶囊在场（tab 类型注册成功 + 右栏展开）')
       if (capOk) {

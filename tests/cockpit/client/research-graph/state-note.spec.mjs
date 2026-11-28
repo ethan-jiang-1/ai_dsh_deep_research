@@ -39,3 +39,23 @@ test('BUG-355：plan.md 读失败 = 独立失败态，不冒充「没有 plan.md
   const source = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../../../../packages/deep-research-pack/src/client/research-graph/useGraphFeed.ts'), 'utf8')
   assert.match(source, /dispatch\(\{ kind: 'plan-error' \}\)/)
 })
+
+// 负例留证 2026-11-28：BUG-478——plan.md 有节点但无依赖边时，旧文案错怪 Team 看板缺 blocked_by 并声称
+// 「图谱按 plan deps 画」。红配方：改回旧文案或删去 hasPlan && !hasEdges 映射 → 本例红。
+test('BUG-478：plan.md 有节点但无依赖边时中英文如实说明以节点清单展示、不画依赖图', async () => {
+  const { en, zh } = await import('../../../../packages/deep-research-pack/src/client/locales.ts')
+  const makeT = (table) => (key, params = {}) => String(table[key]).replace(/\{([A-Za-z0-9_]+)\}/g, (all, name) => (name in params ? String(params[name]) : all))
+  const zhNote = graphStateNote({ ...base, planState: 'ready', boundSlug: 'x', hasPlan: true, hasEdges: false, hasTopLevel: true }, makeT(zh))
+  assert.ok(zhNote !== null)
+  assert.match(zhNote.title, /plan\.md/)
+  assert.match(zhNote.title, /deps/)
+  assert.match(zhNote.body, /节点清单/)
+  assert.doesNotMatch(zhNote.title + zhNote.body, /blocked_by|Team/)
+
+  const enNote = graphStateNote({ ...base, planState: 'ready', boundSlug: 'x', hasPlan: true, hasEdges: false, hasTopLevel: true }, makeT(en))
+  assert.ok(enNote !== null)
+  assert.match(enNote.title, /plan\.md/)
+  assert.match(enNote.title, /deps/)
+  assert.match(enNote.body, /node list/i)
+  assert.doesNotMatch(enNote.title + enNote.body, /blocked_by|[\u4e00-\u9fa5]/)
+})

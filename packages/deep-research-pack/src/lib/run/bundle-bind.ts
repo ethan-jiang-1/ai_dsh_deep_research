@@ -8,7 +8,7 @@
  */
 
 import { askKindOf } from '../events/hitl-fold.ts'
-import { argsObjectOf } from '../events/journal-wire.ts'
+import { argsObjectOf, TOOL_PATH_FIELDS, WRITE_TOOLS } from '../events/journal-wire.ts'
 import { RUN_SLUG } from './run-context.ts'
 
 /** journal 事件的最小形状（wire 事件；只取折算要用的字段）。 */
@@ -16,9 +16,6 @@ interface BindEventLike {
   readonly type?: unknown
   readonly data?: { readonly name?: unknown; readonly arguments?: unknown } | undefined
 }
-
-/** 变更类工具（强绑定信号）：写/编辑进 bundle 的调用直接定绑。 */
-const WRITE_TOOLS = new Set(['write', 'edit', 'multiedit'])
 
 /** 会话 → run bundle 绑定（含绑定强度——RFC cockpit-flow-face G4：read 弱绑定防错绑）。 */
 interface SessionBinding {
@@ -35,7 +32,7 @@ interface SessionBinding {
 }
 
 /** 真实路径字段（正文/示例里的 `drt_` 不算绑定，BUG-090）。 */
-const PATH_FIELDS = ['file_path', 'path', 'paths', 'filePath', 'file'] as const
+const PATH_FIELDS = TOOL_PATH_FIELDS
 
 function pathStringsOf(value: unknown, out: string[]): void {
   if (typeof value === 'string') { out.push(value); return }

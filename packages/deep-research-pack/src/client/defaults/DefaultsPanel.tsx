@@ -67,7 +67,7 @@ export function DefaultsPanel({ sessionId, store, t, onOpenMethodLibrary, layout
   const [confirmClear, setConfirmClear] = useState(false)
   useEffect(() => {
     setAudience(state.value.output?.audience ?? '')
-  }, [state.value.output?.audience])
+  }, [sessionId, state.value.output?.audience])
   // 二次确认是**本会话的**瞬态：切 sessionId 必须复位，否则 B 会话首点即清空 B 的研究默认（BUG-399）。
   useEffect(() => {
     setConfirmClear(false)
@@ -92,6 +92,10 @@ export function DefaultsPanel({ sessionId, store, t, onOpenMethodLibrary, layout
   }
   const commitAudience = (): void => {
     const next = audience.trim()
+    if (next === (state.value.output?.audience ?? '')) {
+      if (audience !== next) setAudience(next)
+      return
+    }
     if (next === '') {
       if (shape === undefined) unset(['output'])
       else apply({ output: { shape } })
@@ -244,7 +248,7 @@ export function DefaultsPanel({ sessionId, store, t, onOpenMethodLibrary, layout
               size="sm"
               data-testid="defaults-source-auto"
               disabled={busy}
-              onClick={() => unset(['source'])}
+              onClick={() => applySource(undefined, authority, recency)}
             >
               {t('defaultsSourceAuto')}
             </Button>

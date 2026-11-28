@@ -74,3 +74,18 @@ test('BUG-431 工具卡：stopped 显示「结果未知」而不是失败', () =
   assert.match(markup, /结果未知/, 'stopped 必须是中性「结果未知」')
   assert.doesNotMatch(markup, /失败/, '不得把「未知」写成「失败」')
 })
+
+// 负例留证 2026-11-28：BUG-481——结算态 defaultAction === null 时二元三目落入 toolDefaultClearDone，
+// 伪报「已清除默认偏好」；且 set 缺 name 时输出残缺冒号「已设默认：」。
+// 红配方：把 ok 分支改回 `defaultAction === 'set' ? 'toolDefaultSetDone' : 'toolDefaultClearDone'`。
+test('BUG-481 默认偏好工具卡结算态三态：未知 action 渲染中性完成文案，空 name 回退占位符', () => {
+  const unknownDone = render('method_library_set_default', '{}', true)
+  assert.match(unknownDone, /已更新默认偏好/, '未知 action 结算态应渲染中性文案 toolDefaultDone')
+  assert.doesNotMatch(unknownDone, /清除/, '未知 action 结算态不得伪报已清除默认偏好')
+
+  const setNoName = render('method_library_set_default', JSON.stringify({ action: 'set' }), true)
+  assert.match(setNoName, /已设默认：方法条目/, 'set 缺 name 时应回退 methodEntries 占位符')
+
+  const clearDone = render('method_library_set_default', JSON.stringify({ action: 'clear' }), true)
+  assert.match(clearDone, /已清除默认偏好/)
+})

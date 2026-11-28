@@ -7,12 +7,16 @@
 // → 本文件红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { createElement } from 'react'
 import { loadRtl, makeTranslator } from '../../client-dom-helpers.mjs'
 import { zh } from '../../../../packages/deep-research-pack/src/client/locales.ts'
 import { createDefaultsStore } from '../../../../packages/deep-research-pack/src/client/defaults/store.ts'
 import { DefaultsPanel } from '../../../../packages/deep-research-pack/src/client/defaults/DefaultsPanel.tsx'
 
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..')
 const t = makeTranslator(zh)
 
 function makeStore(sent) {
@@ -133,4 +137,107 @@ test('BUG-452 DefaultsPanel：「方法库 ›」在注入回调时渲染为可�
   } finally {
     rtl.cleanup()
   }
+})
+
+// 负例留证 2026-11-28：BUG-476 / BUG-482——① DefaultsPanel 受众失焦未判脏触发无效写盘，且切会话不清空草稿；
+// ② defaults-source-auto 直接 unset(['source']) 误清 authority/recency；③ SelectMenu 布局类挂在内层 button
+// 而非外层 Menu wrapper，且 defaults.module.css 缺 flex-wrap 与 @container (max-width: 720px)。
+test('BUG-476 DefaultsPanel：受众未修改 blur 零写盘；跨会话清空未保存草稿', async () => {
+  const rtl = await loadRtl()
+  const sent = []
+  const store = createDefaultsStore({
+    readText: async () => JSON.stringify({ schema: 1, revision: 1, effort: 'quick' }),
+    readLibrary: async () => ({ kind: 'absent', path: 'method-library.md' }),
+    listDir: async () => [],
+    execute: async (sid, line) => {
+      sent.push({ sid, line })
+      return { ok: true, value: { result: { kind: 'success', text: 'ok revision=2' } } }
+    },
+  })
+  const { container, rerender } = rtl.render(createElement(DefaultsPanel, { sessionId: 's1', store, t }))
+  try {
+    await rtl.waitFor(() => {
+      if (container.querySelector('[data-testid=defaults-depth]')?.value !== 'quick') throw new Error('wait s1')
+    })
+    const input = container.querySelector('[data-testid=defaults-audience]')
+    rtl.fireEvent.focus(input)
+    rtl.fireEvent.blur(input)
+    await rtl.act(async () => { await new Promise((resolve) => setTimeout(resolve, 10)) })
+    assert.deepEqual(sent, [], '未修改受众时 blur 绝不得发出写盘命令')
+
+    // 会话 s1 键入未保存草稿，直接切换到 s2（同样无 audience）→ 草稿必须清空
+    rtl.fireEvent.change(input, { target: { value: '决策层草稿' } })
+    assert.equal(input.value, '决策层草稿')
+    rerender(createElement(DefaultsPanel, { sessionId: 's2', store, t }))
+    await rtl.waitFor(() => {
+      if (input.value !== '') throw new Error('wait draft clear')
+    })
+    assert.equal(input.value, '', '切会话后未提交的受众草稿必须清空')
+    rtl.fireEvent.blur(input)
+    assert.deepEqual(sent, [], '切会话清空后的空草稿 blur 不得写盘')
+  } finally {
+    rtl.cleanup()
+  }
+})
+
+test('BUG-476 DefaultsPanel：信源「自动」仅清 families 保留 authority/recency，三者皆空才 unset source', async () => {
+  const rtl = await loadRtl()
+  const sent = []
+  const store = createDefaultsStore({
+    readText: async (sid) => sid === 's-keep'
+      ? JSON.stringify({ schema: 1, revision: 1, source: { families: ['official'], authority: 'primary', recency: '12m' } })
+      : JSON.stringify({ schema: 1, revision: 1, source: { families: ['official'] } }),
+    readLibrary: async () => ({ kind: 'absent', path: 'method-library.md' }),
+    listDir: async () => [],
+    execute: async (sid, line) => {
+      sent.push({ sid, line })
+      return { ok: true, value: { result: { kind: 'success', text: 'ok revision=2' } } }
+    },
+  })
+  const { container, rerender } = rtl.render(createElement(DefaultsPanel, { sessionId: 's-keep', store, t }))
+  try {
+    await rtl.waitFor(() => {
+      if (container.querySelector('[data-testid=defaults-authority]')?.value !== 'primary') throw new Error('wait keep')
+    })
+    rtl.fireEvent.click(container.querySelector('[data-testid=defaults-source-auto]'))
+    await rtl.waitFor(() => { if (sent.length === 0) throw new Error('wait patch') })
+    assert.match(sent[0].line, /set /, 'authority/recency 在场时不得 unset 整条 source')
+    assert.match(sent[0].line, /"authority":"primary"/, '必须保留 authority')
+    assert.match(sent[0].line, /"recency":"12m"/, '必须保留 recency')
+    assert.doesNotMatch(sent[0].line, /"families"/, '必须仅移除 families')
+
+    rerender(createElement(DefaultsPanel, { sessionId: 's-empty', store, t }))
+    await rtl.waitFor(() => {
+      if (container.querySelector('[data-testid=defaults-authority]')?.value !== 'auto') throw new Error('wait empty')
+    })
+    rtl.fireEvent.click(container.querySelector('[data-testid=defaults-source-auto]'))
+    await rtl.waitFor(() => { if (sent.length < 2) throw new Error('wait unset') })
+    assert.match(sent[1].line, /unset source/, '仅 families 在场且 authority/recency 均为空时才 unset source')
+  } finally {
+    rtl.cleanup()
+  }
+})
+
+test('BUG-476 / BUG-482 SelectMenu 与 defaults.module.css：布局类挂外层 Menu wrapper，subRow 允许 wrap，compactGrid 走 @container', async () => {
+  const rtl = await loadRtl()
+  const store = makeStore([])
+  const { container } = rtl.render(createElement(DefaultsPanel, { sessionId: 's1', store, t }))
+  try {
+    const recencyBtn = container.querySelector('[data-testid=defaults-recency]')
+    assert.ok(recencyBtn, '缺少 defaults-recency 按钮')
+    const menuWrapper = recencyBtn.parentElement
+    assert.ok(menuWrapper && menuWrapper.tagName === 'SPAN', 'SelectMenu 外层应为 Menu wrapper <span>')
+    assert.match(menuWrapper.className, /controlGrow/, '布局类 controlGrow 必须挂在 outer <Menu> wrapper 上')
+    assert.doesNotMatch(recencyBtn.className, /controlGrow/, '布局类不得挂在内层 <button> 上')
+  } finally {
+    rtl.cleanup()
+  }
+
+  const cssText = readFileSync(join(ROOT, 'packages/deep-research-pack/src/client/defaults/defaults.module.css'), 'utf8')
+  assert.match(cssText, /\.selectButton\s*\{[^}]*width:\s*100%/, '.selectButton 必须声明 width: 100%')
+  assert.match(cssText, /\.subRow\s*\{[^}]*flex-wrap:\s*wrap/, '.subRow 必须允许 flex-wrap: wrap')
+  assert.match(cssText, /\.subRowCompact\s*\{[^}]*flex-wrap:\s*wrap/, '.subRowCompact 必须允许 flex-wrap: wrap')
+  assert.match(cssText, /container-type:\s*inline-size/, 'DefaultsPanel 容器必须声明 container-type: inline-size')
+  assert.match(cssText, /@container\s*\(max-width:\s*720px\)\s*\{\s*\.compactGrid\b/, '.compactGrid 必须走 @container (max-width: 720px)')
+  assert.doesNotMatch(cssText, /@media\s*\(max-width:\s*920px\)/, '.compactGrid 不得再使用 @media (max-width: 920px)')
 })

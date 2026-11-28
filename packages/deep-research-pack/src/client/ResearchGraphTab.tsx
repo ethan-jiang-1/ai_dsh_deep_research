@@ -26,12 +26,12 @@
  * 折算住 `plan-graph 折算件`（Team 图）与 `plan-index 折算件`（plan.md 解析）；本组件只画。fail-soft：空投影/空任务/缺 plan
  * 都退化为如实空态，不 throw。
  */
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { InputActions } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { countText } from '../lib/shared/i18n.ts'
 import type { TeamMemberProjection, TeamProjection, TeamTaskView } from '@deepseek-ai/dsh-experimental-agent-team/client'
-import { formatPlanNodeMention } from '../lib/events/research-references.ts'
+import { formatPlanNodeMention, parseResearchRefToken } from '../lib/events/research-references.ts'
 import {
   DEFAULT_ATTENTION_THRESHOLDS,
   attentionOf,
@@ -51,12 +51,11 @@ import {
   projectionPendingState,
   type GraphCoverage,
 } from '../lib/plan/graph-model.ts'
-import { assertNever } from '../lib/run/artifact-read.ts'
-import type { SnapshotState } from './research-graph/graph-state.ts'
+import { useContainerWidth } from './useContainerWidth.ts'
 import { useGraphFeed } from './research-graph/useGraphFeed.ts'
 import type { GraphNodeView, ResearchGraphTabProps } from './research-graph/types.ts'
-import { shortLabel } from './research-graph/format.ts'
-import { graphStateNote } from './research-graph/state-note.ts'
+import { formatClock, shortLabel } from './research-graph/format.ts'
+import { graphStateNote, snapshotDiffMessage } from './research-graph/state-note.ts'
 import { NodeCard } from './research-graph/NodeCard.tsx'
 import { GraphVersionRail } from './research-graph/GraphVersionRail.tsx'
 import { GraphNotices } from './research-graph/GraphNotices.tsx'
@@ -64,74 +63,77 @@ import { DagMap } from './research-graph/DagMap.tsx'
 import styles from './research-graph/graph.module.css'
 export type { ResearchGraphInjected, ResearchGraphTabProps } from './research-graph/types.ts'
 
-/** plan.md 只读表头附近（节点表在文首；缺文件合法）。 */
-
-
-
-
-
-
-/**
- * 差异卡里「旧图快照为何不可用」的文案（BUG-391）：按 SnapshotState 穷举——除 ready 外每个
- * 状态都要有话说，只有 loading/idle 才是「读取中」。旧实现把 missing 之外的全部折成加载中，
- * 于是 unreadable/empty/invalid 永远显示「旧图快照读取中…」。
- */
-function snapshotDiffMessage(state: SnapshotState, t: ResearchGraphTabProps['t']): string {
-  switch (state) {
-    case 'idle':
-    case 'loading':
-      return t('oldGraphLoading')
-    case 'missing':
-      return t('oldGraphUnread')
-    case 'empty':
-      return t('graphSnapshotEmpty', { version: '' })
-    case 'invalid':
-      return t('graphSnapshotInvalid', { version: '' })
-    case 'unreadable':
-      return t('graphSnapshotUnreadable', { version: '' })
-    case 'ready':
-      return t('oldGraphUnread')
-    default:
-      return assertNever(state)
+interface GraphTabInfo {
+  readonly sidebar?: { readonly fullscreen?: boolean }
+  readonly tab?: {
+    readonly navigation?: { readonly revision?: number; readonly params?: { readonly nodeId?: unknown } | undefined }
+    readonly actions?: { readonly bindCommands?: (c: { refresh: () => void }) => () => void }
   }
 }
-
-/** 本地时钟 `HH:MM:SS`（“最后刷新”用；不引入日期库）。 */
-function formatClock(ms: number): string {
-  const date = new Date(ms)
-  const pad = (value: number): string => String(value).padStart(2, '0')
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-}
-
-
-
 
 /**
  * 「研究图谱」页签体（只读观察）。
  * @param props - 槽标准 props + 注入面（readFile / openOwner）。
  */
 export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
-  const tabInfo = typeof (props as { useTabInfo?: () => { sidebar?: { fullscreen?: boolean }; tab?: { actions?: { bindCommands?: (c: { refresh: () => void }) => () => void } } } }).useTabInfo === 'function'
-    ? (props as { useTabInfo: () => { sidebar?: { fullscreen?: boolean }; tab?: { actions?: { bindCommands?: (c: { refresh: () => void }) => () => void } } } }).useTabInfo()
-    : undefined
+  const tabInfoHost = props as unknown as { readonly useTabInfo?: () => GraphTabInfo }
+  const tabInfo = typeof tabInfoHost.useTabInfo === 'function' ? tabInfoHost.useTabInfo() : undefined
   const isFullscreen = tabInfo?.sidebar?.fullscreen === true
+  const navNodeId = typeof tabInfo?.tab?.navigation?.params?.nodeId === 'string'
+    ? tabInfo.tab.navigation.params.nodeId
+    : null
+  const navRevision = tabInfo?.tab?.navigation?.revision ?? 0
   // 当前会话若是 teammate，读 Lead 的团队投影（TeamAction 同款；队员自己的投影没有整队视图）。
   const leadSessionId = props.useSession((snapshot) => snapshot.subagent?.address.parentSessionId) ?? props.sessionId
   const team: TeamProjection | undefined = props.useSessions((state) => state.projectionsBySession[leadSessionId]?.values.agentTeam)
   const statuses = props.useSessionStatus((state) => state)
+  const [rootEl, setRootEl] = useState<HTMLDivElement | null>(null)
+  const rootWidth = useContainerWidth(rootEl)
+  const dagWide = isFullscreen && (rootWidth === null || rootWidth >= 768)
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [insertedId, setInsertedId] = useState<string | null>(null)
+  const [scrollRequest, setScrollRequest] = useState<{ readonly id: string; readonly seq: number } | null>(null)
+  const cardRefs = useRef<Map<string, HTMLElement>>(new Map())
   const {
     boundSlug, plan, planText, planState, planVersion, snapshots, latestSnapshot, graphView, setGraphView, retry,
     snapshotPlan, snapshotState, showSnapshotPlan, setShowSnapshotPlan, planLoadedAt, followError,
     snapshotsState,
   } = useGraphFeed(props, leadSessionId)
+  const prevScopeRef = useRef<{ readonly lead: string; readonly slug: string | null }>({ lead: leadSessionId, slug: boundSlug })
+  useEffect(() => {
+    const prev = prevScopeRef.current
+    if (prev.lead === leadSessionId && prev.slug === boundSlug) return
+    const preserveNavBind = prev.lead === leadSessionId && prev.slug === null && boundSlug !== null && navNodeId !== null && navNodeId !== ''
+    prevScopeRef.current = { lead: leadSessionId, slug: boundSlug }
+    if (!preserveNavBind) setExpandedId(null)
+    setCopiedId(null)
+    setInsertedId(null)
+    setScrollRequest(null)
+  }, [leadSessionId, boundSlug, navNodeId])
   useEffect(() => {
     const bind = tabInfo?.tab?.actions?.bindCommands
     if (typeof bind !== 'function') return undefined
     return bind({ refresh: retry })
   }, [tabInfo, retry])
-  const [copiedId, setCopiedId] = useState<string | null>(null)
-  const [insertedId, setInsertedId] = useState<string | null>(null)
+  useEffect(() => {
+    if (navNodeId !== null && navNodeId !== '') {
+      setGraphView('current')
+      setExpandedId(navNodeId)
+    }
+  }, [navNodeId, navRevision, setGraphView])
+  useEffect(() => {
+    if (scrollRequest === null || graphView !== 'current') return
+    const target = cardRefs.current.get(`selected:${scrollRequest.id}`)
+      ?? cardRefs.current.get(`list:${scrollRequest.id}`)
+    if (target === undefined) return
+    target.scrollIntoView?.({ block: 'nearest' })
+    setScrollRequest(null)
+  }, [scrollRequest, graphView, expandedId])
+  const registerCardRef = useCallback((key: string, el: HTMLElement | null): void => {
+    if (el === null) cardRefs.current.delete(key)
+    else cardRefs.current.set(key, el)
+  }, [])
   const inputActions = (props as { inputActions?: InputActions }).inputActions
 
   // journal → 本会话可信绑定的 run bundle（只用于 plan 基址；不折活动流）。
@@ -151,6 +153,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const attention = attentionOf(tasks, memberStatus, Date.now(), DEFAULT_ATTENTION_THRESHOLDS, props.t)
   const counts = countsOf(tasks, memberStatus)
   const planNodes: readonly PlanNode[] = plan?.nodes ?? []
+  const planNodeById = new Map(planNodes.map((node) => [node.id, node]))
   const topPlanNodes: readonly PlanNode[] = (plan?.topLevel ?? planNodes)
     .filter((node, index, all) => all.findIndex((candidate) => candidate.id === node.id) === index)
   const childrenByParent = plan?.childrenByParent ?? new Map<string, readonly PlanNode[]>()
@@ -165,18 +168,21 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const coverage: GraphCoverage = coverageOf(plan, tasks, mappingIndex)
   const coverageWarning = coverageWarningOf(coverage, props.t)
   const unmappedTasks = planNodes.length > 0 ? mappingIndex.tasksOutsidePlan : []
+  const resolveExec = (task: TeamTaskView | undefined, fallbackOwner?: string) => {
+    const owner = task?.ownerName ?? fallbackOwner
+    const member = owner !== undefined ? memberByName.get(owner) : undefined
+    const running = member !== undefined ? statuses.get(member.id)?.running : undefined
+    const attentionItem = task !== undefined ? attention.find((entry) => entry.taskId === task.id) : undefined
+    return { owner, member, running, attentionItem }
+  }
 
   // 顶层图只画 parent 缺省的 active 节点；W3.1… 默认收在 W3 详情里（复合节点折叠；墓碑不进图）。
   const graphNodes: readonly GraphNodeView[] = planNodes.length > 0
     ? topPlanNodes.map((planNode) => {
       const task = taskByPlanId.get(planNode.id)
-      const owner = task?.ownerName ?? planNode.ownerRole
-      const member = owner !== undefined ? memberByName.get(owner) : undefined
-      const running = member !== undefined ? statuses.get(member.id)?.running : undefined
-      const attentionItem = task !== undefined ? attention.find((entry) => entry.taskId === task.id) : undefined
+      const { owner, member, running, attentionItem } = resolveExec(task, planNode.ownerRole)
       // 状态词表归 graph-model：未映射 / 失效 / plan-only 都显示“状态未知/无任务”，
-      // 绝不在没有映射时落回“未执行”。
-      // 投影未就绪时不给映射结论：这是“还没收到数据”，不是“映射缺口”。
+      // 绝不在没有映射时落回“未执行”；投影未就绪时不给映射结论。
       const state = teamReady
         ? planNodeStateOf(mappingIndex.mapping.get(planNode.id), running, attentionItem, props.t)
         : projectionPendingState(props.t)
@@ -196,10 +202,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       }
     })
     : tasks.map((task) => {
-      const owner = task.ownerName
-      const member = owner !== undefined ? memberByName.get(owner) : undefined
-      const running = member !== undefined ? statuses.get(member.id)?.running : undefined
-      const attentionItem = attention.find((entry) => entry.taskId === task.id)
+      const { owner, member, running, attentionItem } = resolveExec(task)
       return {
         id: task.id,
         label: task.subject ?? task.id,
@@ -216,7 +219,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     })
 
   const planDiff: PlanDiff | null = snapshotPlan !== null && plan !== null ? planDiffOf(snapshotPlan, plan, props.t) : null
-
+  const selectedNode = expandedId !== null ? graphNodes.find((n) => n.id === expandedId) ?? null : null
   const knownIds = new Set(graphNodes.map((node) => node.id))
   const hasEdges = graphNodes.some((node) => node.blockedBy.some((dep) => dep !== node.id && knownIds.has(dep)))
   const hasPlan = planNodes.length > 0
@@ -228,12 +231,18 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
   const nodeByTaskId = new Map<string, GraphNodeView>()
   for (const node of graphNodes) {
     if (node.task !== undefined) nodeByTaskId.set(node.task.id, node)
+    if (node.planNode !== undefined) {
+      for (const child of childrenByParent.get(node.planNode.id) ?? []) {
+        const childTask = taskByPlanId.get(child.id)
+        if (childTask !== undefined && !nodeByTaskId.has(childTask.id)) nodeByTaskId.set(childTask.id, node)
+      }
+    }
   }
 
   const focusNode = (nodeId: string): void => {
+    setGraphView('current')
     setExpandedId(nodeId)
-    if (typeof document === 'undefined') return
-    document.getElementById(`research-graph-${nodeId}`)?.scrollIntoView({ block: 'nearest' })
+    setScrollRequest((prev) => ({ id: nodeId, seq: (prev?.seq ?? 0) + 1 }))
   }
   const focusTask = (taskId: string): void => {
     const node = nodeByTaskId.get(taskId)
@@ -264,19 +273,33 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     })
   }
 
-  // 一键填入 `@drt_<slug>/W#.#` 到对话草稿，不自动发送（D18 只读边界）。
+  const canInsertReference = (nodeId: string): boolean => (
+    inputActions !== undefined
+    && boundSlug !== null
+    && parseResearchRefToken(formatPlanNodeMention(boundSlug, nodeId)) !== null
+  )
+
+  // 一键填入 `@drt_<slug>/W#.#` 到对话草稿，不自动发送（D18 只读边界；insertText 失败绝不 setDraft 清空用户草稿，BUG-479）。
   const insertReference = (node: GraphNodeView): void => {
-    if (inputActions === undefined) return
-    const text = boundSlug !== null ? formatPlanNodeMention(boundSlug, node.id) : node.id
+    if (inputActions === undefined || boundSlug === null) return
+    const text = formatPlanNodeMention(boundSlug, node.id)
+    if (parseResearchRefToken(text) === null) return
     const payload = `${text} `
     const span = inputActions.captureInsertion()
-    if (!inputActions.insertText(payload, span)) inputActions.setDraft(payload)
+    if (!inputActions.insertText(payload, span)) return
+    if (isFullscreen) props.toggleFullscreen?.()
     setInsertedId(node.id)
     setTimeout(() => { setInsertedId((current) => current === node.id ? null : current) }, 1800)
   }
 
+  const childStateOf = (childId: string) => {
+    if (!teamReady) return projectionPendingState(props.t)
+    const { running, attentionItem } = resolveExec(taskByPlanId.get(childId), planNodeById.get(childId)?.ownerRole)
+    return planNodeStateOf(mappingIndex.mapping.get(childId), running, attentionItem, props.t)
+  }
+
   // 有边/无边两条渲染分支共用同一张卡；此前两处逐字重复，改一处忘另一处会分叉。
-  const renderNodeCard = (node: GraphNodeView) => (
+  const renderNodeCard = (node: GraphNodeView, slot: 'selected' | 'list') => (
     <NodeCard
       key={node.id}
       node={node}
@@ -285,10 +308,11 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       copied={copiedId === node.id}
       onCopy={() => { copyReference(node) }}
       inserted={insertedId === node.id}
-      {...(inputActions !== undefined ? { onInsertRef: () => { insertReference(node) } } : {})}
+      {...(canInsertReference(node.id) ? { onInsertRef: () => { insertReference(node) } } : {})}
       {...(node.member !== undefined ? { onOpenOwner: () => { openOwner(node.member as TeamMemberProjection) } } : {})}
+      cardRef={(el) => { registerCardRef(`${slot}:${node.id}`, el) }}
       children={node.planNode !== undefined ? childrenByParent.get(node.planNode.id) ?? [] : []}
-      childStateOf={(childId) => (teamReady ? planNodeStateOf(mappingIndex.mapping.get(childId), undefined, undefined, props.t) : projectionPendingState(props.t))}
+      childStateOf={childStateOf}
       leadSessionId={leadSessionId}
       useSessions={props.useSessions}
       useSessionStatus={props.useSessionStatus}
@@ -297,10 +321,9 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
     />
   )
 
-
   return (
     // 滚动义务在页签体自己（vendor .tabBody = overflow:hidden 的定高 flex 列——同状态页/终稿页）。
-    <div className={styles.tabRoot}>
+    <div ref={setRootEl} className={styles.tabRoot}>
       <div className={styles.tabHeader}>
         <strong className={styles.tabTitle}>{props.t('graphHeader')}</strong>
         <span className={styles.readonlyBadge}>{props.t('graphReadonly')}</span>
@@ -329,7 +352,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       />
 
       {/* 结构差异：只比 id/lifecycle/deps（重编号靠 superseded_by，不解析散文）。 */}
-      {graphView === 'diff' && (
+      {graphView === 'diff' && latestSnapshot !== null && (
         <div className={styles.cardBox}>
           <div className={styles.diffHeading}>{props.t('graphStructDiff', { from: String(latestSnapshot) })}</div>
           {planDiff === null ? (
@@ -392,23 +415,27 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         </div>
       )}
 
-      {hasEdges && graphView === 'current' && (() => {
-        const selectedNode = expandedId !== null ? graphNodes.find((n) => n.id === expandedId) ?? null : null
-        return (
-          <>
-            <DagMap nodes={graphNodes} selectedId={expandedId} childCounts={childCounts} fullscreen={isFullscreen} onSelect={setExpandedId} t={props.t} />
-            <div className={styles.edgesHint}>
-              {props.t('graphEdgesHint')}
-            </div>
-            {selectedNode !== null && (
-              <section className={styles.selectedNodeSection} data-testid="graph-selected-node">
-                <div className={styles.sectionEyebrow}>{props.t('graphSelectedNode')}</div>
-                {renderNodeCard(selectedNode)}
-              </section>
-            )}
-          </>
-        )
-      })()}
+      {hasEdges && graphView === 'current' && (
+        <>
+          <DagMap
+            nodes={graphNodes}
+            selectedId={selectedNode?.id ?? null}
+            childCounts={childCounts}
+            wide={dagWide}
+            onSelect={(id) => { setExpandedId((current) => (current === id ? null : id)) }}
+            t={props.t}
+          />
+          <div className={styles.edgesHint}>
+            {props.t('graphEdgesHint')}
+          </div>
+          {selectedNode !== null && (
+            <section className={styles.selectedNodeSection} data-testid="graph-selected-node">
+              <div className={styles.sectionEyebrow}>{props.t('graphSelectedNode')}</div>
+              {renderNodeCard(selectedNode, 'selected')}
+            </section>
+          )}
+        </>
+      )}
 
       {graphView === 'current' && (hasEdges ? (
         <details className={styles.allNodesDetails} data-testid="graph-all-nodes">
@@ -421,7 +448,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
                 <div className={styles.waveTitle}>
                   {props.t('graphWaveTitle', { index: String(wave.level + 1) })}{wave.tasks.length > 1 ? props.t('parallelCount', { count: String(wave.tasks.length) }) : ''}
                 </div>
-                {wave.tasks.map((node) => renderNodeCard(node))}
+                {wave.tasks.map((node) => renderNodeCard(node, 'list'))}
               </section>
             ))}
           </div>
@@ -429,7 +456,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
       ) : graphNodes.length > 0 && (
         <section className={styles.selectedNodeSection}>
           <div className={styles.waveTitle}>{props.t('graphNoEdges')}</div>
-          {graphNodes.map((node) => renderNodeCard(node))}
+          {graphNodes.map((node) => renderNodeCard(node, 'list'))}
         </section>
       ))}
 

@@ -9,7 +9,7 @@ description: 综合写作（wave2 语义）方法论：纯综合先行、finding
 
 ## 流程
 
-1. **纯综合（禁止新搜索）**：通读本 run bundle（drt_<slug>/）的 evidence/ 全部文件与 topics.md，写 findings.md——每个 finding 一个块：`## F<n>：<结论一句话>`（标题必须带冒号），块内每行一个字段：`- 支撑证据：evidence/<file>.md`、`- lenses：<哪些面支撑>`、`- lens_gaps：<哪些面没覆盖>`、`- gap：supported|needs_search|contradicted|insufficient`。一行式 `- F1｜…` 不是合法形态。
+1. **纯综合（禁止新搜索）**：写作 `findings.md` 与 `final.md` 前必须先加载本 skill，通读本 run bundle（drt_<slug>/）的 evidence/ 全部文件与 topics.md，写 findings.md——每个 finding 一个块：`## F<n>：<结论一句话>`（标题必须带冒号），块内每行一个字段：`- 支撑证据：evidence/<file>.md`（完整相对路径，禁写 `t1-a` 类简写前缀）、`- lenses：<哪些面支撑>`、`- lens_gaps：<哪些面没覆盖>`、`- gap：supported|needs_search|contradicted|insufficient`。一行式 `- F1｜…` 或无冒号列表 `- **F0**` 不是合法形态。
 2. **gap 定向补搜**：只对 `needs_search` 的 finding 派一次定向任务（给 analyst 或 subagent，说清找什么、什么算找到）。补完更新 findings.md，**只补一轮**——补了还缺就把该 finding 标 `insufficient` 并在报告里如实呈现。**未取得 ≠ 没有**：拿不到的项，报告里只能落「未取得/无法判定」（写明试过的渠道），**禁止转写成「没有/不提供」**——取证可达性不对称是常态（cn-dr-products 实证：洋厂商一手定价页全域 403，"查不到"进无法判定类），查不到 ≠ 官方没有。
 3. **写 run 根 final.md 当前版**（交付时忠实复制为 final/vN 副本，present 指它）：**决策摘要首屏先行**——六段：
    答案/建议及适用条件（成立条件、口径、有效期；证据不足以支撑建议时如实写
@@ -21,9 +21,8 @@ description: 综合写作（wave2 语义）方法论：纯综合先行、finding
    retrieved_at；来源发布日期以摘录口径为准）。**快速事实型 run 首屏缩略**为
    答案 + 口径 + 依据 + 限制，不强行填满业务选项表。
 4. **来源链格式**：每条关键结论后附 `[来源: evidence/<file>.md]`；来源清单节列出全部 evidence 文件（路径 + 一句话说明 + retrieved_at）。
-5. **交 critic**：review.md 拿到 readiness: PASS 后，才向用户提交审阅建议（HITL2）。
-   呈卡前核对 plan 的 `task_id` 列：每个 active 节点已有真实 `task-N` 或显式 `plan-only`——
-   空行会让研究图谱只显示「状态未知（未映射 task_id）」，别留给用户看图才发现（BUG-043）。
+5. **交 critic**：claim 级复核时，`review/verdicts-r<N>.json` 的 `<N>` 为**审查轮次**（r1/r2）而非批号——同一轮多批（每批 3–5 条、串行等 completion notice 到齐再派下一批）必须合写进同一个 `verdicts-r1.json` 的 `batches[]` 与 `verdicts[]`，禁止把批 1/批 2 拆写成 `verdicts-r1.json`/`verdicts-r2.json`。review.md 拿到 readiness: PASS 后，才向用户提交审阅建议（HITL2）。
+   呈卡前核对四件事：① `plan.md` 的 `task_id` 列每个 active 节点已有真实 `task-N` 或显式 `plan-only`、`## 剩余工作` `state` 仅用四值闭集（`待派发/进行中/完成/阻塞`）——空行会让研究图谱只显示「状态未知（未映射 task_id）」，别留给用户看图才发现（BUG-043）；② 对 `verdicts` 数组**逐条点数**四值计数（验证 `supported + partially_supported + unsupported + unverifiable === total`）并按 `evidence/*.md` 盘上实数汇报总卡数（含 `xcheck-*`），禁止口算或漏算跨行卡；③ 核对 `final.md` 末两节（`## 下一版优先项` 与 `## 什么会改变建议`）均已在场且正文（去表格/代码/URL）达 `protocol.output.length.min`；④ 凡接受低于 `evidence_threshold` 的关键源或节结构偏离，须同步追记进 `protocol.json` 的 `deviations[]`（`question.md §Protocol` 原样从 JSON 抄录 `sections`，不改译）。
    HITL2 卡片的**审阅摘要 ≤ 200 字**（约 4 行）——完整分析进 report 正文或 journal，卡片题干只留
    判决所需（结论一句话 + readiness 状态 + 最大残留）。实测依据（八场 77 张卡）：HITL1 卡全部
    ≤ 400 字无事故；6 张超长卡全是 HITL2（最长 1280 字），把选项挤出视口、人要滚动才能答题。

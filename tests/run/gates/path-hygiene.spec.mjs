@@ -79,3 +79,31 @@ test('portableBundlePath：bundleDir 经 symlink、present 是 realpath → 仍�
     rmSync(base, { recursive: true, force: true })
   }
 })
+
+// 负例留证 2026-11-28：BUG-483——evidence/*.md `## 原文摘录` 的逐字外部报错栈（/home/mtp/...）被
+// path-hygiene 误判为本机宿主泄露；红配方：删去 scanHomePaths 对 evidence 原文摘录块豁免 → 本例红。
+test('BUG-483 scanHomePaths：豁免 evidence/*.md `## 原文摘录` 外部引文块，但仍拦截解读节与其它文件的本机路径', () => {
+  const quoteTraceback = [
+    '---',
+    'source_url: https://github.com/Ascend/pytorch/issues/99',
+    '---',
+    '## 原文摘录',
+    '',
+    '> OSError: /home/mtp/Ascend/nnal/atb/latest/libtbe_adapter.so: undefined symbol',
+    '',
+    '## 解读',
+    '',
+    '正常解读无宿主路径。',
+  ].join('\n')
+  assert.deepEqual(scanHomePaths([{ path: 'evidence/t4-cann.md', text: quoteTraceback }]), [])
+
+  // 负控1：evidence/*.md 的 ## 解读 节（agent 自写）出现 /Users/... 必须仍红
+  const badAnalysis = quoteTraceback.replace('正常解读无宿主路径。', '本地副本见 /Users/alice/tmp/debug.txt')
+  const analysisHits = scanHomePaths([{ path: 'evidence/t4-cann.md', text: badAnalysis }])
+  assert.equal(analysisHits.length, 1)
+  assert.equal(analysisHits[0].line, 10)
+
+  // 负控2：final.md 的 blockquote 出现 /home/... 必须仍红（只豁免 evidence/*.md 的原文摘录）
+  const finalHits = scanHomePaths([{ path: 'final.md', text: '## 原文摘录\n> /home/alice/secret\n' }])
+  assert.equal(finalHits.length, 1)
+})

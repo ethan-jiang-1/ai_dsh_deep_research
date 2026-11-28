@@ -59,7 +59,7 @@ test('registerResearchCommands：注册 /research-defaults 装饰 + /lens /metho
   const defOpts = await defSpec.options({ sessionId: 's1' }, new AbortController().signal)
   assert.ok(defOpts.some((o) => o.id === 'depth:standard' && o.active === true))
   await defSpec.onSelect({ id: 'depth:deep', label: '深度档' }, { sessionId: 's1' })
-  assert.deepEqual(executed, [['s1', '/research-defaults set {"effort":"deep"}']])
+  assert.deepEqual(executed, [['s1', '/research-defaults set {"patch":{"effort":"deep"},"expectedRevision":2}']])
 
   // 验 /lens 含 8 条内置透镜
   const lensOpts = await registered.get('lens').ui.options({ sessionId: 's1' }, new AbortController().signal)
@@ -130,7 +130,7 @@ test('registerResearchShortcuts：三条快捷键全部通过 DSH 真实协议�
 test('registerResearchTriggers / researchReferenceRule：@ 补全证据卡与计划节点并直达预览', async () => {
   const sources = []
   const openedEv = []
-  let openedGraph = 0
+  const openedGraph = []
   const run = makeMaliciousRunSource({
     tree: {
       drt_alpha: {
@@ -159,7 +159,7 @@ test('registerResearchTriggers / researchReferenceRule：@ 补全证据卡与计
     t: tZh,
     runSource: () => run.source,
     openEvidence: (sid, dir, card) => { openedEv.push([sid, dir, card]) },
-    openGraph: () => { openedGraph += 1 },
+    openGraph: (nodeId) => { openedGraph.push(nodeId) },
   })
 
   assert.equal(sources.length, 1)
@@ -176,9 +176,49 @@ test('registerResearchTriggers / researchReferenceRule：@ 补全证据卡与计
   assert.deepEqual(openedEv, [['s1', 'drt_alpha', 'sec-10k.md']])
 
   assert.equal(src.openReference({ sessionId: 's1' }, { ref: '@drt_alpha/W1', appearance: 'file' }), true)
-  assert.equal(openedGraph, 1)
+  assert.deepEqual(openedGraph, ['W1'], 'BUG-479：点击计划节点 @ 引用必须向 openGraph 透传 nodeId')
 
   const node = researchReferenceRule.match('请复核 @drt_alpha/evidence/sec-10k.md 的口径', 0)
   assert.equal(node?.id, 'researchRef')
   assert.equal(node?.data.cardName, 'sec-10k.md')
+})
+
+// 负例留证 2026-11-28：BUG-470——冷会话未预热时 phase='loading'，/research-defaults 弹窗全标「自动」；
+// 且 Host 返回 kind='error' 时 executeDefaultsCommand 吞错不抛出。
+// 红配方：去掉 options() 里的 loading 预热 refresh → 本例红（refreshCalls=0、active 全错）。
+test('BUG-470 registerResearchCommands：冷会话打开 /research-defaults 自动 refresh 并正确高亮 active，失败不静默', async () => {
+  const decorated = new Map()
+  let snap = { phase: 'loading', value: { revision: 0 }, revision: 0 }
+  let refreshCalls = 0
+  const ctx = makeFakeContext({
+    commandUi: {
+      register: () => () => {},
+      decorate: (d) => { decorated.set(d.name, d); return () => { decorated.delete(d.name) } },
+    },
+  })
+
+  registerResearchCommands(ctx, {
+    t: tZh,
+    defaultsStore: {
+      getSnapshot: () => snap,
+      refresh: async () => {
+        refreshCalls += 1
+        snap = { phase: 'ready', value: { effort: 'deep', revision: 4 }, revision: 4 }
+      },
+    },
+    readLibrary: async () => ({ state: 'absent' }),
+    executeDefaultsCommand: async () => ({ ok: false, error: 'error stale revision=5' }),
+    openHubTab: () => {},
+  })
+
+  const defSpec = decorated.get('research-defaults').ui
+  const opts = await defSpec.options({ sessionId: 's-cold' }, new AbortController().signal)
+  assert.equal(refreshCalls, 1, '冷会话首次打开弹窗应先 refresh')
+  assert.ok(opts.some((o) => o.id === 'depth:deep' && o.active === true), 'refresh 后应高亮磁盘当前档位')
+
+  await assert.rejects(
+    () => defSpec.onSelect({ id: 'depth:quick', label: '快速档' }, { sessionId: 's-cold' }),
+    /stale/,
+    '命令返回失败时 onSelect 必须显性抛错不静默',
+  )
 })

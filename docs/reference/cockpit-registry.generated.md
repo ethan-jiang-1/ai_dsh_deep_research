@@ -87,12 +87,14 @@
 | `src/client/ResearchStatusTab.tsx` | 「研究状态」页签体（阶段自适应 3 层驾驶舱）。 |
 | `src/client/ResearchTabMenuItem.tsx` | ResearchTabMenuItem.tsx — 右栏研究页签动作菜单尾部项（sidebar.right.tab.menu.item）： |
 | `src/client/ResearchToolCard.tsx` | 研究语义工具卡（S2 + R2.3 富语义升级）： |
+| `src/client/rightbar-nav.ts` | rightbar-nav.ts — 右栏跨会话资源/页签导航闭包工厂（BUG-459 / BUG-471 / BUG-479）。 |
 | `src/client/run-source-browser.ts` | run-source-browser.ts —— RunSource 的浏览器适配器（run-context 的 client 半）。 |
 | `src/client/session-follow.ts` | session-follow.ts — journal follow 的装配层（wire 帧 → 观察面领域帧）。 |
 | `src/client/session-stream-store.ts` | session-stream-store.ts —— 按 sessionId 引用计数复用单条 remote.session.follow 流。 |
 | `src/client/StartCard.tsx` | StartCard — 意图优先首屏起步卡（D38 / X5）： |
 | `src/client/startup.ts` | client/startup — 首屏工作区记忆与选择的纯谓词（D40）。 |
 | `src/client/styles.ts` | styles.ts — 驾驶舱注入的两段页面级样式（从 client/index.ts 拆出，2026-11-03 审计 P4）。 |
+| `src/client/useContainerWidth.ts` | useContainerWidth.ts — 追踪容器元素实测宽度的共享 hook（BUG-472 / BUG-477 / BUG-482）。 |
 | `src/client/workspace-boot.ts` | workspace-boot.ts — 启动期工作区选择/恢复（首屏 onboarding + 记忆恢复）。 |
 | `src/client/workspace-files.ts` | workspace-files.ts — workspaceFiles 读面闭包（bundle 渐进面数据通道）。 |
 

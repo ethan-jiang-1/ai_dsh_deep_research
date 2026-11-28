@@ -16,7 +16,7 @@ test('researchTurnDefinition：捕获 protocol.json / review.md 与 deliverables
   assert.deepEqual(researchTurnDefinition.match(turnStart), { id: '2', role: 'start' })
   let state = researchTurnDefinition.start({}, { event: turnStart, role: 'start', location: { kind: 'session' } }, { previous: () => undefined })
 
-  const protoCall = { type: 'tool/call', seq: 2, data: { turn: 2, name: 'write_file', arguments: JSON.stringify({ path: 'drt_x/protocol.json' }) } }
+  const protoCall = { type: 'tool/call', seq: 2, data: { turn: 2, name: 'write', arguments: JSON.stringify({ file_path: 'drt_x/protocol.json' }) } }
   state = researchTurnDefinition.update({ state }, { event: protoCall, role: 'update', location: { kind: 'session' } })
 
   const presentEv = { type: 'deliverables/presented', seq: 5, data: { turn: 2, files: [{ path: 'drt_x/final/v1.md' }] } }
@@ -27,6 +27,45 @@ test('researchTurnDefinition：捕获 protocol.json / review.md 与 deliverables
   assert.equal(data.value.milestones.length, 2)
   assert.equal(data.value.milestones[0]?.kind, 'protocol')
   assert.equal(data.value.milestones[1]?.kind, 'delivered')
+})
+
+// 负例留证 2026-11-28：BUG-474——research-turn.ts 硬编码了非 DSH 工具名 write_file/edit_file，
+// 且漏掉 filePath/file 字段与对象形态 arguments，导致真实 write/edit/multiedit 永不触发 protocol/review 里程碑。
+// 红配方：把 WRITE_TOOLS 改回只认 write_file/edit_file → 本例红（milestones.length=0）。
+test('BUG-474 researchTurnDefinition：识别真实 DSH write/edit/multiedit 与 filePath/对象参数，并拒绝 read 与非 drt_ 路径', () => {
+  const turnStart = { type: 'turn/start', seq: 1, data: { turn: 5 } }
+  let state = researchTurnDefinition.start({}, { event: turnStart, role: 'start', location: { kind: 'session' } }, { previous: () => undefined })
+
+  // 真实 wire：write + 对象参数 + filePath
+  state = researchTurnDefinition.update({ state }, {
+    event: { type: 'tool/call', seq: 2, data: { turn: 5, name: 'write', arguments: { filePath: 'drt_demo/protocol.json' } } },
+    role: 'update',
+    location: { kind: 'session' },
+  })
+  // 真实 wire：multiedit + JSON 字符串 + file_path
+  state = researchTurnDefinition.update({ state }, {
+    event: { type: 'tool/call', seq: 3, data: { turn: 5, name: 'multiedit', arguments: JSON.stringify({ file_path: 'archive/drt_demo/review.md' }) } },
+    role: 'update',
+    location: { kind: 'session' },
+  })
+  // 负控：read 工具与非 drt_ 目录下的无关文件不得触发里程碑
+  state = researchTurnDefinition.update({ state }, {
+    event: { type: 'tool/call', seq: 4, data: { turn: 5, name: 'read', arguments: { file_path: 'drt_other/protocol.json' } } },
+    role: 'update',
+    location: { kind: 'session' },
+  })
+  state = researchTurnDefinition.update({ state }, {
+    event: { type: 'tool/call', seq: 5, data: { turn: 5, name: 'edit', arguments: { path: 'notes/review.md' } } },
+    role: 'update',
+    location: { kind: 'session' },
+  })
+
+  const data = researchTurnDefinition.buildLocationData({ state }, 'turn', null)
+  assert.ok(data !== null)
+  assert.deepEqual(
+    data.value.milestones.map((m) => [m.kind, m.path]),
+    [['protocol', 'drt_demo/protocol.json'], ['review', 'archive/drt_demo/review.md']],
+  )
 })
 
 test('ResearchMilestoneCard：无里程碑返回 null；有交付里程碑渲染阅读终稿按钮', () => {

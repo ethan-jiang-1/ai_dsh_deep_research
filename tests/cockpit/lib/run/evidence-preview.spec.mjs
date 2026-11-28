@@ -110,3 +110,12 @@ test('extractTocHeadings / activeTocHeadingIndex：跳过围栏代码并精确�
   assert.equal(activeTocHeadingIndex([80, 200], 48), 0)
   assert.equal(activeTocHeadingIndex([], 48), 0)
 })
+
+// 负例留证 2026-11-28：BUG-473——activeTocHeadingIndex 在遇到未匹配标题的 Infinity 时直接 break，
+// 导致其后所有章节高亮卡死在前一节；normalizeHeadingText 未剥离 _斜体_ 与尾 #。
+// 红配方：把 !Number.isFinite(off) 的 continue 改回 break → 本例红（返回 0 而非 2）。
+test('BUG-473 activeTocHeadingIndex 与 normalizeHeadingText：跳过 Infinity 缺口并剥离下划线斜体与尾 #', () => {
+  assert.equal(activeTocHeadingIndex([-200, Number.POSITIVE_INFINITY, -40, 120], 56), 2)
+  assert.equal(normalizeHeadingText('一、_核心_指标 ###'), '一、核心指标')
+  assert.equal(normalizeHeadingText('__重点__ $x_1$ ##'), '重点 x_1')
+})

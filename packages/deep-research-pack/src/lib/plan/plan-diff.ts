@@ -92,12 +92,14 @@ export function planDiffOf(previous: PlanIndex | null | undefined, next: PlanInd
       kept.push(oldNode.id)
       continue
     }
-    // 旧号在 next 里被墓碑化，且墓碑指向的 active 节点在场 → 重编号/并号。
+    // 旧号在 next 里被墓碑化，且墓碑指向的 active 节点在场 → 重编号/并号/一拆多（BUG-478）。
     const tombstoneLifecycle = nextTombstones.get(oldNode.id)
-    const successor = successorsOf(tombstoneLifecycle).find((id) => newById.has(id))
-    if (successor !== undefined) {
-      aliases.push({ from: oldNode.id, to: successor })
-      aliasTargets.add(successor)
+    const nextTargets = [...new Set(successorsOf(tombstoneLifecycle).filter((id) => newById.has(id)))]
+    if (nextTargets.length > 0) {
+      for (const target of nextTargets) {
+        aliases.push({ from: oldNode.id, to: target })
+        aliasTargets.add(target)
+      }
       continue
     }
     removed.push(oldNode.id)

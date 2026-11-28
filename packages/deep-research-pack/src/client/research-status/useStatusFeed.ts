@@ -9,7 +9,7 @@
 // 不把"读失败"渲染成"没有数据"——那是各视图自己的措辞责任（BUG-045 的原则）。
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type SetStateAction } from 'react'
 import { deriveAnchors, foldHitlPending, type HitlState } from '../../lib/events/hitl-fold.ts'
-import { deriveSteps, latestRunVersion } from '../../lib/run/run-fold.ts'
+import { deriveSteps, latestRunVersion, type RunStepInputs } from '../../lib/run/run-fold.ts'
 import { assertNever, artifactBodyIssueOf, readArtifact, readStateOf, type StatusReads } from '../../lib/run/artifact-read.ts'
 import { foldEvidenceMatrix, type EvidenceCardSample } from '../../lib/run/evidence-matrix.ts'
 import { readProtocolContract } from '../../lib/run/protocol-fold.ts'
@@ -67,7 +67,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
   const { sessionId, follow, runSource, revealStatusTab, t, useSessions } = props
   const [state, dispatch] = useReducer(reduceStatusFeed, INITIAL_STATUS_FEED_STATE)
   const {
-    rows, hitl, journalEvents, face, unbound, trust, journalSeen, receiptDelivery, receiptDangling,
+    hitl, journalEvents, face: rawFace, unbound, trust, journalSeen, receiptDelivery, receiptDangling,
     kickoffHold, error, reads, reviewVerdict, reviewDetail, scanSettled, memberSummaries,
   } = state
   // 时间推进面（BUG-351）：静默阈值必须能在观察期间跨过，不能把 now 冻在 memo 里。
@@ -117,7 +117,6 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           dispatch({
             kind: 'journal-frame',
             events,
-            rows: foldActivityRows(events, t),
             hitl: next,
             trust: nextTrust,
           })
@@ -129,7 +128,7 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
       }
     })()
     return () => { controller.abort() }
-  }, [sessionId, follow, revealStatusTab, t])
+  }, [sessionId, follow, revealStatusTab])
 
   // 切换会话时重开状态页签（F1）：仅在"上一个会话正被观察"时触发；初始挂载与
   // 未观察会话之间的切换不动作（不覆盖用户刻意收起的常态——只在观察被切断时续上）。
@@ -247,8 +246,9 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           : []
         // 回执的「声称」必须用盘上在场事实核对（BUG-424）：声明了 final/vN 而该版本不在场，
         // 不得宣布已交付——回执只能自证「曾这样写」，不能自证「文件还在」。
+        // 仅在 final/ 目录可读（finalState === 'ok'）时判定悬空（BUG-475）：读失败不得折成空列表误报。
         const declaredVersion = receiptArt.state === 'ok' ? receiptDeclaredVersionOf(receiptArt.value) : null
-        const danglingReceipt = declaredVersion !== null && !finalFileNames.includes(`v${declaredVersion}.md`)
+        const danglingReceipt = finalState === 'ok' && declaredVersion !== null && !finalFileNames.includes(`v${declaredVersion}.md`)
         const nextReceiptDelivery = receiptArt.state === 'ok' && !danglingReceipt
           ? deliveryFromReceipt(receiptArt.value, boundSlug)
           : null
@@ -291,6 +291,17 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
           : evidenceCount === 0 && (evidenceEntries.length > 0 || evidenceFailedLog)
             ? (evidenceUnreadableCount > 0 ? 'unreadable' : evidenceFailedLog && evidenceEmptyCount === 0 ? 'failed-only' : 'empty')
             : null
+        const stepInputs: RunStepInputs = {
+          question: questionIssue !== null ? 'unknown' : (questionArt.state === 'ok' && questionBody !== null ? 'present' : 'absent'),
+          team: questionArt.state === 'ok' && questionBody !== null ? 'present' : 'absent',
+          leads: leadsIssue !== null ? 'unknown' : (leadsBody ? 'present' : 'absent'),
+          evidence: evidenceIssue !== null ? 'unknown' : evidenceCount,
+          findings: findingsIssue !== null ? 'unknown' : (findingsBody ? 'present' : 'absent'),
+          review: nextReviewVerdict === 'unconfirmed' || nextReviewVerdict === 'conflict'
+            ? 'unknown'
+            : (nextReviewVerdict === 'pass' || nextReviewVerdict === 'fail' ? 'present' : 'absent'),
+          final: finalBody ? 'present' : 'absent',
+        }
         dispatch({
           kind: 'scan-succeeded',
           receiptDelivery: nextReceiptDelivery,
@@ -321,17 +332,8 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
             // 部分卡读失败不得因为「至少有一张可读」被吞掉（BUG-388）：计数照给可读卡，另记缺口数。
             evidenceUnreadable: evidenceUnreadableCount,
             finalBodyIssue: artifactBodyIssueOf(finalArt.state, finalBody),
-            steps: deriveSteps({
-              question: questionIssue !== null ? 'unknown' : (questionArt.state === 'ok' && questionBody !== null ? 'present' : 'absent'),
-              team: questionArt.state === 'ok' && questionBody !== null ? 'present' : 'absent',
-              leads: leadsIssue !== null ? 'unknown' : (leadsBody ? 'present' : 'absent'),
-              evidence: evidenceIssue !== null ? 'unknown' : evidenceCount,
-              findings: findingsIssue !== null ? 'unknown' : (findingsBody ? 'present' : 'absent'),
-              review: nextReviewVerdict === 'unconfirmed' || nextReviewVerdict === 'conflict'
-                ? 'unknown'
-                : (nextReviewVerdict === 'pass' || nextReviewVerdict === 'fail' ? 'present' : 'absent'),
-              final: finalBody ? 'present' : 'absent',
-            }, t),
+            steps: deriveSteps(stepInputs),
+            stepInputs,
             evidenceCount,
             delivered: finalBody,
             versions,
@@ -355,7 +357,14 @@ export function useStatusFeed(props: ResearchStatusTabProps): StatusFeed {
     void scan()
     const timer = setInterval(() => { void scan() }, REFRESH_MS)
     return () => { stopped = true; clearInterval(timer); scanController?.abort() }
-  }, [sessionId, trust, journalSeen, runSource, t, retryNonce])
+  }, [sessionId, trust, journalSeen, runSource, retryNonce])
+
+  // 本地化文案投影（BUG-475）：t 只进入 useMemo，切语言不重连流也不重扫磁盘。
+  const rows = useMemo(() => foldActivityRows(journalEvents, t), [journalEvents, t])
+  const face = useMemo(
+    () => (rawFace === null ? null : rawFace.stepInputs === undefined ? rawFace : { ...rawFace, steps: deriveSteps(rawFace.stepInputs, t) }),
+    [rawFace, t],
+  )
 
   // 锚点 = 混合折算（尾窗约束的实测产物，RFC cockpit-flow-face）：passed 态由文件事实承载
   // （question.md/final.md 在场），pending 态由 journal 尾窗承载——face 缺席时退化为纯尾窗判定。

@@ -5,6 +5,7 @@
  */
 import { isEvidenceCardName } from '../run/artifact-content.ts'
 import type { PackTranslate } from '../shared/i18n.ts'
+import { parseCommandOutcome } from '../workspace/research-defaults.ts'
 
 export type ResearchRefTarget =
   | { readonly kind: 'evidence'; readonly slug: string; readonly cardName: string; readonly relPath: string; readonly raw: string }
@@ -88,29 +89,58 @@ export function formatPlanNodeMention(slug: string, nodeId: string): string {
   return `@drt_${slug}/${nodeId}`
 }
 
+function setDefaultsCommandLine(patch: Record<string, unknown>, revision: number | null): string {
+  const payload = revision !== null && Number.isInteger(revision) && revision >= 0
+    ? { patch, expectedRevision: revision }
+    : { patch }
+  return `/research-defaults set ${JSON.stringify(payload)}`
+}
+
 /** 将 `/research-defaults` popupSelect 选项 id 翻译为 Host `/research-defaults` 命令行。 */
 export function defaultsCommandLineForOption(optionId: string, revision: number | null): string | null {
   const revSuffix = revision !== null && Number.isInteger(revision) && revision >= 0
     ? ` revision=${String(revision)}`
     : ''
   switch (optionId) {
-    case 'depth:quick': return `/research-defaults set {"effort":"quick"}`
-    case 'depth:standard': return `/research-defaults set {"effort":"standard"}`
-    case 'depth:deep': return `/research-defaults set {"effort":"deep"}`
+    case 'depth:quick': return setDefaultsCommandLine({ effort: 'quick' }, revision)
+    case 'depth:standard': return setDefaultsCommandLine({ effort: 'standard' }, revision)
+    case 'depth:deep': return setDefaultsCommandLine({ effort: 'deep' }, revision)
     case 'depth:auto': return `/research-defaults unset effort${revSuffix}`
-    case 'output:full_report': return `/research-defaults set {"output":{"shape":"full_report"}}`
-    case 'output:one_page_memo': return `/research-defaults set {"output":{"shape":"one_page_memo"}}`
-    case 'output:comparison_table': return `/research-defaults set {"output":{"shape":"comparison_table"}}`
-    case 'output:landscape_map': return `/research-defaults set {"output":{"shape":"landscape_map"}}`
-    case 'output:timeline': return `/research-defaults set {"output":{"shape":"timeline"}}`
-    case 'output:quick_answer': return `/research-defaults set {"output":{"shape":"quick_answer"}}`
+    case 'output:full_report': return setDefaultsCommandLine({ output: { shape: 'full_report' } }, revision)
+    case 'output:one_page_memo': return setDefaultsCommandLine({ output: { shape: 'one_page_memo' } }, revision)
+    case 'output:comparison_table': return setDefaultsCommandLine({ output: { shape: 'comparison_table' } }, revision)
+    case 'output:landscape_map': return setDefaultsCommandLine({ output: { shape: 'landscape_map' } }, revision)
+    case 'output:timeline': return setDefaultsCommandLine({ output: { shape: 'timeline' } }, revision)
+    case 'output:quick_answer': return setDefaultsCommandLine({ output: { shape: 'quick_answer' } }, revision)
     case 'output:auto': return `/research-defaults unset output${revSuffix}`
-    case 'source:primary_first': return `/research-defaults set {"source":{"authority":"primary_first"}}`
-    case 'source:authoritative_secondary': return `/research-defaults set {"source":{"authority":"authoritative_secondary"}}`
-    case 'source:any': return `/research-defaults set {"source":{"authority":"any"}}`
+    case 'source:primary': return setDefaultsCommandLine({ source: { authority: 'primary' } }, revision)
+    case 'source:secondary': return setDefaultsCommandLine({ source: { authority: 'secondary' } }, revision)
+    case 'source:any': return setDefaultsCommandLine({ source: { authority: 'any' } }, revision)
     case 'reset:clear': return `/research-defaults clear${revSuffix}`
     default: return null
   }
+}
+
+/** 解释 `remote.commands.execute('/research-defaults …')` 返回值：RPC 与命令层任一失败均显性返回 `{ ok: false, error }`（BUG-470）。 */
+export function interpretDefaultsCommandResult(result: {
+  readonly ok: boolean
+  readonly value?: { readonly result?: { readonly kind?: string; readonly text?: string } | undefined; readonly kind?: string; readonly text?: string } | undefined
+  readonly error?: { readonly message?: string } | unknown
+}): { readonly ok: boolean; readonly error?: string } {
+  if (!result.ok) {
+    const err = result.error as { readonly message?: string } | undefined
+    return { ok: false, error: err?.message ?? 'command failed' }
+  }
+  const inner = result.value?.result ?? result.value
+  const text = typeof inner?.text === 'string' ? inner.text : ''
+  if (inner?.kind === 'error') {
+    return { ok: false, error: text || 'research-defaults error' }
+  }
+  const parsed = parseCommandOutcome(text)
+  if (!parsed.ok) {
+    return { ok: false, error: text || parsed.code || 'research-defaults error' }
+  }
+  return { ok: true }
 }
 
 /** 构造 `/lens` 选中后插入 Composer 的结构化透镜要求（仅填入草稿，不自动发送，遵守 D18）。 */

@@ -17,7 +17,9 @@ import assert from 'node:assert/strict';
 import { templateText } from '../template-files-helpers.mjs';
 import { EVIDENCE_FIELDS, QUALITY_VALUES, TIER_VALUES } from '../../../checks/lib/gates/evidence-audit-core.mjs';
 import { GAP_STATES, LENS_IDS, SCOPE_ROLES } from '../../../checks/lib/gates/findings-core.mjs';
-import { readFileSync, readdirSync } from 'node:fs';
+import { PLAN_KINDS, planGate } from '../../../checks/lib/gates/plan-gate.mjs';
+import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -77,4 +79,60 @@ test('LENS_IDS = content/lenses/*.md 的 id 集合（BUG-277 单一正本）', (
   const dir = join(fileURLToPath(new URL('../../../packages/deep-research-pack/content/lenses', import.meta.url)));
   const ids = readdirSync(dir).filter((n) => n.endsWith('.md')).map((n) => /^id:\s*(\S+)/m.exec(readFileSync(join(dir, n), 'utf8'))?.[1]).filter(Boolean).sort();
   assert.deepEqual([...LENS_IDS].sort(), ids);
+});
+
+// 负例留证 2026-11-28：BUG-465——templates/run/plan.md 注释混写 stage 词 `scan/dive/check` 诱导非法 kind，
+// 且 research-planning SKILL 写了不在 PLAN_KINDS 闭集内的 `search`。
+// 红配方：把模板第 15 行改回只列 `scan/dive/check` 或在 SKILL.md 留 `search` → 本例红。
+test('BUG-465：plan.md 模板与 research-planning skill 的 kind/state 枚举与 plan-gate 双向一致', () => {
+  const planTpl = templateText('plan.md');
+  for (const kind of PLAN_KINDS) {
+    assert.ok(planTpl.includes(kind), `templates/run/plan.md 必须明示合法 kind「${kind}」`);
+  }
+  assert.match(planTpl, /cross-check\s*→\s*check/, 'templates/run/plan.md 必须明示 check 是派生 stage（由 cross-check 派生），不得误导为 kind');
+  assert.match(planTpl, /待派发\/进行中\/完成\/阻塞/, 'templates/run/plan.md 必须明示 ## 剩余工作 四值闭集');
+
+  // 实例化模板（替换尖括号占位与剩余工作 active 行）后必须直接过 planGate
+  const instantiated = planTpl
+    .replace(/<[^>]+>/g, '示例占位')
+    .replace(/\|\s*—\s*\|\s*完成\s*\|/, '| W1.1 | 待派发 |');
+  const dir = mkdtempSync(join(tmpdir(), 'plan-tpl-465-'));
+  try {
+    writeFileSync(join(dir, 'plan.md'), instantiated);
+    const r = planGate(dir);
+    assert.equal(r.status, 'PASS', `实例化后的 plan.md 模板必须过 planGate：${r.detail}`);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+
+  // research-planning SKILL.md 的 kind 列表不得含非法值 `search`
+  const skillPath = join(fileURLToPath(new URL('../../../packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md', import.meta.url)));
+  const skillText = readFileSync(skillPath, 'utf8');
+  const kindLine = /^-\s*`kind`[^\n]*(?:\n\s+[^\n]+)*/m.exec(skillText)?.[0] ?? '';
+  assert.ok(kindLine !== '', 'research-planning/SKILL.md 必须含 kind 枚举说明');
+  const enumPart = kindLine.split('（')[0];
+  const mentioned = [...enumPart.matchAll(/`([a-z-]+)`/g)].map((m) => m[1]).filter((t) => t !== 'kind');
+  for (const k of mentioned) {
+    assert.ok(PLAN_KINDS.includes(k), `research-planning/SKILL.md 列出的 kind「${k}」不在 PLAN_KINDS（${PLAN_KINDS.join('/')}）`);
+  }
+  for (const k of PLAN_KINDS) {
+    assert.ok(mentioned.includes(k), `research-planning/SKILL.md 漏列合法 kind「${k}」`);
+  }
+});
+
+// 负例留证 2026-11-28：BUG-486——protocol.json 的 source_scope.families 含 `web`/`local` 但
+// content/lenses/ 不存在 web.md/local.md，question-patterns 未显式分隔两套概念致 Lead 读错路径。
+// 红配方：删去 question-patterns 对 families（web/local）≠ lenses 的显式分隔说明 → 本例红。
+test('BUG-486：question-patterns 显式分隔 source_scope.families（含 web/local）与 8 枚内置 content/lenses/*.md', () => {
+  const qpPath = join(fileURLToPath(new URL('../../../packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md', import.meta.url)));
+  const qpText = readFileSync(qpPath, 'utf8');
+  assert.match(qpText, /families.*web.*local|web.*local.*不是\s*lens/i, 'question-patterns 必须显式说明 web/local 属于来源族 families 而非 content/lenses/*.md 透镜文件');
+  const lensesDir = join(fileURLToPath(new URL('../../../packages/deep-research-pack/content/lenses', import.meta.url)));
+  const diskIds = new Set(readdirSync(lensesDir).filter((n) => n.endsWith('.md')).map((n) => n.replace(/\.md$/, '')));
+  assert.equal(diskIds.has('web'), false, 'content/lenses/ 不得假冒存在 web.md');
+  assert.equal(diskIds.has('local'), false, 'content/lenses/ 不得假冒存在 local.md');
+  // 索引表里列出的每个 lens id 必须在盘上存在对应 .md 文件
+  const tableRows = [...qpText.matchAll(/^\|\s*`([a-z-]+)`\s*\|/gm)].map((m) => m[1]);
+  assert.ok(tableRows.length === diskIds.size, `question-patterns lens 表行数(${tableRows.length}) 必须等于盘上 lenses 数(${diskIds.size})`);
+  for (const id of tableRows) assert.ok(diskIds.has(id), `question-patterns 引用了不存在的 lens 文件：${id}.md`);
 });

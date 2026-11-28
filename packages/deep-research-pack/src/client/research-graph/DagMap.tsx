@@ -1,19 +1,20 @@
 // DagMap.tsx — 研究图谱的 DAG 小图（纯展示：吃 GraphNodeView[]，画 SVG，回调选中；支持全屏宽画布舒展）。
+import { useId } from 'react'
 import type { ReactNode } from 'react'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { wavesOf } from '../../lib/plan/plan-graph.ts'
 import type { GraphNodeView } from './types.ts'
-import { shortLabel } from './format.ts'
+import { truncateByDisplayWidth } from './format.ts'
 import styles from './graph.module.css'
 
-const COMPACT_GEOM = { w: 146, h: 44, gapX: 12, gapY: 28, pad: 8, summaryChars: 16, ownerChars: 11 } as const
-const WIDE_GEOM = { w: 212, h: 54, gapX: 20, gapY: 36, pad: 12, summaryChars: 26, ownerChars: 16 } as const
+const COMPACT_GEOM = { w: 146, h: 44, gapX: 12, gapY: 28, pad: 8, summaryUnits: 22, ownerUnits: 11 } as const
+const WIDE_GEOM = { w: 212, h: 54, gapX: 20, gapY: 36, pad: 12, summaryUnits: 32, ownerUnits: 16 } as const
 
 interface DagMapProps {
   readonly nodes: readonly GraphNodeView[]
   readonly selectedId: string | null
   readonly childCounts: ReadonlyMap<string, number>
-  readonly fullscreen?: boolean
+  readonly wide?: boolean
   readonly onSelect: (id: string) => void
   readonly t: TranslateNS<'deepResearchPack'>
 }
@@ -26,12 +27,15 @@ function fillOf(node: GraphNodeView): string {
 
 /**
  * 顶部 DAG 小图：按 `wavesOf` 分层；同层节点横排；展示节点 ID、负责角色与子问题短摘要，
- * 并在 `fullscreen` 态自适应展开宽画布。
+ * 并在宽视口 `wide` 态展开宽画布（窄屏自动全屏保持 compact；BUG-477）。
  */
-export function DagMap({ nodes, selectedId, childCounts, fullscreen = false, onSelect, t }: DagMapProps): ReactNode {
+export function DagMap({ nodes, selectedId, childCounts, wide = false, onSelect, t }: DagMapProps): ReactNode {
+  const uid = useId().replace(/[^A-Za-z0-9_-]/g, '')
   const waves = wavesOf(nodes)
   if (waves.length === 0) return null
-  const geom = fullscreen ? WIDE_GEOM : COMPACT_GEOM
+  const geom = wide ? WIDE_GEOM : COMPACT_GEOM
+  const arrowId = `dag-arrow-${uid}`
+  const arrowActiveId = `dag-arrow-active-${uid}`
   const pos = new Map<string, { x: number; y: number }>()
   let maxRow = 1
   waves.forEach((wave, row) => {
@@ -47,9 +51,9 @@ export function DagMap({ nodes, selectedId, childCounts, fullscreen = false, onS
   const height = geom.pad * 2 + waves.length * geom.h + Math.max(0, waves.length - 1) * geom.gapY
   const known = new Set(nodes.map((node) => node.id))
   return (
-    <div className={styles.dagWrap} data-dag-mode={fullscreen ? 'wide' : 'compact'}>
+    <div className={styles.dagWrap} data-dag-mode={wide ? 'wide' : 'compact'}>
       <svg
-        width={Math.max(fullscreen ? 640 : 320, width)}
+        width={Math.max(wide ? 640 : 320, width)}
         height={height}
         viewBox={`0 0 ${String(width)} ${String(height)}`}
         role="img"
@@ -57,12 +61,17 @@ export function DagMap({ nodes, selectedId, childCounts, fullscreen = false, onS
         className={styles.dagSvg}
       >
         <defs>
-          <marker id="research-graph-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+          <marker id={arrowId} markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
             <path d="M0,0 L7,3.5 L0,7 Z" fill="var(--dsw-alias-label-tertiary)" />
           </marker>
-          <marker id="research-graph-arrow-active" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+          <marker id={arrowActiveId} markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
             <path d="M0,0 L7,3.5 L0,7 Z" fill="var(--dsw-alias-brand-primary)" />
           </marker>
+          {nodes.map((node, index) => (
+            <clipPath key={node.id} id={`dag-clip-${uid}-${String(index)}`}>
+              <rect x={4} y={2} width={geom.w - 8} height={geom.h - 4} rx={5} />
+            </clipPath>
+          ))}
         </defs>
         {nodes.flatMap((node) => node.blockedBy
           .filter((dep) => dep !== node.id && known.has(dep))
@@ -85,16 +94,22 @@ export function DagMap({ nodes, selectedId, childCounts, fullscreen = false, onS
                 stroke={adjacent ? 'var(--dsw-alias-brand-primary)' : 'var(--dsw-alias-label-tertiary)'}
                 strokeWidth={adjacent ? 2 : 1.2}
                 opacity={dimmed ? 0.28 : 1}
-                markerEnd={adjacent ? 'url(#research-graph-arrow-active)' : 'url(#research-graph-arrow)'}
+                markerEnd={adjacent ? `url(#${arrowActiveId})` : `url(#${arrowId})`}
               />
             )
           }))}
-        {nodes.map((node) => {
+        {nodes.map((node, index) => {
           const point = pos.get(node.id)
           if (point === undefined) return null
           const selected = node.id === selectedId
-          const summaryText = shortLabel(node.subject !== '' ? node.subject : node.label, geom.summaryChars)
-          const ownerBadge = node.ownerName !== undefined ? shortLabel(node.ownerName, geom.ownerChars) : null
+          const childCount = childCounts.get(node.id) ?? 0
+          const badgeText = childCount > 0 ? `+${String(childCount)}` : null
+          const summaryMaxUnits = badgeText !== null
+            ? Math.max(4, geom.summaryUnits - (badgeText.length + 3))
+            : geom.summaryUnits
+          const summaryText = truncateByDisplayWidth(node.subject !== '' ? node.subject : node.label, summaryMaxUnits)
+          const ownerBadge = node.ownerName !== undefined ? truncateByDisplayWidth(node.ownerName, geom.ownerUnits) : null
+          const clipId = `dag-clip-${uid}-${String(index)}`
           return (
             <g
               key={node.id}
@@ -121,21 +136,23 @@ export function DagMap({ nodes, selectedId, childCounts, fullscreen = false, onS
                 strokeWidth={selected ? 2 : 1}
                 opacity={node.status === 'unplanned' ? 0.75 : 1}
               />
-              <circle cx={11} cy={13} r={3.2} fill={node.state.color} />
-              <text x={19} y={16} fontSize={10.5} fontWeight={600} fill="var(--dsw-alias-label-primary)">{node.id}</text>
-              {ownerBadge !== null && (
-                <text x={geom.w - 8} y={16} textAnchor="end" fontSize={9} fill="var(--dsw-alias-label-tertiary)">
-                  {ownerBadge}
+              <g clipPath={`url(#${clipId})`}>
+                <circle cx={11} cy={13} r={3.2} fill={node.state.color} />
+                <text x={19} y={16} fontSize={10.5} fontWeight={600} fill="var(--dsw-alias-label-primary)">{node.id}</text>
+                {ownerBadge !== null && (
+                  <text x={geom.w - 8} y={16} textAnchor="end" fontSize={9} fill="var(--dsw-alias-label-tertiary)">
+                    {ownerBadge}
+                  </text>
+                )}
+                <text x={10} y={wide ? 36 : 31} fontSize={wide ? 10.5 : 9.5} fill="var(--dsw-alias-label-secondary)">
+                  {summaryText}
                 </text>
-              )}
-              <text x={10} y={fullscreen ? 36 : 31} fontSize={fullscreen ? 10.5 : 9.5} fill="var(--dsw-alias-label-secondary)">
-                {summaryText}
-              </text>
-              {(childCounts.get(node.id) ?? 0) > 0 && (
-                <text x={geom.w - 8} y={geom.h - 6} textAnchor="end" fontSize={8.5} fontWeight={600} fill="var(--dsw-alias-brand-primary)">
-                  +{String(childCounts.get(node.id))}
-                </text>
-              )}
+                {badgeText !== null && (
+                  <text x={geom.w - 8} y={geom.h - 6} textAnchor="end" fontSize={8.5} fontWeight={600} fill="var(--dsw-alias-brand-primary)">
+                    {badgeText}
+                  </text>
+                )}
+              </g>
             </g>
           )
         })}

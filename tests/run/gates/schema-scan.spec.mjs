@@ -437,3 +437,29 @@ test('phase 与 next/delivered/parked 矛盾 → 核心违约；一致 → 绿�
     assert.deepEqual(scanBundle(ok.dir).core, [])
   } finally { ok.cleanup() }
 })
+
+// 负例留证 2026-11-28：BUG-483——schema-scan hygieneOf 把网站相对路径 `/media/1575` 误杀为 Linux 挂载点，
+// 且扫 evidence/*.md `## 原文摘录` 的逐字报错栈。红配方：恢复宽泛 `/media/` 正则或移除引文块豁免 → 本例红。
+test('BUG-483 hygieneOf：排除 `/media/1575` 站点相对路径与 evidence 原文摘录，仍拦截真实宿主路径与 `/media/user/usb`', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'schema-483-'))
+  try {
+    mkdirSync(join(dir, 'evidence'), { recursive: true })
+    writeFileSync(join(dir, 'run.md'), '# Run\n- schema: 2\n- created: 2026-11-28\n- phase: research\n- next: W1\n')
+    writeFileSync(
+      join(dir, 'evidence', 't4-reg.md'),
+      '## 原文摘录\n\n> OSError: /home/mtp/Ascend/lib.so\n> [PDF](/media/1575)\n\n## 解读\n\n新闻稿指向 `/media/1575`。\n',
+    )
+    assert.deepEqual(hygieneOf(dir), [], '站点相对链接 /media/1575 与原文摘录 /home/mtp/... 不得误红')
+
+    // 负控1：真实 Linux 挂载路径 /media/bob/usb-drive 仍须红
+    writeFileSync(join(dir, 'final.md'), '本地挂载 /media/bob/usb-drive/data.csv\n')
+    assert.ok(hygieneOf(dir).some((c) => c.includes('final.md 含绝对路径')), '真实 /media/user/disk 仍须红')
+
+    // 负控2：evidence ## 解读 节出现 /Users/... 仍须红
+    rmSync(join(dir, 'final.md'))
+    writeFileSync(join(dir, 'evidence', 't4-reg.md'), '## 原文摘录\n\n> ok\n\n## 解读\n\n见 /Users/bob/raw.txt\n')
+    assert.ok(hygieneOf(dir).some((c) => c.includes('t4-reg.md 含绝对路径')), 'evidence 解读节含 /Users/ 仍须红')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})

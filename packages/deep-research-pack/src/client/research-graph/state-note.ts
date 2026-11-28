@@ -5,6 +5,8 @@
 // 语义关键：**"读不到" ≠ "没有"**（BUG-045）——绑定读取失败必须与"尚未绑定"分开报。
 // 文案走折层字典（zh-fold / en-fold）；组件传 `props.t`，非 UI 面缺省中文。
 import { translateZh, type PackTranslate } from '../../lib/shared/i18n.ts'
+import { assertNever } from '../../lib/run/artifact-read.ts'
+import type { SnapshotState } from './graph-state.ts'
 
 export interface GraphStateNoteInput {
   readonly planState: 'loading' | 'missing' | 'unbound' | 'ready' | 'truncated' | 'error'
@@ -52,5 +54,29 @@ export function graphStateNote(input: GraphStateNoteInput, t: PackTranslate = tr
   return {
     title: t('graphNoteNoDagTitle'),
     body: planState === 'missing' ? t('graphNoteNoDagBodyMissingPlan') : t('graphNoteNoDagBodyNoNodes'),
+  }
+}
+
+/**
+ * 差异卡里「旧图快照为何不可用」的文案（BUG-391）：按 SnapshotState 穷举——除 ready 外每个
+ * 状态都要有话说，只有 loading/idle 才是「读取中」。
+ */
+export function snapshotDiffMessage(state: SnapshotState, t: PackTranslate = translateZh): string {
+  switch (state) {
+    case 'idle':
+    case 'loading':
+      return t('oldGraphLoading')
+    case 'missing':
+      return t('oldGraphUnread')
+    case 'empty':
+      return t('graphSnapshotEmpty', { version: '' })
+    case 'invalid':
+      return t('graphSnapshotInvalid', { version: '' })
+    case 'unreadable':
+      return t('graphSnapshotUnreadable', { version: '' })
+    case 'ready':
+      return t('oldGraphUnread')
+    default:
+      return assertNever(state)
   }
 }

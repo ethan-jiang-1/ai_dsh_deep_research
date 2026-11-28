@@ -40,14 +40,27 @@ const isStringArray = (value) => Array.isArray(value) && value.every((item) => t
 /** 是否要求本 bundle 带 protocol.json（CLI 与测试共用这一份）：
  *  `forced` 强制；无 run.md = 旧 bundle；交付回执早于契约落地时刻 = legacy（同日早场，BUG-052）；
  *  其余按 epoch 日期；无 acceptedAt 可依 → 从严（不许同日全豁免）。 */
-/** protocol.output.sections → final 的中文 H2 映射（单一正本；未列出的 section 用原名）。 */
+/** protocol.output.sections → final 的中文 H2 映射与语义别名（单一正本；未列出的 section 用原名）。 */
 export const FINAL_SECTION_OF = Object.freeze({
   decision: '决策摘要',
   options: '备选与取舍',
   criteria: '关键依据',
   tradeoffs: '备选与取舍',
   risks: '目前不能判断',
+  coverage: '覆盖与不可判',
 })
+const FINAL_SECTION_ALIASES = Object.freeze({
+  decision: ['决策摘要', '判决', '核心结论', '结论'],
+  options: ['备选与取舍', '方案对比', '方案与取舍'],
+  criteria: ['关键依据', '判断依据'],
+  tradeoffs: ['备选与取舍', '取舍'],
+  risks: ['目前不能判断', '风险', '落地与风险', '落地条件与风险'],
+  coverage: ['覆盖与不可判', '覆盖', '覆盖与盲区'],
+})
+const normHeading = (h) => String(h ?? '').trim()
+  .replace(/^(?:§\s*)?\d+(?:\.\d+)*[.、:：\s]+/, '')
+  .replace(/[（(][^）)]*[）)]\s*$/, '')
+  .trim().toLowerCase()
 
 /** @param {{ hasRunMd?: boolean, epoch?: string | null, acceptedAt?: string | null, forced?: boolean }} [input] */
 export function requiredByProtocolContract({ hasRunMd = true, epoch = null, acceptedAt = null, forced = false } = {}) {
@@ -411,39 +424,37 @@ export function cardTextOf(options) {
   return cardLinesOf(options).join('\n')
 }
 
-/** final 的 H2 集合必须覆盖 protocol.output.sections 的映射节（BUG-255；final 缺席 = 不判，交付门管在场）。 */
+/** final 的 H2 集合必须覆盖 protocol.output.sections 的映射节（BUG-255 / BUG-484；支持编号/括注与语义别名）。 */
 export function checkFinalSections(protocol, finalText) {
   if (String(finalText ?? '').trim() === '') return []
-  const headings = new Set([...String(finalText).matchAll(/^##\s+(.+)$/gm)].map((m) => m[1].trim()))
+  const rawHeadings = [...String(finalText).matchAll(/^##\s+(.+)$/gm)].map((m) => m[1].trim())
+  const normSet = new Set(rawHeadings.map(normHeading))
   const issues = []
   for (const section of protocol.output.sections) {
     const expected = FINAL_SECTION_OF[section] ?? section
-    if (!headings.has(expected)) issues.push(red('final-sections', `final 缺 protocol.output.sections「${section}」对应的 H2「${expected}」`))
+    const candidates = (FINAL_SECTION_ALIASES[section] ?? [expected]).map(normHeading)
+    const matched = candidates.some((cand) => normSet.has(cand) || [...normSet].some((h) => h.includes(cand)))
+    if (!matched) issues.push(red('final-sections', `final 缺 protocol.output.sections「${section}」对应的 H2「${expected}」`))
   }
   return issues
 }
 
-/**
- * 证据门槛 vs evidence.quality（BUG-271）；quick_factual 豁免。
- * @param {any} protocol
- * @param {any[]} evidences
- * @param {string} [runKind]
- * @param {string[] | null} [criticalEvidence]
- */
+/** 证据门槛 vs evidence.quality（BUG-271 / BUG-484）；quick_factual 豁免；已记入 deviations 的降为 warning。
+ * @param {any} protocol @param {any[]} evidences @param {string} [runKind] @param {readonly string[] | null} [criticalEvidence] */
 export function checkEvidenceThreshold(protocol, evidences, runKind = '', criticalEvidence = null) {
   if (runKind === 'quick_factual') return []
   const threshold = protocol?.gates?.evidence_threshold
   const rank = { A: 4, B: 3, C: 2, D: 1 }
   if (!(threshold in rank)) return []
+  if (!Array.isArray(criticalEvidence)) return [warn('evidence-threshold-unscoped', 'critical 范围未知（claims 不可读或未提供）——未按关键证据逐卡比 quality；失败由 claims 判据承担')]
+  const devs = Array.isArray(protocol?.deviations) ? protocol.deviations.map((d) => (typeof d === 'string' ? d : JSON.stringify(d))).join('\n') : ''
   const out = []
-  // BUG-329：claims 不可读/缺席时 critical 范围未知——不得静默退化成「全部证据逐卡比」。
-  // 该失败由 claims 判据承担；这里只给可行动的 notice，不冒充通过也不假装红。
-  if (criticalEvidence === null) return [warn('evidence-threshold-unscoped', 'critical 范围未知（claims 不可读或未提供）——未按关键证据逐卡比 quality；失败由 claims 判据承担')]
-  const scoped = evidences.filter((ev) => criticalEvidence.includes(ev.file))
-  for (const ev of scoped) {
+  for (const ev of evidences.filter((e) => criticalEvidence.includes(e.file))) {
     const q = String(ev.quality ?? '').trim()
-    if (!(q in rank)) continue
-    if (rank[q] < rank[threshold]) out.push(red('evidence-threshold', `${ev.file} 的 quality=${q} 低于 protocol.gates.evidence_threshold=${threshold}（BUG-271）`))
+    if (!(q in rank) || rank[q] >= rank[threshold]) continue
+    const stem = String(ev.file).replace(/^evidence\//, '').replace(/\.md$/, '')
+    const waived = devs !== '' && (devs.includes(ev.file) || devs.includes(stem))
+    out.push((waived ? warn : red)('evidence-threshold', `${ev.file} 的 quality=${q} 低于 protocol.gates.evidence_threshold=${threshold}${waived ? '（已记 deviations 例外）' : '（BUG-271）'}`))
   }
   return out
 }

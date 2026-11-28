@@ -11,6 +11,12 @@
  * 字段的局部契约，非逻辑重复）。
  */
 
+/** 真实 DSH 写文件 wire 工具名闭集（DSH 上游 wire 契约；供 bundle-bind / research-projection / research-turn 共用）。 */
+export const WRITE_TOOLS: ReadonlySet<string> = new Set(['write', 'edit', 'multiedit'])
+
+/** 真实 DSH 工具参数路径字段闭集（排除 content/pattern 等正文）。 */
+export const TOOL_PATH_FIELDS = ['file_path', 'path', 'paths', 'filePath', 'file'] as const
+
 /** wire 入参（JSON 字符串或对象）→ 对象形态。截断 JSON（流式前缀）/ 非对象 → null。
  *  数组按对象放行（与原手抄家族一致——查不存在的键得 undefined，不特殊拒数组；
  *  需要拒数组的消费方如 tool-card.parseArgsObject 在自己包装里加检）。 */
@@ -21,6 +27,21 @@ export function argsObjectOf(args: unknown): Record<string, unknown> | null {
   }
   if (typeof obj !== 'object' || obj === null) return null
   return obj as Record<string, unknown>
+}
+
+/** 从工具调用参数（JSON 字符串或对象）提取首个非空真实路径字段（BUG-474）。 */
+export function primaryPathOfToolArgs(argsRaw: unknown): string | null {
+  const args = argsObjectOf(argsRaw)
+  if (args === null) return null
+  for (const key of TOOL_PATH_FIELDS) {
+    const val = args[key]
+    if (typeof val === 'string' && val.trim() !== '') return val.trim()
+    if (Array.isArray(val)) {
+      const first = val.find((item): item is string => typeof item === 'string' && item.trim() !== '')
+      if (first !== undefined) return first.trim()
+    }
+  }
+  return null
 }
 
 /** 从 call 的 arguments（JSON 字符串或对象）取字段原值；截断 JSON / 非对象 / 字段缺席 → null。 */

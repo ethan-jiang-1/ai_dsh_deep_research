@@ -214,3 +214,81 @@ test('useGraphFeed：plan/vN.md 快照五态（ready / missing / empty / invalid
   await act(async () => { latestFeed.setGraphView('diff'); await flushMicrotasks(15) })
   assert.equal(latestFeed.snapshotState, 'missing')
 })
+
+// 负例留证 2026-11-28：BUG-478——readArtifact 在快照读取通道抛错时无 try/catch 永久卡死 loading，
+// 且切会话未复位 followAttempt 导致新会话零重试。红配方：去掉快照 try/catch 或 reset-session → 本例红。
+test('BUG-478：快照读通道抛异常转 unreadable 不锁死 loading；切会话重置 follow 重试额度', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1_700_000_000_000 })
+  t.after(() => t.mock.timers.reset())
+
+  const run = makeMaliciousRunSource({
+    tree: {
+      drt_snap: {
+        'plan.md': VALID_PLAN,
+        plan: { 'v1.md': VALID_PLAN },
+      },
+    },
+  })
+  const throwingSource = {
+    ...run.source,
+    async read(relPath, options) {
+      if (relPath.endsWith('plan/v1.md')) throw new Error('channel disconnected')
+      return run.source.read(relPath, options)
+    },
+  }
+  const followSnap = (_sid, signal) => ({
+    async *[Symbol.asyncIterator]() {
+      yield { kind: 'history', events: [toolCall({ name: 'write_file', arguments: { path: 'drt_snap/plan.md' } })] }
+      await new Promise((resolve) => signal.addEventListener('abort', resolve, { once: true }))
+    },
+  })
+
+  let latestFeed
+  const snapProps = {
+    sessionId: 'lead-throw',
+    t: (k) => k,
+    useSession: () => undefined,
+    useSessions: () => undefined,
+    useSessionStatus: () => undefined,
+    follow: followSnap,
+    runSource: () => throwingSource,
+    visible: true,
+  }
+  const snapView = render(createElement(Harness, { props: snapProps, leadSessionId: 'lead-throw', onFeed: (f) => { latestFeed = f } }))
+  await act(async () => { await flushMicrotasks(15) })
+  await act(async () => {
+    latestFeed.setGraphView('diff')
+    await flushMicrotasks(15)
+  })
+  assert.equal(latestFeed.snapshotState, 'unreadable', '快照读取抛异常必须收敛到 unreadable 而非卡死 loading')
+  snapView.unmount()
+
+  // 切会话重置 followAttempt：会话 A 耗尽 3 次重试后，切到会话 B 仍享有 3 次重试
+  const callsBySession = new Map()
+  const followFail = (sid) => ({
+    [Symbol.asyncIterator]() {
+      return {
+        next() {
+          callsBySession.set(sid, (callsBySession.get(sid) ?? 0) + 1)
+          return Promise.reject(new Error('Remote stream WebSocket closed'))
+        },
+      }
+    },
+  })
+  const failProps = { ...snapProps, sessionId: 'lead-a', follow: followFail, runSource: () => run.source }
+  const failView = render(createElement(Harness, { props: failProps, leadSessionId: 'lead-a', onFeed: (f) => { latestFeed = f } }))
+  await act(async () => { await flushMicrotasks(10) })
+  for (let i = 0; i < 4; i += 1) {
+    await act(async () => { t.mock.timers.tick(2_000); await flushMicrotasks(10) })
+  }
+  assert.equal(callsBySession.get('lead-a'), 4)
+
+  await act(async () => {
+    failView.rerender(createElement(Harness, { props: { ...failProps, sessionId: 'lead-b' }, leadSessionId: 'lead-b', onFeed: (f) => { latestFeed = f } }))
+    await flushMicrotasks(10)
+  })
+  for (let i = 0; i < 4; i += 1) {
+    await act(async () => { t.mock.timers.tick(2_000); await flushMicrotasks(10) })
+  }
+  assert.equal(callsBySession.get('lead-b'), 4, '切到新会话后 followAttempt 必须清零，仍享有 1+3 次重试')
+})

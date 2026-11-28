@@ -11,11 +11,12 @@ import { afterEach, test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createElement } from 'react'
 import { zh } from '../../../../packages/deep-research-pack/src/client/locales.ts'
+import { ResearchConfigTab } from '../../../../packages/deep-research-pack/src/client/ResearchConfigTab.tsx'
 import { useConfigFeed } from '../../../../packages/deep-research-pack/src/client/research-config/useConfigFeed.ts'
 import { toolCall } from '../../../fixtures/events.mjs'
 import { createDeferred, flushMicrotasks, flushUi, loadRtl, makeMaliciousRunSource, makeTranslator } from '../../client-dom-helpers.mjs'
 
-const { render, act, cleanup } = await loadRtl()
+const { render, act, cleanup, fireEvent } = await loadRtl()
 const tZh = makeTranslator(zh)
 
 afterEach(() => {
@@ -212,4 +213,223 @@ test('useConfigFeed：follow 失败 fail-soft 且 question.md 采用度如实分
   await flushUi(act)
   assert.equal(latestFeed.adoption.kind, 'missing')
   view2.unmount()
+})
+
+// 负例留证 2026-11-28：BUG-476——ResearchConfigTab 静默吞 libraryRead=unreadable、sending 期间未禁用
+// 换一条菜单、sessionId=undefined 仍渲染 picker、页签 refresh 只调 reload 不刷 defaults/adoption、
+// use-now 完成后不重读 question.md，且 useConfigFeed 异步读缺 try/catch。
+test('BUG-476 ResearchConfigTab：libraryRead=unreadable 显性告警与重试；sending 禁用 picker；无 sessionId 隐藏 picker', async () => {
+  let readCalls = 0
+  let libState = 'unreadable'
+  const sendDeferred = createDeferred()
+  const baseProps = {
+    sessionId: 's1',
+    t: tZh,
+    readFile: async () => null,
+    readLibrary: async () => {
+      readCalls += 1
+      return libState === 'unreadable'
+        ? { kind: 'unreadable', detail: 'EACCES' }
+        : { kind: 'ok', text: LIB_ENTRY_A }
+    },
+    runSource: () => makeMaliciousRunSource().source,
+    listDir: async () => [],
+    follow: async function* (_target, signal) {
+      await new Promise((resolve) => signal.addEventListener('abort', resolve, { once: true }))
+    },
+    sendInstruction: async () => {
+      await sendDeferred.promise
+      return { ok: true, detail: 'sent' }
+    },
+    defaults: makeDummyDefaults(),
+  }
+
+  const view = render(createElement(ResearchConfigTab, baseProps))
+  await flushUi(act)
+
+  assert.ok(view.container.textContent?.includes(tZh('configLibraryUnreadable')), 'libraryRead=unreadable 必须显性展示 configLibraryUnreadable 告警')
+  const warnEl = view.container.querySelector('[data-testid="config-library-unreadable"]')
+  assert.ok(warnEl, '应存在 config-library-unreadable 告警块')
+  const retryBtn = warnEl.querySelector('button')
+  assert.ok(retryBtn, 'libraryRead=unreadable 告警必须附带重试按钮')
+
+  // 点击重试恢复可读
+  libState = 'ok'
+  const readsBeforeRetry = readCalls
+  await act(async () => {
+    fireEvent.click(retryBtn)
+    await flushMicrotasks(15)
+  })
+  assert.ok(readCalls > readsBeforeRetry, '点击重试必须重读方法库')
+  assert.equal(view.container.querySelector('[data-testid="config-library-unreadable"]'), null, '恢复 ok 后告警消失')
+
+  // sending 期间禁用 methodPicker 触发按钮
+  const pickerBtn = [...view.container.querySelectorAll('button')].find((b) => b.textContent?.includes(tZh('pickMethodForLead')))
+  assert.ok(pickerBtn, 'no-run 态应渲染 methodPicker 触发按钮')
+  assert.equal(pickerBtn.disabled, false)
+  fireEvent.click(pickerBtn)
+  const item = document.querySelector('[role="menuitem"]')
+  assert.ok(item, '点击 picker 应打开菜单项')
+  await act(async () => {
+    fireEvent.click(item)
+    await flushMicrotasks(5)
+  })
+  assert.equal(pickerBtn.disabled, true, 'sending=true 期间必须禁用 methodPicker 按钮')
+  sendDeferred.resolve()
+  await act(async () => { await flushMicrotasks(10) })
+
+  // sessionId=undefined 不渲染无响应的 methodPicker
+  view.rerender(createElement(ResearchConfigTab, { ...baseProps, sessionId: undefined }))
+  await flushUi(act)
+  const pickerWhenNoSession = [...view.container.querySelectorAll('button')].find(
+    (b) => b.textContent?.includes(tZh('pickMethodForLead')) || b.textContent?.includes(tZh('switchMethod')),
+  )
+  assert.equal(pickerWhenNoSession, undefined, 'sessionId=undefined 不得渲染 methodPicker')
+})
+
+test('BUG-476 ResearchConfigTab：页签 refresh 同步刷新 library、defaults 与 adoption', async () => {
+  let libReads = 0
+  let defaultsRefreshes = 0
+  const run = makeMaliciousRunSource({
+    tree: {
+      drt_r: {
+        'question.md': '# Q\n\n## 研究方法（本次实际采用）\n- 采用: 事实核查\n',
+      },
+    },
+  })
+  let boundCommands = null
+  const defaults = {
+    ...makeDummyDefaults(),
+    refresh: async () => { defaultsRefreshes += 1 },
+  }
+  const props = {
+    sessionId: 's1',
+    t: tZh,
+    useTabInfo: () => ({
+      tab: {
+        actions: {
+          bindCommands: (cmds) => {
+            boundCommands = cmds
+            return () => {}
+          },
+        },
+      },
+    }),
+    readFile: async () => null,
+    readLibrary: async () => {
+      libReads += 1
+      return { kind: 'ok', text: LIB_ENTRY_A }
+    },
+    runSource: () => run.source,
+    listDir: async () => [],
+    follow: async function* (_target, signal) {
+      yield { kind: 'history', events: [toolCall({ name: 'write_file', arguments: { path: 'drt_r/question.md' } })] }
+      await new Promise((resolve) => signal.addEventListener('abort', resolve, { once: true }))
+    },
+    sendInstruction: async () => ({ ok: true, detail: 'ok' }),
+    defaults,
+  }
+
+  render(createElement(ResearchConfigTab, props))
+  await flushUi(act)
+  assert.ok(boundCommands && typeof boundCommands.refresh === 'function')
+
+  const libBefore = libReads
+  const defBefore = defaultsRefreshes
+  const qReadsBefore = run.calls.filter((c) => c[0] === 'read' && c[1] === 'drt_r/question.md').length
+
+  await act(async () => {
+    boundCommands.refresh()
+    await flushMicrotasks(20)
+  })
+  await flushUi(act)
+
+  assert.ok(libReads > libBefore, 'refresh 必须刷新方法库 reload')
+  assert.ok(defaultsRefreshes > defBefore, 'refresh 必须刷新 defaults.refresh')
+  const qReadsAfter = run.calls.filter((c) => c[0] === 'read' && c[1] === 'drt_r/question.md').length
+  assert.ok(qReadsAfter > qReadsBefore, 'refresh 必须触发 retryAdoption 重读 question.md')
+})
+
+test('BUG-476 useConfigFeed：use-now 完成后重读 adoption，且异步读 reject 显性降级不抛未捕获异常', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1_700_000_000_000 })
+  t.after(() => t.mock.timers.reset())
+
+  const run = makeMaliciousRunSource({
+    tree: {
+      drt_u: {
+        'question.md': '# Q\n\n## 研究方法（本次实际采用）\n- 采用: 事实核查\n',
+      },
+    },
+  })
+  let latestFeed
+  const baseProps = {
+    sessionId: 's1',
+    t: tZh,
+    readFile: async () => null,
+    readLibrary: async () => ({ kind: 'ok', text: LIB_ENTRY_A }),
+    runSource: () => run.source,
+    listDir: async () => [],
+    follow: async function* (_target, signal) {
+      yield { kind: 'history', events: [toolCall({ name: 'write_file', arguments: { path: 'drt_u/question.md' } })] }
+      await new Promise((resolve) => signal.addEventListener('abort', resolve, { once: true }))
+    },
+    sendInstruction: async () => ({ ok: true, detail: 'ok' }),
+    defaults: makeDummyDefaults(),
+  }
+
+  const view = render(createElement(Harness, { props: baseProps, onFeed: (f) => { latestFeed = f } }))
+  await act(async () => {
+    t.mock.timers.tick(0)
+    await flushMicrotasks(20)
+  })
+  assert.equal(latestFeed.adoption.adopted, '事实核查')
+
+  // 模拟 Lead 落盘更新了 question.md，发送 use-now 后等待 2500ms 必须重读 adoption
+  run.update({
+    tree: {
+      drt_u: {
+        'question.md': '# Q\n\n## 研究方法（本次实际采用）\n- 采用: 方案比较\n',
+      },
+    },
+  })
+  let sendPromise
+  await act(async () => {
+    sendPromise = latestFeed.send('使用 方案比较', { target: '方案比较', expectsChange: false })
+    await flushMicrotasks(10)
+    t.mock.timers.tick(2500)
+    await flushMicrotasks(20)
+  })
+  await sendPromise
+  await act(async () => { await flushMicrotasks(20) })
+  assert.equal(latestFeed.adoption.adopted, '方案比较', 'use-now 完成后必须触发 retryAdoption 重读 question.md')
+  view.unmount()
+
+  // 异步读 reject：不得产生 unhandledRejection，且显性落为 unreadable
+  const unhandled = []
+  const onUnhandled = (reason) => { unhandled.push(reason) }
+  process.on('unhandledRejection', onUnhandled)
+  try {
+    let errFeed
+    const throwingSource = {
+      root: '/tmp/bad',
+      list: async () => { throw new Error('disk boom') },
+      read: async () => { throw new Error('disk boom') },
+    }
+    const errView = render(createElement(Harness, {
+      props: {
+        ...baseProps,
+        sessionId: 's-err',
+        readLibrary: async () => { throw new Error('library boom') },
+        runSource: () => throwingSource,
+      },
+      onFeed: (f) => { errFeed = f },
+    }))
+    await act(async () => { await flushMicrotasks(25) })
+    assert.equal(unhandled.length, 0, `异步读 reject 不得产生 unhandledRejection：${String(unhandled[0])}`)
+    assert.equal(errFeed.libraryRead, 'unreadable', 'readLibrary reject 必须显性收口为 unreadable')
+    assert.equal(errFeed.adoption.kind, 'question-unreadable', 'openRun/readArtifact reject 必须显性收口为 question-unreadable')
+    errView.unmount()
+  } finally {
+    process.off('unhandledRejection', onUnhandled)
+  }
 })

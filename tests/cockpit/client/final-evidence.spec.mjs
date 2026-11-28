@@ -471,3 +471,54 @@ test('BUG-460 ResearchFinalTab：启用 container query 与 segmentedControl 类
   const tablist = container.querySelector('[role="tablist"]')
   assert.ok(tablist !== null && /\bsegmentedControl\b/.test(tablist.className), `SegmentedControl 须挂 segmentedControl 类：${tablist?.className}`)
 })
+
+// 负例留证 2026-11-28：BUG-482——ClaimsAuditView 长证据文件名 Pill 在 330px 对照栏内撑爆折行碰撞、
+// .studioInspectorBody 缺横向防溢出守卫，且 ResearchFinalTab 340px 紧凑断点在 341-372px 形成死区裁切第 3 项。
+// 红配方：把 @container (max-width: 390px) 改回 340px、去掉 claimRefPill/claimRefText 单行省略或去掉 .studioInspectorBody overflow-x → 本例红。
+test('BUG-482 ResearchFinalTab / ClaimsAuditView：长证据路径单行省略保留完整 title、对照栏防横溢且紧凑断点升至 390px', async () => {
+  const { readFileSync } = await import('node:fs')
+  const { fileURLToPath } = await import('node:url')
+  const cssText = readFileSync(
+    fileURLToPath(new URL('../../../packages/deep-research-pack/src/client/ResearchFinalTab.module.css', import.meta.url)),
+    'utf8',
+  )
+  assert.match(cssText, /@container\s*\(max-width:\s*390px\)/, '紧凑工具栏断点应调高至 390px 消除 341-372px 死区')
+  const inspectorBlock = /\.studioInspectorBody\s*\{([^}]*)\}/.exec(cssText)?.[1] ?? ''
+  assert.match(inspectorBlock, /overflow-x:\s*hidden/, '.studioInspectorBody 须启用 overflow-x: hidden')
+  assert.match(inspectorBlock, /overflow-wrap:\s*anywhere/, '.studioInspectorBody 须启用 overflow-wrap: anywhere')
+  const pillBlock = /\.claimRefPill\s*\{([^}]*)\}/.exec(cssText)?.[1] ?? ''
+  assert.match(pillBlock, /max-width:\s*100%/)
+  assert.match(pillBlock, /overflow:\s*hidden/)
+  assert.match(pillBlock, /text-overflow:\s*ellipsis/)
+  assert.match(pillBlock, /white-space:\s*nowrap/)
+
+  const longRef = 'evidence/t5-ascend-pytorch-199-graph-capture-benchmark-long-filename.md'
+  const tree = structuredClone(BUNDLE)
+  tree.drt_demo['claims.json'] = JSON.stringify({
+    version: 2, finalRef: 1,
+    claims: [{ id: 'C1', text: '长证据路径主张', critical: true, topics: ['T1'], evidence: [longRef], urls: [] }],
+  })
+  const run = makeMaliciousRunSource({ tree })
+  const { container } = render(createElement(ResearchFinalTab, {
+    sessionId: 's1',
+    t: tZh,
+    useTabInfo: () => ({
+      tab: {
+        navigation: { address: 'dsh-resource://file/session/s1/drt_demo/final.md' },
+        visible: true,
+        actions: { openTab: () => {}, openResource: () => {} },
+      },
+    }),
+    runSource: () => run.source,
+    visible: true,
+  }))
+  await flushUi(act)
+  const claimsTab = [...container.querySelectorAll('[role="tab"]')].find((el) => el.textContent?.includes('核查清单'))
+  assert.ok(claimsTab !== undefined)
+  fireEvent.click(claimsTab)
+  await flushUi(act)
+  const evBtn = [...container.querySelectorAll('button')].find((b) => b.textContent === longRef)
+  assert.ok(evBtn !== undefined, '应渲染长证据路径胶囊按钮')
+  assert.equal(evBtn.getAttribute('title'), longRef, '截断后的长路径胶囊须在 title 中保留完整路径')
+  assert.match(evBtn.className, /\bclaimRefPill\b/, '长路径胶囊须挂载 claimRefPill 单行省略类')
+})

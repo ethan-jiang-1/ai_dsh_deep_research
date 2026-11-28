@@ -37,8 +37,18 @@ export const normalizeText = (s) => String(s ?? '').replace(/\s+/gu, ' ').trim()
 /** 去掉 `[来源: …]` 标记再归一——claim 是从 final 抄的句子，标记不该影响「表内条目真实」。 */
 export const stripCitations = (text) => normalizeText(String(text ?? '').replace(/\[来源\s*:[^\]]*\]/gu, ' '))
 
-/** 原文一致口径：只去**结尾**空白（文件尾随换行不是「改了」；内部一个字节都不许动）。 */
-export const normalizeVerbatim = (s) => String(s ?? '').replace(/\s+$/u, '')
+/** 原文一致口径：去结尾空白与网页零宽不可见符（\u200b-\u200d/\ufeff）；内部字符不许改（BUG-485）。 */
+const stripZws = (s) => String(s ?? '').replace(/[\u200b-\u200d\ufeff]/gu, '')
+export const normalizeVerbatim = (s) => stripZws(s).replace(/\s+$/u, '')
+const FENCE_RE = /^\s*```(?:json)?[ \t]*\r?\n([\s\S]*?)\r?\n?```\s*$/iu
+const verbatimMatches = (raw, childText) => {
+  const key = normalizeVerbatim(raw)
+  if (normalizeVerbatim(childText) === key) return true
+  if (FENCE_RE.test(String(raw ?? ''))) return false // raw 自己加围栏而 child 无围栏仍判 not-verbatim
+  const parsedRaw = parseRawVerdicts(stripZws(raw))
+  const parsedChild = parseRawVerdicts(stripZws(childText))
+  return parsedRaw.ok && parsedChild.ok && JSON.stringify(parsedRaw.value) === JSON.stringify(parsedChild.value)
+}
 
 /** 文本 sha256（claims / verdicts 文件哈希的唯一实现；门禁报告消费）。 */
 export const sha256Text = (text) => createHash('sha256').update(String(text ?? ''), 'utf8').digest('hex')
@@ -241,25 +251,13 @@ function parseRawVerdicts(raw) {
   return attempt(fenced[1])
 }
 
-/** `raw` 里一条裁决的投影（只取受核字段；用于与文件里的 verdicts 比对）。 */
-const projectRawVerdict = (item) => ({
-  claim_id: item?.claim_id,
-  verdict: item?.verdict,
-  quote: item?.quote,
-  reason: item?.reason,
-  rechecked_urls: item?.rechecked_urls ?? [],
-  source_tier_ok: item?.source_tier_ok,
+/** 受核裁决投影（raw 与 verdicts 同形，便于逐字比较）。 */
+const projectVerdict = (v) => ({
+  claim_id: v?.claim_id, verdict: v?.verdict, quote: v?.quote, reason: v?.reason,
+  rechecked_urls: v?.rechecked_urls ?? [], source_tier_ok: v?.source_tier_ok,
 })
-
-/** 文件里一条裁决的投影（同形，便于逐字比较）。 */
-const projectFileVerdict = (v) => ({
-  claim_id: v.claim_id,
-  verdict: v.verdict,
-  quote: v.quote,
-  reason: v.reason,
-  rechecked_urls: v.rechecked_urls ?? [],
-  source_tier_ok: v.source_tier_ok,
-})
+const projectRawVerdict = projectVerdict
+const projectFileVerdict = projectVerdict
 
 /**
  * 审计一个 bundle 的 claim 级裁决。
@@ -464,10 +462,9 @@ export function auditClaimVerdicts({
         if (WRITE_TOOLS.test(tool)) add('verifier-wrote', `${where}：验证者会话调过 ${tool}（只读纪律是任务形状，调用即红）`)
       }
       const texts = Array.isArray(facts.assistantTexts) ? facts.assistantTexts : []
-      const key = normalizeVerbatim(batch.raw)
       let matched = -1
       for (let i = (cursor.get(batch.session) ?? -1) + 1; i < texts.length; i += 1) {
-        if (normalizeVerbatim(texts[i]) === key) { matched = i; break }
+        if (verbatimMatches(batch.raw, texts[i])) { matched = i; break }
       }
       if (matched < 0) {
         add('not-verbatim', `${where}：batches[${bi}].raw 与该会话第 ${String((cursor.get(batch.session) ?? -1) + 2)} 条起的助手正文都不逐字相等——裁决必须原文落盘，且按轮次先后对应`)
@@ -477,10 +474,17 @@ export function auditClaimVerdicts({
     }
   }
 
-  // 覆盖：只看**最新一轮**（旧轮是历史，不拿来充数）。
+  // 覆盖：只看**最新一轮**（旧轮是历史，不拿来充数）；若多轮文件间 claim 完全不相交，附批/轮歧义诊断。
   const latestVerdicts = latest.verdicts
   const verdictOf = new Map()
   for (const verdict of latestVerdicts) if (!verdictOf.has(verdict.claim_id)) verdictOf.set(verdict.claim_id, verdict)
+  const earlierClaimIds = new Set()
+  for (const round of parsedRounds.slice(0, -1)) {
+    for (const verdict of round.verdicts) earlierClaimIds.add(verdict.claim_id)
+  }
+  const looksLikeBatchSplit = parsedRounds.length >= 2
+    && earlierClaimIds.size > 0
+    && [...verdictOf.keys()].every((id) => !earlierClaimIds.has(id))
   let covered = 0
   let unverified = 0
   let unsupported = 0
@@ -488,7 +492,10 @@ export function auditClaimVerdicts({
     if (!claim.critical) continue
     const verdict = verdictOf.get(claim.id)
     if (verdict === undefined) {
-      add('coverage-gap', `${claim.id}（critical）在最新一轮 r${latest.round} 没有裁决`)
+      const hint = looksLikeBatchSplit && earlierClaimIds.has(claim.id)
+        ? '（疑似把同轮多批拆写成 verdicts-r<N>.json；<N> 是审查轮次而非批号，同轮多批应合写进同一文件的 batches[]）'
+        : ''
+      add('coverage-gap', `${claim.id}（critical）在最新一轮 r${latest.round} 没有裁决${hint}`)
       continue
     }
     if (verdict.verdict === 'unverifiable') {

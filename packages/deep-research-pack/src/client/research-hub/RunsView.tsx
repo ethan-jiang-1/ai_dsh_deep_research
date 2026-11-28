@@ -168,7 +168,8 @@ export function RunsView({
             const matchedProj = match?.kind === 'owned' ? match.projection : null
             const isOrphan = sessionMatches !== undefined && match?.kind !== 'owned'
             const isActiveRun = run.status === 'in_progress'
-            const isHitlPending = isActiveRun && matchedProj?.phase === 'hitl_pending'
+            const isHitlPending = matchedProj?.phase === 'hitl_pending'
+            const preferEnterSession = isActiveRun || isHitlPending || matchedProj?.phase === 'running'
             const badgeTone = isHitlPending ? 'warning' : statusToneOf(run.status)
             const badgeLabel = isHitlPending
               ? (matchedProj.hitlKind === 'hitl1'
@@ -210,7 +211,7 @@ export function RunsView({
                   <div className={css.errorBox}>{run.error}</div>
                 )}
                 <div className={css.cardFooter}>
-                  {isActiveRun && ownedSessionId !== null && onEnterSession !== undefined && (
+                  {preferEnterSession && ownedSessionId !== null && onEnterSession !== undefined && (
                     <Button
                       variant="primary"
                       size="sm"
@@ -222,7 +223,7 @@ export function RunsView({
                   )}
                   {finalPath !== null && (
                     <Button
-                      variant={isActiveRun && ownedSessionId !== null ? 'outline' : 'primary'}
+                      variant={preferEnterSession && ownedSessionId !== null && onEnterSession !== undefined ? 'outline' : 'primary'}
                       size="sm"
                       data-testid="hub-open-final"
                       onClick={() => { onOpenFinal(finalPath, ownedSessionId) }}
@@ -230,7 +231,7 @@ export function RunsView({
                       {t('hubOpenFinal')}
                     </Button>
                   )}
-                  {!isActiveRun && ownedSessionId !== null && onEnterSession !== undefined && (
+                  {!preferEnterSession && ownedSessionId !== null && onEnterSession !== undefined && (
                     <Button
                       variant="outline"
                       size="sm"

@@ -35,7 +35,7 @@ export function SelectMenu(props: SelectMenuProps): ReactNode {
       value={value}
       data-value={value}
       disabled={disabled}
-      className={`${css.selectButton} ${className}`.trim()}
+      className={css.selectButton}
       onClick={() => { setOpen((prev) => !prev) }}
     >
       <span className={css.selectLabel}>{current?.label ?? value}</span>
@@ -51,6 +51,7 @@ export function SelectMenu(props: SelectMenuProps): ReactNode {
       selectedId={value}
       portal
       minWidthFromAnchor
+      className={className === '' ? undefined : className}
       onSelect={(id) => {
         onChange(id)
         setOpen(false)

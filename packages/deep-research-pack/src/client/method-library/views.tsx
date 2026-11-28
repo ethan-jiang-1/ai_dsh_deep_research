@@ -191,12 +191,26 @@ export function MethodSummaryView(props: {
   readonly onStageChange: (stage: WorkbenchStage) => void
   readonly onFocusField: (field: DraftField) => void
   readonly onRestartSource: () => void
+  readonly onCancel?: () => void
   readonly canSave: boolean
   readonly sending: boolean
   readonly onSave: (setDefault: boolean) => void
   readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
-  const { draft, mode, existingNames, stage, manualFields, coachFields, sourceFields, onStageChange, onFocusField, onRestartSource, canSave, sending, onSave, t } = props
+  const { draft, mode, existingNames, stage, manualFields, coachFields, sourceFields, onStageChange, onFocusField, onRestartSource, onCancel, canSave, sending, onSave, t } = props
+  useEffect(() => {
+    if (onCancel === undefined || typeof window === 'undefined') return undefined
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key !== 'Escape' || event.defaultPrevented || sending) return
+      const target = event.target as HTMLElement | null
+      const tag = target?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable === true) return
+      event.preventDefault()
+      onCancel()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => { window.removeEventListener('keydown', onKeyDown) }
+  }, [onCancel, sending])
   const filled = SECTION_LABELS.filter(({ key }) => (draft.sections[key] ?? '').trim() !== '').length
   const status = draftStatusOf({
     draft,
@@ -236,7 +250,12 @@ export function MethodSummaryView(props: {
       </div>
       <button type="button" className={css.primaryButton} disabled={!effectiveCanSave || sending} onClick={() => { onSave(false) }}>{sending ? t('saving') : t('save')}</button>
       <button type="button" className={css.button} disabled={!effectiveCanSave || sending} title={t('saveAndSetDefaultDescription')} onClick={() => { onSave(true) }}>{t('saveAndSetDefault')}</button>
-      <button type="button" className={`${css.button} ${css.mlAuto}`} onClick={onRestartSource}>{t('restartSource')}</button>
+      {mode !== 'edit' && (
+        <button type="button" data-method-restart-source="" className={`${css.button} ${css.mlAuto}`} onClick={onRestartSource}>{t('restartSource')}</button>
+      )}
+      {onCancel !== undefined && (
+        <button type="button" data-method-summary-cancel="" className={`${css.button}${mode === 'edit' ? ` ${css.mlAuto}` : ''}`} disabled={sending} onClick={onCancel}>{t('cancel')}</button>
+      )}
       </div>
       {!effectiveCanSave && status.blockerText !== null && <div role="status" className={`${css.muted} ${css.mt6}`}>{status.blockerText}</div>}
       {status.duplicateWarning !== null && <div role="status" className={`${css.muted} ${css.mt6}`}>{status.duplicateWarning}</div>}

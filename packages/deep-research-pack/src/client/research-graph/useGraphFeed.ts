@@ -57,6 +57,10 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
     snapshotsState,
   } = state
   const viewRef = useRef<RunView | null>(null)
+  const activeLeadRef = useRef<SessionId>(leadSessionId)
+  const followAttemptRef = useRef(followAttempt)
+  followAttemptRef.current = followAttempt
+  const skipFollowOnceRef = useRef(false)
   const setGraphView = useCallback<Dispatch<SetStateAction<'current' | 'diff'>>>((value) => {
     dispatch({ kind: 'set-graph-view', value })
   }, [])
@@ -66,6 +70,18 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
   const retry = useCallback(() => { dispatch({ kind: 'plan-retry' }) }, [])
 
   useEffect(() => {
+    if (activeLeadRef.current === leadSessionId) return
+    activeLeadRef.current = leadSessionId
+    viewRef.current = null
+    if (followAttemptRef.current > 0) skipFollowOnceRef.current = true
+    dispatch({ kind: 'reset-session' })
+  }, [leadSessionId])
+
+  useEffect(() => {
+    if (skipFollowOnceRef.current) {
+      skipFollowOnceRef.current = false
+      return undefined
+    }
     const controller = new AbortController()
     let stopped = false
     let events: unknown[] = []
@@ -189,15 +205,21 @@ export function useGraphFeed(props: ResearchGraphTabProps, leadSessionId: Sessio
     const controller = new AbortController()
     dispatch({ kind: 'snapshot-loading' })
     void (async () => {
-      const art = await readArtifact(view, `plan/v${String(latestSnapshot)}.md`, { signal: controller.signal })
-      if (stopped) return
-      if (art.state === 'absent') { dispatch({ kind: 'snapshot-missing' }); return }
-      if (art.state === 'empty') { dispatch({ kind: 'snapshot-failed', state: 'empty' }); return }
-      if (art.state === 'unreadable') { dispatch({ kind: 'snapshot-failed', state: 'unreadable' }); return }
-      if (art.state !== 'ok' || art.text === null) { dispatch({ kind: 'snapshot-failed', state: 'invalid' }); return }
-      const parsed = planIndex(art.text)
-      if (parsed.topLevel.length === 0) { dispatch({ kind: 'snapshot-failed', state: 'invalid' }); return }
-      dispatch({ kind: 'snapshot-ready', plan: parsed })
+      try {
+        const art = await readArtifact(view, `plan/v${String(latestSnapshot)}.md`, { signal: controller.signal })
+        if (stopped) return
+        if (art.state === 'absent') { dispatch({ kind: 'snapshot-missing' }); return }
+        if (art.state === 'empty') { dispatch({ kind: 'snapshot-failed', state: 'empty' }); return }
+        if (art.state === 'unreadable') { dispatch({ kind: 'snapshot-failed', state: 'unreadable' }); return }
+        if (art.state !== 'ok' || art.text === null) { dispatch({ kind: 'snapshot-failed', state: 'invalid' }); return }
+        const parsed = planIndex(art.text)
+        if (parsed.topLevel.length === 0) { dispatch({ kind: 'snapshot-failed', state: 'invalid' }); return }
+        dispatch({ kind: 'snapshot-ready', plan: parsed })
+      } catch (cause) {
+        if (stopped || controller.signal.aborted) return
+        console.error('[research-graph] plan 快照读取失败', String(cause))
+        dispatch({ kind: 'snapshot-failed', state: 'unreadable' })
+      }
     })()
     return () => { stopped = true; controller.abort() }
   }, [graphView, showSnapshotPlan, latestSnapshot, leadSessionId, retryTick])

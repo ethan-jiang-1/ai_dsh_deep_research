@@ -189,7 +189,7 @@
   max-width: 100%;
 }
 
-@container (max-width: 340px) {
+@container (max-width: 390px) {
   .segmentedWrap {
     width: 100%;
   }
@@ -289,6 +289,7 @@
 
 .claimsList {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   padding-top: 4px;
 }
@@ -321,6 +322,8 @@
   border-radius: var(--dsw-radius-sm);
   background: var(--dsw-alias-bg-layer-1);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   gap: 5px;
   font-size: 12.5px;
 }
@@ -354,6 +357,25 @@
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.claimRefPill {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.claimRefText {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .prioritiesBox {
@@ -480,6 +502,8 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
   padding: 10px 12px 24px;
 }
 

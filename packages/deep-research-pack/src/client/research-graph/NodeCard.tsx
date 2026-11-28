@@ -42,6 +42,7 @@ export function NodeCard(props: {
   readonly inserted?: boolean
   readonly onInsertRef?: () => void
   readonly onOpenOwner?: () => void
+  readonly cardRef?: (el: HTMLElement | null) => void
   readonly children: readonly PlanNode[]
   readonly childStateOf: (childId: string) => GraphNodeState
   readonly leadSessionId: string
@@ -50,12 +51,12 @@ export function NodeCard(props: {
   readonly boundSlug: string | null
   readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
-  const { node, expanded, onToggle, copied, onCopy, inserted = false, onInsertRef, onOpenOwner, children: childNodes, childStateOf, leadSessionId, useSessions, useSessionStatus, boundSlug, t } = props
+  const { node, expanded, onToggle, copied, onCopy, inserted = false, onInsertRef, onOpenOwner, cardRef, children: childNodes, childStateOf, leadSessionId, useSessions, useSessionStatus, boundSlug, t } = props
     const task = node.task
     const planNode = node.planNode
     const member = node.member
     return (
-      <article key={node.id} id={`research-graph-${node.id}`} className={styles.cardBox} style={{ borderLeft: `3px solid ${node.state.color}` }}>
+      <article key={node.id} ref={cardRef} className={styles.cardBox} style={{ borderLeft: `3px solid ${node.state.color}` }}>
         <button
           type="button"
           aria-expanded={expanded}

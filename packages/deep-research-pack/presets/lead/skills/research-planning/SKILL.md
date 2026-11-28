@@ -44,8 +44,8 @@ acceptance / budget / depth / task_id`。头部必须有机器可读版本行 `�
 - `id`：`W<wave>.<index>`（如 `W2.1`）；Wave 由 deps 算，ID 前缀必须一致。
 - `parent`：Wave 内顶层留空（`—`）；只有内部拆解写父节点 id（`W2.1.1` 的 parent = `W2.1`）。
 - `lifecycle`：`active` 或墓碑值（见 §0）；墓碑保留可查、不画图。
-- `kind`：`broad-scan` / `deep-dive` / `cross-check` / `synthesis` / `review` / `gate`；子节点
-  可用 `search` / `fetch`，stage 继承根节点。
+- `kind`：闭集仅限 `broad-scan` / `deep-dive` / `cross-check` / `synthesis` / `review` / `gate` / `fetch`
+  （`check` 是由 `cross-check` 派生的 `stage`，**不是**合法 `kind`；子节点可用 `fetch`，stage 继承根节点）。
 - `owner_role`：`lead` / `scout` / `analyst` / `critic`；一个节点一个 owner。
 - `deps` 用节点 id（`W1.1` / `W2.1`），不是 topic id；图必须无环；跨 Wave 子依赖禁止。
 - `output` 写 run bundle 相对路径；`acceptance` 写可判条件；`budget` 写最多 worker/搜索轮次。
@@ -94,8 +94,8 @@ L2 触发（任一）：关键 claim 单源/只有二手、口径缺失、矛盾
    `W2` 不建 task。
 2. **复合节点 W2.1**（有 W2.1.1 等内部拆解）用 rollup task，owner Lead；`blocked_by` = 外部
    依赖 task + 已建子任务；子任务废弃先 `set_dependencies` 清依赖再 delete。
-3. 把返回的 `task-N` 回填 plan 的 `task_id`，**回填后逐行核对**：每个节点要么有真实
-   `task-N`，要么显式写 `plan-only`（内部拆解等不挂任务的节点）——**不留空白**。留空的节点在
+3. 把返回的 `task-N` 立即回填 `plan.md` 的 `task_id`，并同步更新 `## 剩余工作`（`state` 严格四值闭集：`待派发/进行中/完成/阻塞`，禁写「待 W1.1」等依赖散文——依赖只住 `deps` 列）。**回填后逐行核对**：每个节点要么有真实
+   `task-N`，要么显式写 `plan-only`（脚本层/内部拆解等不挂任务的节点）——**不留 `—` 或空白**。留空的节点在
    研究图谱上是「状态未知（未映射 task_id）」，既不是未执行也不是完成；恢复会话重建任务后旧
    `task_id` 会失效，按同一规则重绑。**task_id 只是当前会话映射**；canonical 引用始终是 `W2.1`。
 4. 把所有 ready 且无 owner 的 task `team_task_update action=reassign` 给 owner；owner 不在线就

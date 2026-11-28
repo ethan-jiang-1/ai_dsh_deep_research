@@ -37,9 +37,10 @@ import { useRunSourcePicker } from './method-library/useRunSourcePicker.ts'
 import { useDraftState } from './method-library/useDraftState.ts'
 import { useOperationQueue, useOperationQueueState } from './method-library/useOperationQueue.ts'
 import {
-  LIBRARY_PATH, builtinLibraryEntry,
-  type MethodLibraryOperationRequest,
+  LIBRARY_PATH, builtinLibraryEntry, maxLeftPaneWidth,
+  type MethodLibraryLeaveStatus, type MethodLibraryOperationRequest, type Mode,
 } from './method-library/model.ts'
+import { useContainerWidth } from './useContainerWidth.ts'
 import css from './method-library/library.module.css'
 
 export interface MethodLibraryInjected {
@@ -62,26 +63,30 @@ export interface MethodLibraryInjected {
   readonly readPreview: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<SourcePreview>
 }
 
-export type MethodLibraryViewProps = PropsRuntime<'conversation.view'> & PropsLocale<'deepResearchPack'> & MethodLibraryInjected
+export type MethodLibraryViewProps = PropsRuntime<'conversation.view'> & PropsLocale<'deepResearchPack'> & MethodLibraryInjected & {
+  /** 可选宿主离场守卫注册（Hub 切 tab / 返回对话前检查保存锁与未保存草稿；BUG-480）。 */
+  readonly registerLeaveGuard?: (guard: (() => MethodLibraryLeaveStatus) | null) => void
+}
 
 /**
  * 主界面「方法库」tab。
  * @param props - conversation.view 标准 props + workspace reads and Method Editor session injection.
  */
 export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
-  const { sessionId, t, readLibrary, listDir, readPreview, sendCoach, watchCoach } = props
+  const { sessionId, t, readLibrary, listDir, readPreview, sendCoach, watchCoach, registerLeaveGuard } = props
+  const [mode, setMode] = useState<Mode>('read')
+  const [interviewStarted, setInterviewStarted] = useState(false)
+  const [rootEl, setRootEl] = useState<HTMLDivElement | null>(null)
   const {
     text, loadState, setLoadState, loadError, setLoadError,
     query, setQuery, segment, setSegment, selectedName, setSelectedName,
     entries, filtered, selected, builtin, applyLibraryRead, load, reset: resetLibrary,
-  } = useLibraryData({ sessionId, readLibrary })
+  } = useLibraryData({ sessionId, readLibrary, preserveEmptySelection: mode === 'new' })
   const {
     runNames, runState, selectedRunSource, selectedRunLoading,
-    loadRunNames, selectRunSource, abort: abortRunRead, reset: resetRunPicker,
+    loadRunNames, selectRunSource, abort: abortRunRead, cancelRunRead, reset: resetRunPicker,
     setSelectedRunSource, setSelectedRunLoading,
-  } = useRunSourcePicker({
-    sessionId, t, listDir, readPreview, readLibrary,
-  })
+  } = useRunSourcePicker({ sessionId, t, listDir, readPreview, readLibrary })
   // 写操作队列的状态面必须先于 useDraftState 创建：草稿 hook 借用这些 ref/setter 判忙与落回执。
   const {
     pendingOperationRef, queuedOperationRef, queuedOperationTimeoutRef,
@@ -90,7 +95,6 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   } = useOperationQueueState()
   const [coachId, setCoachId] = useState<SessionId | null>(null)
   const [selectedBuiltinSource, setSelectedBuiltinSource] = useState<LibraryEntry | null>(null)
-  const [narrowPane, setNarrowPane] = useState(false)
   const [libraryOpen, setLibraryOpen] = useState(false)
   const [coachReady, setCoachReady] = useState(false)
   const coachReadyRef = useRef(false)
@@ -112,6 +116,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     setCoachId(null)
     coachReadyRef.current = false
     setCoachReady(false)
+    setInterviewStarted(false)
     if (queuedOperationRef.current === null) return
     if (queuedOperationTimeoutRef.current !== null) clearTimeout(queuedOperationTimeoutRef.current)
     queuedOperationTimeoutRef.current = null
@@ -122,19 +127,18 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   }, [queuedOperationRef, queuedOperationTimeoutRef, setReceipt, setSending, t])
   const [leftWidth, setLeftWidth] = useState(270)
   const {
-    mode, setMode, modeRef, workbenchStage, setWorkbenchStage,
+    modeRef, workbenchStage, setWorkbenchStage,
     draft, setDraft, draftRef, draftRevision, setDraftRevision, draftRevisionRef,
     turnBaseRevisionRef, turnAcceptedRevisionRef, lastAssistantSeqRef,
     activeDraftKey, setActiveDraftKey, activeDraftKeyRef,
     manual, manualRef, coachFields, setCoachFields, coachFieldsRef,
     sourceFields, setSourceFields, activeField, setActiveField, activeRef,
-    coachBase, setCoachBase, coachBaseRef, previousRef,
+    coachBase, setCoachBase, coachBaseRef, previousRef, dirty,
     bumpDraftRevision, releaseCoachIfIdle, switchSegment, beginNew, beginEdit,
     selectMine, selectBuiltin, restartSource, applyBuiltinReference, startBlank,
     startBuiltinSource, startRunSource, cancel, updateSection, onNameChange, undoCoach,
   } = useDraftState({
-    t,
-    segment, entries, selected, setSegment, setSelectedName,
+    t, mode, setMode, segment, entries, selected, setSegment, setSelectedName,
     selectedBuiltinSource, setSelectedBuiltinSource,
     selectedRunSource, setSelectedRunSource, setSelectedRunLoading,
     abortRunRead, setReceipt, setPendingDelete, setLibraryOpen,
@@ -161,49 +165,43 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
     && methodNameIssue(draft.name) === null
     && SECTION_LABELS.every(({ key }) => (draft.sections[key] ?? '').trim() !== '')
 
+  const rootWidth = useContainerWidth(rootEl)
+  const narrowPane = rootWidth !== null && rootWidth < 640
+  const maxLeftWidth = maxLeftPaneWidth(rootWidth)
+  const effectiveLeftWidth = Math.max(120, Math.min(maxLeftWidth, leftWidth))
+  useEffect(() => { if (!narrowPane) setLibraryOpen(false) }, [narrowPane])
+  useEffect(() => { setInterviewStarted(false) }, [sessionId, activeDraftKey, coachEpoch])
   useEffect(() => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return undefined
-    const mediaQuery = window.matchMedia('(max-width: 640px)')
-    const sync = (): void => {
-      setNarrowPane(mediaQuery.matches)
-      if (!mediaQuery.matches) setLibraryOpen(false)
-    }
-    sync()
-    mediaQuery.addEventListener('change', sync)
-    return () => { mediaQuery.removeEventListener('change', sync) }
-  }, [])
+    if (mode === 'read' || workbenchStage === 'source' || coachId === null) setInterviewStarted(false)
+  }, [mode, workbenchStage, coachId])
+
+  const leaveStatusRef = useRef<() => MethodLibraryLeaveStatus>(() => 'allow')
+  leaveStatusRef.current = () => {
+    if (sending || pendingOperationRef.current !== null || queuedOperationRef.current !== null) return 'blocked-saving'
+    return dirty ? 'confirm-discard' : 'allow'
+  }
+  useEffect(() => {
+    if (registerLeaveGuard === undefined) return undefined
+    registerLeaveGuard(() => leaveStatusRef.current())
+    return () => { registerLeaveGuard(null) }
+  }, [registerLeaveGuard])
 
   useEffect(() => {
-    resetRunPicker()
-    resetLibrary()
-    setMode('read')
-    setDraft(null)
-    draftRevisionRef.current = 0
-    setDraftRevision(0)
-    turnBaseRevisionRef.current = null
-    turnAcceptedRevisionRef.current = null
-    lastAssistantSeqRef.current = -1
-    setSourceFields(new Set())
-    setWorkbenchStage('interview')
-    setActiveDraftKey(null)
-    activeDraftKeyRef.current = null
-    setPendingDelete(null)
-    setReceipt(null)
-    setSelectedBuiltinSource(null)
-    setCoachId(null)
-    coachIdRef.current = null
-    setCoachReady(false)
-    coachReadyRef.current = false
-    setCoachVisible(false)
-    coachRetryRef.current = false
+    resetRunPicker(); resetLibrary(); setMode('read'); setDraft(null); setInterviewStarted(false)
+    draftRevisionRef.current = 0; setDraftRevision(0)
+    turnBaseRevisionRef.current = null; turnAcceptedRevisionRef.current = null; lastAssistantSeqRef.current = -1
+    setSourceFields(new Set()); setWorkbenchStage('interview')
+    setActiveDraftKey(null); activeDraftKeyRef.current = null
+    setPendingDelete(null); setReceipt(null); setSelectedBuiltinSource(null)
+    setCoachId(null); coachIdRef.current = null
+    setCoachReady(false); coachReadyRef.current = false
+    setCoachVisible(false); coachRetryRef.current = false
     queuedOperationRef.current = null
     if (queuedOperationTimeoutRef.current !== null) clearTimeout(queuedOperationTimeoutRef.current)
     queuedOperationTimeoutRef.current = null
     if (pendingOperationRef.current !== null) clearTimeout(pendingOperationRef.current.timeout)
     pendingOperationRef.current = null
-    operationUnknownRef.current = false
-    setOperationUnknown(false)
-    setSending(false)
+    operationUnknownRef.current = false; setOperationUnknown(false); setSending(false)
     const controller = new AbortController()
     void load(controller.signal)
     return () => {
@@ -218,13 +216,10 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   // 文案住 coach-prompts（模型面，不是 UI）——见 BUG-055 的扫描守卫边界。
   const coachContext = coachContextOf({ text, draft, draftRevision, selectedBuiltinSource, selectedRunSource })
 
-
   const startInterview = async (id: SessionId): Promise<{ readonly ok: boolean; readonly detail?: string; readonly uncertain?: boolean }> => {
     const action = coachStartAction(selectedRunSource, selectedBuiltinSource)
-    const requestId = crypto.randomUUID()
-    const result = await props.sendCoach(id, `${coachContext}\n\n${action}`, requestId)
-    if (result.ok) return result
-    setReceipt({ ok: false, detail: result.uncertain === true ? props.t('operationUnknown') : props.t('operationFailed', { detail: result.detail ?? 'prompt rejected' }) })
+    const result = await props.sendCoach(id, `${coachContext}\n\n${action}`, crypto.randomUUID())
+    if (result.ok) setInterviewStarted(true)
     return result
   }
 
@@ -332,17 +327,19 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
   // oxlint-disable-next-line react-hooks/exhaustive-deps -- sibling-hook refs/setters are stable; watch stream rebinds only when coachId/callbacks change
   }, [coachId, watchCoach, t])
 
-  // 手改 diff 回传：用户停下 900ms 后，把改动字段作为一条「以用户为准」的消息发给方法编辑。
+  // 手改 diff 回传：仅访谈已启动且无在途写盘时，停下 900ms 后同步改动字段给方法编辑（BUG-480）。
   useEffect(() => {
-    if (coachId === null || manual.size === 0 || draft === null) return undefined
+    if (!interviewStarted || sending || pendingOperationRef.current !== null || coachId === null || manual.size === 0 || draft === null) return undefined
     const handle = setTimeout(() => {
+      if (pendingOperationRef.current !== null) return
       void sendCoach(coachId, manualEditPrompt(draft, manual)).catch(() => { /* @silent-catch: manual edit telemetry is fail-soft */ })
     }, 900)
     return () => clearTimeout(handle)
-  }, [coachId, draft, manual, sendCoach])
+  }, [interviewStarted, sending, coachId, draft, manual, sendCoach, pendingOperationRef])
 
   return (
     <div
+      ref={setRootEl}
       data-method-library=""
       data-method-draft-revision={draftRevision}
       className={css.root}
@@ -376,7 +373,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
           className={css.libraryAside}
           style={{
             display: !narrowPane || libraryOpen ? 'block' : 'none',
-            flex: narrowPane ? '1 1 auto' : `0 0 min(${leftWidth}px, 38vw)`,
+            flex: narrowPane ? '1 1 auto' : (rootWidth !== null ? `0 0 ${effectiveLeftWidth}px` : `0 0 min(${effectiveLeftWidth}px, 38%)`),
             width: narrowPane ? '100%' : undefined,
             minWidth: narrowPane ? 0 : 120,
             borderRight: narrowPane ? 'none' : '1px solid var(--dsw-alias-border-l1)',
@@ -421,7 +418,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
             </>
           )}
         </aside>
-        {!narrowPane && <ColumnHandle onDrag={(delta) => { setLeftWidth((width) => Math.max(120, Math.min(420, width + delta))) }} value={leftWidth} min={120} max={420} label={props.t('columnResize')} />}
+        {!narrowPane && <ColumnHandle onDrag={(delta) => { setLeftWidth((width) => Math.max(120, Math.min(maxLeftWidth, width + delta))) }} value={effectiveLeftWidth} min={120} max={maxLeftWidth} label={props.t('columnResize')} />}
         <main
           id="method-library-workbench-pane"
           data-method-library-pane="workbench"
@@ -443,6 +440,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
               onStageChange={setWorkbenchStage}
               onFocusField={(field) => { setActiveField(field); setWorkbenchStage('form-check') }}
               onRestartSource={restartSource}
+              onCancel={cancel}
               canSave={canSaveDraft}
               sending={sending || operationUnknown}
               onSave={(asDefault) => { void save(asDefault) }}
@@ -464,7 +462,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
               runNames={runNames}
               runState={runState}
               selectedRunLoading={selectedRunLoading}
-              onCancelRunRead={abortRunRead}
+              onCancelRunRead={cancelRunRead}
               selectedBuiltin={selectedBuiltinSource}
               selectedRun={selectedRunSource}
               onSelectBuiltin={setSelectedBuiltinSource}
@@ -478,7 +476,7 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
             />}
             {(mode === 'edit' || mode === 'new') && workbenchStage === 'form-check' && <EditorView draft={draft} mode={mode} existingNames={entries.map((entry) => entry.name)} sending={sending || operationUnknown} t={props.t} onNameChange={onNameChange} onSectionChange={updateSection} onSave={(asDefault) => { void save(asDefault) }} onCancel={cancel} coachFields={coachFields} manualFields={manual} activeField={activeField} coachUpdated={coachBase !== null} onUndoCoach={undoCoach} />}
             {sessionId !== undefined && (coachVisible || (mode !== 'read' && workbenchStage !== 'source')) && (
-              <MethodCoachPanel key={`${sessionId}:${coachEpoch}:${activeDraftKey}`} sessionId={sessionId} draftKey={activeDraftKey ?? 'pending'} visible={(mode === 'edit' || mode === 'new') && workbenchStage === 'interview'} ensure={props.ensureCoach} onCoach={onCoachReady} onError={onCoachError} onStartInterview={startInterview} title={props.t('methodEditorTitle')} startLabel={props.t('startInterview')} readyLabel={props.t('interviewReady')} pendingLabel={props.t('startingInterview')} startedLabel={props.t('interviewStarted')} t={props.t} />
+              <MethodCoachPanel key={`${sessionId}:${coachEpoch}:${activeDraftKey}`} sessionId={sessionId} draftKey={activeDraftKey ?? 'pending'} visible={(mode === 'edit' || mode === 'new') && workbenchStage === 'interview'} ensure={props.ensureCoach} onCoach={onCoachReady} onError={onCoachError} onStartInterview={startInterview} onInterviewStarted={setInterviewStarted} title={props.t('methodEditorTitle')} startLabel={props.t('startInterview')} readyLabel={props.t('interviewReady')} pendingLabel={props.t('startingInterview')} startedLabel={props.t('interviewStarted')} t={props.t} />
             )}
           </div>
         </main>

@@ -82,8 +82,8 @@ function buildDefaultsOptions(
     { id: 'output:timeline', label: t('defaultsShapeTimeline'), detail: 'timeline', group: outputGroup, active: curShape === 'timeline' },
     { id: 'output:quick_answer', label: t('defaultsShapeQuickAnswer'), detail: 'quick_answer', group: outputGroup, active: curShape === 'quick_answer' },
     { id: 'output:auto', label: t('defaultsShapeAuto'), detail: 'unset output', group: outputGroup, active: curShape === null },
-    { id: 'source:primary_first', label: t('defaultsAuthorityPrimary'), detail: 'primary_first', group: sourceGroup, active: curAuth === 'primary_first' },
-    { id: 'source:authoritative_secondary', label: t('defaultsAuthoritySecondary'), detail: 'authoritative_secondary', group: sourceGroup, active: curAuth === 'authoritative_secondary' },
+    { id: 'source:primary', label: t('defaultsAuthorityPrimary'), detail: 'primary', group: sourceGroup, active: curAuth === 'primary' },
+    { id: 'source:secondary', label: t('defaultsAuthoritySecondary'), detail: 'secondary', group: sourceGroup, active: curAuth === 'secondary' },
     { id: 'source:any', label: t('defaultsAuthorityAny'), detail: 'any', group: sourceGroup, active: curAuth === 'any' },
     { id: 'reset:clear', label: t('defaultsClear'), detail: t('cmdDefaultsClearDetail'), group: resetGroup },
   ]
@@ -107,11 +107,19 @@ export function registerResearchCommands(ctx: ClientContext, deps: ResearchComma
           noResults: t('cmdNoResults'),
         }),
         options: async (session) => {
-          const snap = defaultsStore.getSnapshot(session.sessionId)
+          let snap = defaultsStore.getSnapshot(session.sessionId)
+          if (snap.phase === 'loading') {
+            await defaultsStore.refresh(session.sessionId)
+            snap = defaultsStore.getSnapshot(session.sessionId)
+          }
           return buildDefaultsOptions(t, snap.phase === 'ready' ? snap.value : null)
         },
         onSelect: async (option, session) => {
-          const snap = defaultsStore.getSnapshot(session.sessionId)
+          let snap = defaultsStore.getSnapshot(session.sessionId)
+          if (snap.phase === 'loading') {
+            await defaultsStore.refresh(session.sessionId)
+            snap = defaultsStore.getSnapshot(session.sessionId)
+          }
           const revision = snap.phase === 'ready' ? snap.revision : null
           const line = defaultsCommandLineForOption(option.id, revision)
           if (line === null) return

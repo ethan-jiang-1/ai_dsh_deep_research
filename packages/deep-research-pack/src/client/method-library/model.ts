@@ -14,6 +14,13 @@ export const LIBRARY_PATH = 'method-library.md'
 export type Mode = 'read' | 'edit' | 'new'
 export type Segment = 'mine' | 'builtin'
 export type LoadState = 'loading' | 'ok' | 'absent' | 'error'
+export type MethodLibraryLeaveStatus = 'allow' | 'blocked-saving' | 'confirm-discard'
+
+/** 方法库左侧列表拖拽最大宽：受限于容器宽 38%（上限 420px，下限 120px；BUG-482）。 */
+export function maxLeftPaneWidth(containerWidth: number | null): number {
+  if (containerWidth === null) return 420
+  return Math.max(120, Math.min(420, Math.floor(containerWidth * 0.38)))
+}
 
 export interface Receipt {
   readonly ok: boolean

@@ -76,12 +76,24 @@ export function leadsGate(bundleDir, leadsDate) {
     }
     if (/^建议挖深/.test(sv)) {
       dig++
-      const srcM = body.match(/^\s*-\s*支持来源[:：].*$/m)
-      // 分级判据（BUG-038，2026-10-18 端到端实测）：模型会**加粗**分级（`（本轮 200，**A**，primary）`），
-      // 旧判据要求分级紧跟括号 → 对已正确分级的条目假红。判据改为：剥 markdown 强调后，行内任一
-      // 括号/逗号/顿号后出现独立的 A–D 令牌即算（`（A）`（…，A，…）`都认；`A` 后不得接字母数字防撞 URL）。
-      const srcFlat = srcM === null ? '' : srcM[0].replace(/\*\*|__|`/g, '')
-      if (!srcM || !/[(（,，、]\s*[ABCD](?![A-Za-z0-9])/.test(srcFlat)) {
+      const srcIdx = s.body.findIndex((line) => /^\s*-\s*支持来源[:：]/.test(line))
+      let srcBlock = ''
+      if (srcIdx !== -1) {
+        const baseIndent = (/^(\s*)/.exec(s.body[srcIdx])?.[1] ?? '').length
+        const collected = [s.body[srcIdx]]
+        for (let i = srcIdx + 1; i < s.body.length; i += 1) {
+          const next = s.body[i]
+          if (next.trim() === '') break
+          const indent = (/^(\s*)/.exec(next)?.[1] ?? '').length
+          if (indent <= baseIndent) break
+          collected.push(next)
+        }
+        srcBlock = collected.join('\n')
+      }
+      // 分级判据（BUG-038 / BUG-467）：支持单行与缩进多行子列表 `- 支持来源:`；剥 markdown 强调后，
+      // 任一括号/逗号/顿号后出现独立的 A–D 令牌即算（`（A）`（…，A，…）`都认；`A` 后不得接字母数字防撞 URL）。
+      const srcFlat = srcBlock.replace(/\*\*|__|`/g, '')
+      if (srcIdx === -1 || !/[(（,，、]\s*[ABCD](?![A-Za-z0-9])/.test(srcFlat)) {
         problems.push(`「${title}」建议挖深但支持来源缺席或无 A–D 分级（收集而不分级反模式；修正 = 补支持来源行并带分级）`)
       }
       if (!/^\s*-\s*关键线索/m.test(body)) {

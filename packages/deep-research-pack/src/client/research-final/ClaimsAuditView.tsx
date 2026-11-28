@@ -95,7 +95,9 @@ export function ClaimsAuditView(props: {
             {row.evidence.length > 0 && (
               <div className={css.claimRefs}>
                 {row.evidence.map((ref) => (
-                  <Pill key={ref} onClick={() => onOpenEvidence(ref)}>{ref}</Pill>
+                  <Pill key={ref} title={ref} className={css.claimRefPill} onClick={() => onOpenEvidence(ref)}>
+                    <span className={css.claimRefText}>{ref}</span>
+                  </Pill>
                 ))}
               </div>
             )}

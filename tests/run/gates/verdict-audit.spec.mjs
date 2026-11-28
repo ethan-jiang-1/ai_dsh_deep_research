@@ -355,3 +355,54 @@ test('BUG-286：critical_exemption 太短/不提 critical → claims-invalid；�
   base.critical_exemption = '本 run 全部为事实性核对，没有需要 claim 级裁决的关键结论（理由见 review）'
   assert.ok(!codes(auditClaimVerdicts(fixture({ claimsText: JSON.stringify(base) }))).includes('claims-invalid'))
 })
+
+// 负例留证 2026-11-28：BUG-463——verdicts.json 模板仅示单批、verdict-audit-core 对 r1/r2 不相交
+// 拆文件只报泛化 coverage-gap 无批/轮歧义提示；删模板第二批或删诊断提示 → 本例红。
+test('BUG-463：verdicts.json 模板示范单轮多批 batches[]，且 r1/r2 拆批时 audit 明确提示轮次与批号歧义', () => {
+  const tpl = parseVerdicts(readFileSync(join(TEMPLATES, 'verdicts.json'), 'utf8'))
+  assert.deepEqual(tpl.problems, [], JSON.stringify(tpl.problems))
+  assert.equal(tpl.value.round, 1)
+  assert.ok(tpl.value.batches.length >= 2, '模板必须示范同一轮多批合写进 batches[]')
+  assert.ok(new Set(tpl.value.verdicts.map((v) => v.batch)).size >= 2, '模板 verdicts 必须示范 batch 0 与 batch 1')
+
+  const c2Crit = { ...C2, critical: true }
+  const item2 = { claim_id: 'C2', verdict: 'supported', quote: 'Y 的份额是 40%', reason: '原文一致', rechecked_urls: [], source_tier_ok: true }
+  const r1Raw = rawOf([ITEM])
+  const r2Raw = rawOf([item2])
+  const split = auditClaimVerdicts(fixture({
+    claims: [C1, c2Crit],
+    rounds: [
+      { round: 1, text: verdictsTextOf({ round: 1, raw: r1Raw, verdicts: [withBatch(ITEM)], session: 's1' }) },
+      { round: 2, text: verdictsTextOf({ round: 2, raw: r2Raw, verdicts: [withBatch(item2)], session: 's2' }) },
+    ],
+    reviewText: 'readiness: PASS\n\n见 verdicts-r2.json\n',
+    sessions: {
+      s1: { preset: 'critic', depth: 1, parentSession: 'lead', assistantTexts: [r1Raw], toolNames: ['web_fetch'] },
+      s2: { preset: 'critic', depth: 1, parentSession: 'lead', assistantTexts: [r2Raw], toolNames: ['web_fetch'] },
+    },
+  }))
+  const gap = split.problems.find((p) => p.code === 'coverage-gap' && p.detail.includes('C1'))
+  assert.ok(gap !== undefined, 'r1/r2 拆批仍须报 coverage-gap（不放松审计合同）')
+  assert.match(gap.detail, /同轮多批|batches\[\]/, 'coverage-gap 应点名疑似把同轮多批拆成 verdicts-r<N>.json')
+})
+
+// 负例留证 2026-11-28：BUG-485——child 带 ```json 围栏或 pretty-printed / 含网页零宽空格 \u200b 时，
+// Lead 按单行 JSON 落盘触发假 not-verbatim；篡改字段值（如改 reason）仍必须 not-verbatim。
+// 红配方：把 verbatim 比对退回仅做尾部空白修剪 → 前两例红。
+test('BUG-485：child 带围栏/缩进/\u200b 且 raw 为等价未篡改 JSON 时不误报 not-verbatim；改值仍判 not-verbatim', () => {
+  const itemWithZws = { ...ITEM, quote: '0.28 \u200b美元' }
+  const childPretty = JSON.stringify([itemWithZws], null, 2)
+  const childFenced = `\`\`\`json\n${childPretty}\n\`\`\``
+  const rawCompact = JSON.stringify([ITEM])
+
+  const resPretty = auditClaimVerdicts(fixture({ raw: rawCompact, assistantTexts: [childPretty] }))
+  assert.ok(!codes(resPretty).includes('not-verbatim'), `pretty-printed + \\u200b 等价 JSON 不应误报 not-verbatim：${JSON.stringify(resPretty.problems)}`)
+
+  const resFenced = auditClaimVerdicts(fixture({ raw: rawCompact, assistantTexts: [childFenced] }))
+  assert.ok(!codes(resFenced).includes('not-verbatim'), `child 外层围栏剥离后的等价 JSON 不应误报 not-verbatim：${JSON.stringify(resFenced.problems)}`)
+
+  // 负控：只要任意字段值被改（哪怕只改了 reason 里的强调符或措辞）→ 必须仍报 not-verbatim
+  const tampered = JSON.stringify([{ ...ITEM, reason: '原文一致（手改）' }])
+  const resTampered = auditClaimVerdicts(fixture({ raw: tampered, verdicts: [withBatch({ ...ITEM, reason: '原文一致（手改）' })], assistantTexts: [childFenced] }))
+  assert.ok(codes(resTampered).includes('not-verbatim'), '篡改任意字段值仍必须报 not-verbatim')
+})

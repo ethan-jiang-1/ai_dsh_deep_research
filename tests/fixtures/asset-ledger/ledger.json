@@ -849,7 +849,7 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "product-startup — GUI 侧工作区记忆的纯谓词（D40）；不碰 DOM/localStorage。",
-      "oracleType": "self-referential",
+      "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },
     {
@@ -899,6 +899,26 @@
       "class": "unit-pure",
       "cost": "fast-inproc",
       "uniqueClaim": "config feed 会话切换：reload epoch + 交互态复位（BUG-086 / BUG-108）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/research-final/final-studio-sub.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "final-studio-sub.spec.mjs — research-final 子模块（CitationHoverLayer / useEvidencePreview / FinalToc）直测回归（BUG-472 / BUG-473）。",
+      "oracleType": "canonical",
+      "sunset": "随被测模块删除"
+    },
+    {
+      "path": "tests/cockpit/client/research-graph/dag-map.spec.mjs",
+      "domain": "cockpit",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "dag-map.spec.mjs — DagMap SVG 作用域/中文裁剪与 ResearchGraphTab 交互/子节点投影测试（BUG-477 / BUG-478）。",
       "oracleType": "canonical",
       "sunset": "随被测模块删除"
     },

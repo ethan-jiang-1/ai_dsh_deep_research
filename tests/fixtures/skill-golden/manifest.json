@@ -47,7 +47,7 @@
     },
     {
       "path": "packages/deep-research-pack/presets/analyst/skills/evidence-extraction/SKILL.md",
-      "sha256": "83b6a9b86d977ba1a1b6f22e06860e3864312d29d711db62fb292216a5cf098d"
+      "sha256": "0281eacd4a4aa259cf038a8c26948414815a1aef6c6453680cb76e1fc4428ae1"
     },
     {
       "path": "packages/deep-research-pack/presets/analyst/skills/wave-execution/SKILL.md",
@@ -55,7 +55,7 @@
     },
     {
       "path": "packages/deep-research-pack/presets/critic/skills/adversarial-review/SKILL.md",
-      "sha256": "ea716f13713075aac554a634e33888d21e0c0bf952aab4f96697c054d990ac10"
+      "sha256": "aa476f1e39b01a3b5fcc61134218ca45667f3c73f11939a8a31ec17ef5c1d7d9"
     },
     {
       "path": "packages/deep-research-pack/presets/critic/skills/claim-verdict/SKILL.md",
@@ -67,11 +67,11 @@
     },
     {
       "path": "packages/deep-research-pack/presets/lead/skills/question-patterns/SKILL.md",
-      "sha256": "3f114d7080574883e58368cbaeab150f94f426721fbac6ebf76bca59ff386d21"
+      "sha256": "bdb382a3c02b1fb1aa53effeb2559ffc00f2ad3fc7884953c4cca3b20d673cb1"
     },
     {
       "path": "packages/deep-research-pack/presets/lead/skills/reader-final/SKILL.md",
-      "sha256": "975c7e8c641f024936030ea64b1f55282a00fc416bdebb61101ec704e17d6619"
+      "sha256": "b90fd1b77624693c31551b006137a932c016201f0fde63e57aee4f248c9616d3"
     },
     {
       "path": "packages/deep-research-pack/presets/lead/skills/rerun-triage/SKILL.md",
@@ -83,11 +83,11 @@
     },
     {
       "path": "packages/deep-research-pack/presets/lead/skills/research-planning/SKILL.md",
-      "sha256": "b743f0d38bd060c39f38f39f9d2fb6b7b6ccf01a54b8642dc97fd146a5b19cab"
+      "sha256": "9b7dd43514471abf53d14fb1b6640f0d2624371b9e6ef6d4a67c045183a82681"
     },
     {
       "path": "packages/deep-research-pack/presets/lead/skills/synthesis/SKILL.md",
-      "sha256": "542fe3cf51832888a6335baa374a566d28c6e26a0ca7c8959d721daccd59f3a3"
+      "sha256": "3a4d8e31a0c3baf966d4b9b7864af47b30940f5173406b0d86da1d6a2905e55a"
     },
     {
       "path": "packages/deep-research-pack/presets/lead/skills/team-assembly/SKILL.md",

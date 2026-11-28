@@ -42,6 +42,9 @@ export interface DraftStateDeps {
   readonly setReceipt: (receipt: Receipt | null) => void
   readonly setPendingDelete: (name: string | null) => void
   readonly setLibraryOpen: (open: boolean) => void
+  /** 可选外部受控 mode（供父级提前传入 useLibraryData.preserveEmptySelection；BUG-481）。 */
+  readonly mode?: Mode
+  readonly setMode?: (next: Mode) => void
   /** 方法编辑会话与写操作的生命周期仍归组件：这里只借用 ref/setter（时序与内联版一致）。 */
   readonly pendingOperationRef: MutableRefObject<PendingMethodOperation | null>
   readonly queuedOperationRef: MutableRefObject<MethodLibraryOperationRequest | null>
@@ -61,8 +64,10 @@ export function useDraftState(deps: DraftStateDeps) {
     pendingOperationRef, queuedOperationRef, coachIdRef, setCoachId, coachReadyRef, setCoachReady,
     setCoachVisible, activeTurnRef,
   } = deps
-  const [mode, setMode] = useState<Mode>('read')
-  const modeRef = useRef<Mode>('read')
+  const [internalMode, setInternalMode] = useState<Mode>('read')
+  const mode = deps.mode ?? internalMode
+  const setMode = deps.setMode ?? setInternalMode
+  const modeRef = useRef<Mode>(mode)
   const [workbenchStage, setWorkbenchStage] = useState<WorkbenchStage>('interview')
   const [draft, setDraft] = useState<Draft | null>(null)
   const [draftRevision, setDraftRevision] = useState(0)

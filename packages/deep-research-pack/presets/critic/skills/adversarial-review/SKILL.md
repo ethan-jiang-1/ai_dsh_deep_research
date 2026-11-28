@@ -67,6 +67,13 @@ Critic 的核心方法论。你的产出只有两种价值：找到裂缝（修�
 - 「已排除」无原因 → MAJOR；
 - 你不重写 scout 的词：定位 + 逐单元列出 → 回给主编派 scout 原位改。
 
+### 5b. 过程件与交付结构核查（MAJOR 级）
+
+- **`findings.md` 契约**：每个 finding 必须是 `## F<n>：<结论>` 块 + `- 支撑证据：evidence/<file>.md`（完整相对路径，禁简写前缀）+ `lenses` / `lens_gaps` / `gap`；自由列表或 0 条 `F#` 块 → MAJOR；
+- **`plan.md` 字段与回填**：`kind` 须在七值闭集（`broad-scan/deep-dive/cross-check/synthesis/review/gate/fetch`，`check` 非法）、已派发节点 `task_id` 已回填 `task-N`/`plan-only`、`## 剩余工作` `state` 在四值闭集（`待派发/进行中/完成/阻塞`）→ 违规标 MAJOR 交主编回填；
+- **`final.md` 必需末节**（非 `quick_factual`）：文末须含 `## 下一版优先项` 与 `## 什么会改变建议` → 缺节标 MAJOR；
+- **`verdicts` 计数与时点**：写 `review.md` 与 `review/readiness.json` 时必须对 `verdicts-r*.json` 数组**独立逐条点数**四值计数（校验四项之和等于总数，不照抄主编汇总数字），审查时点直接取 `time-context` 读数，不凭时间感估算。
+
 ### 6. 首屏决策摘要核查（final 草稿在场时）
 
 - 「建议/答案」无证据链支撑，或遗漏改变建议的反证 → CRITICAL（无来源结论狩猎同款判据——
@@ -79,7 +86,7 @@ Critic 的核心方法论。你的产出只有两种价值：找到裂缝（修�
 
 - review.md 终局块必须有 `topic × lens` 覆盖表；每个 evidence-producing topic × 其 `lenses:`
   的每格 = 卡数 + 质量（A/B 数），或 `gap：原因/渠道`，或 `n/a：理由`。**静默空格**（无卡、
-  无 gap、无 n/a）= MAJOR 且 readiness 必须 FAIL。
+  无 gap、无 n/a）= MAJOR 且 readiness 必须 FAIL。**跨 topic 对账卡**（`supports` 含多个 `T#`，如 `xcheck-01`）要么计入每个支撑行，要么不落格并在覆盖表下方的脚注行中逐卡点名文件前缀并注明「跨行/不落格」（静默漏计 = RED）。
 - 抽查任意一格：要能指向真实 evidence 文件与 `lens` 字段；找不到卡 = 表造假（MAJOR）。
 - 每个 lens 的 `blind_spots` 要有「配对 lens 接住 / 本题不 material + 理由 / 单镜风险已接受 +
   理由」之一；缺 = MAJOR。P1 单 `official` 同样要写后两者之一，不许静默。

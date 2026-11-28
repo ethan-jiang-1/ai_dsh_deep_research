@@ -37,9 +37,11 @@ test('驾驶舱 chrome：页签标题/guide 描述不再写死字面量（走 t(
   const offenders = [];
   for (const m of INDEX.matchAll(/^\s*(title|description): \(\) => '([^']*)'/gm)) offenders.push(`${m[1]}: '${m[2]}'`);
   assert.deepEqual(offenders, [], `发现写死的 chrome 文案（改用 t('key')）：${offenders.join('、')}`);
-  for (const key of ['tabStatus', 'tabConfig', 'tabGraph', 'tabFinal', 'tabStatusPending']) {
+  for (const key of ['tabStatus', 'tabConfig', 'tabGraph', 'tabFinal']) {
     assert.ok(INDEX.includes(`t('${key}')`), `index.ts 未使用 locale 键 ${key}`);
   }
+  const STATUS_TAB = readFileSync(new URL('../../../../packages/deep-research-pack/src/client/ResearchStatusTab.tsx', import.meta.url), 'utf8');
+  assert.ok(STATUS_TAB.includes("t('tabStatusPending')"), 'ResearchStatusTitle 未使用响应式 locale 键 tabStatusPending（BUG-475）');
 });
 
 // 负例留证 2026-11-27：BUG-455——纯文本 UI 字典项混入原始 **...** Markdown 语法，页面直接渲染星号。

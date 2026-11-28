@@ -380,3 +380,21 @@ test('BUG-137 research-brief：HITL1 选项 label 不得把语言并进项目默
   const skill = readFileSync(join(PRESETS, 'lead', 'skills', 'research-brief', 'SKILL.md'), 'utf8')
   assert.match(skill, /带「项目默认\/库默认」的\*\*选项名\/分句不得出现语言词\*\*/)
 })
+
+// 负例留证 2026-11-28：BUG-469——长 run 漂移（verdicts 跨批口算错、列表 API 替代单页 web_fetch、
+// critic 未核 final 末两节/findings 格式与 verdicts 独立点数、reader-final 未核已闭合 CRITICAL 收口）。
+// 红配方：删除四份 skill 对应的硬规则句 → 本例红。
+test('BUG-469 技能硬护栏：verdicts 逐条点数 + 列表 API 不替单页 fetch + critic 末节/findings 核查 + reader-final 闭合收口对账', () => {
+  const synthesis = readFileSync(join(PRESETS, 'lead', 'skills', 'synthesis', 'SKILL.md'), 'utf8')
+  const readerFinal = readFileSync(join(PRESETS, 'lead', 'skills', 'reader-final', 'SKILL.md'), 'utf8')
+  const criticReview = readFileSync(join(PRESETS, 'critic', 'skills', 'adversarial-review', 'SKILL.md'), 'utf8')
+  const evidence = readFileSync(join(PRESETS, 'analyst', 'skills', 'evidence-extraction', 'SKILL.md'), 'utf8')
+
+  assert.match(synthesis, /verdicts-r<N>\.json.*审查轮次/, 'synthesis 必须明示 verdicts-r<N> 的 N 为审查轮次而非批号')
+  assert.match(synthesis, /逐条点数/, 'synthesis 必须要求 HITL2 前逐条点数 verdicts 数组而非口算')
+  assert.match(evidence, /批量列表 API/, 'evidence-extraction 必须禁止用批量列表 API 响应替代单页 source_url 的 web_fetch')
+  assert.match(criticReview, /独立逐条点数/, 'adversarial-review 必须要求 critic 独立逐条点数 verdicts 数组')
+  assert.match(criticReview, /## 下一版优先项/, 'adversarial-review 必须核查 final.md 末两节')
+  assert.match(criticReview, /## F<n>：/, 'adversarial-review 必须核查 findings.md 的 F# 块格式')
+  assert.match(readerFinal, /已闭合的 CRITICAL/, 'reader-final 必须要求自检核对已闭合 CRITICAL 边界收口')
+})

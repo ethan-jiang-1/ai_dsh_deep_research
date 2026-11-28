@@ -23,12 +23,14 @@ export function useEvidencePreview(args: {
   const { sessionId, getBundleDir, runSource } = args
   const cacheRef = useRef(createEvidencePreviewCache(48))
   const inflightRef = useRef(new Map<string, Promise<EvidencePreviewEntry>>())
+  const sessionEpochRef = useRef(0)
   const runSourceRef = useRef(runSource)
   runSourceRef.current = runSource
   const bundleDirRef = useRef(getBundleDir)
   bundleDirRef.current = getBundleDir
 
   useEffect(() => {
+    sessionEpochRef.current += 1
     cacheRef.current.clear()
     inflightRef.current.clear()
   }, [sessionId])
@@ -60,31 +62,35 @@ export function useEvidencePreview(args: {
       if (pending !== undefined) return pending
     }
 
-    const work = (async (): Promise<EvidencePreviewEntry> => {
+    const epoch = sessionEpochRef.current
+    let work: Promise<EvidencePreviewEntry> | null = null
+    work = (async (): Promise<EvidencePreviewEntry> => {
       try {
         const opened = await openRun(runSourceRef.current(sessionId), dir)
         if (!opened.ok) {
           const failed: EvidencePreviewEntry = { state: opened.reason === 'missing' ? 'absent' : 'unreadable' }
-          cacheRef.current.set(key, failed)
+          if (sessionEpochRef.current === epoch) cacheRef.current.set(key, failed)
           return failed
         }
         const art = await readArtifact(opened.value, clean)
         if (art.state !== 'ok' || art.text === null) {
           const failed: EvidencePreviewEntry = { state: art.state === 'ok' ? 'invalid' : art.state }
-          cacheRef.current.set(key, failed)
+          if (sessionEpochRef.current === epoch) cacheRef.current.set(key, failed)
           return failed
         }
         const cardName = clean.slice('evidence/'.length)
         const resolved: EvidencePreviewEntry = { state: 'ok', summary: extractEvidencePreview(cardName, art.text) }
-        cacheRef.current.set(key, resolved)
+        if (sessionEpochRef.current === epoch) cacheRef.current.set(key, resolved)
         return resolved
       } catch {
         /* @silent-catch: evidence hover preview surfaces explicit unreadable state */
         const failed: EvidencePreviewEntry = { state: 'unreadable' }
-        cacheRef.current.set(key, failed)
+        if (sessionEpochRef.current === epoch) cacheRef.current.set(key, failed)
         return failed
       } finally {
-        inflightRef.current.delete(key)
+        if (sessionEpochRef.current === epoch && work !== null && inflightRef.current.get(key) === work) {
+          inflightRef.current.delete(key)
+        }
       }
     })()
 

@@ -114,7 +114,7 @@
 ### 2.8 意图首屏与启动工作区恢复（[D40](../decisions.md#d40)）
 
 - `HeroResearchOptions.tsx` 挂在 `conversation.hero.options`，在空白会话角色选择栏右侧同行提供「方法 / 视角 / 工作台」轻量触发胶囊。
-- `StartCard.tsx` 挂在 `conversation.input.dock`，在空白新会话（尚未发送用户消息，无论工作区是否已有历史 `drt_*`）展示极简副标题、带题型标签的起题灵感卡（点击 `inputActions.insertText`）与最近 Run 快捷续接条（冷启动未水合时显示磁盘档案数与工作台直达链接）；会话已绑定有效研究工作区时不再重复渲染大号工作区路径框，未绑定时突出引导目录选择。
+- `StartCard.tsx` 挂在 `conversation.input.dock`，响应 DSH 原生 `session` / `useConversation` / `useSessions` 空白会话生命周期：仅在空白新会话（尚未发送用户消息、非子会话、非回放未决态，无论工作区是否已有历史 `drt_*`）展示极简副标题、带题型标签的起题灵感卡（点击 `inputActions.insertText`）与最近 Run 快捷续接条（冷启动未水合时显示磁盘档案数与工作台直达链接），首条发送/进入对话即同步收起；会话已绑定有效研究工作区时不再重复渲染大号工作区路径框，未绑定时突出引导目录选择。
 - `startup.ts` 在挂载后按「已保存 `workspaceId` → 唯一 `Deep Research — ` 标题」恢复研究工作区并切到对应 Lead 会话。
 
 ## 3. 数据通道与接线

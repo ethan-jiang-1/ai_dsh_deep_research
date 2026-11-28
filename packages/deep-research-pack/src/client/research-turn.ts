@@ -7,7 +7,7 @@
 import type {
   ConversationNodeDefinition, TurnLocation,
 } from '@deepseek-ai/dsh-client-ui-conversation/client'
-import { argsObjectOf } from '../lib/events/journal-wire.ts'
+import { primaryPathOfToolArgs, WRITE_TOOLS } from '../lib/events/journal-wire.ts'
 import { finalPathOf } from '../lib/run/final-target.ts'
 import { RESEARCH_TURN_DATA_KEY } from './keys.ts'
 
@@ -39,12 +39,8 @@ function addMilestone(list: readonly ResearchMilestone[], next: ResearchMileston
   return [...list, next]
 }
 
-function pathOfToolArgs(argsRaw: string): string | null {
-  const args = argsObjectOf(argsRaw)
-  if (args === null) return null
-  const candidate = args.path ?? args.file_path ?? args.TargetFile
-  return typeof candidate === 'string' && candidate.trim() !== '' ? candidate.trim() : null
-}
+const DRT_PROTOCOL_RE = /(?:^|\/)drt_[\w.-]+\/protocol\.json$/
+const DRT_REVIEW_RE = /(?:^|\/)drt_[\w.-]+\/review\.md$/
 
 /** 从 Turn 结尾提取里程碑列表（若同回合原生 ui-deliverables 已渲染终稿交付卡，则对 delivered 行去重）。 */
 export function selectResearchMilestones(owner: { readonly turn: TurnLocation; readonly seq: number }): readonly ResearchMilestone[] {
@@ -81,16 +77,16 @@ export const researchTurnDefinition: ConversationNodeDefinition<ResearchTurnStat
     const rec = match.event as {
       type: string
       seq?: number
-      data?: { name?: string; arguments?: string; files?: readonly { path?: unknown }[] }
+      data?: { name?: string; arguments?: unknown; files?: readonly { path?: unknown }[] }
     }
     const seq = typeof rec.seq === 'number' ? rec.seq : 0
-    if (rec.type === 'tool/call' && (rec.data?.name === 'write_file' || rec.data?.name === 'edit_file')) {
-      const path = pathOfToolArgs(rec.data.arguments ?? '')
+    if (rec.type === 'tool/call' && typeof rec.data?.name === 'string' && WRITE_TOOLS.has(rec.data.name)) {
+      const path = primaryPathOfToolArgs(rec.data.arguments)
       if (path === null) return context.state
-      if (/(?:^|\/)protocol\.json$/.test(path)) {
+      if (DRT_PROTOCOL_RE.test(path)) {
         return { ...context.state, milestones: addMilestone(context.state.milestones, { kind: 'protocol', path, seq }) }
       }
-      if (/(?:^|\/)review\.md$/.test(path)) {
+      if (DRT_REVIEW_RE.test(path)) {
         return { ...context.state, milestones: addMilestone(context.state.milestones, { kind: 'review', path, seq }) }
       }
       return context.state

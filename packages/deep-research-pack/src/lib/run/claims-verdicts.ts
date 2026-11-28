@@ -174,6 +174,34 @@ export interface ClaimsVerdictsView extends ArtifactView {
   list?(dir?: string, opts?: { readonly signal?: AbortSignal }): Promise<Outcome<readonly Entry[]>>
 }
 
+function mergeVerdictsDocuments(
+  docs: readonly { readonly round: number; readonly doc: DecodedArtifactResult<VerdictsDocument> }[],
+): DecodedArtifactResult<VerdictsDocument> {
+  for (const item of docs) {
+    if (item.doc.state !== 'ok' || item.doc.value === null) return item.doc
+  }
+  const merged = new Map<string, VerdictRecord>()
+  let latestVersion: number | null = null
+  let latestRound: number | null = null
+  let latestText: string | null = null
+  for (const item of docs) {
+    const val = item.doc.value!
+    latestVersion = val.version ?? latestVersion
+    latestRound = val.round ?? item.round
+    latestText = item.doc.text
+    for (const v of val.verdicts) merged.set(v.claimId, v)
+  }
+  return {
+    state: 'ok',
+    text: latestText,
+    value: {
+      version: latestVersion,
+      round: latestRound,
+      verdicts: [...merged.values()],
+    },
+  }
+}
+
 async function readLatestVerdicts(
   view: ClaimsVerdictsView,
   signal?: AbortSignal,
@@ -192,22 +220,31 @@ async function readLatestVerdicts(
         return match === null ? null : { name: entry.name, round: Number(match[1]) }
       })
       .filter((item): item is { readonly name: string; readonly round: number } => item !== null)
-      .sort((a, b) => b.round - a.round)
-    const latest = rounds[0]
-    if (latest !== undefined) {
-      return readArtifact(view, `review/${latest.name}`, { ...signalOpts, decoder: decodeVerdicts })
+      .sort((a, b) => a.round - b.round)
+    if (rounds.length > 0) {
+      const readDocs: { readonly round: number; readonly doc: DecodedArtifactResult<VerdictsDocument> }[] = []
+      for (const item of rounds) {
+        const doc = await readArtifact(view, `review/${item.name}`, { ...signalOpts, decoder: decodeVerdicts })
+        readDocs.push({ round: item.round, doc })
+      }
+      return mergeVerdictsDocuments(readDocs)
     }
     return readArtifact(view, 'verdicts.json', { ...signalOpts, decoder: decodeVerdicts })
   }
-  for (const candidate of ['review/verdicts-r2.json', 'review/verdicts-r1.json', 'verdicts.json']) {
+  const fallbackDocs: { readonly round: number; readonly doc: DecodedArtifactResult<VerdictsDocument> }[] = []
+  for (const [round, candidate] of [
+    [1, 'review/verdicts-r1.json'],
+    [2, 'review/verdicts-r2.json'],
+  ] as const) {
     const res = await readArtifact(view, candidate, { ...signalOpts, decoder: decodeVerdicts })
-    if (res.state !== 'absent') return res
+    if (res.state !== 'absent') fallbackDocs.push({ round, doc: res })
   }
-  return { state: 'absent', text: null, value: null }
+  if (fallbackDocs.length > 0) return mergeVerdictsDocuments(fallbackDocs)
+  return readArtifact(view, 'verdicts.json', { ...signalOpts, decoder: decodeVerdicts })
 }
 
 /**
- * 联合读取 `review/claims.json` + 最新 `review/verdicts-r<N>.json`（缺席时兼容根路径）。
+ * 联合读取 `review/claims.json` + 合并全部 `review/verdicts-r<N>.json`（按轮次升序合并，高轮覆盖同 ID；缺席时兼容根路径）。
  */
 export async function readClaimsAndVerdicts(
   view: ClaimsVerdictsView,

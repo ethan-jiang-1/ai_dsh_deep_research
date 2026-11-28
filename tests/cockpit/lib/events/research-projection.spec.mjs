@@ -244,3 +244,41 @@ test('resolveRunSessionMatch：精准反查所属会话、跳过 subagent、跨�
   })
   assert.equal(matchMissing.kind, 'orphan')
 })
+
+// 负例留证 2026-11-28：BUG-482——同会话二次研究写入新 slug drt_run2 时，research-projection 未清空
+// 上一场 drt_run1 的 deliveredPath，导致新 run 错误沿用旧终稿路径并停在 delivered 态。
+// 红配方：去掉 writeSlug 切换不同新 slug 时重置 deliveredPath: null 的逻辑。
+test('BUG-482 同会话写切到新 slug drt_run2 时清空旧 drt_run1 的 deliveredPath；写回同 slug 保留 deliveredPath', () => {
+  let state = initialResearchRunState({ createdAt: 100 })
+  state = applyResearchRunEvent(state, {
+    type: 'tool/call',
+    time: 200,
+    data: { name: 'write', arguments: JSON.stringify({ file_path: 'drt_run1/question.md' }) },
+  })
+  state = applyResearchRunEvent(state, {
+    type: 'deliverables/presented',
+    time: 300,
+    data: { files: [{ path: 'drt_run1/final/readable-v1.md' }] },
+  })
+  assert.equal(projectResearchRunView(state).phase, 'delivered')
+  assert.equal(projectResearchRunView(state).deliveredPath, 'drt_run1/final/readable-v1.md')
+
+  // 负控：同 slug 再写文件保持 deliveredPath 与状态引用不变
+  const sameSlugState = applyResearchRunEvent(state, {
+    type: 'tool/call',
+    time: 350,
+    data: { name: 'write', arguments: JSON.stringify({ file_path: 'drt_run1/final.md' }) },
+  })
+  assert.equal(Object.is(sameSlugState, state), true, '写回同一 slug 不得清空 deliveredPath 或分配新 state')
+
+  // 切到新 slug drt_run2：必须清空旧 deliveredPath，回到 running
+  const run2State = applyResearchRunEvent(state, {
+    type: 'tool/call',
+    time: 400,
+    data: { name: 'write', arguments: JSON.stringify({ file_path: 'drt_run2/question.md' }) },
+  })
+  const view2 = projectResearchRunView(run2State)
+  assert.equal(view2.slug, 'run2')
+  assert.equal(view2.phase, 'running')
+  assert.equal(view2.deliveredPath, null, '同会话切到新 slug 必须清空上一场的 deliveredPath')
+})

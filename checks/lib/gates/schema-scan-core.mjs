@@ -22,6 +22,7 @@ import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { hasFinalVersion } from '../shared/final-version.mjs'
 import { localDateStr } from '../shared/local-date.mjs'
+import { stripEvidenceVerbatimQuotes } from '../shared/path-hygiene.mjs'
 
 const CONTRACT_DATE = '2026-09-29'
 /** 当前 run bundle 契约版本（run.md 的 `schema:`，整数；模板写、门禁按整数分档）。
@@ -156,8 +157,8 @@ const OPS_ARTIFACTS = new Set(['audit.md', 'node-gate.md', 'acceptance.md', 'del
 const INSTRUCTION_FILES = new Set(['AGENTS.md', 'CLAUDE.md', 'AGENTS.local.md', 'CLAUDE.local.md'])
 /** 可执行脚本后缀（RFC §7：bundle 是数据区，不放程序）。 */
 const SCRIPT_FILE_RE = /\.(?:sh|bash|zsh|py|rb|pl|mjs|cjs|js|ts)(?:~)?$/i
-/** 绝对路径族（不只 /Users/：换机/换 home 即断源）。 */
-const ABS_PATH_RE = /(?:^|[\s(`"'\[])(?:\/(?:Users|home|tmp|private|var|Volumes|opt|mnt|media|root)\/|[A-Za-z]:\\|~\/)/
+/** 绝对路径族（不只 /Users/：换机/换 home 即断源；`/media/` 仅匹配真实两段挂载 `/media/<user>/<dev>`，不误杀 `/media/1575` 网页相对链接，BUG-483）。 */
+const ABS_PATH_RE = /(?:^|[\s(`"'\[])(?:\/(?:Users|home|tmp|private|var|Volumes|opt|mnt|root)\/|\/media\/[A-Za-z_][A-Za-z0-9_.-]*\/[^/\s)`"']+|[A-Za-z]:\\|~\/)/
 /** D28 顶层白名单（RFC §11；新 run 只许这些条目，未登记 = 核心违约）。 */
 export const TOP_LEVEL_ALLOWED = new Set([
   'run.md', 'question.md', 'topics.md', 'plan.md', 'leads.md', 'findings.md', 'review.md', 'final.md', 'journal.md',
@@ -188,7 +189,8 @@ export function hygieneOf(bundleDir) {
       if (SCRIPT_FILE_RE.test(ent.name)) { core.push(`${rel} 是脚本（D28 新 run 禁：bundle 只放研究数据）`); continue }
       if (!ent.name.endsWith('.md') || OPS_ARTIFACTS.has(ent.name)) continue
       const text = readFileSync(p, 'utf8')
-      if (ABS_PATH_RE.test(text)) core.push(`${rel} 含绝对路径（D28 新 run 禁）`)
+      const hyText = stripEvidenceVerbatimQuotes(rel, text)
+      if (ABS_PATH_RE.test(hyText)) core.push(`${rel} 含绝对路径（D28 新 run 禁）`)
       if (text.includes('../drt_')) core.push(`${rel} 含跨 bundle 路径 ../drt_（D28 新 run 禁）`)
       const cross = text.split('\n').find((l) => /\[来源:[^\]]*drt_/.test(l))
       if (cross !== undefined) core.push(`${rel} 含跨 bundle [来源:]（D28 新 run 禁）`)

@@ -51,6 +51,7 @@ canonical 还会改。quick_factual 可跳过；非 quick_factual 的新 run 交
 - [ ] 无 `[来源:`、无 `evidence/`、无 `drt_`；canonical 链接可解析。
 - [ ] 六节齐、长度在限内、首段 canonical 指针对应当前版本。
 - [ ] 没有把「未取得」写成「没有」；没有把「结构性差异」写成「落后」；canonical 的空视角没有被删。
+- [ ] **已闭合的 CRITICAL/MAJOR 边界收口对账**：通读 `review.md`（含历史轮）所有已闭合的 CRITICAL 与涉及口径收口的 MAJOR，确认 `## 结论` 逐字对齐 canonical 首屏限定语——凡被驳回且 canonical 已删去的全称断言或限定突破词（如「唯一」「全部」「从未」），绝不得在读者版死灰复燃；若本 run 存在已闭合的 CRITICAL 边界收口，须将 `final/readable.md` 的 `## 结论` 与 `final.md` 首屏逐句对照（必要时派轻量子代理复核）无越界后再发 HITL2。
 
 ## 交付
 

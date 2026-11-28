@@ -11,7 +11,7 @@ export const RUN_OWNERS = ['analyze', 'channel', 'gates', 'harness', 'probes', '
 export const CHECK_OWNERS = ['analyze', 'channel', 'harness', 'repo', 'shared', 'test-infra']
 export const COCKPIT_PARTS = ['lib', 'client', 'shared']
 export const COCKPIT_LIB_DOMAINS = ['run', 'plan', 'events', 'method-library', 'review', 'workspace', 'shared']
-export const CLIENT_SUBS = ['defaults', 'locales', 'method-library', 'research-config', 'research-graph', 'research-status']
+export const CLIENT_SUBS = ['defaults', 'locales', 'method-library', 'research-config', 'research-final', 'research-graph', 'research-status']
 export const PACK_SURFACES = ['contract', 'scripts', 'content', 'startup', 'defaults', 'fetch-fallback']
 
 /** tests/ 下会被默认回归发现的测试文件（fixtures 另属夹具，不在本判据）。 */

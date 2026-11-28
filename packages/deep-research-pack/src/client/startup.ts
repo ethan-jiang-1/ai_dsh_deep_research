@@ -72,63 +72,149 @@ export function needsProductSwitch(currentCwd: string | undefined, productPath: 
 }
 
 /**
- * 构造 `uiWorkspace.startSession` 的草稿初始化参数（BUG-451）：
- * 必须使用 vendor `DraftInitializationOptions.prompt` 字段，不得使用无效的 `initialPrompt`。
+ * 选出「新研究」目标工作区：优先当前会话所属工作区，避免切走后被旧 localStorage 强拉回（BUG-479）。
+ */
+export function pickStartWorkspaceId<T extends WorkspaceRowLike>(
+  items: readonly T[],
+  currentWorkspaceId: string | undefined,
+  savedId: string | null,
+): string | undefined {
+  if (currentWorkspaceId !== undefined && items.some((item) => item.workspaceId === currentWorkspaceId)) {
+    return currentWorkspaceId
+  }
+  return pickProductWorkspace(items, savedId)?.workspaceId
+}
+
+/** 构造 `uiWorkspace.openSession` 的队员会话地址：显式携带 `parentSessionId`，避免依赖未预热的 subagentCatalog（BUG-471）。 */
+export function buildMemberSessionTarget<S extends string>(
+  leadSessionId: S,
+  memberId: S,
+): S | { readonly parentSessionId: S; readonly childSessionId: S; readonly mode: 'continuable' } {
+  if (memberId === leadSessionId) return leadSessionId
+  return { parentSessionId: leadSessionId, childSessionId: memberId, mode: 'continuable' }
+}
+
+/**
+ * 构造 `uiWorkspace.startSession` 的草稿初始化参数（BUG-451 / BUG-479）：
+ * 使用 vendor `DraftInitializationOptions.prompt` 与 `whenDraftExists: 'append'`，不静默丢弃透镜 prompt。
  */
 export function buildStartResearchOptions(prompt?: string): {
   readonly prompt: string
-  readonly whenDraftExists: 'keep'
+  readonly whenDraftExists: 'append'
 } | undefined {
   if (prompt === undefined || prompt.trim() === '') return undefined
-  return { prompt, whenDraftExists: 'keep' }
+  return { prompt, whenDraftExists: 'append' }
 }
 
 export interface SidebarRightResourceHost {
   openResource(address: string): void
+  openTab?: (kind: never, options?: never) => void
+  mounted?: {
+    readonly getSnapshot: () => string | undefined
+    readonly subscribe?: (listener: () => void) => () => void
+  }
   isExpanded?: () => boolean
   toggleExpanded?: () => void
 }
 
-/**
- * 在主区切回对话后等待 `ui-sidebar-right` 完成当前会话表面挂载，再打开目标资源并展开收起的右栏（BUG-459）。
- */
-export function openResourceWhenMounted(
+export interface SidebarRightMountWaitOptions {
+  readonly expectedSessionId?: string
+  readonly intervalMs?: number
+  readonly maxAttempts?: number
+  readonly onError?: (cause: unknown) => void
+}
+
+function whenSessionMounted(
   sidebarRight: SidebarRightResourceHost,
-  address: string,
-  opts?: {
-    readonly intervalMs?: number
-    readonly maxAttempts?: number
-    readonly onError?: (cause: unknown) => void
-  },
+  runAction: () => void,
+  opts?: SidebarRightMountWaitOptions,
 ): () => void {
   const intervalMs = opts?.intervalMs ?? 25
   const maxAttempts = opts?.maxAttempts ?? 24
+  const expected = opts?.expectedSessionId
   let cancelled = false
+  let done = false
   let timer: ReturnType<typeof setTimeout> | null = null
+  let unsubscribe: (() => void) | null = null
   let attempts = 0
 
+  const cleanup = (): void => {
+    if (timer !== null) { clearTimeout(timer); timer = null }
+    if (unsubscribe !== null) { unsubscribe(); unsubscribe = null }
+  }
+
   const tryOpen = (): void => {
-    if (cancelled) return
+    if (cancelled || done) return
     attempts += 1
+    if (expected !== undefined && sidebarRight.mounted !== undefined) {
+      const current = sidebarRight.mounted.getSnapshot()
+      if (current !== expected) {
+        if (attempts < maxAttempts) {
+          timer = setTimeout(tryOpen, intervalMs)
+          return
+        }
+        done = true
+        cleanup()
+        opts?.onError?.(new Error(`sidebarRight: expected session "${expected}" did not mount`))
+        return
+      }
+    }
     try {
-      sidebarRight.openResource(address)
+      runAction()
       if (sidebarRight.isExpanded?.() === false) sidebarRight.toggleExpanded?.()
+      done = true
+      cleanup()
     } catch (cause) {
       const msg = cause instanceof Error ? cause.message : String(cause)
       if (/no session surface is mounted/i.test(msg) && attempts < maxAttempts) {
         timer = setTimeout(tryOpen, intervalMs)
         return
       }
+      done = true
+      cleanup()
       opts?.onError?.(cause)
     }
+  }
+
+  if (expected !== undefined && typeof sidebarRight.mounted?.subscribe === 'function') {
+    unsubscribe = sidebarRight.mounted.subscribe(() => {
+      if (cancelled || done) return
+      if (sidebarRight.mounted?.getSnapshot() === expected) {
+        if (timer !== null) { clearTimeout(timer); timer = null }
+        tryOpen()
+      }
+    })
   }
 
   tryOpen()
   return () => {
     cancelled = true
-    if (timer !== null) {
-      clearTimeout(timer)
-      timer = null
-    }
+    cleanup()
   }
+}
+
+/**
+ * 等待 `ui-sidebar-right` 挂载到目标会话后打开资源并展开收起的右栏（BUG-459 / BUG-471）。
+ */
+export function openResourceWhenMounted(
+  sidebarRight: SidebarRightResourceHost,
+  address: string,
+  opts?: SidebarRightMountWaitOptions,
+): () => void {
+  return whenSessionMounted(sidebarRight, () => { sidebarRight.openResource(address) }, opts)
+}
+
+/**
+ * 等待 `ui-sidebar-right` 挂载到目标会话后打开指定页签并展开收起的右栏（BUG-471 / BUG-479）。
+ */
+export function openTabWhenMounted(
+  sidebarRight: SidebarRightResourceHost,
+  kind: string,
+  opts?: SidebarRightMountWaitOptions & { readonly params?: Record<string, unknown> },
+): () => void {
+  const openOpts = opts?.params !== undefined ? { params: opts.params } : undefined
+  return whenSessionMounted(sidebarRight, () => {
+    const openTab = sidebarRight.openTab as ((k: string, o?: { readonly params?: Record<string, unknown> }) => void) | undefined
+    openTab?.(kind, openOpts)
+  }, opts)
 }

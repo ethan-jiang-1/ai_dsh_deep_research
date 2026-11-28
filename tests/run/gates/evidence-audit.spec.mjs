@@ -357,3 +357,81 @@ test('BUG-279：evidence.supports 指向不存在的 T# → MAJOR', () => withTm
   r = auditBundle(bundle, sessions);
   assert.equal(r.findings.filter((f) => f.kind === 'supports 越界').length, 1);
 }));
+
+// 负例留证 2026-11-28：BUG-466——evidence-audit 不追踪 web_fetch spill 文件的 read/grep、不剥 HTML 标签与
+// markdown 行内链接、不对 `…`/`[…]` 省略号分片，导致四类合法原文摘录被误判 MAJOR [转写不符]。
+// 红配方：去掉 spillPaths 登记、HTML/链接剥离或省略号分片 → 本例四类正例转红。
+test('BUG-466：web_fetch spill 追踪 + HTML 标签 + 行内超链接 + 省略号分片均回溯命中；非 spill 本地读与捏造仍判转写不符', () => withTmpCleanup(() => {
+  const { bundle, sessions } = fixture();
+  const spillPath = '/tmp/dsh-spill-test/session-1/08d97ee22ace-web_fetch.txt';
+  const chainedSpill = '/tmp/dsh-spill-test/session-1/d9d6599ebf8a-grep.txt';
+  const localAgentFile = '/tmp/agent-authored-notes.txt';
+  const logPath = join(sessions, 'session.v4.jsonl');
+  const extraLog = [
+    // ① web_fetch 触发 spill，随后 grep/read 该已登记 spill 路径（含链式 spill）
+    JSON.stringify(toolCall({ callId: 'sp1', name: 'web_fetch', arguments: { url: 'https://www.federalregister.gov/doc/2024-28270' } })),
+    JSON.stringify(toolResult({
+      callId: 'sp1',
+      text: `Fetched https://www.federalregister.gov/doc/2024-28270 (HTTP 200)\n\nHeader preview only.\n\n(Omitted 102400 bytes. Full formatted result stored at: ${spillPath}. Use read with offset/limit, or grep this path to search within it.)`,
+    })),
+    JSON.stringify(toolCall({ callId: 'sp2', name: 'grep', arguments: { pattern: '3A090', path: spillPath } })),
+    JSON.stringify(toolResult({
+      callId: 'sp2',
+      text: `Line 420: Based on the importance of HBM described above, BIS is adding new ECCN 3A090.c.\n\n(Omitted 4096 bytes. Full formatted result stored at: ${chainedSpill}. Use read with offset/limit, or grep this path to search within it.)`,
+    })),
+    JSON.stringify(toolCall({ callId: 'sp3', name: 'read', arguments: { path: chainedSpill, offset: 1, limit: 20 } })),
+    JSON.stringify(toolResult({
+      callId: 'sp3',
+      text: 'Line 512: 3B001.c.3 controls the etch equipment used to package a chip in advanced manufacturing.',
+    })),
+    // ② HTML 内联标签残余
+    JSON.stringify(toolCall({ callId: 'h1', name: 'web_fetch', arguments: { url: 'https://support.huaweicloud.com/spec' } })),
+    JSON.stringify(toolResult({
+      callId: 'h1',
+      text: 'Fetched https://support.huaweicloud.com/spec (HTTP 200)\n\n<td>规格：<span style="color:#1f1f1f;">ModelArts昇腾AI加速型(B1)1卡实例</span></td>',
+    })),
+    // ③ 行内 Markdown 链接与括号股号链接 + 省略号长句
+    JSON.stringify(toolCall({ callId: 'm1', name: 'web_fetch', arguments: { url: 'https://news.cnyes.com/news/id/6571974' } })),
+    JSON.stringify(toolResult({
+      callId: 'm1',
+      text: 'Fetched https://news.cnyes.com/news/id/6571974 (HTTP 200)\n\n國產 AI 算力形成兩條路線：一邊是華為、寒武紀 ([688256-CN](https://www.cnyes.com/astock/quote/688256)) 等國產 AI 加速晶片擴大供應，另一邊是阿里巴巴 ([09988-HK](https://www.cnyes.com/hkstock/quote/09988)) 、百度 ([BIDU-US](https://invest.cnyes.com/usstock/detail/BIDU)) 等大型雲端服務商。\n\n风险提示：宏观经济影响下游需求；估值回调风险；客户集中度较高风险等',
+    })),
+    // ④ 负控：对任意非 spill 本地文件的 read 不得进入 webChunks（防自证红线）
+    JSON.stringify(toolCall({ callId: 'loc1', name: 'read', arguments: { path: localAgentFile } })),
+    JSON.stringify(toolResult({
+      callId: 'loc1',
+      text: '这是 agent 自己写进本地笔记的自证文本绝对不该被当作外部网页语料。',
+    })),
+  ].join('\n');
+  writeFileSync(logPath, `${readFileSync(logPath, 'utf8')}\n${extraLog}`);
+
+  const writeCard = (name, url, quotes) => {
+    const host = new URL(url).hostname;
+    writeFileSync(
+      join(bundle, 'evidence', name),
+      `---\nsource_url: ${url}\nretrieved_at: 2026-11-28\nquality: A\nfound_by: analyst\nsupports: T1\nlens: official\nsource_tier: primary\npublisher: ${host}\n---\n\n## 原文摘录\n\n${quotes.map((q) => `> ${q}`).join('\n\n')}\n\n## 解读\n\n测试。\n`,
+    );
+  };
+  writeCard('ev-spill.md', 'https://www.federalregister.gov/doc/2024-28270', [
+    'Based on the importance of HBM described above, BIS is adding new ECCN 3A090.c.',
+    '3B001.c.3 controls the etch equipment used to package a chip in advanced manufacturing.',
+  ]);
+  writeCard('ev-html.md', 'https://support.huaweicloud.com/spec', [
+    '规格：ModelArts昇腾AI加速型(B1)1卡实例',
+  ]);
+  writeCard('ev-link-ellipsis.md', 'https://news.cnyes.com/news/id/6571974', [
+    '國產 AI 算力形成兩條路線：一邊是華為、寒武紀等國產 AI 加速晶片擴大供應，另一邊是阿里巴巴、百度等大型雲端服務商。',
+    '风险提示：…客户集中度较高风险等',
+  ]);
+  writeCard('ev-negative.md', 'https://news.cnyes.com/news/id/6571974', [
+    '这是 agent 自己写进本地笔记的自证文本绝对不该被当作外部网页语料。',
+    '风险提示：…完全捏造的火星轨道算力中心投资风险等',
+  ]);
+
+  const r = auditBundle(bundle, sessions);
+  const badByFile = (file) => r.findings.filter((f) => f.kind === '转写不符' && f.file === file);
+  assert.deepEqual(badByFile('ev-spill.md'), [], `spill 读取摘录不得误报转写不符：${JSON.stringify(badByFile('ev-spill.md'))}`);
+  assert.deepEqual(badByFile('ev-html.md'), [], `HTML 标签摘录不得误报转写不符：${JSON.stringify(badByFile('ev-html.md'))}`);
+  assert.deepEqual(badByFile('ev-link-ellipsis.md'), [], `行内链接与省略号摘录不得误报转写不符：${JSON.stringify(badByFile('ev-link-ellipsis.md'))}`);
+  assert.equal(badByFile('ev-negative.md').length, 2, `非 spill 本地读自证 + 省略号捏造必须仍判转写不符：${JSON.stringify(badByFile('ev-negative.md'))}`);
+}));

@@ -6,6 +6,31 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [487](BUG-487-coverage-gate-xcheck-fanout-conflict-and-final-counts.md) | review-contract 支持已脚注声明跨行 xcheck 卡独占计数，补全交付前盘面点数护栏 | （exclusiveCounts + footnoteAccountsFor + 交付前点数护栏） | 2026-11-28 |
+| [486](BUG-486-protocol-web-family-confused-with-missing-web-lens.md) | question-patterns 显式分隔 source_scope.families（web/local）与 content/lenses/*.md | （question-patterns 明确 families ≠ lenses 闭集） | 2026-11-28 |
+| [485](BUG-485-verdict-audit-not-verbatim-and-minified-template-trap.md) | verdict-audit 剥除 child 围栏与零宽空格并接受等价 JSON 缩进差异 | （stripZws + verbatimMatches 等价 JSON 校验） | 2026-11-28 |
+| [484](BUG-484-protocol-audit-section-mapping-and-lead-projection-drift.md) | protocol-audit 放宽终稿节编号/别名映射并降级已记 deviations 证据门槛例外 | （FINAL_SECTION_ALIASES + normHeading + deviations warning 降级） | 2026-11-28 |
+| [483](BUG-483-schema-scan-and-path-hygiene-catch22-on-evidence-quotes.md) | path-hygiene/schema-scan 豁免 evidence/*.md 原文摘录块并收窄 /media/ 正则 | （stripEvidenceVerbatimQuotes + 两段 /media/<user>/<dev> 正则） | 2026-11-28 |
+| [482](BUG-482-runsview-hitl2-gated-and-narrow-panel-layout-overflows.md) | 解除 RunsView HITL2 门禁、新 slug 清旧交付、HeaderPill 读真回执与多面板容器响应式防溢 | （RunsView HITL2 + projection 清 deliveredPath + HeaderPill decodeDeliveredReceipt + 多面板容器查询/省略） | 2026-11-28 |
+| [481](BUG-481-method-library-cancel-deadlock-esc-autoscroll-and-toolcard.md) | 修复取消读取卡死 loading、摘要页取消/Esc、Portal 滚底监听、新建防抢选与工具卡三态 | （cancelRunRead + MethodSummaryView Esc/cancel + Portal MutationObserver + preserveEmptySelection + toolDefaultDone） | 2026-11-28 |
+| [480](BUG-480-method-library-spurious-llm-turns-tab-loss-and-interview-lock.md) | 方法库手改仅访谈态同步、Hub 切页签守卫在途写盘与草稿、访谈失败保持可重试 | （interviewStarted 门禁 + registerLeaveGuard + startInterview 失败可重试） | 2026-11-28 |
+| [479](BUG-479-cross-surface-draft-prefill-and-at-reference-roundtrip-breaks.md) | 修复透镜 append 与当前工作区优先、图谱禁回退 setDraft、@W# 透传 nodeId 与全屏预填退全屏 | （whenDraftExists=append + pickStartWorkspaceId + openGraph(nodeId) + 全屏预填退全屏） | 2026-11-28 |
+| [478](BUG-478-graph-child-state-vnull-trap-plan-diff-and-state-note.md) | 图谱子节点真状态投影、缺图复位防 vnull、快照 try/catch、planDiff 一拆多与 state-note 校正 | （childStateOf 真 running/attention + reset-session + plan-diff filter + 双语文案） | 2026-11-28 |
+| [477](BUG-477-dagmap-cjk-overflow-global-marker-ids-and-narrow-wide-mode.md) | DagMap 实例唯一 marker/clipPath 与 CJK 双宽截断，ResearchGraphTab 复位选中态与窄屏紧凑 | （useId marker/clipPath + CJK 双宽截断 + cardRefs + dagWide 容器宽门禁） | 2026-11-28 |
+| [476](BUG-476-defaults-panel-blur-write-source-auto-selectmenu-and-config-tab.md) | DefaultsPanel 失焦脏判/跨会话复位/信源自动仅清 families、SelectMenu 布局与配置页显性读错 | （commitAudience 脏判 + source-auto 保权威时效 + SelectMenu Menu class + 配置页读错/三路刷新） | 2026-11-28 |
+| [475](BUG-475-status-tab-member-btn-title-locale-freeze-and-feed-t-dep.md) | 状态页队员钮迁 headerAccessory、活标题响应式 locale+复位、流 effect 脱离 t 依赖 | （headerAccessory + 活标题 locale/reset + useMemo 投影 + HITL2/danglingReceipt） | 2026-11-28 |
+| [474](BUG-474-research-turn-wrong-write-tool-names-never-triggers.md) | research-turn 共享真实 DSH WRITE_TOOLS/TOOL_PATH_FIELDS 并校 drt_ 路径边界 | （journal-wire 共享 WRITE_TOOLS/primaryPathOfToolArgs + drt_ 边界） | 2026-11-28 |
+| [473](BUG-473-final-studio-async-races-cache-pollution-and-toc-freeze.md) | 终稿 loadEpoch/inspectToken/sessionEpoch 代次隔离与 FinalToc 跳过 Infinity/滚底高亮 | （loadEpochRef + inspectTokenRef + sessionEpochRef + activeTocHeadingIndex） | 2026-11-28 |
+| [472](BUG-472-final-fullscreen-breaks-citation-hover-and-narrow-studio-dead-clicks.md) | 终稿 callback ref 重绑悬停卡、容器宽 studioActive 单一真值与高卡翻转收起 | （useContainerWidth + containerEl + CitationHoverLayer 实测高度与收起） | 2026-11-28 |
+| [471](BUG-471-cross-session-open-final-status-race-and-openmember-address.md) | 统一 whenSessionMounted(expectedSessionId) 与 buildMemberSessionTarget(parentSessionId) | （whenSessionMounted + openTabWhenMounted + rightbar-nav） | 2026-11-28 |
+| [470](BUG-470-research-defaults-popup-set-payload-mismatch-silent-fail.md) | /research-defaults 弹窗补 {patch,expectedRevision}、修真 authority 枚举、显性报错与冷会话预热 | （set 封装 + 真 AUTHORITIES + interpretDefaultsCommandResult + 冷刷新） | 2026-11-28 |
+| [469](BUG-469-long-run-compliance-drift-math-sections-and-batch-fetch.md) | 补齐长 run 逐条点数、列表 API 禁替单页抓取、末节与时间戳技能护栏 | （4 项 skill 正文纪律护栏 + presets 契约断言） | 2026-11-28 |
+| [468](BUG-468-reader-final-reintroduces-critic-rejected-claim.md) | readerGate 回查已闭合 CRITICAL 驳回表述/限定词防读者版复发 | （criticalRelapseIssues 门C 回查 + reader-final 自检） | 2026-11-28 |
+| [467](BUG-467-leads-gate-single-line-only-and-findings-contract-bypass.md) | leadsGate 支持多行缩进支持来源，强化 findings.md 格式与核查护栏 | （leadsGate 多行子列表 + synthesis/critic 契约护栏） | 2026-11-28 |
+| [466](BUG-466-evidence-audit-misses-web-fetch-spills-and-inline-noise.md) | evidence-audit 追踪 web_fetch spill、剥 HTML/行内链接与省略号分段 | （spillPaths 追踪 + stripHtmlAndLinks + 省略号分段） | 2026-11-28 |
+| [465](BUG-465-plan-template-suggests-check-kind-and-lead-skips-backfill.md) | plan.md 模板对齐 PLAN_KINDS 闭集并强化 task_id/剩余工作回填 | （PLAN_KINDS 闭集模板 + research-planning 护栏） | 2026-11-28 |
+| [464](BUG-464-review-contract-false-red-on-table-major-and-bold-waiver.md) | review-contract 覆盖表首列、当轮 CRITICAL 节与加粗豁免对齐 | （activeReviewScope + topicIdOf + CRITICAL 节隔离） | 2026-11-28 |
+| [463](BUG-463-claims-verdicts-drops-earlier-batch-files.md) | 多批 verdicts*.json 升序合并与真模板对齐 | （多文件 verdicts 升序合并 + 模板双批范例） | 2026-11-28 |
 | [462](BUG-462-defaults-button-renders-double-tooltip-and-native-title.md) | `DefaultsButton` 移除 `<button>` 重复原生 `title` 属性 | （去重复 title） | 2026-11-27 |
 | [461](BUG-461-runs-view-copy-path-shows-copied-on-clipboard-reject.md) | `RunsView`「复制路径」按剪贴板 Promise 异步反馈成功/失败 | （三态 `copyFeedback`） | 2026-11-27 |
 | [460](BUG-460-final-segmented-control-clips-active-tab-in-narrow-split.md) | 终稿 `SegmentedControl` 窄分屏启用 `@container` 自适应不裁切 | （`container-type` 缩紧） | 2026-11-27 |

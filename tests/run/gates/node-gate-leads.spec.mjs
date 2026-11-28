@@ -168,3 +168,47 @@ test('BUG-421 负控：显式 synthesis 角色不进入覆盖要求（0/0 合法
     rmSync(dir, { recursive: true, force: true })
   }
 })
+
+// 负例留证 2026-11-28：BUG-467——leadsGate 只读 `- 支持来源:` 单行，来源写成缩进多行子列表时
+// 冒号同行为空、子列表里的 (A)/(B) 未扫到导致误红。红配方：把多行采集退回单行 match → 正例红。
+test('BUG-467：leadsGate 支持多行缩进子列表 `- 支持来源:` 的 A–D 分级，无分级多行仍判 RED', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'leads-467-'))
+  try {
+    writeFileSync(join(dir, 'topics.md'), [
+      '## T1: 监管面',
+      '',
+      '- must_answer:',
+      '  - 管制清单',
+      '  - 适用范围',
+      '- scope_role: primary',
+      '- depends_on: 无',
+    ].join('\n'), 'utf8')
+    writeFileSync(join(dir, 'leads.md'), [
+      '### 0.2 主体状态：实体清单',
+      '- 状态: 建议挖深（T1 起点）',
+      '- 支持来源:',
+      '  - [BIS 指南](https://www.bis.gov/doc.pdf)（B；PDF）[tier: primary]',
+      '  - [Federal Register](https://www.federalregister.gov/doc)（A）[tier: primary]',
+      '- 关键线索: 监管原文点名范围',
+      '- 建议 owner: analyst（对应 topic: T1）',
+    ].join('\n'), 'utf8')
+    const pass = leadsGate(dir, '2026-11-28')
+    assert.equal(pass.status, 'PASS', `多行缩进子列表含 (A)/(B) 必须 PASS：${pass.detail}`)
+
+    // 负控：多行缩进子列表确实无 A–D 分级（就算后面别的字段里出现 (A) 也不得串行凑绿）
+    writeFileSync(join(dir, 'leads.md'), [
+      '### 0.2 主体状态：无分级多行',
+      '- 状态: 建议挖深（T1 起点）',
+      '- 支持来源:',
+      '  - [某网页](https://example.com/1) [tier: primary]',
+      '  - [另一页](https://example.com/2)',
+      '- 关键线索: 仅列链接无分级（A 类场景讨论）',
+      '- 建议 owner: analyst（对应 topic: T1）',
+    ].join('\n'), 'utf8')
+    const red = leadsGate(dir, '2026-11-28')
+    assert.equal(red.status, 'RED', `无分级多行支持来源仍必须 RED：${red.detail}`)
+    assert.match(red.detail, /无 A–D 分级/)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})

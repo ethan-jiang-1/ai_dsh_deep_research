@@ -13,9 +13,11 @@ import { LIBRARY_PATH, type LoadState, type Segment } from './model.ts'
 export interface LibraryDataDeps {
   readonly sessionId: SessionId | undefined
   readonly readLibrary: (sessionId: SessionId, path: string, signal: AbortSignal) => Promise<MethodLibraryReadResult>
+  /** 新建草稿期间保留空选中，避免 useEffect 立即把左侧抢选回 entries[0]（BUG-481）。 */
+  readonly preserveEmptySelection?: boolean
 }
 
-export function useLibraryData({ sessionId, readLibrary }: LibraryDataDeps) {
+export function useLibraryData({ sessionId, readLibrary, preserveEmptySelection = false }: LibraryDataDeps) {
   const [text, setText] = useState<string | null>(null)
   const [loadState, setLoadState] = useState<LoadState>('loading')
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -74,17 +76,21 @@ export function useLibraryData({ sessionId, readLibrary }: LibraryDataDeps) {
     setSelectedName(null)
   }, [])
 
-  // 文本到位后保证有一个合法选中（仅在「我的库」视图生效，避免切换至「内置参考」时覆盖 selectedName）。
+  // 文本到位后保证有一个合法选中（仅在「我的库」视图生效，避免切换至「内置参考」或新建草稿时覆盖 selectedName）。
   useEffect(() => {
     if (segment !== 'mine') return
     if (entries.length === 0) {
       setSelectedName(null)
       return
     }
-    if (selectedName === null || !entries.some((entry) => entry.name === selectedName)) {
+    if (selectedName === null) {
+      if (!preserveEmptySelection) setSelectedName(entries[0]?.name ?? null)
+      return
+    }
+    if (!entries.some((entry) => entry.name === selectedName)) {
       setSelectedName(entries[0]?.name ?? null)
     }
-  }, [entries, selectedName, segment])
+  }, [entries, selectedName, segment, preserveEmptySelection])
 
   return {
     text, setText, loadState, setLoadState, loadError, setLoadError,

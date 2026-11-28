@@ -79,14 +79,22 @@ export function useConfigFeed(props: ConfigFeedInput) {
     reloadControllerRef.current?.abort()
     const controller = new AbortController()
     reloadControllerRef.current = controller
-    // 完整读面（readLibrary 分页到 eof）：固定 1000 行会在 >1000 行时静默短读（BUG-088）。
-    const result = await readLibrary(sid, LIBRARY_PATH, controller.signal)
-    const folded = result.kind === 'ok' ? foldLibrary(result.text) : []
-    if (!isReloadCurrent(epochRef.current, sid, seq) || sessionRef.current !== sid) return folded
-    if (result.kind === 'ok') { setEntries(folded); setLibraryRead('ok') }
-    else if (result.kind === 'absent') { setEntries([]); setLibraryRead('absent') }
-    else { setEntries(null); setLibraryRead('unreadable') }
-    return folded
+    try {
+      // 完整读面（readLibrary 分页到 eof）：固定 1000 行会在 >1000 行时静默短读（BUG-088）。
+      const result = await readLibrary(sid, LIBRARY_PATH, controller.signal)
+      const folded = result.kind === 'ok' ? foldLibrary(result.text) : []
+      if (!isReloadCurrent(epochRef.current, sid, seq) || sessionRef.current !== sid) return folded
+      if (result.kind === 'ok') { setEntries(folded); setLibraryRead('ok') }
+      else if (result.kind === 'absent') { setEntries([]); setLibraryRead('absent') }
+      else { setEntries(null); setLibraryRead('unreadable') }
+      return folded
+    } catch (cause) {
+      if (!controller.signal.aborted) console.error('[research-config] readLibrary 失败', String(cause))
+      if (!isReloadCurrent(epochRef.current, sid, seq) || sessionRef.current !== sid) return []
+      setEntries(null)
+      setLibraryRead('unreadable')
+      return []
+    }
   }, [readLibrary])
 
   useEffect(() => {
@@ -156,22 +164,28 @@ export function useConfigFeed(props: ConfigFeedInput) {
     let stopped = false
     const controller = new AbortController()
     void (async () => {
-      const opened = await openRun(runSource(sid), `drt_${slug}`, { signal: controller.signal })
-      if (stopped) return
-      if (!opened.ok) {
-        setAdoption(foldMethodAdoption(null, { bundle: opened.reason !== 'missing', question: false }))
-        return
+      try {
+        const opened = await openRun(runSource(sid), `drt_${slug}`, { signal: controller.signal })
+        if (stopped) return
+        if (!opened.ok) {
+          setAdoption(foldMethodAdoption(null, { bundle: opened.reason !== 'missing', question: false }))
+          return
+        }
+        const view = opened.value
+        const art = await readArtifact(view, 'question.md', { signal: controller.signal })
+        if (stopped) return
+        if (art.state === 'absent') {
+          setAdoption(foldMethodAdoption(null, { bundle: true, question: false, questionState: 'absent' }))
+          return
+        }
+        setAdoption(foldMethodAdoption(art.state === 'ok' ? art.text : null, {
+          bundle: true, question: true, questionState: art.state,
+        }))
+      } catch (cause) {
+        if (stopped || controller.signal.aborted) return
+        console.error('[research-config] adoption 读取失败', String(cause))
+        setAdoption(foldMethodAdoption(null, { bundle: true, question: true, questionState: 'unreadable' }))
       }
-      const view = opened.value
-      const art = await readArtifact(view, 'question.md', { signal: controller.signal })
-      if (stopped) return
-      if (art.state === 'absent') {
-        setAdoption(foldMethodAdoption(null, { bundle: true, question: false, questionState: 'absent' }))
-        return
-      }
-      setAdoption(foldMethodAdoption(art.state === 'ok' ? art.text : null, {
-        bundle: true, question: true, questionState: art.state,
-      }))
     })()
     return () => { stopped = true; controller.abort() }
   }, [sessionId, boundSlug, runSource, adoptionTick])
@@ -218,7 +232,10 @@ export function useConfigFeed(props: ConfigFeedInput) {
       onOk?.()
       if (!intent.expectsChange) {
         await sleep(2500)
-        if (stillMine()) await reload(sid)
+        if (stillMine()) {
+          await reload(sid)
+          if (stillMine()) retryAdoption()
+        }
         return
       }
       // 落盘对账：有界轮询（20 × 3s）。Lead 是模型，落笔时间不可预期——轮询到对账出 diff 即停，
@@ -230,6 +247,10 @@ export function useConfigFeed(props: ConfigFeedInput) {
         if (!stillMine()) return
         const diff = libraryDiff(diffBase.current ?? [], after, intent.target, props.t)
         if (diff.landed) { setReceiptDiff(diff); return }
+      }
+    } catch (cause) {
+      if (stillMine()) {
+        setReceiptBase({ ok: false, detail: String(cause), target: intent.target, expectsChange: intent.expectsChange })
       }
     } finally {
       if (sendAbortRef.current === controller) sendAbortRef.current = null

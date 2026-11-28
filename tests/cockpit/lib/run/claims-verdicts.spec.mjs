@@ -139,3 +139,89 @@ test('BUG-437 readClaimsAndVerdicts：优先读规范 review/claims.json + 最�
   const dirErr = await readClaimsAndVerdicts(unreadableDirView)
   assert.equal(dirErr.verdicts.state, 'unreadable')
 })
+
+// 负例留证 2026-11-28：BUG-463——readLatestVerdicts 只读最高轮 verdicts-r<N>.json，多批拆文件
+// （r1=C1..C5、r2=C6..C10）或增量复审（r2 只覆写部分 claim）时前批裁决被静默丢弃成 UNVERIFIED。
+// 红配方：把 readLatestVerdicts 改回只读 rounds[0] → 本例 C1/C2 退回 UNVERIFIED 实红。
+test('BUG-463 readClaimsAndVerdicts：按轮次升序合并多个 verdicts-r<N>.json（高轮覆盖同 id，不丢弃前批；坏文件 fail-loud）', async () => {
+  const CLAIMS_4 = {
+    version: 2,
+    finalRef: 1,
+    claims: [
+      { id: 'C1', text: '主张 1', critical: true, topics: ['T1'], evidence: ['evidence/e1.md'], urls: [] },
+      { id: 'C2', text: '主张 2', critical: true, topics: ['T1'], evidence: ['evidence/e1.md'], urls: [] },
+      { id: 'C3', text: '主张 3', critical: true, topics: ['T2'], evidence: ['evidence/e2.md'], urls: [] },
+      { id: 'C4', text: '主张 4', critical: true, topics: ['T2'], evidence: ['evidence/e2.md'], urls: [] },
+    ],
+  }
+  const R1 = {
+    version: 1,
+    round: 1,
+    verdicts: [
+      { claim_id: 'C1', verdict: 'supported', quote: 'q1', reason: 'r1', rechecked_urls: [], source_tier_ok: true },
+      { claim_id: 'C2', verdict: 'partially_supported', quote: 'q2-old', reason: 'r2-old', rechecked_urls: [], source_tier_ok: true },
+    ],
+  }
+  const R2 = {
+    version: 1,
+    round: 2,
+    verdicts: [
+      { claim_id: 'C2', verdict: 'supported', quote: 'q2-new', reason: 'r2-new', rechecked_urls: [], source_tier_ok: true },
+      { claim_id: 'C3', verdict: 'supported', quote: 'q3', reason: 'r3', rechecked_urls: [], source_tier_ok: true },
+      { claim_id: 'C4', verdict: 'partially_supported', quote: 'q4', reason: 'r4', rechecked_urls: [], source_tier_ok: true },
+    ],
+  }
+  const view = {
+    list: async (dir) => (dir === 'review'
+      ? {
+          ok: true,
+          value: [
+            { name: 'claims.json', type: 'file' },
+            { name: 'verdicts-r2.json', type: 'file' },
+            { name: 'verdicts-r1.json', type: 'file' },
+          ],
+        }
+      : { ok: false, reason: 'missing' }),
+    read: async (name) => {
+      if (name === 'review/claims.json') return { ok: true, value: { text: JSON.stringify(CLAIMS_4) } }
+      if (name === 'review/verdicts-r1.json') return { ok: true, value: { text: JSON.stringify(R1) } }
+      if (name === 'review/verdicts-r2.json') return { ok: true, value: { text: JSON.stringify(R2) } }
+      return { ok: false, reason: 'missing' }
+    },
+  }
+  const { claims, verdicts } = await readClaimsAndVerdicts(view)
+  assert.equal(claims.state, 'ok')
+  assert.equal(verdicts.state, 'ok')
+  assert.equal(verdicts.value?.round, 2)
+  const summary = joinClaimsVerdicts(claims, verdicts)
+  assert.deepEqual(
+    summary.rows.map((r) => [r.claimId, r.status, r.quote]),
+    [
+      ['C1', 'supported', 'q1'],
+      ['C2', 'supported', 'q2-new'],
+      ['C3', 'supported', 'q3'],
+      ['C4', 'partial', 'q4'],
+    ],
+    'r1 独有 C1 保留；r2 重审 C2 覆盖 r1；r2 独有 C3/C4 保留',
+  )
+  assert.equal(summary.counts.unverified, 0)
+
+  // 邻接变体：无 view.list 时同样按 r1 → r2 合并，不丢前批
+  const noListView = { read: view.read }
+  const mergedNoList = await readClaimsAndVerdicts(noListView)
+  assert.equal(mergedNoList.verdicts.state, 'ok')
+  assert.equal(joinClaimsVerdicts(mergedNoList.claims, mergedNoList.verdicts).counts.unverified, 0)
+
+  // 负控：多轮文件中任一份损坏或不可读必须 fail-loud，不得静默忽略
+  const brokenEarlierView = {
+    list: view.list,
+    read: async (name) => {
+      if (name === 'review/claims.json') return { ok: true, value: { text: JSON.stringify(CLAIMS_4) } }
+      if (name === 'review/verdicts-r1.json') return { ok: true, value: { text: '{broken' } }
+      if (name === 'review/verdicts-r2.json') return { ok: true, value: { text: JSON.stringify(R2) } }
+      return { ok: false, reason: 'missing' }
+    },
+  }
+  const brokenRes = await readClaimsAndVerdicts(brokenEarlierView)
+  assert.equal(brokenRes.verdicts.state, 'invalid', '早期 verdicts 文件损坏必须显性判 invalid')
+})

@@ -157,3 +157,66 @@ test('门C 反证：reader 的相对链接按 final/ 解析；错写成 final.md
   assert.equal(r.status, 'RED')
   assert.match(r.detail, /链接不可解析/)
 })
+
+// 负例留证 2026-11-28：BUG-468——reader-final 位于 critic PASS 之后且门C 不核查 review.md 已闭合
+// CRITICAL 的驳回表述/限定突破词，导致已被驳回的「唯一…」全称断言在读者版首句死灰复燃。
+// 红配方：删去 readerGate 的 CRITICAL 驳回词/原句回查 → 前两例复发用例变 PASS。
+test('BUG-468 门C：读者版复现 review.md CRITICAL 已驳回且 canonical 已删去的全称断言/原句 → RED；收口合规或否定语境 → PASS', (t) => {
+  const dir = makeBundle(t)
+  writeFileSync(join(dir, 'final', 'v1.md'), [
+    '# Canonical v1',
+    '',
+    '## 决策摘要',
+    '',
+    '一句话：昇腾是国产阵营里出货规模最大的一家（28% 份额）。',
+  ].join('\n'))
+  writeFileSync(join(dir, 'review.md'), [
+    '# 第 2 轮终局块',
+    '',
+    '## readiness（终局）: PASS',
+    '',
+    '# 第 1 轮终局块（历史）',
+    '',
+    '### CRITICAL',
+    '',
+    '- **C1（已闭合）** 首屏原为无来源链全称断言「昇腾是唯一能规模交付的全国产 AI 算力选项」，现已改写为出货规模最大。',
+  ].join('\n'))
+
+  // 报告例：读者版在 ## 结论 重新塞入被 C1 驳回的「唯一」全称断言 → RED
+  const relapsed = validReader(1).replace(
+    '8 分，4 个月。',
+    '昇腾是国产阵营里唯一已经形成规模交付的 AI 算力体系。',
+  )
+  writeReader(dir, relapsed)
+  const redQualifier = readerGate(dir)
+  assert.equal(redQualifier.status, 'RED', `复现被驳回的「唯一」全称断言必须判 RED：${redQualifier.detail}`)
+  assert.match(redQualifier.detail, /唯一/)
+
+  // 邻接变体：读者版逐字复现 CRITICAL 驳回原句 → RED
+  const verbatimRelapse = validReader(1).replace(
+    '同一把尺子。',
+    '昇腾是唯一能规模交付的全国产 AI 算力选项。',
+  )
+  writeReader(dir, verbatimRelapse)
+  const redVerbatim = readerGate(dir)
+  assert.equal(redVerbatim.status, 'RED', `逐字复现 CRITICAL 驳回原句必须判 RED：${redVerbatim.detail}`)
+  assert.match(redVerbatim.detail, /CRITICAL/)
+
+  // 负控1：读者版与 canonical 同步收口（不含被驳回词）→ PASS
+  const aligned = validReader(1).replace(
+    '8 分，4 个月。',
+    '昇腾是国产阵营里出货规模最大的一家（28% 份额）。',
+  )
+  writeReader(dir, aligned)
+  const passAligned = readerGate(dir)
+  assert.equal(passAligned.status, 'PASS', `收口一致的读者版应 PASS：${passAligned.detail}`)
+
+  // 负控2：否定语境「并非唯一」不误判为全称断言复发 → PASS
+  const negated = validReader(1).replace(
+    '8 分，4 个月。',
+    '昇腾是出货规模最大的一家，但并非唯一选择。',
+  )
+  writeReader(dir, negated)
+  const passNegated = readerGate(dir)
+  assert.equal(passNegated.status, 'PASS', `显式否定语境「并非唯一」不得误红：${passNegated.detail}`)
+})

@@ -15,7 +15,7 @@ import { extractNextVersionPriorities, rerunTriageRowsOf } from '../lib/run/reru
 import {
   FINAL_LEDGER_DIR, FINAL_NAME, FINAL_REVIEW_NAME, finalReadPlan, finalTargetOf, finalViewOf, sessionFileOf, watchTargetOf,
 } from '../lib/run/final-target.ts'
-import { assertNever, readArtifact, readStateOf, type ArtifactState } from '../lib/run/artifact-read.ts'
+import { readArtifact, readStateOf, type ArtifactState } from '../lib/run/artifact-read.ts'
 import { openRun, type RunSource } from '../lib/run/run-context.ts'
 import { latestRunVersion } from '../lib/run/run-fold.ts'
 import { parseReadinessDeclaration, readinessOfSources, reviewVerdictOf, type ReviewVerdict } from '../lib/review/review-readiness.ts'
@@ -30,6 +30,7 @@ import { FinalToc } from './research-final/FinalToc.tsx'
 import { FinalToolbar } from './research-final/FinalToolbar.tsx'
 import { StudioInspectorPane, type StudioInspectorTab } from './research-final/StudioInspectorPane.tsx'
 import { useEvidencePreview } from './research-final/useEvidencePreview.ts'
+import { useContainerWidth } from './useContainerWidth.ts'
 import { RESEARCH_STATUS_TAB_KIND } from './keys.ts'
 import css from './ResearchFinalTab.module.css'
 
@@ -42,6 +43,22 @@ export type ResearchFinalTabProps = PropsRuntime<'sidebar.right.pane.tab'> & Pro
 
 const REFRESH_MS = 30_000
 type FinalView = 'reader' | 'audit' | 'draft' | 'claims'
+
+const NOTICE_KEY = {
+  readerEmpty: 'finalReaderEmptyFallback',
+  readerUnreadable: 'finalReaderReadFailedFallback',
+  auditEmpty: 'finalBodyEmptyFallback',
+  auditUnreadable: 'finalBodyReadFailedFallback',
+  auditMissing: 'finalBodyMissingFallback',
+} as const
+
+const REVIEW_STATE_KEY: Record<ReviewVerdict, 'reviewFailed' | 'reviewConflict' | 'reviewUnconfirmed' | null> = {
+  fail: 'reviewFailed', conflict: 'reviewConflict', unconfirmed: 'reviewUnconfirmed', pass: null, absent: null,
+}
+
+const REVIEW_NOTICE_KEY: Record<ReviewVerdict, 'finalReviewConflict' | 'finalReviewUnconfirmed' | null> = {
+  conflict: 'finalReviewConflict', unconfirmed: 'finalReviewUnconfirmed', pass: null, fail: null, absent: null,
+}
 
 function markdownLabels(t: ResearchFinalTabProps['t']): {
   readonly code: { readonly copyLabel: string; readonly copiedLabel: string; readonly toolbarLabels: { readonly codeLabel: string; readonly wrapLabel: string; readonly unwrapLabel: string } }
@@ -73,9 +90,15 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const viewRef = useRef<FinalView>('reader')
   const versionRef = useRef<string | null>(null)
   const aliveRef = useRef(true)
+  const loadEpochRef = useRef(0)
+  const inspectTokenRef = useRef(0)
   const manualControllerRef = useRef<AbortController | null>(null)
   useEffect(() => () => { manualControllerRef.current?.abort() }, [])
 
+  const [rootEl, setRootEl] = useState<HTMLDivElement | null>(null)
+  const rootWidth = useContainerWidth(rootEl)
+  const studioActive = isFullscreen && (rootWidth === null || rootWidth >= 960)
+  const [bodyEl, setBodyEl] = useState<HTMLDivElement | null>(null)
   const [text, setText] = useState<string | null>(null)
   const [readerText, setReaderText] = useState<string | null>(null)
   const [draftText, setDraftText] = useState<string | null>(null)
@@ -101,35 +124,34 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const targetRef = useRef<{ dir: string; name: string } | null>(null)
   const targetNamesRef = useRef<{ audit: string; readerName: string | null }>({ audit: '', readerName: null })
   const bodyRef = useRef<HTMLDivElement | null>(null)
+  const assignBodyEl = useCallback((el: HTMLDivElement | null): void => {
+    bodyRef.current = el
+    setBodyEl(el)
+  }, [])
 
   const failLoad = useCallback((key: 'finalUnreadable' | 'finalReadFailed' | 'finalEmpty' | 'finalDirUnreadable'): void => {
-    setText(null)
-    setReaderText(null)
-    setDraftText(null)
-    setReaderName(null)
-    setShownVersion(null)
-    setClaimsSummary(null)
-    setStale(false)
-    setFailure(key)
-    setLoading(false)
+    setText(null); setReaderText(null); setDraftText(null); setReaderName(null); setShownVersion(null)
+    setClaimsSummary(null); setStale(false); setFailure(key); setLoading(false)
   }, [])
 
   viewRef.current = view
 
   const load = useCallback(async (signal: AbortSignal): Promise<void> => {
     if (sessionId === undefined || plan === null) return
+    const epoch = ++loadEpochRef.current
+    const isStale = (): boolean => signal.aborted || !aliveRef.current || loadEpochRef.current !== epoch
     const io = ioRef.current
     setLoading(true)
     setFailure(null)
     const opened = await openRun(io.runSource(sessionId), plan.final, { signal })
-    if (signal.aborted || !aliveRef.current) return
+    if (isStale()) return
     if (!opened.ok) {
       failLoad(opened.reason === 'missing' ? 'finalUnreadable' : 'finalReadFailed')
       return
     }
     const viewIo = opened.value
     const listed = await viewIo.list(FINAL_LEDGER_DIR, { signal })
-    if (signal.aborted || !aliveRef.current) return
+    if (isStale()) return
     if (readStateOf(listed) === 'unreadable') {
       failLoad('finalDirUnreadable')
       return
@@ -149,7 +171,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       target.reader === null ? Promise.resolve(null) : readArtifact(viewIo, target.reader, { signal }),
       readClaimsAndVerdicts(viewIo, signal),
     ])
-    if (signal.aborted || !aliveRef.current) return
+    if (isStale()) return
     const initial = finalViewOf({ body: bodyArt.state, reader: readerArt?.state ?? 'absent', requested: 'reader' })
     if (initial.failure !== null) {
       failLoad(initial.failure === 'empty' ? 'finalEmpty' : initial.failure === 'missing' ? 'finalUnreadable' : 'finalReadFailed')
@@ -180,21 +202,33 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     setReviewVerdict(reviewVerdictOf(reading, { review: reviewArt.state, readiness: readinessArt.state }))
     setReviewDetail(reading.detail ?? null)
     const token = await io.runSource(sessionId).version(`${viewIo.dir}/${primaryName}`, { signal })
-    if (!signal.aborted && token.ok) versionRef.current = token.value
+    if (isStale()) return
+    if (token.ok) versionRef.current = token.value
     setLoading(false)
     setStale(false)
   }, [sessionId, plan, failLoad])
 
   useEffect(() => {
     aliveRef.current = true
+    manualControllerRef.current?.abort()
+    manualControllerRef.current = null
+    loadEpochRef.current += 1
+    inspectTokenRef.current += 1
     const controller = new AbortController()
     setText(null); setReaderText(null); setDraftText(null); setReaderName(null); setShownVersion(null)
     setFallback(false); setBodyState('absent'); setReaderState('absent'); setReviewVerdict('absent'); setReviewDetail(null)
     targetNamesRef.current = { audit: '', readerName: null }
-    setStale(false); setResolved(null); setView('reader'); setInspectedRel(null); setInspectedEntry(null)
+    setStale(false); setResolved(null); setView('reader'); setInspectedRel(null); setInspectedEntry(null); setPrefilledCopy(null)
     viewRef.current = 'reader'; targetRef.current = null; versionRef.current = null
     void load(controller.signal)
-    return () => { aliveRef.current = false; controller.abort() }
+    return () => {
+      aliveRef.current = false
+      loadEpochRef.current += 1
+      inspectTokenRef.current += 1
+      controller.abort()
+      manualControllerRef.current?.abort()
+      manualControllerRef.current = null
+    }
   }, [load])
 
   useEffect(() => {
@@ -255,6 +289,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   })
 
   const inspectInStudio = useCallback((relPath: string, forceRetry = false): void => {
+    const token = ++inspectTokenRef.current
     const cleaned = relPath.trim().replace(/^\.\//, '')
     setInspectedRel(cleaned)
     setStudioTab('evidence')
@@ -265,23 +300,9 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     }
     setInspectedEntry({ state: 'loading' })
     void loadEvidencePreview(cleaned, forceRetry).then((resolvedEntry) => {
-      setInspectedEntry(resolvedEntry)
+      if (inspectTokenRef.current === token) setInspectedEntry(resolvedEntry)
     })
   }, [getCachedEvidence, loadEvidencePreview])
-
-  const openEvidence = useCallback((rawPath: string): void => {
-    if (sessionId === undefined || plan === null) return
-    const cleaned = rawPath.trim().replace(/^\.\//, '')
-    if (isFullscreen && cleaned.startsWith('evidence/')) {
-      inspectInStudio(cleaned)
-      return
-    }
-    const bundleDir = targetRef.current?.dir ?? plan.dir
-    const targetAddr = isEvidenceAddress(rawPath) ? rawPath : evidenceAddressOf(sessionId, bundleDir, cleaned)
-    if (!isEvidenceAddress(targetAddr)) return
-    const openResource = (tab.tab.actions as { openResource?: (addr: string, opts?: { preferNewPane?: boolean }) => void }).openResource
-    if (typeof openResource === 'function') openResource(targetAddr, { preferNewPane: true })
-  }, [sessionId, plan, tab.tab.actions, isFullscreen, inspectInStudio])
 
   const openEvidenceSplit = useCallback((rawPath: string): void => {
     if (sessionId === undefined || plan === null) return
@@ -293,11 +314,26 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     if (typeof openResource === 'function') openResource(targetAddr, { preferNewPane: true })
   }, [sessionId, plan, tab.tab.actions])
 
+  const openEvidence = useCallback((rawPath: string): void => {
+    if (sessionId === undefined || plan === null) return
+    const cleaned = rawPath.trim().replace(/^\.\//, '')
+    if (studioActive && cleaned.startsWith('evidence/')) {
+      inspectInStudio(cleaned)
+      return
+    }
+    openEvidenceSplit(rawPath)
+  }, [sessionId, plan, studioActive, inspectInStudio, openEvidenceSplit])
+
   const inputActions = (props as { inputActions?: InputActions }).inputActions
   const prefillDraft = (copyText: string): void => {
     if (inputActions === undefined) return
-    const span = inputActions.captureInsertion()
-    if (!inputActions.insertText(copyText, span)) inputActions.setDraft(copyText)
+    if (isFullscreen) props.toggleFullscreen?.()
+    if (prefilledCopy !== null) {
+      inputActions.setDraft(copyText)
+    } else {
+      const span = inputActions.captureInsertion()
+      if (!inputActions.insertText(copyText, span)) inputActions.setDraft(copyText)
+    }
     setPrefilledCopy(copyText)
   }
 
@@ -331,70 +367,45 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   const displayedPath = showingReader && readerName !== null
     ? readerName
     : showingDraft ? FINAL_NAME : resolved ?? plan.final
-  const noticeKey = decision.notice === 'readerEmpty'
-    ? 'finalReaderEmptyFallback'
-    : decision.notice === 'readerUnreadable'
-      ? 'finalReaderReadFailedFallback'
-      : decision.notice === 'auditEmpty'
-        ? 'finalBodyEmptyFallback'
-        : decision.notice === 'auditUnreadable'
-          ? 'finalBodyReadFailedFallback'
-          : decision.notice === 'auditMissing' ? 'finalBodyMissingFallback' : null
-  const reviewStateCopy = (() => {
-    switch (reviewVerdict) {
-      case 'fail': return props.t('reviewFailed')
-      case 'conflict': return props.t('reviewConflict')
-      case 'unconfirmed': return props.t('reviewUnconfirmed')
-      case 'pass':
-      case 'absent':
-        return null
-      default:
-        return assertNever(reviewVerdict)
-    }
-  })()
+  const noticeKey = decision.notice === null ? null : NOTICE_KEY[decision.notice]
+  const reviewStateKey = REVIEW_STATE_KEY[reviewVerdict]
+  const reviewStateCopy = reviewStateKey === null ? null : props.t(reviewStateKey)
   const state = reviewStateCopy ?? (showingReader
     ? shownVersion !== null ? props.t('readerEditionVersion', { version: String(shownVersion) }) : `${props.t('readerEdition')}${props.t('notFinalized')}`
     : shownVersion !== null && shownVersion >= 1
       ? (showingDraft ? props.t('workingDraft') : props.t('auditEdition', { version: String(shownVersion) }))
       : props.t('currentVersion'))
-  const reviewNoticeKey = (() => {
-    switch (reviewVerdict) {
-      case 'conflict': return 'finalReviewConflict'
-      case 'unconfirmed': return 'finalReviewUnconfirmed'
-      case 'pass':
-      case 'fail':
-      case 'absent':
-        return null
-      default:
-        return assertNever(reviewVerdict)
-    }
-  })()
+  const reviewNoticeKey = REVIEW_NOTICE_KEY[reviewVerdict]
   const draftToggleLabel = !hasReader && fallback && versions >= 1 && draftText !== null
     ? (view === 'draft' ? props.t('viewVersion', { version: String(shownVersion ?? versions) }) : props.t('viewCurrentDraft'))
     : null
 
+  const followupFooter = (
+    <FinalFollowupFooter
+      priorities={nextPriorities}
+      triageRows={triageRows}
+      canPrefill={inputActions !== undefined}
+      prefilledCopy={prefilledCopy}
+      onPrefill={prefillDraft}
+      t={props.t}
+    />
+  )
+
   const proseContent = (
     <>
       <MarkdownDelegateProvider openFile={(path) => { openEvidence(path) }}>
-        {!isFullscreen && (
-          <FinalToc markdown={linkifiedMarkdown} bodyRef={bodyRef} open={tocOpen} onToggleOpen={setTocOpen} t={props.t} />
+        {!studioActive && (
+          <FinalToc markdown={linkifiedMarkdown} bodyRef={bodyRef} bodyEl={bodyEl} open={tocOpen} onToggleOpen={setTocOpen} t={props.t} />
         )}
         <MarkdownText text={linkifiedMarkdown} labels={markdownLabelsMemo} />
       </MarkdownDelegateProvider>
       {failure !== null && <div className={css.errorNote}>{props.t(failure)}</div>}
-      <FinalFollowupFooter
-        priorities={nextPriorities}
-        triageRows={triageRows}
-        canPrefill={inputActions !== undefined}
-        prefilledCopy={prefilledCopy}
-        onPrefill={prefillDraft}
-        t={props.t}
-      />
+      {followupFooter}
     </>
   )
 
   return (
-    <div className={css.root} data-final-layout={isFullscreen ? 'studio' : 'sidebar'}>
+    <div ref={setRootEl} className={css.root} data-final-layout={studioActive ? 'studio' : 'sidebar'}>
       {stale && (
         <div className={css.bar}>
           <span className={css.barText}>{props.t('finalUpdated')}</span>
@@ -425,6 +436,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
         stateWarn={reviewStateCopy !== null}
         draftToggleLabel={draftToggleLabel}
         isFullscreen={isFullscreen}
+        showTocToggle={!studioActive && view !== 'claims'}
         onChangeView={setView}
         onToggleDraft={() => { setView(view === 'draft' ? 'audit' : 'draft') }}
         onToggleToc={() => { setTocOpen((prev) => !prev) }}
@@ -434,10 +446,10 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
         t={props.t}
       />
 
-      {isFullscreen && view !== 'claims' ? (
-        <div className={css.studioShell} data-testid="final-studio-shell">
-          <FinalToc markdown={linkifiedMarkdown} bodyRef={bodyRef} mode="sticky" t={props.t} />
-          <div ref={bodyRef} className={`${css.body} ${css.studioBody}`}>
+      {studioActive && view !== 'claims' ? (
+        <div key="studio-shell" className={css.studioShell} data-testid="final-studio-shell">
+          <FinalToc markdown={linkifiedMarkdown} bodyRef={bodyRef} bodyEl={bodyEl} mode="sticky" t={props.t} />
+          <div ref={assignBodyEl} className={`${css.body} ${css.studioBody}`}>
             <div className={css.studioProse}>{proseContent}</div>
           </div>
           <StudioInspectorPane
@@ -454,7 +466,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
           />
         </div>
       ) : (
-        <div ref={bodyRef} className={css.body}>
+        <div key="sidebar-body" ref={assignBodyEl} className={css.body}>
           {view === 'claims' ? (
             <>
               <ClaimsAuditView
@@ -463,14 +475,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
                 onRetry={reloadManually}
                 t={props.t}
               />
-              <FinalFollowupFooter
-                priorities={nextPriorities}
-                triageRows={triageRows}
-                canPrefill={inputActions !== undefined}
-                prefilledCopy={prefilledCopy}
-                onPrefill={prefillDraft}
-                t={props.t}
-              />
+              {followupFooter}
             </>
           ) : proseContent}
         </div>
@@ -478,11 +483,12 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
 
       {view !== 'claims' && (
         <CitationHoverLayer
-          containerRef={bodyRef}
+          containerEl={bodyEl}
+          docKey={displayedPath}
           loadPreview={loadEvidencePreview}
           getCached={getCachedEvidence}
           onOpenSplit={openEvidenceSplit}
-          {...(isFullscreen ? { onInspectInStudio: (rel: string) => { inspectInStudio(rel) } } : {})}
+          {...(studioActive ? { onInspectInStudio: (rel: string) => { inspectInStudio(rel) } } : {})}
           t={props.t}
         />
       )}

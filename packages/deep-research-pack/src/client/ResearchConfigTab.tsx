@@ -28,31 +28,42 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
     ? (props as { useTabInfo: () => { tab?: { actions?: { bindCommands?: (c: { refresh: () => void }) => () => void } } } }).useTabInfo()
     : undefined
   const {
-    entries, switchOpen, setSwitchOpen, receipt, send, adoption, retryAdoption, reload,
+    entries, switchOpen, setSwitchOpen, sending, receipt, send, adoption, retryAdoption, libraryRead, reload,
   } = useConfigFeed(props)
   const sessionId = props.sessionId
+  const { defaults } = props
   useEffect(() => {
     const bind = tabInfo?.tab?.actions?.bindCommands
     if (typeof bind !== 'function') return undefined
-    return bind({ refresh: () => { if (sessionId !== undefined) void reload(sessionId) } })
-  }, [tabInfo, sessionId, reload])
+    return bind({
+      refresh: () => {
+        if (sessionId !== undefined) {
+          void reload(sessionId)
+          void defaults.refresh(sessionId)
+        }
+        retryAdoption()
+      },
+    })
+  }, [tabInfo, sessionId, reload, defaults, retryAdoption])
 
   const methodPicker = (label: string) => (
-    <Menu
-      open={switchOpen}
-      portal
-      listClassName={css.switchMenuList ?? ''}
-      anchor={<Button variant="ghost" size="sm" onClick={() => setSwitchOpen(!switchOpen)}>{label}</Button>}
-      onClose={() => setSwitchOpen(false)}
-      align="start"
-    >
-      {BUILTIN_PREFERENCES.map((b) => (
-        <MenuItemButton key={b.name} onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', b.name), { target: b.name, expectsChange: false }) }}>{displayNameOf(b.name, props.t)}</MenuItemButton>
-      ))}
-      {(entries ?? []).map((e) => (
-        <MenuItemButton key={`l-${e.name}`} onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', e.name), { target: e.name, expectsChange: false }) }}>{e.name}</MenuItemButton>
-      ))}
-    </Menu>
+    sessionId === undefined ? null : (
+      <Menu
+        open={!sending && switchOpen}
+        portal
+        listClassName={css.switchMenuList ?? ''}
+        anchor={<Button variant="ghost" size="sm" disabled={sending} onClick={() => setSwitchOpen(!switchOpen)}>{label}</Button>}
+        onClose={() => setSwitchOpen(false)}
+        align="start"
+      >
+        {BUILTIN_PREFERENCES.map((b) => (
+          <MenuItemButton key={b.name} disabled={sending} onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', b.name), { target: b.name, expectsChange: false }) }}>{displayNameOf(b.name, props.t)}</MenuItemButton>
+        ))}
+        {(entries ?? []).map((e) => (
+          <MenuItemButton key={`l-${e.name}`} disabled={sending} onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', e.name), { target: e.name, expectsChange: false }) }}>{e.name}</MenuItemButton>
+        ))}
+      </Menu>
+    )
   )
 
   return (
@@ -75,7 +86,7 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
           <div className={css.thisRunRow}>
             <span>{props.t('configThisRunAdopted', { name: adoption.adopted === null ? '' : displayNameOf(adoption.adopted, props.t) })}</span>
             {adoption.origin !== null && <span className={css.inlineMuted}>{props.t('configSourceInline', { origin: adoption.origin })}</span>}
-            <span className={css.dotMuted}>·</span>
+            {sessionId !== undefined && <span className={css.dotMuted}>·</span>}
             {methodPicker(props.t('switchMethod'))}
           </div>
         )}
@@ -126,6 +137,14 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
           )}
         </div>
         <div className={css.libraryEntryHint}>{props.t('configLibraryHint')}</div>
+        {libraryRead === 'unreadable' && (
+          <div className={css.warnRow} role="alert" data-testid="config-library-unreadable">
+            ⚠ {props.t('configLibraryUnreadable')}
+            {sessionId !== undefined && (
+              <button type="button" onClick={() => { void reload(sessionId) }} className={css.retryLink}>{props.t('retry')}</button>
+            )}
+          </div>
+        )}
       </div>
 
       {receipt !== null && (

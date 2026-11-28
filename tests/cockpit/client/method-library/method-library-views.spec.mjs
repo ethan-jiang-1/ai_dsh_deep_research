@@ -125,3 +125,78 @@ test('BUG-456 MethodSummaryView / EditorView：命名错误显示具体原因（
   assert.match(editorHtml, /<button[^>]*disabled[^>]*>保存/, '名称含前导 # 时保存按钮必须禁用')
   assert.match(editorHtml, /#/, 'EditorView 必须显示前导 # 命名错误说明')
 })
+
+// 负例留证 2026-11-28：BUG-481——MethodSummaryView 缺少取消按钮与 Escape 监听，且 edit 态仍渲染「重新选择来源」。
+// 红配方：去掉 MethodSummaryView 的 onCancel 按钮/Escape 监听或恢复 edit 态渲染 restartSource。
+test('BUG-481 MethodSummaryView：访谈态提供取消按钮与 Escape 退出（输入焦点忽略），edit 态隐藏重新选择来源', async () => {
+  const baseSections = { source: '官方优先', verify: '两源交叉', report: '六段结论先行', limit: '中文' }
+  const editHtml = renderToStaticMarkup(createElement(MethodSummaryView, {
+    draft: { name: '事实核查', currentName: '事实核查', provenance: null, legacyText: null, sections: baseSections },
+    mode: 'edit',
+    stage: 'interview',
+    manualFields: new Set(),
+    coachFields: new Set(),
+    sourceFields: new Set(),
+    onStageChange() {},
+    onFocusField() {},
+    onRestartSource() {},
+    onCancel() {},
+    canSave: true,
+    sending: false,
+    onSave() {},
+    t: tZh,
+  }))
+  assert.ok(editHtml.includes(zh.cancel), 'MethodSummaryView 必须提供取消按钮')
+  assert.ok(!editHtml.includes(zh.restartSource), 'edit 态下不得显示「重新选择来源」')
+
+  const newHtml = renderToStaticMarkup(createElement(MethodSummaryView, {
+    draft: { name: '新方法', provenance: null, legacyText: null, sections: baseSections },
+    mode: 'new',
+    stage: 'interview',
+    manualFields: new Set(),
+    coachFields: new Set(),
+    sourceFields: new Set(),
+    onStageChange() {},
+    onFocusField() {},
+    onRestartSource() {},
+    onCancel() {},
+    canSave: true,
+    sending: false,
+    onSave() {},
+    t: tZh,
+  }))
+  assert.ok(newHtml.includes(zh.restartSource), 'new 态保留「重新选择来源」')
+  assert.ok(newHtml.includes(zh.cancel), 'new 态同样提供取消按钮')
+
+  const { loadRtl } = await import('../../client-dom-helpers.mjs')
+  const rtl = await loadRtl()
+  let cancels = 0
+  const { container } = rtl.render(createElement('div', null,
+    createElement('input', { 'data-testid': 'other-input' }),
+    createElement(MethodSummaryView, {
+      draft: { name: '事实核查', currentName: '事实核查', provenance: null, legacyText: null, sections: baseSections },
+      mode: 'edit',
+      stage: 'interview',
+      manualFields: new Set(),
+      coachFields: new Set(),
+      sourceFields: new Set(),
+      onStageChange() {},
+      onFocusField() {},
+      onRestartSource() {},
+      onCancel: () => { cancels += 1 },
+      canSave: true,
+      sending: false,
+      onSave() {},
+      t: tZh,
+    }),
+  ))
+  try {
+    const input = container.querySelector('input')
+    rtl.fireEvent.keyDown(input, { key: 'Escape' })
+    assert.equal(cancels, 0, '焦点在 input 内时 Escape 不得误触发取消')
+    rtl.fireEvent.keyDown(window, { key: 'Escape' })
+    assert.equal(cancels, 1, '非输入焦点下按 Escape 应触发 onCancel')
+  } finally {
+    rtl.cleanup()
+  }
+})

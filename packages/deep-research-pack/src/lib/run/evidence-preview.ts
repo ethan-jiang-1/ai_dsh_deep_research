@@ -208,7 +208,12 @@ function stripMarkdownLinks(raw: string): string {
 export function normalizeHeadingText(raw: string): string {
   return stripMarkdownLinks(raw)
     .replace(/\[([^\]]+)\]\[[^\]]*\]/g, '$1')
-    .replace(/\\([\\`*_{}[\]()#+\-.!])/g, '$1')
+    .replace(/\s+#+\s*$/, '')
+    .replace(/\$\$([^$]+)\$\$/g, '$1')
+    .replace(/\$(?!\s)([^$\n]+?)(?<!\s)\$/g, '$1')
+    .replace(/(?<![A-Za-z0-9\\])__(.+?)__(?![A-Za-z0-9])/g, '$1')
+    .replace(/(?<![A-Za-z0-9\\])_([^_\n]+)_(?![A-Za-z0-9])/g, '$1')
+    .replace(/\\([\\`*_{}[\]()#+\-.!$])/g, '$1')
     .replace(/[*`~]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
@@ -239,7 +244,9 @@ export function activeTocHeadingIndex(offsets: readonly number[], thresholdPx = 
   if (offsets.length === 0) return 0
   let active = 0
   for (let i = 0; i < offsets.length; i += 1) {
-    if (offsets[i]! <= thresholdPx) active = i
+    const off = offsets[i]!
+    if (!Number.isFinite(off)) continue
+    if (off <= thresholdPx) active = i
     else break
   }
   return active

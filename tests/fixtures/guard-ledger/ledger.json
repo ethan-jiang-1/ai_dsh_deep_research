@@ -2534,6 +2534,206 @@
       "oracleType": "canonical",
       "status": "closed",
       "redRecipe": "在 DefaultsButton <button> 恢复 title={tooltip} → BUG-462 用例红"
+    },
+    {
+      "id": "BUG-463",
+      "mechanism": "claims-verdicts.ts readLatestVerdicts 仅读最高轮 verdicts-r<N>.json 丢弃前批裁决，且 verdicts.json 模板仅示单批未明示同轮多批合写进 batches[]",
+      "guard": "tests/cockpit/lib/run/claims-verdicts.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "把 readLatestVerdicts 改回只读 rounds[0] → BUG-463 用例 C1 退回 UNVERIFIED 实红"
+    },
+    {
+      "id": "BUG-464",
+      "mechanism": "review-contract.mjs 对覆盖表首列要求精确相等、CRITICAL 清单跨 MAJOR 与历史轮全局匹配、resolved-critical 不剥加粗/括注导致合法 PASS 误红",
+      "guard": "tests/run/gates/review-contract.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "把 topic 匹配退回 cells[0] === id 或 severityIssues 退回全文扫 - C# / 去掉加粗括注剥离 → BUG-464 用例红"
+    },
+    {
+      "id": "BUG-465",
+      "mechanism": "templates/run/plan.md 注释混写 stage 词 scan/dive/check 诱导非法 kind，且 research-planning skill 列入不在 PLAN_KINDS 的 search",
+      "guard": "tests/pack/contract/template-contract.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 templates/run/plan.md 改回只列 scan/dive/check 或在 research-planning/SKILL.md 留回 search → BUG-465 用例红"
+    },
+    {
+      "id": "BUG-466",
+      "mechanism": "evidence-audit-core.mjs 不追踪已登记 web_fetch spill 路径的 read/grep、不剥 HTML 标签与行内/括号 Markdown 链接、不对省略号分片导致批量误报转写不符",
+      "guard": "tests/run/gates/evidence-audit.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "去掉 spillPaths 登记、stripHtmlAndLinks 或 quoteCoverage 省略号分片 → BUG-466 四类正例红"
+    },
+    {
+      "id": "BUG-467",
+      "mechanism": "leadsGate 只匹配单行 - 支持来源: 导致缩进多行子列表漏扫 A–D 分级误红",
+      "guard": "tests/run/gates/node-gate-leads.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 leadsGate 支持来源采集退回单行 match → BUG-467 多行子列表用例红"
+    },
+    {
+      "id": "BUG-468",
+      "mechanism": "reader-final 处于 critic 终局 PASS 之后且门C 未回查 review.md 已闭合 CRITICAL 驳回表述/限定突破词，致被驳回全称断言在读者版复发",
+      "guard": "tests/run/gates/node-gate-reader.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "从 readerGate 删去 criticalRelapseIssues 回查 → BUG-468 复发用例变 PASS 实红"
+    },
+    {
+      "id": "BUG-469",
+      "mechanism": "长 run 中 Lead/Analyst/Critic 缺少对 verdicts 逐条点数、批量列表 API 禁替单页 fetch、final 末两节与 findings 格式的显式技能护栏",
+      "guard": "tests/pack/scripts/presets.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删除 synthesis/evidence-extraction/adversarial-review/reader-final 对应硬护栏句 → BUG-469 用例红"
+    },
+    {
+      "id": "BUG-470",
+      "mechanism": "defaultsCommandLineForOption 遗漏 {patch, expectedRevision} 封装且 source.authority 用影子枚举 primary_first/authoritative_secondary，index.ts 吞掉命令层 error 且冷会话未预热 refresh",
+      "guard": "tests/cockpit/client/research-commands-shortcuts.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 set 命令行退回裸 patch、去掉冷会话 refresh 或在 interpretDefaultsCommandResult 吞掉 kind=error → BUG-470 双用例红"
+    },
+    {
+      "id": "BUG-471",
+      "mechanism": "跨会话打开终稿与状态页未校验 sidebarRight.mounted === expectedSessionId 导致错开在旧会话或抛 no session surface is mounted，且 openMember 丢弃 parentSessionId",
+      "guard": "tests/cockpit/client/product-startup.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "去掉 openResourceWhenMounted/openTabWhenMounted 的 expectedSessionId 校验或 buildMemberSessionTarget 的 parentSessionId → BUG-471 用例红"
+    },
+    {
+      "id": "BUG-472",
+      "mechanism": "ResearchFinalTab 切换全屏销毁旧 bodyRef DOM 致 CitationHoverLayer 监听挂死，且窄全屏(<960px)点击引用写进 display:none 对照栏并隐藏目录开关",
+      "guard": "tests/cockpit/client/final-studio-r2.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 CitationHoverLayer 退回 containerRef 或把 studioActive 改回裸 isFullscreen → BUG-472 用例红"
+    },
+    {
+      "id": "BUG-473",
+      "mechanism": "ResearchFinalTab 手动 reload 与 inspectInStudio 缺代次校验导致慢返回覆盖新报告/快证据，useEvidencePreview 缺 sessionEpoch，activeTocHeadingIndex 遇 Infinity 提前 break 卡死目录",
+      "guard": "tests/cockpit/client/final-studio-r2.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "去掉 inspectTokenRef/loadEpochRef/sessionEpochRef 或把 activeTocHeadingIndex continue 改回 break → BUG-473 用例红"
+    },
+    {
+      "id": "BUG-474",
+      "mechanism": "research-turn.ts 硬编码影子写工具名 write_file/edit_file 且漏掉 filePath/对象 arguments 与 drt_ 路径边界，导致真实运行永不产出 protocol/review 里程碑",
+      "guard": "tests/cockpit/client/research-turn.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 research-turn.ts 改回仅匹配 write_file/edit_file → BUG-474 用例红"
+    },
+    {
+      "id": "BUG-475",
+      "mechanism": "ResearchStatusTab 将队员跳转钮放进 collapsedContent 导致双 DOM 与键盘失效，活标题缺 locale 与切会话复位，useStatusFeed/useMemberActivity 依赖 t 致切语言重连劫持，HITL2 与 danglingReceipt 误判",
+      "guard": "tests/cockpit/client/research-status/status-feed-behavior.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 memberJumpBtn 放回 collapsedContent、给 useStatusFeed 依赖加回 t 或去掉 ResearchStatusTitle locale/reset → BUG-475 四用例红"
+    },
+    {
+      "id": "BUG-476",
+      "mechanism": "DefaultsPanel 受众 blur 无 dirty check 且跨会话漏草稿，source-auto 整轴清零 authority/recency，SelectMenu 布局类挂错节点，ResearchConfigTab 吞 libraryRead 读错与 sending 重复点",
+      "guard": "tests/cockpit/client/defaults/defaults-panel-confirm.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "去掉 commitAudience dirty check、恢复 unset(['source']) 或去掉 configLibraryUnreadable/refresh 三路刷新 → BUG-476 用例红"
+    },
+    {
+      "id": "BUG-477",
+      "mechanism": "DagMap 硬编码全局 marker ID 且无 clipPath/CJK 宽字形截断致中文侵入邻卡，ResearchGraphTab 未复位 expandedId 且窄屏自动全屏反切宽画布",
+      "guard": "tests/cockpit/client/research-graph/dag-map.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 DagMap marker 改回全局字面量、去掉 clipPath/CJK 截断或把 dagWide 退回裸 isFullscreen → BUG-477 用例红"
+    },
+    {
+      "id": "BUG-478",
+      "mechanism": "ResearchGraphTab 复合子节点丢 running/attention 误报 owner 未知，graph-state 缺图未复位 diff 陷 vnull 死锁，快照读缺 try/catch，planDiffOf 用 find 丢多后继，state-note 文案与事实相反",
+      "guard": "tests/cockpit/client/research-graph/dag-map.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "childStateOf 传回 undefined/undefined、去掉 plan-missing 视图复位或 plan-diff 退回 find → BUG-478 用例红"
+    },
+    {
+      "id": "BUG-479",
+      "mechanism": "跨面草稿预填与 @ 引用断链：透镜起题 whenDraftExists=keep 静默丢词且硬跳旧工作区，图谱 insertText 失败回退 setDraft 清草稿，@W# 不透传 nodeId，全屏预填不退全屏",
+      "guard": "tests/cockpit/client/final-studio-r2.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 whenDraftExists 改回 keep、恢复 insertText 失败回退 setDraft 或去掉全屏预填退出全屏 → BUG-479 用例红"
+    },
+    {
+      "id": "BUG-480",
+      "mechanism": "MethodLibraryView 未启访谈也每 900ms 静默调 sendCoach，ResearchHubPanel 切 tab 卸载丢草稿与写盘回执，startInterview 失败置 started=true 永久锁死",
+      "guard": "tests/cockpit/client/method-library/coach-panel.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "恢复 startInterview 对 uncertain 置 started=true、去掉 manualEditPrompt 访谈门禁或去掉 Hub 切 tab 守卫 → BUG-480 三用例红"
+    },
+    {
+      "id": "BUG-481",
+      "mechanism": "useRunSourcePicker abortRunRead 提前清空 ref 致取消永久卡死 loading，MethodSummaryView 缺取消/Esc 且编辑态显重选来源，coach 滚底 observer 错过 Portal，useLibraryData 抢选，ToolCard 未知动作误报清除默认",
+      "guard": "tests/cockpit/client/method-library/coach-panel.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "去掉 cancelRunRead 状态落位、Portal MutationObserver、preserveEmptySelection 或 toolDefaultDone 分支 → BUG-481 用例红"
+    },
+    {
+      "id": "BUG-482",
+      "mechanism": "RunsView HITL2 被 isActiveRun 门禁锁死，research-projection 换新 slug 未清旧 deliveredPath，HeaderPill 硬编码 final.md，且多面板缺容器查询/minmax(0,1fr)/单行省略致爆宽裁切",
+      "guard": "tests/cockpit/client/defaults/defaults-panel-confirm.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "恢复 RunsView isActiveRun 门禁、去掉 projection deliveredPath 清零或恢复 @media/340px 断点 → BUG-482 用例红"
+    },
+    {
+      "id": "BUG-483",
+      "mechanism": "schema-scan 与 path-hygiene 扫描 evidence/*.md 原文摘录块造成与 evidence-audit 逐字契约 Catch-22，且 /media/ 误杀网站相对链接",
+      "guard": "tests/run/gates/path-hygiene.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删去 stripEvidenceVerbatimQuotes 或恢复宽泛 /media/ 正则 → BUG-483 用例红"
+    },
+    {
+      "id": "BUG-484",
+      "mechanism": "protocol-audit-core checkFinalSections 仅认 5 个英文 slug 精确 H2 匹配导致编号/括注与语义别名误红，且已记 deviations 的证据门槛例外未降级",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 checkFinalSections 退回精确 headings.has(expected) 或移除 deviations 例外降级 → BUG-484 用例红"
+    },
+    {
+      "id": "BUG-485",
+      "mechanism": "verdict-audit-core not-verbatim 未剥 child 外层围栏/零宽空格 \\u200b 及等价 JSON 缩进差异，诱导重序列化即误红",
+      "guard": "tests/run/gates/verdict-audit.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "把 verbatimMatches 退回只去尾部空白 → BUG-485 用例红"
+    },
+    {
+      "id": "BUG-486",
+      "mechanism": "protocol.json source_scope.families 含 web/local 但 content/lenses/ 无 web.md/local.md，question-patterns 未显式分隔两套集合",
+      "guard": "tests/pack/contract/template-contract.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "删去 question-patterns 对 families（web/local）≠ content/lenses/*.md 的边界说明 → BUG-486 用例红"
+    },
+    {
+      "id": "BUG-487",
+      "mechanism": "review-contract 强行将跨 topic 对账卡复计进每行与 critic 表下注脚不落格记法冲突",
+      "guard": "tests/run/gates/review-contract.spec.mjs",
+      "oracleType": "structured",
+      "status": "closed",
+      "redRecipe": "去掉 coverageIssues 对已脚注声明跨行卡的 exclusiveCounts 分支 → BUG-487 用例红"
     }
   ]
 }

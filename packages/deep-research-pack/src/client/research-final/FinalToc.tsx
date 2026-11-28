@@ -24,12 +24,13 @@ function locateHeadingElement(root: HTMLElement, headings: readonly TocHeading[]
 export function FinalToc(props: {
   readonly markdown: string
   readonly bodyRef?: RefObject<HTMLDivElement | null>
+  readonly bodyEl?: HTMLDivElement | null
   readonly mode?: 'collapsible' | 'sticky'
   readonly open?: boolean
   readonly onToggleOpen?: (next: boolean) => void
   readonly t: TranslateNS<'deepResearchPack'>
 }): ReactNode {
-  const { markdown, bodyRef, mode = 'collapsible', open, onToggleOpen, t } = props
+  const { markdown, bodyRef, bodyEl, mode = 'collapsible', open, onToggleOpen, t } = props
   const headings = useMemo(() => extractTocHeadings(markdown), [markdown])
   const [activeIndex, setActiveIndex] = useState(0)
 
@@ -39,8 +40,8 @@ export function FinalToc(props: {
 
   useEffect(() => {
     if (mode !== 'sticky') return undefined
-    const scroller = bodyRef?.current
-    if (scroller === null || scroller === undefined || headings.length < 2) return undefined
+    const scroller = bodyEl !== undefined ? bodyEl : (bodyRef?.current ?? null)
+    if (scroller === null || headings.length < 2) return undefined
     const updateActive = () => {
       const containerTop = scroller.getBoundingClientRect().top
       const nodes = [...scroller.querySelectorAll<HTMLElement>('h1, h2, h3')]
@@ -49,18 +50,29 @@ export function FinalToc(props: {
         const el = locateHeadingElement(scroller, headings, h, idx)
         return el !== undefined ? el.getBoundingClientRect().top - containerTop : Number.POSITIVE_INFINITY
       })
+      const atBottom =
+        scroller.scrollHeight > scroller.clientHeight
+        && scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2
+      if (atBottom) {
+        for (let i = offsets.length - 1; i >= 0; i -= 1) {
+          if (Number.isFinite(offsets[i])) {
+            setActiveIndex(i)
+            return
+          }
+        }
+      }
       setActiveIndex(activeTocHeadingIndex(offsets, 56))
     }
     updateActive()
     scroller.addEventListener('scroll', updateActive, { passive: true })
     return () => { scroller.removeEventListener('scroll', updateActive) }
-  }, [mode, bodyRef, headings])
+  }, [mode, bodyEl, bodyRef, headings])
 
   if (headings.length < 2) return null
 
   const jumpToHeading = (heading: TocHeading, index: number): void => {
-    const root = bodyRef?.current
-    if (root === null || root === undefined) return
+    const root = bodyEl !== undefined ? bodyEl : (bodyRef?.current ?? null)
+    if (root === null) return
     const target = locateHeadingElement(root, headings, heading, index)
     setActiveIndex(index)
     target?.scrollIntoView({ behavior: 'smooth', block: 'start' })

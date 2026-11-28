@@ -71,9 +71,14 @@ import { StartCard, type StartCardInjected } from './StartCard.tsx'
 import { DefaultsButton, type DefaultsButtonInjected } from './defaults/DefaultsButton.tsx'
 import { createDefaultsStore } from './defaults/store.ts'
 import { ResearchHubIcon, ResearchHubPanel, type HubTab } from './ResearchHubPanel.tsx'
-import { CURRENT_SESSION_KEY, PRODUCT_WORKSPACE_KEY, buildStartResearchOptions, openResourceWhenMounted, pickProductWorkspace, readCurrentSessionId } from './startup.ts'
-import { finalAddressOf, isFinalAddress } from '../lib/run/final-target.ts'
-import { evidenceAddressOf, isEvidenceAddress } from '../lib/run/evidence-card.ts'
+import {
+  CURRENT_SESSION_KEY, PRODUCT_WORKSPACE_KEY,
+  buildStartResearchOptions, pickStartWorkspaceId, readCurrentSessionId,
+} from './startup.ts'
+import { createRightbarNav, type WorkspaceNavLike } from './rightbar-nav.ts'
+import { isFinalAddress } from '../lib/run/final-target.ts'
+import { interpretDefaultsCommandResult } from '../lib/events/research-references.ts'
+import { isEvidenceAddress } from '../lib/run/evidence-card.ts'
 import { foldLibrary } from '../lib/method-library/library-fold.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
@@ -193,49 +198,13 @@ export function apply(ctx: ClientContext): void {
 
     // ── 导航与资源打开闭包 ──
     const runSource = (sessionId: SessionId) => browserRunSource(workspaceFiles, sessionId, workspaceOf(sessionId)?.path)
-    let cancelPendingFinal: (() => void) | null = null
-    scoped.effect(() => () => { cancelPendingFinal?.(); cancelPendingFinal = null }, 'deep-research-pack: pending open-final cleanup')
-    const openFinal = (sessionId: SessionId, path: string) => {
-      cancelPendingFinal?.()
-      cancelPendingFinal = openResourceWhenMounted(scoped.sidebarRight, finalAddressOf(sessionId, path), {
-        onError: (cause) => {
-          /* @silent-catch: sidebar openResource fails soft when host frame is closing */
-          console.error('[research-final] openResource 失败', String(cause))
-        },
-      })
-    }
-
-    let cancelPendingEvidence: (() => void) | null = null
-    scoped.effect(() => () => { cancelPendingEvidence?.(); cancelPendingEvidence = null }, 'deep-research-pack: pending open-evidence cleanup')
-    const openEvidence = (sessionId: SessionId, runDir: string, cardFile: string) => {
-      cancelPendingEvidence?.()
-      cancelPendingEvidence = openResourceWhenMounted(scoped.sidebarRight, evidenceAddressOf(sessionId, runDir, cardFile), {
-        onError: (cause) => {
-          /* @silent-catch: sidebar openResource fails soft when host frame is closing */
-          console.error('[research-evidence] openResource 失败', String(cause))
-        },
-      })
-    }
-
-    const uiWorkspaceNav = (scoped as unknown as { uiWorkspace: { openSession(target: SessionId): void } }).uiWorkspace
-    const openSession = (sessionId: SessionId) => { uiWorkspaceNav.openSession(sessionId) }
-    const openMember = (_leadSessionId: SessionId, memberId: SessionId) => { uiWorkspaceNav.openSession(memberId) }
-    const revealStatusTab = () => { scoped.sidebarRight.openTab(RESEARCH_STATUS_TAB_KIND) }
-    const revealGraphTab = () => { scoped.sidebarRight.openTab(RESEARCH_GRAPH_TAB_KIND) }
-    const toggleRightFullscreen = () => {
-      const sr = scoped.sidebarRight as unknown as {
-        commandTarget?: (el: Element | null) => unknown
-        toggleFullscreen?: (target: unknown) => void
-      }
-      const target = sr.commandTarget?.(null)
-      if (target !== undefined) sr.toggleFullscreen?.(target)
-    }
     const backToChat = () => { layout.selectPanel(null) }
-    const openSessionFinal = (sessionId: SessionId, path: string) => {
-      openSession(sessionId)
-      backToChat()
-      openFinal(sessionId, path)
-    }
+    const uiWorkspaceNav = (scoped as unknown as { uiWorkspace: WorkspaceNavLike }).uiWorkspace
+    const {
+      openFinal, openEvidence, openSession, openMember,
+      revealStatusTab, revealGraphTab, openSessionFinal, toggleRightFullscreen, dispose: disposeRightbarNav,
+    } = createRightbarNav(scoped.sidebarRight, uiWorkspaceNav, backToChat)
+    scoped.effect(() => disposeRightbarNav, 'deep-research-pack: pending rightbar navigation cleanup')
 
     let pendingHubTab: HubTab | null = null
     const hubTabListeners = new Set<() => void>()
@@ -263,9 +232,14 @@ export function apply(ctx: ClientContext): void {
       }).uiWorkspace
       const snap = (scoped.workspaces as unknown as WorkspacesLike).list.getSnapshot()
       const savedId = typeof localStorage !== 'undefined' ? localStorage.getItem(PRODUCT_WORKSPACE_KEY) : null
-      const picked = pickProductWorkspace(snap.items, savedId)
+      const activeSid = scoped.sidebarRight.mounted.getSnapshot()
+        ?? (readCurrentSessionId(typeof localStorage !== 'undefined' ? localStorage.getItem(CURRENT_SESSION_KEY) : null) as SessionId | null)
+      const activePath = activeSid ? workspaceOf(activeSid)?.path : undefined
+      const currentWsId = activePath !== undefined
+        ? snap.items.find((item) => item.path === activePath)?.workspaceId
+        : undefined
       backToChat()
-      uiWs.startSession(picked?.workspaceId, buildStartResearchOptions(prompt))
+      uiWs.startSession(pickStartWorkspaceId(snap.items, currentWsId, savedId), buildStartResearchOptions(prompt))
     }
 
     // ── Composer / 首屏 / 左栏会话行槽位 ──
@@ -343,7 +317,7 @@ export function apply(ctx: ClientContext): void {
         ResearchConfigTab,
       ),
       scoped.slots.register(
-        { name: RESEARCH_PANE_SLOT, key: RESEARCH_GRAPH_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ runSource, follow, openOwner: openMember }) },
+        { name: RESEARCH_PANE_SLOT, key: RESEARCH_GRAPH_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ runSource, follow, openOwner: openMember, toggleFullscreen: toggleRightFullscreen }) },
         ResearchGraphTab,
       ),
       scoped.slots.register(
@@ -358,7 +332,7 @@ export function apply(ctx: ClientContext): void {
 
     scoped.effect(() => scoped.slots.inject(RESEARCH_TITLE_SLOT, () => [
       scoped.slots.register(
-        { name: RESEARCH_TITLE_SLOT, key: RESEARCH_TAB_KEY, inject: () => ({ follow, listDir, readFile, revealStatusTab, labels: { idle: t('tabStatus'), pending: t('tabStatusPending') } }) },
+        { name: RESEARCH_TITLE_SLOT, key: RESEARCH_TAB_KEY, locale: 'deepResearchPack', inject: () => ({ follow }) },
         ResearchStatusTitle,
       ),
     ]), 'deep-research-pack: research-status live title')
@@ -450,14 +424,13 @@ export function apply(ctx: ClientContext): void {
           })),
         }
       },
-      executeDefaultsCommand: async (sessionId, line) => {
-        const result = await scoped.remote.commands.execute(sessionId, line, [])
-        return result.ok ? { ok: true } : { ok: false, error: result.error?.message ?? 'command failed' }
-      },
+      executeDefaultsCommand: async (sessionId, line) => interpretDefaultsCommandResult(
+        await scoped.remote.commands.execute(sessionId, line, []),
+      ),
     })
     registerResearchTriggers(ctx, { t, runSource, openEvidence, openGraph: revealGraphTab })
     registerResearchShortcuts(ctx, {
-      t, openStatus: revealStatusTab, openGraph: revealGraphTab, openHub: () => { openHubTab('runs') },
+      t, openStatus: () => { revealStatusTab() }, openGraph: () => { revealGraphTab() }, openHub: () => { openHubTab('runs') },
       hasActiveSession: () => scoped.sidebarRight.mounted.getSnapshot() !== undefined,
     })
 

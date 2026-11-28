@@ -12,7 +12,8 @@
 > `W2.1/W2.2` 是 Wave 2 内的节点；`W2.1.1` 是节点内部拆解，不是新 Wave。单节点 Wave 也写
 > `W1.1`。Wave 由 deps 计算，不手写 LAYER 表；ID 前缀必须与计算 Wave 一致。跨 Wave 变化 =
 > **重编号 + 重写记录旧号别名**（`W2.1 → W3.2`），不静默保留旧前缀。
-> `stage` 由根节点 kind 派生（scan/dive/check/synthesis/review/gate；未知=unknown），不单独建列。
+> `kind` 闭集仅限 `broad-scan` / `deep-dive` / `cross-check` / `synthesis` / `review` / `gate` / `fetch`（`check` 是派生 stage，**不是**合法 `kind`）；`stage` 由根节点 `kind` 自动派生（`broad-scan→scan` / `deep-dive→dive` / `cross-check→check` / `synthesis→synthesis` / `review→review` / `gate→gate`；未知=unknown），不单独建列。
+> `task_id`：创建 Team task 后立即把返回的 `task-N` 回填本列（脚本层写 `plan-only`），不留 `—` 到交付。
 > 拆分/合并/删除只做墓碑（`lifecycle` = retired / merged_into / superseded_by），墓碑留在表里
 > 供 byId 解析但不画图；旧号不复用。图版本：v1（每次重写递增）——**重写前先把当前
 > `plan.md` 复制到 `plan/v<被取代的版本>.md`**（只读旧图快照）；`plan.md` 始终是唯一当前版。
@@ -55,8 +56,8 @@
 
 ## 剩余工作
 
-<!-- 两列表格：未完成节点 + 状态（待派发/进行中/完成/阻塞）。owner 与 next 从节点表/deps 派生，
-     不再手写；全部完成写 | — | 完成 |。在场时必须有本节（nodes-contract）。 -->
+<!-- 两列表格：未完成节点 + 状态，state 只能取四值闭集（待派发/进行中/完成/阻塞），禁止写「待 W1.1」等依赖散文
+     （依赖已记在节点表 deps 列）；owner 与 next 从节点表/deps 派生，不再手写；全部完成写 | — | 完成 |。在场时必须有本节（nodes-contract）。 -->
 | task_id | state |
 |---|---|
 | — | 完成 |

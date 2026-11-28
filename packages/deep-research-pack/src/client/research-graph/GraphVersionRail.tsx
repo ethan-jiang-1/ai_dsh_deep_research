@@ -48,7 +48,7 @@ export function GraphVersionRail(props: {
       )}
 
       {/* 旧图快照：只列节点结构（id/kind/deps），不与当前 Team 板对板。 */}
-      {showSnapshotPlan && (
+      {showSnapshotPlan && latestSnapshot !== null && (
         <div className={styles.snapshotBanner}>
           <div className={styles.diffHeading}>{t('graphOldSnapshotTitle', { version: String(latestSnapshot) })}</div>
           {snapshotState === 'missing' && <div className={styles.mutedLine}>{t('graphSnapshotMissing', { version: String(latestSnapshot) })}</div>}
