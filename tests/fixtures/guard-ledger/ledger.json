@@ -2734,6 +2734,22 @@
       "oracleType": "structured",
       "status": "closed",
       "redRecipe": "去掉 coverageIssues 对已脚注声明跨行卡的 exclusiveCounts 分支 → BUG-487 用例红"
+    },
+    {
+      "id": "BUG-488",
+      "mechanism": "fetch-fallback 外层 localTimeoutMs deadline 先于 HttpFetchProvider 内部 timer 触发被归类成 WEB_ABORTED，orchestrate 误当调用方取消拒回退并裸抛无 URL 错误",
+      "guard": "tests/pack/fetch-fallback/fetch-fallback-orchestration.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "去掉 orchestrate.ts 里 localSignal.aborted && !callerAborted() 的 WEB_FETCH_TIMEOUT 归一化 → BUG-488 假腿与真 HttpFetchProvider 契约用例双红"
+    },
+    {
+      "id": "BUG-489",
+      "mechanism": "中文 full_report 的 protocol.output.sections 使用自定义英文 slug 时，checkFinalSections 机械字面匹配中文 H2 误红，且 research-brief 未约束自定义节名须与交付语言 H2 对齐",
+      "guard": "tests/run/gates/protocol-core.spec.mjs",
+      "oracleType": "canonical",
+      "status": "closed",
+      "redRecipe": "去掉 checkFinalSections 对中文报告自定义英文 slug 的 final-sections-unmapped warning 分支或删去 research-brief 的 output.sections 约束 → BUG-489 用例红"
     }
   ]
 }

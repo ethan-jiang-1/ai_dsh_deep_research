@@ -3,7 +3,7 @@
 > 生成器 = `probes/_index.mjs --write`；事实源 = 每支探针头注；本表只答「有哪些、在哪」。
 > 指南 = [../docs/guides/probe-playbook.md](../docs/guides/probe-playbook.md)。
 
-## analyze/（11 支）
+## analyze/（12 支）
 
 | 探针 | 一句话 | 档位 | 何时跑 | 状态 |
 |---|---|---|---|---|
@@ -12,6 +12,7 @@
 | [provider-error-stats.mjs](analyze/provider-error-stats.mjs) | 上游流错误（回合被终结）的跨场分布投影 | keyless（须先 source tools/env.sh） | BUG-022 类复发时数它；需要跨场而非单场分布 | 常驻 |
 | [run-dashboard.mjs](analyze/run-dashboard.mjs) | M2 run 只读 HTML 投影（步骤条 / HITL 等待横幅 / 归档标注；多场扫描） | keyless（只读 bundle 与会话日志；写抛弃型 HTML） | 要看 run 进度或多场对比；给用户看现场 | 常驻 |
 | [run-inventory.mjs](analyze/run-inventory.mjs) | run bundle 只读保留期视图（数量 / 大小 / 最老日期；不删任何东西） | keyless（纯读盘） | 清理运行区前先看有几场、多大；保留期评估 | 常驻 |
+| [run-trajectory.mjs](analyze/run-trajectory.mjs) | 多角色研究轨迹一键体检：展开 Lead→子会话树、成本总账、深研域 Smells 与 web.log 留痕关联 | keyless（读本地会话日志或原生 /export 解压目录） | 研究 run 跑完复盘或跑中卡顿时，排查技能漏载、抓取异常、协作漂移与计数失真 | 常驻 |
 | [scene-capture.mjs](analyze/scene-capture.mjs) | 场景包捕获/读取：截图 + DOM + 正文 + console + meta（token 脱敏） | 抓取 keyless（真实浏览器，须起通道）；读取 keyless（纯读盘） | 看见「当时页面」；事后看现场（--list / --show） | 常驻 |
 | [session-events.mjs](analyze/session-events.mjs) | 会话事件尾部：按 id/标题看「刚才发生了什么」（tool/call、turn/end 摘要） | keyless（读会话日志） | agent 需要会话时间线；诊断第一步（除会话 id 之外的事实） | 常驻 |
 | [session-replay.mjs](analyze/session-replay.mjs) | 任意历史会话在真实 UI 重开并抓场景包（现在的客户端 + 当年的数据） | keyless（真实浏览器；须先 source） | 复看历史会话当时/现在的页面；症状还原 | 常驻 |

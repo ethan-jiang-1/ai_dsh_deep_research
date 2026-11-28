@@ -12,7 +12,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { fetchWithFallback, markRescued, describeFailure } from '../../../packages/deep-research-pack/src/fetch-fallback/orchestrate.ts';
+import { fetchWithFallback, markRescued, describeFailure, sanitizeUrlForLog } from '../../../packages/deep-research-pack/src/fetch-fallback/orchestrate.ts';
 import { PROVIDER_ID } from '../../../packages/deep-research-pack/src/fetch-fallback/policy.ts';
 import { researchRoles } from '../../../checks/lib/shared/roles.mjs';
 
@@ -203,4 +203,146 @@ test('单源对账：provider id / 行名 / 预算在 YAML 与代码间一致（
     assert.ok(Number.isFinite(toolBudget), `${role}: tool-web 缺 fetchTimeoutMs`);
     assert.ok(toolBudget > total, `${role}: 工具预算 ${toolBudget} 必须大于回退两腿总预算 ${total}`);
   }
+});
+
+test('原生运行留痕：剥除 URL query/userinfo，覆盖回退成功/跳过/双腿失败分支', async () => {
+  assert.equal(sanitizeUrlForLog('https://user:secret@example.com/path/page?token=abc#sec'), 'https://example.com/path/page');
+  assert.equal(sanitizeUrlForLog('not a url'), 'invalid-url');
+
+  const logs = [];
+  const log = { info: (m) => logs.push({ level: 'info', m }), warn: (m) => logs.push({ level: 'warn', m }) };
+
+  // 1) 回退成功 → info，URL 已剥除 query token
+  const hOk = harness({ local: async () => { throw failure('WEB_REDIRECT_BLOCKED', 'cross-origin'); } });
+  hOk.deps.log = log;
+  await fetchWithFallback(hOk.deps, settings(), { url: 'https://example.com/doc?token=topsecret' });
+  assert.equal(logs.length, 1);
+  assert.equal(logs[0].level, 'info');
+  assert.match(logs[0].m, /^\[deep-research:fetch-fallback\] event=fallback_ok url=https:\/\/example\.com\/doc localCode=WEB_REDIRECT_BLOCKED /);
+  assert.doesNotMatch(logs[0].m, /topsecret/);
+
+  // 2) 安全拒绝跳过回退 → warn + reason=policy
+  logs.length = 0;
+  const hSkip = harness({ local: async () => { throw failure('WEB_BLOCKED_URL'); } });
+  hSkip.deps.log = log;
+  await assert.rejects(() => fetchWithFallback(hSkip.deps, settings(), { url: 'http://127.0.0.1/secret?k=1' }));
+  assert.equal(logs.length, 1);
+  assert.equal(logs[0].level, 'warn');
+  assert.match(logs[0].m, /event=fallback_skipped reason=policy url=http:\/\/127\.0\.0\.1\/secret localCode=WEB_BLOCKED_URL/);
+  assert.doesNotMatch(logs[0].m, /k=1/);
+
+  // 3) 双腿失败 → warn + fallback_fail
+  logs.length = 0;
+  const hFail = harness({
+    local: async () => { throw failure('WEB_FETCH_TIMEOUT'); },
+    api: async () => { throw failure('WEB_PROVIDER_ERROR', 'HTTP 404'); },
+  });
+  hFail.deps.log = log;
+  await assert.rejects(() => fetchWithFallback(hFail.deps, settings(), { url: 'https://bis.gov/media/1575?api_key=xyz' }));
+  assert.equal(logs.length, 1);
+  assert.equal(logs[0].level, 'warn');
+  assert.match(logs[0].m, /event=fallback_fail url=https:\/\/bis\.gov\/media\/1575 localCode=WEB_FETCH_TIMEOUT apiCode=WEB_PROVIDER_ERROR/);
+  assert.doesNotMatch(logs[0].m, /xyz/);
+});
+
+// 负例留证 2026-11-28：BUG-488——本地 deadline signal 先于 HttpFetchProvider 内部 timer 触发时，
+// provider 把外层 signal abort 归类成 WEB_ABORTED，orchestrate 直接按调用方取消拒回退并裸抛 `web fetch aborted`。
+// 红配方：去掉 orchestrate.ts 里 `localSignal.aborted && !callerAborted()` 的 WEB_FETCH_TIMEOUT 归一化 → 本例红。
+test('BUG-488：本地 deadline 超时被底层判成 WEB_ABORTED 时按 WEB_FETCH_TIMEOUT 回退 API，保留 URL 且调用方取消绝不回退', async () => {
+  const url = 'https://www.reuters.com/technology/example-article';
+  const logs = [];
+  const log = { info: (m) => logs.push({ level: 'info', m }), warn: (m) => logs.push({ level: 'warn', m }) };
+
+  // 1) 外层本地 deadline 已中止（调用方未取消），底层抛 WEB_ABORTED → 必须归一为 WEB_FETCH_TIMEOUT 并走 API 腿
+  const localTimeoutCtrl = new AbortController();
+  const hRescued = harness({
+    local: async (_req, sig) => {
+      localTimeoutCtrl.abort(new DOMException('timed out', 'TimeoutError'));
+      assert.equal(sig.aborted, true);
+      throw failure('WEB_ABORTED', 'web fetch aborted');
+    },
+  });
+  hRescued.deps.deadline = () => localTimeoutCtrl.signal;
+  hRescued.deps.log = log;
+  const rescued = await fetchWithFallback(hRescued.deps, settings(), { url });
+  assert.deepEqual(hRescued.calls, { local: 1, api: 1 }, '本地 deadline 超时必须触发 API 回退');
+  assert.match(rescued.body.content, /^> 回退：本地抓取失败（WEB_FETCH_TIMEOUT:/);
+  assert.match(rescued.body.content, new RegExp(url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(logs[0].m, /event=fallback_ok .*localCode=WEB_FETCH_TIMEOUT/);
+
+  // 2) 预算已耗尽且本地 deadline 触发 → 抛 WEB_FETCH_TIMEOUT 并含 URL，而非裸 WEB_ABORTED
+  const budgetCtrl = new AbortController();
+  const hExhausted = harness({
+    local: async () => {
+      hExhausted.advance(28_000);
+      budgetCtrl.abort(new DOMException('timed out', 'TimeoutError'));
+      throw failure('WEB_ABORTED', 'web fetch aborted');
+    },
+  });
+  hExhausted.deps.deadline = () => budgetCtrl.signal;
+  await assert.rejects(
+    () => fetchWithFallback(hExhausted.deps, settings(), { url }),
+    (error) => {
+      assert.equal(error.code, 'WEB_FETCH_TIMEOUT');
+      assert.match(error.message, new RegExp(url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+      return true;
+    },
+  );
+  assert.deepEqual(hExhausted.calls, { local: 1, api: 0 });
+
+  // 3) API 腿 deadline 触发（调用方未取消）且两腿都失败 → 报错准确点名 API 超时与 URL
+  const legSignals = [new AbortController(), new AbortController()];
+  let legIdx = 0;
+  const hDualTimeout = harness({
+    local: async () => {
+      legSignals[0].abort(new DOMException('local timeout', 'TimeoutError'));
+      throw failure('WEB_ABORTED', 'web fetch aborted');
+    },
+    api: async () => {
+      legSignals[1].abort(new DOMException('api timeout', 'TimeoutError'));
+      throw failure('WEB_ABORTED', 'web fetch aborted');
+    },
+  });
+  hDualTimeout.deps.deadline = () => legSignals[legIdx++].signal;
+  await assert.rejects(
+    () => fetchWithFallback(hDualTimeout.deps, settings(), { url }),
+    (error) => {
+      assert.equal(error.code, 'WEB_FETCH_TIMEOUT');
+      assert.match(error.message, new RegExp(url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+      assert.match(error.message, /DeepSeek Fetch API fallback also failed \(WEB_FETCH_TIMEOUT:/);
+      return true;
+    },
+  );
+  assert.deepEqual(hDualTimeout.calls, { local: 1, api: 1 });
+
+  // 4) 状态码回退腿上遇到真正的调用方取消 → 错误包含 URL
+  const callerCtrl = new AbortController();
+  const hStatusAbort = harness({
+    local: async () => text('server error', 503),
+    api: async () => { callerCtrl.abort(); throw failure('WEB_ABORTED', 'cancelled'); },
+  });
+  await assert.rejects(
+    () => fetchWithFallback(hStatusAbort.deps, settings(), { url }, callerCtrl.signal),
+    (error) => {
+      assert.equal(error.code, 'WEB_ABORTED');
+      assert.match(error.message, new RegExp(url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+      return true;
+    },
+  );
+
+  // 5) 负控：真正的调用方取消（callerSignal.aborted === true）仍绝不回退
+  const trueCancel = new AbortController();
+  const originalAbort = failure('WEB_ABORTED', 'web fetch aborted');
+  const hCancel = harness({
+    local: async () => {
+      trueCancel.abort();
+      throw originalAbort;
+    },
+  });
+  hCancel.deps.deadline = (sig) => sig ?? new AbortController().signal;
+  await assert.rejects(
+    () => fetchWithFallback(hCancel.deps, settings(), { url }, trueCancel.signal),
+    (error) => error === originalAbort,
+  );
+  assert.deepEqual(hCancel.calls, { local: 1, api: 0 });
 });

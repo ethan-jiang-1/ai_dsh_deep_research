@@ -43,12 +43,25 @@
 
 | 症状 | 先看 |
 |---|---|
+| 多角色研究复盘 / 技能漏载 / 抓取异常 / 编排与计数漂移 | [`run-trajectory`](../../probes/analyze/run-trajectory.mjs)（`show`：一键展开 Lead→子会话树 + 5 类 Smells + `web.log` 关联） |
 | 模型不按纪律/角色回话 | [`discipline-probe`](../../probes/behavior/discipline-probe.mjs) |
 | 入口链/授权口径漂移 | [`entry-chain-probe`](../../probes/behavior/entry-chain-probe.mjs) |
 | Lead 不知道偏好库/条目 | [`method-library-probe`](../../probes/behavior/method-library-probe.mjs) |
 | 驾驶舱页签/点击/交互坏 | [`cdp-probe`](../../probes/browser/cdp-probe.mjs) |
 | 不满转接话术 | [`rerun-triage-probe`](../../probes/behavior/rerun-triage-probe.mjs) |
 | LLM 流异常、要归因 | [`llm-stream-tee`](../../probes/stream/llm-stream-tee.cjs)（仪器，先取证） |
+
+### 2.1 诊断与取证路由（原生能力优先 → 域探针补位）
+
+排障与复盘优先用 DSH 原生能力，不另造第二套日志系统或采集框架；只有深研多角色域反模式与跨会话归因走 `probes/analyze/`：
+
+| 场景 / 症状 | DSH 原生能力（首选） | 本仓 `probes/analyze/` 补位 |
+|---|---|---|
+| 跑中查宿主模块状态（`fetch-fallback` / `defaults` / `method-library-tool`） | 宿主日志 `$STATE_DIR/web.log`（或浏览器 DevTools Console），过滤 `[deep-research:<module>]`（默认 `ctx.logger` 留痕，已脱敏 URL query/userinfo） | [`run-trajectory`](../../probes/analyze/run-trajectory.mjs) `--web-log <path>` 按 run 时间窗关联切片 |
+| 跑中查会话树 / 工具耗时 / RPC / 错误分布（仅本机调试） | 临时启用官方 `@deepseek-ai/dsh-experimental-inspector`（独立实验 profile，只绑定本机，勿长期开启或暴露非 loopback） | 无需重复造实时面板 |
+| 研究跑完一键体检（Lead + 全子会话成本、技能漏载、抓取乱码/假超时、任务未闭合、盘上计数漂移） | 原生 `/export` 导出含全子会话的完整包 | [`run-trajectory`](../../probes/analyze/run-trajectory.mjs) `<bundle\|leadSessionId>` 或 `--dir <export-dir>`（`--json` 供脚本消费） |
+| 反查某 bundle 对应哪条会话、查在飞状态/挂起/模型重试风暴 | 原始日志 `sessions/<组>/<id>/session.v*.jsonl.zstd` | [`bundle-sessions`](../../probes/analyze/bundle-sessions.mjs) → [`watch-run`](../../probes/analyze/watch-run.mjs) / [`stream-diagnostics`](../../probes/analyze/stream-diagnostics.mjs) / [`session-events`](../../probes/analyze/session-events.mjs) |
+| 上游 LLM SSE 流撕裂 / 原始报文取证 | `DSH_WEB_LOG` / provider 报错事件 | [`llm-stream-tee`](../../probes/stream/llm-stream-tee.cjs)（`NODE_OPTIONS` 预载仪器） |
 
 **不要用探针做的事**：纯函数/纯逻辑 → 单测；装配/安装 → 冒烟；完整用户旅程 → E2E；
 内容质量/文风 → L4 或人读。

@@ -18,9 +18,13 @@
 
 | 卡 | 状态 | 严重级 | 一句话 |
 |---|---|---|---|
-| （空） | — | — | 全部活跃缺陷已于 2026-11-28 收口归档 |
 
 ## 最近归档
+
+（2026-11-28 抓取回退超时归类与协议自定义节收口批〔2 张，488–489〕，批 Note = [2026-11-28-fetch-fallback-timeout-and-protocol-sections](../../notes/implemented/2026-11-28-fetch-fallback-timeout-and-protocol-sections.md)：
+[488](../_archived/fixed_bugs/BUG-488-fetch-fallback-local-timeout-misclassified-as-web-aborted.md) `fetch-fallback` 区分 `localSignal.aborted` 腿超时与 `callerAborted()`，归一 `WEB_FETCH_TIMEOUT`、补齐 URL 上下文并补真 `HttpFetchProvider` 零外网契约测试；
+[489](../_archived/fixed_bugs/BUG-489-protocol-audit-full-report-custom-sections-still-red.md) `research-brief` 约定 `output.sections` 仅用 6 内置键或交付语言 H2 节名，`protocol-audit-core` 对中文报告自定义英文 slug 在剩余中文 H2 数足够时降级 `final-sections-unmapped` warning。
+）
 
 （2026-11-28 驾驶舱双端 Wire 契约与交互健壮性修复批〔13 张，470–482〕，批 Note = [2026-11-28-cockpit-wire-contracts-and-ux-fixes](../../notes/implemented/2026-11-28-cockpit-wire-contracts-and-ux-fixes.md)：
 [470](../_archived/fixed_bugs/BUG-470-research-defaults-popup-set-payload-mismatch-silent-fail.md) /research-defaults 弹窗补 {patch,expectedRevision}、修真 authority 枚举、显性报错与冷会话预热；

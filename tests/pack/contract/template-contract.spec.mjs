@@ -136,3 +136,14 @@ test('BUG-486：question-patterns 显式分隔 source_scope.families（含 web/l
   assert.ok(tableRows.length === diskIds.size, `question-patterns lens 表行数(${tableRows.length}) 必须等于盘上 lenses 数(${diskIds.size})`);
   for (const id of tableRows) assert.ok(diskIds.has(id), `question-patterns 引用了不存在的 lens 文件：${id}.md`);
 });
+
+// 负例留证 2026-11-28：BUG-489——research-brief 未约束 protocol.output.sections 自定义节名须与交付语言 H2 对齐，
+// 致中文 full_report 发明只存在于 JSON 的自由英文 slug。
+// 红配方：删去 research-brief/SKILL.md 中 output.sections 的 6 内置键 / 交付语言 H2 对齐约束 → 本例红。
+test('BUG-489：research-brief 显式约定 protocol.output.sections 仅用 6 内置键或交付语言 H2 节名', () => {
+  const rbPath = join(fileURLToPath(new URL('../../../packages/deep-research-pack/presets/lead/skills/research-brief/SKILL.md', import.meta.url)));
+  const rbText = readFileSync(rbPath, 'utf8');
+  assert.match(rbText, /output\.sections/, 'research-brief 必须显式点名 protocol.output.sections 的填写口径');
+  assert.match(rbText, /decision.*options.*criteria.*tradeoffs.*risks.*coverage/, 'research-brief 必须列齐 6 个内置标准键');
+  assert.match(rbText, /交付语言.*H2|与.*final.*H2.*对齐/, 'research-brief 必须要求自定义章节直接写交付语言 H2 节名');
+});

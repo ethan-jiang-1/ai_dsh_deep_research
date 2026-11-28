@@ -173,3 +173,36 @@ test('commands 晚到：ctx.inject 等待 service 出现后再注册（禁止 ct
   assert.equal(commandsRegistered.length, 1)
   assert.equal(commandsRegistered[0].name, 'research-defaults')
 })
+
+test('原生运行留痕：/research-defaults 写入记 info、拒收记 warn、正常 show 保持静默', () => {
+  const dir = workspace()
+  const logs = []
+  const { ctx, commandsRegistered } = mount()
+  ctx.logger = {
+    info: (m) => logs.push({ level: 'info', m }),
+    warn: (m) => logs.push({ level: 'warn', m }),
+  }
+  apply(ctx)
+  const handler = commandsRegistered[0].handler
+  const inv = (rawInput) => ({ rawInput, agent: { session: { header: { cwd: dir } } } })
+
+  // show 成功不刷屏
+  const shown = handler(inv('show'))
+  assert.equal(shown.kind, 'success')
+  assert.equal(logs.length, 0)
+
+  // set 成功记 info
+  const ok = handler(inv('set {"patch":{"effort":"deep"}}'))
+  assert.equal(ok.kind, 'success')
+  assert.equal(logs.length, 1)
+  assert.equal(logs[0].level, 'info')
+  assert.match(logs[0].m, /^\[deep-research:defaults\] event=command_ok op=set detail=ok revision=1/)
+
+  // 坏参数拒收记 warn
+  logs.length = 0
+  const bad = handler(inv('set {"effort":"deep"}'))
+  assert.equal(bad.kind, 'error')
+  assert.equal(logs.length, 1)
+  assert.equal(logs[0].level, 'warn')
+  assert.match(logs[0].m, /^\[deep-research:defaults\] event=command_error op=set detail=error /)
+})

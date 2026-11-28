@@ -227,6 +227,22 @@ function runShow(target: string): CommandResultLike {
   return success(`ok ${summaryOf(current.value)}${warn}`)
 }
 
+/** 将一次 `/research-defaults` 调用折算为原生 `ctx.logger` 留痕（正常只读 show 静默；变更与失败全记）。 */
+export function formatDefaultsCommandLog(
+  rawInput: string,
+  result: CommandResultLike,
+): { readonly level: 'info' | 'warn'; readonly line: string } | null {
+  const token = rawInput.trim().split(/\s+/)[0] ?? ''
+  const op = token === '' ? 'show' : ['show', 'set', 'unset', 'clear'].includes(token) ? token : 'unknown'
+  if (result.kind === 'error') {
+    const summary = result.text.replace(/\s+/g, ' ').slice(0, 180)
+    return { level: 'warn', line: `[deep-research:defaults] event=command_error op=${op} detail=${summary}` }
+  }
+  if (op === 'show') return null
+  const summary = result.text.replace(/\s+/g, ' ').slice(0, 180)
+  return { level: 'info', line: `[deep-research:defaults] event=command_ok op=${op} detail=${summary}` }
+}
+
 /**
  * 执行 `/research-defaults` 的一次调用（纯 host 侧；命令注册只做 cwd 提取）。
  * @param input - cwd + rawInput + 测试时钟。

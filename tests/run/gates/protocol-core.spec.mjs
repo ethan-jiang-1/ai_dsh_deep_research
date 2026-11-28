@@ -876,3 +876,68 @@ test('BUG-484：checkFinalSections 支持编号/括注与语义别名对齐，�
   )
   assert.ok(unwaived.some((f) => f.level === 'red' && f.code === 'evidence-threshold'), '未记 deviations 仍必须 RED')
 })
+
+// 负例留证 2026-11-28：BUG-489——中文 full_report 的 protocol.output.sections 使用自定义英文 slug 时，
+// checkFinalSections 按原样字面匹配中文 H2 必红 6 条。
+// 红配方：去掉 checkFinalSections 对中文报告自定义英文 slug 的 `final-sections-unmapped` warning 分支 → 本例红。
+test('BUG-489：中文 full_report 自定义英文 slug 在剩余中文 H2 数足够时降级为 final-sections-unmapped warning，缺节/英文报告/中文节缺失仍 RED', async () => {
+  const { checkFinalSections } = await import('../../../checks/lib/gates/protocol-audit-core.mjs')
+
+  // 1) drt_huawei-ascend-dd 同构：8 节（decision + 6 自定义英文 slug + coverage）配 8 个中文 H2 → 0 RED + 6 warning
+  const protocol = baseProtocol({
+    output: {
+      ...baseProtocol().output,
+      shape: 'full_report',
+      sections: [
+        'decision',
+        'product-and-changes',
+        'landscape',
+        'business-model',
+        'dependency-boundaries',
+        'frontline-negative',
+        'landing-and-risks',
+        'coverage',
+      ],
+    },
+  })
+  const fullCnFinal = [
+    '# 华为昇腾调研报告',
+    '## 1. 判决（首屏）',
+    '## 2. 产品与近 12 个月变化',
+    '## 3. 生态与竞争格局',
+    '## 4. 商业模式与定价结构',
+    '## 5. 依赖边界与替代约束',
+    '## 6. 一线负面反馈与痛点',
+    '## 7. 落地条件与风险',
+    '## 8. 覆盖与不可判',
+  ].join('\n\n')
+  const findings = checkFinalSections(protocol, fullCnFinal)
+  assert.equal(findings.filter((f) => f.level === 'red').length, 0, '自定义英文 slug 配齐中文 H2 不应硬红')
+  const warns = findings.filter((f) => f.level === 'warning' && f.code === 'final-sections-unmapped')
+  assert.equal(warns.length, 6, '6 个自定义英文 slug 应显式降级为 final-sections-unmapped warning 交由 critic 核验')
+
+  // 2) 负控 1：真正漏写节（剩余中文 H2 数不足以覆盖自定义英文 slug 数）→ 必须 RED
+  const truncatedFinal = [
+    '# 报告',
+    '## 1. 判决（首屏）',
+    '## 2. 产品与变化',
+    '## 8. 覆盖与不可判',
+  ].join('\n\n')
+  const truncatedRes = checkFinalSections(protocol, truncatedFinal)
+  assert.ok(truncatedRes.some((f) => f.level === 'red' && f.code === 'final-sections'), '漏节时必须维持 RED')
+
+  // 3) 负控 2：纯英文报告缺自定义英文 slug → 必须 RED
+  const enProto = baseProtocol({ output: { ...baseProtocol().output, sections: ['summary', 'landscape'] } })
+  const enFinal = '# Report\n\n## Summary\n\n## Appendix\n'
+  const enRes = checkFinalSections(enProto, enFinal)
+  assert.ok(enRes.some((f) => f.level === 'red' && f.code === 'final-sections' && f.message.includes('landscape')), '英文报告缺英文 slug 必须 RED')
+
+  // 4) 负控 3：中文报告写的是中文自定义节名但正文缺失，或缺失内置标准键 decision → 必须 RED
+  const cnCustomProto = baseProtocol({ output: { ...baseProtocol().output, sections: ['decision', '商业模式', 'coverage'] } })
+  const missingCnCustom = '# 报告\n\n## 1. 判决\n\n## 2. 别的话题\n\n## 3. 覆盖与不可判\n'
+  const cnCustomRes = checkFinalSections(cnCustomProto, missingCnCustom)
+  assert.ok(cnCustomRes.some((f) => f.level === 'red' && f.code === 'final-sections' && f.message.includes('商业模式')), '中文自定义节缺失必须 RED')
+
+  const missingBuiltin = checkFinalSections(protocol, fullCnFinal.replace('## 1. 判决（首屏）', '## 1. 引言'))
+  assert.ok(missingBuiltin.some((f) => f.level === 'red' && f.code === 'final-sections' && f.message.includes('decision')), '内置标准键缺失必须 RED')
+})

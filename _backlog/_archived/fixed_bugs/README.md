@@ -6,6 +6,8 @@
 
 | Bug | 标题 | 修复 commit | 日期 |
 |---|---|---|---|
+| [489](BUG-489-protocol-audit-full-report-custom-sections-still-red.md) | `research-brief` 约定 `output.sections` 对齐交付语言 H2，`protocol-audit-core` 对中文报告自定义英文 slug 在节数充足时降级 `final-sections-unmapped` warning | （checkFinalSections unmatchedCjk + research-brief output.sections 约束） | 2026-11-28 |
+| [488](BUG-488-fetch-fallback-local-timeout-misclassified-as-web-aborted.md) | `fetch-fallback` 区分腿级 deadline 超时与调用方取消，归一 `WEB_FETCH_TIMEOUT` 并补真 `HttpFetchProvider` 契约测试 | （withDeadline + localSignal/apiSignal 超时归因 + fetch-fallback-http.vendor.spec） | 2026-11-28 |
 | [487](BUG-487-coverage-gate-xcheck-fanout-conflict-and-final-counts.md) | review-contract 支持已脚注声明跨行 xcheck 卡独占计数，补全交付前盘面点数护栏 | （exclusiveCounts + footnoteAccountsFor + 交付前点数护栏） | 2026-11-28 |
 | [486](BUG-486-protocol-web-family-confused-with-missing-web-lens.md) | question-patterns 显式分隔 source_scope.families（web/local）与 content/lenses/*.md | （question-patterns 明确 families ≠ lenses 闭集） | 2026-11-28 |
 | [485](BUG-485-verdict-audit-not-verbatim-and-minified-template-trap.md) | verdict-audit 剥除 child 围栏与零宽空格并接受等价 JSON 缩进差异 | （stripZws + verbatimMatches 等价 JSON 校验） | 2026-11-28 |

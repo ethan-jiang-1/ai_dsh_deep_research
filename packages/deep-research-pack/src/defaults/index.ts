@@ -9,7 +9,7 @@
  * method-library.md；方法默认仍归方法库（D25/D37）。命令是唯一写路径，结果 code-like。
  */
 import type { Context } from '@deepseek-ai/cordis'
-import { runDefaultsCommand, type CommandResultLike } from './command.ts'
+import { formatDefaultsCommandLog, runDefaultsCommand, type CommandResultLike } from './command.ts'
 import { defaultsSectionFor } from './context.ts'
 
 /** Cordis 插件名。 */
@@ -101,10 +101,18 @@ export function apply(ctx: Context): void {
         name: 'research-defaults',
         description: '项目研究默认 / Project research defaults',
         input: { hint: 'show | set <json> | unset <field[,field]> [revision=N] | clear [revision=N]' },
-        handler: (invocation) => runDefaultsCommand({
-          cwd: invocation.agent?.session?.header?.cwd,
-          rawInput: invocation.rawInput,
-        }),
+        handler: (invocation) => {
+          const result = runDefaultsCommand({
+            cwd: invocation.agent?.session?.header?.cwd,
+            rawInput: invocation.rawInput,
+          })
+          const trace = formatDefaultsCommandLog(invocation.rawInput, result)
+          if (trace !== null) {
+            if (trace.level === 'warn') ctx.logger.warn(trace.line)
+            else ctx.logger.info(trace.line)
+          }
+          return result
+        },
       })
       return () => {
         if (typeof dispose === 'function') dispose()

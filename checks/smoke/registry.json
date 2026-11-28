@@ -210,6 +210,17 @@
     "sunset": "doctor 判据抽到 checks/lib 并直测后退役",
     "lane": "e2e"
   },
+  "fetch-fallback.e2e.mjs": {
+    "tier": "dev-only",
+    "reason": "fetch-fallback 变更时本地实跑（零外网实例化真 HttpFetchProvider 验证外层 deadline 竞态与调用方取消边界）；因传递引入 node:net/fetch 不入 tests/ 回归层，nightly 已达上限不扩默认频率",
+    "cost": "fast",
+    "uniqueClaim": "真 HttpFetchProvider 遇外层 localTimeoutMs deadline 时归一 WEB_FETCH_TIMEOUT 并触发 API 回退，且调用方主动 abort 绝不回退（BUG-488）",
+    "oracle": [
+      "tests/pack/fetch-fallback/fetch-fallback-orchestration.spec.mjs"
+    ],
+    "sunset": "当上游 HttpFetchProvider 自身不再把外层 deadline 折为 WEB_ABORTED 或 pack 改用单计时器接线后退役",
+    "lane": "e2e"
+  },
   "gates.e2e.mjs": {
     "tier": "nightly",
     "job": "keyless",

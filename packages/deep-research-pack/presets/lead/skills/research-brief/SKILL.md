@@ -92,6 +92,7 @@ description: 立项对齐（HITL1）方法论：判型模式库对照、研究�
 - 写 `protocol.json`：字段/枚举 = 模板；`method.fields` 四字段 = 已采用方法的四字段快照；
   `method.adjustments` 写补法 + 角色（复合方法 = 主方法 id + 补法）；`source_scope` 是解析结果，
   不是用户原话；`gates` 是出厂 policy，不作偏好开放。
+- `output.sections`：除 6 个内置标准键（`decision` / `options` / `criteria` / `tradeoffs` / `risks` / `coverage`）外，自定义章节直接写交付语言 H2 节名（与 `final.md` 的 `##` 标题对齐），不要在中文报告里发明只存在于 JSON 的自由英文 slug。
 - `question.md §Protocol`：4 字段行 + 版本行（方法/来源/投入/输出/`protocol: vN`），从 JSON 抄；
   `plan.md` 头写 `protocol: vN`；版本/方法/band/shape 与 JSON 一致（gate `projection`/`plan-ref`）。
 - `deviations`：来源不可达 / 输出形状改 / 方法步骤跳过 / effort 超带时，**发生即写**

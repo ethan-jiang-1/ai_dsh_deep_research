@@ -21,7 +21,7 @@ import { DeepSeekFetchApiProvider, type DeepSeekFetchApiOptions } from '@deepsee
 import { HttpFetchProvider } from '@deepseek-ai/dsh-web-fetch-http'
 import type { Config as ConfigShape } from './config.ts'
 import { resolveCredential, type CredentialsSource } from './credentials.ts'
-import { fetchWithFallback, type FallbackSettings } from './orchestrate.ts'
+import { fetchWithFallback, withDeadline, type FallbackSettings } from './orchestrate.ts'
 import { PROVIDER_ID } from './policy.ts'
 
 export { Config } from './config.ts'
@@ -31,12 +31,6 @@ export const name = 'fetch-fallback'
 
 /** Both the local and API legs need the web seam. */
 export const inject = ['web']
-
-/** Resolve one caller signal and one wall-clock deadline into a single abort signal. */
-function withDeadline(signal: AbortSignal | undefined, ms: number): AbortSignal {
-  const timeout = AbortSignal.timeout(Math.max(1, Math.floor(ms)))
-  return signal === undefined ? timeout : AbortSignal.any([signal, timeout])
-}
 
 /**
  * Register the local-first fetch provider; the seam selects it through
@@ -94,6 +88,7 @@ export function apply(ctx: Context, config: ConfigShape): void {
           message, code, cause === undefined ? undefined : { cause },
         ),
         now: () => Date.now(),
+        log: ctx.logger,
       }, settings(), request, signal)
     },
   }

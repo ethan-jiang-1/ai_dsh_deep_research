@@ -12,6 +12,7 @@
 | analyze | `checks/lib/analyze/run-dashboard-core` | `tests/checks/analyze/evaluation-contract.test.mjs`<br>`tests/run/analyze/run-dashboard.spec.mjs` |
 | analyze | `checks/lib/analyze/run-dashboard-html` | `tests/run/analyze/run-dashboard.spec.mjs` |
 | analyze | `checks/lib/analyze/run-inventory-core` | `tests/run/analyze/run-inventory.spec.mjs` |
+| analyze | `checks/lib/analyze/run-trajectory-core` | `tests/run/analyze/run-trajectory.spec.mjs` |
 | analyze | `checks/lib/analyze/scene-pack` | `tests/run/analyze/scene-pack.spec.mjs` |
 | analyze | `checks/lib/analyze/session-events-core` | `tests/run/analyze/session-events.spec.mjs` |
 | analyze | `checks/lib/analyze/session-replay` | `tests/run/analyze/session-replay.spec.mjs` |

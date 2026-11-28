@@ -2023,6 +2023,16 @@
       "sunset": "随被测模块删除"
     },
     {
+      "path": "tests/run/analyze/run-trajectory.spec.mjs",
+      "domain": "run",
+      "lane": "spec",
+      "class": "unit-pure",
+      "cost": "fast-inproc",
+      "uniqueClaim": "run-trajectory.spec.mjs — 多角色研究轨迹体检纯核（run-trajectory-core.mjs）的 keyless 回归。",
+      "oracleType": "structured",
+      "sunset": "随被测模块删除"
+    },
+    {
       "path": "tests/run/analyze/scene-pack.spec.mjs",
       "domain": "run",
       "lane": "spec",

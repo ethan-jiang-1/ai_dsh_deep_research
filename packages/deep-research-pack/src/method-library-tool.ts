@@ -17,6 +17,35 @@ function digestText(text: string): string {
   return createHash('sha256').update(text, 'utf8').digest('hex')
 }
 
+function logMethodTool(ctx: Context, level: 'info' | 'warn', message: string): void {
+  const logger = (ctx as unknown as { logger?: { info?(msg: string): void; warn?(msg: string): void } }).logger
+  const fn = level === 'warn' ? logger?.warn : logger?.info
+  if (typeof fn === 'function') fn.call(logger, `[deep-research:method-library] ${message}`)
+}
+
+function withMethodToolTrace<T>(
+  ctx: Context,
+  tool: string,
+  operationId: string,
+  fn: () => Promise<T>,
+  summarizeOk: (value: T) => string,
+): Promise<T> {
+  try {
+    return fn().then((value) => {
+      logMethodTool(ctx, 'info', `event=tool_ok tool=${tool} op=${operationId} ${summarizeOk(value)}`)
+      return value
+    }, (error: unknown) => {
+      const reason = (error instanceof Error ? error.message : String(error)).replace(/\s+/g, ' ').slice(0, 180)
+      logMethodTool(ctx, 'warn', `event=tool_error tool=${tool} op=${operationId} reason=${reason}`)
+      throw error
+    })
+  } catch (error) {
+    const reason = (error instanceof Error ? error.message : String(error)).replace(/\s+/g, ' ').slice(0, 180)
+    logMethodTool(ctx, 'warn', `event=tool_error tool=${tool} op=${operationId} reason=${reason}`)
+    throw error
+  }
+}
+
 /** Cordis 插件名。 */
 export const name = 'method-library-tool'
 
@@ -57,57 +86,59 @@ export function apply(ctx: Context): void {
       presentationMeta: (_args, value) => value,
     },
     execute(args, exec) {
-      const agent = exec.agent
-      const session = agent?.session
-      if (session === undefined || session.header.agentPreset !== 'method-editor') {
-        throw new Error('method_library_upsert 只允许 Method Editor owning session')
-      }
-      if (digestText(args.entry) !== args.operationHash) throw new Error('方法条目内容摘要不匹配，拒绝写入')
-      const operationState = ctx.sessionProjections.stateOf(session, 'method-library-operation')
-      if (operationState === undefined || !hasMethodLibraryClaim(operationState, {
-        operationId: args.operationId,
-        action: args.defaultAction === 'set' ? 'save-and-set-default' : 'save',
-        name: foldLibrary(args.entry)[0]?.name,
-        payloadHash: args.operationHash,
-        callId: exec.callId,
-      })) {
-        throw new Error('方法库写入没有匹配到当前 UI 操作，拒绝写入')
-      }
-      const cwd = session.header.cwd
-      if (cwd === undefined) throw new Error('method_library_upsert 需要 owning agent session（没有 cwd）')
-      const entries = foldLibrary(args.entry)
-      const parsed = entries[0]
-      if (entries.length !== 1 || parsed === undefined) throw new Error('entry 必须且只能包含一条可解析的库条目')
-      const mutated = mutateMethodLibrary(cwd, (text) => {
-        const priorEntries = foldLibrary(text)
-        const priorDefaults = priorEntries.filter((entry) => entry.isDefault).map((entry) => entry.name)
-        const priorNames = priorEntries.map((entry) => entry.name)
-        const result = upsertMethodEntry(text, parsed, { defaultAction: args.defaultAction })
-        return { text: result.text, value: { result, priorEntries, priorDefaults, priorNames } }
-      })
-      const { result, priorEntries, priorDefaults, priorNames } = mutated.value
-      const persisted = mutated.after
-      const savedEntries = foldLibrary(persisted)
-      const savedMatches = savedEntries.filter((entry) => entry.name === result.name)
-      const saved = savedMatches[0]
-      const defaults = savedEntries.filter((entry) => entry.isDefault)
-      const priorTarget = priorEntries.find((entry) => entry.name === result.name)
-      const expectedDefault = args.defaultAction === 'set' || priorTarget?.isDefault === true
-      const expectedDefaults = args.defaultAction === 'set' ? [result.name] : priorDefaults
-      const actualNames = savedEntries.map((entry) => entry.name)
-      if (savedMatches.length !== 1 || saved === undefined
-        || (result.action === 'created' && priorNames.some((priorName) => !actualNames.includes(priorName)))
-        || JSON.stringify(defaults.map((entry) => entry.name)) !== JSON.stringify(expectedDefaults)
-        || saved.provenance !== parsed.provenance
-        || saved.sections.source !== parsed.sections.source
-        || saved.sections.verify !== parsed.sections.verify
-        || saved.sections.report !== parsed.sections.report
-        || saved.sections.limit !== parsed.sections.limit
-        || saved.legacyText !== parsed.legacyText
-        || saved.isDefault !== expectedDefault) {
-        throw new Error(`写入后方法「${result.name}」回读核对失败`)
-      }
-      return Promise.resolve({ operationId: args.operationId, name: result.name, action: result.action, isDefault: saved.isDefault, defaults: defaults.map((entry) => entry.name) })
+      return withMethodToolTrace(ctx, 'method_library_upsert', args.operationId, () => {
+        const agent = exec.agent
+        const session = agent?.session
+        if (session === undefined || session.header.agentPreset !== 'method-editor') {
+          throw new Error('method_library_upsert 只允许 Method Editor owning session')
+        }
+        if (digestText(args.entry) !== args.operationHash) throw new Error('方法条目内容摘要不匹配，拒绝写入')
+        const operationState = ctx.sessionProjections.stateOf(session, 'method-library-operation')
+        if (operationState === undefined || !hasMethodLibraryClaim(operationState, {
+          operationId: args.operationId,
+          action: args.defaultAction === 'set' ? 'save-and-set-default' : 'save',
+          name: foldLibrary(args.entry)[0]?.name,
+          payloadHash: args.operationHash,
+          callId: exec.callId,
+        })) {
+          throw new Error('方法库写入没有匹配到当前 UI 操作，拒绝写入')
+        }
+        const cwd = session.header.cwd
+        if (cwd === undefined) throw new Error('method_library_upsert 需要 owning agent session（没有 cwd）')
+        const entries = foldLibrary(args.entry)
+        const parsed = entries[0]
+        if (entries.length !== 1 || parsed === undefined) throw new Error('entry 必须且只能包含一条可解析的库条目')
+        const mutated = mutateMethodLibrary(cwd, (text) => {
+          const priorEntries = foldLibrary(text)
+          const priorDefaults = priorEntries.filter((entry) => entry.isDefault).map((entry) => entry.name)
+          const priorNames = priorEntries.map((entry) => entry.name)
+          const result = upsertMethodEntry(text, parsed, { defaultAction: args.defaultAction })
+          return { text: result.text, value: { result, priorEntries, priorDefaults, priorNames } }
+        })
+        const { result, priorEntries, priorDefaults, priorNames } = mutated.value
+        const persisted = mutated.after
+        const savedEntries = foldLibrary(persisted)
+        const savedMatches = savedEntries.filter((entry) => entry.name === result.name)
+        const saved = savedMatches[0]
+        const defaults = savedEntries.filter((entry) => entry.isDefault)
+        const priorTarget = priorEntries.find((entry) => entry.name === result.name)
+        const expectedDefault = args.defaultAction === 'set' || priorTarget?.isDefault === true
+        const expectedDefaults = args.defaultAction === 'set' ? [result.name] : priorDefaults
+        const actualNames = savedEntries.map((entry) => entry.name)
+        if (savedMatches.length !== 1 || saved === undefined
+          || (result.action === 'created' && priorNames.some((priorName) => !actualNames.includes(priorName)))
+          || JSON.stringify(defaults.map((entry) => entry.name)) !== JSON.stringify(expectedDefaults)
+          || saved.provenance !== parsed.provenance
+          || saved.sections.source !== parsed.sections.source
+          || saved.sections.verify !== parsed.sections.verify
+          || saved.sections.report !== parsed.sections.report
+          || saved.sections.limit !== parsed.sections.limit
+          || saved.legacyText !== parsed.legacyText
+          || saved.isDefault !== expectedDefault) {
+          throw new Error(`写入后方法「${result.name}」回读核对失败`)
+        }
+        return Promise.resolve({ operationId: args.operationId, name: result.name, action: result.action, isDefault: saved.isDefault, defaults: defaults.map((entry) => entry.name) })
+      }, (val) => `action=${val.action} name=${val.name} isDefault=${String(val.isDefault)}`)
     },
     presentCall: () => ({ card: 'generic', title: '写入方法库', kind: 'other' }),
   }))
@@ -134,43 +165,45 @@ export function apply(ctx: Context): void {
       presentationMeta: (_args, value) => value,
     },
     execute(args, exec) {
-      const session = exec.agent?.session
-      if (session === undefined || session.header.agentPreset !== 'method-editor') {
-        throw new Error('method_library_set_default 只允许 Method Editor owning session')
-      }
-      const requestedName = args.action === 'set' ? args.name : undefined
-      const state = ctx.sessionProjections.stateOf(session, 'method-library-operation')
-      if (state === undefined || !hasMethodLibraryClaim(state, {
-        operationId: args.operationId,
-        action: args.action === 'set' ? 'set-default' : 'clear-default',
-        name: requestedName,
-        callId: exec.callId,
-      })) throw new Error('默认操作没有匹配到当前 UI 操作，拒绝修改')
-      if (args.action === 'set' && (requestedName === undefined || requestedName.trim() === '')) throw new Error('设默认需要方法名称')
-      const cwd = session.header.cwd
-      if (cwd === undefined) throw new Error('默认操作需要 owning agent session（没有 cwd）')
-      const mutated = mutateMethodLibrary(cwd, (text) => {
-        const result = args.action === 'set'
-          ? setDefaultMethodEntry(text, requestedName ?? '')
-          : clearDefaultMethodEntry(text)
-        return { text: result.text, value: result }
-      })
-      const persisted = mutated.after
-      const defaults = foldLibrary(persisted).filter((entry) => entry.isDefault).map((entry) => entry.name)
-      // 回读与回执都只认**请求名**：模块级 `name` 是本插件的名字（'method-library-tool'），
-      // 曾把它当方法名比较/回传，导致合法 set 在写盘之后必抛「回读未通过」（BUG-396）。
-      const target = args.action === 'set' ? (requestedName ?? '') : ''
-      if (defaults.length > 1 || (args.action === 'set' && (defaults.length !== 1 || defaults[0] !== target))
-        || (args.action === 'clear' && defaults.length !== 0)) {
-        throw new Error('默认操作回读未通过：库默认标记不符合操作结果')
-      }
-      return Promise.resolve({
-        operationId: args.operationId,
-        action: args.action,
-        name: target,
-        changed: persisted !== mutated.before,
-        defaults,
-      })
+      return withMethodToolTrace(ctx, 'method_library_set_default', args.operationId, () => {
+        const session = exec.agent?.session
+        if (session === undefined || session.header.agentPreset !== 'method-editor') {
+          throw new Error('method_library_set_default 只允许 Method Editor owning session')
+        }
+        const requestedName = args.action === 'set' ? args.name : undefined
+        const state = ctx.sessionProjections.stateOf(session, 'method-library-operation')
+        if (state === undefined || !hasMethodLibraryClaim(state, {
+          operationId: args.operationId,
+          action: args.action === 'set' ? 'set-default' : 'clear-default',
+          name: requestedName,
+          callId: exec.callId,
+        })) throw new Error('默认操作没有匹配到当前 UI 操作，拒绝修改')
+        if (args.action === 'set' && (requestedName === undefined || requestedName.trim() === '')) throw new Error('设默认需要方法名称')
+        const cwd = session.header.cwd
+        if (cwd === undefined) throw new Error('默认操作需要 owning agent session（没有 cwd）')
+        const mutated = mutateMethodLibrary(cwd, (text) => {
+          const result = args.action === 'set'
+            ? setDefaultMethodEntry(text, requestedName ?? '')
+            : clearDefaultMethodEntry(text)
+          return { text: result.text, value: result }
+        })
+        const persisted = mutated.after
+        const defaults = foldLibrary(persisted).filter((entry) => entry.isDefault).map((entry) => entry.name)
+        // 回读与回执都只认**请求名**：模块级 `name` 是本插件的名字（'method-library-tool'），
+        // 曾把它当方法名比较/回传，导致合法 set 在写盘之后必抛「回读未通过」（BUG-396）。
+        const target = args.action === 'set' ? (requestedName ?? '') : ''
+        if (defaults.length > 1 || (args.action === 'set' && (defaults.length !== 1 || defaults[0] !== target))
+          || (args.action === 'clear' && defaults.length !== 0)) {
+          throw new Error('默认操作回读未通过：库默认标记不符合操作结果')
+        }
+        return Promise.resolve({
+          operationId: args.operationId,
+          action: args.action,
+          name: target,
+          changed: persisted !== mutated.before,
+          defaults,
+        })
+      }, (val) => `action=${val.action} name=${val.name || 'none'} changed=${String(val.changed)}`)
     },
     presentCall: (args) => ({ card: 'generic', title: args.action === 'set' ? '设定方法默认' : '清除方法默认', kind: 'other' }),
   }))
@@ -196,32 +229,34 @@ export function apply(ctx: Context): void {
       presentationMeta: (_args, value) => value,
     },
     execute(args, exec) {
-      const agent = exec.agent
-      const session = agent?.session
-      if (session === undefined || session.header.agentPreset !== 'method-editor') {
-        throw new Error('method_library_remove 只允许 Method Editor owning session')
-      }
-      const operationState = ctx.sessionProjections.stateOf(session, 'method-library-operation')
-      if (operationState === undefined || !hasMethodLibraryClaim(operationState, {
-        operationId: args.operationId,
-        action: 'remove',
-        name: args.name,
-        callId: exec.callId,
-      })) throw new Error('方法库删除没有匹配到当前 UI 操作，拒绝删除')
-      const cwd = session.header.cwd
-      if (cwd === undefined) throw new Error('method_library_remove 需要 owning agent session（没有 cwd）')
-      let priorDefaults: string[] = []
-      const mutated = mutateMethodLibrary(cwd, (text) => {
-        priorDefaults = foldLibrary(text).filter((entry) => entry.isDefault && entry.name !== args.name).map((entry) => entry.name)
-        const result = removeMethodEntry(text, args.name)
-        if (!result.removed) throw new Error(`库里没有「${args.name}」`)
-        return { text: result.text, value: result }
-      })
-      const entries = foldLibrary(mutated.after)
-      const remains = entries.some((entry) => entry.name === args.name)
-      const defaults = entries.filter((entry) => entry.isDefault).map((entry) => entry.name)
-      if (remains || JSON.stringify(defaults) !== JSON.stringify(priorDefaults)) throw new Error(`删除后方法「${args.name}」回读核对失败`)
-      return Promise.resolve({ operationId: args.operationId, name: args.name, removed: true, defaults })
+      return withMethodToolTrace(ctx, 'method_library_remove', args.operationId, () => {
+        const agent = exec.agent
+        const session = agent?.session
+        if (session === undefined || session.header.agentPreset !== 'method-editor') {
+          throw new Error('method_library_remove 只允许 Method Editor owning session')
+        }
+        const operationState = ctx.sessionProjections.stateOf(session, 'method-library-operation')
+        if (operationState === undefined || !hasMethodLibraryClaim(operationState, {
+          operationId: args.operationId,
+          action: 'remove',
+          name: args.name,
+          callId: exec.callId,
+        })) throw new Error('方法库删除没有匹配到当前 UI 操作，拒绝删除')
+        const cwd = session.header.cwd
+        if (cwd === undefined) throw new Error('method_library_remove 需要 owning agent session（没有 cwd）')
+        let priorDefaults: string[] = []
+        const mutated = mutateMethodLibrary(cwd, (text) => {
+          priorDefaults = foldLibrary(text).filter((entry) => entry.isDefault && entry.name !== args.name).map((entry) => entry.name)
+          const result = removeMethodEntry(text, args.name)
+          if (!result.removed) throw new Error(`库里没有「${args.name}」`)
+          return { text: result.text, value: result }
+        })
+        const entries = foldLibrary(mutated.after)
+        const remains = entries.some((entry) => entry.name === args.name)
+        const defaults = entries.filter((entry) => entry.isDefault).map((entry) => entry.name)
+        if (remains || JSON.stringify(defaults) !== JSON.stringify(priorDefaults)) throw new Error(`删除后方法「${args.name}」回读核对失败`)
+        return Promise.resolve({ operationId: args.operationId, name: args.name, removed: true, defaults })
+      }, (val) => `action=remove name=${val.name}`)
     },
     presentCall: () => ({ card: 'generic', title: '删除方法库条目', kind: 'other' }),
   }))

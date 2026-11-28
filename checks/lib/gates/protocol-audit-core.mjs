@@ -424,19 +424,26 @@ export function cardTextOf(options) {
   return cardLinesOf(options).join('\n')
 }
 
-/** final 的 H2 集合必须覆盖 protocol.output.sections 的映射节（BUG-255 / BUG-484；支持编号/括注与语义别名）。 */
+/** final 的 H2 集合必须覆盖 protocol.output.sections（BUG-255 / BUG-484 / BUG-489；中文报告自定义英文 slug 在剩余中文 H2 数足够时降级 warning 交由 critic 核验）。 */
 export function checkFinalSections(protocol, finalText) {
   if (String(finalText ?? '').trim() === '') return []
   const rawHeadings = [...String(finalText).matchAll(/^##\s+(.+)$/gm)].map((m) => m[1].trim())
-  const normSet = new Set(rawHeadings.map(normHeading))
-  const issues = []
+  const normHeadings = rawHeadings.map(normHeading)
+  const matchedIdx = new Set()
+  const missing = []
   for (const section of protocol.output.sections) {
     const expected = FINAL_SECTION_OF[section] ?? section
     const candidates = (FINAL_SECTION_ALIASES[section] ?? [expected]).map(normHeading)
-    const matched = candidates.some((cand) => normSet.has(cand) || [...normSet].some((h) => h.includes(cand)))
-    if (!matched) issues.push(red('final-sections', `final 缺 protocol.output.sections「${section}」对应的 H2「${expected}」`))
+    const idx = normHeadings.findIndex((h) => candidates.some((cand) => h === cand || h.includes(cand)))
+    if (idx >= 0) matchedIdx.add(idx)
+    else missing.push({ section, expected })
   }
-  return issues
+  const unmatchedCjk = rawHeadings.filter((h, i) => !matchedIdx.has(i) && /[\u4e00-\u9fff]/.test(h)).length
+  const unmappedSlugs = new Set(missing.map((m) => m.section).filter((s) => !(s in FINAL_SECTION_OF) && /^[\x00-\x7f]+$/.test(s)))
+  const canDowngrade = unmappedSlugs.size > 0 && unmatchedCjk >= unmappedSlugs.size
+  return missing.map(({ section, expected }) => (canDowngrade && unmappedSlugs.has(section)
+    ? warn('final-sections-unmapped', `final 为中文标题，自定义英文 slug「${section}」无法机械映射，交由 critic 核验 Protocol 兑现（新 run 请直接写交付语言 H2 节名）`)
+    : red('final-sections', `final 缺 protocol.output.sections「${section}」对应的 H2「${expected}」`)))
 }
 
 /** 证据门槛 vs evidence.quality（BUG-271 / BUG-484）；quick_factual 豁免；已记入 deviations 的降为 warning。

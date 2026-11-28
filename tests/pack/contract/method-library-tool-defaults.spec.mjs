@@ -111,3 +111,34 @@ test('BUG-396 set_default：未声明的目标名不得写盘（claim 名称不�
     rmSync(dir, { recursive: true, force: true })
   }
 })
+
+test('原生运行留痕：method-library 工具成功记 info、拒写记 warn', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'ml-tool-log-'))
+  try {
+    writeFileSync(join(dir, 'method-library.md'), LIBRARY, 'utf8')
+    const logs = []
+    const defs = new Map()
+    apply({
+      logger: { info: (m) => logs.push({ level: 'info', m }), warn: (m) => logs.push({ level: 'warn', m }) },
+      sessionProjections: { register() {}, stateOf: () => state },
+      tools: { register: (def) => { defs.set(def.name, def) } },
+    })
+    const setDefault = defs.get('method_library_set_default')
+    claimFor({ operationId: 'op-log-1', action: 'set-default', name: '方案比较', callId: 'call-log-1' })
+    await setDefault.execute({ action: 'set', operationId: 'op-log-1', name: '方案比较' }, fakeExec(dir, 'call-log-1'))
+    assert.equal(logs.length, 1)
+    assert.equal(logs[0].level, 'info')
+    assert.match(logs[0].m, /^\[deep-research:method-library\] event=tool_ok tool=method_library_set_default op=op-log-1 action=set name=方案比较/)
+
+    logs.length = 0
+    await assert.rejects(
+      async () => await setDefault.execute({ action: 'set', operationId: 'op-log-2', name: '事实核查' }, fakeExec(dir, 'call-log-2')),
+      /匹配到当前 UI 操作/,
+    )
+    assert.equal(logs.length, 1)
+    assert.equal(logs[0].level, 'warn')
+    assert.match(logs[0].m, /^\[deep-research:method-library\] event=tool_error tool=method_library_set_default op=op-log-2 reason=/)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
