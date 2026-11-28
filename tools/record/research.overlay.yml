@@ -11,6 +11,12 @@
   disabled: true
 - id: ui-sidebar-terminal
   disabled: true
+- id: ui-schedule
+  disabled: true
+- id: entry-customization
+  disabled: true
+- id: ui-plugin-manager
+  disabled: true
 - id: locale
   config:
     preference: zh

@@ -60,7 +60,7 @@
 
 | 操作 | 行 ID |
 |---|---|
-| 替换 / 关闭（`- id:`） | `ui-trajectory`、`ui-sidebar-terminal`、`locale`、`agent-preset-registry`、`session-query-sqlite`、`llm-deepseek`、`web` |
+| 替换 / 关闭（`- id:`） | `ui-trajectory`、`ui-sidebar-terminal`、`ui-schedule`、`entry-customization`、`ui-plugin-manager`、`locale`、`agent-preset-registry`、`session-query-sqlite`、`llm-deepseek`、`web` |
 | 新增（`- insert:`） | `research-fetch-fallback`、`tool-present`、`research-content`、`research-defaults`、`research-client`、`research-startup` |
 
 ## 角色预设与 Worker Profiles

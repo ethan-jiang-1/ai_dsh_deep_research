@@ -140,7 +140,7 @@ left-sidebar live badges (Host `researchRun` projection), header pill, intent-fi
 - **Credentials** come from DSH (Models page, credentials service, environment, or
   `$DSH_HOME/.credentials.yaml`); the package never bundles one. Search uses `DEEPSEEK_API_KEY`;
   the fetch fallback resolves the same ref and reports `fallback unavailable` when missing.
-- **Host-level rows this bundle also touches**: it disables the base `ui-trajectory` and `ui-sidebar-terminal` tabs, defaults the profile locale to `zh` (`locale`), makes `lead` the registry default preset (`agent-preset-registry`), adds `MALFORMED_RESPONSE` to `llm-deepseek`'s bounded retry, points `web` search/fetch at `deepseek-search-api` / `deepseek-fallback-fetch`, and keeps `session-query-sqlite` on `:memory:` with first-search activation — all profile-wide, not scoped to this package's sessions.
+- **Host-level rows this bundle also touches**: it disables the base `ui-trajectory`, `ui-sidebar-terminal`, `ui-schedule`, `entry-customization`, and `ui-plugin-manager` surfaces, defaults the profile locale to `zh` (`locale`), makes `lead` the registry default preset (`agent-preset-registry`), adds `MALFORMED_RESPONSE` to `llm-deepseek`'s bounded retry, points `web` search/fetch at `deepseek-search-api` / `deepseek-fallback-fetch`, and keeps `session-query-sqlite` on `:memory:` with first-search activation — all profile-wide, not scoped to this package's sessions.
 
 ### Upgrade and rollback
 

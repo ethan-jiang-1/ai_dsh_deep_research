@@ -39,6 +39,12 @@ const SURFACE_HIDDEN = [
   'ui-trajectory',
   // 右栏 New Terminal：研究产品的逃生口不是 shell；工作区是文件面的。
   'ui-sidebar-terminal',
+  // 左栏自动化任务：四研究角色不挂 tool-schedule，不暴露空壳面板。
+  'ui-schedule',
+  // 左栏「更多」与右栏「更多工具」自定义菜单：取消固定与 cordis 创建插件不属于深研工作台。
+  'entry-customization',
+  // 左栏「插件」管理页：研究 profile 插件生命周期统一走 CLI，避免通用插件入口干扰。
+  'ui-plugin-manager',
 ]
 
 /** 出厂面契约的另一半：必须留下的出厂面（真被误关就红——收窄不等于把界面掏空）。 */

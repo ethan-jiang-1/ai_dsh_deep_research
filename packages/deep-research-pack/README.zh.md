@@ -133,7 +133,7 @@ dsh --profile deep-research --no-open --port 0
 - **凭据**来自 DSH：Models 页、凭据服务、环境变量，或 `$DSH_HOME/.credentials.yaml`。本包从不打包
   或转发 key。搜索使用 `DEEPSEEK_API_KEY`；抓取回退解析同一个 ref，缺失时报告
   `fallback unavailable`。
-- **本 bundle 还会动到的 host 级行**：关闭 base 的 `ui-trajectory` 与 `ui-sidebar-terminal`、把 profile 缺省语言钉到 `zh`（`locale`）、把 `lead` 设为预设默认（`agent-preset-registry`）、给 `llm-deepseek` 的有界重试并入 `MALFORMED_RESPONSE`、把 `web` 的搜索/抓取钉到 `deepseek-search-api` / `deepseek-fallback-fetch`，并让 `session-query-sqlite` 走 `:memory:` + 首次搜索开索引；这些对**整个 profile** 生效，不只本包的会话。
+- **本 bundle 还会动到的 host 级行**：关闭 base 的 `ui-trajectory`、`ui-sidebar-terminal`、`ui-schedule`、`entry-customization` 与 `ui-plugin-manager`、把 profile 缺省语言钉到 `zh`（`locale`）、把 `lead` 设为预设默认（`agent-preset-registry`）、给 `llm-deepseek` 的有界重试并入 `MALFORMED_RESPONSE`、把 `web` 的搜索/抓取钉到 `deepseek-search-api` / `deepseek-fallback-fetch`，并让 `session-query-sqlite` 走 `:memory:` + 首次搜索开索引；这些对**整个 profile** 生效，不只本包的会话。
 
 ### 升级与回退
 

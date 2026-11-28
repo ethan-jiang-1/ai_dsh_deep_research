@@ -27,6 +27,9 @@
 |---|---|---|---|
 | 主区 Trajectory 页签 | `ui-trajectory` | 关 | 展示 harness 内部事件流，非研究证据；证据在 `drt_<slug>/` |
 | 右栏 New Terminal | `ui-sidebar-terminal` | 关 | 研究逃生口不是 shell；工作区是文件面的 |
+| 左栏 自动化任务 | `ui-schedule` | 关 | 四研究角色不挂定时任务工具，不暴露空壳定时面板 |
+| 左栏 更多 / 右栏 更多工具 | `entry-customization` | 关 | 取消固定与 `cordis` 创建插件流程不属于深研工作台 |
+| 左栏 插件管理 | `ui-plugin-manager` | 关 | 研究 profile 的插件装卸统一走 CLI，界面保持纯研究导航 |
 | 主区 对话 | `ui-chat` | 留 | 研究的入口与出口 |
 | 右栏 文件树 | `ui-sidebar-files` | 留 | 终稿页签读 `workspaceFiles`；保留盘上可见性 |
 | 右栏 浏览器 | `ui-sidebar-browser` | 上游关（非 desktop） | 沿用 DSH profile 关面机制 |
