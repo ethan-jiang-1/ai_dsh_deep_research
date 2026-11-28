@@ -186,7 +186,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
     targetRef.current = { dir: viewIo.dir, name: primaryName }
     setBodyState(bodyArt.state)
     setReaderState(readerArt?.state ?? 'absent')
-    setResolved(`${viewIo.dir}${target.audit}`)
+    setResolved(`${viewIo.dir}/${target.audit}`)
     setText(bodyArt.state === 'ok' ? bodyArt.text : null)
     setDraftText(draftArt.state === 'ok' ? draftArt.text : null)
     setReaderText(readerArt?.state === 'ok' ? readerArt.text : null)
@@ -352,8 +352,8 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
   }, [displayed, text])
 
   if (file === null || plan === null) return <div className={css.message}>{props.t('notFinalFile')}</div>
-  if (loading && text === null) return <div className={css.message}>{props.t('finalLoading')}</div>
-  if (failure !== null && text === null) {
+  if (loading && text === null && readerText === null) return <div className={css.message}>{props.t('finalLoading')}</div>
+  if (failure !== null && text === null && readerText === null) {
     return (
       <div className={css.message}>
         {props.t(failure)}
@@ -468,7 +468,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
       ) : (
         <div key="sidebar-body" ref={assignBodyEl} className={css.body}>
           {view === 'claims' ? (
-            <>
+            <div className={isFullscreen ? css.claimsFullscreenWrap : undefined}>
               <ClaimsAuditView
                 summary={claimsSummary}
                 onOpenEvidence={openEvidenceSplit}
@@ -476,7 +476,7 @@ export function ResearchFinalTab(props: ResearchFinalTabProps): ReactNode {
                 t={props.t}
               />
               {followupFooter}
-            </>
+            </div>
           ) : proseContent}
         </div>
       )}

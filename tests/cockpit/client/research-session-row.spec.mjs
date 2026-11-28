@@ -40,6 +40,10 @@ test('ResearchSessionLeading：非研究/idle 零渲染，hitl_pending / running
     assert.ok(mark, 'HITL 挂起必须渲染 hitl_pending 状态标')
     assert.match(mark.textContent ?? '', /立项待你拍板/)
     assert.match(mark.textContent ?? '', /drt_ai-chip/)
+    let bubbled = 0
+    rHitl.container.addEventListener('click', () => { bubbled += 1 })
+    rtl.fireEvent.click(mark)
+    assert.equal(bubbled, 1, '点击左侧状态点必须冒泡到会话行，不得阻断打开会话')
     rHitl.unmount()
 
     const rDeliv = rtl.render(createElement(ResearchSessionLeading, { sessionId: 'sDeliv', useSessions, t: tEn }))

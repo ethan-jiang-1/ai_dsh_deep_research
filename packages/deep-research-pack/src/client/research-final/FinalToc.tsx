@@ -3,10 +3,14 @@ import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { activeTocHeadingIndex, extractTocHeadings, type TocHeading } from '../../lib/run/evidence-preview.ts'
 import css from '../ResearchFinalTab.module.css'
 
-function locateHeadingElement(root: HTMLElement, headings: readonly TocHeading[], heading: TocHeading, index: number): HTMLElement | undefined {
+function locateHeadingElement(
+  nodes: readonly HTMLElement[],
+  headings: readonly TocHeading[],
+  heading: TocHeading,
+  index: number,
+): HTMLElement | undefined {
   const normalize = (s: string): string => s.replace(/\s+/g, ' ').trim()
   const targetText = normalize(heading.text)
-  const nodes = [...root.querySelectorAll<HTMLElement>('h1, h2, h3')]
   const nthSame = headings
     .slice(0, index + 1)
     .filter((item) => item.level === heading.level && normalize(item.text) === targetText)
@@ -18,6 +22,12 @@ function locateHeadingElement(root: HTMLElement, headings: readonly TocHeading[]
   return (byIndex !== undefined && byIndex.tagName === `H${heading.level}` && normalize(byIndex.textContent ?? '') === targetText)
     ? byIndex
     : sameLevelAndText[nthSame] ?? nodes.find((el) => normalize(el.textContent ?? '') === targetText)
+}
+
+function tocItemClassOf(level: number): string | undefined {
+  if (level >= 3) return css.tocSubItemL3
+  if (level === 2) return css.tocSubItem
+  return css.tocItem
 }
 
 /** 章节目录：常规侧栏呈折叠大纲，全屏精读台呈左侧常驻 Sticky 大纲并同步高亮当前章节。 */
@@ -42,12 +52,14 @@ export function FinalToc(props: {
     if (mode !== 'sticky') return undefined
     const scroller = bodyEl !== undefined ? bodyEl : (bodyRef?.current ?? null)
     if (scroller === null || headings.length < 2) return undefined
+    let rafId: number | null = null
     const updateActive = () => {
+      rafId = null
       const containerTop = scroller.getBoundingClientRect().top
       const nodes = [...scroller.querySelectorAll<HTMLElement>('h1, h2, h3')]
       if (nodes.length === 0) return
       const offsets = headings.map((h, idx) => {
-        const el = locateHeadingElement(scroller, headings, h, idx)
+        const el = locateHeadingElement(nodes, headings, h, idx)
         return el !== undefined ? el.getBoundingClientRect().top - containerTop : Number.POSITIVE_INFINITY
       })
       const atBottom =
@@ -63,9 +75,17 @@ export function FinalToc(props: {
       }
       setActiveIndex(activeTocHeadingIndex(offsets, 56))
     }
+    const scheduleUpdate = () => {
+      if (typeof requestAnimationFrame !== 'function') { updateActive(); return }
+      if (rafId !== null) return
+      rafId = requestAnimationFrame(updateActive)
+    }
     updateActive()
-    scroller.addEventListener('scroll', updateActive, { passive: true })
-    return () => { scroller.removeEventListener('scroll', updateActive) }
+    scroller.addEventListener('scroll', scheduleUpdate, { passive: true })
+    return () => {
+      if (rafId !== null && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(rafId)
+      scroller.removeEventListener('scroll', scheduleUpdate)
+    }
   }, [mode, bodyEl, bodyRef, headings])
 
   if (headings.length < 2) return null
@@ -73,7 +93,8 @@ export function FinalToc(props: {
   const jumpToHeading = (heading: TocHeading, index: number): void => {
     const root = bodyEl !== undefined ? bodyEl : (bodyRef?.current ?? null)
     if (root === null) return
-    const target = locateHeadingElement(root, headings, heading, index)
+    const nodes = [...root.querySelectorAll<HTMLElement>('h1, h2, h3')]
+    const target = locateHeadingElement(nodes, headings, heading, index)
     setActiveIndex(index)
     target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
@@ -88,7 +109,7 @@ export function FinalToc(props: {
               type="button"
               key={`${i}:${h.text}`}
               data-toc-active={i === activeIndex ? 'true' : undefined}
-              className={`${h.level >= 2 ? css.tocSubItem : css.tocItem}${i === activeIndex ? ` ${css.tocItemActive}` : ''}`}
+              className={`${tocItemClassOf(h.level) ?? ''}${i === activeIndex ? ` ${css.tocItemActive}` : ''}`}
               onClick={() => { jumpToHeading(h, i) }}
             >
               {h.text}
@@ -115,7 +136,7 @@ export function FinalToc(props: {
           <button
             type="button"
             key={`${i}:${h.text}`}
-            className={h.level >= 2 ? css.tocSubItem : css.tocItem}
+            className={tocItemClassOf(h.level)}
             onClick={() => { jumpToHeading(h, i) }}
           >
             {h.text}

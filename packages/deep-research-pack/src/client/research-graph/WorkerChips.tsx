@@ -31,7 +31,7 @@ export function WorkerChips({ memberId, useSessions, useSessionStatus }: WorkerC
   const suffix = chips.length > shown.length ? ` +${String(chips.length - shown.length)}` : ''
   return (
     <span className={styles.workerChips}>
-      worker：{shown.map((chip) => `${chip.label}${chip.status === 'running' ? '●' : chip.status === 'inactive' ? '○' : '·'}`).join(' · ')}{suffix}
+      worker: {shown.map((chip) => `${chip.label}${chip.status === 'running' ? '●' : chip.status === 'inactive' ? '○' : '·'}`).join(' · ')}{suffix}
     </span>
   )
 }

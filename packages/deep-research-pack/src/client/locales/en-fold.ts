@@ -177,7 +177,7 @@ export const enFold = {
   graphNoteNoDagBodyMissingPlan: 'This run has no plan.md (old run / not yet written), and the Team board has no blocked_by. The task snapshot below is not a DAG; a rerun will generate an execution graph from plan.md.',
   graphNoteNoDagBodyNoNodes: 'plan.md has no readable node table, and the Team board has no blocked_by. The task snapshot below is not a DAG.',
   graphNotePlanReadFailedTitle: 'Could not read the plan',
-  graphNotePlanReadFailedBody: 'plan.md exists but could not be read (permission / IO / workspace failure) — this is not “no plan.md”. The page retries every 30s; you can also retry now.',
+  graphNotePlanReadFailedBody: 'plan.md exists but could not be read (permission / IO / workspace failure) — this is not “no plan.md”. The page retries every 5s; you can also retry now.',
   graphRetryRead: 'Retry',
 
   executionWhoSource: 'scout (retriever reconciliation, three query rounds) + analyst (source-tier grading)',

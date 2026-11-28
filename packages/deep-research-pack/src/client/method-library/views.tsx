@@ -104,9 +104,10 @@ export function SourceSelectionView(props: {
       <section className={`${css.sourceSectionGrid} ${css.sourceSectionBorder}`}>
         <div>
           <h3 className={css.sourceHeading}>{t('builtinSources')}</h3>
-          {builtinChoices.map((entry) => (
-            <button key={entry.name} type="button" data-method-source-builtin="" className={`${css.button} ${css.sourceChoiceBtn}`} onClick={() => { onSelectBuiltin(entry) }}>{displayNameOf(entry.name, t)}</button>
-          ))}
+          {builtinChoices.map((entry) => {
+            const active = selectedBuiltin?.name === entry.name
+            return <button key={entry.name} type="button" data-method-source-builtin="" aria-pressed={active} className={`${css.button} ${css.sourceChoiceBtn}${active ? ` ${css.buttonActive}` : ''}`} onClick={() => { onSelectBuiltin(entry) }}>{displayNameOf(entry.name, t)}</button>
+          })}
         </div>
         <div aria-live="polite" data-method-source-preview="">
           {selectedBuiltinDisplay === null ? <span className={css.muted}>{t('chooseBuiltin')}</span> : <>
@@ -122,7 +123,10 @@ export function SourceSelectionView(props: {
           {runState === 'error' && <div className={css.textError}>{t('sourceReadFailure')}</div>}
           {runState === 'cancelled' && <div className={css.muted}>{t('sourceCancelled')}</div>}
           {runState === 'ready' && runNames.length === 0 && <div className={css.muted}>{t('noCompletedRuns')}</div>}
-          {runNames.map((run) => <button key={run} type="button" data-method-source-run="" className={`${css.button} ${css.sourceChoiceBtn}`} onClick={() => { onSelectRun(run) }}>{run}</button>)}
+          {runNames.map((run) => {
+            const active = selectedRun?.name === run
+            return <button key={run} type="button" data-method-source-run="" aria-pressed={active} className={`${css.button} ${css.sourceChoiceBtn}${active ? ` ${css.buttonActive}` : ''}`} onClick={() => { onSelectRun(run) }}>{run}</button>
+          })}
         </div>
         <div aria-live="polite" data-method-source-preview="">
           {selectedRun === null ? <span className={css.muted}>{selectedRunLoading ? <>{t('sourceLoading')} <button type="button" className={css.button} onClick={onCancelRunRead}>{t('cancel')}</button></> : t('chooseRun')}</span> : <>
@@ -245,8 +249,8 @@ export function MethodSummaryView(props: {
       </div>
       <div className={css.summaryActions}>
       <div role="tablist" aria-label={t('currentMethod')} className={css.stageTabs}>
-        <button type="button" role="tab" aria-selected={stage === 'interview'} className={css.button} onClick={() => { onStageChange('interview') }}>{t('interview')}</button>
-        <button type="button" role="tab" aria-selected={stage === 'form-check'} className={css.button} onClick={() => { onStageChange('form-check') }}>{t('formCheck')}</button>
+        <button type="button" role="tab" aria-selected={stage === 'interview'} className={`${css.button}${stage === 'interview' ? ` ${css.buttonActive}` : ''}`} onClick={() => { onStageChange('interview') }}>{t('interview')}</button>
+        <button type="button" role="tab" aria-selected={stage === 'form-check'} className={`${css.button}${stage === 'form-check' ? ` ${css.buttonActive}` : ''}`} onClick={() => { onStageChange('form-check') }}>{t('formCheck')}</button>
       </div>
       <button type="button" className={css.primaryButton} disabled={!effectiveCanSave || sending} onClick={() => { onSave(false) }}>{sending ? t('saving') : t('save')}</button>
       <button type="button" className={css.button} disabled={!effectiveCanSave || sending} title={t('saveAndSetDefaultDescription')} onClick={() => { onSave(true) }}>{t('saveAndSetDefault')}</button>
@@ -312,11 +316,11 @@ export function ReadMineView(props: {
         {entry.isDefault && <span className={css.badgeBrand}>{t('defaultPreference')}</span>}
         {entry.provenance !== null && <span className={css.muted}>{entry.provenance}</span>}
         <span className={css.spacer} />
-        <button type="button" className={css.button} onClick={() => { onEdit(entry) }}>{t('continueInterview')}</button>
+        <button type="button" className={css.button} disabled={sending} onClick={() => { onEdit(entry) }}>{t('continueInterview')}</button>
         {entry.isDefault
           ? <button type="button" className={css.button} disabled={sending} onClick={onClearDefault}>{t('clearDefault')}</button>
           : <button type="button" className={css.button} disabled={sending} onClick={() => { onSetDefault(entry) }}>{t('setDefault')}</button>}
-        <button type="button" className={css.button} onClick={() => { onPendingDelete(entry.name) }}>{t('deleteAction')}</button>
+        <button type="button" className={css.button} disabled={sending} onClick={() => { onPendingDelete(entry.name) }}>{t('deleteAction')}</button>
       </div>
       {pendingDelete === entry.name && (
         <div className={css.deleteBox}>

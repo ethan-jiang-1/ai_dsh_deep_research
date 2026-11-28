@@ -264,8 +264,9 @@ export function toolResultBodyOf(
         truncated: meta.truncated === true,
       }
     }
-    if (settled && argUrl !== '') {
-      return { kind: 'web-fetch', url: argUrl, statusCode: 200, truncated: false }
+    if (settled) {
+      const text = extractResultText(block)
+      if (text !== '') return { kind: 'fallback', text: text.slice(0, 400) }
     }
     if (argUrl !== '') return { kind: 'fallback', text: argUrl }
     return null

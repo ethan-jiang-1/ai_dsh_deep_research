@@ -62,7 +62,6 @@ export function ResearchSessionLeading({ sessionId, useSessions, t }: ResearchSe
       className={css.mark}
       data-research-row-phase={projection.phase}
       data-research-row-slug={projection.slug ?? ''}
-      onClick={(event) => { event.stopPropagation() }}
     >
       <StateDot state={dotStateOf(projection)} size={8} />
       <span className={css.visuallyHidden}>

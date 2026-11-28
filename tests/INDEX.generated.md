@@ -133,7 +133,7 @@
 | events | `events/research-projection` | `tests/cockpit/lib/events/research-projection.spec.mjs`<br>`tests/cockpit/lib/run/showcase-fixture.spec.mjs` |
 | events | `events/research-references` | `tests/cockpit/lib/events/research-references.spec.mjs` |
 | events | `events/stream-failure` | `tests/run/shared/stream-failure.spec.mjs` |
-| events | `events/tool-card` | `tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/shared/tool-card.spec.mjs` |
+| events | `events/tool-card` | `tests/cockpit/client/final-studio-r2.spec.mjs`<br>`tests/cockpit/shared/i18n.spec.mjs`<br>`tests/run/harness/replay-fixtures.spec.mjs`<br>`tests/run/shared/tool-card.spec.mjs` |
 | method-library | `method-library/library-fold` | `tests/cockpit/client/method-library/locales.spec.mjs`<br>`tests/cockpit/client/method-library/method-library-views.spec.mjs`<br>`tests/cockpit/lib/method-library/library-fold.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-codec.spec.mjs`<br>`tests/cockpit/lib/method-library/library-heading-consistency.spec.mjs`<br>`tests/cockpit/lib/method-library/method-library-write.spec.mjs`<br>`tests/cockpit/lib/run/receipt-fold.spec.mjs`<br>`tests/contracts/skill-parser-contract.spec.mjs`<br>`tests/pack/contract/method-library-tool-defaults.spec.mjs`<br>`tests/run/gates/text-encoding-equivalence.spec.mjs` |
 | method-library | `method-library/method-draft` | `tests/cockpit/lib/method-library/method-draft.spec.mjs` |
 | method-library | `method-library/method-library-commands` | `tests/cockpit/lib/method-library/method-library-commands.spec.mjs` |

@@ -198,6 +198,12 @@ export function createDefaultsStore(deps: DefaultsStoreDeps): DefaultsStore {
     const defaults = methodEntries.filter((entry) => entry.isDefault)
     const methodDefault = library.kind === 'ok' ? findDefaultMethod(library.text) : null
     const phase: DefaultsSnapshot['phase'] = unreadable ? 'unreadable' : 'ready'
+    const nextOutcome = current.outcome !== null
+      && current.outcome.kind === 'ok'
+      && current.outcome.revision !== undefined
+      && current.outcome.revision !== parsed.value.revision
+      ? null
+      : current.outcome
     const next: DefaultsSnapshot = {
       phase,
       value: parsed.value,
@@ -208,7 +214,7 @@ export function createDefaultsStore(deps: DefaultsStoreDeps): DefaultsStore {
       methodRead,
       revision: parsed.value.revision,
       pending: current.pending,
-      outcome: current.outcome,
+      outcome: nextOutcome,
     }
     setState(sessionId, next)
   }

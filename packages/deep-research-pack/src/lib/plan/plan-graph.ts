@@ -379,7 +379,7 @@ export function countsOf(
     const status = task.status ?? 'pending'
     if (status === 'deleted') continue
     total += 1
-    const owner = task.ownerName !== undefined && task.ownerName.trim() !== '' ? task.ownerName : undefined
+    const owner = task.ownerName !== undefined && task.ownerName.trim() !== '' ? task.ownerName.trim() : undefined
     const member = lookupMember(memberStatus, owner, task.ownerId)
     if (status === 'completed') done += 1
     else if (status === 'pending' && task.ready === true) ready += 1

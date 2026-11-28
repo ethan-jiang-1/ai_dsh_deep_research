@@ -380,8 +380,8 @@ export function MethodLibraryView(props: MethodLibraryViewProps): ReactNode {
           }}
         >
           <div className={css.segmentBar}>
-            <button type="button" className={`${css.button}${segment === 'mine' ? ` ${css.buttonActive}` : ''}`} onClick={() => { switchSegment('mine') }}>{props.t('segmentMine')}</button>
-            <button type="button" className={`${css.button}${segment === 'builtin' ? ` ${css.buttonActive}` : ''}`} onClick={() => { switchSegment('builtin') }}>{props.t('segmentBuiltin')}</button>
+            <button type="button" aria-pressed={segment === 'mine'} className={`${css.button}${segment === 'mine' ? ` ${css.buttonActive}` : ''}`} onClick={() => { switchSegment('mine') }}>{props.t('segmentMine')}</button>
+            <button type="button" aria-pressed={segment === 'builtin'} className={`${css.button}${segment === 'builtin' ? ` ${css.buttonActive}` : ''}`} onClick={() => { switchSegment('builtin') }}>{props.t('segmentBuiltin')}</button>
           </div>
           {segment === 'mine' && (
             <>

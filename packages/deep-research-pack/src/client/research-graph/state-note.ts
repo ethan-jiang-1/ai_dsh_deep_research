@@ -61,7 +61,12 @@ export function graphStateNote(input: GraphStateNoteInput, t: PackTranslate = tr
  * 差异卡里「旧图快照为何不可用」的文案（BUG-391）：按 SnapshotState 穷举——除 ready 外每个
  * 状态都要有话说，只有 loading/idle 才是「读取中」。
  */
-export function snapshotDiffMessage(state: SnapshotState, t: PackTranslate = translateZh): string {
+export function snapshotDiffMessage(
+  state: SnapshotState,
+  t: PackTranslate = translateZh,
+  version?: number | null,
+): string {
+  const versionStr = version !== null && version !== undefined ? String(version) : ''
   switch (state) {
     case 'idle':
     case 'loading':
@@ -69,11 +74,11 @@ export function snapshotDiffMessage(state: SnapshotState, t: PackTranslate = tra
     case 'missing':
       return t('oldGraphUnread')
     case 'empty':
-      return t('graphSnapshotEmpty', { version: '' })
+      return t('graphSnapshotEmpty', { version: versionStr })
     case 'invalid':
-      return t('graphSnapshotInvalid', { version: '' })
+      return t('graphSnapshotInvalid', { version: versionStr })
     case 'unreadable':
-      return t('graphSnapshotUnreadable', { version: '' })
+      return t('graphSnapshotUnreadable', { version: versionStr })
     case 'ready':
       return t('oldGraphUnread')
     default:

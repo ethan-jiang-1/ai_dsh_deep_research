@@ -83,8 +83,8 @@ export function DefaultsPanel({ sessionId, store, t, onOpenMethodLibrary, layout
   const warnings = state.warnings
   const receipt = receiptOf(state, t)
 
-  const apply = (patch: DefaultsPatch): void => { void store.setPatch(sessionId, patch) }
-  const unset = (fields: readonly DefaultsAxis[]): void => { void store.unset(sessionId, fields) }
+  const apply = (patch: DefaultsPatch): void => { setConfirmClear(false); void store.setPatch(sessionId, patch) }
+  const unset = (fields: readonly DefaultsAxis[]): void => { setConfirmClear(false); void store.unset(sessionId, fields) }
   const applySource = (nextFamilies: readonly SourceFamily[] | undefined, nextAuthority: Authority | undefined, nextRecency: Recency | undefined): void => {
     const patch = sourcePatch(nextFamilies, nextAuthority, nextRecency)
     if (!hasSource(patch)) unset(['source'])
@@ -125,12 +125,17 @@ export function DefaultsPanel({ sessionId, store, t, onOpenMethodLibrary, layout
       <div className={css.headerRow}>
         <strong className={css.title}>{t('defaultsTitle')}</strong>
         <Tag tone="info">{t('defaultsBadge')}</Tag>
-        {compact && <span className={css.subtitleInline}>{t('defaultsSubtitle')}</span>}
+        {compact && <span className={css.subtitleInline} title={t('defaultsSubtitle')}>{t('defaultsSubtitle')}</span>}
         <span className={css.revision}>v{state.revision}</span>
       </div>
       {!compact && <div className={css.subtitle}>{t('defaultsSubtitle')}</div>}
 
-      {problems.length > 0 ? (
+      {state.phase === 'unreadable' ? (
+        <div role="alert" className={`${css.bannerError} ${css.bannerRow}`}>
+          <span>{t('defaultsUnreadableBanner')}</span>
+          <Button variant="ghost" size="sm" onClick={() => { void store.refresh(sessionId) }}>{t('retry')}</Button>
+        </div>
+      ) : problems.length > 0 ? (
         <div role="alert" className={css.bannerError}>
           {t('defaultsInvalidBanner', { detail: problems.map((item) => `${item.field}:${item.code}`).join('; ') })}
         </div>
@@ -304,16 +309,33 @@ export function DefaultsPanel({ sessionId, store, t, onOpenMethodLibrary, layout
           variant={confirmClear ? 'primary' : 'outline'}
           size="sm"
           data-testid="defaults-clear"
-          disabled={busy}
+          disabled={busy || (!confirmClear && state.value.effort === undefined && state.value.output === undefined && state.value.source === undefined && problems.length === 0 && warnings.length === 0)}
           onClick={() => {
             if (!confirmClear) { setConfirmClear(true); return }
             setConfirmClear(false)
             void store.clear(sessionId)
           }}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape' && confirmClear) {
+              event.preventDefault()
+              setConfirmClear(false)
+            }
+          }}
           className={confirmClear ? undefined : css.clearButton}
         >
           {t(confirmClear ? 'defaultsClearConfirm' : 'defaultsClear')}
         </Button>
+        {confirmClear && (
+          <Button
+            variant="ghost"
+            size="sm"
+            data-testid="defaults-clear-cancel"
+            disabled={busy}
+            onClick={() => { setConfirmClear(false) }}
+          >
+            {t('cancel')}
+          </Button>
+        )}
         <span className={css.footerSave}>{t('defaultsFooterSave')}</span>
       </div>
       {!compact && (

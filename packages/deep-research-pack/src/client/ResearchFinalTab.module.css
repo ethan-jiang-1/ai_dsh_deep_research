@@ -118,11 +118,6 @@
   word-break: break-word;
 }
 
-.studioProse :global(.md-table-wide) th:first-child,
-.studioProse :global(.md-table-wide) td:first-child {
-  white-space: nowrap;
-}
-
 .studioProse :global(.md-table-wide) table code {
   white-space: pre-wrap;
   word-break: break-word;
@@ -255,7 +250,8 @@
 }
 
 .tocItem,
-.tocSubItem {
+.tocSubItem,
+.tocSubItemL3 {
   display: block;
   width: 100%;
   text-align: left;
@@ -268,12 +264,14 @@
 }
 
 .tocItem:hover,
-.tocSubItem:hover {
+.tocSubItem:hover,
+.tocSubItemL3:hover {
   background: var(--dsw-alias-interactive-bg-hover);
 }
 
 .tocItem:focus-visible,
-.tocSubItem:focus-visible {
+.tocSubItem:focus-visible,
+.tocSubItemL3:focus-visible {
   outline: 1.5px solid var(--dsw-alias-state-business-primary);
   outline-offset: 1px;
 }
@@ -285,6 +283,18 @@
 .tocSubItem {
   padding-left: 14px;
   color: var(--dsw-alias-label-secondary);
+}
+
+.tocSubItemL3 {
+  padding-left: 24px;
+  font-size: 11px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.claimsFullscreenWrap {
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .claimsList {
@@ -498,6 +508,11 @@
   flex-shrink: 0;
 }
 
+.studioInspectorControl {
+  width: 100%;
+  max-width: 100%;
+}
+
 .studioInspectorBody {
   flex: 1;
   min-height: 0;
@@ -623,11 +638,4 @@
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
-}
-
-.filterActiveWrap {
-  display: inline-flex;
-  border-radius: 999px;
-  outline: 1.5px solid var(--dsw-alias-brand-primary);
-  outline-offset: 1px;
 }

@@ -217,7 +217,7 @@ export function coverageWarningOf(coverage: GraphCoverage, t: PackTranslate = tr
   return t('graphCoverageWarning', { count: String(gap), detail })
 }
 
-const COLOR_MUTED = 'var(--dsw-alias-label-caption)'
+const COLOR_MUTED = 'var(--dsw-alias-label-tertiary)'
 const COLOR_SECONDARY = 'var(--dsw-alias-label-secondary)'
 const COLOR_SUCCESS = 'var(--dsw-alias-state-success-primary)'
 const COLOR_ERROR = 'var(--dsw-alias-state-error-primary)'

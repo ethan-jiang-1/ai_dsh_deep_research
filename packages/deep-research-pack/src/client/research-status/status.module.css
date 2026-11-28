@@ -236,6 +236,8 @@
   flex: 1;
   min-width: 0;
   color: var(--dsw-alias-label-secondary);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .membersSection {
@@ -353,7 +355,9 @@
 
 .stepCurrent {
   font-weight: 600;
-  background: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 14%, transparent);
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 12%, transparent);
+  border-color: color-mix(in srgb, var(--dsw-alias-state-business-primary) 34%, transparent);
+  color: var(--dsw-alias-state-business-primary);
 }
 
 .stepDone {
@@ -425,6 +429,12 @@
   font-weight: 600;
 }
 
+.versionTag {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--dsw-alias-label-tertiary);
+}
+
 .protocolGrid {
   display: grid;
   gap: 3px;
@@ -480,7 +490,7 @@
   color: var(--dsw-alias-label-secondary);
 }
 
-.matrixHit {
+.matrixTable td.matrixHit {
   padding: 0;
   background: color-mix(in srgb, var(--dsw-alias-state-success-primary) 10%, transparent);
 }
@@ -510,14 +520,25 @@
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dsw-alias-state-success-primary) 42%, transparent);
 }
 
-.matrixMiss {
+.matrixTable td.matrixMiss {
+  padding: 0;
   color: var(--dsw-alias-state-warn-label);
   background: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 10%, transparent);
 }
 
 .matrixGapTrigger {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  height: 100%;
+  min-height: 24px;
+  padding: 2px 6px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
   cursor: help;
 }
 

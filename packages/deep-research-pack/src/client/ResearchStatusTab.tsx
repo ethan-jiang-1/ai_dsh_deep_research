@@ -154,11 +154,24 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
   const planIssueKey = planIssueKeyOf(reads.plan)
   const [activityOpen, setActivityOpen] = useState(true)
   const [openMembers, setOpenMembers] = useState<Readonly<Record<string, boolean>>>({})
+  useEffect(() => {
+    setActivityOpen(true)
+    setOpenMembers({})
+  }, [props.sessionId])
   const statusNotices = collectStatusNotices({ face, reads, reviewVerdict })
+  const hasEvidenceNotice = statusNotices.some((n) => n.id === 'evidence')
   const stalledBanner = stalledBannerOf(
     { health, bound: trust.kind === 'bound', delivered: delivery !== null, hitlPending: hitl.pending },
     props.t,
   )
+  const activityRunning = focusPhase === 'running' && !streamFailure.dead && stalledBanner === null && error === null && !unbound
+  const activityDotState = delivery !== null
+    ? 'done'
+    : (hitl.pending || streamFailure.dead || stalledBanner !== null || error !== null)
+      ? 'warning'
+      : activityRunning
+        ? 'ongoing'
+        : 'idle'
   const activeMembers = members.filter((m) => m.phase === 'active')
   const runDir = face?.runDir ?? (trust.kind === 'bound' ? `drt_${trust.slug}` : null)
   const reviewDraftPath = face !== null && face.hasFinal && runDir !== null ? `${runDir}/final.md` : null
@@ -275,10 +288,12 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
       {face !== null && (
         <div className={css.evidenceBar}>
           {reads.evidence === 'unreadable' ? (
-            <span className={css.warnText}>
-              {props.t('statusEvidenceReadFailed')}
-              <button type="button" onClick={retry} className={css.retryLink}>{props.t('retry')}</button>
-            </span>
+            hasEvidenceNotice ? null : (
+              <span className={css.warnText}>
+                {props.t('statusEvidenceReadFailed')}
+                <button type="button" onClick={retry} className={css.retryLink}>{props.t('retry')}</button>
+              </span>
+            )
           ) : (
             <span className={css.evidenceMetric}>{countText(props.t, face.evidenceCount, 'statusEvidenceCountOne', 'statusEvidenceCountOther')}</span>
           )}
@@ -334,11 +349,11 @@ export function ResearchStatusTab(props: ResearchStatusTabProps): ReactNode {
         {rows.length === 0 && props.sessionId !== undefined && <span className={css.activityEmpty}>{props.t('statusNoActivity')}</span>}
         {rows.length > 0 && (
           <DisclosureRow
-            icon={<StateDot state={delivery !== null ? 'done' : hitl.pending ? 'warning' : 'ongoing'} />}
+            icon={<StateDot state={activityDotState} />}
             title={props.t('statusActivityStream', { count: String(rows.length) })}
             open={activityOpen}
             expandable
-            running={delivery === null && !hitl.pending && rows.length > 0}
+            running={activityRunning}
             expandOnRowClick
             onToggle={() => setActivityOpen((current) => !current)}
           >

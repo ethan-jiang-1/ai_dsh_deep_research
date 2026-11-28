@@ -44,7 +44,11 @@ test('研究状态契约卡与质量雷达：展示 protocol 契约与 Topic×Le
     t: tZh,
   }))
   assert.match(okProtocol, /领域地图/)
-  assert.match(okProtocol, /approved/)
+  assert.match(okProtocol, /已定稿/)
+  assert.match(okProtocol, /深度档/)
+  assert.match(okProtocol, /报告\+主张双审/)
+  assert.doesNotMatch(okProtocol, />approved</)
+  assert.doesNotMatch(okProtocol, /\bboth\b/)
 
   const radarHtml = renderToStaticMarkup(createElement(QualityRadar, {
     matrix: {

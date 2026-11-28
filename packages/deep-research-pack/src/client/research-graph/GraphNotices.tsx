@@ -6,7 +6,7 @@ import type { ReactNode } from 'react'
 import type { PlanIssue } from '../../lib/plan/plan-index.ts'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { AttentionItem } from '../../lib/plan/plan-graph.ts'
-import { ATTENTION_ROW_STYLE, BANNER_STYLE, MUTED_STYLE } from './styles.ts'
+import { ATTENTION_ROW_STYLE, MUTED_STYLE } from './styles.ts'
 import { severityIcon } from './format.ts'
 import styles from './graph.module.css'
 
@@ -20,12 +20,12 @@ export function GraphNotices(props: {
   return (
     <>
       {planIssues.length > 0 && (
-        <div className={styles.errorBanner} style={BANNER_STYLE}>
+        <div className={styles.errorBanner}>
           <div className={`${styles.bannerTitle} ${styles.errorText}`}>{t('graphPlanIssues')}</div>
           {planIssues.slice(0, 6).map((issue) => (
-            <div key={`${issue.kind}:${issue.nodeId}:${issue.message}`} className={styles.errorText} style={MUTED_STYLE}>{issue.message}</div>
+            <div key={`${issue.kind}:${issue.nodeId}:${issue.message}`} className={`${styles.errorDetail} ${styles.errorText}`}>{issue.message}</div>
           ))}
-          {planIssues.length > 6 && <div style={MUTED_STYLE}>{t('graphMoreIssues', { count: String(planIssues.length - 6) })}</div>}
+          {planIssues.length > 6 && <div className={styles.mutedLine}>{t('graphMoreIssues', { count: String(planIssues.length - 6) })}</div>}
         </div>
       )}
 

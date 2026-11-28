@@ -25,6 +25,8 @@ export interface ResearchShortcutsDeps {
 
 function defaultProfiles(code: string): Readonly<Record<string, ShortcutBinding>> {
   const binding: ShortcutBinding = { code, modifiers: ['primary', 'shift'] }
+  // 注：DSH 上游 `isWebBindingAllowed` 仅在 web:macos/windows 放行 Primary+Shift+<Key>，
+  // `web:linux` 仅白名单 Slash/Comma/Period，故不注册 `web:linux` 以免触发 unsupported-browser。
   return {
     'desktop:macos': binding,
     'desktop:windows': binding,

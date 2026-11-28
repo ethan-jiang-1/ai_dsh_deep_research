@@ -1,7 +1,7 @@
 /**
  * FinalToolbar.tsx —— 终稿页签合一单条工具栏（左：视图分段 + 版本状态；右：目录 / 分屏 / 全屏 / 过程）。
  */
-import type { ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
 import {
   Button,
   IconCompareSplitOutlineRegular,
@@ -40,15 +40,23 @@ export function FinalToolbar(props: FinalToolbarProps): ReactNode {
     stateText, stateWarn, draftToggleLabel, isFullscreen, showTocToggle,
     onChangeView, onToggleDraft, onToggleToc, onOpenSplitStatus, onOpenProcess, onToggleFullscreen, t,
   } = props
+  const controlId = useId()
   const tocToggleVisible = showTocToggle ?? (!isFullscreen && view !== 'claims')
+  const segmentedValue: 'reader' | 'audit' | 'claims' = view === 'claims'
+    ? 'claims'
+    : view === 'draft'
+      ? ('draft' as unknown as 'audit')
+      : showingReader
+        ? 'reader'
+        : 'audit'
   return (
     <div className={css.toolbar} title={displayedPath} data-testid="final-toolbar">
       <div className={css.segmentedWrap}>
         <SegmentedControl<'reader' | 'audit' | 'claims'>
-          id="research-final-view"
+          id={`research-final-view-${controlId}`}
           label={t('tabFinal')}
           className={css.segmentedControl ?? ''}
-          value={view === 'claims' ? 'claims' : showingReader ? 'reader' : 'audit'}
+          value={segmentedValue}
           options={[
             { value: 'reader', label: t('finalTabReader'), disabled: !hasReader },
             { value: 'audit', label: t('finalTabAudit'), disabled: !hasAudit },

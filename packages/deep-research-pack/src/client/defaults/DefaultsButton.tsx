@@ -65,7 +65,7 @@ export function DefaultsButton(props: DefaultsButtonProps): ReactNode {
     problems: state.problems,
   })
   const loading = state.phase === 'loading'
-  const invalid = state.phase === 'unreadable' || state.problems.length > 0
+  const invalid = state.phase === 'unreadable' || state.problems.length > 0 || state.methodConflict || state.methodRead === 'error'
   const label = loading
     ? props.t('defaultsButtonLoading')
     : invalid
@@ -76,21 +76,33 @@ export function DefaultsButton(props: DefaultsButtonProps): ReactNode {
           ? props.t('defaultsButtonCount', { count: button.count })
           : props.t('defaultsButtonAuto')
   const warn = state.warnings.map((item) => `${item.field}:${item.code}`).join('\n')
+  const invalidParts = [
+    ...(state.phase === 'unreadable'
+      ? [props.t('defaultsUnreadableBanner')]
+      : state.problems.map((item) => `${item.field}:${item.code}`)),
+    ...(state.methodConflict ? [props.t('defaultsMethodConflict')] : []),
+    ...(state.methodRead === 'error' ? [props.t('defaultsMethodUnreadable')] : []),
+  ]
   const tooltip = loading
-    ? props.t('defaultsTooltipAuto')
+    ? props.t('defaultsButtonLoading')
     : invalid
-      ? state.problems.map((item) => `${item.field}:${item.code}`).join('\n')
+      ? invalidParts.join('\n')
       : (warn === '' ? tooltipOf(state, props.t) : `${tooltipOf(state, props.t)}\n${props.t('defaultsWarnings', { detail: warn })}`)
   const active = !loading && !invalid && (button.kind === 'method' || button.kind === 'count')
+  const triggerClass = invalid && !loading
+    ? `${css.triggerButton} ${css.triggerButtonInvalid}`
+    : active
+      ? `${css.triggerButton} ${css.triggerButtonActive}`
+      : css.triggerButton
   return (
-    <Tooltip label={tooltip} side="top">
+    <Tooltip label={tooltip} side="top" portal>
       <button
         type="button"
         data-testid="deep-research-defaults"
         data-defaults-state={loading ? 'loading' : invalid ? 'invalid' : button.kind}
         aria-label={tooltip === '' ? label : `${label} — ${tooltip}`}
         onClick={props.openConfig}
-        className={active ? `${css.triggerButton} ${css.triggerButtonActive}` : css.triggerButton}
+        className={triggerClass}
       >
         <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" className={css.triggerIcon}>
           <path d="M1 3h10M1 6h10M1 9h10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />

@@ -331,9 +331,9 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
         <span className={styles.mutedLine}>
           {hasPlan ? `${props.t('graphPlanLoaded', { version: '' }).trim()} ${countText(props.t, topPlanNodes.length, 'graphTopLevelOne', 'graphTopLevelOther')}${planNodes.length !== topPlanNodes.length ? ` / ${countText(props.t, planNodes.length, 'graphPlanNodesTotalOne', 'graphPlanNodesTotalOther')}` : ''} · ` : ''}{countText(props.t, counts.total, 'graphTeamTasksOne', 'graphTeamTasksOther', { done: String(counts.done) })}
         </span>
-        {counts.running > 0 && <span className={`${styles.runningText} ${styles.mutedLine}`}>● {props.t('graphRunning', { count: String(counts.running) })}</span>}
-        {counts.ready > 0 && <span className={`${styles.warnText} ${styles.mutedLine}`}>○ {props.t('graphReady', { count: String(counts.ready) })}</span>}
-        {counts.stalled > 0 && <span className={`${styles.warnText} ${styles.mutedLine}`}>⚠ {props.t('graphStalled', { count: String(counts.stalled) })}</span>}
+        {counts.running > 0 && <span className={`${styles.runningText} ${styles.mutedLine}`}>{props.t('graphRunning', { count: String(counts.running) })}</span>}
+        {counts.ready > 0 && <span className={`${styles.warnText} ${styles.mutedLine}`}>{props.t('graphReady', { count: String(counts.ready) })}</span>}
+        {counts.stalled > 0 && <span className={`${styles.warnText} ${styles.mutedLine}`}>{props.t('graphStalled', { count: String(counts.stalled) })}</span>}
       </div>
 
       <GraphVersionRail
@@ -357,7 +357,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
           <div className={styles.diffHeading}>{props.t('graphStructDiff', { from: String(latestSnapshot) })}</div>
           {planDiff === null ? (
             <>
-              <div className={styles.mutedLine}>{snapshotDiffMessage(snapshotState, props.t)}</div>
+              <div className={styles.mutedLine}>{snapshotDiffMessage(snapshotState, props.t, latestSnapshot)}</div>
               {(snapshotState === 'missing' || snapshotState === 'empty' || snapshotState === 'invalid' || snapshotState === 'unreadable') && (
                 <button type="button" onClick={retry} className={styles.retryBtn}>{props.t('graphRetryRead')}</button>
               )}
@@ -367,8 +367,8 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
               <div className={styles.diffSummary}>{planDiff.summary}</div>
               {planDiff.added.length > 0 && <div className={`${styles.addedText} ${styles.diffDetail}`}>{props.t('planAdded', { items: planDiff.added.join(', ') })}</div>}
               {planDiff.removed.length > 0 && <div className={`${styles.warnText} ${styles.diffDetail}`}>{props.t('planRemoved', { items: planDiff.removed.join(', ') })}</div>}
-              {planDiff.aliases.length > 0 && <div className={`${styles.aliasText} ${styles.diffDetail}`}>{props.t('planRenumbered', { items: planDiff.aliases.map((alias) => `${alias.from} → ${alias.to}`).join('、') })}</div>}
-              {planDiff.dependencyChanges.length > 0 && <div className={`${styles.warnText} ${styles.diffDetail}`}>{props.t('planDepsChanged', { items: planDiff.dependencyChanges.map((change) => `${change.id}（${change.from.join(',') || '—'} → ${change.to.join(',') || '—'}）`).join('；') })}</div>}
+              {planDiff.aliases.length > 0 && <div className={`${styles.aliasText} ${styles.diffDetail}`}>{props.t('planRenumbered', { items: planDiff.aliases.map((alias) => `${alias.from} → ${alias.to}`).join(' · ') })}</div>}
+              {planDiff.dependencyChanges.length > 0 && <div className={`${styles.warnText} ${styles.diffDetail}`}>{props.t('planDepsChanged', { items: planDiff.dependencyChanges.map((change) => `${change.id} (${change.from.join(', ') || '—'} → ${change.to.join(', ') || '—'})`).join(' · ') })}</div>}
               {planDiff.kept.length > 0 && <div className={styles.mutedLine}>{countText(props.t, planDiff.kept.length, 'graphKeptOne', 'graphKeptOther')}</div>}
             </>
           )}
@@ -404,7 +404,7 @@ export function ResearchGraphTab(props: ResearchGraphTabProps): ReactNode {
 
       <GraphNotices planIssues={planIssues} attention={attention} onFocusTask={focusTask} t={props.t} />
 
-      {team === undefined && (
+      {team === undefined && !hasPlan && (
         <div className={styles.emptyBlock}>
           {props.t('graphNoTeam')}
         </div>

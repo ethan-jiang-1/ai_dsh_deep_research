@@ -19,16 +19,16 @@ function planLines(node: PlanNode): ReactNode {
   return (
     <>
       <div className={styles.nodeDetailLine}>
-        plan：{node.id}
+        plan: {node.id}
         {node.kind !== undefined ? ` · ${node.kind}` : ''}
         {node.stage !== undefined ? ` · stage ${node.stage}` : ''}
         {node.depth !== undefined ? ` · depth ${node.depth}` : ''}
         {node.ownerRole !== undefined ? ` · plan owner ${node.ownerRole}` : ''}
       </div>
-      {node.question !== undefined && <div className={styles.nodeDetailLine}>question：{node.question}</div>}
-      {node.deps.length > 0 && <div className={styles.nodeDetailLine}>plan deps：{node.deps.join(', ')}</div>}
-      {node.output !== undefined && <div className={styles.nodeDetailLine}>output：{node.output}</div>}
-      {node.acceptance !== undefined && <div className={styles.nodeDetailLine}>acceptance：{node.acceptance}</div>}
+      {node.question !== undefined && <div className={styles.nodeDetailLine}>question: {node.question}</div>}
+      {node.deps.length > 0 && <div className={styles.nodeDetailLine}>plan deps: {node.deps.join(', ')}</div>}
+      {node.output !== undefined && <div className={styles.nodeDetailLine}>output: {node.output}</div>}
+      {node.acceptance !== undefined && <div className={styles.nodeDetailLine}>acceptance: {node.acceptance}</div>}
     </>
   )
 }
@@ -73,9 +73,9 @@ export function NodeCard(props: {
           </div>
           <div className={styles.nodeMetaRow}>
             <span>{t('graphOwner', { name: node.ownerName ?? t('graphUnassignedOwner') })}</span>
-            {node.blockedBy.length > 0 && <span>deps：{node.blockedBy.join(', ')}</span>}
-            {planNode?.depth !== undefined && <span>depth：{planNode.depth}</span>}
-            {task !== undefined && <span>task：{task.id}</span>}
+            {node.blockedBy.length > 0 && <span>deps: {node.blockedBy.join(', ')}</span>}
+            {planNode?.depth !== undefined && <span>depth: {planNode.depth}</span>}
+            {task !== undefined && <span>task: {task.id}</span>}
             {member !== undefined && (
               <WorkerChips memberId={member.id} useSessions={useSessions} useSessionStatus={useSessionStatus} />
             )}
@@ -88,7 +88,7 @@ export function NodeCard(props: {
             )}
             <div className={styles.nodeDetailLine}>{t('graphOwner', { name: node.ownerName ?? t('graphUnassignedOwner') })}{member !== undefined ? ` (${member.phase})` : ''}</div>
             {node.blockedBy.length > 0 && <div className={styles.nodeDetailLine}>{t('graphDependency', { ids: node.blockedBy.join(', ') })}</div>}
-            {task !== undefined && <div className={styles.nodeDetailLine}>revision：{task.revision}{task.ready ? ' · ready' : ''}</div>}
+            {task !== undefined && <div className={styles.nodeDetailLine}>revision: {task.revision}{task.ready ? ' · ready' : ''}</div>}
             {planNode !== undefined
               ? planLines(planNode)
               : <div className={styles.mutedSlug}>{t('graphNodeNotInPlan')}</div>}

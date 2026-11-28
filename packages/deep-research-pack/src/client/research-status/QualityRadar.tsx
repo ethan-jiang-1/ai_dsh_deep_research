@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Button, IconCloseOutlineRegular, LinkIconMedium, Tag, Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { EvidenceMatrix, EvidenceMeta } from '../../lib/run/evidence-matrix.ts'
@@ -12,14 +12,16 @@ const BUILTIN_LENS_IDS = new Set([
 ])
 
 function lensLabelOf(lens: string, t: TranslateNS<'deepResearchPack'>): string {
-  return BUILTIN_LENS_IDS.has(lens) ? t(`lens_${lens}_name` as CockpitLocaleKey) : lens
+  const key = lens.toLowerCase()
+  return BUILTIN_LENS_IDS.has(key) ? t(`lens_${key}_name` as CockpitLocaleKey) : lens
 }
 
 function lensBlindSpotOf(lens: string, t: TranslateNS<'deepResearchPack'>): string {
-  if (BUILTIN_LENS_IDS.has(lens)) {
+  const key = lens.toLowerCase()
+  if (BUILTIN_LENS_IDS.has(key)) {
     return t('statusRadarGapTooltip', {
       lens: lensLabelOf(lens, t),
-      blindSpots: t(`lens_${lens}_blindSpots` as CockpitLocaleKey),
+      blindSpots: t(`lens_${key}_blindSpots` as CockpitLocaleKey),
     })
   }
   return t('statusRadarGapGeneric', { lens })
@@ -38,6 +40,11 @@ export function QualityRadar(props: {
 }): ReactNode {
   const { matrix, onRetry, onOpenEvidence, t } = props
   const [selectedCell, setSelectedCell] = useState<{ readonly topicId: string; readonly lens: string } | null>(null)
+  useEffect(() => {
+    if (selectedCell === null) return
+    const count = matrix.cells[selectedCell.topicId]?.[selectedCell.lens] ?? 0
+    if (count <= 0) setSelectedCell(null)
+  }, [matrix, selectedCell])
   if (matrix.state === 'absent') return null
   const tiers = [
     { key: 'primary' as const, label: 'P', count: matrix.byTier.primary },
@@ -139,7 +146,7 @@ export function QualityRadar(props: {
                               className={css.matrixHitBtn}
                               data-radar-cell={`${topic.id}:${lens}`}
                               aria-pressed={isSelected}
-                              title={t('statusRadarCellDrillHint', { topic: topic.id, lens: lensLabelOf(lens, t), count: String(count) })}
+                              title={t(count === 1 ? 'statusRadarCellDrillHintOne' : 'statusRadarCellDrillHintOther', { topic: topic.id, lens: lensLabelOf(lens, t), count: String(count) })}
                               onClick={() => {
                                 setSelectedCell((current) =>
                                   current?.topicId === topic.id && current.lens === lens ? null : { topicId: topic.id, lens },
@@ -152,16 +159,18 @@ export function QualityRadar(props: {
                         )
                       }
                       if (required) {
+                        const gapTip = lensBlindSpotOf(lens, t)
                         return (
                           <td key={lens} className={css.matrixMiss}>
-                            <Tooltip label={lensBlindSpotOf(lens, t)} side="top" portal maxWidth={240}>
-                              <span
+                            <Tooltip label={gapTip} side="top" portal openOnClick maxWidth={240}>
+                              <button
+                                type="button"
                                 className={css.matrixGapTrigger}
-                                tabIndex={0}
+                                aria-label={gapTip}
                                 data-radar-gap={`${topic.id}:${lens}`}
                               >
                                 0
-                              </span>
+                              </button>
                             </Tooltip>
                           </td>
                         )
@@ -218,7 +227,7 @@ export function QualityRadar(props: {
                         <span className={css.radarEvidenceMeta}>{card.publisher}</span>
                       )}
                     </span>
-                    <Tag tone={gradeTone}>{card.quality}</Tag>
+                    <Tag tone={gradeTone}>{card.quality === 'unknown' ? t('evidenceQualityUnknown') : card.quality}</Tag>
                   </button>
                 )
               })}

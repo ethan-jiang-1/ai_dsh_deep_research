@@ -133,6 +133,7 @@ export function RunsView({
             <Pill
               key={opt.id}
               active={locationFilter === opt.id}
+              aria-pressed={locationFilter === opt.id}
               onClick={() => { setLocationFilter(opt.id) }}
             >
               {opt.label}
@@ -155,7 +156,12 @@ export function RunsView({
       )}
 
       {!loading && visible.length === 0 && (
-        <div className={css.emptyState}>{t('hubRunsEmpty')}</div>
+        <div className={css.emptyState}>
+          <div>{t('hubRunsEmpty')}</div>
+          {result.runs.length === 0 && (
+            <Button variant="primary" size="sm" onClick={onStartResearch}>{t('hubNewResearch')}</Button>
+          )}
+        </div>
       )}
 
       {visible.length > 0 && (
@@ -228,7 +234,7 @@ export function RunsView({
                       data-testid="hub-open-final"
                       onClick={() => { onOpenFinal(finalPath, ownedSessionId) }}
                     >
-                      {t('hubOpenFinal')}
+                      {isOrphan ? t('hubOpenArchiveFinal') : t('hubOpenFinal')}
                     </Button>
                   )}
                   {!preferEnterSession && ownedSessionId !== null && onEnterSession !== undefined && (

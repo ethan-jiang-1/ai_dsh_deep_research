@@ -108,7 +108,7 @@ export function ResearchHeaderPill(props: ResearchHeaderPillProps): ReactNode {
   const deliveredPath = delivery?.path ?? diskDelivered
   const isOngoing = !hitl.pending && deliveredPath === null && !failure.dead && (sessionRunning || hasOpenTurn(events))
 
-  const dotState: StateDotState = failure.dead || hitl.pending
+  const dotState: StateDotState = hitl.pending || failure.dead
     ? 'warning'
     : deliveredPath !== null
       ? 'done'
@@ -117,20 +117,22 @@ export function ResearchHeaderPill(props: ResearchHeaderPillProps): ReactNode {
         : 'idle'
   const label = hitl.pending
     ? t('pillHitlPending')
-    : deliveredPath !== null
-      ? t('pillDelivered')
-      : failure.dead
-        ? t('pillStreamIssue')
+    : failure.dead
+      ? t('pillStreamIssue')
+      : deliveredPath !== null
+        ? t('pillDelivered')
         : isOngoing
           ? t('pillResearching')
           : t('pillSettled')
   const hint = hitl.pending
     ? t('pillHoverHitl')
-    : deliveredPath !== null
-      ? t('pillHoverDelivered')
-      : isOngoing
-        ? t('pillHoverActive')
-        : t('pillHoverSettled')
+    : failure.dead
+      ? t('pillHoverStreamIssue')
+      : deliveredPath !== null
+        ? t('pillHoverDelivered')
+        : isOngoing
+          ? t('pillHoverActive')
+          : t('pillHoverSettled')
   const pillClass = `${css.trigger}${dotState === 'warning' ? ` ${css.triggerWarn}` : dotState === 'done' ? ` ${css.triggerDone}` : ''}`
 
   return (
@@ -143,7 +145,7 @@ export function ResearchHeaderPill(props: ResearchHeaderPillProps): ReactNode {
           data-testid="research-header-pill"
           className={pillClass}
           onClick={() => {
-            if (deliveredPath !== null && sessionId !== undefined) openFinal(sessionId, deliveredPath)
+            if (!hitl.pending && !failure.dead && deliveredPath !== null && sessionId !== undefined) openFinal(sessionId, deliveredPath)
             else openStatus()
           }}
         >

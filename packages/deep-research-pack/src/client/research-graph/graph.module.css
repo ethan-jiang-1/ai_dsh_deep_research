@@ -1,54 +1,5 @@
 /* graph.module.css — 研究图谱与 DagMap 样式（全部复用 DSH --dsw-alias-* token）。 */
 
-.root {
-  padding: 12px;
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
-
-.headerTitle {
-  font-size: 14px;
-}
-
-.muted {
-  font-size: 11px;
-  color: var(--dsw-alias-label-secondary);
-  line-height: 1.5;
-}
-
-.badge {
-  font-size: 10px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: var(--dsw-alias-bg-layer-2);
-  border: 0.5px solid var(--dsw-alias-border-l2);
-  color: var(--dsw-alias-label-secondary);
-}
-
-.empty {
-  font-size: 12px;
-  color: var(--dsw-alias-label-secondary);
-  line-height: 1.6;
-  padding: 6px 0;
-}
-
-.card {
-  border: 0.5px solid var(--dsw-alias-border-l2);
-  border-radius: var(--dsw-radius-sm, 6px);
-  padding: 6px 8px;
-  margin-bottom: 6px;
-  background: var(--dsw-alias-bg-layer-1);
-}
-
 .banner {
   margin-bottom: 8px;
   padding: 6px 10px;
@@ -68,12 +19,20 @@
 }
 
 .errorBanner {
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: var(--dsw-radius-sm, 6px);
   background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 10%, transparent);
-  border-color: var(--dsw-alias-state-error-secondary);
+  border: 0.5px solid var(--dsw-alias-state-error-secondary);
 }
 
 .errorText {
   color: var(--dsw-alias-state-error-primary);
+}
+
+.errorDetail {
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .attentionBanner {
@@ -89,8 +48,8 @@
   margin-bottom: 6px;
   border: 0.5px solid var(--dsw-alias-border-l2);
   border-radius: var(--dsw-radius-md, 8px);
-  padding: 6px 8px;
-  background: var(--dsw-alias-bg-layer-1);
+  padding: 8px 10px;
+  background: var(--dsw-alias-bg-layer-2);
 }
 
 .dagSvg {
@@ -100,6 +59,20 @@
 
 .dagNode {
   cursor: pointer;
+}
+
+.dagNode:hover rect {
+  stroke: var(--dsw-alias-brand-primary);
+  stroke-width: 1.5;
+}
+
+.dagNode:focus-visible {
+  outline: none;
+}
+
+.dagNode:focus-visible rect {
+  stroke: var(--dsw-alias-state-business-primary);
+  stroke-width: 2;
 }
 
 .planBody {

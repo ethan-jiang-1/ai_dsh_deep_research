@@ -28,6 +28,13 @@
   min-width: 0;
 }
 
+.headerActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .metaRow {
   display: flex;
   flex-wrap: wrap;

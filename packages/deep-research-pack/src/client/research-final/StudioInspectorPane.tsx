@@ -1,7 +1,7 @@
 /**
  * StudioInspectorPane.tsx —— 全屏三栏精读台右侧常驻对照栏（证据卡速览 / Critic 核查清单）。
  */
-import type { ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
 import { Button, LinkIconMedium, SegmentedControl, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ClaimsAuditSummary } from '../../lib/run/claims-verdicts.ts'
@@ -30,12 +30,14 @@ export function StudioInspectorPane(props: StudioInspectorPaneProps): ReactNode 
     mode, onChangeMode, claimsSummary, inspectedRelPath, inspectedEntry,
     onInspectEvidence, onOpenEvidenceSplit, onRetryEvidence, onRetryClaims, t,
   } = props
+  const controlId = useId()
   return (
     <aside className={css.studioInspector} data-testid="final-studio-inspector" aria-label={t('finalStudioInspectorTitle')}>
       <div className={css.studioInspectorHeader}>
         <SegmentedControl<StudioInspectorTab>
-          id="research-final-studio-inspector"
+          id={`research-final-studio-inspector-${controlId}`}
           label={t('finalStudioInspectorTitle')}
+          className={css.studioInspectorControl ?? ''}
           value={mode}
           options={[
             { value: 'claims', label: t('finalTabClaims', { count: String(claimsSummary?.counts.total ?? 0) }) },
@@ -85,7 +87,9 @@ export function StudioInspectorPane(props: StudioInspectorPaneProps): ReactNode 
             <div className={css.hoverCardBadges}>
               {inspectedEntry.summary.quality !== null && (
                 <Tag tone={inspectedEntry.summary.quality === 'A' ? 'success' : inspectedEntry.summary.quality === 'B' ? 'info' : 'outline'}>
-                  {t('evidenceQualityBadge', { grade: inspectedEntry.summary.quality })}
+                  {inspectedEntry.summary.quality === 'unknown'
+                    ? t('evidenceQualityUnknown')
+                    : t('evidenceQualityBadge', { grade: inspectedEntry.summary.quality })}
                 </Tag>
               )}
               {inspectedEntry.summary.sourceTier !== null && (

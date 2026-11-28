@@ -1,5 +1,5 @@
 // SelectMenu.tsx — 项目默认面板下拉控件，使用 DSH 原生 Menu 原语替换原生 <select>。
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { IconChevronDownOutlineRegular, Menu } from '@deepseek-ai/dsh-client-ui-primitives'
 import css from './defaults.module.css'
 
@@ -22,6 +22,9 @@ export interface SelectMenuProps {
 export function SelectMenu(props: SelectMenuProps): ReactNode {
   const { testId, ariaLabel, value, options, disabled = false, className = '', onChange } = props
   const [open, setOpen] = useState(false)
+  useEffect(() => {
+    if (disabled) setOpen(false)
+  }, [disabled])
   const current = options.find((item) => item.value === value)
   const items = options.map((item) => ({ id: item.value, label: item.label }))
 

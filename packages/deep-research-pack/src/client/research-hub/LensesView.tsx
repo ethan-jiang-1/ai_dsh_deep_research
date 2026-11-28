@@ -57,6 +57,8 @@ export function LensesView({ onDraftWithLens, t }: LensesViewProps): ReactNode {
             const bias = lensField(t, lens.id, 'bias')
             const blindSpots = lensField(t, lens.id, 'blindSpots')
             const isOpen = expanded[lens.id] === true
+            const sep = t('labelSeparator')
+            const pairedNames = lens.pairsWith.map((pairId) => lensField(t, pairId, 'name')).join(' / ')
             return (
               <article key={lens.id} className={css.card}>
                 <div className={css.cardTop}>
@@ -64,10 +66,10 @@ export function LensesView({ onDraftWithLens, t }: LensesViewProps): ReactNode {
                   <Tag tone="neutral">{lens.id}</Tag>
                 </div>
                 <div className={css.lensDesc}>
-                  <strong>{t('hubLensWhen')}: </strong>{when}
+                  <strong>{t('hubLensWhen')}{sep}</strong>{when}
                 </div>
                 <div className={css.lensPairs}>
-                  {t('hubLensPairs')}: {lens.pairsWith.join(' / ')}
+                  {t('hubLensPairs')}{sep}{pairedNames}
                 </div>
                 <DisclosureRow
                   icon={<span aria-hidden="true">◎</span>}
@@ -78,12 +80,12 @@ export function LensesView({ onDraftWithLens, t }: LensesViewProps): ReactNode {
                   onToggle={() => { toggle(lens.id) }}
                 >
                   <div className={css.lensDetails}>
-                    <div className={css.lensDetailRow}><strong>{t('hubLensSeek')}: </strong>{seek}</div>
-                    <div className={css.lensDetailRow}><strong>{t('hubLensVerify')}: </strong>{verify}</div>
-                    <div className={css.lensDetailRow}><strong>{t('hubLensFrame')}: </strong>{frame}</div>
-                    <div className={css.lensDetailRow}><strong>{t('hubLensRefuse')}: </strong>{refuse}</div>
-                    <div className={css.lensDetailRow}><strong>{t('hubLensBias')}: </strong>{bias}</div>
-                    <div className={css.lensDetailRow}><strong>{t('hubLensBlindSpots')}: </strong>{blindSpots}</div>
+                    <div className={css.lensDetailRow}><strong>{t('hubLensSeek')}{sep}</strong>{seek}</div>
+                    <div className={css.lensDetailRow}><strong>{t('hubLensVerify')}{sep}</strong>{verify}</div>
+                    <div className={css.lensDetailRow}><strong>{t('hubLensFrame')}{sep}</strong>{frame}</div>
+                    <div className={css.lensDetailRow}><strong>{t('hubLensRefuse')}{sep}</strong>{refuse}</div>
+                    <div className={css.lensDetailRow}><strong>{t('hubLensBias')}{sep}</strong>{bias}</div>
+                    <div className={css.lensDetailRow}><strong>{t('hubLensBlindSpots')}{sep}</strong>{blindSpots}</div>
                   </div>
                 </DisclosureRow>
                 <div className={css.cardFooter}>

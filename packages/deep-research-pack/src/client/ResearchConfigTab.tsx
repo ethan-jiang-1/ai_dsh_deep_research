@@ -59,8 +59,15 @@ export function ResearchConfigTab(props: ResearchConfigTabProps): ReactNode {
         {BUILTIN_PREFERENCES.map((b) => (
           <MenuItemButton key={b.name} disabled={sending} onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', b.name), { target: b.name, expectsChange: false }) }}>{displayNameOf(b.name, props.t)}</MenuItemButton>
         ))}
-        {(entries ?? []).map((e) => (
-          <MenuItemButton key={`l-${e.name}`} disabled={sending} onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', e.name), { target: e.name, expectsChange: false }) }}>{e.name}</MenuItemButton>
+        {(entries ?? []).map((e, idx) => (
+          <MenuItemButton
+            key={`l-${String(idx)}-${e.name}`}
+            separatorBefore={idx === 0}
+            disabled={sending}
+            onSelect={() => { setSwitchOpen(false); void send(instructionOf('use-now', e.name), { target: e.name, expectsChange: false }) }}
+          >
+            {e.name}
+          </MenuItemButton>
         ))}
       </Menu>
     )

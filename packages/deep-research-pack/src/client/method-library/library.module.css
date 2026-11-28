@@ -55,9 +55,15 @@
   color: var(--dsw-alias-label-primary);
 }
 
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .buttonActive {
   border-color: var(--dsw-alias-brand-primary);
   color: var(--dsw-alias-brand-primary);
+  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 8%, var(--dsw-alias-bg-layer-2));
 }
 
 .primaryButton {
@@ -68,6 +74,40 @@
   background: var(--dsw-alias-brand-primary);
   color: var(--dsw-alias-bg-base);
   cursor: pointer;
+}
+
+.primaryButton:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.columnHandle {
+  flex: 0 0 5px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  z-index: 2;
+  touch-action: none;
+}
+
+.columnHandleLine {
+  position: absolute;
+  left: 2px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--dsw-alias-border-l1);
+  transition: background-color 120ms ease, width 120ms ease;
+}
+
+.columnHandle:hover .columnHandleLine,
+.columnHandle:focus-visible .columnHandleLine {
+  width: 2px;
+  background: var(--dsw-alias-brand-primary);
+}
+
+.columnHandle:focus-visible {
+  outline: none;
 }
 
 .receiptOk {
@@ -184,6 +224,11 @@
   background: var(--dsw-alias-bg-base);
   color: var(--dsw-alias-label-primary);
   cursor: pointer;
+}
+
+.coachStartBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .coachError {

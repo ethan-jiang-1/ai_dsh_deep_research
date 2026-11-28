@@ -86,7 +86,7 @@ test('ResearchHubIcon 与 ResearchHubPanel：无会话空态、有会话扫描�
   assert.match(panel.container.textContent ?? '', /证据 1 份/)
   assert.match(panel.container.textContent ?? '', /archive（simulated list error）/)
 
-  fireEvent.click(panel.getByText(zh.hubOpenFinal))
+  fireEvent.click(panel.getByText(zh.hubOpenArchiveFinal))
   assert.deepEqual(openedFinals, [{ sid: 's-hub', path: 'drt_hub/final.md' }])
   assert.equal(backCount, 1)
 })
@@ -287,7 +287,7 @@ test('BUG-459 ResearchHubPanel：点击归档「打开终稿」先回对话再�
   }))
   await flushUi(act)
 
-  fireEvent.click(panel.getByText(zh.hubOpenFinal))
+  fireEvent.click(panel.getByText(zh.hubOpenArchiveFinal))
   assert.deepEqual(trace, [
     { event: 'backToChat' },
     { event: 'openFinal', sid: 's-hub', path: 'archive/drt_arch/final/readable-v2.md' },

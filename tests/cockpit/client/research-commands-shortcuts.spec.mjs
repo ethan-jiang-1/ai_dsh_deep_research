@@ -1,7 +1,7 @@
 // research-commands-shortcuts.spec.mjs — R2.2 Composer `/` 命令、`@` 研究引用与全局快捷键直测回归。
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { zh } from '../../../packages/deep-research-pack/src/client/locales.ts'
+import { en, zh } from '../../../packages/deep-research-pack/src/client/locales.ts'
 import { makeMaliciousRunSource, makeTranslator } from '../client-dom-helpers.mjs'
 import { registerResearchCommands } from '../../../packages/deep-research-pack/src/client/research-commands.ts'
 import { registerResearchShortcuts } from '../../../packages/deep-research-pack/src/client/research-shortcuts.ts'
@@ -9,6 +9,7 @@ import { registerResearchTriggers, researchReferenceRule } from '../../../packag
 import { bindingIssue, isWebBindingAllowed, normalizeBinding } from '../../../vendor/dsh/packages/client/shortcuts/src/protocol.ts'
 
 const tZh = makeTranslator(zh)
+const tEn = makeTranslator(en)
 
 function makeFakeContext(services) {
   const disposers = []
@@ -221,4 +222,27 @@ test('BUG-470 registerResearchCommands：冷会话打开 /research-defaults 自�
     /stale/,
     '命令返回失败时 onSelect 必须显性抛错不静默',
   )
+})
+
+test('registerResearchCommands：英文界面 /method 弹窗内置打法本地化无中文残留', async () => {
+  const registered = new Map()
+  const ctx = makeFakeContext({
+    commandUi: {
+      register: (d) => { registered.set(d.name, d); return () => { registered.delete(d.name) } },
+      decorate: () => () => {},
+    },
+  })
+  registerResearchCommands(ctx, {
+    t: tEn,
+    defaultsStore: { getSnapshot: () => ({ phase: 'ready', value: {}, revision: 0 }), refresh: async () => {} },
+    readLibrary: async () => ({ state: 'absent' }),
+    executeDefaultsCommand: async () => ({ ok: true }),
+    openHubTab: () => {},
+  })
+  const opts = await registered.get('method').ui.options({ sessionId: 's1' }, new AbortController().signal)
+  const builtinOpts = opts.filter((o) => o.id.startsWith('builtin:'))
+  assert.ok(builtinOpts.length >= 5)
+  for (const o of builtinOpts) {
+    assert.doesNotMatch(`${o.label} ${o.detail ?? ''}`, /[\u4e00-\u9fa5]/, `${o.id} 英文弹窗不得残留中文`)
+  }
 })

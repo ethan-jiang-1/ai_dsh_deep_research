@@ -44,14 +44,14 @@ const encodeSegment = (segment: string): string => encodeURIComponent(segment).r
  */
 export function parseEvidenceAddress(address: string): EvidenceTarget | null {
   if (typeof address !== 'string' || !address.startsWith(SESSION_ADDRESS_PREFIX)) return null
-  const rest = address.slice(SESSION_ADDRESS_PREFIX.length)
-  const slash = rest.indexOf('/')
+  const withoutFrag = address.slice(SESSION_ADDRESS_PREFIX.length).split(/[?#]/, 1)[0] ?? ''
+  const slash = withoutFrag.indexOf('/')
   if (slash <= 0) return null
   let sessionId: string
   let relPath: string
   try {
-    sessionId = decodeURIComponent(rest.slice(0, slash))
-    relPath = rest
+    sessionId = decodeURIComponent(withoutFrag.slice(0, slash))
+    relPath = withoutFrag
       .slice(slash + 1)
       .split('/')
       .map((seg) => decodeURIComponent(seg))

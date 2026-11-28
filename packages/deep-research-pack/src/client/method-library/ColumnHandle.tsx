@@ -3,6 +3,7 @@
 // 从 MethodLibraryView.tsx 拆出（2026-11-03 审计 P4）。
 import { useRef } from 'react'
 import type { ReactNode } from 'react'
+import css from './library.module.css'
 
 export function ColumnHandle({ onDrag, value, min, max, label }: {
   onDrag: (delta: number) => void
@@ -21,11 +22,13 @@ export function ColumnHandle({ onDrag, value, min, max, label }: {
       aria-valuemin={min}
       aria-valuemax={max}
       tabIndex={0}
+      className={css.columnHandle}
       onKeyDown={(event) => {
-        if (event.key === 'ArrowLeft') onDrag(-16)
-        if (event.key === 'ArrowRight') onDrag(16)
+        if (event.key === 'ArrowLeft') { event.preventDefault(); onDrag(-16) }
+        else if (event.key === 'ArrowRight') { event.preventDefault(); onDrag(16) }
+        else if (event.key === 'Home') { event.preventDefault(); onDrag(min - value) }
+        else if (event.key === 'End') { event.preventDefault(); onDrag(max - value) }
       }}
-      style={{ flex: '0 0 5px', cursor: 'col-resize', background: 'transparent', position: 'relative', zIndex: 2, touchAction: 'none' }}
       onPointerDown={(event) => {
         event.preventDefault()
         lastX.current = event.clientX
@@ -40,7 +43,7 @@ export function ColumnHandle({ onDrag, value, min, max, label }: {
       onPointerUp={() => { lastX.current = null }}
       onPointerCancel={() => { lastX.current = null }}
     >
-      <div style={{ position: 'absolute', left: 2, top: 0, bottom: 0, width: 1, background: 'var(--dsw-alias-border-l1)' }} />
+      <div className={css.columnHandleLine} />
     </div>
   )
 }

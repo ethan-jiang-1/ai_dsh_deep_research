@@ -2,7 +2,7 @@
 // 红配方：删掉 followError 分支 → 失败态落到「尚未绑定」→ 本例红。
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { graphStateNote } from '../../../../packages/deep-research-pack/src/client/research-graph/state-note.ts'
+import { graphStateNote, snapshotDiffMessage } from '../../../../packages/deep-research-pack/src/client/research-graph/state-note.ts'
 import { INITIAL_GRAPH_FEED_STATE, reduceGraphFeed } from '../../../../packages/deep-research-pack/src/client/research-graph/graph-state.ts'
 
 const base = { planState: 'unbound', boundSlug: null, followError: null, hasPlan: false, hasEdges: false, hasTopLevel: false }
@@ -58,4 +58,7 @@ test('BUG-478：plan.md 有节点但无依赖边时中英文如实说明以节�
   assert.match(enNote.title, /deps/)
   assert.match(enNote.body, /node list/i)
   assert.doesNotMatch(enNote.title + enNote.body, /blocked_by|[\u4e00-\u9fa5]/)
+
+  const diffMsg = snapshotDiffMessage('invalid', makeT(zh), 3)
+  assert.match(diffMsg ?? '', /v3/, 'snapshotDiffMessage 应渲染真实版本号而非仅字面 v?')
 })

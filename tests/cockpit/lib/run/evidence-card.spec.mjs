@@ -15,6 +15,7 @@ test('isEvidenceAddress / evidenceAddressOf：三位置合法证据卡认领，d
   assert.equal(isEvidenceAddress('dsh-resource://file/session/s1/drafts/drt_demo/evidence/e1.md'), false)
   assert.equal(isEvidenceAddress('dsh-resource://file/session/s1/drt_demo/evidence/../secret.md'), false)
   assert.equal(parseEvidenceAddress(a1)?.cardName, 'e1.md')
+  assert.equal(parseEvidenceAddress(`${a1}?view=raw#quote`)?.cardName, 'e1.md')
 })
 
 test('parseEvidenceCard + safeExternalUrl：解析 metadata 与 Question List 勾选态', () => {

@@ -21,13 +21,13 @@ const render = (toolName, argsRaw, settled) => renderToStaticMarkup(createElemen
 
 test('BUG-400 删除卡：名称取自 args.name（不依赖 entry 正文）', () => {
   const markup = render('method_library_remove', JSON.stringify({ name: '方案比较' }), true)
-  assert.match(markup, /已删除库：方案比较/)
+  assert.match(markup, /已从库删除：方案比较/)
   assert.doesNotMatch(markup, /方法条目/)
 })
 
 test('BUG-400 删除卡：运行态也带名称；缺 name 时才回退占位（负控）', () => {
   assert.match(render('method_library_remove', JSON.stringify({ name: '事实核查' }), false), /正在删除方法…/)
-  assert.match(render('method_library_remove', '{}', true), /已删除库：方法条目/)
+  assert.match(render('method_library_remove', '{}', true), /已从库删除：方法条目/)
 })
 
 test('BUG-400 保存卡：名称仍取自 entry 标题（负控：不得改成读 args.name）', () => {

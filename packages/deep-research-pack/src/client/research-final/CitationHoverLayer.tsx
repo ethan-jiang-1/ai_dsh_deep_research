@@ -261,7 +261,9 @@ export function CitationHoverLayer(props: CitationHoverLayerProps): ReactNode {
             <div className={css.hoverCardBadges}>
               {entry.summary.quality !== null && (
                 <Tag tone={entry.summary.quality === 'A' ? 'success' : entry.summary.quality === 'B' ? 'info' : 'outline'}>
-                  {t('evidenceQualityBadge', { grade: entry.summary.quality })}
+                  {entry.summary.quality === 'unknown'
+                    ? t('evidenceQualityUnknown')
+                    : t('evidenceQualityBadge', { grade: entry.summary.quality })}
                 </Tag>
               )}
               {entry.summary.sourceTier !== null && (

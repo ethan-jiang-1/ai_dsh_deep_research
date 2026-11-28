@@ -77,17 +77,19 @@ test('ResearchFinalTab：全屏态自动展开三栏精读布局（Sticky TOC + 
 
   // 全屏右侧默认显示核查清单，支持风险筛选胶囊
   assert.equal(container.querySelectorAll('[data-claim-status]').length, 3, '默认展示全部 3 条主张')
-  const riskPill = container.querySelector('[data-testid="claims-filter-risk"] button')
+  const riskPill = container.querySelector('[data-testid="claims-filter-risk"]')
   assert.ok(riskPill !== null, '应存在存疑/未核查筛选胶囊')
   fireEvent.click(riskPill)
   await flushUi(act)
+  assert.equal(riskPill.getAttribute('aria-pressed'), 'true')
   assert.equal(container.querySelectorAll('[data-claim-status]').length, 2, '风险筛选应仅保留 partial + UNVERIFIED 共 2 条')
   assert.doesNotMatch(container.querySelector('[data-testid="final-claims-audit-view"]')?.textContent ?? '', /已证实的核心指标/)
 
-  const supportedPill = container.querySelector('[data-testid="claims-filter-supported"] button')
+  const supportedPill = container.querySelector('[data-testid="claims-filter-supported"]')
   assert.ok(supportedPill !== null)
   fireEvent.click(supportedPill)
   await flushUi(act)
+  assert.equal(supportedPill.getAttribute('aria-pressed'), 'true')
   assert.equal(container.querySelectorAll('[data-claim-status]').length, 1, '已支持筛选应仅保留 supported 1 条')
 
   // 点击工具栏全屏切换按钮触发注入回调
@@ -156,6 +158,15 @@ test('ResearchToolCard：web_search / spawn_teammate 渲染结构化富语义展
   assert.ok(jumpBtn !== null, '队员存在时应显示跳转子会话按钮')
   fireEvent.click(jumpBtn)
   assert.deepEqual(jumped, [['lead-1', 'member-scout-1']])
+
+  const { toolResultBodyOf } = await import('../../../packages/deep-research-pack/src/lib/events/tool-card.ts')
+  const noMetaFetch = toolResultBodyOf(
+    'web_fetch',
+    { kind: 'tool-result', isError: false, output: 'Fetched body' },
+    { url: 'https://example.com/spec' },
+    JSON.stringify({ url: 'https://example.com/spec' }),
+  )
+  assert.equal(noMetaFetch?.kind, 'fallback', '无 meta 的 web_fetch 不得伪造 HTTP 200')
 })
 
 test('R4 终稿三栏宽表折行规则与窄侧栏工具栏收敛', async () => {

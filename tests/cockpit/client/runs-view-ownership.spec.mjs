@@ -133,6 +133,7 @@ test('ResearchHubPanel：进行中归属 Run 切会话开状态；已交付归�
 
     const doneCard = container.querySelector('[data-hub-run-slug="done-topic"]')
     assert.equal(doneCard?.getAttribute('data-hub-run-ownership'), 'owned')
+    assert.equal(doneCard.querySelector('[data-testid="hub-open-final"]')?.textContent, '打开终稿')
     rtl.fireEvent.click(doneCard.querySelector('[data-testid="hub-open-final"]'))
     assert.deepEqual(trace.splice(0), [
       ['openSession', 's-done-owner'],
@@ -143,6 +144,7 @@ test('ResearchHubPanel：进行中归属 Run 切会话开状态；已交付归�
     const orphanCard = container.querySelector('[data-hub-run-slug="orphan-topic"]')
     assert.equal(orphanCard?.getAttribute('data-hub-run-ownership'), 'orphan')
     assert.ok(orphanCard?.querySelector('[data-testid="hub-orphan-badge"]'), '无本地归属会话的磁盘归档必须显性标为只读归档')
+    assert.equal(orphanCard.querySelector('[data-testid="hub-open-final"]')?.textContent, '只读打开终稿')
     rtl.fireEvent.click(orphanCard.querySelector('[data-testid="hub-open-final"]'))
     assert.deepEqual(trace.splice(0), [
       ['backToChat'],

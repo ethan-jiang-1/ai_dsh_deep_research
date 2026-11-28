@@ -38,18 +38,31 @@ export function DagMap({ nodes, selectedId, childCounts, wide = false, onSelect,
   const arrowActiveId = `dag-arrow-active-${uid}`
   const pos = new Map<string, { x: number; y: number }>()
   let maxRow = 1
+  for (const wave of waves) maxRow = Math.max(maxRow, wave.tasks.length)
+  const width = geom.pad * 2 + maxRow * geom.w + Math.max(0, maxRow - 1) * geom.gapX
+  const height = geom.pad * 2 + waves.length * geom.h + Math.max(0, waves.length - 1) * geom.gapY
   waves.forEach((wave, row) => {
-    maxRow = Math.max(maxRow, wave.tasks.length)
+    const rowWidth = wave.tasks.length * geom.w + Math.max(0, wave.tasks.length - 1) * geom.gapX
+    const startX = (width - rowWidth) / 2
     wave.tasks.forEach((node, index) => {
       pos.set(node.id, {
-        x: geom.pad + index * (geom.w + geom.gapX),
+        x: startX + index * (geom.w + geom.gapX),
         y: geom.pad + row * (geom.h + geom.gapY),
       })
     })
   })
-  const width = geom.pad * 2 + maxRow * geom.w + Math.max(0, maxRow - 1) * geom.gapX
-  const height = geom.pad * 2 + waves.length * geom.h + Math.max(0, waves.length - 1) * geom.gapY
   const known = new Set(nodes.map((node) => node.id))
+  const relatedIds = new Set<string>()
+  if (selectedId !== null) {
+    relatedIds.add(selectedId)
+    for (const n of nodes) {
+      if (n.id === selectedId) {
+        for (const dep of n.blockedBy) if (known.has(dep)) relatedIds.add(dep)
+      } else if (n.blockedBy.includes(selectedId)) {
+        relatedIds.add(n.id)
+      }
+    }
+  }
   return (
     <div className={styles.dagWrap} data-dag-mode={wide ? 'wide' : 'compact'}>
       <svg
@@ -102,12 +115,14 @@ export function DagMap({ nodes, selectedId, childCounts, wide = false, onSelect,
           const point = pos.get(node.id)
           if (point === undefined) return null
           const selected = node.id === selectedId
+          const related = !selected && selectedId !== null && relatedIds.has(node.id)
           const childCount = childCounts.get(node.id) ?? 0
           const badgeText = childCount > 0 ? `+${String(childCount)}` : null
           const summaryMaxUnits = badgeText !== null
             ? Math.max(4, geom.summaryUnits - (badgeText.length + 3))
             : geom.summaryUnits
-          const summaryText = truncateByDisplayWidth(node.subject !== '' ? node.subject : node.label, summaryMaxUnits)
+          const fullSummary = node.subject !== '' ? node.subject : node.label
+          const summaryText = truncateByDisplayWidth(fullSummary, summaryMaxUnits)
           const ownerBadge = node.ownerName !== undefined ? truncateByDisplayWidth(node.ownerName, geom.ownerUnits) : null
           const clipId = `dag-clip-${uid}-${String(index)}`
           return (
@@ -116,7 +131,8 @@ export function DagMap({ nodes, selectedId, childCounts, wide = false, onSelect,
               transform={`translate(${String(point.x)},${String(point.y)})`}
               role="button"
               tabIndex={0}
-              aria-label={`${node.id} ${summaryText} ${node.state.text}`}
+              aria-pressed={selected}
+              aria-label={`${node.id} ${fullSummary} ${node.state.text}`}
               className={styles.dagNode}
               onClick={() => { onSelect(node.id) }}
               onKeyDown={(event) => {
@@ -126,14 +142,14 @@ export function DagMap({ nodes, selectedId, childCounts, wide = false, onSelect,
                 }
               }}
             >
-              <title>{t('graphNodeTitle', { id: node.id, label: node.subject !== '' ? node.subject : node.label, owner: node.ownerName ?? t('graphUnassignedOwner'), state: node.state.text })}</title>
+              <title>{t('graphNodeTitle', { id: node.id, label: fullSummary, owner: node.ownerName ?? t('graphUnassignedOwner'), state: node.state.text })}</title>
               <rect
                 width={geom.w}
                 height={geom.h}
                 rx={7}
                 fill={fillOf(node)}
-                stroke={selected ? 'var(--dsw-alias-brand-primary)' : 'var(--dsw-alias-border-l2)'}
-                strokeWidth={selected ? 2 : 1}
+                stroke={selected ? 'var(--dsw-alias-brand-primary)' : related ? 'var(--dsw-alias-state-success-primary)' : 'var(--dsw-alias-border-l2)'}
+                strokeWidth={selected ? 2 : related ? 1.5 : 1}
                 opacity={node.status === 'unplanned' ? 0.75 : 1}
               />
               <g clipPath={`url(#${clipId})`}>

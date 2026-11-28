@@ -3,12 +3,21 @@
  * 支持元数据胶囊条、安全外部信源链接、Markdown 原文与摘录渲染、Question List 核对清单。
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { Button, MarkdownText, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, MarkdownDelegateProvider, MarkdownText, Tag } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { InputActions } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { readArtifact, type ArtifactState } from '../lib/run/artifact-read.ts'
 import { openRun, type RunSource } from '../lib/run/run-context.ts'
-import { parseEvidenceAddress, parseEvidenceCard, safeExternalUrl, type EvidenceCardView } from '../lib/run/evidence-card.ts'
+import {
+  evidenceAddressOf,
+  isEvidenceAddress,
+  parseEvidenceAddress,
+  parseEvidenceCard,
+  safeExternalUrl,
+  type EvidenceCardView,
+} from '../lib/run/evidence-card.ts'
+import { formatEvidenceMention } from '../lib/events/research-references.ts'
 import type { CockpitLocaleKey } from './locales/zh-cockpit.ts'
 import css from './ResearchEvidenceTab.module.css'
 
@@ -33,6 +42,18 @@ export function ResearchEvidenceTab(props: ResearchEvidenceTabProps): ReactNode 
   const [state, setState] = useState<'loading' | ArtifactState>('loading')
   const [card, setCard] = useState<EvidenceCardView | null>(null)
   const [reloadNonce, setReloadNonce] = useState(0)
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
+  const [inserted, setInserted] = useState(false)
+  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const inputActions = (props as { inputActions?: InputActions }).inputActions
+
+  useEffect(() => () => {
+    if (feedbackTimerRef.current !== null) clearTimeout(feedbackTimerRef.current)
+  }, [])
+  useEffect(() => {
+    setCopyState('idle')
+    setInserted(false)
+  }, [address])
 
   const reload = useCallback(() => {
     setReloadNonce((n) => n + 1)
@@ -105,24 +126,77 @@ export function ResearchEvidenceTab(props: ResearchEvidenceTabProps): ReactNode 
   const meta = card.meta
   const externalUrl = safeExternalUrl(meta?.sourceUrl)
   const qualityTone = meta?.quality === 'A' ? 'success' : meta?.quality === 'B' ? 'info' : 'outline'
+  const lensKey = meta?.lens?.toLowerCase() ?? null
+  const slugMatch = /(?:^|\/)drt_([\w.-]+)$/.exec(parsedAddr.runDir)
+  const mentionText = slugMatch?.[1] !== undefined
+    ? formatEvidenceMention(slugMatch[1], parsedAddr.cardName)
+    : `${parsedAddr.runDir}/evidence/${parsedAddr.cardName}`
+  const copyRef = (): void => {
+    if (typeof navigator === 'undefined' || navigator.clipboard === undefined) {
+      setCopyState('failed')
+      return
+    }
+    void navigator.clipboard.writeText(parsedAddr.relPath).then(
+      () => {
+        setCopyState('copied')
+        if (feedbackTimerRef.current !== null) clearTimeout(feedbackTimerRef.current)
+        feedbackTimerRef.current = setTimeout(() => setCopyState('idle'), 1600)
+      },
+      () => {
+        setCopyState('failed')
+      },
+    )
+  }
+  const insertRef = (): void => {
+    if (inputActions === undefined) return
+    const span = inputActions.captureInsertion()
+    if (!inputActions.insertText(`${mentionText} `, span)) return
+    setInserted(true)
+    if (feedbackTimerRef.current !== null) clearTimeout(feedbackTimerRef.current)
+    feedbackTimerRef.current = setTimeout(() => setInserted(false), 1600)
+  }
+  const openLinkedEvidence = (rawPath: string): void => {
+    const targetAddr = isEvidenceAddress(rawPath)
+      ? rawPath
+      : evidenceAddressOf(parsedAddr.sessionId, parsedAddr.runDir, rawPath)
+    if (!isEvidenceAddress(targetAddr)) return
+    const openResource = (tab.tab.actions as { openResource?: (addr: string, opts?: { preferNewPane?: boolean }) => void }).openResource
+    if (typeof openResource === 'function') openResource(targetAddr)
+  }
   return (
     <div className={css.root} data-testid="research-evidence-tab" data-evidence-state="ok">
       <div className={css.header}>
         <div className={css.titleRow}>
           <strong className={css.title}>{card.title ?? card.file}</strong>
-          {externalUrl !== null && (
-            <a className={css.sourceLink} href={externalUrl} target="_blank" rel="noopener noreferrer">
-              {props.t('evidenceOpenSource')}
-            </a>
-          )}
+          <div className={css.headerActions}>
+            <Button variant="ghost" size="sm" data-testid="evidence-copy-ref" onClick={copyRef}>
+              {copyState === 'copied' ? props.t('hubCopied') : copyState === 'failed' ? props.t('hubCopyFailed') : props.t('hubCopyPath')}
+            </Button>
+            {inputActions !== undefined && (
+              <Button variant="ghost" size="sm" data-testid="evidence-insert-ref" onClick={insertRef}>
+                {inserted ? props.t('graphInsertedRef') : props.t('graphInsertRef')}
+              </Button>
+            )}
+            {externalUrl !== null && (
+              <a className={css.sourceLink} href={externalUrl} target="_blank" rel="noopener noreferrer">
+                {props.t('evidenceOpenSource')}
+              </a>
+            )}
+          </div>
         </div>
         {meta !== null && (
           <div className={css.metaRow}>
-            <Tag tone={qualityTone}>{props.t('evidenceQualityBadge', { grade: meta.quality })}</Tag>
+            <Tag tone={qualityTone}>
+              {meta.quality === 'unknown'
+                ? props.t('evidenceQualityUnknown')
+                : props.t('evidenceQualityBadge', { grade: meta.quality })}
+            </Tag>
             <Tag tone="outline">{props.t(`evidenceTier_${meta.sourceTier}` as CockpitLocaleKey)}</Tag>
             {meta.lens !== null && (
               <Tag tone="neutral">
-                {BUILTIN_LENS_IDS.has(meta.lens) ? props.t(`lens_${meta.lens}_name` as CockpitLocaleKey) : meta.lens}
+                {lensKey !== null && BUILTIN_LENS_IDS.has(lensKey)
+                  ? props.t(`lens_${lensKey}_name` as CockpitLocaleKey)
+                  : meta.lens}
               </Tag>
             )}
             {meta.publisher !== null && <Tag tone="quiet">{meta.publisher}</Tag>}
@@ -131,7 +205,9 @@ export function ResearchEvidenceTab(props: ResearchEvidenceTabProps): ReactNode 
         )}
       </div>
       <div className={css.body}>
-        <MarkdownText text={card.bodyMarkdown} labels={markdownLabelsMemo} />
+        <MarkdownDelegateProvider openFile={openLinkedEvidence}>
+          <MarkdownText text={card.bodyMarkdown} labels={markdownLabelsMemo} />
+        </MarkdownDelegateProvider>
         {card.questions.length > 0 && (
           <div className={css.questionsBox}>
             <div className={css.questionsTitle}>{props.t('evidenceQuestionsTitle')}</div>

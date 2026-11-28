@@ -24,6 +24,7 @@ import {
   buildMethodDraftInstruction,
   defaultsCommandLineForOption,
 } from '../lib/events/research-references.ts'
+import { displayNameOf, displaySummaryOf } from './builtin-display.ts'
 import type { DefaultsStore } from './defaults/store.ts'
 import type { HubTab } from './ResearchHubPanel.tsx'
 import type { CockpitLocaleKey } from './locales/zh-cockpit.ts'
@@ -198,8 +199,8 @@ export function registerResearchCommands(ctx: ClientContext, deps: ResearchComma
           for (const pref of BUILTIN_PREFERENCES) {
             rows.push({
               id: `builtin:${pref.name}`,
-              label: pref.name,
-              detail: pref.summary,
+              label: displayNameOf(pref.name, t),
+              detail: displaySummaryOf(pref.name, t, pref.summary),
               group: builtinGroup,
             })
           }

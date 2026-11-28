@@ -67,7 +67,7 @@
 | `src/client/research-hub/LensesView.tsx` | — |
 | `src/client/research-hub/RunsView.tsx` | — |
 | `src/client/research-shortcuts.ts` | research-shortcuts.ts —— 跨平台研究工作台快捷键注册（ctx.shortcuts）。 |
-| `src/client/research-status/ProtocolCard.tsx` | HITL1 研究契约摘要卡：展示 protocol.json 解码后的研究方法、信源范围、深度预算与质量门槛； |
+| `src/client/research-status/ProtocolCard.tsx` | — |
 | `src/client/research-status/QualityRadar.tsx` | — |
 | `src/client/research-status/status-state.ts` | status-state.ts — 「研究状态」页签纯状态机与通知列表派生（从 useStatusFeed / ResearchStatusTab 抽出）。 |
 | `src/client/research-status/TrackRail.tsx` | TrackRail.tsx — 「研究状态」页签的紧凑流程轨道：◆立项确认 + 主轨 + ◆交付审阅 + 交付。 |
